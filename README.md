@@ -28,6 +28,54 @@ npx skills add https://github.com/luongnv89/skills --skill auto-push
 npx skills add https://github.com/luongnv89/skills --skill code-optimizer
 ```
 
+## Software Development Lifecycle
+
+```mermaid
+flowchart TB
+    subgraph IDEATION["💡 Ideation"]
+        I1[idea-validator]
+        I2[name-checker]
+    end
+
+    subgraph PLANNING["📋 Planning"]
+        P1[prd-generator]
+        P2[system-design]
+        P3[tasks-generator]
+    end
+
+    subgraph DEVELOPMENT["💻 Development"]
+        D1[code-optimizer]
+        D2[test-coverage]
+        D3[agent-config]
+    end
+
+    subgraph QUALITY["✅ Quality & CI/CD"]
+        Q1[devops-pipeline]
+        Q2[auto-push]
+    end
+
+    subgraph RELEASE["🚀 Release & Docs"]
+        R1[oss-ready]
+        R2[docs-refactor]
+        R3[logo-designer]
+        R4[blog-draft]
+    end
+
+    IDEATION --> PLANNING
+    PLANNING --> DEVELOPMENT
+    DEVELOPMENT --> QUALITY
+    QUALITY --> RELEASE
+    RELEASE -.->|iterate| IDEATION
+```
+
+| Phase | Skills | Purpose |
+|-------|--------|---------|
+| **Ideation** | idea-validator → name-checker | Validate concept, check name availability |
+| **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
+| **Development** | code-optimizer, test-coverage, agent-config | Write quality code with tests |
+| **Quality & CI/CD** | devops-pipeline → auto-push | Setup CI/CD, commit and push |
+| **Release & Docs** | oss-ready, docs-refactor, logo-designer, blog-draft | Prepare for public release |
+
 ## Available Skills
 
 ### Development Workflow
