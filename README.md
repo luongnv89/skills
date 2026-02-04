@@ -40,7 +40,7 @@ flowchart LR
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>auto-push *</i>"]
-    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator"]
+    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes"]
     OPTIONAL["<b>Optional</b><br/>───────────<br/>oss-ready<br/>blog-draft"]
 
     IDEATION --> PLANNING
@@ -59,7 +59,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
 | **Development** | code-optimizer, test-coverage, agent-config | Write quality code with tests |
 | **Quality & CI/CD** | devops-pipeline → auto-push | Setup CI/CD, commit and push |
-| **Release & Docs** | docs-generator | Generate project documentation |
+| **Release & Docs** | docs-generator, release-notes | Generate documentation and changelogs |
 | **Optional** | oss-ready, blog-draft | Open source setup, announcements |
 
 ## Available Skills
@@ -89,6 +89,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 |-------|-------------|
 | **blog-draft** | Draft SEO-optimized blog posts with research, title optimization, and content SEO |
 | **docs-generator** | Restructure project documentation |
+| **release-notes** | Generate release notes from git commits and GitHub PRs/issues |
 | **oss-ready** | Setup open-source project standards |
 | **agent-config** | Create or update CLAUDE.md and AGENTS.md files |
 
@@ -113,6 +114,7 @@ Skills trigger automatically based on your requests:
 | "improve test coverage" | test-coverage |
 | "update CLAUDE.md" | agent-config |
 | "design a logo" | logo-designer |
+| "generate release notes" | release-notes |
 
 ## Project Structure
 
