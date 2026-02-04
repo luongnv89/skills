@@ -37,6 +37,7 @@ npx skills add https://github.com/luongnv89/skills --skill code-optimizer
 | **auto-push** | Stage, commit, and push changes with security checks |
 | **test-coverage** | Expand unit test coverage targeting untested branches |
 | **code-optimizer** | Analyze code for performance issues and optimizations |
+| **devops-pipeline** | Setup pre-commit hooks and GitHub Actions for CI/CD |
 
 ### Product Development
 
@@ -71,6 +72,7 @@ Skills trigger automatically based on your requests:
 |--------------|-----------------|
 | "push my changes" | auto-push |
 | "optimize this code" | code-optimizer |
+| "setup CI/CD" | devops-pipeline |
 | "evaluate my idea" | idea-validator |
 | "create a PRD" | prd-generator |
 | "make this open source" | oss-ready |
