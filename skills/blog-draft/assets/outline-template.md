@@ -1,14 +1,23 @@
-# Blog Post Outline: [Title]
+# Blog Post Outline
+
+## Title Options
+
+| Option | Title | Length |
+|--------|-------|--------|
+| **Selected** | [Primary title - keyword near start, 45-65 chars] | XX chars |
+| Alt 1 | [Alternative for A/B testing] | XX chars |
+| Alt 2 | [Alternative for A/B testing] | XX chars |
 
 ## Meta Information
 
 | Attribute | Value |
 |-----------|-------|
+| **Primary Keyword** | [Main search term to target] |
 | **Target Audience** | [Who is this for?] |
 | **Tone** | [Formal/Casual/Technical/Conversational] |
 | **Target Length** | [Word count range] |
 | **Main Takeaway** | [One sentence: what should readers remember?] |
-| **Keywords** | [SEO keywords if relevant] |
+| **Secondary Keywords** | [Related terms to include naturally] |
 
 ---
 
