@@ -39,7 +39,7 @@ flowchart LR
     IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config"]
-    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>auto-push *</i>"]
+    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes"]
     OPTIONAL["<b>Optional</b><br/>───────────<br/>oss-ready<br/>blog-draft"]
 
@@ -58,7 +58,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Ideation** | idea-validator → name-checker → logo-designer | Validate concept, check name, design logo |
 | **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
 | **Development** | code-optimizer, test-coverage, agent-config | Write quality code with tests |
-| **Quality & CI/CD** | devops-pipeline → auto-push | Setup CI/CD, commit and push |
+| **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
 | **Release & Docs** | docs-generator, release-notes | Generate documentation and changelogs |
 | **Optional** | oss-ready, blog-draft | Open source setup, announcements |
 
@@ -71,6 +71,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **auto-push** | Stage, commit, and push changes with security checks |
 | **test-coverage** | Expand unit test coverage targeting untested branches |
 | **code-optimizer** | Analyze code for performance issues and optimizations |
+| **code-review** | Review code for smells and pragmatic programming violations |
 | **devops-pipeline** | Setup pre-commit hooks and GitHub Actions for CI/CD |
 
 ### Product Development
@@ -115,6 +116,7 @@ Skills trigger automatically based on your requests:
 | "update CLAUDE.md" | agent-config |
 | "design a logo" | logo-designer |
 | "generate release notes" | release-notes |
+| "review this code" | code-review |
 
 ## Project Structure
 
