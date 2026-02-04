@@ -20,7 +20,7 @@ npx skills add https://github.com/luongnv89/skills
 ```
 
 <p align="center">
-  <img src="assets/add-skills.png" alt="Installing skills" width="600">
+  <img src="assets/add-skills-17.png" alt="Installing skills" width="600">
 </p>
 
 To install a specific skill:
