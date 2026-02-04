@@ -1,0 +1,16 @@
+# Build artifacts
+dist/
+*.skill
+
+# Python
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.tmp
+*~
