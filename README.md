@@ -1,7 +1,13 @@
-# Agent Skills
+<p align="center">
+  <img src="assets/logo/logo-full.svg" alt="Agent Skills" width="320">
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+</p>
+
+# Agent Skills
 
 A collection of skills for AI coding agents. Works with Claude Code, Cursor, Windsurf, Codex, OpenCode, and other AI agents that support skill-based workflows.
 
@@ -47,6 +53,12 @@ npx skills add luongnv89/skills/code-optimizer
 | **oss-ready** | Setup open-source project standards |
 | **agent-config** | Create or update CLAUDE.md and AGENTS.md files |
 
+### Design & Branding
+
+| Skill | Description |
+|-------|-------------|
+| **logo-designer** | Design professional logos with automatic project context detection |
+
 ## Usage
 
 Skills trigger automatically based on your requests:
@@ -60,6 +72,7 @@ Skills trigger automatically based on your requests:
 | "make this open source" | oss-ready |
 | "improve test coverage" | test-coverage |
 | "update CLAUDE.md" | agent-config |
+| "design a logo" | logo-designer |
 
 ## Project Structure
 

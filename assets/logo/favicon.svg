@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
+  <!-- Simplified mark for 16x16 -->
+  <rect x="1" y="1" width="8" height="5" rx="1" fill="#39FF14"/>
+  <rect x="7" y="10" width="8" height="5" rx="1" fill="#000000"/>
+  <rect x="7" y="5" width="2" height="6" fill="#22C55E"/>
+</svg>

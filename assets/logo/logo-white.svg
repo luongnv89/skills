@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 64" fill="none">
+  <style>
+    .logo-text { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 700; font-size: 32px; }
+  </style>
+  <!-- Mark - white version for dark backgrounds -->
+  <rect x="8" y="8" width="32" height="20" rx="4" fill="#39FF14"/>
+  <rect x="24" y="36" width="32" height="20" rx="4" fill="#FFFFFF"/>
+  <rect x="28" y="24" width="8" height="16" fill="#22C55E"/>
+  <!-- Wordmark -->
+  <text x="80" y="44" class="logo-text" fill="#FFFFFF">Agent</text>
+  <text x="188" y="44" class="logo-text" fill="#39FF14">Skills</text>
+</svg>

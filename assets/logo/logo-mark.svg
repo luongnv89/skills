@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Abstract "S" formed by two interlocking skill blocks -->
+  <!-- Top block - represents skill input -->
+  <rect x="8" y="8" width="32" height="20" rx="4" fill="#39FF14"/>
+  <!-- Bottom block - represents skill output -->
+  <rect x="24" y="36" width="32" height="20" rx="4" fill="#000000"/>
+  <!-- Connector line - represents flow/extension -->
+  <rect x="28" y="24" width="8" height="16" fill="#22C55E"/>
+</svg>
