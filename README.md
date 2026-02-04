@@ -9,7 +9,9 @@
 
 # Agent Skills
 
-A collection of skills for AI coding agents. Works with Claude Code, Cursor, Windsurf, Codex, OpenCode, and other AI agents that support skill-based workflows.
+> Supercharge your AI agents/bots with reusable skills
+
+A collection of skills for AI agents, bots, and coding assistants. Works with Claude Code, Cursor, Windsurf, Codex, OpenCode, and other AI tools that support skill-based workflows.
 
 ## Installation
 
@@ -28,53 +30,37 @@ npx skills add https://github.com/luongnv89/skills --skill auto-push
 npx skills add https://github.com/luongnv89/skills --skill code-optimizer
 ```
 
-## Software Development Lifecycle
+## Example: Skill-First Development Workflow
+
+Each skill is independent and can be used separately for various tasks. The diagram below shows one example of how skills can be combined for a complete software development workflow:
 
 ```mermaid
-flowchart TB
-    subgraph IDEATION["💡 Ideation"]
-        I1[idea-validator]
-        I2[name-checker]
-    end
-
-    subgraph PLANNING["📋 Planning"]
-        P1[prd-generator]
-        P2[system-design]
-        P3[tasks-generator]
-    end
-
-    subgraph DEVELOPMENT["💻 Development"]
-        D1[code-optimizer]
-        D2[test-coverage]
-        D3[agent-config]
-    end
-
-    subgraph QUALITY["✅ Quality & CI/CD"]
-        Q1[devops-pipeline]
-        Q2[auto-push]
-    end
-
-    subgraph RELEASE["🚀 Release & Docs"]
-        R1[oss-ready]
-        R2[docs-generator]
-        R3[logo-designer]
-        R4[blog-draft]
-    end
+flowchart LR
+    IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
+    PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
+    DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config"]
+    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>auto-push *</i>"]
+    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator"]
+    OPTIONAL["<b>Optional</b><br/>───────────<br/>oss-ready<br/>blog-draft"]
 
     IDEATION --> PLANNING
     PLANNING --> DEVELOPMENT
     DEVELOPMENT --> QUALITY
     QUALITY --> RELEASE
-    RELEASE -.->|iterate| IDEATION
+    QUALITY -.->|iterate| PLANNING
+    RELEASE -.-> OPTIONAL
 ```
+
+_* Skills marked with * can be used repeatedly during development iterations._
 
 | Phase | Skills | Purpose |
 |-------|--------|---------|
-| **Ideation** | idea-validator → name-checker | Validate concept, check name availability |
+| **Ideation** | idea-validator → name-checker → logo-designer | Validate concept, check name, design logo |
 | **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
 | **Development** | code-optimizer, test-coverage, agent-config | Write quality code with tests |
 | **Quality & CI/CD** | devops-pipeline → auto-push | Setup CI/CD, commit and push |
-| **Release & Docs** | oss-ready, docs-generator, logo-designer, blog-draft | Prepare for public release |
+| **Release & Docs** | docs-generator | Generate project documentation |
+| **Optional** | oss-ready, blog-draft | Open source setup, announcements |
 
 ## Available Skills
 
@@ -168,3 +154,11 @@ See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 ## License
 
 [MIT](LICENSE)
+
+---
+
+<p align="center">
+  <a href="https://luongnv.com">Website</a> •
+  <a href="https://github.com/luongnv89/claude-howto">Claude How-To</a> •
+  <a href="https://medium.com/@luongnv89">Blog</a>
+</p>
