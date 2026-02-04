@@ -56,7 +56,7 @@ flowchart TB
 
     subgraph RELEASE["🚀 Release & Docs"]
         R1[oss-ready]
-        R2[docs-refactor]
+        R2[docs-generator]
         R3[logo-designer]
         R4[blog-draft]
     end
@@ -74,7 +74,7 @@ flowchart TB
 | **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
 | **Development** | code-optimizer, test-coverage, agent-config | Write quality code with tests |
 | **Quality & CI/CD** | devops-pipeline → auto-push | Setup CI/CD, commit and push |
-| **Release & Docs** | oss-ready, docs-refactor, logo-designer, blog-draft | Prepare for public release |
+| **Release & Docs** | oss-ready, docs-generator, logo-designer, blog-draft | Prepare for public release |
 
 ## Available Skills
 
@@ -102,7 +102,7 @@ flowchart TB
 | Skill | Description |
 |-------|-------------|
 | **blog-draft** | Draft blog posts with research and iteration |
-| **docs-refactor** | Restructure project documentation |
+| **docs-generator** | Restructure project documentation |
 | **oss-ready** | Setup open-source project standards |
 | **agent-config** | Create or update CLAUDE.md and AGENTS.md files |
 

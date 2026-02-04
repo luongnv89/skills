@@ -1,6 +1,6 @@
 ---
-name: docs-refactor
-description: Restructure project documentation for clarity and accessibility. Use when users ask to "organize docs", "refactor documentation", "improve doc structure", "restructure README", or need to reorganize scattered documentation into a coherent structure. Analyzes project type and creates appropriate documentation hierarchy.
+name: docs-generator
+description: Restructure project documentation for clarity and accessibility. Use when users ask to "organize docs", "generate documentation", "improve doc structure", "restructure README", or need to reorganize scattered documentation into a coherent structure. Analyzes project type and creates appropriate documentation hierarchy.
 ---
 
 ## Workflow
