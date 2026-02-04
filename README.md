@@ -14,7 +14,7 @@ npx skills add luongnv89/skills
 To install a specific skill:
 
 ```bash
-npx skills add luongnv89/skills/smart-commit
+npx skills add luongnv89/skills/auto-push
 npx skills add luongnv89/skills/code-optimizer
 ```
 
@@ -24,8 +24,7 @@ npx skills add luongnv89/skills/code-optimizer
 
 | Skill | Description |
 |-------|-------------|
-| **smart-commit** | Create intelligent git commits with conventional commits format |
-| **auto-push** | Safely commit and push changes with security checks |
+| **auto-push** | Stage, commit, and push changes with security checks |
 | **test-coverage** | Expand unit test coverage targeting untested branches |
 | **code-optimizer** | Analyze code for performance issues and optimizations |
 
@@ -46,12 +45,7 @@ npx skills add luongnv89/skills/code-optimizer
 | **blog-draft** | Draft blog posts with research and iteration |
 | **docs-refactor** | Restructure project documentation |
 | **oss-ready** | Setup open-source project standards |
-
-### Skill Development
-
-| Skill | Description |
-|-------|-------------|
-| **skill-creator** | Guide for creating effective agent skills |
+| **agent-config** | Create or update CLAUDE.md and AGENTS.md files |
 
 ## Usage
 
@@ -59,12 +53,13 @@ Skills trigger automatically based on your requests:
 
 | What you say | Skill triggered |
 |--------------|-----------------|
-| "commit my changes" | smart-commit |
+| "push my changes" | auto-push |
 | "optimize this code" | code-optimizer |
 | "evaluate my idea" | idea-validator |
 | "create a PRD" | prd-generator |
 | "make this open source" | oss-ready |
 | "improve test coverage" | test-coverage |
+| "update CLAUDE.md" | agent-config |
 
 ## Project Structure
 
