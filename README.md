@@ -73,6 +73,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **code-optimizer** | Analyze code for performance issues and optimizations |
 | **code-review** | Review code for smells and pragmatic programming violations |
 | **devops-pipeline** | Setup pre-commit hooks and GitHub Actions for CI/CD |
+| **ollama-optimizer** | Optimize Ollama configuration for maximum local LLM performance |
 
 ### Product Development
 
@@ -117,6 +118,7 @@ Skills trigger automatically based on your requests:
 | "design a logo" | logo-designer |
 | "generate release notes" | release-notes |
 | "review this code" | code-review |
+| "optimize Ollama" | ollama-optimizer |
 
 ## Project Structure
 
