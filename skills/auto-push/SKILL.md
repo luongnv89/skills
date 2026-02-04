@@ -1,6 +1,6 @@
 ---
-description: Stage all changes, create commit, and push to remote (use with caution)
-allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*), Bash(git push:*), Bash(git diff:*), Bash(git log:*), Bash(git pull:*)
+name: auto-push
+description: Stage all changes, create commit, and push to remote. Use when asked to "push everything", "commit and push all", "push all my changes", or for bulk operations. Includes safety checks for secrets, API keys, and large files. Requires explicit user confirmation before executing. Use with caution.
 ---
 
 # Commit and Push Everything
@@ -124,23 +124,6 @@ Files changed: X (+insertions, -deletions)
   - Non-fast-forward: `git pull --rebase && git push`
   - No remote branch: `git push -u origin [branch]`
   - Protected branch: Use PR workflow instead
-
-## When to Use
-
-✅ **Good:**
-- Multi-file documentation updates
-- Feature with tests and docs
-- Bug fixes across files
-- Project-wide formatting/refactoring
-- Configuration changes
-
-❌ **Avoid:**
-- Uncertain what's being committed
-- Contains secrets/sensitive data
-- Protected branches without review
-- Merge conflicts present
-- Want granular commit history
-- Pre-commit hooks failing
 
 ## Alternatives
 

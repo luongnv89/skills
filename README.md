@@ -14,14 +14,14 @@ A collection of skills for AI coding agents. Works with Claude Code, Cursor, Win
 ## Installation
 
 ```bash
-npx skills add luongnv89/skills
+npx skills add https://github.com/luongnv89/skills --skill <skill_name>
 ```
 
 To install a specific skill:
 
 ```bash
-npx skills add luongnv89/skills/auto-push
-npx skills add luongnv89/skills/code-optimizer
+npx skills add https://github.com/luongnv89/skills --skill auto-push
+npx skills add https://github.com/luongnv89/skills --skill code-optimizer
 ```
 
 ## Available Skills
