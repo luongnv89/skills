@@ -87,7 +87,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Description |
 |-------|-------------|
-| **blog-draft** | Draft blog posts with research and iteration |
+| **blog-draft** | Draft SEO-optimized blog posts with research, title optimization, and content SEO |
 | **docs-generator** | Restructure project documentation |
 | **oss-ready** | Setup open-source project standards |
 | **agent-config** | Create or update CLAUDE.md and AGENTS.md files |
