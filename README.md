@@ -14,7 +14,7 @@ A collection of skills for AI coding agents. Works with Claude Code, Cursor, Win
 ## Installation
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill <skill_name>
+npx skills add https://github.com/luongnv89/skills
 ```
 
 To install a specific skill:
