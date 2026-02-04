@@ -1,0 +1,83 @@
+# Contributing to Agent Skills
+
+Thank you for your interest in contributing! This document provides guidelines for contributing to this project.
+
+## How to Contribute
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/my-new-skill`)
+3. Make your changes
+4. Commit using conventional commits (`git commit -m "feat: add new skill"`)
+5. Push to your branch (`git push origin feature/my-new-skill`)
+6. Open a Pull Request
+
+## Development Setup
+
+```bash
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/skills.git
+cd skills
+
+# Create a new skill
+python3 .agents/skills/skill-creator/scripts/init_skill.py my-skill --path skills/
+
+# Edit the skill
+# ... make changes to skills/my-skill/SKILL.md
+
+# Package and validate
+python3 .agents/skills/skill-creator/scripts/package_skill.py skills/my-skill
+```
+
+## Skill Structure
+
+Each skill must follow this structure:
+
+```
+skill-name/
+├── SKILL.md              # Required: Skill definition
+├── scripts/              # Optional: Executable scripts
+├── references/           # Optional: Reference documentation
+└── assets/               # Optional: Templates and resources
+```
+
+### SKILL.md Requirements
+
+```yaml
+---
+name: skill-name
+description: Clear description of what the skill does and when to use it
+---
+
+# Skill content...
+```
+
+## Commit Message Convention
+
+We use [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` New feature or skill
+- `fix:` Bug fix
+- `docs:` Documentation changes
+- `refactor:` Code refactoring
+- `test:` Adding or updating tests
+- `chore:` Maintenance tasks
+
+Examples:
+- `feat: add code-review skill`
+- `fix: correct trigger phrases in smart-commit`
+- `docs: update installation instructions`
+
+## Pull Request Process
+
+1. Ensure your skill passes validation (`package_skill.py`)
+2. Update README.md if adding a new skill
+3. Fill out the PR template completely
+4. Wait for review and address any feedback
+
+## Code of Conduct
+
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+
+## Questions?
+
+Open an issue for any questions about contributing.
