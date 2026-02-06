@@ -75,6 +75,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **devops-pipeline** | Setup pre-commit hooks and GitHub Actions for CI/CD |
 | **ollama-optimizer** | Optimize Ollama configuration for maximum local LLM performance |
 | **install-script-generator** | Generate cross-platform installation scripts with environment detection |
+| **note-taker** | Capture notes (text, voice, image) into a git-backed repo with task extraction |
 
 ### Product Development
 
@@ -121,6 +122,7 @@ Skills trigger automatically based on your requests:
 | "review this code" | code-review |
 | "optimize Ollama" | ollama-optimizer |
 | "create an installer for X" | install-script-generator |
+| "take a note" | note-taker |
 
 ## Project Structure
 
