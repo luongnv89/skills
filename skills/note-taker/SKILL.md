@@ -53,11 +53,17 @@ Update `KANBAN.md`:
 - Add new tasks to **Backlog**
 - Each task should include a link to the note path
 
-### 7) Commit (and push if remote exists)
+### 7) Maintain README index (mandatory)
+After updating notes and `KANBAN.md`, update the notes repo README so it stays clickable and current:
+- Preferred: run `python3 scripts/update_readme_overview.py` from repo root (if the script exists)
+- Fallback: update `README.md` manually (overview counts + kanban table + notes index)
+
+### 8) Commit (and push if remote exists)
 Commit message conventions:
 - `note: add <short-title>`
 - `kanban: add tasks from <slug>`
 - `note: update <slug>`
+- `docs: update notes README` (if README changed)
 
 If git remote is configured, push.
 

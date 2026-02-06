@@ -98,6 +98,12 @@ Before finalizing:
 - [ ] All tasks in dependency table
 - [ ] Critical path identified
 
+## README Maintenance (idea-2-prd repo)
+
+After writing `tasks.md`, if the PRD lives inside an `idea-2-prd` repo, update the repo README ideas table:
+- Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
+- Fallback: update `README.md` manually (ensure Tasks status becomes ✅ for that idea)
+
 ## Output Summary
 
 After generating, provide:
