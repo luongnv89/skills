@@ -74,6 +74,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **code-review** | Review code for smells and pragmatic programming violations |
 | **devops-pipeline** | Setup pre-commit hooks and GitHub Actions for CI/CD |
 | **ollama-optimizer** | Optimize Ollama configuration for maximum local LLM performance |
+| **install-script-generator** | Generate cross-platform installation scripts with environment detection |
 
 ### Product Development
 
@@ -119,6 +120,7 @@ Skills trigger automatically based on your requests:
 | "generate release notes" | release-notes |
 | "review this code" | code-review |
 | "optimize Ollama" | ollama-optimizer |
+| "create an installer for X" | install-script-generator |
 
 ## Project Structure
 
