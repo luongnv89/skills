@@ -71,6 +71,12 @@ See [references/prd-template.md](references/prd-template.md) for full template s
 3. Highlight areas needing user review
 4. Suggest next steps
 
+### Phase 6: README Maintenance (idea-2-prd repo)
+
+After writing `prd.md`, if the project folder is inside an `idea-2-prd` repo, update the repo README ideas table:
+- Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
+- Fallback: update `README.md` manually (ensure PRD status becomes ✅ for that idea)
+
 ## Modification Mode
 
 If user wants to modify existing PRD:

@@ -84,6 +84,17 @@ Update `validate.md` with:
 - **Specific**: Concrete examples, not vague feedback
 - **Balanced**: Acknowledge strengths alongside weaknesses
 
+## README Maintenance (when running inside idea-2-prd)
+
+If the current working directory looks like the root of an `idea-2-prd` repo (contains `README.md` + multiple `YYYY_MM_DD_*` idea folders):
+- After creating/updating `idea.md` + `validate.md`, update the repo index table by running:
+  - `python3 scripts/update_readme_ideas_index.py` (if the script exists)
+
+If the script does not exist, update `README.md` manually by inserting/updating an `## Ideas index` table with:
+- link to each `idea.md`
+- PRD/tasks status
+- verdict link to `validate.md`
+
 ## Output Summary
 
 After all phases:
