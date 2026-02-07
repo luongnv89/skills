@@ -9,12 +9,23 @@ Transform PRD documents into structured, sprint-based development tasks with dep
 
 ## Input
 
-PRD file path provided in `$ARGUMENTS`. If empty, ask user for the path.
+Preferred: PRD file path provided in `$ARGUMENTS`.
+
+Auto-pick mode (if `$ARGUMENTS` is empty):
+1. Reuse the most recent project folder/path from this chat/session.
+2. If unavailable, use env var `IDEAS_ROOT` when present.
+3. Else check shared marker file `~/.config/ideas-root.txt`.
+4. Backward compatibility fallback: `~/.openclaw/ideas-root.txt`.
+5. If still unavailable, auto-discover the newest folder containing `prd.md` under:
+   - `/home/luongnv/workspace/ideas` (default)
+   - `/home/luongnv/workspace/idea-2-prd` (legacy fallback)
+6. Use `<project>/prd.md`.
+7. If multiple candidates are plausible, ask user to choose.
 
 ## Pre-checks
 
-1. Verify `prd.md` exists at provided path
-2. Check for existing `tasks.md` - create backup if exists: `tasks_backup_YYYY_MM_DD_HHMMSS.md`
+1. Resolve `PRD_PATH` (from `$ARGUMENTS` or auto-pick mode) and verify it exists
+2. Check for existing `tasks.md` in the same directory - create backup if exists: `tasks_backup_YYYY_MM_DD_HHMMSS.md`
 3. Look for supporting docs in same directory: `tad.md`, `ux_design.md`, `brand_kit.md`
 
 ## Workflow
@@ -98,9 +109,9 @@ Before finalizing:
 - [ ] All tasks in dependency table
 - [ ] Critical path identified
 
-## README Maintenance (idea-2-prd repo)
+## README Maintenance (ideas repo)
 
-After writing `tasks.md`, if the PRD lives inside an `idea-2-prd` repo, update the repo README ideas table:
+After writing `tasks.md`, if the PRD lives inside an `ideas` repo, update the repo README ideas table:
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure Tasks status becomes ✅ for that idea)
 

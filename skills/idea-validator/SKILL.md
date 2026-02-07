@@ -9,9 +9,19 @@ Critically evaluate ideas with honest feedback on market viability, technical fe
 
 ## Setup
 
-1. **Create project folder**: `YYYY_MM_DD_<short_snake_case_name>/`
+0. **Resolve storage location (tool-agnostic, ask once per environment)**
+   - Prefer env var `IDEAS_ROOT` if set.
+   - Else use shared marker file: `~/.config/ideas-root.txt`.
+   - Backward compatibility: if shared marker is missing but legacy `~/.openclaw/ideas-root.txt` exists, reuse its value and write it into `~/.config/ideas-root.txt`.
+   - If no marker exists (new environment), ask user once where to store generated docs.
+   - Suggested default: `/home/luongnv/workspace/ideas`.
+   - Save chosen root to `~/.config/ideas-root.txt`.
+   - Only ask again if the user explicitly asks to change location.
+
+1. **Create project folder** under resolved root: `YYYY_MM_DD_<short_snake_case_name>/`
 2. **Create `idea.md`**: Document the idea and clarifications
 3. **Create `validate.md`**: Document evaluation and recommendations
+4. **Echo the absolute project folder path** in your response so downstream skills can auto-pick it.
 
 If no idea provided in `$ARGUMENTS`, ask user to describe their concept.
 
@@ -84,9 +94,9 @@ Update `validate.md` with:
 - **Specific**: Concrete examples, not vague feedback
 - **Balanced**: Acknowledge strengths alongside weaknesses
 
-## README Maintenance (when running inside idea-2-prd)
+## README Maintenance (when running inside ideas repo)
 
-If the current working directory looks like the root of an `idea-2-prd` repo (contains `README.md` + multiple `YYYY_MM_DD_*` idea folders):
+If the current working directory looks like the root of an `ideas` repo (contains `README.md` + multiple `YYYY_MM_DD_*` idea folders):
 - After creating/updating `idea.md` + `validate.md`, update the repo index table by running:
   - `python3 scripts/update_readme_ideas_index.py` (if the script exists)
 
