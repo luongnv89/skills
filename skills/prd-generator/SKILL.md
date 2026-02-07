@@ -9,19 +9,25 @@ Generate comprehensive Product Requirements Documents from validated idea files.
 
 ## Input
 
-Requires project folder path in `$ARGUMENTS` containing:
+Preferred: project folder path in `$ARGUMENTS` containing:
 - `idea.md` - Product concept and technical context (required)
 - `validate.md` - Evaluation and recommendations (required)
 
-If path not provided, ask user for the project folder location.
+If path is not provided (auto-pick mode):
+1. First, reuse the most recent project folder path from this chat/session (typically from idea-validator output).
+2. If unavailable, auto-discover the newest folder containing both `idea.md` + `validate.md` under:
+   - `/home/luongnv/workspace/ideas` (new default)
+   - `/home/luongnv/workspace/idea-2-prd` (legacy fallback)
+3. If multiple candidates are plausible, ask user to choose.
 
 ## Workflow
 
 ### Phase 1: Validate Input
 
-1. Check `$ARGUMENTS/idea.md` exists
-2. Check `$ARGUMENTS/validate.md` exists
-3. If `prd.md` exists, create backup: `prd.backup.YYYYMMDD_HHMMSS.md`
+1. Resolve `PROJECT_DIR` (from `$ARGUMENTS` or auto-pick mode above)
+2. Check `PROJECT_DIR/idea.md` exists
+3. Check `PROJECT_DIR/validate.md` exists
+4. If `PROJECT_DIR/prd.md` exists, create backup: `prd.backup.YYYYMMDD_HHMMSS.md`
 
 ### Phase 2: Extract Context
 
@@ -71,9 +77,9 @@ See [references/prd-template.md](references/prd-template.md) for full template s
 3. Highlight areas needing user review
 4. Suggest next steps
 
-### Phase 6: README Maintenance (idea-2-prd repo)
+### Phase 6: README Maintenance (ideas repo)
 
-After writing `prd.md`, if the project folder is inside an `idea-2-prd` repo, update the repo README ideas table:
+After writing `prd.md`, if the project folder is inside an `ideas` repo, update the repo README ideas table:
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure PRD status becomes ✅ for that idea)
 

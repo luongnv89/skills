@@ -9,9 +9,15 @@ Critically evaluate ideas with honest feedback on market viability, technical fe
 
 ## Setup
 
-1. **Create project folder**: `YYYY_MM_DD_<short_snake_case_name>/`
+0. **Ask storage location first (breaking change)**
+   - Ask user where to store generated brainstorm docs.
+   - If they don’t specify, suggest default root: `/home/luongnv/workspace/ideas`.
+   - If that path does not exist, ask for an existing root path.
+
+1. **Create project folder** under chosen root: `YYYY_MM_DD_<short_snake_case_name>/`
 2. **Create `idea.md`**: Document the idea and clarifications
 3. **Create `validate.md`**: Document evaluation and recommendations
+4. **Echo the absolute project folder path** in your response so downstream skills can auto-pick it.
 
 If no idea provided in `$ARGUMENTS`, ask user to describe their concept.
 
@@ -84,9 +90,9 @@ Update `validate.md` with:
 - **Specific**: Concrete examples, not vague feedback
 - **Balanced**: Acknowledge strengths alongside weaknesses
 
-## README Maintenance (when running inside idea-2-prd)
+## README Maintenance (when running inside ideas repo)
 
-If the current working directory looks like the root of an `idea-2-prd` repo (contains `README.md` + multiple `YYYY_MM_DD_*` idea folders):
+If the current working directory looks like the root of an `ideas` repo (contains `README.md` + multiple `YYYY_MM_DD_*` idea folders):
 - After creating/updating `idea.md` + `validate.md`, update the repo index table by running:
   - `python3 scripts/update_readme_ideas_index.py` (if the script exists)
 
