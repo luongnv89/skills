@@ -13,12 +13,14 @@ Preferred: PRD file path provided in `$ARGUMENTS`.
 
 Auto-pick mode (if `$ARGUMENTS` is empty):
 1. Reuse the most recent project folder/path from this chat/session.
-2. If unavailable, check marker file `~/.openclaw/ideas-root.txt` and use that root if present.
-3. If still unavailable, auto-discover the newest folder containing `prd.md` under:
+2. If unavailable, use env var `IDEAS_ROOT` when present.
+3. Else check shared marker file `~/.config/ideas-root.txt`.
+4. Backward compatibility fallback: `~/.openclaw/ideas-root.txt`.
+5. If still unavailable, auto-discover the newest folder containing `prd.md` under:
    - `/home/luongnv/workspace/ideas` (default)
    - `/home/luongnv/workspace/idea-2-prd` (legacy fallback)
-4. Use `<project>/prd.md`.
-5. If multiple candidates are plausible, ask user to choose.
+6. Use `<project>/prd.md`.
+7. If multiple candidates are plausible, ask user to choose.
 
 ## Pre-checks
 

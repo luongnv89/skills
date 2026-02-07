@@ -15,11 +15,13 @@ Preferred: project folder path in `$ARGUMENTS` containing:
 
 If path is not provided (auto-pick mode):
 1. Reuse the most recent project folder path from this chat/session (typically from idea-validator output).
-2. If unavailable, check marker file `~/.openclaw/ideas-root.txt` and use that root if present.
-3. If still unavailable, auto-discover the newest folder containing both `idea.md` + `validate.md` under:
+2. If unavailable, use env var `IDEAS_ROOT` when present.
+3. Else check shared marker file `~/.config/ideas-root.txt`.
+4. Backward compatibility fallback: `~/.openclaw/ideas-root.txt`.
+5. If still unavailable, auto-discover the newest folder containing both `idea.md` + `validate.md` under:
    - `/home/luongnv/workspace/ideas` (default)
    - `/home/luongnv/workspace/idea-2-prd` (legacy fallback)
-4. If multiple candidates are plausible, ask user to choose.
+6. If multiple candidates are plausible, ask user to choose.
 
 ## Workflow
 

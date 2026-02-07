@@ -9,12 +9,13 @@ Critically evaluate ideas with honest feedback on market viability, technical fe
 
 ## Setup
 
-0. **Resolve storage location (ask once per environment)**
-   - Use marker file: `~/.openclaw/ideas-root.txt`.
-   - If marker exists, use that root silently (do not ask again).
-   - If marker is missing (new environment), ask user once where to store generated docs.
+0. **Resolve storage location (tool-agnostic, ask once per environment)**
+   - Prefer env var `IDEAS_ROOT` if set.
+   - Else use shared marker file: `~/.config/ideas-root.txt`.
+   - Backward compatibility: if shared marker is missing but legacy `~/.openclaw/ideas-root.txt` exists, reuse its value and write it into `~/.config/ideas-root.txt`.
+   - If no marker exists (new environment), ask user once where to store generated docs.
    - Suggested default: `/home/luongnv/workspace/ideas`.
-   - Save the chosen root to `~/.openclaw/ideas-root.txt`.
+   - Save chosen root to `~/.config/ideas-root.txt`.
    - Only ask again if the user explicitly asks to change location.
 
 1. **Create project folder** under resolved root: `YYYY_MM_DD_<short_snake_case_name>/`
