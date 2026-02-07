@@ -9,12 +9,15 @@ Critically evaluate ideas with honest feedback on market viability, technical fe
 
 ## Setup
 
-0. **Ask storage location first (breaking change)**
-   - Ask user where to store generated brainstorm docs.
-   - If they don’t specify, suggest default root: `/home/luongnv/workspace/ideas`.
-   - If that path does not exist, ask for an existing root path.
+0. **Resolve storage location (ask once per environment)**
+   - Use marker file: `~/.openclaw/ideas-root.txt`.
+   - If marker exists, use that root silently (do not ask again).
+   - If marker is missing (new environment), ask user once where to store generated docs.
+   - Suggested default: `/home/luongnv/workspace/ideas`.
+   - Save the chosen root to `~/.openclaw/ideas-root.txt`.
+   - Only ask again if the user explicitly asks to change location.
 
-1. **Create project folder** under chosen root: `YYYY_MM_DD_<short_snake_case_name>/`
+1. **Create project folder** under resolved root: `YYYY_MM_DD_<short_snake_case_name>/`
 2. **Create `idea.md`**: Document the idea and clarifications
 3. **Create `validate.md`**: Document evaluation and recommendations
 4. **Echo the absolute project folder path** in your response so downstream skills can auto-pick it.
