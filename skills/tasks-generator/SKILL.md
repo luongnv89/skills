@@ -1,5 +1,6 @@
 ---
 name: tasks-generator
+version: 1.0.0
 description: Generate development tasks from a PRD file with sprint-based planning. Use when users ask to "create tasks from PRD", "break down the PRD", "generate sprint tasks", or want to convert product requirements into actionable development tasks. Creates tasks.md with POC → MVP → Full Features approach and dependency analysis.
 ---
 

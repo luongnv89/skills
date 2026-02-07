@@ -39,7 +39,7 @@ def validate_skill(skill_path):
         return False, f"Invalid YAML in frontmatter: {e}"
 
     # Define allowed properties
-    ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata'}
+    ALLOWED_PROPERTIES = {'name', 'version', 'description', 'license', 'allowed-tools', 'metadata', 'argument-hint', 'disable-model-invocation'}
 
     # Check for unexpected properties (excluding nested keys under metadata)
     unexpected_keys = set(frontmatter.keys()) - ALLOWED_PROPERTIES
@@ -52,8 +52,20 @@ def validate_skill(skill_path):
     # Check required fields
     if 'name' not in frontmatter:
         return False, "Missing 'name' in frontmatter"
+    if 'version' not in frontmatter:
+        return False, "Missing 'version' in frontmatter"
     if 'description' not in frontmatter:
         return False, "Missing 'description' in frontmatter"
+
+    # Validate version format (semver: MAJOR.MINOR.PATCH)
+    version = frontmatter.get('version', '')
+    # YAML may parse "1.0" as float — convert to string
+    if isinstance(version, (int, float)):
+        version = str(version)
+    if not isinstance(version, str):
+        return False, f"Version must be a string, got {type(version).__name__}"
+    if not re.match(r'^\d+\.\d+\.\d+$', version):
+        return False, f"Version '{version}' must follow semver format (MAJOR.MINOR.PATCH, e.g., 1.0.0)"
 
     # Extract name for validation
     name = frontmatter.get('name', '')

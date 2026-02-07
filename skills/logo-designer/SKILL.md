@@ -1,5 +1,6 @@
 ---
 name: logo-designer
+version: 1.0.0
 description: Design professional, modern logos with automatic project context detection. Use when users ask to "create a logo", "design a logo", "generate brand identity", "make a favicon", or need visual brand assets. Analyzes project files (README, package.json, etc.) to understand product name, purpose, and existing brand colors before generating logo concepts.
 ---
 

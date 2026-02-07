@@ -1,5 +1,6 @@
 ---
 name: release-notes
+version: 1.0.0
 description: Generate release notes from git commits and GitHub PRs/issues. Use when asked to "create release notes", "generate changelog", "prepare release", "what changed since last release", or need to document changes for a new version. Analyzes commit history, merged PRs, and closed issues to produce GitHub Releases formatted notes.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: devops-pipeline
+version: 1.0.0
 description: Implement pre-commit hooks and GitHub Actions for quality assurance. Use when asked to "setup CI/CD", "add pre-commit hooks", "create GitHub Actions", "setup quality gates", "automate testing", "add linting to CI", or any DevOps automation for code quality. Detects project type and configures appropriate tools.
 ---
 

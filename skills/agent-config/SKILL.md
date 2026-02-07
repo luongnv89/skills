@@ -1,5 +1,6 @@
 ---
 name: agent-config
+version: 1.0.0
 description: Create or update CLAUDE.md and AGENTS.md files following official best practices. Use when asked to create, update, audit, or improve project configuration files for AI agents, or when users mention "CLAUDE.md", "AGENTS.md", "agent config", or "agent instructions".
 ---
 

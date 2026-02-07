@@ -1,5 +1,6 @@
 ---
 name: code-optimizer
+version: 1.0.0
 description: Analyze code for performance issues and suggest optimizations. Use when users ask to "optimize this code", "find performance issues", "improve performance", "check for memory leaks", "review code efficiency", or want to identify bottlenecks, algorithmic improvements, caching opportunities, or concurrency problems.
 ---
 

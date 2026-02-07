@@ -10,9 +10,13 @@ Example:
     python utils/package_skill.py skills/public/my-skill ./dist
 """
 
+import re
 import sys
 import zipfile
 from pathlib import Path
+
+import yaml
+
 from quick_validate import validate_skill
 
 
@@ -53,6 +57,22 @@ def package_skill(skill_path, output_dir=None):
         return None
     print(f"✅ {message}\n")
 
+    # Extract version from frontmatter for filename
+    version = None
+    content = skill_md.read_text()
+    fm_match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+    if fm_match:
+        try:
+            fm = yaml.safe_load(fm_match.group(1))
+            if isinstance(fm, dict):
+                v = fm.get('version', '')
+                if isinstance(v, (int, float)):
+                    v = str(v)
+                if isinstance(v, str) and re.match(r'^\d+\.\d+\.\d+$', v):
+                    version = v
+        except yaml.YAMLError:
+            pass
+
     # Determine output location
     skill_name = skill_path.name
     if output_dir:
@@ -61,7 +81,10 @@ def package_skill(skill_path, output_dir=None):
     else:
         output_path = Path.cwd()
 
-    skill_filename = output_path / f"{skill_name}.skill"
+    if version:
+        skill_filename = output_path / f"{skill_name}-{version}.skill"
+    else:
+        skill_filename = output_path / f"{skill_name}.skill"
 
     # Create the .skill file (zip format)
     try:

@@ -66,42 +66,48 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 ### Development Workflow
 
-| Skill | Description |
-|-------|-------------|
-| **auto-push** | Stage, commit, and push changes with security checks |
-| **test-coverage** | Expand unit test coverage targeting untested branches |
-| **code-optimizer** | Analyze code for performance issues and optimizations |
-| **code-review** | Review code for smells and pragmatic programming violations |
-| **devops-pipeline** | Setup pre-commit hooks and GitHub Actions for CI/CD |
-| **ollama-optimizer** | Optimize Ollama configuration for maximum local LLM performance |
-| **install-script-generator** | Generate cross-platform installation scripts with environment detection |
-| **note-taker** | Capture notes (text, voice, image) into a git-backed repo with task extraction |
+| Skill | Version | Description |
+|-------|---------|-------------|
+| **auto-push** | 1.0.0 | Stage, commit, and push changes with security checks |
+| **test-coverage** | 1.0.0 | Expand unit test coverage targeting untested branches |
+| **code-optimizer** | 1.0.0 | Analyze code for performance issues and optimizations |
+| **code-review** | 1.0.0 | Review code for smells and pragmatic programming violations |
+| **devops-pipeline** | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
+| **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
+| **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
+| **note-taker** | 1.0.0 | Capture notes (text, voice, image) into a git-backed repo with task extraction |
 
 ### Product Development
 
-| Skill | Description |
-|-------|-------------|
-| **idea-validator** | Critically evaluate app ideas and startup concepts |
-| **name-checker** | Check product names for trademark and domain conflicts |
-| **prd-generator** | Generate Product Requirements Documents |
-| **tasks-generator** | Generate sprint tasks from PRD |
-| **system-design** | Generate Technical Architecture Documents |
+| Skill | Version | Description |
+|-------|---------|-------------|
+| **idea-validator** | 1.0.0 | Critically evaluate app ideas and startup concepts |
+| **name-checker** | 1.0.0 | Check product names for trademark and domain conflicts |
+| **prd-generator** | 1.0.0 | Generate Product Requirements Documents |
+| **tasks-generator** | 1.0.0 | Generate sprint tasks from PRD |
+| **system-design** | 1.0.0 | Generate Technical Architecture Documents |
 
 ### Content & Documentation
 
-| Skill | Description |
-|-------|-------------|
-| **blog-draft** | Draft SEO-optimized blog posts with research, title optimization, and content SEO |
-| **docs-generator** | Restructure project documentation |
-| **release-notes** | Generate release notes from git commits and GitHub PRs/issues |
-| **oss-ready** | Setup open-source project standards |
-| **agent-config** | Create or update CLAUDE.md and AGENTS.md files |
+| Skill | Version | Description |
+|-------|---------|-------------|
+| **blog-draft** | 1.0.0 | Draft SEO-optimized blog posts with research, title optimization, and content SEO |
+| **docs-generator** | 1.0.0 | Restructure project documentation |
+| **release-notes** | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
+| **oss-ready** | 1.0.0 | Setup open-source project standards |
+| **agent-config** | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |
 
 ### Design & Branding
 
-| Skill | Description |
-|-------|-------------|
-| **logo-designer** | Design professional logos with automatic project context detection |
+| Skill | Version | Description |
+|-------|---------|-------------|
+| **logo-designer** | 1.0.0 | Design professional logos with automatic project context detection |
+
+### Skill Development
+
+| Skill | Version | Description |
+|-------|---------|-------------|
+| **skill-creator** | 1.0.0 | Guide for creating effective skills with templates and packaging tools |
 
 ## Usage
 
@@ -134,8 +140,7 @@ Skills trigger automatically based on your requests:
 │       ├── scripts/     # Optional scripts
 │       ├── references/  # Optional docs
 │       └── assets/      # Optional templates
-├── .agents/             # Agent configuration
-└── .claude/             # Claude-specific skills
+└── .claude/             # Claude-specific config
 ```
 
 ## Creating New Skills
@@ -145,6 +150,7 @@ Use the **skill-creator** skill or create manually:
 ```markdown
 ---
 name: my-skill
+version: 1.0.0
 description: What it does and when to use it
 ---
 

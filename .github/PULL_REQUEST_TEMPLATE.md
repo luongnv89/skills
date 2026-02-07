@@ -17,7 +17,7 @@ Fixes #(issue number)
 ## Checklist
 
 - [ ] Skill passes validation (`package_skill.py`)
-- [ ] SKILL.md has proper frontmatter (name, description)
+- [ ] SKILL.md has proper frontmatter (name, version, description)
 - [ ] Description includes trigger phrases
 - [ ] I have tested the skill with an AI agent
 - [ ] README.md updated (if adding new skill)

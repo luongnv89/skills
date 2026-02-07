@@ -19,13 +19,13 @@ git clone https://github.com/YOUR_USERNAME/skills.git
 cd skills
 
 # Create a new skill
-python3 .agents/skills/skill-creator/scripts/init_skill.py my-skill --path skills/
+python3 skills/skill-creator/scripts/init_skill.py my-skill --path skills/
 
 # Edit the skill
 # ... make changes to skills/my-skill/SKILL.md
 
 # Package and validate
-python3 .agents/skills/skill-creator/scripts/package_skill.py skills/my-skill
+python3 skills/skill-creator/scripts/package_skill.py skills/my-skill
 ```
 
 ## Skill Structure
@@ -45,6 +45,7 @@ skill-name/
 ```yaml
 ---
 name: skill-name
+version: 1.0.0
 description: Clear description of what the skill does and when to use it
 ---
 
@@ -66,6 +67,16 @@ Examples:
 - `feat: add code-review skill`
 - `fix: correct trigger phrases in smart-commit`
 - `docs: update installation instructions`
+
+## Versioning
+
+Skills use [semantic versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`):
+
+- **PATCH** (e.g., `1.0.0` → `1.0.1`): Bug fixes, typo corrections
+- **MINOR** (e.g., `1.0.0` → `1.1.0`): New features, added capabilities
+- **MAJOR** (e.g., `1.0.0` → `2.0.0`): Breaking changes to skill behavior
+
+Always update the `version` field in SKILL.md frontmatter when modifying a skill.
 
 ## Pull Request Process
 
