@@ -73,6 +73,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **code-optimizer** | 1.0.0 | Analyze code for performance issues and optimizations |
 | **code-review** | 1.0.0 | Review code for smells and pragmatic programming violations |
 | **devops-pipeline** | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
+| **openspec-task-loop** | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
 | **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
 | **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
 | **note-taker** | 1.0.0 | Capture notes (text, voice, image) into a git-backed repo with task extraction |
@@ -119,6 +120,7 @@ Skills trigger automatically based on your requests:
 | "push my changes" | auto-push |
 | "optimize this code" | code-optimizer |
 | "setup CI/CD" | devops-pipeline |
+| "run one OpenSpec task at a time" | openspec-task-loop |
 | "evaluate my idea" | idea-validator |
 | "create a PRD" | prd-generator |
 | "make this open source" | oss-ready |
