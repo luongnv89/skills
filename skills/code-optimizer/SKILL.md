@@ -18,6 +18,16 @@ Analyze code for performance issues following this priority order:
 
 ## Workflow
 
+### 0. Create Feature Branch
+
+Before making any changes:
+1. Check the current branch - if already on a feature branch for this task, skip
+2. Check the repo for branch naming conventions (e.g., `feat/`, `feature/`, etc.)
+3. Create and switch to a new branch following the repo's convention, or fallback to: `feat/optimize-<target>`
+   - Example: `feat/optimize-api-handlers`
+
+### 1. Analysis
+
 1. Read the target code file(s)
 2. Identify language and framework context
 3. Analyze for each priority category

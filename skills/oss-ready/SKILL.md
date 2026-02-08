@@ -6,6 +6,13 @@ description: Transform projects into professional open-source repositories with 
 
 ## Workflow
 
+### 0. Create Feature Branch
+
+Before making any changes:
+1. Check the current branch - if already on a feature branch for this task, skip
+2. Check the repo for branch naming conventions (e.g., `feat/`, `feature/`, etc.)
+3. Create and switch to a new branch following the repo's convention, or fallback to: `feat/oss-ready`
+
 ### 1. Analyze Project
 
 Identify:
