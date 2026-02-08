@@ -76,6 +76,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
 | **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
 | **note-taker** | 1.0.0 | Capture notes (text, voice, image) into a git-backed repo with task extraction |
+| **codex-usage-status** | 1.0.0 | Check Codex quota/usage and project end-of-week pace from Day reset windows |
 
 ### Product Development
 
@@ -129,6 +130,7 @@ Skills trigger automatically based on your requests:
 | "optimize Ollama" | ollama-optimizer |
 | "create an installer for X" | install-script-generator |
 | "take a note" | note-taker |
+| "check my codex usage" | codex-usage-status |
 
 ## Project Structure
 
