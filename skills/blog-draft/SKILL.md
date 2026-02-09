@@ -1,7 +1,7 @@
 ---
 name: blog-draft
-version: 1.0.0
-description: Draft a blog post from ideas and resources. Use when users want to write a blog post, create content from research, or draft articles. Guides through research, brainstorming, outlining, and iterative drafting with version control.
+version: 1.1.0
+description: Draft a blog post from ideas and resources, then keep blogs/README.md in sync with created date, draft link, status (draft/complete/on-hold), and public link when published.
 ---
 
 ## User Input
@@ -23,7 +23,11 @@ User should provide:
 
 1. Create project folder: `blog-posts/YYYY-MM-DD-topic-slug/`
 2. For each resource, fetch/read and save summaries to `resources/source-N-name.md`
-3. Present research summary to user
+3. Add/update `blog-posts/status.json` entry for this slug:
+   - `status`: `draft`
+   - `public_url`: empty string
+   - `title`: working title
+4. Present research summary to user
 
 ### 2. Brainstorm & Clarify
 
@@ -86,7 +90,7 @@ Before review, optimize content for search engines. See [references/seo-content-
 
 Save SEO-optimized version and commit.
 
-### 6. Review & Iterate
+### 6. Review, Status, and Iterate
 
 Present draft and ask for feedback on:
 - Overall impression
@@ -94,20 +98,46 @@ Present draft and ask for feedback on:
 - Tone adjustments
 - Missing information
 
-**If changes requested**: Increment version (v0.2, v0.3...), incorporate feedback, repeat review.
+If changes requested:
+- Increment version (v0.2, v0.3...), incorporate feedback, repeat review.
 
-**If approved**: Optionally rename to `final.md` and summarize the creation process.
+If paused/not publishing now:
+- Set status to `on-hold` in `blog-posts/status.json`.
+
+If approved and published:
+- Set status to `complete` in `blog-posts/status.json`.
+- Set `public_url` to final published blog URL.
+
+If still in progress:
+- Keep status `draft`.
+
+### 7. Sync Blog Tracker README (mandatory)
+
+After any draft creation, status change, or publish URL update, run from the `blogs/` repo root:
+
+```bash
+python3 scripts/update_blog_drafts_readme.py
+```
+
+This updates `blogs/README.md` to list all blog drafts with:
+- created date
+- link to latest draft (or outline)
+- status (`draft`, `complete`, `on-hold`)
+- public blog link for completed posts
 
 ## Output Structure
 
 ```
-blog-posts/YYYY-MM-DD-topic-name/
-├── resources/
-│   ├── source-1-name.md
-│   └── source-2-name.md
-├── OUTLINE.md
-├── draft-v0.1.md
-└── draft-v0.2.md (if iterated)
+blog-posts/
+├── status.json
+├── YYYY-MM-DD-topic-name/
+│   ├── resources/
+│   │   ├── source-1-name.md
+│   │   └── source-2-name.md
+│   ├── OUTLINE.md
+│   ├── draft-v0.1.md
+│   └── draft-v0.2.md (if iterated)
+README.md
 ```
 
 ## Resources

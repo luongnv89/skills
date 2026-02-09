@@ -93,7 +93,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **blog-draft** | 1.0.0 | Draft SEO-optimized blog posts with research, title optimization, and content SEO |
+| **blog-draft** | 1.1.0 | Draft SEO-optimized blog posts and auto-sync blogs/README.md draft tracker with status/public links |
 | **docs-generator** | 1.0.0 | Restructure project documentation |
 | **release-notes** | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
 | **oss-ready** | 1.0.0 | Setup open-source project standards |
