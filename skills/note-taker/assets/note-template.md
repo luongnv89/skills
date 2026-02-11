@@ -1,7 +1,7 @@
 # Note: {{title}}
 
 - **Captured**: {{captured_at}}
-- **Source**: {{source}} (text|voice|image)
+- **Source**: {{source}} (text|voice|image|video|file)
 - **Tags**: {{tags}}
 - **Context**: {{context}}
 
@@ -15,4 +15,7 @@
 - [ ] {{task_1}}
 
 ## Attachments
-- {{attachments}}
+{{attachments}}
+
+## Media preview (images)
+{{image_embeds}}

@@ -1,7 +1,7 @@
 ---
 name: note-taker
-version: 1.0.0
-description: Capture chat notes (text, voice, image) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, and commit/push changes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
+version: 1.1.0
+description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, and commit/push changes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
 argument-hint: "[optional title or tags]"
 disable-model-invocation: true
 ---
@@ -19,7 +19,7 @@ This skill maintains NEO’s private notes system in:
 Accept input as:
 - **Text**: the message content
 - **Voice**: summarize (do not store full transcript unless user asks)
-- **Image**: keep the image file and reference it from the note
+- **Image / video / file**: copy attachment file and reference it from the note
 
 If the user provides multiple items, treat each as a separate note unless they explicitly want a single combined note.
 
@@ -35,13 +35,30 @@ Minimum sections:
 - Summary (short)
 - Details (only what matters)
 - Tasks (checkboxes)
-- Attachments (paths)
+- Attachments (paths + links)
 
-### 4) Store attachments
-- Images → `assets/images/YYYY/MM/<slug>--N.<ext>`
-- Audio (optional, if available & <10MB) → `assets/audio/YYYY/MM/<slug>.<ext>`
+### 4) Store attachments (mandatory)
+Always store attachment files in the **same folder as the note file**.
 
-### 5) Redact secrets (mandatory)
+Example:
+- Note: `notes/2026/02/2026-02-11--example.md`
+- Attachments:
+  - `notes/2026/02/2026-02-11--example--1.jpg`
+  - `notes/2026/02/2026-02-11--example--2.mp4`
+
+Rules:
+- Never store note attachments for this workflow under `assets/images` or `assets/audio`.
+- Keep deterministic suffixes: `--1`, `--2`, ...
+- Use relative paths in note markdown.
+
+### 5) Embed images in note markdown (mandatory)
+For every image attachment, include an inline markdown image so it renders in the note:
+
+- `![<short-alt-text>](./<attachment-filename>)`
+
+For non-image files (video/audio/docs), keep normal markdown links under Attachments.
+
+### 6) Redact secrets (mandatory)
 Before committing, scan the note (and any pasted snippets) for:
 - API keys / tokens / passwords / private keys
 
@@ -49,17 +66,17 @@ If found:
 - replace with `[REDACTED_SECRET]`
 - if ambiguity remains, **ask before commit**
 
-### 6) Extract tasks → Kanban
+### 7) Extract tasks → Kanban
 Update `KANBAN.md`:
 - Add new tasks to **Backlog**
 - Each task should include a link to the note path
 
-### 7) Maintain README index (mandatory)
+### 8) Maintain README index (mandatory)
 After updating notes and `KANBAN.md`, update the notes repo README so it stays clickable and current:
 - Preferred: run `python3 scripts/update_readme_overview.py` from repo root (if the script exists)
-- Fallback: update `README.md` manually (overview counts + kanban table + notes index)
+- Fallback: update `README.md` manually (overview counts + notes index)
 
-### 8) Commit (and push if remote exists)
+### 9) Commit (and push if remote exists)
 Commit message conventions:
 - `note: add <short-title>`
 - `kanban: add tasks from <slug>`
