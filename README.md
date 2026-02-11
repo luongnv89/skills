@@ -78,7 +78,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
 | **note-taker** | 1.1.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction and inline media previews |
 | **codex-usage-status** | 1.0.0 | Check Codex quota/usage and project end-of-week pace from Day reset windows |
-| **x-post-generator** | 1.1.0 | Generate branded X posts with auto hashtags (max 5), media link references, and Telegram copy-first 3+ options |
+| **x-post-generator** | 1.1.1 | Generate branded X posts with auto hashtags (max 5), optional media references, and Telegram copy-first 3+ options |
 
 ### Product Development
 

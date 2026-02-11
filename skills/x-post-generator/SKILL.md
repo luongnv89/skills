@@ -1,7 +1,7 @@
 ---
 name: x-post-generator
-version: 1.1.0
-description: Generate X (Twitter) posts from user draft/idea with relevant hashtags (max 5), media link references, and multiple copy-ready variants optimized for Telegram one-tap copy. Use when asked to create tweets, X posts, social post options, or rewrite a draft for X. Supports brand style via references/brand.md and auto-learning from last 10 user-accepted posts.
+version: 1.1.1
+description: Generate X (Twitter) posts from user draft/idea with relevant hashtags (max 5), optional media link references (only when provided), and multiple copy-ready variants optimized for Telegram one-tap copy. Use when asked to create tweets, X posts, social post options, or rewrite a draft for X. Supports brand style via references/brand.md and auto-learning from last 10 user-accepted posts.
 ---
 
 # X Post Generator
@@ -38,7 +38,8 @@ Produce **at least 3 distinct options**.
 Hard rules:
 - Auto-generate relevant hashtags, maximum **5 unique hashtags**
 - Keep hashtags relevant to topic + brand
-- Keep media links explicitly referenced in each option
+- If media links are provided, reference them explicitly in each option
+- If media links are not provided, do not add a media line
 - Keep tone aligned with `references/brand.md`
 
 ### 4) Output format (strict, Telegram copy-first)
@@ -76,8 +77,7 @@ Option 3
 📎 Media: <link1> <link2>
 ```
 
-If no media links are provided, replace media line with:
-`📎 Media: (none provided)`
+If no media links are provided, omit the media line entirely.
 
 ### 5) Learn from accepted post (auto-update brand memory)
 When user accepts one option, run:
@@ -96,6 +96,6 @@ Before final answer, verify:
 - At least 3 options
 - Each option in its own `text` code block
 - No more than 5 hashtags per option
-- Media links present in each option (or explicit none-provided line)
+- Media line present only when media links are provided; absent otherwise
 - No ambiguous placeholders left
 - No extra commentary outside option labels + code blocks
