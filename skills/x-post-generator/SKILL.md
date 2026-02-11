@@ -1,7 +1,7 @@
 ---
 name: x-post-generator
-version: 1.0.0
-description: Generate X (Twitter) posts from user draft/idea with relevant hashtags (max 5), media link references, and multiple copy-ready variants. Use when asked to create tweets, X posts, social post options, or rewrite a draft for X. Supports brand style via references/brand.md and auto-learning from last 10 user-accepted posts.
+version: 1.1.0
+description: Generate X (Twitter) posts from user draft/idea with relevant hashtags (max 5), media link references, and multiple copy-ready variants optimized for Telegram one-tap copy. Use when asked to create tweets, X posts, social post options, or rewrite a draft for X. Supports brand style via references/brand.md and auto-learning from last 10 user-accepted posts.
 ---
 
 # X Post Generator
@@ -41,11 +41,18 @@ Hard rules:
 - Keep media links explicitly referenced in each option
 - Keep tone aligned with `references/brand.md`
 
-### 4) Output format (strict)
-Always return options in separate code blocks so user can copy directly.
+### 4) Output format (strict, Telegram copy-first)
+Always format output so Telegram users can copy each proposal in one tap.
 
-Use this structure for each option:
+Rules:
+- Return **only** option labels + fenced code blocks (no extra commentary before/after).
+- Put exactly one full post per code block.
+- Keep plain text inside code blocks (no markdown bullets inside).
+- Use triple backticks with `text` language.
 
+Use this structure:
+
+Option 1
 ```text
 <post body>
 
@@ -53,7 +60,23 @@ Use this structure for each option:
 📎 Media: <link1> <link2>
 ```
 
-If no media links are provided, replace last line with:
+Option 2
+```text
+<post body>
+
+#hashtag1 #hashtag2 #hashtag3
+📎 Media: <link1> <link2>
+```
+
+Option 3
+```text
+<post body>
+
+#hashtag1 #hashtag2 #hashtag3
+📎 Media: <link1> <link2>
+```
+
+If no media links are provided, replace media line with:
 `📎 Media: (none provided)`
 
 ### 5) Learn from accepted post (auto-update brand memory)
@@ -71,7 +94,8 @@ This will:
 ## Quality checks
 Before final answer, verify:
 - At least 3 options
-- Each option in its own code block
+- Each option in its own `text` code block
 - No more than 5 hashtags per option
-- Media links present in each option
+- Media links present in each option (or explicit none-provided line)
 - No ambiguous placeholders left
+- No extra commentary outside option labels + code blocks
