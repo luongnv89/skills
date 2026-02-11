@@ -41,7 +41,7 @@ flowchart LR
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes<br/>oss-ready"]
-    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker<br/>codex-usage-status"]
+    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker<br/>codex-usage-status<br/>x-post-generator"]
 
     IDEATION --> PLANNING
     PLANNING --> DEVELOPMENT
@@ -60,7 +60,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop | Write quality code with tests and structured task loops |
 | **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
 | **Release & Docs** | docs-generator, release-notes, oss-ready | Generate documentation, changelogs, and open source setup |
-| **Tooling** | skill-creator, ollama-optimizer, install-script-generator, note-taker, codex-usage-status | Create skills, optimize local LLMs, generate installers, capture notes, monitor usage |
+| **Tooling** | skill-creator, ollama-optimizer, install-script-generator, note-taker, codex-usage-status, x-post-generator | Create skills, optimize local LLMs, generate installers, capture notes, monitor usage, draft branded X posts |
 
 ## Available Skills
 
@@ -76,8 +76,9 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **openspec-task-loop** | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
 | **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
 | **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
-| **note-taker** | 1.0.0 | Capture notes (text, voice, image) into a git-backed repo with task extraction |
+| **note-taker** | 1.1.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction and inline media previews |
 | **codex-usage-status** | 1.0.0 | Check Codex quota/usage and project end-of-week pace from Day reset windows |
+| **x-post-generator** | 1.0.0 | Generate branded X posts with auto hashtags (max 5), media link references, and 3+ copy-ready options |
 
 ### Product Development
 
@@ -133,6 +134,7 @@ Skills trigger automatically based on your requests:
 | "create an installer for X" | install-script-generator |
 | "take a note" | note-taker |
 | "check my codex usage" | codex-usage-status |
+| "create an X post about this" | x-post-generator |
 
 ## Project Structure
 
