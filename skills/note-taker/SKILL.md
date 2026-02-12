@@ -1,7 +1,7 @@
 ---
 name: note-taker
-version: 1.2.0
-description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, commit/push changes, and always report GitHub links to new/updated notes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
+version: 1.3.0
+description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, commit/push changes, and always report GitHub app deep links (+ web fallback) to new/updated notes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
 argument-hint: "[optional title or tags]"
 disable-model-invocation: true
 ---
@@ -85,16 +85,21 @@ Commit message conventions:
 
 Always push when remote exists, so reported GitHub links are valid for user.
 
-### 10) Report back with GitHub links (mandatory)
+### 10) Report back with GitHub app deep links (mandatory)
 When reporting completion of any note action, include:
-- GitHub link to each new/updated note markdown file
-- GitHub link to each attached media file (if added)
+- GitHub **app deep link** for each new/updated note markdown file
+- GitHub **app deep link** for each attached media file (if added)
+- Web fallback link for each file
 - Commit hash
 
-Link format:
+Preferred deep-link format:
+- `github://openRepo/luongnv89/notes?branch=main&filepath=<relative-path>`
+
+Web fallback format:
 - `https://github.com/luongnv89/notes/blob/main/<relative-path>`
 
 Example:
+- `github://openRepo/luongnv89/notes?branch=main&filepath=notes/2026/02/2026-02-12--example.md`
 - `https://github.com/luongnv89/notes/blob/main/notes/2026/02/2026-02-12--example.md`
 
 ## Daily routines

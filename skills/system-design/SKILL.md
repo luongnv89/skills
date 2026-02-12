@@ -1,7 +1,7 @@
 ---
 name: system-design
-version: 1.1.0
-description: Generate Technical Architecture Documents (TAD) from PRD files. Use when users ask to "design the architecture", "create a TAD", "system design", or want to define how a product will be built. Creates/updates tad.md and always reports GitHub links to changed files.
+version: 1.2.0
+description: Generate Technical Architecture Documents (TAD) from PRD files. Use when users ask to "design the architecture", "create a TAD", "system design", or want to define how a product will be built. Creates/updates tad.md and always reports GitHub app deep links (+ web fallback) to changed files.
 ---
 
 # System Design
@@ -86,12 +86,14 @@ See [references/tad-template.md](references/tad-template.md) for full template s
 4. List cost estimates by phase
 5. Suggest next steps (setup dev environment, create tasks)
 
-## Reporting with GitHub links (mandatory)
+## Reporting with GitHub app deep links (mandatory)
 When reporting completion, include:
-- GitHub link to `tad.md`
+- GitHub app deep link to `tad.md`
+- Web fallback link
 - Commit hash
 
 If this project is in the ideas repo, use:
+- `github://openRepo/luongnv89/ideas?branch=main&filepath=<relative-path>`
 - `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
 
 ## Modification Mode

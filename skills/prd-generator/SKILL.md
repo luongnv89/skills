@@ -1,7 +1,7 @@
 ---
 name: prd-generator
-version: 1.1.0
-description: Generate comprehensive Product Requirements Documents (PRD) from idea validation files. Use when users ask to "create a PRD", "generate product requirements", "write a PRD", or want to turn validated ideas into actionable product specs. Works with idea.md and validate.md files and always reports GitHub links to changed files.
+version: 1.2.0
+description: Generate comprehensive Product Requirements Documents (PRD) from idea validation files. Use when users ask to "create a PRD", "generate product requirements", "write a PRD", or want to turn validated ideas into actionable product specs. Works with idea.md and validate.md files and always reports GitHub app deep links (+ web fallback) to changed files.
 ---
 
 # PRD Generator
@@ -87,13 +87,17 @@ After writing `prd.md`, if the project folder is inside an `ideas` repo, update 
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure PRD status becomes ✅ for that idea)
 
-## Reporting with GitHub links (mandatory)
+## Reporting with GitHub app deep links (mandatory)
 When reporting completion, include:
-- GitHub link to `prd.md`
-- GitHub link to `README.md` when it was updated
+- GitHub app deep link to `prd.md`
+- GitHub app deep link to `README.md` when it was updated
+- Web fallback links
 - Commit hash
 
-Link format:
+Deep-link format:
+- `github://openRepo/luongnv89/ideas?branch=main&filepath=<relative-path>`
+
+Web fallback format:
 - `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
 
 ## Modification Mode

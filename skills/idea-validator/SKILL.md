@@ -1,7 +1,7 @@
 ---
 name: idea-validator
-version: 1.1.0
-description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability. Creates/updates idea.md and validate.md and always reports GitHub links to changed files.
+version: 1.2.0
+description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability. Creates/updates idea.md and validate.md and always reports GitHub app deep links (+ web fallback) to changed files.
 ---
 
 # Idea Validator
@@ -106,14 +106,18 @@ If the script does not exist, update `README.md` manually by inserting/updating 
 - PRD/tasks status
 - verdict link to `validate.md`
 
-## Reporting with GitHub links (mandatory)
+## Reporting with GitHub app deep links (mandatory)
 When reporting completion, include:
-- GitHub link to `idea.md`
-- GitHub link to `validate.md`
-- GitHub link to `README.md` when it was updated
+- GitHub app deep link to `idea.md`
+- GitHub app deep link to `validate.md`
+- GitHub app deep link to `README.md` when it was updated
+- Web fallback links
 - Commit hash
 
-Link format:
+Deep-link format:
+- `github://openRepo/luongnv89/ideas?branch=main&filepath=<relative-path>`
+
+Web fallback format:
 - `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
 
 ## Output Summary
