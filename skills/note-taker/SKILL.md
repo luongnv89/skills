@@ -1,7 +1,7 @@
 ---
 name: note-taker
-version: 1.1.0
-description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, and commit/push changes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
+version: 1.2.0
+description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, commit/push changes, and always report GitHub links to new/updated notes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
 argument-hint: "[optional title or tags]"
 disable-model-invocation: true
 ---
@@ -76,14 +76,26 @@ After updating notes and `KANBAN.md`, update the notes repo README so it stays c
 - Preferred: run `python3 scripts/update_readme_overview.py` from repo root (if the script exists)
 - Fallback: update `README.md` manually (overview counts + notes index)
 
-### 9) Commit (and push if remote exists)
+### 9) Commit and push (mandatory for reporting links)
 Commit message conventions:
 - `note: add <short-title>`
 - `kanban: add tasks from <slug>`
 - `note: update <slug>`
 - `docs: update notes README` (if README changed)
 
-If git remote is configured, push.
+Always push when remote exists, so reported GitHub links are valid for user.
+
+### 10) Report back with GitHub links (mandatory)
+When reporting completion of any note action, include:
+- GitHub link to each new/updated note markdown file
+- GitHub link to each attached media file (if added)
+- Commit hash
+
+Link format:
+- `https://github.com/luongnv89/notes/blob/main/<relative-path>`
+
+Example:
+- `https://github.com/luongnv89/notes/blob/main/notes/2026/02/2026-02-12--example.md`
 
 ## Daily routines
 - End-of-day: list today’s notes + propose re-organization (tags / merges / splits)

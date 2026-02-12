@@ -76,7 +76,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **openspec-task-loop** | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
 | **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
 | **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
-| **note-taker** | 1.1.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction and inline media previews |
+| **note-taker** | 1.2.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
 | **codex-usage-status** | 1.0.0 | Check Codex quota/usage and project end-of-week pace from Day reset windows |
 | **x-post-generator** | 1.1.1 | Generate branded X posts with auto hashtags (max 5), optional media references, and Telegram copy-first 3+ options |
 
