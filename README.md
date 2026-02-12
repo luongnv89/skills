@@ -84,17 +84,17 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **idea-validator** | 1.0.0 | Critically evaluate app ideas and startup concepts |
+| **idea-validator** | 1.1.0 | Critically evaluate app ideas and startup concepts with GitHub-link reporting |
 | **name-checker** | 1.0.0 | Check product names for trademark and domain conflicts |
-| **prd-generator** | 1.0.0 | Generate Product Requirements Documents |
-| **tasks-generator** | 1.0.0 | Generate sprint tasks from PRD |
-| **system-design** | 1.0.0 | Generate Technical Architecture Documents |
+| **prd-generator** | 1.1.0 | Generate Product Requirements Documents with GitHub-link reporting |
+| **tasks-generator** | 1.1.0 | Generate sprint tasks from PRD with GitHub-link reporting |
+| **system-design** | 1.1.0 | Generate Technical Architecture Documents with GitHub-link reporting |
 
 ### Content & Documentation
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **blog-draft** | 1.1.0 | Draft SEO-optimized blog posts and auto-sync blogs/README.md draft tracker with status/public links |
+| **blog-draft** | 1.2.0 | Draft SEO-optimized blog posts, sync blog tracker, and report GitHub links for updated files |
 | **docs-generator** | 1.0.0 | Restructure project documentation |
 | **release-notes** | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
 | **oss-ready** | 1.0.0 | Setup open-source project standards |

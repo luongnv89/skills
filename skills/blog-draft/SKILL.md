@@ -1,7 +1,7 @@
 ---
 name: blog-draft
-version: 1.1.0
-description: Draft a blog post from ideas and resources, then keep blogs/README.md in sync with created date, draft link, status (draft/complete/on-hold), and public link when published.
+version: 1.2.0
+description: Draft a blog post from ideas and resources, keep blogs/README.md in sync with status/public links, and always report GitHub links to new/updated files in completion replies.
 ---
 
 ## User Input
@@ -124,6 +124,14 @@ This updates `blogs/README.md` to list all blog drafts with:
 - link to latest draft (or outline)
 - status (`draft`, `complete`, `on-hold`)
 - public blog link for completed posts
+
+### 8. Report with GitHub links (mandatory)
+When reporting any blog draft result, include:
+- GitHub link(s) to created/updated draft files (`OUTLINE.md`, `draft-v*.md`, `status.json`, `README.md` if changed)
+- Commit hash
+
+Link format:
+- `https://github.com/luongnv89/blogs/blob/main/<relative-path>`
 
 ## Output Structure
 

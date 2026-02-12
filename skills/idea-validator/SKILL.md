@@ -1,7 +1,7 @@
 ---
 name: idea-validator
-version: 1.0.0
-description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability. Creates project folder with idea.md and validate.md files for documentation.
+version: 1.1.0
+description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability. Creates/updates idea.md and validate.md and always reports GitHub links to changed files.
 ---
 
 # Idea Validator
@@ -105,6 +105,16 @@ If the script does not exist, update `README.md` manually by inserting/updating 
 - link to each `idea.md`
 - PRD/tasks status
 - verdict link to `validate.md`
+
+## Reporting with GitHub links (mandatory)
+When reporting completion, include:
+- GitHub link to `idea.md`
+- GitHub link to `validate.md`
+- GitHub link to `README.md` when it was updated
+- Commit hash
+
+Link format:
+- `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
 
 ## Output Summary
 
