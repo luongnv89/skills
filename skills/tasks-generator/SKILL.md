@@ -1,7 +1,7 @@
 ---
 name: tasks-generator
-version: 1.2.0
-description: Generate development tasks from a PRD file with sprint-based planning. Use when users ask to "create tasks from PRD", "break down the PRD", "generate sprint tasks", or want to convert product requirements into actionable development tasks. Creates/updates tasks.md and always reports GitHub app deep links (+ web fallback) to changed files.
+version: 1.2.1
+description: Generate development tasks from a PRD file with sprint-based planning. Use when users ask to "create tasks from PRD", "break down the PRD", "generate sprint tasks", or want to convert product requirements into actionable development tasks. Creates/updates tasks.md and always reports GitHub links to changed files.
 ---
 
 # Tasks Generator
@@ -116,17 +116,13 @@ After writing `tasks.md`, if the PRD lives inside an `ideas` repo, update the re
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure Tasks status becomes ✅ for that idea)
 
-## Reporting with GitHub app deep links (mandatory)
+## Reporting with GitHub links (mandatory)
 When reporting completion, include:
-- GitHub app deep link to `tasks.md`
-- GitHub app deep link to `README.md` when it was updated
-- Web fallback links
+- GitHub link to `tasks.md`
+- GitHub link to `README.md` when it was updated
 - Commit hash
 
-Deep-link format:
-- `github://openRepo/luongnv89/ideas?branch=main&filepath=<relative-path>`
-
-Web fallback format:
+Link format:
 - `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
 
 ## Output Summary

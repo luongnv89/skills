@@ -1,7 +1,7 @@
 ---
 name: blog-draft
-version: 1.3.0
-description: Draft a blog post from ideas and resources, keep blogs/README.md in sync with status/public links, and always report GitHub app deep links (+ web fallback) to new/updated files in completion replies.
+version: 1.3.1
+description: Draft a blog post from ideas and resources, keep blogs/README.md in sync with status/public links, and always report GitHub links to new/updated files in completion replies.
 ---
 
 ## User Input
@@ -125,16 +125,12 @@ This updates `blogs/README.md` to list all blog drafts with:
 - status (`draft`, `complete`, `on-hold`)
 - public blog link for completed posts
 
-### 8. Report with GitHub app deep links (mandatory)
+### 8. Report with GitHub links (mandatory)
 When reporting any blog draft result, include:
-- GitHub app deep link(s) to created/updated draft files (`OUTLINE.md`, `draft-v*.md`, `status.json`, `README.md` if changed)
-- Web fallback link(s)
+- GitHub link(s) to created/updated draft files (`OUTLINE.md`, `draft-v*.md`, `status.json`, `README.md` if changed)
 - Commit hash
 
-Deep-link format:
-- `github://openRepo/luongnv89/blogs?branch=main&filepath=<relative-path>`
-
-Web fallback format:
+Link format:
 - `https://github.com/luongnv89/blogs/blob/main/<relative-path>`
 
 ## Output Structure

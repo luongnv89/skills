@@ -76,7 +76,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **openspec-task-loop** | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
 | **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
 | **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
-| **note-taker** | 1.3.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub app deep-link reporting |
+| **note-taker** | 1.3.1 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
 | **codex-usage-status** | 1.0.0 | Check Codex quota/usage and project end-of-week pace from Day reset windows |
 | **x-post-generator** | 1.1.1 | Generate branded X posts with auto hashtags (max 5), optional media references, and Telegram copy-first 3+ options |
 
@@ -84,17 +84,17 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **idea-validator** | 1.2.0 | Critically evaluate app ideas and startup concepts with GitHub app deep-link reporting |
+| **idea-validator** | 1.2.1 | Critically evaluate app ideas and startup concepts with GitHub link reporting |
 | **name-checker** | 1.0.0 | Check product names for trademark and domain conflicts |
-| **prd-generator** | 1.2.0 | Generate Product Requirements Documents with GitHub app deep-link reporting |
-| **tasks-generator** | 1.2.0 | Generate sprint tasks from PRD with GitHub app deep-link reporting |
-| **system-design** | 1.2.0 | Generate Technical Architecture Documents with GitHub app deep-link reporting |
+| **prd-generator** | 1.2.1 | Generate Product Requirements Documents with GitHub link reporting |
+| **tasks-generator** | 1.2.1 | Generate sprint tasks from PRD with GitHub link reporting |
+| **system-design** | 1.2.1 | Generate Technical Architecture Documents with GitHub link reporting |
 
 ### Content & Documentation
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **blog-draft** | 1.3.0 | Draft SEO-optimized blog posts, sync blog tracker, and report GitHub app deep links for updated files |
+| **blog-draft** | 1.3.1 | Draft SEO-optimized blog posts, sync blog tracker, and report GitHub links for updated files |
 | **docs-generator** | 1.0.0 | Restructure project documentation |
 | **release-notes** | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
 | **oss-ready** | 1.0.0 | Setup open-source project standards |
