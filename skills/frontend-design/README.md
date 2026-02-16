@@ -39,3 +39,7 @@ graph TD
 ## Output
 
 Production-ready frontend code (HTML/CSS/JS or framework components) with distinctive typography, cohesive color theming, animations, and visual depth — ready to ship.
+
+## Acknowledgement
+
+Customized from Anthropic's official [frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) skill. Added a default style guide and adapted for this skill collection.

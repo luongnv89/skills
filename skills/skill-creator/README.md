@@ -51,3 +51,7 @@ graph TD
 - Supporting resources in `scripts/`, `references/`, `assets/` as needed
 - Packaged `.skill` file for distribution
 - Test suite with trigger and functional tests
+
+## Acknowledgement
+
+Customized from Anthropic's official [skill-creator](https://github.com/anthropics/claude-code/tree/main/plugins/skill-creator) skill. Added README.md generation step and adapted for this skill collection.
