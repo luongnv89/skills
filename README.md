@@ -172,6 +172,13 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
+## Acknowledgements
+
+The following skills are customized from Anthropic's official [Claude Code plugins](https://github.com/anthropics/claude-code/tree/main/plugins):
+
+- [**frontend-design**](skills/frontend-design/) — added default style guide
+- [**skill-creator**](skills/skill-creator/) — added README.md generation step
+
 ## License
 
 [MIT](LICENSE)
