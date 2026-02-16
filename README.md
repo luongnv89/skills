@@ -40,7 +40,7 @@ flowchart LR
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
-    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes<br/>oss-ready"]
+    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes<br/>oss-ready<br/>seo-ai-optimizer"]
     TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
 
     IDEATION --> PLANNING
@@ -59,7 +59,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
 | **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop | Write quality code with tests and structured task loops |
 | **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
-| **Release & Docs** | docs-generator, release-notes, oss-ready | Generate documentation, changelogs, and open source setup |
+| **Release & Docs** | docs-generator, release-notes, oss-ready, seo-ai-optimizer | Generate documentation, changelogs, open source setup, and SEO/AI optimization |
 | **Tooling** | skill-creator, ollama-optimizer, install-script-generator, note-taker | Create skills, optimize local LLMs, generate installers, capture notes |
 
 ## Available Skills
@@ -96,6 +96,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | [**release-notes**](skills/release-notes/) | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
 | [**oss-ready**](skills/oss-ready/) | 1.0.0 | Setup open-source project standards |
 | [**agent-config**](skills/agent-config/) | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.0 | Audit and optimize website codebases for SEO and AI bot scanning |
 
 ### Design & Branding
 
@@ -130,6 +131,7 @@ Skills trigger automatically based on your requests:
 | "optimize Ollama" | ollama-optimizer |
 | "create an installer for X" | install-script-generator |
 | "take a note" | note-taker |
+| "optimize for SEO" | seo-ai-optimizer |
 
 ## Project Structure
 
