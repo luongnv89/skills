@@ -38,7 +38,7 @@ Each skill is independent and can be used separately for various tasks. The diag
 flowchart LR
     IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
-    DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i>"]
+    DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes<br/>oss-ready<br/>seo-ai-optimizer"]
     TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
@@ -57,7 +57,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 |-------|--------|---------|
 | **Ideation** | idea-validator → name-checker → logo-designer | Validate concept, check name, design logo |
 | **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
-| **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop | Write quality code with tests and structured task loops |
+| **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop, frontend-design | Write quality code with tests, structured task loops, and distinctive UIs |
 | **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
 | **Release & Docs** | docs-generator, release-notes, oss-ready, seo-ai-optimizer | Generate documentation, changelogs, open source setup, and SEO/AI optimization |
 | **Tooling** | skill-creator, ollama-optimizer, install-script-generator, note-taker | Create skills, optimize local LLMs, generate installers, capture notes |
@@ -102,7 +102,8 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| [**logo-designer**](skills/logo-designer/) | 1.0.0 | Design professional logos with automatic project context detection |
+| [**logo-designer**](skills/logo-designer/) | 1.1.0 | Design professional logos with automatic project context detection |
+| [**frontend-design**](skills/frontend-design/) | 1.1.0 | Create distinctive, production-grade frontend interfaces with default style guide |
 
 ### Skill Development
 
@@ -132,6 +133,7 @@ Skills trigger automatically based on your requests:
 | "create an installer for X" | install-script-generator |
 | "take a note" | note-taker |
 | "optimize for SEO" | seo-ai-optimizer |
+| "build a landing page" | frontend-design |
 
 ## Project Structure
 
