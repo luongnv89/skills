@@ -1,0 +1,47 @@
+# Tasks Generator
+
+> Transform PRD documents into structured, sprint-based development tasks with dependency analysis.
+
+## Highlights
+
+- Create sprint-based task plans from PRD requirements
+- Perform dependency analysis with parallel task grouping and critical path
+- Group tasks by phase: POC, MVP, and Full Features
+- Link every task back to its PRD section
+
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| "Create tasks from PRD" | Generate sprint plan from requirements |
+| "Break down the PRD" | Extract and organize development tasks |
+| "Generate sprint tasks" | Build phased task plan with dependencies |
+
+## How It Works
+
+```mermaid
+graph TD
+    A["Read PRD"] --> B["Extract Requirements"]
+    B --> C["Define Phases"]
+    C --> D["Plan Sprints"]
+    D --> E["Analyze Dependencies"]
+    E --> F["Generate tasks.md"]
+    style A fill:#4CAF50,color:#fff
+    style F fill:#2196F3,color:#fff
+```
+
+## Usage
+
+```
+/tasks-generator
+```
+
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/` | Sprint planning templates and task formats |
+
+## Output
+
+`tasks.md` with sprint-organized tasks, each including title, description, acceptance criteria, dependencies, and PRD reference. Includes dependency analysis with waves, critical path, and bottleneck identification.

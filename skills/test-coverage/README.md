@@ -1,0 +1,40 @@
+# Test Coverage
+
+> Expand unit test coverage by targeting untested branches, edge cases, and error paths.
+
+## Highlights
+
+- Analyze existing coverage to identify specific gaps
+- Target untested branches, error paths, and boundary values
+- Adapt to any testing framework (Jest, Vitest, pytest, Go, Rust)
+- Create feature branch automatically before adding tests
+
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| "Increase test coverage" | Find gaps and write new tests |
+| "Add more tests" | Target untested branches and edges |
+| "Cover edge cases" | Write tests for boundaries and errors |
+| "Improve test coverage" | Measurably increase coverage metrics |
+
+## How It Works
+
+```mermaid
+graph TD
+    A["Analyze Coverage Gaps"] --> B["Identify Untested Paths"]
+    B --> C["Write Targeted Tests"]
+    C --> D["Run & Verify Improvement"]
+    style A fill:#4CAF50,color:#fff
+    style D fill:#2196F3,color:#fff
+```
+
+## Usage
+
+```
+/test-coverage
+```
+
+## Output
+
+New test cases added to the project's existing test suite, following current patterns and naming conventions. Tests target error handling, boundary values, null/empty inputs, and async edge cases with measurably improved coverage.
