@@ -1,6 +1,6 @@
 ---
 name: logo-designer
-version: 1.0.0
+version: 1.1.0
 description: Design professional, modern logos with automatic project context detection. Use when users ask to "create a logo", "design a logo", "generate brand identity", "make a favicon", or need visual brand assets. Analyzes project files (README, package.json, etc.) to understand product name, purpose, and existing brand colors before generating logo concepts.
 ---
 
@@ -65,11 +65,19 @@ Generate logo based on project type and context.
 - Abstract symbol or monogram related to core purpose
 - Works at all sizes (16px favicon to hero banner)
 - Flat or semi-flat design, no gradients or visual clichés
+- Incorporate visual depth using cards, lines, borders, and subtle shadows
 
 **Colors:**
-- Use detected brand colors OR suggest based on industry
+- Use detected brand colors if available, OR user-provided palette
+- If neither exists, apply the **Default Style Guide** below
 - High contrast, WCAG AA compliant (4.5:1 minimum)
 - Always provide light, dark, and transparent versions
+
+**Default Style Guide** (used when user provides no style preference):
+- **Palette**: Strictly four core colors only — Black (`#000000`), White (`#FFFFFF`), Gray (`#6B7280`), and Bright Green (`#22C55E`)
+- **Aesthetic**: Elegant, clear, clean, and professional
+- **Bright Green constraint**: Reserved for highlights only (text, borders, lines) — never as a background color
+- **System status colors**: Danger (`#EF4444`), Warning (`#F59E0B`), Info (`#3B82F6`) may only be applied to text elements, never to backgrounds or primary UI components
 
 **Typography:**
 - Modern sans-serif (Inter, SF Pro, Geist, or match detected fonts)
@@ -110,6 +118,7 @@ After generating logos, provide:
    ```
    Primary: #HEXCODE
    Secondary: #HEXCODE (if applicable)
+   Accent/Highlight: #HEXCODE (for borders, lines, highlight text)
    Background Light: #FFFFFF
    Background Dark: #0A0A0A
    ```
@@ -120,6 +129,7 @@ After generating logos, provide:
      brand: {
        primary: '#HEXCODE',
        secondary: '#HEXCODE',
+       accent: '#HEXCODE',
      }
    }
    ```
@@ -144,12 +154,15 @@ Assets found: None
 
 ## Design Rationale
 - **Symbol**: Abstract "F" formed by stacked horizontal bars suggesting speed and layered builds
-- **Colors**: Monochrome (#0A0A0A) for technical credibility, matching Vercel/Linear aesthetic
+- **Colors**: Default style guide — Black/White/Gray base with Bright Green highlight on the speed bars
 - **Typography**: Geist Mono for CLI tool authenticity
 
 ## Colors
-Primary: #0A0A0A
-Accent: #3B82F6 (optional highlight)
+Primary: #000000
+Secondary: #6B7280
+Accent: #22C55E (highlights only — borders, lines)
+Background Light: #FFFFFF
+Background Dark: #0A0A0A
 ```
 
 ## Notes
