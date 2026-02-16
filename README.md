@@ -103,7 +103,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | Skill | Version | Description |
 |-------|---------|-------------|
 | [**logo-designer**](skills/logo-designer/) | 1.1.0 | Design professional logos with automatic project context detection |
-| [**frontend-design**](skills/frontend-design/) | 1.1.0 | Create distinctive, production-grade frontend interfaces with default style guide |
+| [**frontend-design**](skills/frontend-design/) | 1.2.0 | Create distinctive, usability-focused frontend interfaces with default style guide |
 
 ### Skill Development
 

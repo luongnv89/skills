@@ -1,7 +1,7 @@
 ---
 name: frontend-design
-version: 1.1.0
-description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include web apps, landing pages, dashboards, forms, portfolios). Generates creative, polished code that avoids generic AI aesthetics. Includes a default style guide (Black/White/Gray/Bright Green) when no style preference is provided.
+version: 1.2.0
+description: Create distinctive, usability-focused, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include web apps, landing pages, dashboards, forms, portfolios). Generates creative, polished code that avoids generic AI aesthetics. Applies "Don't Make Me Think" usability principles and a default style guide (Black/White/Gray/Bright Green) when no style preference is provided.
 ---
 
 # Frontend Design
@@ -37,6 +37,37 @@ When the user does **not** provide a specific style preference, color palette, o
 5. **System Status Colors:** Danger (`#EF4444`), Warning (`#F59E0B`), and Info (`#3B82F6`) may only be applied to text elements, not backgrounds or primary UI components.
 
 If the user provides their own colors, brand kit, or style direction, use those instead and ignore this default guide.
+
+## Usability Principles — "Don't Make Me Think"
+
+Every design MUST follow these usability rules derived from Steve Krug's principles. These are non-negotiable regardless of aesthetic direction.
+
+### 1. Design for Scanning, Not Reading
+- Users scan pages — they do not read them. Use clear headings, short paragraphs, bullet points, and visual hierarchy (bigger/bolder = more important).
+- Highlight keywords. Apply the **billboard rule**: if a user can't grasp the page purpose in 5 seconds, simplify.
+
+### 2. Follow Conventions
+- Place navigation at the top, logo upper-left, search top-right. Use familiar icons (magnifying glass for search, hamburger for mobile menu).
+- Use straightforward labels: "Books" not "Library Vault". Clicks are fine if each is unambiguous.
+
+### 3. Make Interactions Self-Evident
+- Buttons must look clickable (shaded, bordered, with hover states). Links must be visually distinct from body text.
+- CTAs use action verbs ("Shop Now", "Get Started") and are prominently placed. Forms have no unnecessary fields.
+
+### 4. Eliminate Cognitive Load
+- Edit ruthlessly — cut half the words, then half again. Use plain language, no jargon.
+- Ensure consistency across pages: same button styles, same spacing patterns, same color semantics.
+- Design error states gracefully: clear messages with recovery suggestions (e.g., "No results found. Try a broader search.").
+
+### 5. Self-Test Every Design
+- Before delivering, simulate user paths: role-play 3-5 task scenarios (e.g., "Find and buy a product"). Flag any point of hesitation.
+- Verify mobile responsiveness — the design must adapt without losing core functionality.
+
+### 6. Accessibility Is Mandatory
+- Alt text on all images, WCAG AA contrast (4.5:1 minimum), keyboard navigable.
+- Site identity (logo, tagline) visible on every page.
+
+For the full step-by-step guideline, see `references/usability-guide.md`.
 
 ## Frontend Aesthetics Guidelines
 

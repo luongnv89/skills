@@ -5,8 +5,8 @@
 ## Highlights
 
 - Bold aesthetic direction with intentional design choices, not generic AI output
+- Built-in usability principles from "Don't Make Me Think" (scan-friendly, self-evident, low cognitive load)
 - Default style guide (Black/White/Gray/Bright Green) when no preference is provided
-- Production-grade code with animations, micro-interactions, and visual depth
 - Supports HTML/CSS/JS, React, Vue, and any modern frontend framework
 
 ## When to Use
@@ -23,9 +23,9 @@
 ```mermaid
 graph TD
     A["Understand Context"] --> B["Choose Aesthetic Direction"]
-    B --> C["Apply Style Guide"]
+    B --> C["Apply Style & Usability Rules"]
     C --> D["Implement Production Code"]
-    D --> E["Refine Details & Motion"]
+    D --> E["Self-Test & Refine"]
     style A fill:#4CAF50,color:#fff
     style E fill:#2196F3,color:#fff
 ```
@@ -36,10 +36,16 @@ graph TD
 /frontend-design
 ```
 
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/usability-guide.md` | Full "Don't Make Me Think" step-by-step guideline with checklist |
+
 ## Output
 
-Production-ready frontend code (HTML/CSS/JS or framework components) with distinctive typography, cohesive color theming, animations, and visual depth — ready to ship.
+Production-ready frontend code (HTML/CSS/JS or framework components) with distinctive typography, cohesive color theming, animations, and visual depth — usability-tested and ready to ship.
 
 ## Acknowledgement
 
-Customized from Anthropic's official [frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) skill. Added a default style guide and adapted for this skill collection.
+Customized from Anthropic's official [frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) skill. Added a default style guide, usability principles from "Don't Make Me Think", and adapted for this skill collection.
