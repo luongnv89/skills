@@ -34,9 +34,9 @@ def validate_skill(skill_path):
     if not skill_md.exists():
         return False, "SKILL.md not found"
 
-    # Check for forbidden files
-    if (skill_path / 'README.md').exists():
-        warnings.append("WARNING: README.md found inside skill folder (not recommended -- put docs in SKILL.md or references/)")
+    # Check for README.md (required)
+    if not (skill_path / 'README.md').exists():
+        warnings.append("WARNING: README.md not found -- every skill should include a README.md for human-readable documentation")
 
     # Read content
     content = skill_md.read_text()

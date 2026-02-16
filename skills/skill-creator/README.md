@@ -6,7 +6,7 @@
 
 - Discovery phase to understand purpose, requirements, and edge cases
 - Approval gate before building to confirm understanding
-- Generate YAML frontmatter, SKILL.md, and supporting resources
+- Generate YAML frontmatter, SKILL.md, README.md, and supporting resources
 - Include test suite with trigger and functional test cases
 
 ## When to Use
@@ -47,7 +47,7 @@ graph TD
 
 ## Output
 
-- Complete skill folder with SKILL.md (YAML frontmatter + instructions)
+- Complete skill folder with SKILL.md (YAML frontmatter + instructions) and README.md (human-readable docs)
 - Supporting resources in `scripts/`, `references/`, `assets/` as needed
 - Packaged `.skill` file for distribution
 - Test suite with trigger and functional tests

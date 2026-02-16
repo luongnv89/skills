@@ -41,7 +41,7 @@ flowchart LR
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes<br/>oss-ready"]
-    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker<br/>codex-usage-status<br/>x-post-generator"]
+    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
 
     IDEATION --> PLANNING
     PLANNING --> DEVELOPMENT
@@ -60,7 +60,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop | Write quality code with tests and structured task loops |
 | **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
 | **Release & Docs** | docs-generator, release-notes, oss-ready | Generate documentation, changelogs, and open source setup |
-| **Tooling** | skill-creator, ollama-optimizer, install-script-generator, note-taker, codex-usage-status, x-post-generator | Create skills, optimize local LLMs, generate installers, capture notes, monitor usage, draft branded X posts |
+| **Tooling** | skill-creator, ollama-optimizer, install-script-generator, note-taker | Create skills, optimize local LLMs, generate installers, capture notes |
 
 ## Available Skills
 
@@ -77,8 +77,6 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
 | **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
 | **note-taker** | 1.3.1 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
-| **codex-usage-status** | 1.0.0 | Check Codex quota/usage and project end-of-week pace from Day reset windows |
-| **x-post-generator** | 1.1.1 | Generate branded X posts with auto hashtags (max 5), optional media references, and Telegram copy-first 3+ options |
 
 ### Product Development
 
@@ -94,7 +92,6 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **blog-draft** | 1.3.1 | Draft SEO-optimized blog posts, sync blog tracker, and report GitHub links for updated files |
 | **docs-generator** | 1.0.0 | Restructure project documentation |
 | **release-notes** | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
 | **oss-ready** | 1.0.0 | Setup open-source project standards |
@@ -133,8 +130,6 @@ Skills trigger automatically based on your requests:
 | "optimize Ollama" | ollama-optimizer |
 | "create an installer for X" | install-script-generator |
 | "take a note" | note-taker |
-| "check my codex usage" | codex-usage-status |
-| "create an X post about this" | x-post-generator |
 
 ## Project Structure
 

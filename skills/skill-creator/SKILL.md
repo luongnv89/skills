@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-version: 2.0.0
+version: 2.1.0
 description: Interactive guide for creating new skills (or updating existing skills) that extend Claude's capabilities. Walks the user through use case definition, frontmatter generation, instruction writing, and validation. Use when users want to create a new skill, build a skill, update an existing skill, or ask "help me make a skill for X". Always clarifies requirements before generating.
 ---
 
@@ -21,7 +21,7 @@ Skill creation follows four phases in strict order:
 
 1. **Discovery** -- Ask questions, clarify requirements, gather examples
 2. **Approval** -- Present understanding summary, get user sign-off
-3. **Build** -- Initialize, write SKILL.md and resources, run validation
+3. **Build** -- Initialize, write SKILL.md, README.md, and resources, run validation
 4. **Test & Deliver** -- Generate test suite, run validation, package
 
 Do NOT skip or merge phases. Complete each phase before proceeding.
@@ -277,6 +277,62 @@ Then:
   - [no errors]
 ```
 
+### Step 3.6: Generate README.md
+
+Every skill MUST include a README.md for human-readable documentation. Use the following template:
+
+```markdown
+# [Skill Display Name]
+
+> [One-line description of what the skill does]
+
+## Highlights
+
+- [Key capability 1]
+- [Key capability 2]
+- [Key capability 3]
+- [Key capability 4]
+
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| "[trigger phrase 1]" | [What happens] |
+| "[trigger phrase 2]" | [What happens] |
+| "[trigger phrase 3]" | [What happens] |
+
+## How It Works
+
+` ` `mermaid
+graph TD
+    A["[First Step]"] --> B["[Second Step]"]
+    B --> C["[Third Step]"]
+    C --> D["[Final Step]"]
+    style A fill:#4CAF50,color:#fff
+    style D fill:#2196F3,color:#fff
+` ` `
+
+## Usage
+
+` ` `
+/[skill-name]
+` ` `
+
+## Output
+
+[Description of what the skill produces -- files, reports, etc.]
+```
+
+**README rules:**
+- Title: Use the human-readable display name (e.g., "Code Optimizer", not "code-optimizer")
+- Tagline: One sentence in blockquote format (> prefix)
+- Highlights: 3-5 bullet points of key capabilities
+- When to Use: Table with 3-4 trigger phrases mapping to actions
+- How It Works: Mermaid `graph TD` diagram showing the main workflow steps. First node green (#4CAF50), last node blue (#2196F3)
+- Usage: Code block with the slash command invocation
+- Output: Brief description of what the skill produces
+- Optional **Resources** section: Table with `| Path | Description |` columns if the skill has `scripts/`, `references/`, or `assets/` directories
+
 ---
 
 ## Phase 4: Test & Deliver
@@ -304,7 +360,7 @@ Verify each item:
 - [ ] `name` is kebab-case, no spaces, no capitals
 - [ ] `description` includes WHAT and WHEN
 - [ ] No XML tags anywhere
-- [ ] No README.md inside skill folder
+- [ ] README.md exists with correct template structure (title, tagline, highlights, when to use, how it works, usage, output)
 
 **Content:**
 - [ ] Instructions are clear and actionable (no vague language)
@@ -331,7 +387,7 @@ The packaging script validates automatically and creates a versioned `.skill` fi
 
 Deliver the completed skill with:
 1. The `.skill` file location
-2. Summary of what was created (files, structure)
+2. Summary of what was created (SKILL.md, README.md, and supporting files)
 3. The test suite for the user to run
 4. Installation instructions:
    - Claude.ai: Settings > Capabilities > Skills > Upload
@@ -365,9 +421,10 @@ Match specificity to the task:
 ### What NOT to Include
 
 Do not create these files inside a skill:
-- README.md, CHANGELOG.md, INSTALLATION_GUIDE.md
-- User-facing documentation (skill is for AI agent, not humans)
+- CHANGELOG.md, INSTALLATION_GUIDE.md
 - Auxiliary context about the creation process
+
+**Exception:** README.md IS required -- it provides human-readable documentation for browsing the skill catalog.
 
 ### Design Patterns
 
