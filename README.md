@@ -69,14 +69,14 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | Skill | Version | Description |
 |-------|---------|-------------|
 | [**auto-push**](skills/auto-push/) | 1.0.0 | Stage, commit, and push changes with security checks |
-| [**test-coverage**](skills/test-coverage/) | 1.0.0 | Expand unit test coverage targeting untested branches |
-| [**code-optimizer**](skills/code-optimizer/) | 1.0.0 | Analyze code for performance issues and optimizations |
+| [**test-coverage**](skills/test-coverage/) | 1.2.0 | Expand unit test coverage targeting untested branches |
+| [**code-optimizer**](skills/code-optimizer/) | 1.2.0 | Analyze code for performance issues and optimizations |
 | [**code-review**](skills/code-review/) | 1.0.0 | Review code for smells and pragmatic programming violations |
 | [**devops-pipeline**](skills/devops-pipeline/) | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
 | [**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
 | [**install-script-generator**](skills/install-script-generator/) | 1.0.0 | Generate cross-platform installation scripts with environment detection |
-| [**note-taker**](skills/note-taker/) | 1.3.1 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
+| [**note-taker**](skills/note-taker/) | 1.4.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
 
 ### Product Development
 
@@ -92,7 +92,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| [**docs-generator**](skills/docs-generator/) | 1.0.0 | Restructure project documentation |
+| [**docs-generator**](skills/docs-generator/) | 1.2.0 | Restructure project documentation |
 | [**release-notes**](skills/release-notes/) | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
 | [**oss-ready**](skills/oss-ready/) | 1.0.0 | Setup open-source project standards |
 | [**agent-config**](skills/agent-config/) | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |

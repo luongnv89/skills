@@ -1,8 +1,12 @@
 ---
 name: test-coverage
-version: 1.1.0
+version: 1.2.0
 description: Expand unit test coverage by targeting untested branches and edge cases. Use when users ask to "increase test coverage", "add more tests", "expand unit tests", "cover edge cases", "improve test coverage", or want to identify and fill gaps in existing test suites. Adapts to project's testing framework.
 ---
+
+# Test Coverage Expander
+
+Expand unit test coverage by targeting untested branches and edge cases.
 
 ## Workflow
 
@@ -15,9 +19,15 @@ Before making any changes:
 
 ### 1. Analyze Coverage
 
-Run coverage report to identify:
+Detect the project's test runner and run the coverage report:
+- **JavaScript/TypeScript**: `npx jest --coverage` or `npx vitest --coverage`
+- **Python**: `pytest --cov=. --cov-report=term-missing`
+- **Go**: `go test -coverprofile=coverage.out ./...`
+- **Rust**: `cargo tarpaulin` or `cargo llvm-cov`
+
+From the report, identify:
 - Untested branches and code paths
-- Low-coverage files/functions
+- Low-coverage files/functions (prioritize files below 60%)
 - Missing error handling tests
 
 ### 2. Identify Test Gaps
@@ -45,11 +55,26 @@ Target scenarios:
 
 ### 4. Verify Improvement
 
-Run coverage again and confirm measurable increase.
+Run coverage again and confirm measurable increase. Report:
+- Before/after coverage percentages
+- Number of new test cases added
+- Files with the biggest coverage gains
+
+## Error Handling
+
+### No test framework detected
+**Solution:** Check `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` for test dependencies. If none found, ask the user which framework to use and install it.
+
+### Coverage tool not installed
+**Solution:** Install the appropriate coverage tool (`nyc`, `pytest-cov`, etc.) and retry.
+
+### Existing tests failing
+**Solution:** Do not add new tests until existing failures are resolved. Report failing tests to the user first.
 
 ## Guidelines
 
 - Follow existing test patterns and naming conventions
-- Present new test code blocks only
+- Place test files alongside source or in the project's existing test directory
 - Group related test cases logically
 - Use descriptive test names that explain the scenario
+- Do not mock what you do not own — prefer integration tests for external boundaries

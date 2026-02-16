@@ -1,8 +1,12 @@
 ---
 name: docs-generator
-version: 1.1.0
+version: 1.2.0
 description: Restructure project documentation for clarity and accessibility. Use when users ask to "organize docs", "generate documentation", "improve doc structure", "restructure README", or need to reorganize scattered documentation into a coherent structure. Analyzes project type and creates appropriate documentation hierarchy.
 ---
+
+# Documentation Generator
+
+Restructure and organize project documentation for clarity and accessibility.
 
 ## Workflow
 
@@ -15,10 +19,12 @@ Before making any changes:
 
 ### 1. Analyze Project
 
-Identify:
+Read the codebase to identify:
 - **Project type**: Library, API, web app, CLI, microservices
 - **Architecture**: Monorepo, multi-package, single module
 - **User personas**: End users, developers, operators
+- **Existing docs**: Scan for README files, docs/ folder, inline comments, docstrings
+- **Gaps**: List what documentation exists vs. what is missing
 
 ### 2. Restructure Documentation
 
@@ -52,9 +58,25 @@ Use Mermaid for all visual documentation:
 - Data flow diagrams
 - Database schemas
 
-### Guidelines
+### 4. Review and Validate
+
+1. Verify all internal links resolve correctly
+2. Check that code examples in docs are syntactically valid
+3. Confirm no orphaned docs (files not linked from anywhere)
+4. Present a summary of changes to the user before committing
+
+## Error Handling
+
+### No existing documentation found
+**Solution:** Generate documentation from scratch based on code analysis. Start with README.md and add docs/ files based on project complexity.
+
+### Conflicting or outdated docs
+**Solution:** Flag conflicts to the user. Prefer code-derived information over stale docs. Mark outdated sections for user review.
+
+## Guidelines
 
 - Keep docs concise and scannable
 - Adapt structure to project type (not all categories apply)
 - Maintain cross-references between related docs
 - Remove redundant or outdated content
+- Preserve any existing docs that are still accurate

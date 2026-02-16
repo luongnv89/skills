@@ -1,6 +1,6 @@
 ---
 name: note-taker
-version: 1.3.1
+version: 1.4.0
 description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, commit/push changes, and always report GitHub web links to new/updated notes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
 argument-hint: "[optional title or tags]"
 disable-model-invocation: true
@@ -8,8 +8,9 @@ disable-model-invocation: true
 
 # Note Taker (Git-managed)
 
-This skill maintains NEO’s private notes system in:
-`/home/luongnv/workspace/notes`
+This skill maintains a private notes system in a dedicated git-backed notes repository.
+
+**Setup:** The notes repo path must be configured. Look for a `NOTES_REPO` variable in the project's CLAUDE.md or AGENTS.md, or ask the user for the path on first use.
 
 **Rule:** This skill has side effects (writes + commits + pushes) so it must be user-invoked.
 
@@ -92,15 +93,14 @@ When reporting completion of any note action, include:
 - Commit hash
 
 Link format:
-- `https://github.com/luongnv89/notes/blob/main/<relative-path>`
+- `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
 
-Example:
-- `https://github.com/luongnv89/notes/blob/main/notes/2026/02/2026-02-12--example.md`
+Detect the remote URL from the notes repo's `git remote get-url origin` to build correct links.
 
 ## Daily routines
 - End-of-day: list today’s notes + propose re-organization (tags / merges / splits)
 - Daily 10–15min: review Backlog → pick → move to In Progress → Done
 
 ## References
-- Repo process rules: `/home/luongnv/workspace/notes/AGENTS.md`
-- Redaction + workflow policy: `/home/luongnv/workspace/notes/POLICY.md`
+- Repo process rules: `AGENTS.md` in the notes repo root
+- Redaction + workflow policy: `POLICY.md` in the notes repo root

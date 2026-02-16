@@ -1,6 +1,6 @@
 ---
 name: code-optimizer
-version: 1.1.0
+version: 1.2.0
 description: Analyze code for performance issues and suggest optimizations. Use when users ask to "optimize this code", "find performance issues", "improve performance", "check for memory leaks", "review code efficiency", or want to identify bottlenecks, algorithmic improvements, caching opportunities, or concurrency problems.
 ---
 
@@ -28,10 +28,18 @@ Before making any changes:
 
 ### 1. Analysis
 
-1. Read the target code file(s)
-2. Identify language and framework context
-3. Analyze for each priority category
-4. Report findings with severity and fixes
+1. Read the target code file(s) or directory
+2. Identify language, framework, and runtime context (Node.js, CPython, browser, etc.)
+3. Analyze for each priority category in order
+4. For each issue found, estimate the performance impact (e.g., "reduces API response from ~500ms to ~50ms")
+5. Report findings sorted by severity (Critical first)
+
+### 2. Apply Fixes
+
+1. Present the optimization report to the user
+2. On approval, apply fixes starting with Critical/High severity
+3. Run existing tests after each change to verify no regressions
+4. If no tests exist, warn the user before applying changes
 
 ## Response Format
 
@@ -75,3 +83,14 @@ For each issue found:
 - Premature optimization warnings (only flag if genuinely impactful)
 - Database query patterns (N+1, missing indexes)
 - I/O in hot paths
+
+## Error Handling
+
+### No obvious performance issues found
+**Solution:** Report that the code is already well-optimized. Suggest profiling with runtime tools (e.g., `perf`, Chrome DevTools, `py-spy`) to find runtime-specific bottlenecks.
+
+### Target file is too large (>2000 lines)
+**Solution:** Ask the user to specify which functions or sections to focus on. Analyze the most performance-critical paths first.
+
+### Optimization breaks existing tests
+**Solution:** Revert the change immediately. Re-examine the optimization and adjust the approach to preserve existing behavior.
