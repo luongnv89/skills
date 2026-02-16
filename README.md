@@ -68,46 +68,46 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **auto-push** | 1.0.0 | Stage, commit, and push changes with security checks |
-| **test-coverage** | 1.0.0 | Expand unit test coverage targeting untested branches |
-| **code-optimizer** | 1.0.0 | Analyze code for performance issues and optimizations |
-| **code-review** | 1.0.0 | Review code for smells and pragmatic programming violations |
-| **devops-pipeline** | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
-| **openspec-task-loop** | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
-| **ollama-optimizer** | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
-| **install-script-generator** | 1.0.0 | Generate cross-platform installation scripts with environment detection |
-| **note-taker** | 1.3.1 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
+| [**auto-push**](skills/auto-push/) | 1.0.0 | Stage, commit, and push changes with security checks |
+| [**test-coverage**](skills/test-coverage/) | 1.0.0 | Expand unit test coverage targeting untested branches |
+| [**code-optimizer**](skills/code-optimizer/) | 1.0.0 | Analyze code for performance issues and optimizations |
+| [**code-review**](skills/code-review/) | 1.0.0 | Review code for smells and pragmatic programming violations |
+| [**devops-pipeline**](skills/devops-pipeline/) | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
+| [**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
+| [**install-script-generator**](skills/install-script-generator/) | 1.0.0 | Generate cross-platform installation scripts with environment detection |
+| [**note-taker**](skills/note-taker/) | 1.3.1 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
 
 ### Product Development
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **idea-validator** | 1.2.1 | Critically evaluate app ideas and startup concepts with GitHub link reporting |
-| **name-checker** | 1.0.0 | Check product names for trademark and domain conflicts |
-| **prd-generator** | 1.2.1 | Generate Product Requirements Documents with GitHub link reporting |
-| **tasks-generator** | 1.2.1 | Generate sprint tasks from PRD with GitHub link reporting |
-| **system-design** | 1.2.1 | Generate Technical Architecture Documents with GitHub link reporting |
+| [**idea-validator**](skills/idea-validator/) | 1.2.1 | Critically evaluate app ideas and startup concepts with GitHub link reporting |
+| [**name-checker**](skills/name-checker/) | 1.0.0 | Check product names for trademark and domain conflicts |
+| [**prd-generator**](skills/prd-generator/) | 1.2.1 | Generate Product Requirements Documents with GitHub link reporting |
+| [**tasks-generator**](skills/tasks-generator/) | 1.2.1 | Generate sprint tasks from PRD with GitHub link reporting |
+| [**system-design**](skills/system-design/) | 1.2.1 | Generate Technical Architecture Documents with GitHub link reporting |
 
 ### Content & Documentation
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **docs-generator** | 1.0.0 | Restructure project documentation |
-| **release-notes** | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
-| **oss-ready** | 1.0.0 | Setup open-source project standards |
-| **agent-config** | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |
+| [**docs-generator**](skills/docs-generator/) | 1.0.0 | Restructure project documentation |
+| [**release-notes**](skills/release-notes/) | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
+| [**oss-ready**](skills/oss-ready/) | 1.0.0 | Setup open-source project standards |
+| [**agent-config**](skills/agent-config/) | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |
 
 ### Design & Branding
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **logo-designer** | 1.0.0 | Design professional logos with automatic project context detection |
+| [**logo-designer**](skills/logo-designer/) | 1.0.0 | Design professional logos with automatic project context detection |
 
 ### Skill Development
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| **skill-creator** | 1.0.0 | Guide for creating effective skills with templates and packaging tools |
+| [**skill-creator**](skills/skill-creator/) | 1.0.0 | Guide for creating effective skills with templates and packaging tools |
 
 ## Usage
 
