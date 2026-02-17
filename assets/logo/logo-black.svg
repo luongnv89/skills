@@ -1,19 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 64" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 72" fill="none">
   <defs>
     <style>
-      .wm { font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.5px; }
+      .w1 { font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -0.8px; }
+      .w2 { font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif; font-weight: 400; font-size: 28px; letter-spacing: -0.4px; }
     </style>
   </defs>
 
-  <!-- Mark: full black monochrome version -->
-  <rect x="4" y="6" width="32" height="18" rx="4" fill="#000000"/>
-  <rect x="24" y="22" width="8" height="14" fill="#000000"/>
-  <rect x="20" y="34" width="32" height="18" rx="4" fill="#000000"/>
+  <!-- Mark: full monochrome black -->
+  <path d="M34 9 L57.4 22.5 L57.4 49.5 L34 63 L10.6 49.5 L10.6 22.5 Z" fill="#000000"/>
+  <path d="M34 16 L51.4 26 L51.4 46 L34 56 L16.6 46 L16.6 26 Z" fill="#1A1A1A"/>
+
+  <!-- Plug tab monochrome -->
+  <rect x="51" y="28" width="10" height="16" rx="2" fill="#000000"/>
+  <line x1="51" y1="28" x2="51" y2="44" stroke="#000000" stroke-width="1.5"/>
+
+  <!-- Agent core -->
+  <circle cx="34" cy="36" r="6" fill="#000000"/>
+  <circle cx="34" cy="36" r="3" fill="#FFFFFF"/>
+
+  <!-- Circuit spokes -->
+  <line x1="34" y1="30" x2="34" y2="23" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="28.8" y1="33" x2="23" y2="29.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="28.8" y1="39" x2="23" y2="42.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
 
   <!-- Divider -->
-  <rect x="72" y="14" width="1" height="36" fill="#000000" opacity="0.3"/>
+  <rect x="84" y="16" width="1" height="40" fill="#000000" opacity="0.25"/>
 
   <!-- Wordmark all black -->
-  <text x="86" y="43" class="wm" fill="#000000">Agent</text>
-  <text x="204" y="43" class="wm" fill="#000000">Skills</text>
+  <text x="98" y="47" class="w1" fill="#000000">Agent</text>
+  <text x="222" y="47" class="w2" fill="#000000">Skills</text>
 </svg>

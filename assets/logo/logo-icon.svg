@@ -1,17 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- Dark background -->
-  <rect width="512" height="512" fill="#0A0A0A"/>
+  <!-- App icon: dark bg, large hex mark centered -->
+  <rect width="512" height="512" rx="112" fill="#0A0A0A"/>
 
-  <!-- Mark centered and scaled: top block -->
-  <rect x="92" y="100" width="212" height="120" rx="22" fill="#39FF14"/>
-  <!-- Connector -->
-  <rect x="208" y="218" width="56" height="88" fill="#22C55E"/>
-  <!-- Bottom block -->
-  <rect x="208" y="290" width="212" height="120" rx="22" fill="#111111"/>
-  <!-- Accent edge on bottom block -->
-  <rect x="208" y="290" width="212" height="10" rx="4" fill="#22C55E"/>
+  <!-- Hexagon body — center 256,256 -->
+  <path d="M256 72 L432 174 L432 378 L256 480 L80 378 L80 174 Z" fill="#111111"/>
+  <path d="M256 110 L400 192 L400 320 L256 402 L112 320 L112 192 Z" fill="#1A1A1A"/>
 
-  <!-- Small bracket indicator at bottom-right of bottom block -->
-  <rect x="386" y="348" width="6" height="34" rx="2" fill="#39FF14"/>
-  <rect x="368" y="376" width="24" height="6" rx="2" fill="#39FF14"/>
+  <!-- Skill plug tab — right -->
+  <rect x="396" y="210" width="52" height="92" rx="10" fill="#22C55E"/>
+  <rect x="428" y="224" width="28" height="20" rx="5" fill="#16A34A"/>
+  <rect x="428" y="258" width="28" height="20" rx="5" fill="#16A34A"/>
+  <line x1="396" y1="210" x2="396" y2="302" stroke="#22C55E" stroke-width="6"/>
+
+  <!-- Agent core ring -->
+  <circle cx="256" cy="256" r="52" fill="#22C55E"/>
+  <circle cx="256" cy="256" r="36" fill="#0A0A0A"/>
+  <circle cx="256" cy="256" r="18" fill="#22C55E"/>
+  <circle cx="256" cy="256" r="10" fill="#0A0A0A"/>
+
+  <!-- Circuit spokes -->
+  <line x1="256" y1="204" x2="256" y2="152" stroke="#374151" stroke-width="8" stroke-linecap="round"/>
+  <line x1="211" y1="230" x2="168" y2="206" stroke="#374151" stroke-width="8" stroke-linecap="round"/>
+  <line x1="211" y1="282" x2="168" y2="306" stroke="#374151" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="308" x2="256" y2="360" stroke="#374151" stroke-width="8" stroke-linecap="round"/>
 </svg>
