@@ -1,9 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- Abstract "S" formed by two interlocking skill blocks -->
-  <!-- Top block - represents skill input -->
-  <rect x="8" y="8" width="32" height="20" rx="4" fill="#39FF14"/>
-  <!-- Bottom block - represents skill output -->
-  <rect x="24" y="36" width="32" height="20" rx="4" fill="#000000"/>
-  <!-- Connector line - represents flow/extension -->
-  <rect x="28" y="24" width="8" height="16" fill="#22C55E"/>
+  <!-- Agent Skills mark: staggered skill-block "S" flow -->
+  <!-- Top block (neon) -->
+  <rect x="6" y="6" width="34" height="18" rx="5" fill="#39FF14"/>
+  <!-- Connector bridge -->
+  <rect x="26" y="22" width="10" height="14" rx="0" fill="#22C55E"/>
+  <!-- Corner cap on bridge top -->
+  <rect x="26" y="22" width="10" height="4" fill="#22C55E"/>
+  <!-- Bottom block (black) -->
+  <rect x="24" y="34" width="34" height="18" rx="5" fill="#000000"/>
+  <!-- Highlight line on bottom block -->
+  <rect x="24" y="34" width="34" height="3" rx="1" fill="#22C55E"/>
 </svg>

@@ -1,12 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 64" fill="none">
-  <style>
-    .logo-text { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 700; font-size: 32px; }
-  </style>
-  <!-- Mark - monochrome black version -->
-  <rect x="8" y="8" width="32" height="20" rx="4" fill="#000000"/>
-  <rect x="24" y="36" width="32" height="20" rx="4" fill="#000000"/>
-  <rect x="28" y="24" width="8" height="16" fill="#000000"/>
-  <!-- Wordmark -->
-  <text x="80" y="44" class="logo-text" fill="#000000">Agent</text>
-  <text x="188" y="44" class="logo-text" fill="#000000">Skills</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 64" fill="none">
+  <defs>
+    <style>
+      .wm { font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.5px; }
+    </style>
+  </defs>
+
+  <!-- Mark: full black monochrome version -->
+  <rect x="4" y="6" width="32" height="18" rx="4" fill="#000000"/>
+  <rect x="24" y="22" width="8" height="14" fill="#000000"/>
+  <rect x="20" y="34" width="32" height="18" rx="4" fill="#000000"/>
+
+  <!-- Divider -->
+  <rect x="72" y="14" width="1" height="36" fill="#000000" opacity="0.3"/>
+
+  <!-- Wordmark all black -->
+  <text x="86" y="43" class="wm" fill="#000000">Agent</text>
+  <text x="204" y="43" class="wm" fill="#000000">Skills</text>
 </svg>

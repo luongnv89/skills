@@ -1,8 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- App icon with padding -->
-  <rect width="512" height="512" fill="#000000"/>
-  <!-- Centered mark scaled up -->
-  <rect x="96" y="96" width="192" height="120" rx="24" fill="#39FF14"/>
-  <rect x="224" y="296" width="192" height="120" rx="24" fill="#FFFFFF"/>
-  <rect x="232" y="200" width="48" height="112" fill="#22C55E"/>
+  <!-- Dark background -->
+  <rect width="512" height="512" fill="#0A0A0A"/>
+
+  <!-- Mark centered and scaled: top block -->
+  <rect x="92" y="100" width="212" height="120" rx="22" fill="#39FF14"/>
+  <!-- Connector -->
+  <rect x="208" y="218" width="56" height="88" fill="#22C55E"/>
+  <!-- Bottom block -->
+  <rect x="208" y="290" width="212" height="120" rx="22" fill="#111111"/>
+  <!-- Accent edge on bottom block -->
+  <rect x="208" y="290" width="212" height="10" rx="4" fill="#22C55E"/>
+
+  <!-- Small bracket indicator at bottom-right of bottom block -->
+  <rect x="386" y="348" width="6" height="34" rx="2" fill="#39FF14"/>
+  <rect x="368" y="376" width="24" height="6" rx="2" fill="#39FF14"/>
 </svg>

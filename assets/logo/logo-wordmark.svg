@@ -1,7 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48" fill="none">
-  <style>
-    .logo-text { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 700; font-size: 32px; }
-  </style>
-  <text x="0" y="36" class="logo-text" fill="#000000">Agent</text>
-  <text x="108" y="36" class="logo-text" fill="#39FF14">Skills</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" fill="none">
+  <defs>
+    <style>
+      .wm { font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.5px; }
+    </style>
+  </defs>
+  <text x="0" y="36" class="wm" fill="#000000">Agent</text>
+  <text x="118" y="36" class="wm" fill="#39FF14">Skills</text>
 </svg>
