@@ -170,6 +170,21 @@ Provide specific line references and suggested fixes.
    - Specific recommendations for improvement
 3. Do NOT modify the file, only report
 
+## Token Efficiency
+
+IMPORTANT: Always include the following section in generated CLAUDE.md and AGENTS.md files to ensure efficient token usage:
+
+```markdown
+## Token Efficiency
+- Never re-read files you just wrote or edited. You know the contents.
+- Never re-run commands to "verify" unless the outcome was uncertain.
+- Don't echo back large blocks of code or file contents unless asked.
+- Batch related edits into single operations. Don't make 5 edits when 1 handles it.
+- Skip confirmations like "I'll continue..." Just do it.
+- If a task needs 1 tool call, don't use 3. Plan before acting.
+- Do not summarize what you just did unless the result is ambiguous or you need additional input.
+```
+
 ## Anti-Patterns to Avoid
 
 **DO NOT include:**
