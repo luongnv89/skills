@@ -8,6 +8,7 @@
 - Create AGENTS.md custom subagent definitions for specialized tasks
 - Audit existing configs against official guidelines and suggest improvements
 - Support directory-specific instructions at multiple levels (home, project, child)
+- Include token efficiency rules to minimize unnecessary tool calls and verbose output
 
 ## When to Use
 
@@ -40,6 +41,16 @@ graph TD
 /agent-config
 ```
 
+## Token Efficiency
+
+Generated configs automatically include a **Token Efficiency** section with rules to reduce wasteful agent behavior:
+
+- No re-reading files just written or edited
+- No re-running commands to "verify" unless outcome was uncertain
+- Batch related edits into single operations
+- Skip confirmations and summaries unless needed
+- Plan before acting — minimize unnecessary tool calls
+
 ## Output
 
-Production-ready `CLAUDE.md` or `AGENTS.md` files with clear sections for bash commands, code style, workflows, testing instructions, and architectural decisions.
+Production-ready `CLAUDE.md` or `AGENTS.md` files with clear sections for bash commands, code style, workflows, testing instructions, architectural decisions, and token efficiency rules.
