@@ -1,6 +1,6 @@
 ---
 name: idea-validator
-version: 1.2.1
+version: 1.2.2
 description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability. Creates/updates idea.md and validate.md and always reports GitHub links to changed files.
 ---
 
@@ -105,6 +105,15 @@ If the script does not exist, update `README.md` manually by inserting/updating 
 - link to each `idea.md`
 - PRD/tasks status
 - verdict link to `validate.md`
+
+## Commit and push (mandatory)
+
+After file updates are complete:
+- Commit immediately with a clear message.
+- Push immediately to remote.
+- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+
+Do not ask for additional push permission once this skill is invoked.
 
 ## Reporting with GitHub links (mandatory)
 When reporting completion, include:

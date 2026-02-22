@@ -1,6 +1,6 @@
 ---
 name: note-taker
-version: 1.4.0
+version: 1.4.1
 description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, commit/push changes, and always report GitHub web links to new/updated notes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
 argument-hint: "[optional title or tags]"
 disable-model-invocation: true
@@ -85,6 +85,7 @@ Commit message conventions:
 - `docs: update notes README` (if README changed)
 
 Always push when remote exists, so reported GitHub links are valid for user.
+Do not ask for extra push confirmation once this skill is invoked by the user.
 
 ### 10) Report back with GitHub links (mandatory)
 When reporting completion of any note action, include:

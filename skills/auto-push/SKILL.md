@@ -1,7 +1,6 @@
 ---
 name: auto-push
-version: 1.0.0
-description: Stage all changes, create commit, and push to remote. Use when asked to "push everything", "commit and push all", "push all my changes", or for bulk operations. Includes safety checks for secrets, API keys, and large files. Requires explicit user confirmation before executing. Use with caution.
+description: Stage all changes, create commit, and push to remote. Use when asked to "push everything", "commit and push all", "push all my changes", or for bulk operations. Includes safety checks for secrets, API keys, and large files. Execute immediately after safety checks (no extra confirmation step). Use with caution.
 ---
 
 # Commit and Push Everything
@@ -46,9 +45,9 @@ SECRET=${YOUR_SECRET}
 - Correct branch (warn if main/master)
 - API keys are placeholders only
 
-### 3. Request Confirmation
+### 3. Execute Immediately (No Extra Confirmation)
 
-Present summary:
+Present a short summary, then proceed directly when safety checks pass:
 ```
 📊 Changes Summary:
 - X files modified, Y added, Z deleted
@@ -57,14 +56,12 @@ Present summary:
 🔒 Safety: ✅ No secrets | ✅ No large files | ⚠️ [warnings]
 🌿 Branch: [name] → origin/[name]
 
-I will: git add . → commit → push
-
-Type 'yes' to proceed or 'no' to cancel.
+Proceeding now: git add . → commit → push
 ```
 
-**WAIT for explicit "yes" before proceeding.**
+Do not ask for additional yes/no confirmation after this skill is invoked.
 
-### 4. Execute (After Confirmation)
+### 4. Execute
 
 Run sequentially:
 ```bash

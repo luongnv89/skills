@@ -1,6 +1,6 @@
 ---
 name: tasks-generator
-version: 1.2.1
+version: 1.2.2
 description: Generate development tasks from a PRD file with sprint-based planning. Use when users ask to "create tasks from PRD", "break down the PRD", "generate sprint tasks", or want to convert product requirements into actionable development tasks. Creates/updates tasks.md and always reports GitHub links to changed files.
 ---
 
@@ -115,6 +115,14 @@ Before finalizing:
 After writing `tasks.md`, if the PRD lives inside an `ideas` repo, update the repo README ideas table:
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure Tasks status becomes ✅ for that idea)
+
+## Commit and push (mandatory)
+
+- Commit immediately after updates.
+- Push immediately to remote.
+- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+
+Do not ask for additional push permission once this skill is invoked.
 
 ## Reporting with GitHub links (mandatory)
 When reporting completion, include:

@@ -1,6 +1,6 @@
 ---
 name: system-design
-version: 1.2.1
+version: 1.2.3
 description: Generate Technical Architecture Documents (TAD) from PRD files. Use when users ask to "design the architecture", "create a TAD", "system design", or want to define how a product will be built. Creates/updates tad.md and always reports GitHub links to changed files.
 ---
 
@@ -78,7 +78,21 @@ Create `tad.md` with sections:
 
 See [references/tad-template.md](references/tad-template.md) for full template structure.
 
-### Phase 6: Output
+### Phase 6: README Maintenance (ideas repo)
+
+After writing `tad.md`, if the project folder is inside an `ideas` repo, update the repo README ideas table:
+- Preferred: `cd` to repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
+- Fallback: update `README.md` manually (ensure TAD status becomes ✅ for that idea)
+
+### Phase 7: Commit and push (mandatory)
+
+- Commit immediately after updates.
+- Push immediately to remote.
+- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+
+Do not ask for additional push permission once this skill is invoked.
+
+### Phase 8: Output
 
 1. Write `tad.md` to project folder
 2. Summarize architecture decisions
@@ -89,6 +103,7 @@ See [references/tad-template.md](references/tad-template.md) for full template s
 ## Reporting with GitHub links (mandatory)
 When reporting completion, include:
 - GitHub link to `tad.md`
+- GitHub link to `README.md` when it was updated
 - Commit hash
 
 If this project is in the ideas repo, use:
