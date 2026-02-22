@@ -1,6 +1,6 @@
 ---
 name: agent-config
-version: 1.0.0
+version: 1.1.0
 description: Create or update CLAUDE.md and AGENTS.md files following official best practices. Use when asked to create, update, audit, or improve project configuration files for AI agents, or when users mention "CLAUDE.md", "AGENTS.md", "agent config", or "agent instructions".
 ---
 
@@ -146,8 +146,8 @@ Provide specific line references and suggested fixes.
    - Identify technology stack, project type, development tools
    - Review README.md, CONTRIBUTING.md, package.json, etc.
 3. Draft the file following guidelines above
-4. Present draft for review
-5. Write to appropriate location after approval
+4. If the user explicitly asked to apply now, write directly; otherwise present draft for review
+5. Finalize at the appropriate location
 
 ### For `update`:
 
@@ -157,8 +157,8 @@ Provide specific line references and suggested fixes.
    - Content to remove (redundant, obvious, style rules)
    - Content to condense
    - Missing essential information
-4. Present changes for review
-5. Apply changes after approval
+4. If the user explicitly asked to apply now, implement directly; otherwise present changes for review
+5. Finalize updates in place
 
 ### For `audit`:
 
@@ -184,6 +184,30 @@ IMPORTANT: Always include the following section in generated CLAUDE.md and AGENT
 - If a task needs 1 tool call, don't use 3. Plan before acting.
 - Do not summarize what you just did unless the result is ambiguous or you need additional input.
 ```
+
+## Workflow Orchestration (optional, when requested)
+
+When users ask for stronger execution discipline, include a concise orchestration block in generated CLAUDE.md/AGENTS.md.
+
+Use this pattern (keep it short and enforceable):
+
+```markdown
+## Workflow Orchestration (Balanced)
+- For non-trivial tasks (3+ steps, architecture choices, or unclear dependencies), write a short plan first.
+- If assumptions break, stop and re-plan before continuing.
+- Use subagents strategically for parallel exploration; keep one focused goal per subagent.
+- Do not mark tasks done without evidence (tests, logs, diffs, or output proof).
+- Prefer elegant solutions for non-trivial work; keep simple fixes minimal.
+- If logs/tests clearly show root cause, fix directly; ask only when risk or ambiguity is high.
+- Capture lessons after corrections in durable docs to reduce repeat mistakes.
+
+Core bias:
+- Simplicity first
+- Root-cause over patchwork
+- Minimal-impact changes
+```
+
+Do not inject this section blindly—add it when the user asks for orchestration/process rigor.
 
 ## Anti-Patterns to Avoid
 
