@@ -8,6 +8,26 @@ description: Design professional, modern logos with automatic project context de
 
 Design modern, professional logos by analyzing project context and generating SVG-based brand assets.
 
+## Repo Sync Before Edits (mandatory)
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
 ## Workflow
 
 ### Phase 1: Project Analysis

@@ -42,6 +42,20 @@ It's OK to briefly explain terms if you're in doubt, and feel free to clarify te
 
 ---
 
+## Mandatory Rule for Repo-Mutating Skills
+
+When creating or updating any skill that changes files in a git repository (code, docs, config, commits, publishing), include this rule in that skill's SKILL.md:
+
+- Add a **"Repo Sync Before Edits (mandatory)"** section near the top.
+- Require pulling latest remote branch before modifications:
+  - `branch="$(git rev-parse --abbrev-ref HEAD)"`
+  - `git fetch origin`
+  - `git pull --rebase origin "$branch"`
+- If working tree is dirty: stash, sync, then pop.
+- If `origin` is missing or conflicts occur: stop and ask the user before continuing.
+
+Do not ship repo-mutating skills without this pre-sync guardrail.
+
 ## Creating a skill
 
 ### Capture Intent

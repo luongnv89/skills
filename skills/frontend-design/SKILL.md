@@ -10,6 +10,26 @@ Create distinctive, production-grade frontend interfaces that avoid generic "AI 
 
 The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
 
+## Repo Sync Before Edits (mandatory)
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
 ## Design Thinking
 
 Before coding, understand the context and commit to a BOLD aesthetic direction:

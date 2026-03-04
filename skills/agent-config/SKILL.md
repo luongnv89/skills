@@ -4,6 +4,26 @@ version: 1.1.0
 description: Create or update CLAUDE.md and AGENTS.md files following official best practices. Use when asked to create, update, audit, or improve project configuration files for AI agents, or when users mention "CLAUDE.md", "AGENTS.md", "agent config", or "agent instructions".
 ---
 
+## Repo Sync Before Edits (mandatory)
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
 ## User Input
 
 ```text

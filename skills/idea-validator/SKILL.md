@@ -8,6 +8,26 @@ description: Critically evaluate and enhance app ideas, startup concepts, and pr
 
 Critically evaluate ideas with honest feedback on market viability, technical feasibility, and actionable improvements.
 
+## Repo Sync Before Edits (mandatory)
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
 ## Setup
 
 0. **Resolve storage location (tool-agnostic, ask once per environment)**
