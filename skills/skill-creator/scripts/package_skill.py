@@ -10,14 +10,33 @@ Example:
     python utils/package_skill.py skills/public/my-skill ./dist
 """
 
-import re
+import fnmatch
 import sys
 import zipfile
 from pathlib import Path
+from scripts.quick_validate import validate_skill
 
-import yaml
+# Patterns to exclude when packaging skills.
+EXCLUDE_DIRS = {"__pycache__", "node_modules"}
+EXCLUDE_GLOBS = {"*.pyc"}
+EXCLUDE_FILES = {".DS_Store"}
+# Directories excluded only at the skill root (not when nested deeper).
+ROOT_EXCLUDE_DIRS = {"evals"}
 
-from quick_validate import validate_skill
+
+def should_exclude(rel_path: Path) -> bool:
+    """Check if a path should be excluded from packaging."""
+    parts = rel_path.parts
+    if any(part in EXCLUDE_DIRS for part in parts):
+        return True
+    # rel_path is relative to skill_path.parent, so parts[0] is the skill
+    # folder name and parts[1] (if present) is the first subdir.
+    if len(parts) > 1 and parts[1] in ROOT_EXCLUDE_DIRS:
+        return True
+    name = rel_path.name
+    if name in EXCLUDE_FILES:
+        return True
+    return any(fnmatch.fnmatch(name, pat) for pat in EXCLUDE_GLOBS)
 
 
 def package_skill(skill_path, output_dir=None):
@@ -57,22 +76,6 @@ def package_skill(skill_path, output_dir=None):
         return None
     print(f"✅ {message}\n")
 
-    # Extract version from frontmatter for filename
-    version = None
-    content = skill_md.read_text()
-    fm_match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
-    if fm_match:
-        try:
-            fm = yaml.safe_load(fm_match.group(1))
-            if isinstance(fm, dict):
-                v = fm.get('version', '')
-                if isinstance(v, (int, float)):
-                    v = str(v)
-                if isinstance(v, str) and re.match(r'^\d+\.\d+\.\d+$', v):
-                    version = v
-        except yaml.YAMLError:
-            pass
-
     # Determine output location
     skill_name = skill_path.name
     if output_dir:
@@ -81,21 +84,21 @@ def package_skill(skill_path, output_dir=None):
     else:
         output_path = Path.cwd()
 
-    if version:
-        skill_filename = output_path / f"{skill_name}-{version}.skill"
-    else:
-        skill_filename = output_path / f"{skill_name}.skill"
+    skill_filename = output_path / f"{skill_name}.skill"
 
     # Create the .skill file (zip format)
     try:
         with zipfile.ZipFile(skill_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            # Walk through the skill directory
+            # Walk through the skill directory, excluding build artifacts
             for file_path in skill_path.rglob('*'):
-                if file_path.is_file():
-                    # Calculate the relative path within the zip
-                    arcname = file_path.relative_to(skill_path.parent)
-                    zipf.write(file_path, arcname)
-                    print(f"  Added: {arcname}")
+                if not file_path.is_file():
+                    continue
+                arcname = file_path.relative_to(skill_path.parent)
+                if should_exclude(arcname):
+                    print(f"  Skipped: {arcname}")
+                    continue
+                zipf.write(file_path, arcname)
+                print(f"  Added: {arcname}")
 
         print(f"\n✅ Successfully packaged skill to: {skill_filename}")
         return skill_filename

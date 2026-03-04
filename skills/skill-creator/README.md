@@ -1,57 +1,37 @@
 # Skill Creator
 
-> Interactive, guided skill creation following Anthropic's best practices with a 4-phase workflow.
+> Create, evaluate, benchmark, and iteratively improve skills.
 
-## Highlights
+## What’s New (synced with upstream improvements)
 
-- Discovery phase to understand purpose, requirements, and edge cases
-- Approval gate before building to confirm understanding
-- Generate YAML frontmatter, SKILL.md, README.md, and supporting resources
-- Include test suite with trigger and functional test cases
+- Iterative skill loop: draft → test prompts → evaluate → refine
+- Quantitative + qualitative eval workflow
+- Baseline comparison support (with-skill vs without/old-skill)
+- Benchmark aggregation and report tooling
+- Description optimization flow to improve triggering quality
+- Dedicated eval viewer (`eval-viewer/`) and grading agents (`agents/`)
 
 ## When to Use
 
-| Say this... | Skill will... |
+Use this skill when you need to:
+- Create a new skill from scratch
+- Improve an existing skill
+- Run evals for a skill and inspect results
+- Compare performance variance across iterations
+- Tune a skill description for better trigger behavior
+
+## Key Resources
+
+| Path | Purpose |
 |---|---|
-| "Create a new skill" | Start guided skill creation |
-| "Build a skill for X" | Design and build from requirements |
-| "Update an existing skill" | Modify with diff-style summary |
-| "Help me make a skill" | Walk through the 4-phase process |
+| `SKILL.md` | Main workflow and operating instructions |
+| `scripts/` | Eval loop, benchmarking, packaging, validation utilities |
+| `references/schemas.md` | Evals schema reference |
+| `eval-viewer/` | Generate/view review pages for eval results |
+| `agents/` | Analyzer/comparator/grader agent prompts |
+| `assets/` | Viewer template assets |
 
-## How It Works
+## Upstream Reference
 
-```mermaid
-graph TD
-    A["Discovery Phase"] --> B["Present Understanding"]
-    B --> C{"User Approves?"}
-    C -->|Yes| D["Build Skill"]
-    C -->|No| A
-    D --> E["Test & Deliver"]
-    style A fill:#4CAF50,color:#fff
-    style C fill:#FF9800,color:#fff
-    style E fill:#2196F3,color:#fff
-```
-
-## Usage
-
-```
-/skill-creator
-```
-
-## Resources
-
-| Path | Description |
-|---|---|
-| `references/` | Skill structure guidelines and best practices |
-| `scripts/` | Validation and packaging scripts |
-
-## Output
-
-- Complete skill folder with SKILL.md (YAML frontmatter + instructions) and README.md (human-readable docs)
-- Supporting resources in `scripts/`, `references/`, `assets/` as needed
-- Packaged `.skill` file for distribution
-- Test suite with trigger and functional tests
-
-## Acknowledgement
-
-Customized from Anthropic's official [skill-creator](https://github.com/anthropics/claude-code/tree/main/plugins/skill-creator) skill. Added README.md generation step and adapted for this skill collection.
+Based on Anthropic’s official skill-creator:
+- https://github.com/anthropics/skills/tree/main/skills/skill-creator
