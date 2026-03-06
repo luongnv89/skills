@@ -1,20 +1,27 @@
 ---
 name: theme-transformer
-description: "Transform an existing website or app UI into a futuristic, space, cyberpunk, neon, digital-dark theme with user-adjustable color accents. Use when users ask to redesign current interfaces/styles, reskin an existing product, or apply a full theme transformation. Enforce a safe workflow: always create a new git branch first, analyze current style, propose changes, create a step-by-step implementation plan with verification points, then execute iteratively until user is satisfied."
+description: "Transform an existing website/app design into a futuristic, space, cyberpunk, neon, digital-dark theme with user-adjustable colors. Use when users ask to reskin current UI, apply a new visual theme, or migrate a product to Neon Command Center style. Always create a new git branch first, then follow a strict 4-step loop: style audit -> design proposal -> implementation plan -> incremental execution with user approval gates."
 ---
 
 # Theme Transformer
 
-Transform existing interfaces into a futuristic cyberpunk/neon design system without breaking functionality.
+Transform existing interfaces into a futuristic cyberpunk/neon design system while preserving usability and product clarity.
 
-## Repo Safety Rule (mandatory)
-Before changing any file, create a new branch.
+## Default Style Profile
+Use **Neon Command Center** as default visual baseline:
+- Futuristic + space + cyberpunk + digital-dark
+- Dark-first surfaces
+- Electric blue/cyan accents
+- Controlled glow (signal, not decoration)
 
-1. Verify this is a git repository.
-2. Ensure local branch is synced.
-3. Create a dedicated branch for the theme transformation.
+Read these references when running this skill:
+- `references/theme-tokens.md` (core tokens + mapping rules)
+- `references/neon-command-center.md` (full style language)
 
-Use:
+If the target repo already has local branding docs (for example `docs/branding.md`, `brand.md`, `design-system.md`), read them first and prioritize user/project brand constraints.
+
+## Mandatory Safety Rule: branch first
+Before changing any file, create a dedicated branch.
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -26,96 +33,107 @@ ts="$(date +%Y%m%d-%H%M%S)"
 git checkout -b "design/${slug}-${ts}"
 ```
 
-If pull/rebase conflicts happen, stop and resolve with the user before continuing.
+If pull/rebase conflicts happen, stop and resolve with user before edits.
 
-## Workflow (mandatory)
-Follow this exact sequence.
+## Mandatory 4-step workflow (approval-gated)
 
-### 1) Analyze the current style
-Produce a concise style audit before proposing changes.
+### Step 1) Analyze current style
+Produce a concise style audit first.
 
 Audit checklist:
-- Color tokens and contrast
-- Typography scale and font pairing
-- Spacing/radius/shadow system
-- Component styles (buttons, cards, inputs, nav, tables, charts)
-- Motion/interaction patterns
-- Visual density and hierarchy
+- Color system + contrast
+- Typography scale + readability
+- Spacing/radius/shadow consistency
+- Component states (buttons, inputs, nav, cards, tables, charts)
+- Motion behavior
+- Visual hierarchy / density
 
 Output format:
 - Current strengths
 - Current inconsistencies
-- Risks during theme migration (contrast, readability, complexity)
+- Migration risks
 
-### 2) Propose design transformation for all elements
-Propose a complete transformation plan, covering all core UI elements.
+Do **not** implement changes before audit is shared.
+
+---
+
+### Step 2) Propose full design transformation
+Propose the transformed design for all major elements.
 
 Must include:
-- Theme direction statement (futuristic/space/cyberpunk/digital dark)
-- Updated design tokens (colors, type, radius, shadows, motion)
-- Component-by-component changes
-- Before/after intent for major screens
-
-Use `references/theme-tokens.md` for default token structure.
+- Theme direction statement
+- Token updates (color/type/radius/shadow/motion)
+- Component-by-component transformation map
+- Before/after intent for key screens
 
 Iterate until user is happy:
-- Ask for feedback after proposal.
-- Adjust palette/style details based on user input.
-- Repeat proposal updates until explicitly approved.
+- Ask for feedback
+- Adjust proposal
+- Repeat until explicit approval
 
-### 3) Propose implementation plan with verifiable steps
-Create a gradual task plan with checkpoints.
+No implementation before approval.
 
-Each task must contain:
+---
+
+### Step 3) Propose implementation plan (step-by-step)
+Create a gradual execution plan with verifiable checkpoints.
+
+Each task must include:
 - Goal
-- Files/components to change
+- Files/components impacted
 - Expected visual result
-- Verification method (screenshot, storybook route, page check, contrast check)
-- Rollback note (how to revert this step)
+- Verification method (screenshot/storybook/page checks/contrast checks)
+- Rollback note
 
 Plan quality rules:
-- Start from tokens/foundation, then shared components, then pages.
-- Keep each task small enough to review safely.
-- Include accessibility checks (contrast, focus state, readable text).
+- Sequence: tokens -> foundations -> shared components -> pages
+- Small, reviewable increments
+- Include accessibility checks each phase
 
-Iterate plan until user approves.
+Iterate the plan with user until approved.
 
-### 4) Execute the approved plan
-Implement tasks step-by-step and verify after each step.
+No execution before plan approval.
 
-Execution loop:
-1. Apply one task.
-2. Run relevant checks/build.
-3. Show what changed and how to verify.
+---
+
+### Step 4) Execute approved plan
+Run incremental execution loop:
+1. Implement one task.
+2. Run checks/build.
+3. Provide verification instructions and/or screenshots.
 4. Ask for feedback and adjust if requested.
 
 Continue until user confirms satisfaction.
 
-## Color customization rule
-Always allow accent color customization from user input while preserving dark cyberpunk structure.
+## Color customization (mandatory)
+Theme colors must be adjustable based on user input.
 
-Default behavior:
-- Keep dark base surfaces.
-- Map user-selected accent hue to primary/secondary neon tokens.
-- Preserve semantic colors (success/warning/danger) unless user asks to change them.
+Rules:
+- Keep dark structure by default (`bg/surface/text`).
+- Map user accent color(s) to neon action tokens.
+- Preserve semantic colors unless user requests custom semantics.
 
-If user gives only one color:
-- Use it as primary neon accent.
-- Auto-generate lighter hover and softer glow variants.
+If user gives one color:
+- Use as `primary-500`
+- Auto-generate `primary-400` (hover) and glow alpha variants
 
-If user gives full palette:
-- Respect provided palette and skip defaults.
+If user gives two colors:
+- 1st color = primary action
+- 2nd color = secondary accent/data highlights
 
-## Deliverables
-At minimum, produce:
-- Updated design token definitions (CSS/Tailwind/theme file)
+If user provides full palette:
+- Respect provided palette; skip defaults
+
+## Deliverables (minimum)
+- Updated tokens/theme definitions (CSS/Tailwind/theme config)
 - Updated shared components
 - Updated target screens/pages
-- Verification summary (what changed, how to test)
-- Branch name and commit summary
+- Verification summary (what changed + how to test)
+- Branch name + commit summary
 
 ## Quality guardrails
-- Do not ship unreadable neon-on-neon contrast.
-- Do not overuse glow on every element.
-- Keep information hierarchy clear for dense dashboard screens.
-- Preserve usability over visual effects.
+- Avoid unreadable neon-on-neon combinations
+- Avoid global glow overuse
+- Keep dense dashboard information scannable
+- Preserve focus states and keyboard accessibility
+- Prioritize usability over effects
