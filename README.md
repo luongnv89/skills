@@ -104,6 +104,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 |-------|---------|-------------|
 | [**logo-designer**](skills/logo-designer/) | 1.1.0 | Design professional logos with automatic project context detection |
 | [**frontend-design**](skills/frontend-design/) | 1.2.0 | Create distinctive, usability-focused frontend interfaces with default style guide |
+| [**theme-transformer**](skills/theme-transformer/) | 1.0.0 | Transform existing UIs into futuristic cyberpunk neon-dark themes with branch-safe iterative redesign workflow |
 
 ### Skill Development
 
@@ -134,6 +135,7 @@ Skills trigger automatically based on your requests:
 | "take a note" | note-taker |
 | "optimize for SEO" | seo-ai-optimizer |
 | "build a landing page" | frontend-design |
+| "transform this app into futuristic cyberpunk theme" | theme-transformer |
 
 ## Project Structure
 
