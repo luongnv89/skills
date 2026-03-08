@@ -174,10 +174,8 @@ See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
 ## Acknowledgements
 
-The following skills are customized from Anthropic's official [Claude Code plugins](https://github.com/anthropics/claude-code/tree/main/plugins):
-
-- [**frontend-design**](skills/frontend-design/) — added default style guide
-- [**skill-creator**](skills/skill-creator/) — added README.md generation step
+- [**frontend-design**](skills/frontend-design/) — inspired by Anthropic's official [frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) plugin. This is an independent implementation with a default style guide and usability principles.
+- [**skill-creator**](skills/skill-creator/) — customized from Anthropic's official [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) (Apache 2.0). Added README.md generation step.
 
 ## License
 

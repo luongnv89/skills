@@ -48,4 +48,4 @@ Production-ready frontend code (HTML/CSS/JS or framework components) with distin
 
 ## Acknowledgement
 
-Customized from Anthropic's official [frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) skill. Added a default style guide, usability principles from "Don't Make Me Think", and adapted for this skill collection.
+Inspired by Anthropic's official [frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) skill. This skill is an independent implementation with a default style guide, usability principles from "Don't Make Me Think", and adaptations for this skill collection.
