@@ -91,6 +91,7 @@ skill-name/
 ├── SKILL.md (required)
 │   ├── YAML frontmatter (name, description required)
 │   └── Markdown instructions
+├── README.md (required — human-readable docs for catalog browsing)
 └── Bundled Resources (optional)
     ├── scripts/    - Executable code for deterministic/repetitive tasks
     ├── references/ - Docs loaded into context as needed
@@ -151,6 +152,71 @@ Output: feat(auth): implement JWT-based authentication
 ### Writing Style
 
 Try to explain to the model why things are important in lieu of heavy-handed musty MUSTs. Use theory of mind and try to make the skill general and not super-narrow to specific examples. Start by writing a draft and then look at it with fresh eyes and improve it.
+
+### Generate README.md
+
+Every skill MUST include a README.md for human-readable documentation. This is what users see when browsing the skill catalog — it should be scannable and informative without reading the full SKILL.md.
+
+Use the following template:
+
+```markdown
+# [Skill Display Name]
+
+> [One-line description of what the skill does]
+
+## Highlights
+
+- [Key capability 1]
+- [Key capability 2]
+- [Key capability 3]
+- [Key capability 4]
+
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| "[trigger phrase 1]" | [What happens] |
+| "[trigger phrase 2]" | [What happens] |
+| "[trigger phrase 3]" | [What happens] |
+
+## How It Works
+
+` ` `mermaid
+graph TD
+    A["[First Step]"] --> B["[Second Step]"]
+    B --> C["[Third Step]"]
+    C --> D["[Final Step]"]
+    style A fill:#4CAF50,color:#fff
+    style D fill:#2196F3,color:#fff
+` ` `
+
+## Usage
+
+` ` `
+/[skill-name]
+` ` `
+
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/` | [What the references contain] |
+| `scripts/` | [What the scripts do] |
+
+## Output
+
+[Description of what the skill produces — files, reports, etc.]
+```
+
+**README rules:**
+- Title: Use the human-readable display name (e.g., "Code Optimizer", not "code-optimizer")
+- Tagline: One sentence in blockquote format (> prefix)
+- Highlights: 3-5 bullet points of key capabilities
+- When to Use: Table with 3-4 trigger phrases mapping to actions
+- How It Works: Mermaid `graph TD` diagram showing the main workflow steps. First node green (#4CAF50), last node blue (#2196F3)
+- Usage: Code block with the slash command invocation
+- Output: Brief description of what the skill produces
+- Optional **Resources** section: Table with `| Path | Description |` columns if the skill has `scripts/`, `references/`, or `assets/` directories
 
 ### Test Cases
 
