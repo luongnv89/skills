@@ -21,6 +21,7 @@ SKILL_DESCS=()      # one-line descriptions (from frontmatter)
 SKILL_SEL=()        # 1/0 toggle per skill
 TOOLS=("Claude Code" "Cursor" "Windsurf" "GitHub Copilot" "OpenAI Codex" "OpenCode" "Google Antigravity")
 TOOL_SEL=()         # 1/0 toggle per tool
+INSTALL_SCOPE=""    # "global" or "project"
 INSTALLED=()        # log: "skill → tool → path"
 
 # ─── OS detection ───────────────────────────────────────────────────────────
@@ -128,6 +129,60 @@ checkbox_select() {
   tput cnorm 2>/dev/null || true
 }
 
+# ─── Interactive single-choice selector ──────────────────────────────────────
+# Usage: radio_select <title> <items_array_name> <descs_array_name> <result_var_name>
+# Sets the result variable to the selected index.
+radio_select() {
+  local title="$1"
+  local items_name=$2
+  local descs_name=$3
+  local result_name=$4
+
+  eval "local count=\${#${items_name}[@]}"
+  local cursor=0
+
+  tput civis 2>/dev/null || true
+  stty -echo -icanon min 1 time 0 2>/dev/null || true
+
+  while true; do
+    printf "\033[2J\033[H"
+    echo "${BOLD}${CYAN}$title${RESET}"
+    echo "${DIM}  ↑/↓ Navigate   Enter Select${RESET}"
+    echo ""
+
+    local i
+    for (( i = 0; i < count; i++ )); do
+      eval "local item_val=\"\${${items_name}[$i]}\""
+      eval "local desc_val=\"\${${descs_name}[$i]:-}\""
+      local marker="  "
+      [[ $i -eq $cursor ]] && marker="${GREEN}●${RESET} "
+      if [[ $i -eq $cursor ]]; then
+        printf " ${BOLD}▸ %s %-25s${RESET} ${DIM}%s${RESET}\n" "$marker" "$item_val" "$desc_val"
+      else
+        printf "   %s %-25s ${DIM}%s${RESET}\n" "$marker" "$item_val" "$desc_val"
+      fi
+    done
+
+    local key
+    key=$(dd bs=1 count=1 2>/dev/null) || true
+    if [[ "$key" == $'\x1b' ]]; then
+      local seq
+      seq=$(dd bs=1 count=2 2>/dev/null) || true
+      case "$seq" in
+        '[A') [[ $cursor -gt 0 ]] && (( cursor-- )) || true ;;
+        '[B') [[ $cursor -lt $((count - 1)) ]] && (( cursor++ )) || true ;;
+      esac
+    elif [[ "$key" == "" ]]; then
+      break
+    fi
+  done
+
+  stty echo icanon 2>/dev/null || true
+  tput cnorm 2>/dev/null || true
+
+  eval "${result_name}=${cursor}"
+}
+
 # ─── Strip YAML frontmatter from SKILL.md ──────────────────────────────────
 strip_frontmatter() {
   local file="$1"
@@ -142,17 +197,24 @@ install_skill_for_tool() {
 
   case "$tool" in
     "Claude Code")
-      skill_dir="$HOME/.claude/skills/$skill"
+      if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        skill_dir="$HOME/.claude/skills/$skill"
+      else
+        skill_dir=".claude/skills/$skill"
+      fi
       mkdir -p "$skill_dir"
       cp -r "$src"/* "$skill_dir"/
       INSTALLED+=("${skill}|${tool}|${skill_dir}/")
       ;;
 
     "Cursor")
-      skill_dir="$HOME/.agents/skills/$skill"
+      if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        skill_dir="$HOME/.agents/skills/$skill"
+      else
+        skill_dir=".agents/skills/$skill"
+      fi
       mkdir -p "$skill_dir"
       cp -r "$src"/* "$skill_dir"/
-      # Project-level instruction file
       mkdir -p .cursor/rules
       dest_file=".cursor/rules/${skill}.mdc"
       strip_frontmatter "$src/SKILL.md" > "$dest_file"
@@ -160,7 +222,11 @@ install_skill_for_tool() {
       ;;
 
     "Windsurf")
-      skill_dir="$HOME/.agents/skills/$skill"
+      if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        skill_dir="$HOME/.agents/skills/$skill"
+      else
+        skill_dir=".agents/skills/$skill"
+      fi
       mkdir -p "$skill_dir"
       cp -r "$src"/* "$skill_dir"/
       mkdir -p .windsurf/rules
@@ -170,7 +236,11 @@ install_skill_for_tool() {
       ;;
 
     "GitHub Copilot")
-      skill_dir="$HOME/.agents/skills/$skill"
+      if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        skill_dir="$HOME/.agents/skills/$skill"
+      else
+        skill_dir=".agents/skills/$skill"
+      fi
       mkdir -p "$skill_dir"
       cp -r "$src"/* "$skill_dir"/
       mkdir -p .github/instructions
@@ -180,11 +250,18 @@ install_skill_for_tool() {
       ;;
 
     "OpenAI Codex")
-      skill_dir="$HOME/.agents/skills/$skill"
-      mkdir -p "$skill_dir"
-      cp -r "$src"/* "$skill_dir"/
-      mkdir -p "$HOME/.codex"
-      dest_file="$HOME/.codex/AGENTS.md"
+      if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        skill_dir="$HOME/.agents/skills/$skill"
+        mkdir -p "$skill_dir"
+        cp -r "$src"/* "$skill_dir"/
+        mkdir -p "$HOME/.codex"
+        dest_file="$HOME/.codex/AGENTS.md"
+      else
+        skill_dir=".agents/skills/$skill"
+        mkdir -p "$skill_dir"
+        cp -r "$src"/* "$skill_dir"/
+        dest_file="AGENTS.md"
+      fi
       {
         echo ""
         echo "<!-- pskills: $skill -->"
@@ -195,14 +272,22 @@ install_skill_for_tool() {
       ;;
 
     "OpenCode")
-      skill_dir="$HOME/.agents/skills/$skill"
+      if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        skill_dir="$HOME/.agents/skills/$skill"
+      else
+        skill_dir=".agents/skills/$skill"
+      fi
       mkdir -p "$skill_dir"
       cp -r "$src"/* "$skill_dir"/
       INSTALLED+=("${skill}|${tool}|${skill_dir}/")
       ;;
 
     "Google Antigravity")
-      skill_dir="$HOME/.agents/skills/$skill"
+      if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        skill_dir="$HOME/.agents/skills/$skill"
+      else
+        skill_dir=".agents/skills/$skill"
+      fi
       mkdir -p "$skill_dir"
       cp -r "$src"/* "$skill_dir"/
       INSTALLED+=("${skill}|${tool}|${skill_dir}/")
@@ -262,7 +347,27 @@ main() {
     TOOL_SEL+=(0)
   done
 
-  checkbox_select "Select skills to install:" SKILLS SKILL_DESCS SKILL_SEL
+  # Prepend "Install All" option
+  local ALL_SKILLS=("Install All" "${SKILLS[@]}")
+  local ALL_SKILL_DESCS=("Select/deselect all skills at once" "${SKILL_DESCS[@]}")
+  local ALL_SKILL_SEL=(0)
+  for (( i = 0; i < ${#SKILLS[@]}; i++ )); do
+    ALL_SKILL_SEL+=(0)
+  done
+
+  checkbox_select "Select skills to install:" ALL_SKILLS ALL_SKILL_DESCS ALL_SKILL_SEL
+
+  # If "Install All" was toggled on, select every skill
+  if [[ ${ALL_SKILL_SEL[0]} -eq 1 ]]; then
+    for (( i = 0; i < ${#SKILLS[@]}; i++ )); do
+      SKILL_SEL[$i]=1
+    done
+  else
+    # Copy individual selections back (skip index 0 which is "Install All")
+    for (( i = 0; i < ${#SKILLS[@]}; i++ )); do
+      SKILL_SEL[$i]=${ALL_SKILL_SEL[$((i + 1))]}
+    done
+  fi
 
   # Check if any skills were selected
   local any_skill=0
@@ -284,9 +389,22 @@ main() {
     exit 0
   fi
 
-  # ── Step 3: Install ──
+  # ── Step 3: Select installation scope ──
+  local SCOPE_ITEMS=("Global" "Project")
+  local SCOPE_DESCS=("Install to ~/  (available in all projects)" "Install to ./  (current project only)")
+  local SCOPE_CHOICE=0
+
+  radio_select "Install scope:" SCOPE_ITEMS SCOPE_DESCS SCOPE_CHOICE
+
+  if [[ $SCOPE_CHOICE -eq 0 ]]; then
+    INSTALL_SCOPE="global"
+  else
+    INSTALL_SCOPE="project"
+  fi
+
+  # ── Step 4: Install ──
   printf "\033[2J\033[H"
-  echo "${BOLD}${CYAN}Installing...${RESET}"
+  echo "${BOLD}${CYAN}Installing (${INSTALL_SCOPE})...${RESET}"
   echo ""
 
   local i j
@@ -299,7 +417,7 @@ main() {
     done
   done
 
-  # ── Step 4: Summary ──
+  # ── Step 5: Summary ──
   print_summary
   echo "${GREEN}Done!${RESET}"
 }
