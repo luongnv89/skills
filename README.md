@@ -41,7 +41,7 @@ flowchart LR
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes<br/>oss-ready<br/>seo-ai-optimizer"]
-    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
+    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
 
     IDEATION --> PLANNING
     PLANNING --> DEVELOPMENT
@@ -60,7 +60,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop, frontend-design | Write quality code with tests, structured task loops, and distinctive UIs |
 | **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
 | **Release & Docs** | docs-generator, release-notes, oss-ready, seo-ai-optimizer | Generate documentation, changelogs, open source setup, and SEO/AI optimization |
-| **Tooling** | skill-creator, ollama-optimizer, install-script-generator, note-taker | Create skills, optimize local LLMs, generate installers, capture notes |
+| **Tooling** | skill-creator, context-hub, ollama-optimizer, install-script-generator, note-taker | Create skills, fetch current API docs, optimize local LLMs, generate installers, capture notes |
 
 ## Available Skills
 
@@ -111,6 +111,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | Skill | Version | Description |
 |-------|---------|-------------|
 | [**skill-creator**](skills/skill-creator/) | 1.0.0 | Guide for creating effective skills with templates and packaging tools |
+| [**context-hub**](skills/context-hub/) | 1.0.0 | Fetch current API/SDK docs via Context Hub (`chub`) before implementing integrations |
 
 ## Usage
 
@@ -133,6 +134,7 @@ Skills trigger automatically based on your requests:
 | "optimize Ollama" | ollama-optimizer |
 | "create an installer for X" | install-script-generator |
 | "take a note" | note-taker |
+| "use latest Stripe/OpenAI API docs" | context-hub |
 | "optimize for SEO" | seo-ai-optimizer |
 | "build a landing page" | frontend-design |
 | "transform this app into futuristic cyberpunk theme" | theme-transformer |
