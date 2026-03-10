@@ -8,6 +8,19 @@ description: Check product/brand names for trademark, domain, and social media c
 
 Check product and brand names for conflicts across trademarks, domains, and social media.
 
+## Repo Sync Before Edits (mandatory)
+
+Before writing any output files, sync with the remote to avoid conflicts:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty, stash first (`git stash`), sync, then pop (`git stash pop`).
+If `origin` is missing or conflicts occur, stop and ask the user before continuing.
+
 ## Input
 
 Name to analyze provided in `$ARGUMENTS`. If empty, ask user for the name.

@@ -8,6 +8,19 @@ description: Perform code reviews following best practices from Code Smells and 
 
 Review code for quality issues, code smells, and pragmatic programming violations.
 
+## Repo Sync Before Edits (mandatory)
+
+Before writing any output files, sync with the remote to avoid conflicts:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty, stash first (`git stash`), sync, then pop (`git stash pop`).
+If `origin` is missing or conflicts occur, stop and ask the user before continuing.
+
 ## Review Modes
 
 ### Mode 1: PR/Diff Review

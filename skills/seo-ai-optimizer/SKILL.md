@@ -8,9 +8,16 @@ description: Audits and optimizes website codebases for SEO and AI bot scanning.
 
 Audit and optimize website codebases for search engines and AI systems.
 
+## Quick Reference
+
+Consult these reference files as needed during the workflow:
+- `references/technical-seo.md` — Full SEO checklist and best practices
+- `references/framework-configs.md` — Framework-specific configuration (Next.js, Nuxt, Astro, Hugo, etc.)
+- `references/ai-bot-guide.md` — AI crawler directives, llms.txt format, JSON-LD templates
+
 ## Important
 
-- ALWAYS audit first, present findings, then propose a plan -- never modify files without user approval
+- Audit first, present findings, then propose a plan — never modify files without user approval
 - Fetch latest best practices via web search during each audit to supplement embedded knowledge
 - For large codebases (100+ pages), audit a representative sample and offer to expand
 

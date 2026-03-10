@@ -8,6 +8,19 @@ description: Optimize Ollama configuration for maximum performance on the curren
 
 Optimize Ollama configuration based on system hardware analysis.
 
+## Repo Sync Before Edits (mandatory)
+
+Before writing any output files, sync with the remote to avoid conflicts:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty, stash first (`git stash`), sync, then pop (`git stash pop`).
+If `origin` is missing or conflicts occur, stop and ask the user before continuing.
+
 ## Workflow
 
 ### Phase 1: System Detection
