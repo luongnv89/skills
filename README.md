@@ -1,5 +1,11 @@
 <p align="center">
-  <img src="assets/logo/logo-full.svg" alt="Agent Skills" width="320">
+  <img src="assets/logo/logo-icon.svg" alt="Agent Skills" width="120">
+</p>
+
+<h1 align="center">Agent Skills</h1>
+
+<p align="center">
+  <strong>Supercharge your AI agents with plug-and-play skills</strong>
 </p>
 
 <p align="center">
@@ -7,28 +13,78 @@
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
 
-# Agent Skills
-
-> Supercharge your AI agents/bots with reusable skills
-
-A collection of skills for AI agents, bots, and coding assistants. Works with Claude Code, Cursor, Windsurf, Codex, OpenCode, and other AI tools that support skill-based workflows.
+A collection of reusable skills for AI coding agents. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, and other tools that support skill-based workflows.
 
 ## Installation
+
+### Method 1: npx (recommended)
 
 ```bash
 npx skills add https://github.com/luongnv89/skills
 ```
 
 <p align="center">
-  <img src="assets/add-skills-17.png" alt="Installing skills" width="600">
+  <img src="assets/screenshot.png" alt="Installing skills" width="600">
 </p>
 
-To install a specific skill:
+Install specific skills:
 
 ```bash
 npx skills add https://github.com/luongnv89/skills --skill auto-push
 npx skills add https://github.com/luongnv89/skills --skill code-optimizer
 ```
+
+### Method 2: One-liner remote install (no clone needed)
+
+Interactive mode — select skills, tools, and scope from a TUI menu:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash
+```
+
+Or with wget:
+
+```bash
+wget -qO- https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash
+```
+
+Non-interactive mode — specify everything via flags:
+
+```bash
+# Install specific skills for Claude Code globally
+curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash -s -- \
+  --skills "code-review,auto-push" --tools "Claude Code" --scope global
+
+# Install all skills for multiple tools in current project
+curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash -s -- \
+  --all --tools "Claude Code,Cursor" --scope project
+
+# List available skills
+curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash -s -- --list
+```
+
+### Method 3: Clone and run the local installer
+
+```bash
+git clone https://github.com/luongnv89/skills.git
+cd skills
+bash install.sh
+```
+
+The local installer provides the same interactive TUI to select skills, tools, and scope.
+
+### Method 4: Manual installation
+
+Copy the skill folder to your tool's expected location:
+
+| Tool | Global path | Project path |
+|------|-------------|--------------|
+| **Claude Code** | `~/.claude/skills/<skill>/` | `.claude/skills/<skill>/` |
+| **Cursor** | `~/.agents/skills/<skill>/` + `.cursor/rules/<skill>.mdc` | same, relative |
+| **Windsurf** | `~/.agents/skills/<skill>/` + `.windsurf/rules/<skill>.md` | same, relative |
+| **GitHub Copilot** | `~/.agents/skills/<skill>/` + `.github/instructions/<skill>.instructions.md` | same, relative |
+| **OpenAI Codex** | `~/.agents/skills/<skill>/` + `~/.codex/AGENTS.md` | same, relative |
+| **OpenCode** | `~/.agents/skills/<skill>/` | same, relative |
 
 ## Example: Skill-First Development Workflow
 
