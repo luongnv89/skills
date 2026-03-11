@@ -1,37 +1,54 @@
 # Skill Creator
 
-> Create, evaluate, benchmark, and iteratively improve skills.
+> Create, evaluate, benchmark, and iteratively improve agent skills.
 
-## What’s New (synced with upstream improvements)
+## Highlights
 
-- Iterative skill loop: draft → test prompts → evaluate → refine
-- Quantitative + qualitative eval workflow
-- Baseline comparison support (with-skill vs without/old-skill)
-- Benchmark aggregation and report tooling
-- Description optimization flow to improve triggering quality
-- Dedicated eval viewer (`eval-viewer/`) and grading agents (`agents/`)
+- Iterative skill loop: draft, test prompts, evaluate, refine
+- Quantitative + qualitative eval workflow with baseline comparison
+- Benchmark aggregation, variance analysis, and report tooling
+- Description optimization flow to improve triggering accuracy
+- Dedicated eval viewer and grading agents for structured review
 
 ## When to Use
 
-Use this skill when you need to:
-- Create a new skill from scratch
-- Improve an existing skill
-- Run evals for a skill and inspect results
-- Compare performance variance across iterations
-- Tune a skill description for better trigger behavior
-
-## Key Resources
-
-| Path | Purpose |
+| Say this... | Skill will... |
 |---|---|
-| `SKILL.md` | Main workflow and operating instructions |
+| "Create a skill for X" | Interview you, draft SKILL.md + README.md, run test cases |
+| "Improve this skill" | Run evals, collect feedback, iterate on the skill |
+| "Run evals for my skill" | Execute test prompts, grade results, show benchmark |
+| "Optimize skill triggering" | Generate trigger eval queries, run optimization loop |
+
+## How It Works
+
+```mermaid
+graph TD
+    A["Capture Intent & Interview"] --> B["Draft SKILL.md + README.md"]
+    B --> C["Run Test Cases & Baselines"]
+    C --> D["Evaluate: Viewer + Benchmarks"]
+    D --> E["Iterate Based on Feedback"]
+    E --> C
+    E --> F["Optimize Description & Package"]
+    style A fill:#4CAF50,color:#fff
+    style F fill:#2196F3,color:#fff
+```
+
+## Usage
+
+```
+/skill-creator
+```
+
+## Resources
+
+| Path | Description |
+|---|---|
 | `scripts/` | Eval loop, benchmarking, packaging, validation utilities |
-| `references/schemas.md` | Evals schema reference |
+| `references/` | Evals schema reference |
 | `eval-viewer/` | Generate/view review pages for eval results |
-| `agents/` | Analyzer/comparator/grader agent prompts |
+| `agents/` | Analyzer, comparator, and grader agent prompts |
 | `assets/` | Viewer template assets |
 
-## Upstream Reference
+## Output
 
-Based on Anthropic’s official skill-creator:
-- https://github.com/anthropics/skills/tree/main/skills/skill-creator
+Produces complete skill packages (SKILL.md + README.md), eval results with benchmark reports, and optimized skill descriptions for accurate triggering.

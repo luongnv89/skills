@@ -126,8 +126,8 @@ When reporting completion, include:
 - GitHub link to `README.md` when it was updated
 - Commit hash
 
-If this project is in the ideas repo, use:
-- `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
+Link format (derive `<owner>/<repo>` from `git remote get-url origin`):
+- `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
 
 ## Modification Mode
 

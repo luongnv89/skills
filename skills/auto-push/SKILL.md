@@ -1,5 +1,6 @@
 ---
 name: auto-push
+version: 1.0.0
 description: Stage all changes, create commit, and push to remote. Use when asked to "push everything", "commit and push all", "push all my changes", or for bulk operations. Includes safety checks for secrets, API keys, and large files. Execute immediately after safety checks (no extra confirmation step). Use with caution.
 ---
 

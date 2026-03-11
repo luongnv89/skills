@@ -35,7 +35,7 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
    - Else use shared marker file: `~/.config/ideas-root.txt`.
    - Backward compatibility: if shared marker is missing but legacy `~/.openclaw/ideas-root.txt` exists, reuse its value and write it into `~/.config/ideas-root.txt`.
    - If no marker exists (new environment), ask user once where to store generated docs.
-   - Suggested default: `/home/luongnv/workspace/ideas`.
+   - Suggested default: `~/workspace/ideas`.
    - Save chosen root to `~/.config/ideas-root.txt`.
    - Only ask again if the user explicitly asks to change location.
 
@@ -142,8 +142,8 @@ When reporting completion, include:
 - GitHub link to `README.md` when it was updated
 - Commit hash
 
-Link format:
-- `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
+Link format (derive `<owner>/<repo>` from `git remote get-url origin`):
+- `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
 
 ## Output Summary
 

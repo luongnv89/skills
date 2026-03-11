@@ -39,9 +39,7 @@ If path is not provided (auto-pick mode):
 2. If unavailable, use env var `IDEAS_ROOT` when present.
 3. Else check shared marker file `~/.config/ideas-root.txt`.
 4. Backward compatibility fallback: `~/.openclaw/ideas-root.txt`.
-5. If still unavailable, auto-discover the newest folder containing both `idea.md` + `validate.md` under:
-   - `/home/luongnv/workspace/ideas` (default)
-   - `/home/luongnv/workspace/idea-2-prd` (legacy fallback)
+5. If still unavailable, ask the user to provide the path or set `IDEAS_ROOT`.
 6. If multiple candidates are plausible, ask user to choose.
 
 ## Workflow
@@ -121,8 +119,8 @@ When reporting completion, include:
 - GitHub link to `README.md` when it was updated
 - Commit hash
 
-Link format:
-- `https://github.com/luongnv89/ideas/blob/main/<relative-path>`
+Link format (derive `<owner>/<repo>` from `git remote get-url origin`):
+- `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
 
 ## Modification Mode
 

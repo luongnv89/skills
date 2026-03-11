@@ -1,14 +1,7 @@
 ---
 name: release-manager
 version: 2.0.0
-description: >
-  Complete release automation — version bumping, changelog generation, README updates, builds, git tags,
-  and GitHub releases. Use this skill whenever the user says "prepare a release", "bump the version",
-  "cut a release", "do a release", "create a new version", "release v1.2.0", "tag a release",
-  "publish a release", "update the changelog", "generate release notes", or anything related to
-  shipping a new version. Also trigger when the user asks "what changed since last release" or
-  "what's ready to release". Even if they only mention one part (like "update changelog" or "bump version"),
-  use this skill because releases have interdependent steps that should be done together.
+description: Complete release automation — version bumping, changelog generation, README updates, builds, git tags, and GitHub releases. Use this skill whenever the user says "prepare a release", "bump the version", "cut a release", "do a release", "create a new version", "release v1.2.0", "tag a release", "publish a release", "update the changelog", "generate release notes", or anything related to shipping a new version. Also trigger when the user asks "what changed since last release" or "what's ready to release". Even if they only mention one part (like "update changelog" or "bump version"), use this skill because releases have interdependent steps that should be done together.
 ---
 
 # Release Manager

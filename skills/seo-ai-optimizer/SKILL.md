@@ -8,6 +8,27 @@ description: Audits and optimizes website codebases for SEO and AI bot scanning.
 
 Audit and optimize website codebases for search engines and AI systems.
 
+## Repo Sync Before Edits (mandatory)
+
+Before modifying any project files, sync the current branch with remote:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
 ## Quick Reference
 
 Consult these reference files as needed during the workflow:

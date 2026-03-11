@@ -4,6 +4,10 @@ version: 1.1.0
 description: Transform projects into professional open-source repositories with standard components. Use when users ask to "make this open source", "add open source files", "setup OSS standards", "create contributing guide", "add license", or want to prepare a project for public release with README, CONTRIBUTING, LICENSE, and GitHub templates.
 ---
 
+# OSS Ready
+
+Transform a project into a professional open-source repository with standard community files and GitHub templates.
+
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
