@@ -1,5 +1,17 @@
 # Release Notes
 
+## v1.1.1 — 2026-03-11
+
+### Bug Fixes
+- Require single-line description in skill-creator for correct external parsing (3fde564) @luongnv89
+
+### Skills Updated
+| Skill | Change |
+|-------|--------|
+| skill-creator | Added single-line description validation in SKILL.md guide and quick_validate.py |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.1.0...v1.1.1
+
 ## v1.1.0 — 2026-03-11
 
 ### Features
