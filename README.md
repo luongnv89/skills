@@ -71,10 +71,10 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | [**auto-push**](skills/auto-push/) | 1.0.0 | Stage, commit, and push changes with security checks |
 | [**test-coverage**](skills/test-coverage/) | 1.2.0 | Expand unit test coverage targeting untested branches |
 | [**code-optimizer**](skills/code-optimizer/) | 1.2.0 | Analyze code for performance issues and optimizations |
-| [**code-review**](skills/code-review/) | 1.0.0 | Review code for smells and pragmatic programming violations |
+| [**code-review**](skills/code-review/) | 1.0.1 | Review code for smells and pragmatic programming violations |
 | [**devops-pipeline**](skills/devops-pipeline/) | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
 | [**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.0 | Optimize Ollama configuration for maximum local LLM performance |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.1 | Optimize Ollama configuration for maximum local LLM performance |
 | [**install-script-generator**](skills/install-script-generator/) | 1.0.0 | Generate cross-platform installation scripts with environment detection |
 | [**note-taker**](skills/note-taker/) | 1.4.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
 
@@ -83,7 +83,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | Skill | Version | Description |
 |-------|---------|-------------|
 | [**idea-validator**](skills/idea-validator/) | 1.2.1 | Critically evaluate app ideas and startup concepts with GitHub link reporting |
-| [**name-checker**](skills/name-checker/) | 1.0.0 | Check product names for trademark and domain conflicts |
+| [**name-checker**](skills/name-checker/) | 1.0.1 | Check product names for trademark and domain conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.2.1 | Generate Product Requirements Documents with GitHub link reporting |
 | [**tasks-generator**](skills/tasks-generator/) | 1.2.1 | Generate sprint tasks from PRD with GitHub link reporting |
 | [**system-design**](skills/system-design/) | 1.2.1 | Generate Technical Architecture Documents with GitHub link reporting |
@@ -96,7 +96,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | [**release-manager**](skills/release-manager/) | 2.0.0 | Complete release automation — version bumps, changelog, README updates, builds, git tags, and GitHub releases |
 | [**oss-ready**](skills/oss-ready/) | 1.0.0 | Setup open-source project standards |
 | [**agent-config**](skills/agent-config/) | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |
-| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.0 | Audit and optimize website codebases for SEO and AI bot scanning |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.1 | Audit and optimize website codebases for SEO and AI bot scanning |
 
 ### Design & Branding
 
@@ -110,7 +110,8 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| [**skill-creator**](skills/skill-creator/) | 1.0.0 | Guide for creating effective skills with templates and packaging tools |
+| [**skill-creator**](skills/skill-creator/) | 1.0.1 | Guide for creating effective skills with templates and packaging tools |
+| [**skill-inventory-auditor**](skills/skill-inventory-auditor/) | 1.0.0 | Audit installed skills to find and remove duplicates |
 | [**context-hub**](skills/context-hub/) | 1.0.0 | Fetch current API/SDK docs via Context Hub (`chub`) before implementing integrations |
 
 ## Usage
