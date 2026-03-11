@@ -76,6 +76,9 @@ def validate_skill(skill_path):
         return False, f"Description must be a string, got {type(description).__name__}"
     description = description.strip()
     if description:
+        # Description must be a single line (no newlines) for correct parsing by external tools
+        if '\n' in description or '\r' in description:
+            return False, "Description must be a single line (no newlines or line breaks). This is required for correct parsing by external tools and automation."
         # Check for angle brackets
         if '<' in description or '>' in description:
             return False, "Description cannot contain angle brackets (< or >)"
