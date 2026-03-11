@@ -69,24 +69,26 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | Skill | Version | Description |
 |-------|---------|-------------|
 | [**auto-push**](skills/auto-push/) | 1.0.0 | Stage, commit, and push changes with security checks |
+| [**cli-builder**](skills/cli-builder/) | 1.0.0 | Build production-quality CLI tools with a 5-step approval-gated workflow |
 | [**test-coverage**](skills/test-coverage/) | 1.2.0 | Expand unit test coverage targeting untested branches |
 | [**code-optimizer**](skills/code-optimizer/) | 1.2.0 | Analyze code for performance issues and optimizations |
 | [**code-review**](skills/code-review/) | 1.0.1 | Review code for smells and pragmatic programming violations |
 | [**devops-pipeline**](skills/devops-pipeline/) | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
 | [**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.1 | Optimize Ollama configuration for maximum local LLM performance |
-| [**install-script-generator**](skills/install-script-generator/) | 1.0.0 | Generate cross-platform installation scripts with environment detection |
-| [**note-taker**](skills/note-taker/) | 1.4.0 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
+| [**install-script-generator**](skills/install-script-generator/) | 2.0.0 | Generate cross-platform installation scripts with environment detection |
+| [**note-taker**](skills/note-taker/) | 1.4.1 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
+| [**vscode-extension-publisher**](skills/vscode-extension-publisher/) | 1.0.0 | Publish VS Code extensions to the Visual Studio Marketplace |
 
 ### Product Development
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| [**idea-validator**](skills/idea-validator/) | 1.2.1 | Critically evaluate app ideas and startup concepts with GitHub link reporting |
+| [**idea-validator**](skills/idea-validator/) | 1.2.2 | Critically evaluate app ideas and startup concepts with GitHub link reporting |
 | [**name-checker**](skills/name-checker/) | 1.0.1 | Check product names for trademark and domain conflicts |
-| [**prd-generator**](skills/prd-generator/) | 1.2.1 | Generate Product Requirements Documents with GitHub link reporting |
-| [**tasks-generator**](skills/tasks-generator/) | 1.2.1 | Generate sprint tasks from PRD with GitHub link reporting |
-| [**system-design**](skills/system-design/) | 1.2.1 | Generate Technical Architecture Documents with GitHub link reporting |
+| [**prd-generator**](skills/prd-generator/) | 1.2.2 | Generate Product Requirements Documents with GitHub link reporting |
+| [**tasks-generator**](skills/tasks-generator/) | 1.2.2 | Generate sprint tasks from PRD with GitHub link reporting |
+| [**system-design**](skills/system-design/) | 1.2.3 | Generate Technical Architecture Documents with GitHub link reporting |
 
 ### Content & Documentation
 
@@ -94,8 +96,8 @@ _* Skills marked with * can be used repeatedly during development iterations._
 |-------|---------|-------------|
 | [**docs-generator**](skills/docs-generator/) | 1.2.0 | Restructure project documentation |
 | [**release-manager**](skills/release-manager/) | 2.0.0 | Complete release automation — version bumps, changelog, README updates, builds, git tags, and GitHub releases |
-| [**oss-ready**](skills/oss-ready/) | 1.0.0 | Setup open-source project standards |
-| [**agent-config**](skills/agent-config/) | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |
+| [**oss-ready**](skills/oss-ready/) | 1.1.0 | Setup open-source project standards |
+| [**agent-config**](skills/agent-config/) | 1.1.0 | Create or update CLAUDE.md and AGENTS.md files |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.1 | Audit and optimize website codebases for SEO and AI bot scanning |
 
 ### Design & Branding
