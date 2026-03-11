@@ -40,7 +40,7 @@ flowchart LR
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
-    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-notes<br/>oss-ready<br/>seo-ai-optimizer"]
+    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
     TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
 
     IDEATION --> PLANNING
@@ -59,7 +59,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
 | **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop, frontend-design | Write quality code with tests, structured task loops, and distinctive UIs |
 | **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
-| **Release & Docs** | docs-generator, release-notes, oss-ready, seo-ai-optimizer | Generate documentation, changelogs, open source setup, and SEO/AI optimization |
+| **Release & Docs** | docs-generator, release-manager, oss-ready, seo-ai-optimizer | Generate documentation, manage releases, open source setup, and SEO/AI optimization |
 | **Tooling** | skill-creator, context-hub, ollama-optimizer, install-script-generator, note-taker | Create skills, fetch current API docs, optimize local LLMs, generate installers, capture notes |
 
 ## Available Skills
@@ -93,7 +93,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | Skill | Version | Description |
 |-------|---------|-------------|
 | [**docs-generator**](skills/docs-generator/) | 1.2.0 | Restructure project documentation |
-| [**release-notes**](skills/release-notes/) | 1.0.0 | Generate release notes from git commits and GitHub PRs/issues |
+| [**release-manager**](skills/release-manager/) | 2.0.0 | Complete release automation — version bumps, changelog, README updates, builds, git tags, and GitHub releases |
 | [**oss-ready**](skills/oss-ready/) | 1.0.0 | Setup open-source project standards |
 | [**agent-config**](skills/agent-config/) | 1.0.0 | Create or update CLAUDE.md and AGENTS.md files |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.0 | Audit and optimize website codebases for SEO and AI bot scanning |
@@ -129,7 +129,7 @@ Skills trigger automatically based on your requests:
 | "improve test coverage" | test-coverage |
 | "update CLAUDE.md" | agent-config |
 | "design a logo" | logo-designer |
-| "generate release notes" | release-notes |
+| "prepare a release" | release-manager |
 | "review this code" | code-review |
 | "optimize Ollama" | ollama-optimizer |
 | "create an installer for X" | install-script-generator |
