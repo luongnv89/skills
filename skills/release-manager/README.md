@@ -47,7 +47,7 @@ graph TD
 ## Output
 
 - Updated version numbers across all project files
-- `RELEASE_NOTES.md` (or `CHANGELOG.md`) with categorized changes
+- `CHANGELOG.md` with categorized changes
 - Updated `README.md` with version info
 - Git commit tagged with the new version
 - GitHub Release with release notes and optional build artifacts

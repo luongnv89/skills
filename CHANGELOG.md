@@ -1,4 +1,16 @@
-# Release Notes
+# Changelog
+
+## v1.1.3 — 2026-03-11
+
+### Bug Fixes
+- Update release-manager to use CHANGELOG.md instead of RELEASE_NOTES.md @luongnv89
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| release-manager | 2.0.0 → 2.1.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.1.2...v1.1.3
 
 ## v1.1.2 — 2026-03-11
 

@@ -1,6 +1,6 @@
 ---
 name: release-manager
-version: 2.0.0
+version: 2.1.0
 description: Complete release automation — version bumping, changelog generation, README updates, builds, git tags, and GitHub releases. Use this skill whenever the user says "prepare a release", "bump the version", "cut a release", "do a release", "create a new version", "release v1.2.0", "tag a release", "publish a release", "update the changelog", "generate release notes", or anything related to shipping a new version. Also trigger when the user asks "what changed since last release" or "what's ready to release". Even if they only mention one part (like "update changelog" or "bump version"), use this skill because releases have interdependent steps that should be done together.
 ---
 
@@ -191,9 +191,9 @@ Omit empty sections. Link PR numbers. Credit authors. Highlight breaking changes
 
 ## Step 5: Update Project Files
 
-### CHANGELOG.md or RELEASE_NOTES.md
+### CHANGELOG.md
 
-If the project has a `CHANGELOG.md`, prepend the new entry at the top (below any header). If it has `RELEASE_NOTES.md`, do the same. If neither exists, create `RELEASE_NOTES.md`.
+If the project has a `CHANGELOG.md`, prepend the new entry at the top (below any header). If it does not exist, create `CHANGELOG.md` with a `# Changelog` header and add the new entry below it. Do NOT create or update a `RELEASE_NOTES.md` file.
 
 Keep previous entries intact — only add the new version at the top.
 
@@ -270,7 +270,7 @@ If `gh` CLI is available and this is a GitHub repo, offer to create a GitHub rel
 ```bash
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
-  --notes-file RELEASE_NOTES.md \
+  --notes-file CHANGELOG.md \
   --latest
 ```
 
@@ -279,7 +279,7 @@ If there are build artifacts to attach (`.tar.gz`, `.zip`, binaries, `.skill` fi
 ```bash
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
-  --notes-file RELEASE_NOTES.md \
+  --notes-file CHANGELOG.md \
   --latest \
   path/to/artifact1 path/to/artifact2
 ```
