@@ -23,6 +23,7 @@ TOOLS=("Claude Code" "Cursor" "Windsurf" "GitHub Copilot" "OpenAI Codex" "OpenCo
 TOOL_SEL=()         # 1/0 toggle per tool
 INSTALL_SCOPE=""    # "global" or "project"
 INSTALLED=()        # log: "skill → tool → path"
+INSTALL_ALL_TOOLS=0 # 1 if "Install All" was toggled for tools
 
 # ─── OS detection ───────────────────────────────────────────────────────────
 detect_os() {
@@ -295,6 +296,76 @@ install_skill_for_tool() {
   esac
 }
 
+# ─── Install one skill for ALL tools (shared .agents/skills + symlink) ────
+install_skill_all_tools() {
+  local skill="$1"
+  local src="$SCRIPT_DIR/skills/$skill"
+  local shared_dir dest_file
+
+  # Step 1: Copy skill files to the shared canonical location (.agents/skills/)
+  if [[ "$INSTALL_SCOPE" == "global" ]]; then
+    shared_dir="$HOME/.agents/skills/$skill"
+  else
+    shared_dir=".agents/skills/$skill"
+  fi
+  mkdir -p "$shared_dir"
+  cp -r "$src"/* "$shared_dir"/
+
+  # Step 2: Create symlink for Claude Code
+  local claude_dir
+  if [[ "$INSTALL_SCOPE" == "global" ]]; then
+    claude_dir="$HOME/.claude/skills/$skill"
+    mkdir -p "$(dirname "$claude_dir")"
+    rm -rf "$claude_dir"
+    ln -s "$shared_dir" "$claude_dir"
+  else
+    claude_dir=".claude/skills/$skill"
+    mkdir -p "$(dirname "$claude_dir")"
+    rm -rf "$claude_dir"
+    ln -s "../../.agents/skills/$skill" "$claude_dir"
+  fi
+  INSTALLED+=("${skill}|Claude Code|${claude_dir}/ → ${shared_dir}/ (symlink)")
+
+  # Step 3: Cursor rule file
+  mkdir -p .cursor/rules
+  dest_file=".cursor/rules/${skill}.mdc"
+  strip_frontmatter "$src/SKILL.md" > "$dest_file"
+  INSTALLED+=("${skill}|Cursor|${shared_dir}/ + ${dest_file}")
+
+  # Step 4: Windsurf rule file
+  mkdir -p .windsurf/rules
+  dest_file=".windsurf/rules/${skill}.md"
+  strip_frontmatter "$src/SKILL.md" > "$dest_file"
+  INSTALLED+=("${skill}|Windsurf|${shared_dir}/ + ${dest_file}")
+
+  # Step 5: GitHub Copilot instructions file
+  mkdir -p .github/instructions
+  dest_file=".github/instructions/${skill}.instructions.md"
+  strip_frontmatter "$src/SKILL.md" > "$dest_file"
+  INSTALLED+=("${skill}|GitHub Copilot|${shared_dir}/ + ${dest_file}")
+
+  # Step 6: OpenAI Codex AGENTS.md entry
+  if [[ "$INSTALL_SCOPE" == "global" ]]; then
+    mkdir -p "$HOME/.codex"
+    dest_file="$HOME/.codex/AGENTS.md"
+  else
+    dest_file="AGENTS.md"
+  fi
+  {
+    echo ""
+    echo "<!-- pskills: $skill -->"
+    strip_frontmatter "$src/SKILL.md"
+    echo "<!-- /pskills: $skill -->"
+  } >> "$dest_file"
+  INSTALLED+=("${skill}|OpenAI Codex|${shared_dir}/ + ${dest_file}")
+
+  # Step 7: OpenCode (uses .agents/skills/ directly)
+  INSTALLED+=("${skill}|OpenCode|${shared_dir}/")
+
+  # Step 8: Google Antigravity (uses .agents/skills/ directly)
+  INSTALLED+=("${skill}|Google Antigravity|${shared_dir}/")
+}
+
 # ─── Print summary table ───────────────────────────────────────────────────
 print_summary() {
   if [[ ${#INSTALLED[@]} -eq 0 ]]; then
@@ -379,7 +450,28 @@ main() {
   fi
 
   # ── Step 2: Select tools ──
-  checkbox_select "Select target tools:" TOOLS TOOL_DESCS TOOL_SEL
+  # Prepend "Install All" option for tools
+  local ALL_TOOLS=("Install All" "${TOOLS[@]}")
+  local ALL_TOOL_DESCS=("Select all tools (shared .agents/skills/ + symlinks)" "${TOOL_DESCS[@]}")
+  local ALL_TOOL_SEL=(0)
+  for (( i = 0; i < ${#TOOLS[@]}; i++ )); do
+    ALL_TOOL_SEL+=(0)
+  done
+
+  checkbox_select "Select target tools:" ALL_TOOLS ALL_TOOL_DESCS ALL_TOOL_SEL
+
+  # If "Install All" was toggled on, select every tool and set flag
+  if [[ ${ALL_TOOL_SEL[0]} -eq 1 ]]; then
+    INSTALL_ALL_TOOLS=1
+    for (( i = 0; i < ${#TOOLS[@]}; i++ )); do
+      TOOL_SEL[$i]=1
+    done
+  else
+    # Copy individual selections back (skip index 0 which is "Install All")
+    for (( i = 0; i < ${#TOOLS[@]}; i++ )); do
+      TOOL_SEL[$i]=${ALL_TOOL_SEL[$((i + 1))]}
+    done
+  fi
 
   local any_tool=0
   for t in "${TOOL_SEL[@]}"; do [[ $t -eq 1 ]] && any_tool=1 && break; done
@@ -410,11 +502,16 @@ main() {
   local i j
   for (( i = 0; i < ${#SKILLS[@]}; i++ )); do
     [[ ${SKILL_SEL[$i]} -eq 0 ]] && continue
-    for (( j = 0; j < ${#TOOLS[@]}; j++ )); do
-      [[ ${TOOL_SEL[$j]} -eq 0 ]] && continue
-      echo "  ${GREEN}✔${RESET} ${BOLD}${SKILLS[$i]}${RESET} → ${TOOLS[$j]}"
-      install_skill_for_tool "${SKILLS[$i]}" "${TOOLS[$j]}"
-    done
+    if [[ $INSTALL_ALL_TOOLS -eq 1 ]]; then
+      echo "  ${GREEN}✔${RESET} ${BOLD}${SKILLS[$i]}${RESET} → All tools (shared + symlinks)"
+      install_skill_all_tools "${SKILLS[$i]}"
+    else
+      for (( j = 0; j < ${#TOOLS[@]}; j++ )); do
+        [[ ${TOOL_SEL[$j]} -eq 0 ]] && continue
+        echo "  ${GREEN}✔${RESET} ${BOLD}${SKILLS[$i]}${RESET} → ${TOOLS[$j]}"
+        install_skill_for_tool "${SKILLS[$i]}" "${TOOLS[$j]}"
+      done
+    fi
   done
 
   # ── Step 5: Summary ──

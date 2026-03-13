@@ -15,3 +15,7 @@ Thumbs.db
 *.tmp
 *~
 .windsurf
+.cursor/
+
+# GitHub
+.github/instructions/
