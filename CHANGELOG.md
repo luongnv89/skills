@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2.0 — 2026-03-13
+
+### Features
+- Add "Install All" tools option to install.sh and remote-install.sh with shared `.agents/skills/` + symlinks @luongnv89
+- Add remote installer and update README with all installation methods @luongnv89
+- Add Step 6 (Update Documentation) and Step 10 (Publish to PyPI/npm) to release-manager skill @luongnv89
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| release-manager | 2.1.0 → 2.2.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.1.3...v1.2.0
+
 ## v1.1.3 — 2026-03-11
 
 ### Bug Fixes

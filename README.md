@@ -151,7 +151,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | Skill | Version | Description |
 |-------|---------|-------------|
 | [**docs-generator**](skills/docs-generator/) | 1.2.0 | Restructure project documentation |
-| [**release-manager**](skills/release-manager/) | 2.1.0 | Complete release automation — version bumps, changelog, README updates, builds, git tags, and GitHub releases |
+| [**release-manager**](skills/release-manager/) | 2.2.0 | Complete release automation — version bumps, changelog, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm |
 | [**oss-ready**](skills/oss-ready/) | 1.1.0 | Setup open-source project standards |
 | [**agent-config**](skills/agent-config/) | 1.1.0 | Create or update CLAUDE.md and AGENTS.md files |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.1 | Audit and optimize website codebases for SEO and AI bot scanning |
