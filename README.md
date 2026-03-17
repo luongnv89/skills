@@ -15,6 +15,19 @@
 
 A collection of reusable skills for AI coding agents. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, and other tools that support skill-based workflows.
 
+## Skill Management
+
+Use [**agent-skill-manager**](https://github.com/luongnv89/agent-skill-manager) (`asm`) to manage your installed skills across all AI coding agents from a single TUI/CLI:
+
+```bash
+npm install -g agent-skill-manager
+asm list          # List all installed skills
+asm search        # Search skills by name or description
+asm install github:luongnv89/skills   # Install skills from this repo
+```
+
+See the [agent-skill-manager docs](https://github.com/luongnv89/agent-skill-manager) for full usage.
+
 ## Installation
 
 ### Method 1: npx (recommended)
@@ -97,12 +110,14 @@ flowchart LR
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
+    MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing"]
     TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
 
     IDEATION --> PLANNING
     PLANNING --> DEVELOPMENT
     DEVELOPMENT --> QUALITY
     QUALITY --> RELEASE
+    RELEASE --> MARKETING
     QUALITY -.->|iterate| PLANNING
     TOOLING -.->|supports all phases| DEVELOPMENT
 ```
@@ -116,6 +131,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop, frontend-design | Write quality code with tests, structured task loops, and distinctive UIs |
 | **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
 | **Release & Docs** | docs-generator, release-manager, oss-ready, seo-ai-optimizer | Generate documentation, manage releases, open source setup, and SEO/AI optimization |
+| **Marketing** | aso-marketing | App Store Optimization for mobile apps on iOS and Google Play |
 | **Tooling** | skill-creator, context-hub, ollama-optimizer, install-script-generator, note-taker | Create skills, fetch current API docs, optimize local LLMs, generate installers, capture notes |
 
 ## Available Skills
@@ -145,6 +161,12 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | [**prd-generator**](skills/prd-generator/) | 1.2.2 | Generate Product Requirements Documents with GitHub link reporting |
 | [**tasks-generator**](skills/tasks-generator/) | 1.2.2 | Generate sprint tasks from PRD with GitHub link reporting |
 | [**system-design**](skills/system-design/) | 1.2.3 | Generate Technical Architecture Documents with GitHub link reporting |
+
+### Marketing & ASO
+
+| Skill | Version | Description |
+|-------|---------|-------------|
+| [**aso-marketing**](skills/aso-marketing/) | 1.0.0 | Full-lifecycle App Store Optimization for iOS and Google Play — analysis, keyword strategy, metadata optimization, and conversion improvement |
 
 ### Content & Documentation
 
@@ -197,6 +219,7 @@ Skills trigger automatically based on your requests:
 | "optimize for SEO" | seo-ai-optimizer |
 | "build a landing page" | frontend-design |
 | "transform this app into futuristic cyberpunk theme" | theme-transformer |
+| "optimize my app store listing" | aso-marketing |
 
 ## Project Structure
 

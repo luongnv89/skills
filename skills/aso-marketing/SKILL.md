@@ -1,5 +1,6 @@
 ---
 name: aso-marketing
+version: 1.0.0
 description: Comprehensive App Store Optimization (ASO) marketing skill for mobile applications. Analyzes your app's codebase, store listing, and competitive landscape, then builds and executes a full ASO plan covering keyword strategy, metadata optimization, visual asset guidance, localization, and conversion rate improvement — for both Apple App Store and Google Play. Use when asked to "optimize my app store listing", "ASO plan", "improve app visibility", "app store marketing", "increase app downloads", "keyword strategy for my app", "optimize for App Store", "optimize for Google Play", "app marketing plan", "store listing optimization", "improve app conversion rate", "ASO audit and fix", or any request about making a mobile app more discoverable and downloadable in app stores. Also trigger when the user mentions app store rankings, keyword research for apps, screenshot optimization, app metadata, or wants to increase organic installs — even if they don't say "ASO" explicitly.
 ---
 

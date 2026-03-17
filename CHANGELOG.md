@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.3.0 — 2026-03-17
+
+### Features
+- Add **aso-marketing** skill — full-lifecycle App Store Optimization for mobile apps covering both Apple App Store and Google Play with keyword strategy, metadata optimization, conversion improvement, and localization @luongnv89
+- Add **Skill Management** section to README referencing [agent-skill-manager](https://github.com/luongnv89/agent-skill-manager) (`asm`) for managing skills across all AI coding agents @luongnv89
+- Add Marketing phase to the workflow diagram and skill tables @luongnv89
+
+### New Skills
+| Skill | Version |
+|-------|---------|
+| aso-marketing | 1.0.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.2.0...v1.3.0
+
 ## v1.2.0 — 2026-03-13
 
 ### Features
