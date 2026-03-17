@@ -185,6 +185,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 | [**logo-designer**](skills/logo-designer/) | 1.1.0 | Design professional logos with automatic project context detection |
 | [**frontend-design**](skills/frontend-design/) | 1.2.0 | Create distinctive, usability-focused frontend interfaces with default style guide |
 | [**theme-transformer**](skills/theme-transformer/) | 1.0.0 | Transform existing UIs into futuristic cyberpunk neon-dark themes with branch-safe iterative redesign workflow |
+| [**excalidraw-generator**](skills/excalidraw-generator/) | 1.0.0 | Generate diagrams, charts, and visualizations as Excalidraw JSON with 25+ diagram types and 9 automated quality checks |
 
 ### Skill Development
 
@@ -220,6 +221,7 @@ Skills trigger automatically based on your requests:
 | "build a landing page" | frontend-design |
 | "transform this app into futuristic cyberpunk theme" | theme-transformer |
 | "optimize my app store listing" | aso-marketing |
+| "draw a flowchart of this process" | excalidraw-generator |
 
 ## Project Structure
 

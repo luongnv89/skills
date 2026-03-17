@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.5.0 — 2026-03-17
+
+### Features
+- Add **excalidraw-generator** skill — generate diagrams, charts, and visualizations as valid Excalidraw JSON with a 4-phase workflow (Understand → Propose → Generate → Validate) @luongnv89
+  - Supports **25+ diagram types** across 8 categories: flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, Gantt charts, Kanban boards, SWOT analysis, wireframes, and more
+  - **9 automated quality checks** with auto-fix: JSON validation, required fields, unique IDs, two-way text/arrow bindings, overlap detection, semantic completeness, readable text
+  - Selectable **color palettes** (Professional, Pastel, Monochrome) and **rendering styles** (Hand-drawn, Clean, Sketchy)
+  - Outputs `.excalidraw.md` (Markdown with code block) by default, or raw `.excalidraw` files
+  - Comprehensive reference docs for Excalidraw JSON schema and all diagram type layouts
+
+### New Skills
+| Skill | Version |
+|-------|---------|
+| excalidraw-generator | 1.0.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.4.0...v1.5.0
+
 ## v1.4.0 — 2026-03-17
 
 ### Features
