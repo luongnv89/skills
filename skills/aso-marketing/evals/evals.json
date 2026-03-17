@@ -1,0 +1,47 @@
+{
+  "skill_name": "aso-marketing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a fitness app for iOS that helps people do home workouts. It's been on the App Store for 6 months but barely gets any organic downloads. Can you help me optimize my store listing? The metadata is in ./metadata/ and my main competitor is Nike Training Club.",
+      "expected_output": "Full ASO analysis report and prioritized plan with iOS-specific metadata optimization including cross-field keyword combination strategy and approval gate.",
+      "files": [],
+      "assertions": [
+        {"text": "Produces a structured analysis report with app overview, metadata status table, and competitive findings", "type": "boolean"},
+        {"text": "Includes categorized keyword tables (primary/secondary/long-tail) with volume estimates and rationale", "type": "boolean"},
+        {"text": "Covers all iOS-specific metadata fields with character counts", "type": "boolean"},
+        {"text": "Includes competitive analysis referencing Nike Training Club", "type": "boolean"},
+        {"text": "Explains cross-field keyword combination strategy", "type": "boolean"},
+        {"text": "Includes an explicit approval gate before execution", "type": "boolean"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We're launching a new meditation app on both iOS and Google Play next month. I need a complete ASO marketing plan. The app is called 'ZenMind' and it focuses on guided sleep meditation and stress relief. No existing metadata yet — starting from scratch.",
+      "expected_output": "Comprehensive dual-platform ASO plan with platform-specific metadata, launch timeline, localization strategy, and visual asset guidance.",
+      "files": [],
+      "assertions": [
+        {"text": "Has distinct sections for both Apple App Store AND Google Play with platform-specific metadata", "type": "boolean"},
+        {"text": "iOS uses keywords field while Android emphasizes full description indexing", "type": "boolean"},
+        {"text": "Addresses fresh-launch context with timeline and pre-launch steps", "type": "boolean"},
+        {"text": "Includes localization strategy with priority markets", "type": "boolean"},
+        {"text": "Targets meditation/sleep/stress relief with categorized keywords", "type": "boolean"},
+        {"text": "Provides visual asset guidance (screenshots, icon, video)", "type": "boolean"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My Android app is a budget tracker. It's getting decent downloads but the conversion rate from page views to installs is only about 15%. I think the store listing isn't convincing enough. Can you help improve the Google Play listing? Metadata is in fastlane/metadata/android/en-US/.",
+      "expected_output": "Conversion-focused ASO plan for Google Play with before/after metadata, above-the-fold optimization, and A/B testing recommendations.",
+      "files": [],
+      "assertions": [
+        {"text": "Prioritizes conversion rate optimization as primary objective", "type": "boolean"},
+        {"text": "Covers Google Play fields with correct character limits and indexing rules", "type": "boolean"},
+        {"text": "Addresses above-the-fold optimization (first 1-3 lines)", "type": "boolean"},
+        {"text": "Recommends A/B testing with Store Listing Experiments", "type": "boolean"},
+        {"text": "Shows before/after metadata comparison with character counts", "type": "boolean"},
+        {"text": "Includes visual asset recommendations for conversion", "type": "boolean"}
+      ]
+    }
+  ]
+}
