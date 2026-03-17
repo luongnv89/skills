@@ -5,7 +5,7 @@ description: Generate diagrams, schemas, charts, flowcharts, architecture diagra
 
 # Excalidraw Diagram Generator
 
-You generate professional diagrams and visualizations as valid Excalidraw JSON. Every diagram goes through four phases: **Understand** the request, **Propose** options, **Generate** the JSON, and **Validate** it against 9 quality checks before writing the file.
+You generate professional diagrams and visualizations as valid Excalidraw JSON. Every diagram goes through four phases: **Understand** the request, **Propose** options, **Generate** the JSON, and **Validate** it against 10 quality checks before writing the file.
 
 ## Core Workflow
 
@@ -48,18 +48,11 @@ Wait for the user to confirm or select their preferred options before proceeding
 
 ### Phase 3: Generate
 
-Generate the Excalidraw JSON and write it to a file.
+Generate the Excalidraw JSON and write it as a `.excalidraw` file (raw JSON, no wrapper).
 
-**Output format depends on context:**
+**Default output: `.excalidraw` file** — always write the raw JSON object directly to a `.excalidraw` file. This is the native format that Excalidraw, VS Code (with the Excalidraw extension), and Obsidian can open directly.
 
-**Default — Markdown file (`.excalidraw.md`)**: When generating as part of documentation, notes, or any Markdown-oriented workflow, wrap the JSON in a fenced code block inside a `.md` file:
-
-```markdown
-# [Diagram Title]
-
-[Brief description of what this diagram shows]
-
-` ` `excalidraw
+```json
 {
   "type": "excalidraw",
   "version": 2,
@@ -71,14 +64,23 @@ Generate the Excalidraw JSON and write it to a file.
   },
   "files": {}
 }
+```
+
+**Embedding in Markdown**: If the user explicitly asks to embed the diagram in a `.md` file, or says they want a Markdown file, create the `.excalidraw` file first, then create a companion `.md` file that references or embeds it. Use a fenced code block with the `excalidraw` language tag:
+
+```markdown
+# [Diagram Title]
+
+[Brief description]
+
+` ` `excalidraw
+<paste the same JSON here>
 ` ` `
 ```
 
 (The triple backticks above are escaped for this document — use real triple backticks in output.)
 
-**Raw Excalidraw file (`.excalidraw`)**: When the user explicitly says they want an `.excalidraw` file, or when the output is meant to be opened directly in Excalidraw (not embedded in docs), write the raw JSON directly — no Markdown wrapper, no code fences, just the JSON object.
-
-**File naming**: Use descriptive kebab-case names in the current working directory: `auth-flow.excalidraw.md` or `database-schema.excalidraw`. If the user specifies a path, use that instead.
+**File naming**: Use descriptive kebab-case names in the current working directory: `auth-flow.excalidraw`, `database-schema.excalidraw`. If the user specifies a path, use that instead.
 
 ### Phase 4: Validate
 
@@ -93,10 +95,10 @@ Every element in the `elements` array must have ALL of these fields — no excep
 `id`, `type`, `x`, `y`, `width`, `height`, `angle`, `strokeColor`, `backgroundColor`, `fillStyle`, `strokeWidth`, `strokeStyle`, `roughness`, `opacity`, `groupIds`, `frameId`, `roundness`, `isDeleted`, `boundElements`, `updated`, `link`, `locked`, `seed`
 
 Additionally:
-- Text elements must also have: `text`, `fontSize`, `fontFamily`, `textAlign`, `verticalAlign`, `containerId`, `originalText`, `lineHeight`
+- Text elements must also have: `text`, `fontSize`, `fontFamily`, `textAlign`, `verticalAlign`, `containerId`, `originalText`, `lineHeight`, `autoResize`
 - Arrow/line elements must also have: `points`, `startBinding`, `endBinding`, `startArrowhead`, `endArrowhead`
 
-**Fix**: Add any missing field with its default value.
+**Fix**: Add any missing field with its default value. For text, ensure `autoResize: true` and `lineHeight: 1.25`.
 
 #### Check 3: Unique IDs
 Collect all `id` values. If any duplicates exist, append a suffix to make them unique.
@@ -140,16 +142,33 @@ Review the original user request and verify that every entity, relationship, or 
 #### Check 9: Readable text
 - All text elements must have `fontSize >= 16`
 - All text `strokeColor` must not be `"transparent"` or same as `backgroundColor`
+- All text elements must have `lineHeight: 1.25` (not 1.35 — that causes overflow)
+- All text elements must have `autoResize: true`
 
-**Fix**: Set minimum fontSize to 16; set strokeColor to `"#1e1e1e"` if invisible.
+**Fix**: Set minimum fontSize to 16; set strokeColor to `"#1e1e1e"` if invisible; set lineHeight to 1.25; set autoResize to true.
+
+#### Check 10: Shape-to-text size fit
+
+This is the most common cause of garbled rendering in Excalidraw. For every text element bound to a shape (`containerId` is set):
+
+1. Count the lines: `line_count = text.split('\n').length`
+2. Calculate minimum text height: `min_text_height = line_count * fontSize * 1.25`
+3. Calculate minimum shape height: `min_shape_height = min_text_height + 40` (20px padding top/bottom)
+4. The container shape's `height` must be >= `min_shape_height`
+5. The container shape's `width` must be >= longest line's approximate pixel width + 20px padding
+
+**Also check**: boundary/container labels (like "System Boundary") should NOT be bound to their container rectangle. These must be standalone text (`containerId: null`) positioned near the top-left of the container.
+
+**Fix**: Increase the shape's height/width to fit the text. If a shape needs to be taller, also adjust `y` positions of elements below it to maintain spacing. For container labels, remove the binding and set `containerId: null`.
 
 #### Validation report
 
 After all checks pass, include a brief validation summary as a comment in your response (not in the file):
 ```
-Validation: 9/9 checks passed
+Validation: 10/10 checks passed
 - Elements: N shapes, M text labels, K arrows
 - Bindings: X text bindings, Y arrow bindings (all two-way)
+- Text fits: all shapes sized to fit their bound text
 - No overlaps, no missing fields
 ```
 
@@ -171,11 +190,16 @@ Use descriptive, unique IDs: `"node-auth"`, `"arrow-auth-to-db"`, `"text-auth-la
 
 ### Text inside shapes
 
-This is a two-way binding:
+This is a two-way binding AND a sizing relationship — both must be correct or text renders as garbled characters:
+
 1. The shape's `boundElements` must include `{"id": "text-id", "type": "text"}`
 2. The text's `containerId` must reference the shape's ID
-3. Text `x`/`y` should be approximately centered in the container (Excalidraw auto-adjusts)
-4. Text `width` should be container width minus ~40px padding
+3. Text must have `autoResize: true` and `lineHeight: 1.25`
+4. Text `x` = shape.x + 10, `y` = shape.y + 10
+5. Text `width` = shape.width - 20 (10px padding each side)
+6. **Shape height must fit the text**: count lines, multiply by `fontSize * 1.25`, add 40px padding. A shape that is too small for its text is the #1 cause of rendering bugs.
+7. Keep bound text to 1-3 lines when possible. For longer descriptions, use a taller shape (160px+) or place description as standalone text outside.
+8. Boundary/container labels (like "System Boundary") must be **standalone text** (`containerId: null`), NOT bound to the container shape.
 
 ### Arrow connections
 
@@ -262,14 +286,9 @@ When iterating, read the existing file, modify the JSON, and rewrite. Preserve e
 
 For a request like "draw a flowchart of a login process":
 
-**File**: `login-flow.excalidraw.md`
+**File**: `login-flow.excalidraw`
 
-The output Markdown contains:
-1. A title: `# Login Flow`
-2. A brief description
-3. A fenced code block with language `excalidraw` containing the full JSON
-
-The JSON would include:
+The output is a raw JSON file containing the full Excalidraw document with:
 - An ellipse "Start" node at the top
 - Rectangle nodes for "Enter Credentials", "Validate", "Create Session"
 - A diamond for "Valid?" decision

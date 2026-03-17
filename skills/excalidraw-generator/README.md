@@ -6,8 +6,8 @@
 
 - Supports 25+ diagram types across 8 categories (flow, architecture, data, planning, comparison, charts, UX, custom)
 - Interactive workflow: analyzes input, proposes visualization type with selectable options, iterates until clear
-- Built-in validation: 9 automated quality checks with auto-fix before writing output
-- Outputs valid Excalidraw JSON in a Markdown code block (`.excalidraw.md`) or raw `.excalidraw` file
+- Built-in validation: 10 automated quality checks with auto-fix before writing output
+- Outputs native `.excalidraw` files by default (can embed in `.md` on request)
 - Automatically extracts structure from code, SQL, config files, or plain descriptions
 - Multiple color palettes: professional, pastel, monochrome
 
@@ -29,7 +29,7 @@ graph TD
     A["1. Understand Input"] --> B["2. Propose Options"]
     B --> C["3. Generate JSON"]
     C --> D["4. Validate (9 checks)"]
-    D -->|Pass| E["Write File"]
+    D -->|"10/10 Pass"| E["Write File"]
     D -->|Fail| F["Auto-fix & Re-check"]
     F --> D
     style A fill:#4CAF50,color:#fff
@@ -65,4 +65,4 @@ graph TD
 
 ## Output
 
-By default, generates a `.excalidraw.md` Markdown file with the Excalidraw JSON inside a fenced code block. Users can request a raw `.excalidraw` file instead.
+Generates native `.excalidraw` files (raw JSON) by default. Can also embed in a `.md` file with a fenced code block on request.

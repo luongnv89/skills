@@ -222,14 +222,53 @@ To place text inside a shape:
   "containerId": "box-1",
   "textAlign": "center",
   "verticalAlign": "middle",
-  "x": <same as box center>,
-  "y": <same as box center>,
-  "width": <box width - padding>,
-  "height": <auto based on text>
+  "autoResize": true,
+  "lineHeight": 1.25,
+  "x": <shape.x + 10>,
+  "y": <shape.y + 10>,
+  "width": <shape.width - 20>,
+  "height": <calculated from line count>
 }
 ```
 
-The text's x/y should be approximately centered in the container. Excalidraw will auto-adjust on load.
+### Critical: Sizing shapes to fit their text
+
+Excalidraw does NOT auto-resize shapes to fit text. If a shape is too small for its bound text, the text overflows and renders as garbled/overlapping characters. You MUST size shapes based on their text content.
+
+**Calculate required height** before creating the shape:
+- `line_count` = number of `\n` in the text + 1
+- `text_height` = `line_count * fontSize * lineHeight`
+- `shape_height` = `text_height + 40` (20px padding top + 20px padding bottom)
+- Minimum shape height: 60px (for single-line text)
+
+**Example calculation** for text "MMT Probe\n[C / Libpcap]\nReal-time packet\ncapture & analysis":
+- line_count = 4
+- text_height = 4 * 16 * 1.25 = 80px
+- shape_height = 80 + 40 = 120px minimum
+
+**Keep bound text short** — ideally 1-3 lines for node labels. If you need more detail, use a larger shape (width 240+, height 160+) or put the description as standalone text below the shape instead of inside it.
+
+### Boundary / container labels
+
+For labeling a boundary or container rectangle (like "System Boundary" or "VPC"), do NOT bind the label text to the container — this causes the text to render at the wrong position. Instead, use **standalone text** positioned near the top-left corner of the container:
+
+```json
+{
+  "id": "boundary-label",
+  "type": "text",
+  "containerId": null,
+  "text": "System Boundary",
+  "x": <boundary.x + 10>,
+  "y": <boundary.y + 8>
+}
+```
+
+### Text properties that matter for rendering
+
+- **`autoResize`: true** — always set this on text elements so Excalidraw can reflow text properly
+- **`lineHeight`: 1.25** — use 1.25 for all text (not 1.35 which causes overflow)
+- **`width`**: for bound text, set to `shape.width - 20` (10px padding each side)
+- **`height`**: set to `line_count * fontSize * lineHeight` (Excalidraw will adjust on load, but an approximate value prevents rendering glitches on first render)
 
 ---
 
@@ -334,9 +373,9 @@ Use these spacing values for consistent layouts:
 
 | Constant | Value | Use |
 |----------|-------|-----|
-| NODE_WIDTH | 200 | Standard node/box width |
-| NODE_HEIGHT | 80 | Standard node/box height |
-| NODE_PADDING | 20 | Text padding inside nodes |
+| NODE_WIDTH | 200 | Standard node/box width (use 240 if text is long) |
+| NODE_HEIGHT | 80 | Minimum for 1-2 lines. Use 120 for 3-4 lines, 160 for 5-6 lines |
+| NODE_PADDING | 20 | Text padding inside nodes (10px each side) |
 | H_GAP | 80 | Horizontal gap between nodes |
 | V_GAP | 60 | Vertical gap between nodes |
 | ARROW_GAP | 8 | Gap between arrow tip and node |
