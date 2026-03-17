@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.4.0 — 2026-03-17
+
+### Features
+- Add **store policy compliance checking** to aso-marketing skill — validates all proposed metadata against Apple App Store Review Guidelines (2.3.7, 2.3.8, 5.2.1) and Google Play metadata policies before submission @luongnv89
+  - New **Phase 3: Policy Compliance Check** — scans for prohibited keywords, trademark/competitor brand violations, formatting issues, and content accuracy
+  - Comprehensive **prohibited keyword lists** for both stores (e.g., "free", "best", "#1", "top", "download now")
+  - **Trademark protection** — prevents competitor brand names from leaking into proposed metadata
+  - Policy compliance integrated into Review (Phase 5), Verify (Phase 6), and Summary Report (Phase 7)
+  - New **Store Policy Compliance** section in best practices reference with universal comparison table
+  - Updated evals with policy compliance assertions
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| aso-marketing | 1.0.0 → 1.1.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.3.0...v1.4.0
+
 ## v1.3.0 — 2026-03-17
 
 ### Features

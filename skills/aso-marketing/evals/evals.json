@@ -10,8 +10,10 @@
         {"text": "Produces a structured analysis report with app overview, metadata status table, and competitive findings", "type": "boolean"},
         {"text": "Includes categorized keyword tables (primary/secondary/long-tail) with volume estimates and rationale", "type": "boolean"},
         {"text": "Covers all iOS-specific metadata fields with character counts", "type": "boolean"},
-        {"text": "Includes competitive analysis referencing Nike Training Club", "type": "boolean"},
+        {"text": "Includes competitive analysis referencing Nike Training Club but does NOT use 'Nike Training Club' as a proposed keyword or in proposed metadata", "type": "boolean"},
         {"text": "Explains cross-field keyword combination strategy", "type": "boolean"},
+        {"text": "Includes a store policy compliance check that scans for prohibited keywords, trademark violations, and listing policy issues", "type": "boolean"},
+        {"text": "No proposed metadata contains prohibited terms (free, best, #1, top-rated) or competitor trademarks", "type": "boolean"},
         {"text": "Includes an explicit approval gate before execution", "type": "boolean"}
       ]
     },
@@ -26,7 +28,9 @@
         {"text": "Addresses fresh-launch context with timeline and pre-launch steps", "type": "boolean"},
         {"text": "Includes localization strategy with priority markets", "type": "boolean"},
         {"text": "Targets meditation/sleep/stress relief with categorized keywords", "type": "boolean"},
-        {"text": "Provides visual asset guidance (screenshots, icon, video)", "type": "boolean"}
+        {"text": "Provides visual asset guidance (screenshots, icon, video)", "type": "boolean"},
+        {"text": "Includes a policy compliance check validating proposed metadata against both Apple and Google Play store policies", "type": "boolean"},
+        {"text": "No proposed metadata uses prohibited terms like 'best', 'free', '#1', or competitor trademarks like 'Headspace', 'Calm'", "type": "boolean"}
       ]
     },
     {
@@ -40,7 +44,8 @@
         {"text": "Addresses above-the-fold optimization (first 1-3 lines)", "type": "boolean"},
         {"text": "Recommends A/B testing with Store Listing Experiments", "type": "boolean"},
         {"text": "Shows before/after metadata comparison with character counts", "type": "boolean"},
-        {"text": "Includes visual asset recommendations for conversion", "type": "boolean"}
+        {"text": "Includes visual asset recommendations for conversion", "type": "boolean"},
+        {"text": "Validates proposed metadata against Google Play prohibited keywords (no 'top', 'best', '#1', 'free', 'download now', etc.) and trademark rules", "type": "boolean"}
       ]
     }
   ]

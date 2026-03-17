@@ -292,18 +292,108 @@ Rank markets by: (1) market size for your category, (2) competition level, (3) l
 
 ---
 
+## Store Policy Compliance
+
+Both Apple and Google enforce strict metadata policies. Violating these policies can result in app rejection, removal from the store, or developer account termination. **Always validate metadata against these rules before submission.**
+
+### Apple App Store — Prohibited Metadata (Guidelines 2.3.7, 2.3.8, 5.2.1)
+
+#### Banned Words and Phrases in Title, Subtitle, and Keywords
+- **"free"** — pricing terms are not allowed in visible metadata
+- **"best"**, **"#1"**, **"top-rated"**, **"must-have"** — unverifiable superlative claims
+- **"#1 in the world"**, **"top app"** — ranking claims cannot be verified
+- **"limited time"**, **"sale"**, **"discount"** — promotional/pricing language
+- **"For Kids"**, **"For Children"** — reserved exclusively for the Kids Category
+- **"Editor's Choice"** — reserved; only Apple applies this badge automatically
+
+#### Trademark and Competitor Restrictions
+- **Competitor brand names** — cannot appear in title, subtitle, keywords, or description (e.g., using "WhatsApp" in a messaging app's keywords)
+- **Trademarked terms** you don't own or license — Apple explicitly prohibits this under guideline 2.3.7
+- **Celebrity names** — unless you have explicit authorization
+- **Apple trademarks** — cannot suggest Apple endorsement or source relationship (guideline 5.2.4)
+- **Consequences:** Apple may silently de-index offending keywords, reject the update, remove the app, or terminate the developer account. Trademark owners can file disputes via Apple's App Store dispute form
+
+#### Content Restrictions
+- **Other platform names** — "Android", "Google Play", "Play Store" prohibited in iOS metadata (guideline 2.3.10)
+- **Emojis and special characters** — not allowed in app name, subtitle, or keywords
+- **ALL CAPS** — not permitted unless it's the actual brand name
+- **Unverifiable claims** — "fastest", "most popular", "award-winning" without evidence
+- **Misleading descriptions** — describing features the app doesn't have
+- **Placeholder/generic text** — unfinished or default metadata
+- **Repetition** — repeating the app name in subtitle or keywords wastes budget and may be flagged
+
+#### Metadata Accuracy Requirements (Guideline 2.3)
+- Screenshots must show the app in actual use — no title art, splash screens, or login pages only
+- Preview videos must use actual app screen captures
+- Description must accurately reflect app functionality
+- In-app purchases and subscriptions must be clearly disclosed
+- Age rating must be honest and accurate
+
+### Google Play Store — Prohibited Metadata
+
+#### Banned Words and Phrases in Title, Short Description, Developer Name, and Icon
+- **"top"**, **"best"**, **"#1"**, **"number one"** — store performance claims
+- **"free"**, **"no ads"**, **"ad free"** — pricing/promotional terms
+- **"new"**, **"hot"**, **"first"**, **"bonus"** — promotional language
+- **"discount"**, **"sale"**, **"million downloads"** — promotional claims
+- **"App of the Year"**, **"Best Google Play App of 20XX"**, **"Popular"** — ranking claims
+- **"download now"**, **"install now"**, **"play now"**, **"try now"**, **"update now"** — call-to-action phrases
+
+#### Trademark and Competitor Restrictions
+- **Competitor brand names** — cannot be used in title, short description, or full description to mislead users
+- **Trademarked terms** — trademark owners can file complaints, leading to enforcement
+- **Misleading developer names** — developer name cannot impersonate another entity
+- **Consequences:** Google may remove the app listing, suspend the developer account, or restrict future submissions. Trademark complaints trigger review and potential enforcement
+
+#### Formatting and Content Restrictions
+- **Emojis and emoticons** — prohibited in title, icon, and developer name
+- **Repeated special characters** — not allowed
+- **ALL CAPS** — prohibited unless part of the official brand name
+- **Unattributed user testimonials** — cannot include fake or unattributed reviews in metadata
+- **Graphic elements suggesting rankings** — no trophy emojis, medal icons, or badges implying store ranking
+- **Keyword stuffing** — Google's algorithm detects and penalizes repetitive or unrelated keywords; this includes excessive repetition in the full description
+- **Misleading information** — descriptions of features the app doesn't provide
+
+#### Description-Specific Rules
+- Avoid excessive length, irrelevant detail, or improper formatting
+- Maintain natural readability — Google's NLP detects unnatural keyword cramming
+- Do not list keywords as comma-separated blocks in the description
+- Do not repeat keywords more than 5 times across all fields
+
+### Both Stores — Universal Rules
+
+| Rule | Apple | Google | Consequence |
+|------|-------|--------|-------------|
+| No competitor trademarks | Yes (2.3.7, 5.2.1) | Yes | Rejection/removal |
+| No pricing terms ("free") | Yes | Yes | Rejection |
+| No ranking claims ("#1", "best") | Yes | Yes | Rejection |
+| No platform references | Yes (2.3.10) | Yes | Rejection |
+| No keyword stuffing | Yes | Yes (algorithmic penalty) | Rejection/demotion |
+| No misleading screenshots | Yes (2.3.3) | Yes | Rejection |
+| No emojis in title | Yes | Yes | Rejection |
+| No ALL CAPS (unless brand) | Yes | Yes | Rejection |
+| No unverifiable claims | Yes | Yes | Rejection |
+| Accurate feature descriptions | Yes (2.3.1) | Yes | Rejection |
+| Disclose IAP/subscriptions | Yes (2.3.2) | Yes | Rejection |
+
+---
+
 ## Common Mistakes
 
-1. **Keyword stuffing** — Cramming keywords unnaturally hurts readability and can trigger penalties (Google Play)
-2. **Duplicating words across indexed fields (iOS)** — Wastes character budget; Apple indexes title + subtitle + keywords together
-3. **Translating instead of localizing** — Direct translation misses local search behavior
-4. **Ignoring the "above the fold"** — Users see only the first 1-3 lines before "Read More"
-5. **Set and forget** — ASO requires ongoing iteration as competition and algorithms change
-6. **Optimizing for search only** — High visibility with low conversion wastes potential
-7. **Neglecting ratings** — A 3.5-star app converts dramatically worse than a 4.2-star app
-8. **Spaces after commas in iOS keywords** — Each space wastes a character of your 100-char budget
-9. **Not using all screenshot slots** — Empty slots are missed conversion opportunities
-10. **Same metadata across all locales** — Signals lazy localization to both algorithms and users
+1. **Keyword stuffing** — Cramming keywords unnaturally hurts readability and can trigger penalties (Google Play) or rejection (both stores)
+2. **Using competitor trademarks** — Including competitor brand names in metadata violates both Apple (2.3.7, 5.2.1) and Google Play policies and can lead to app removal or legal action
+3. **Prohibited words in title** — Using "free", "best", "#1", "top" in titles causes immediate rejection on both stores
+4. **Duplicating words across indexed fields (iOS)** — Wastes character budget; Apple indexes title + subtitle + keywords together
+5. **Translating instead of localizing** — Direct translation misses local search behavior
+6. **Ignoring the "above the fold"** — Users see only the first 1-3 lines before "Read More"
+7. **Set and forget** — ASO requires ongoing iteration as competition and algorithms change
+8. **Optimizing for search only** — High visibility with low conversion wastes potential
+9. **Neglecting ratings** — A 3.5-star app converts dramatically worse than a 4.2-star app
+10. **Spaces after commas in iOS keywords** — Each space wastes a character of your 100-char budget
+11. **Not using all screenshot slots** — Empty slots are missed conversion opportunities
+12. **Same metadata across all locales** — Signals lazy localization to both algorithms and users
+13. **Unverifiable superlative claims** — "Fastest", "most popular", "award-winning" without evidence triggers rejection
+14. **Emojis and special characters in titles** — Both stores now prohibit these in titles and subtitles
 
 ---
 

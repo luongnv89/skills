@@ -166,7 +166,7 @@ _* Skills marked with * can be used repeatedly during development iterations._
 
 | Skill | Version | Description |
 |-------|---------|-------------|
-| [**aso-marketing**](skills/aso-marketing/) | 1.0.0 | Full-lifecycle App Store Optimization for iOS and Google Play — analysis, keyword strategy, metadata optimization, and conversion improvement |
+| [**aso-marketing**](skills/aso-marketing/) | 1.1.0 | Full-lifecycle App Store Optimization for iOS and Google Play — analysis, keyword strategy, metadata optimization, conversion improvement, and **store policy compliance checking** (prohibited keywords, trademark violations, listing policy validation) |
 
 ### Content & Documentation
 
