@@ -1,0 +1,23 @@
+{
+  "skill_name": "excalidraw-generator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Draw a flowchart for a user registration process: user enters email, we validate the format, check if email exists in DB, if yes show error, if no send verification email, user clicks link, account activated.",
+      "expected_output": "A top-to-bottom flowchart with rectangles for process steps, diamonds for decisions, ellipses for start/end, arrows connecting everything. Should have proper colors and labels.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I have a microservice architecture with these services: API Gateway, Auth Service, User Service, Order Service, Payment Service, Notification Service, and a PostgreSQL database shared by User and Order services, plus a Redis cache used by Auth and API Gateway. Visualize this architecture.",
+      "expected_output": "A system architecture diagram showing all services as rectangles, databases as distinct shapes, arrows showing communication paths, color-coded by layer/function.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Create a mind map about 'Machine Learning' with branches for: Supervised Learning (classification, regression), Unsupervised Learning (clustering, dimensionality reduction), Reinforcement Learning (Q-learning, policy gradient), and Deep Learning (CNN, RNN, Transformer).",
+      "expected_output": "A radial mind map with 'Machine Learning' in the center, main branches radiating outward to sub-topics, different colors per branch, clean readable layout.",
+      "files": []
+    }
+  ]
+}
