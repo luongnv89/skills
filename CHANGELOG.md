@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.6.1 — 2026-03-18
+
+### Bug Fixes
+- **skill consistency**: audit and fix skill consistency issues across 4 skills @luongnv89
+  - excalidraw-generator: add missing metadata.version, fix README mermaid check count (9 → 10)
+  - drawio-generator: add missing metadata.version
+  - cli-builder: replace non-standard README sections with standard Output
+- **SKILL.md frontmatter**: migrate from unsupported `version:` attribute to valid `metadata.version` across all 30 skills @luongnv89
+  - Add `license: MIT` and `metadata.creator` to every skill
+  - Valid frontmatter attributes now: argument-hint, compatibility, description, disable-model-invocation, license, metadata, name, user-invocable
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| excalidraw-generator | 1.1.0 → 1.1.1 |
+| drawio-generator | 1.0.0 → 1.0.1 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.6.0...v1.6.1
+
 ## v1.6.0 — 2026-03-18
 
 ### Features
