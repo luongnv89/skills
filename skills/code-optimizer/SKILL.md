@@ -41,7 +41,7 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 
 ## Workflow
 
-### 0. Create Feature Branch
+### Prerequisites
 
 Before making any changes:
 1. Check the current branch - if already on a feature branch for this task, skip
@@ -101,6 +101,24 @@ For each issue found:
 - Global interpreter lock considerations
 - Context manager usage for resources
 - N+1 query patterns
+
+### Go
+- Goroutine leaks (unbounded `go func()` without context cancellation)
+- Unnecessary allocations in hot paths (use `sync.Pool`, pre-allocate slices)
+- String concatenation in loops (use `strings.Builder`)
+- Missing `defer` for resource cleanup
+
+### Rust
+- Unnecessary cloning (use references or `Cow<>` instead)
+- Lock contention with `Mutex` when `RwLock` would suffice
+- Unbounded `Vec` growth without `with_capacity`
+- Blocking operations in async contexts
+
+### Java
+- Autoboxing in tight loops (use primitive types)
+- String concatenation with `+` in loops (use `StringBuilder`)
+- Synchronized blocks that are too broad
+- Stream API misuse (unnecessary intermediate collections)
 
 ### General
 - Premature optimization warnings (only flag if genuinely impactful)

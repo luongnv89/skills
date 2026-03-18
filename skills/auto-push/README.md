@@ -24,7 +24,7 @@ graph TD
     A["Analyze Changes"] --> B["Run Safety Checks"]
     B --> C{"Secrets or Issues Found?"}
     C -->|Yes| D["Warn & Abort"]
-    C -->|No| E["Confirm with User"]
+    C -->|No| E["Show Summary"]
     E --> F["Commit & Push"]
     style A fill:#4CAF50,color:#fff
     style C fill:#FF9800,color:#fff

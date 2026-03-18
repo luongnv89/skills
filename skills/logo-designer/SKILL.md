@@ -87,8 +87,7 @@ Generate logo based on project type and context.
 - Minimalist, clean, strong geometry
 - Abstract symbol or monogram related to core purpose
 - Works at all sizes (16px favicon to hero banner)
-- Flat or semi-flat design, no gradients or visual clichés
-- Incorporate visual depth using cards, lines, borders, and subtle shadows
+- Flat or semi-flat design — no fill gradients. Use cards, lines, borders, and box shadows for visual depth.
 
 **Colors:**
 - Use detected brand colors if available, OR user-provided palette

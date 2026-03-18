@@ -256,9 +256,3 @@ When users ask for stricter coding workflow rules, include this exact numbered b
 - Instructions for specific one-time tasks
 - File-by-file codebase descriptions
 
-## Notes
-
-- Run `/init` to generate a starter CLAUDE.md based on current project structure
-- Treat CLAUDE.md like code: review it when things go wrong, prune it regularly
-- Check CLAUDE.md into git so your team can contribute
-- The file compounds in value over time as you refine it

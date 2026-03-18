@@ -1,6 +1,6 @@
 ---
 name: aso-marketing
-description: Comprehensive App Store Optimization (ASO) marketing skill for mobile applications. Analyzes your app's codebase, store listing, and competitive landscape, then builds and executes a full ASO plan covering keyword strategy, metadata optimization, visual asset guidance, localization, and conversion rate improvement — for both Apple App Store and Google Play. Includes built-in store policy compliance checking that validates all proposed metadata against Apple App Store Review Guidelines (2.3.7, 5.2.1) and Google Play metadata policies — catching prohibited keywords, trademark violations, competitor brand misuse, and listing policy issues before submission to prevent app rejection. Use when asked to "optimize my app store listing", "ASO plan", "improve app visibility", "app store marketing", "increase app downloads", "keyword strategy for my app", "optimize for App Store", "optimize for Google Play", "app marketing plan", "store listing optimization", "improve app conversion rate", "ASO audit and fix", "check listing policy compliance", "avoid app store rejection", or any request about making a mobile app more discoverable and downloadable in app stores. Also trigger when the user mentions app store rankings, keyword research for apps, screenshot optimization, app metadata, store policy compliance, or wants to increase organic installs — even if they don't say "ASO" explicitly.
+description: Full-lifecycle App Store Optimization (ASO) for mobile apps — keyword strategy, metadata optimization, visual assets, localization, conversion improvement, and store policy compliance for both Apple App Store and Google Play. Use when asked to "optimize my app store listing", "ASO plan", "improve app visibility", "increase app downloads", "keyword strategy", "store listing optimization", "check listing compliance", or any request about making a mobile app more discoverable. Also trigger when user mentions app store rankings, screenshot optimization, or app metadata — even without saying "ASO".
 license: MIT
 metadata:
   version: 1.1.0
@@ -13,7 +13,7 @@ A comprehensive, iterative ASO workflow that takes your mobile app from analysis
 
 ## Repo Sync Before Edits (mandatory)
 
-Before modifying any files in the repository:
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,7 +21,16 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is dirty: stash, sync, then pop. If `origin` is missing or conflicts occur: stop and ask the user before continuing.
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Philosophy
 

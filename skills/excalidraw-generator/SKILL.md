@@ -1,6 +1,6 @@
 ---
 name: excalidraw-generator
-description: Generate diagrams, schemas, charts, flowcharts, architecture diagrams, mind maps, ER diagrams, sequence diagrams, Gantt charts, org charts, wireframes, Venn diagrams, and any other visualization as Excalidraw JSON. Use this skill whenever the user asks to create, draw, diagram, visualize, sketch, or chart anything — including flowcharts, system architecture, database schemas, mind maps, org charts, process flows, network topology, class diagrams, state machines, timelines, roadmaps, Kanban boards, SWOT analysis, comparison matrices, bar charts, wireframes, user flows, sitemaps, dependency graphs, C4 models, swimlane diagrams, or any kind of visual representation. Also trigger when the user says "excalidraw", "draw this", "make a diagram of", "visualize this", "sketch this out", "chart this", or shares data/code/structure they want turned into a visual. Even if the user doesn't explicitly say "diagram", if they describe relationships, flows, hierarchies, or structures that would benefit from visualization, suggest this skill.
+description: Generate diagrams and visualizations as Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, org charts, wireframes, C4 models, swimlanes, and more. Trigger when user asks to draw, diagram, visualize, sketch, or chart anything, says "excalidraw", "draw this", "make a diagram of", "visualize this", or shares data/structures that would benefit from visualization. Also suggest when the user describes relationships, flows, or hierarchies even without saying "diagram".
 license: MIT
 metadata:
   version: 1.1.1
@@ -182,49 +182,7 @@ If any check required auto-fixes, mention what was corrected so the user knows.
 
 ## Generating Valid Excalidraw JSON
 
-Read `references/excalidraw-format.md` for the exact JSON schema. Here are the critical rules:
-
-### Every element MUST have ALL required fields
-
-Missing fields cause Excalidraw to error or render incorrectly. The minimum required fields for every element are: `id`, `type`, `x`, `y`, `width`, `height`, `angle`, `strokeColor`, `backgroundColor`, `fillStyle`, `strokeWidth`, `strokeStyle`, `roughness`, `opacity`, `groupIds`, `frameId`, `roundness`, `isDeleted`, `boundElements`, `updated`, `link`, `locked`, `seed`.
-
-### ID generation
-
-Use descriptive, unique IDs: `"node-auth"`, `"arrow-auth-to-db"`, `"text-auth-label"`. This makes the JSON readable and debuggable. Never use duplicate IDs.
-
-### Text inside shapes
-
-This is a two-way binding AND a sizing relationship — both must be correct or text renders as garbled characters:
-
-1. The shape's `boundElements` must include `{"id": "text-id", "type": "text"}`
-2. The text's `containerId` must reference the shape's ID
-3. Text must have `autoResize: true` and `lineHeight: 1.25`
-4. Text `x` = shape.x + 10, `y` = shape.y + 10
-5. Text `width` = shape.width - 20 (10px padding each side)
-6. **Shape height must fit the text**: count lines, multiply by `fontSize * 1.25`, add 40px padding. A shape that is too small for its text is the #1 cause of rendering bugs.
-7. Keep bound text to 1-3 lines when possible. For longer descriptions, use a taller shape (160px+) or place description as standalone text outside.
-8. Boundary/container labels (like "System Boundary") must be **standalone text** (`containerId: null`), NOT bound to the container shape.
-
-### Arrow connections
-
-Also a two-way binding:
-1. Source shape's `boundElements` must include `{"id": "arrow-id", "type": "arrow"}`
-2. Target shape's `boundElements` must include `{"id": "arrow-id", "type": "arrow"}`
-3. Arrow's `startBinding` must reference source shape ID
-4. Arrow's `endBinding` must reference target shape ID
-5. Arrow `points`: first point is always `[0, 0]`, last point is the offset to the target
-
-### Layout spacing
-
-Use consistent spacing from `references/excalidraw-format.md`:
-- Node width: 200px, height: 80px
-- Horizontal gap: 80px, vertical gap: 60px
-- Grid cell: 280px (node + gap)
-- Arrow gap: 8px from node border
-
-### Seed values
-
-Every element needs a `seed` — a positive integer used for roughness rendering. Use incrementing values starting from 1000: 1000, 1001, 1002, etc. Each element must have a unique seed.
+Refer to the validation checks in Phase 4 and `references/excalidraw-format.md` for the complete JSON schema and format rules.
 
 ---
 

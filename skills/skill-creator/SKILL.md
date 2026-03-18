@@ -244,6 +244,9 @@ Save test cases to `evals/evals.json`. Don't write assertions yet — just the p
 
 See `references/schemas.md` for the full schema (including the `assertions` field, which you'll add later).
 
+Read `references/output-patterns.md` when designing output formats or file-writing behavior for a skill.
+Read `references/workflows.md` when structuring multi-phase workflows or iteration loops in a skill.
+
 ## Running and evaluating test cases
 
 This section is one continuous sequence — don't stop partway through. Do NOT use `/skill-test` or any other testing skill.

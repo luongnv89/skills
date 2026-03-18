@@ -39,7 +39,8 @@ graph TD
 
 | Path | Description |
 |---|---|
-| `references/` | Language-specific tooling configurations |
+| `references/precommit-configs.md` | Language-specific pre-commit hook configurations |
+| `references/github-actions.md` | GitHub Actions workflow templates |
 
 ## Output
 

@@ -1,6 +1,6 @@
 ---
 name: theme-transformer
-description: Transform an existing website/app design into a futuristic, space, cyberpunk, neon, digital-dark theme with user-adjustable colors. Use when users ask to reskin current UI, apply a new visual theme, or migrate a product to Neon Command Center style. Always creates a new git branch first, then follows a strict 4-step loop — style audit, design proposal, implementation plan, and incremental execution with user approval gates.
+description: Transform an existing website/app UI into a futuristic cyberpunk, neon, space, or digital-dark theme with user-adjustable colors. Use when asked to "reskin the UI", "apply a dark theme", "cyberpunk style this app", "make the interface futuristic", "apply neon command center style", or migrate a product to a new visual theme.
 license: MIT
 metadata:
   version: 1.0.0

@@ -95,7 +95,7 @@ If slash commands are unavailable:
    - `design.md`
    - `tasks.md`
    - `specs/<capability>/spec.md`
-3. Use templates from `references/openspec-task-templates.md`.
+3. Read `references/openspec-task-templates.md` before scaffolding task artifacts.
 4. Implement task and update checkboxes.
 5. Run local validation/tests.
 6. Merge spec deltas into `openspec/specs/` and move change to `openspec/changes/archive/<date>-<change-id>/`.

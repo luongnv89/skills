@@ -13,7 +13,7 @@ Check product and brand names for conflicts across trademarks, domains, and soci
 
 ## Repo Sync Before Edits (mandatory)
 
-Before writing any output files, sync with the remote to avoid conflicts:
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,8 +21,16 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is dirty, stash first (`git stash`), sync, then pop (`git stash pop`).
-If `origin` is missing or conflicts occur, stop and ask the user before continuing.
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Input
 
@@ -32,7 +40,7 @@ Optionally check for `prd.md` in project to understand product context.
 
 ## Analysis Protocol
 
-**CRITICAL: STOP immediately if any exact social handle is taken.**
+**If an exact social handle is taken, skip Steps 2-3 and jump directly to Step 5 (Recommendation) with an "Abandon" verdict.**
 
 ### Step 1: Social Media Check (First Priority)
 

@@ -1,6 +1,6 @@
 ---
 name: idea-validator
-description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability. Creates/updates idea.md and validate.md and always reports GitHub links to changed files.
+description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability.
 license: MIT
 metadata:
   version: 1.2.2
@@ -121,10 +121,7 @@ Update `validate.md` with:
 ## README Maintenance (when running inside ideas repo)
 
 If the current working directory looks like the root of an `ideas` repo (contains `README.md` + multiple `YYYY_MM_DD_*` idea folders):
-- After creating/updating `idea.md` + `validate.md`, update the repo index table by running:
-  - `python3 scripts/update_readme_ideas_index.py` (if the script exists)
-
-If the script does not exist, update `README.md` manually by inserting/updating an `## Ideas index` table with:
+- After creating/updating `idea.md` + `validate.md`, update `README.md` by inserting/updating an `## Ideas index` table with:
 - link to each `idea.md`
 - PRD/tasks status
 - verdict link to `validate.md`

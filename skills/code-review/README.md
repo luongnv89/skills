@@ -43,7 +43,7 @@ graph TD
 
 | Path | Description |
 |---|---|
-| `references/` | Code smells catalog and review checklists |
+| `references/code-smells.md` | Complete catalog of code smells with examples |
 
 ## Output
 

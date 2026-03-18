@@ -41,7 +41,7 @@ graph TD
 | Path | Description |
 |---|---|
 | `assets/` | Note templates and formatting guides |
-| `scripts/` | README index update and task extraction scripts |
+| `scripts/` | Redaction check script |
 
 ## Output
 

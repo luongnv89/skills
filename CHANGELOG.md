@@ -1,5 +1,63 @@
 # Changelog
 
+## v1.6.2 — 2026-03-18
+
+### Bug Fixes
+- **skill audit**: comprehensive quality audit and fix across all 30 skills @luongnv89
+  - Remove embedded test/validation sections from seo-ai-optimizer and vscode-extension-publisher SKILL.md (91 lines of non-runtime content)
+  - Remove dangling script references in idea-validator and note-taker
+  - Remove committed `__pycache__/*.pyc` files from skill-creator
+  - Fix auto-push README diagram contradicting no-confirmation behavior
+  - Trim overly long descriptions on 8 skills (release-manager, excalidraw-generator, drawio-generator, aso-marketing, theme-transformer, note-taker, idea-validator, prd-generator)
+  - Extract `references/publishing.md` from release-manager to get body under 500 lines
+  - Add missing Go, Rust, and Java language-specific checks to code-optimizer
+  - Standardize repo sync block to canonical full form across 6 skills (aso-marketing, release-manager, ollama-optimizer, name-checker, context-hub, code-review)
+  - Add explicit read-on-demand cues for reference files (code-review, openspec-task-loop, prd-generator)
+  - Fix README resource tables to list specific files (system-design, tasks-generator, code-review, devops-pipeline)
+  - Fix name-checker "CRITICAL: STOP" wording to actionable skip instruction
+  - Remove decorative padding sections (agent-config Notes, system-design Design Principles)
+  - Fix logo-designer conflicting design principles (no gradients vs shadows)
+  - Remove motivational non-instructional line from frontend-design
+  - Clarify docs-generator commit behavior and branch detection
+  - Move drawio-generator "Advantages Over Excalidraw" to README
+  - Collapse excalidraw-generator redundant JSON section to pointer
+  - Clarify ollama-optimizer output path and benchmark expectations
+  - Add missing branch creation step to oss-ready README diagram
+  - Add read-on-demand cues for unreferenced files in skill-creator
+
+### Skills Updated (30 files changed, -227 lines net)
+| Skill | Change |
+|-------|--------|
+| agent-config | Remove filler Notes section |
+| aso-marketing | Trim description, standardize repo sync |
+| auto-push | Fix README diagram |
+| cli-builder | (no content change — reviewed, passed) |
+| code-optimizer | Add Go/Rust/Java checks, rename Step 0 |
+| code-review | Standardize repo sync, read-on-demand cue, fix README |
+| context-hub | Standardize repo sync |
+| devops-pipeline | Fix README resource table |
+| docs-generator | Clarify branch detection and commit behavior |
+| drawio-generator | Trim description, remove Advantages section |
+| excalidraw-generator | Trim description, collapse redundant section |
+| frontend-design | Remove motivational line |
+| idea-validator | Trim description, remove missing script ref |
+| logo-designer | Fix conflicting design principles |
+| name-checker | Standardize repo sync, fix STOP wording |
+| note-taker | Trim description, remove missing script ref |
+| ollama-optimizer | Standardize repo sync, clarify output/benchmark |
+| openspec-task-loop | Add read-on-demand cue |
+| oss-ready | Fix README diagram |
+| prd-generator | Trim description, add read-on-demand cue |
+| release-manager | Trim description, standardize repo sync, extract publishing to references/ |
+| seo-ai-optimizer | Remove embedded test cases |
+| skill-creator | Remove __pycache__, add reference cues |
+| system-design | Remove Design Principles padding, fix README |
+| tasks-generator | Fix README resource table |
+| theme-transformer | Trim description |
+| vscode-extension-publisher | Remove embedded test cases |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.6.1...v1.6.2
+
 ## v1.6.1 — 2026-03-18
 
 ### Bug Fixes

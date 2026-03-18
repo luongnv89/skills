@@ -1,6 +1,6 @@
 ---
 name: release-manager
-description: Complete release automation — version bumping, changelog generation, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm. Use this skill whenever the user says "prepare a release", "bump the version", "cut a release", "do a release", "create a new version", "release v1.2.0", "tag a release", "publish a release", "publish to npm", "publish to pypi", "update the changelog", "generate release notes", or anything related to shipping a new version. Also trigger when the user asks "what changed since last release" or "what's ready to release". Even if they only mention one part (like "update changelog" or "bump version"), use this skill because releases have interdependent steps that should be done together.
+description: Complete release automation — version bumping, changelog generation, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm. Use when asked to "prepare a release", "bump the version", "cut a release", "publish to npm/pypi", "update the changelog", "generate release notes", "what changed since last release", or anything related to shipping a new version. Even if they only mention one part (like "update changelog"), use this skill because releases have interdependent steps.
 license: MIT
 metadata:
   version: 2.2.0
@@ -13,7 +13,7 @@ Automate the entire release lifecycle: version bump, changelog, README update, d
 
 ## Repo Sync Before Edits (mandatory)
 
-Before making any changes, sync with the remote:
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,7 +21,16 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is dirty: stash, sync, then pop. If `origin` is missing or conflicts occur, stop and ask the user before continuing.
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Overview
 
@@ -368,145 +377,7 @@ After creating the release, share the release URL with the user.
 
 ## Step 10: Publish to Package Registries
 
-Publish the new release to PyPI and/or npm based on what the project uses.
-
-### Detect which registries apply
-
-```bash
-# Python package (PyPI)
-[ -f pyproject.toml ] || [ -f setup.py ] || [ -f setup.cfg ] && echo "PYPI"
-
-# Node.js package (npm)
-[ -f package.json ] && grep -q '"name"' package.json && echo "NPM"
-```
-
-### Publish to PyPI
-
-If the project is a Python package:
-
-#### Pre-requisites check
-
-```bash
-# Ensure build tools are available
-pip install --upgrade build twine 2>/dev/null || pip3 install --upgrade build twine
-
-# Check for PyPI credentials
-# Token in environment variable
-echo "${TWINE_PASSWORD:+PyPI token is set}"
-
-# Or check for .pypirc
-[ -f ~/.pypirc ] && echo ".pypirc found"
-```
-
-#### Build the distribution
-
-If the build step (Step 7) already produced distribution files in `dist/`, reuse them. Otherwise, build now:
-
-```bash
-# Clean previous builds
-rm -rf dist/ build/ *.egg-info
-
-# Build source distribution and wheel
-python -m build
-```
-
-#### Verify the package
-
-```bash
-# Check the built packages
-twine check dist/*
-
-# Show what will be uploaded
-ls -la dist/
-```
-
-#### Upload to PyPI
-
-Ask the user before publishing — this is an irreversible action:
-
-"Ready to publish the following to PyPI:
-- `dist/package-X.Y.Z.tar.gz`
-- `dist/package-X.Y.Z-py3-none-any.whl`
-
-Proceed? (Note: once published, this version cannot be overwritten on PyPI)"
-
-```bash
-# Upload to PyPI (production)
-twine upload dist/*
-
-# Or upload to Test PyPI first (if user wants to verify)
-# twine upload --repository testpypi dist/*
-```
-
-After successful upload, share the PyPI URL: `https://pypi.org/project/<package-name>/X.Y.Z/`
-
-### Publish to npm
-
-If the project is a Node.js package:
-
-#### Pre-requisites check
-
-```bash
-# Check if logged in to npm
-npm whoami
-
-# Check package.json for publish config
-grep -A5 '"publishConfig"' package.json 2>/dev/null
-
-# Check if package is scoped and has access setting
-grep '"name"' package.json
-```
-
-#### Verify the package
-
-```bash
-# Dry run to see what will be published
-npm pack --dry-run
-
-# Check for .npmignore or "files" field in package.json
-[ -f .npmignore ] && echo ".npmignore found"
-grep '"files"' package.json 2>/dev/null && echo "files field found"
-```
-
-#### Publish to npm
-
-Ask the user before publishing — this is a visible, hard-to-reverse action:
-
-"Ready to publish `<package-name>@X.Y.Z` to npm. Proceed?"
-
-```bash
-# Publish to npm
-npm publish
-
-# For scoped packages that should be public
-# npm publish --access public
-
-# Or publish with a specific tag (e.g., beta, next)
-# npm publish --tag <tag>
-```
-
-After successful publish, share the npm URL: `https://www.npmjs.com/package/<package-name>/v/X.Y.Z`
-
-### Handle publish failures
-
-If publishing fails:
-
-- **Authentication error** — guide the user to set up credentials:
-  - PyPI: `twine upload` requires a PyPI API token (set via `TWINE_USERNAME=__token__` and `TWINE_PASSWORD=<token>`, or configure `~/.pypirc`)
-  - npm: run `npm login` or set `NPM_TOKEN` environment variable
-- **Version conflict** — the version already exists on the registry. The user must bump the version and re-release.
-- **Package name conflict** — the package name is taken. Suggest using a scoped name or choosing a different name.
-- **Build error** — re-run the build step (Step 7) and fix any issues before retrying.
-
-### Post-publish verification
-
-```bash
-# Verify PyPI publication (check the PyPI JSON API)
-curl -sf "https://pypi.org/pypi/<package-name>/X.Y.Z/json" | head -1 && echo "PyPI: OK"
-
-# Verify npm publication
-npm view <package-name>@X.Y.Z version 2>/dev/null && echo "npm: OK"
-```
+If the project publishes to PyPI and/or npm, read `references/publishing.md` for the full publishing workflow including pre-requisites, build, verify, upload, and post-publish verification steps.
 
 ---
 

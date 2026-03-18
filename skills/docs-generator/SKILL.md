@@ -37,7 +37,7 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 
 Before making any changes:
 1. Check the current branch - if already on a feature branch for this task, skip
-2. Check the repo for branch naming conventions (e.g., `feat/`, `feature/`, etc.)
+2. Check the repo for branch naming conventions by running `git branch -r | head -20` (e.g., `feat/`, `feature/`, etc.)
 3. Create and switch to a new branch following the repo's convention, or fallback to: `feat/docs-generator`
 
 ### 1. Analyze Project
@@ -87,6 +87,8 @@ Use Mermaid for all visual documentation:
 2. Check that code examples in docs are syntactically valid
 3. Confirm no orphaned docs (files not linked from anywhere)
 4. Present a summary of changes to the user before committing
+
+Present changes to user for approval. Do not commit unless the user explicitly asks.
 
 ## Error Handling
 

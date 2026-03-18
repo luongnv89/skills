@@ -40,7 +40,7 @@ graph TD
 
 | Path | Description |
 |---|---|
-| `references/` | Sprint planning templates and task formats |
+| `references/tasks-template.md` | Task format template and sprint structure |
 
 ## Output
 

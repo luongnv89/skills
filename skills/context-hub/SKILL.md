@@ -13,7 +13,7 @@ Use `chub` as the default source of truth for third-party API/SDK behavior.
 
 ## Repo Sync Before Edits (mandatory)
 
-When the task will modify files in a git repository, sync first.
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,8 +21,16 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is dirty, stash before syncing, then pop after sync.
-If `origin` is missing or rebase conflicts happen, stop and ask the user.
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## 1) Ensure `chub` is ready
 

@@ -40,7 +40,8 @@ graph TD
 
 | Path | Description |
 |---|---|
-| `references/` | Architecture patterns and research templates |
+| `references/tad-template.md` | Technical Architecture Document template |
+| `references/tech-stack.md` | Technology stack patterns and research guide |
 
 ## Output
 

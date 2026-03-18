@@ -22,11 +22,12 @@
 
 ```mermaid
 graph TD
-    A["Analyze Project"] --> B["Create Core Files"]
+    F["Create Feature Branch"] --> A["Analyze Project"]
+    A --> B["Create Core Files"]
     B --> C["Add GitHub Templates"]
     C --> D["Build Documentation"]
     D --> E["Update Metadata"]
-    style A fill:#4CAF50,color:#fff
+    style F fill:#4CAF50,color:#fff
     style E fill:#2196F3,color:#fff
 ```
 

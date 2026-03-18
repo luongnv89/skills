@@ -40,4 +40,4 @@ graph TD
 
 - `idea.md` with concept, clarifications, and technical context
 - `validate.md` with verdict, ratings, market analysis, and improvement roadmap
-- Updated README index with GitHub links
+- Updated README ideas index table with GitHub links

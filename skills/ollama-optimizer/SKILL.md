@@ -13,7 +13,7 @@ Optimize Ollama configuration based on system hardware analysis.
 
 ## Repo Sync Before Edits (mandatory)
 
-Before writing any output files, sync with the remote to avoid conflicts:
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,8 +21,16 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is dirty, stash first (`git stash`), sync, then pop (`git stash pop`).
-If `origin` is missing or conflicts occur, stop and ask the user before continuing.
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Workflow
 
@@ -111,6 +119,7 @@ Provide copy-paste commands in order:
 ```bash
 # Benchmark current performance
 python3 scripts/benchmark_ollama.py --model <model>
+# Expected output: tokens/s and generation latency. Compare against tier baseline from Phase 2.
 
 # Check GPU memory usage (NVIDIA)
 nvidia-smi
@@ -127,7 +136,7 @@ ollama run <model> "test" --verbose 2>&1 | head -20
 
 ## Output Format
 
-Generate an `ollama-optimization-guide.md` file in the current directory with:
+Generate an `ollama-optimization-guide.md` file. Ask the user where to save it (suggest `~/.config/ollama/optimization-guide.md` or current directory). Contents:
 
 ```markdown
 # Ollama Optimization Guide

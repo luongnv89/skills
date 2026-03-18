@@ -1,6 +1,6 @@
 ---
 name: note-taker
-description: Capture chat notes (text, voice, image, video, file) into the git-backed notes repo, summarize and organize them, extract tasks into KANBAN.md, commit/push changes, and always report GitHub web links to new/updated notes. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
+description: Capture chat notes (text, voice, image, video, file) into a git-backed notes repo, summarize and organize them, and extract tasks into KANBAN.md. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
 argument-hint: "[optional title or tags]"
 disable-model-invocation: true
 license: MIT
@@ -96,9 +96,9 @@ Update `KANBAN.md`:
 - Each task should include a link to the note path
 
 ### 8) Maintain README index (mandatory)
-After updating notes and `KANBAN.md`, update the notes repo README so it stays clickable and current:
-- Preferred: run `python3 scripts/update_readme_overview.py` from repo root (if the script exists)
-- Fallback: update `README.md` manually (overview counts + notes index)
+After updating notes and `KANBAN.md`, update the notes repo `README.md` manually:
+- Update overview counts (total notes, total tasks)
+- Update notes index table with links to latest notes
 
 ### 9) Commit and push (mandatory for reporting links)
 Commit message conventions:

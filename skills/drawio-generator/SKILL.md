@@ -1,6 +1,6 @@
 ---
 name: drawio-generator
-description: Generate diagrams, schemas, charts, and visualizations as draw.io (diagrams.net) XML files. Use this skill whenever the user asks to create a draw.io diagram, or wants a visualization that should be editable in draw.io, diagrams.net, or VS Code's draw.io extension. Supports flowcharts, system architecture, C4 models, ER diagrams, sequence diagrams, mind maps, org charts, network topology, swimlane diagrams, class diagrams, state machines, deployment diagrams, and any kind of visual representation in draw.io format. Trigger when the user says "draw.io", "drawio", "diagrams.net", ".drawio file", or explicitly wants draw.io format rather than Excalidraw. Also trigger when the user has existing .drawio files they want to extend, or when the context clearly calls for draw.io (e.g., corporate environments, Confluence/Jira integration, multi-page diagrams).
+description: Generate diagrams and visualizations as draw.io (diagrams.net) XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, swimlanes, and more. Trigger when user says "draw.io", "drawio", "diagrams.net", ".drawio file", or wants draw.io format. Also trigger when extending existing .drawio files or when context calls for draw.io (corporate environments, Confluence/Jira integration, multi-page diagrams).
 license: MIT
 metadata:
   version: 1.0.1
@@ -246,14 +246,3 @@ After generating the first version, the user may want changes:
 
 When iterating, read the existing file, modify the XML, and rewrite. Preserve element IDs that haven't changed.
 
----
-
-## Advantages Over Excalidraw
-
-Draw.io is the better choice when the user needs:
-- **Multi-page diagrams** (e.g., all C4 levels in one file)
-- **Corporate/enterprise environments** (Confluence, Jira, SharePoint integration)
-- **Rich shape libraries** (AWS, Azure, GCP, Cisco, UML icons)
-- **Precise grid-aligned layouts** (not hand-drawn look)
-- **VS Code editing** (with draw.io extension)
-- **PDF/PNG export** with precise control

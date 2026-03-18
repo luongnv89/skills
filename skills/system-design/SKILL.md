@@ -11,13 +11,6 @@ metadata:
 
 Generate comprehensive Technical Architecture Documents with modular design for startups.
 
-## Design Principles
-
-- **Modularity**: Separated concerns for independent testing and development
-- **Simplicity**: Minimal complexity appropriate for startup resources
-- **Scalability**: Designed to grow with user base
-- **Cost-effectiveness**: Optimized for startup budget
-
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
