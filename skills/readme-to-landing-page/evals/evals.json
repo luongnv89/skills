@@ -1,0 +1,23 @@
+{
+  "skill_name": "readme-to-landing-page",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "turn my README into a landing page",
+      "expected_output": "README.md rewritten with landing page structure (hero, problem, solution, how it works, social proof, FAQ, CTA). README.backup.md created as backup. Technical content preserved in <details> blocks.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "make my README sell the project — I want more GitHub stars and contributors",
+      "expected_output": "README.md rewritten with persuasive copy focusing on attracting contributors. Should use benefit-focused language, CTAs, and social proof section. README.backup.md created.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "rewrite my README as a landing page, use the StoryBrand framework",
+      "expected_output": "README.md rewritten using StoryBrand framework specifically (user as hero, project as guide). README.backup.md created. Framework choice explained to user.",
+      "files": []
+    }
+  ]
+}
