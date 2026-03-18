@@ -2,33 +2,80 @@
   <img src="assets/logo/logo-icon.svg" alt="Agent Skills" width="120">
 </p>
 
-<h1 align="center">Agent Skills</h1>
-
-<p align="center">
-  <strong>Supercharge your AI agents with plug-and-play skills</strong>
-</p>
-
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+  <a href="https://github.com/luongnv89/skills/releases"><img src="https://img.shields.io/github/v/release/luongnv89/skills?label=version" alt="Latest Release"></a>
+  <a href="https://github.com/luongnv89/skills"><img src="https://img.shields.io/github/stars/luongnv89/skills?style=social" alt="GitHub Stars"></a>
 </p>
 
-A collection of reusable skills for AI coding agents. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, and other tools that support skill-based workflows.
+<h1 align="center">Ship Software 10x Faster with AI Agent Skills</h1>
 
-## Skill Management
+<p align="center">
+  30 plug-and-play skills that turn your AI coding agent into a full product team — from idea validation to App Store launch. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode.
+</p>
 
-Use [**agent-skill-manager**](https://github.com/luongnv89/agent-skill-manager) (`asm`) to manage your installed skills across all AI coding agents from a single TUI/CLI:
+<p align="center">
+  <a href="#get-started-in-30-seconds"><b>Get Started in 30 Seconds →</b></a>
+</p>
 
-```bash
-npm install -g agent-skill-manager
-asm list          # List all installed skills
-asm search        # Search skills by name or description
-asm install github:luongnv89/skills   # Install skills from this repo
+---
+
+## You Keep Telling Your AI Agent the Same Things
+
+You're using Claude Code, Cursor, or Copilot. The AI is smart — but it doesn't know *your* workflow.
+
+- **You repeat yourself constantly.** Every time you want a code review, you paste the same detailed prompt. Every release, you walk the agent through the same 10 steps. Every new project, you explain your conventions from scratch.
+- **Results are inconsistent.** Monday's code review catches different things than Friday's. The release process misses a step. The PRD format changes every time because there's no standard.
+- **You're stuck in the generic zone.** Your agent can write code, but it can't validate your startup idea, optimize your App Store listing, generate a technical architecture document, or design a logo. You end up doing those manually — or not at all.
+
+The AI is capable. It just doesn't have the playbook.
+
+## Agent Skills Gives Your AI the Playbook
+
+**Agent Skills** is a collection of 30 reusable, battle-tested skills that plug directly into your AI coding agent. Each skill is a structured prompt with references, templates, and scripts — turning a generic AI into a specialist.
+
+- **Every skill works the same way, every time.** Code reviews follow the same checklist. Releases hit every step. PRDs match a proven template. No more "I forgot to mention…"
+- **Cover the full product lifecycle.** Validate an idea → generate a PRD → design the architecture → write code → review → test → release → optimize your App Store listing. One toolkit, zero context-switching.
+- **Zero config, instant setup.** One command installs skills into Claude Code, Cursor, Windsurf, Copilot, Codex, or OpenCode. Skills trigger automatically from natural language — just say "review this code" or "prepare a release."
+
+<p align="center">
+  <a href="#get-started-in-30-seconds"><b>Start Building Faster →</b></a>
+</p>
+
+## How It Works
+
+1. **Install** — Run one command to add skills to your AI agent (global or per-project).
+2. **Talk naturally** — Say "optimize this code" or "create a PRD" and the right skill activates automatically.
+3. **Get consistent results** — Every skill follows a structured workflow with quality checks built in.
+4. **Ship** — From idea to production with a toolkit that covers every phase.
+
+```mermaid
+flowchart LR
+    IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
+    PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
+    DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
+    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
+    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
+    MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing"]
+    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
+
+    IDEATION --> PLANNING
+    PLANNING --> DEVELOPMENT
+    DEVELOPMENT --> QUALITY
+    QUALITY --> RELEASE
+    RELEASE --> MARKETING
+    QUALITY -.->|iterate| PLANNING
+    TOOLING -.->|supports all phases| DEVELOPMENT
 ```
 
-See the [agent-skill-manager docs](https://github.com/luongnv89/agent-skill-manager) for full usage.
+_* Skills marked with * can be used repeatedly during development iterations._
 
-## Installation
+<p align="center">
+  <a href="#get-started-in-30-seconds"><b>See All 30 Skills →</b></a>
+</p>
+
+## Get Started in 30 Seconds
 
 ### Method 1: npx (recommended)
 
@@ -55,12 +102,6 @@ Interactive mode — select skills, tools, and scope from a TUI menu:
 curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash
 ```
 
-Or with wget:
-
-```bash
-wget -qO- https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash
-```
-
 Non-interactive mode — specify everything via flags:
 
 ```bash
@@ -76,7 +117,7 @@ curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install
 curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash -s -- --list
 ```
 
-### Method 3: Clone and run the local installer
+### Method 3: Clone and run locally
 
 ```bash
 git clone https://github.com/luongnv89/skills.git
@@ -84,11 +125,139 @@ cd skills
 bash install.sh
 ```
 
-The local installer provides the same interactive TUI to select skills, tools, and scope.
+### Manage with agent-skill-manager
 
-### Method 4: Manual installation
+Use [**agent-skill-manager**](https://github.com/luongnv89/agent-skill-manager) (`asm`) to manage skills across all your AI coding agents from a single TUI/CLI:
 
-Copy the skill folder to your tool's expected location:
+```bash
+npm install -g agent-skill-manager
+asm list          # List all installed skills
+asm search        # Search skills by name or description
+asm install github:luongnv89/skills   # Install skills from this repo
+```
+
+## 30 Skills Across 6 Categories
+
+### Development Workflow
+
+| Skill | Version | What You Get |
+|-------|---------|--------------|
+| [**auto-push**](skills/auto-push/) | 1.0.0 | Stage, commit, and push with built-in security checks for secrets and large files |
+| [**cli-builder**](skills/cli-builder/) | 1.0.0 | Build production CLI tools with a 5-step approval-gated workflow |
+| [**test-coverage**](skills/test-coverage/) | 1.2.0 | Find and fill untested branches and edge cases automatically |
+| [**code-optimizer**](skills/code-optimizer/) | 1.2.0 | Spot performance bottlenecks, memory leaks, and algorithmic improvements |
+| [**code-review**](skills/code-review/) | 1.0.1 | Consistent reviews based on Code Smells and The Pragmatic Programmer |
+| [**devops-pipeline**](skills/devops-pipeline/) | 1.0.0 | Pre-commit hooks and GitHub Actions configured in minutes, not hours |
+| [**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | Execute work in strict one-task-per-change loops with archive/verify gates |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.1 | Maximize local LLM performance based on your actual hardware |
+| [**install-script-generator**](skills/install-script-generator/) | 2.0.0 | Cross-platform installers that detect the environment automatically |
+| [**note-taker**](skills/note-taker/) | 1.4.1 | Capture notes (text, voice, images) into a git-backed repo with task extraction |
+| [**vscode-extension-publisher**](skills/vscode-extension-publisher/) | 1.0.0 | Publish VS Code extensions to the Marketplace without the ceremony |
+
+### Product Development
+
+| Skill | Version | What You Get |
+|-------|---------|--------------|
+| [**idea-validator**](skills/idea-validator/) | 1.2.2 | Honest feasibility and market viability feedback before you build |
+| [**name-checker**](skills/name-checker/) | 1.0.1 | Trademark, domain, and social media conflict checks in one pass |
+| [**prd-generator**](skills/prd-generator/) | 1.2.2 | Structured Product Requirements Documents from a description |
+| [**tasks-generator**](skills/tasks-generator/) | 1.2.2 | Sprint-ready task breakdowns generated from your PRD |
+| [**system-design**](skills/system-design/) | 1.2.3 | Technical Architecture Documents with data flow and component diagrams |
+
+### Marketing & ASO
+
+| Skill | Version | What You Get |
+|-------|---------|--------------|
+| [**aso-marketing**](skills/aso-marketing/) | 1.1.0 | Full-lifecycle App Store Optimization for iOS and Google Play — keywords, metadata, conversion, and store policy compliance |
+
+### Content & Documentation
+
+| Skill | Version | What You Get |
+|-------|---------|--------------|
+| [**docs-generator**](skills/docs-generator/) | 1.2.0 | Restructure scattered docs into a coherent hierarchy |
+| [**release-manager**](skills/release-manager/) | 2.2.0 | Version bumps, changelog, README sync, git tags, GitHub releases, and publishing to PyPI/npm — in one command |
+| [**oss-ready**](skills/oss-ready/) | 1.1.0 | LICENSE, CONTRIBUTING, CODE_OF_CONDUCT, and GitHub templates — done |
+| [**agent-config**](skills/agent-config/) | 1.1.0 | CLAUDE.md and AGENTS.md files that follow best practices |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.1 | Technical SEO, structured data, and AI bot accessibility in one audit |
+
+### Design & Branding
+
+| Skill | Version | What You Get |
+|-------|---------|--------------|
+| [**logo-designer**](skills/logo-designer/) | 1.1.0 | Professional logos with automatic project context detection |
+| [**frontend-design**](skills/frontend-design/) | 1.2.0 | Distinctive, usability-focused UIs — not generic AI slop |
+| [**theme-transformer**](skills/theme-transformer/) | 1.0.0 | Transform any UI into a cyberpunk neon-dark theme with branch-safe workflow |
+| [**excalidraw-generator**](skills/excalidraw-generator/) | 1.1.1 | 25+ diagram types as Excalidraw JSON with 10 automated quality checks |
+| [**drawio-generator**](skills/drawio-generator/) | 1.0.1 | Draw.io diagrams with multi-page support, C4 models, and 9 quality checks |
+
+### Skill Development
+
+| Skill | Version | What You Get |
+|-------|---------|--------------|
+| [**skill-creator**](skills/skill-creator/) | 1.0.1 | Create new skills with templates, validation, and packaging |
+| [**skill-inventory-auditor**](skills/skill-inventory-auditor/) | 1.0.0 | Find and remove duplicate skill installations |
+| [**context-hub**](skills/context-hub/) | 1.0.0 | Fetch current API/SDK docs before writing integration code |
+
+## Just Say What You Need
+
+Skills trigger from natural language. No commands to memorize.
+
+| What you say | Skill that activates |
+|--------------|----------------------|
+| "push my changes" | auto-push |
+| "optimize this code" | code-optimizer |
+| "setup CI/CD" | devops-pipeline |
+| "evaluate my idea" | idea-validator |
+| "create a PRD" | prd-generator |
+| "design the architecture" | system-design |
+| "review this code" | code-review |
+| "improve test coverage" | test-coverage |
+| "prepare a release" | release-manager |
+| "make this open source" | oss-ready |
+| "design a logo" | logo-designer |
+| "build a landing page" | frontend-design |
+| "optimize for SEO" | seo-ai-optimizer |
+| "optimize my app store listing" | aso-marketing |
+| "draw a flowchart" | excalidraw-generator |
+| "create a draw.io diagram" | drawio-generator |
+
+## FAQ
+
+**Is this free?**
+Yes. Agent Skills is MIT licensed — use it in personal projects, commercial products, whatever you want. Free forever.
+
+**Which AI tools are supported?**
+Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode. The installer handles the different file locations and formats for each tool automatically.
+
+**Do I need all 30 skills?**
+No. Install only what you need — each skill is independent. Start with `code-review` and `auto-push`, add more as your workflow grows.
+
+**Is this actively maintained?**
+Yes. The project ships regular updates — 6 releases in the last week alone, with quality audits across all 30 skills. Check the [CHANGELOG](CHANGELOG.md) for details.
+
+**Can I create my own skills?**
+Absolutely. Use the `skill-creator` skill to scaffold, validate, and package new skills. See the [Contributing Guide](CONTRIBUTING.md) for details.
+
+**How does this compare to custom prompts?**
+Skills are structured prompts with references, templates, scripts, and quality checks. A custom prompt tells the AI what to do; a skill gives it a complete playbook with guardrails. Skills are also version-controlled, shareable, and consistent across team members.
+
+**Can I use this in production?**
+Yes. Skills don't modify your runtime code — they guide your AI agent during development. There's nothing to deploy, no dependencies to manage, no runtime overhead.
+
+## Start Shipping
+
+You have a capable AI agent. Give it the skills to actually run your workflow end-to-end — from validating an idea to pushing a release.
+
+MIT licensed. Zero runtime dependencies. Installs in 30 seconds. Uninstall by deleting a folder.
+
+<p align="center">
+  <a href="#get-started-in-30-seconds"><b>Install Agent Skills Now →</b></a>
+</p>
+
+---
+
+<details>
+<summary><b>Supported Tool Paths (Manual Installation)</b></summary>
 
 | Tool | Global path | Project path |
 |------|-------------|--------------|
@@ -99,133 +268,10 @@ Copy the skill folder to your tool's expected location:
 | **OpenAI Codex** | `~/.agents/skills/<skill>/` + `~/.codex/AGENTS.md` | same, relative |
 | **OpenCode** | `~/.agents/skills/<skill>/` | same, relative |
 
-## Example: Skill-First Development Workflow
+</details>
 
-Each skill is independent and can be used separately for various tasks. The diagram below shows one example of how skills can be combined for a complete software development workflow:
-
-```mermaid
-flowchart LR
-    IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
-    PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
-    DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
-    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
-    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
-    MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing"]
-    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
-
-    IDEATION --> PLANNING
-    PLANNING --> DEVELOPMENT
-    DEVELOPMENT --> QUALITY
-    QUALITY --> RELEASE
-    RELEASE --> MARKETING
-    QUALITY -.->|iterate| PLANNING
-    TOOLING -.->|supports all phases| DEVELOPMENT
-```
-
-_* Skills marked with * can be used repeatedly during development iterations._
-
-| Phase | Skills | Purpose |
-|-------|--------|---------|
-| **Ideation** | idea-validator → name-checker → logo-designer | Validate concept, check name, design logo |
-| **Planning** | prd-generator → system-design → tasks-generator | Create PRD, architecture, sprint tasks |
-| **Development** | code-optimizer, test-coverage, agent-config, openspec-task-loop, frontend-design | Write quality code with tests, structured task loops, and distinctive UIs |
-| **Quality & CI/CD** | devops-pipeline, code-review → auto-push | Setup CI/CD, review code, commit and push |
-| **Release & Docs** | docs-generator, release-manager, oss-ready, seo-ai-optimizer | Generate documentation, manage releases, open source setup, and SEO/AI optimization |
-| **Marketing** | aso-marketing | App Store Optimization for mobile apps on iOS and Google Play |
-| **Tooling** | skill-creator, context-hub, ollama-optimizer, install-script-generator, note-taker | Create skills, fetch current API docs, optimize local LLMs, generate installers, capture notes |
-
-## Available Skills
-
-### Development Workflow
-
-| Skill | Version | Description |
-|-------|---------|-------------|
-| [**auto-push**](skills/auto-push/) | 1.0.0 | Stage, commit, and push changes with security checks |
-| [**cli-builder**](skills/cli-builder/) | 1.0.0 | Build production-quality CLI tools with a 5-step approval-gated workflow |
-| [**test-coverage**](skills/test-coverage/) | 1.2.0 | Expand unit test coverage targeting untested branches |
-| [**code-optimizer**](skills/code-optimizer/) | 1.2.0 | Analyze code for performance issues and optimizations |
-| [**code-review**](skills/code-review/) | 1.0.1 | Review code for smells and pragmatic programming violations |
-| [**devops-pipeline**](skills/devops-pipeline/) | 1.0.0 | Setup pre-commit hooks and GitHub Actions for CI/CD |
-| [**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | Execute OpenSpec in strict one-task-per-change loops with archive/verify gates |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.1 | Optimize Ollama configuration for maximum local LLM performance |
-| [**install-script-generator**](skills/install-script-generator/) | 2.0.0 | Generate cross-platform installation scripts with environment detection |
-| [**note-taker**](skills/note-taker/) | 1.4.1 | Capture notes (text, voice, image/video/files) into a git-backed repo with task extraction, inline media previews, and GitHub link reporting |
-| [**vscode-extension-publisher**](skills/vscode-extension-publisher/) | 1.0.0 | Publish VS Code extensions to the Visual Studio Marketplace |
-
-### Product Development
-
-| Skill | Version | Description |
-|-------|---------|-------------|
-| [**idea-validator**](skills/idea-validator/) | 1.2.2 | Critically evaluate app ideas and startup concepts with GitHub link reporting |
-| [**name-checker**](skills/name-checker/) | 1.0.1 | Check product names for trademark and domain conflicts |
-| [**prd-generator**](skills/prd-generator/) | 1.2.2 | Generate Product Requirements Documents with GitHub link reporting |
-| [**tasks-generator**](skills/tasks-generator/) | 1.2.2 | Generate sprint tasks from PRD with GitHub link reporting |
-| [**system-design**](skills/system-design/) | 1.2.3 | Generate Technical Architecture Documents with GitHub link reporting |
-
-### Marketing & ASO
-
-| Skill | Version | Description |
-|-------|---------|-------------|
-| [**aso-marketing**](skills/aso-marketing/) | 1.1.0 | Full-lifecycle App Store Optimization for iOS and Google Play — analysis, keyword strategy, metadata optimization, conversion improvement, and **store policy compliance checking** (prohibited keywords, trademark violations, listing policy validation) |
-
-### Content & Documentation
-
-| Skill | Version | Description |
-|-------|---------|-------------|
-| [**docs-generator**](skills/docs-generator/) | 1.2.0 | Restructure project documentation |
-| [**release-manager**](skills/release-manager/) | 2.2.0 | Complete release automation — version bumps, changelog, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm |
-| [**oss-ready**](skills/oss-ready/) | 1.1.0 | Setup open-source project standards |
-| [**agent-config**](skills/agent-config/) | 1.1.0 | Create or update CLAUDE.md and AGENTS.md files |
-| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.1 | Audit and optimize website codebases for SEO and AI bot scanning |
-
-### Design & Branding
-
-| Skill | Version | Description |
-|-------|---------|-------------|
-| [**logo-designer**](skills/logo-designer/) | 1.1.0 | Design professional logos with automatic project context detection |
-| [**frontend-design**](skills/frontend-design/) | 1.2.0 | Create distinctive, usability-focused frontend interfaces with default style guide |
-| [**theme-transformer**](skills/theme-transformer/) | 1.0.0 | Transform existing UIs into futuristic cyberpunk neon-dark themes with branch-safe iterative redesign workflow |
-| [**excalidraw-generator**](skills/excalidraw-generator/) | 1.1.1 | Generate diagrams, charts, and visualizations as Excalidraw JSON with 25+ diagram types and 10 automated quality checks |
-| [**drawio-generator**](skills/drawio-generator/) | 1.0.1 | Generate draw.io (diagrams.net) diagrams with multi-page support, C4 models, swimlanes, and 9 quality checks |
-
-### Skill Development
-
-| Skill | Version | Description |
-|-------|---------|-------------|
-| [**skill-creator**](skills/skill-creator/) | 1.0.1 | Guide for creating effective skills with templates and packaging tools |
-| [**skill-inventory-auditor**](skills/skill-inventory-auditor/) | 1.0.0 | Audit installed skills to find and remove duplicates |
-| [**context-hub**](skills/context-hub/) | 1.0.0 | Fetch current API/SDK docs via Context Hub (`chub`) before implementing integrations |
-
-## Usage
-
-Skills trigger automatically based on your requests:
-
-| What you say | Skill triggered |
-|--------------|-----------------|
-| "push my changes" | auto-push |
-| "optimize this code" | code-optimizer |
-| "setup CI/CD" | devops-pipeline |
-| "run one OpenSpec task at a time" | openspec-task-loop |
-| "evaluate my idea" | idea-validator |
-| "create a PRD" | prd-generator |
-| "make this open source" | oss-ready |
-| "improve test coverage" | test-coverage |
-| "update CLAUDE.md" | agent-config |
-| "design a logo" | logo-designer |
-| "prepare a release" | release-manager |
-| "review this code" | code-review |
-| "optimize Ollama" | ollama-optimizer |
-| "create an installer for X" | install-script-generator |
-| "take a note" | note-taker |
-| "use latest Stripe/OpenAI API docs" | context-hub |
-| "optimize for SEO" | seo-ai-optimizer |
-| "build a landing page" | frontend-design |
-| "transform this app into futuristic cyberpunk theme" | theme-transformer |
-| "optimize my app store listing" | aso-marketing |
-| "draw a flowchart of this process" | excalidraw-generator |
-| "create a draw.io C4 diagram" | drawio-generator |
-
-## Project Structure
+<details>
+<summary><b>Project Structure</b></summary>
 
 ```
 .
@@ -238,7 +284,10 @@ Skills trigger automatically based on your requests:
 └── .claude/             # Claude-specific config
 ```
 
-## Creating New Skills
+</details>
+
+<details>
+<summary><b>Creating New Skills</b></summary>
 
 Use the **skill-creator** skill or create manually:
 
@@ -254,22 +303,29 @@ description: What it does and when to use it
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
-## Contributing
+</details>
+
+<details>
+<summary><b>Contributing</b></summary>
 
 Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Security
+</details>
+
+<details>
+<summary><b>Security</b></summary>
 
 See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
-## Acknowledgements
+</details>
+
+<details>
+<summary><b>Acknowledgements</b></summary>
 
 - [**frontend-design**](skills/frontend-design/) — inspired by Anthropic's official [frontend-design](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) plugin. This is an independent implementation with a default style guide and usability principles.
 - [**skill-creator**](skills/skill-creator/) — customized from Anthropic's official [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) (Apache 2.0). Added README.md generation step.
 
-## License
-
-[MIT](LICENSE)
+</details>
 
 ---
 
