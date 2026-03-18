@@ -1,0 +1,23 @@
+{
+  "skill_name": "drawio-generator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a draw.io flowchart for a user registration process: user enters email, validate format, check if email exists in DB, if yes show error, if no send verification email, user clicks link, account activated.",
+      "expected_output": "A .drawio file with a top-to-bottom flowchart using rectangles, diamonds, and terminators with proper edge routing.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Generate a draw.io C4 container diagram for a microservice system with: API Gateway, Auth Service, User Service, Order Service, Payment Service, Notification Service, PostgreSQL (shared by User and Order), and Redis (used by Auth and API Gateway).",
+      "expected_output": "A .drawio file with a C4-styled container diagram showing all services, databases, and connections with proper C4 colors.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Make a draw.io swimlane diagram showing a CI/CD pipeline across 3 lanes: Developer (write code, create PR), CI System (run tests, build, lint), and Ops (deploy staging, approve, deploy production).",
+      "expected_output": "A .drawio file with 3 horizontal swimlanes containing process steps and cross-lane arrows.",
+      "files": []
+    }
+  ]
+}
