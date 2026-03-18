@@ -19,3 +19,7 @@ Thumbs.db
 
 # GitHub
 .github/instructions/
+.gstack/
+
+# Skill workspaces
+*-workspace/

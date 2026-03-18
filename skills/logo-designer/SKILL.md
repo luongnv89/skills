@@ -96,13 +96,13 @@ Generate logo based on project type and context.
 - Always provide light, dark, and transparent versions
 
 **Default Style Guide** (used when user provides no style preference):
-- **Palette**: Strictly four core colors only — Black (`#000000`), White (`#FFFFFF`), Gray (`#6B7280`), and Bright Green (`#22C55E`)
+- **Palette**: Dark base with neon green accent — Background (`#0A0A0A`), Surface (`#111111`), Border (`#262626`), Muted text (`#A1A1A1`), Text (`#FAFAFA`), and Neon Green (`#00FF41`)
 - **Aesthetic**: Elegant, clear, clean, and professional
-- **Bright Green constraint**: Reserved for highlights only (text, borders, lines) — never as a background color
+- **Neon Green constraint**: Reserved for highlights only (text, borders, lines, CTAs) — never as a background fill
 - **System status colors**: Danger (`#EF4444`), Warning (`#F59E0B`), Info (`#3B82F6`) may only be applied to text elements, never to backgrounds or primary UI components
 
 **Typography:**
-- Modern sans-serif (Inter, SF Pro, Geist, or match detected fonts)
+- Modern sans-serif (Inter, system-ui, sans-serif as default; or match detected fonts)
 - Medium to Bold weight
 - Confident and readable at small sizes
 
@@ -139,9 +139,12 @@ After generating logos, provide:
 2. **Color Specification**
    ```
    Primary: #HEXCODE
-   Secondary: #HEXCODE (if applicable)
-   Accent/Highlight: #HEXCODE (for borders, lines, highlight text)
-   Background Light: #FFFFFF
+   Surface: #HEXCODE (cards, elevated elements)
+   Border: #HEXCODE
+   Muted: #HEXCODE (secondary text)
+   Text: #HEXCODE
+   Accent/Highlight: #HEXCODE (for borders, lines, highlight text, CTAs)
+   Background Light: #FAFAFA
    Background Dark: #0A0A0A
    ```
 
@@ -150,7 +153,9 @@ After generating logos, provide:
    colors: {
      brand: {
        primary: '#HEXCODE',
-       secondary: '#HEXCODE',
+       surface: '#HEXCODE',
+       border: '#HEXCODE',
+       muted: '#HEXCODE',
        accent: '#HEXCODE',
      }
    }
@@ -176,20 +181,23 @@ Assets found: None
 
 ## Design Rationale
 - **Symbol**: Abstract "F" formed by stacked horizontal bars suggesting speed and layered builds
-- **Colors**: Default style guide — Black/White/Gray base with Bright Green highlight on the speed bars
-- **Typography**: Geist Mono for CLI tool authenticity
+- **Colors**: Default style guide — dark base with Neon Green highlight on the speed bars
+- **Typography**: Inter for clean, modern readability
 
 ## Colors
-Primary: #000000
-Secondary: #6B7280
-Accent: #22C55E (highlights only — borders, lines)
-Background Light: #FFFFFF
+Primary: #0A0A0A
+Surface: #111111
+Border: #262626
+Muted: #A1A1A1
+Text: #FAFAFA
+Accent: #00FF41 (highlights only — borders, lines, CTAs)
+Background Light: #FAFAFA
 Background Dark: #0A0A0A
 ```
 
 ## Notes
 
-- Always show logo previews on both light (#FFFFFF) and dark (#0A0A0A) backgrounds
+- Always show logo previews on both light (#FAFAFA) and dark (#0A0A0A) backgrounds
 - For wordmarks, ensure the product name is spelled exactly as found in project files
 - If no project context is found, ask the user for: product name, type, and purpose
 - Prefer simplicity - a logo should be recognizable at 16x16 pixels
