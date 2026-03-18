@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.6.0 — 2026-03-18
+
+### Features
+- Add **drawio-generator** skill — generate diagrams and visualizations as draw.io (diagrams.net) XML files with a 4-phase workflow (Understand → Propose → Generate → Validate) @luongnv89
+  - Supports **25+ diagram types**: flowcharts, C4 models, ER diagrams, swimlanes, architecture, and more
+  - **Multi-page support** — multiple C4 levels or related diagrams in a single `.drawio` file
+  - **9 automated quality checks**: XML validation, required attributes, unique IDs, edge bindings, overlap detection, container hierarchy, semantic completeness, text readability
+  - Native `.drawio` output compatible with diagrams.net, VS Code, Confluence, and Jira
+  - Comprehensive reference docs for draw.io XML schema, shapes, styles, and color palettes
+
+### Bug Fixes
+- **excalidraw-generator**: fix text rendering — add Check 10 (shape-to-text size fit), require `autoResize: true` and `lineHeight: 1.25`, boundary labels must be standalone text
+- **excalidraw-generator**: default output changed to `.excalidraw` (raw JSON) instead of `.excalidraw.md`
+
+### New Skills
+| Skill | Version |
+|-------|---------|
+| drawio-generator | 1.0.0 |
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| excalidraw-generator | 1.0.0 → 1.1.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.5.0...v1.6.0
+
 ## v1.5.0 — 2026-03-17
 
 ### Features
