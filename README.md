@@ -185,7 +185,7 @@ asm install github:luongnv89/skills   # Install skills from this repo
 
 | Skill | Version | What You Get |
 |-------|---------|--------------|
-| [**logo-designer**](skills/logo-designer/) | 1.1.0 | Professional logos with automatic project context detection |
+| [**logo-designer**](skills/logo-designer/) | 1.2.0 | Professional logos with automatic project context detection |
 | [**frontend-design**](skills/frontend-design/) | 1.2.0 | Distinctive, usability-focused UIs — not generic AI slop |
 | [**theme-transformer**](skills/theme-transformer/) | 1.0.0 | Transform any UI into a cyberpunk neon-dark theme with branch-safe workflow |
 | [**excalidraw-generator**](skills/excalidraw-generator/) | 1.1.1 | 25+ diagram types as Excalidraw JSON with 10 automated quality checks |

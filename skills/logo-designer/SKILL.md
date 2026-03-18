@@ -3,7 +3,7 @@ name: logo-designer
 description: Design professional, modern logos with automatic project context detection. Use when users ask to "create a logo", "design a logo", "generate brand identity", "make a favicon", or need visual brand assets. Analyzes project files (README, package.json, etc.) to understand product name, purpose, and existing brand colors before generating logo concepts.
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 

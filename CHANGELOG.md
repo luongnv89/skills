@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.7.0 — 2026-03-18
+
+### Features
+- Add **readme-to-landing-page** skill — transform any project README into a persuasive, landing-page-structured markdown using proven copywriting frameworks (PAS, AIDA, StoryBrand) @luongnv89
+
+### Bug Fixes
+- **logo-designer**: update default brand palette to dark theme with neon green accent (#0A0A0A, #111111, #262626, #A1A1A1, #FAFAFA, #00FF41) and Inter font
+- **README**: add missing readme-to-landing-page skill entry
+
+### Documentation
+- Rewrite README as a landing page with PAS copywriting framework
+
+### Other Changes
+- Add GitHub issue template for new skill proposals
+- Add `.gstack/` and `*-workspace/` to .gitignore
+
+### New Skills
+| Skill | Version |
+|-------|---------|
+| readme-to-landing-page | 1.0.0 |
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| logo-designer | 1.1.0 → 1.2.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.6.2...v1.7.0
+
 ## v1.6.2 — 2026-03-18
 
 ### Bug Fixes
