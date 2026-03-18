@@ -43,28 +43,6 @@ Each step requires user approval before proceeding to the next.
 /cli-builder
 ```
 
-## Example Output
-
-A typical CLI built with this skill includes:
-
-```
-mytool/
-├── cli.py          # Entry point with click/commander/cobra
-├── commands/       # Subcommand handlers
-├── tests/
-│   ├── test_cli.py         # Unit tests (CliRunner, etc.)
-│   └── test_integration.py # Subprocess integration tests
-└── pyproject.toml  # Entry point + dependencies
-```
-
-```bash
-# Example invocations
-mytool greet World --greeting "Hi"
-mytool process --format json < input.csv
-mytool --version
-mytool --help
-```
-
 ## Resources
 
 | Path | Description |
@@ -72,6 +50,6 @@ mytool --help
 | `references/cli-libraries.md` | Per-language library recommendations + starter scaffolds |
 | `references/testing-patterns.md` | CLI testing patterns (unit, integration, stdin, JSON) |
 
-## Quality Guardrails
+## Output
 
-Every CLI produced includes: `--help` at every level, `--version`, proper exit codes (0/1/2), stderr for errors, `NO_COLOR` support, and POSIX flag conventions.
+A production-quality CLI tool with entry point, subcommand handlers, unit/integration tests, and proper packaging. Every CLI includes `--help` at every level, `--version`, proper exit codes (0/1/2), stderr for errors, `NO_COLOR` support, and POSIX flag conventions.

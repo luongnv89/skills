@@ -28,8 +28,8 @@
 graph TD
     A["1. Understand Input"] --> B["2. Propose Options"]
     B --> C["3. Generate JSON"]
-    C --> D["4. Validate (9 checks)"]
-    D -->|"10/10 Pass"| E["Write File"]
+    C --> D["4. Validate (10 checks)"]
+    D -->|Pass| E["Write File"]
     D -->|Fail| F["Auto-fix & Re-check"]
     F --> D
     style A fill:#4CAF50,color:#fff
