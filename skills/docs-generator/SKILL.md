@@ -1,7 +1,10 @@
 ---
 name: docs-generator
-version: 1.2.0
 description: Restructure project documentation for clarity and accessibility. Use when users ask to "organize docs", "generate documentation", "improve doc structure", "restructure README", or need to reorganize scattered documentation into a coherent structure. Analyzes project type and creates appropriate documentation hierarchy.
+license: MIT
+metadata:
+  version: 1.2.0
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Documentation Generator

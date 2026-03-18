@@ -1,7 +1,10 @@
 ---
 name: code-review
-version: 1.0.1
 description: Perform code reviews following best practices from Code Smells and The Pragmatic Programmer. Use when asked to "review this code", "check for code smells", "review my PR", "audit the codebase", or need quality feedback on code changes. Supports both full codebase audits and focused PR/diff reviews. Outputs structured markdown reports grouped by severity.
+license: MIT
+metadata:
+  version: 1.0.1
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Code Review

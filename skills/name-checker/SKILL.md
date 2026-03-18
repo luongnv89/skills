@@ -1,7 +1,10 @@
 ---
 name: name-checker
-version: 1.0.1
 description: Check product/brand names for trademark, domain, and social media conflicts. Use when users ask to "check this name", "validate a product name", "is this name available", or need to assess naming risks. Provides risk assessment and alternative suggestions.
+license: MIT
+metadata:
+  version: 1.0.1
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Name Checker

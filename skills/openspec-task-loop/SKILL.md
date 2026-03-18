@@ -1,7 +1,10 @@
 ---
 name: openspec-task-loop
-version: 1.0.0
 description: Apply OpenSpec OPSX in a strict one-task-at-a-time loop. Use when the user asks to execute work as single-task changes, wants spec-first implementation per task, or says to use OpenSpec method for each task from a task list. Supports both native /opsx command environments and manual fallback by creating OpenSpec artifact files directly.
+license: MIT
+metadata:
+  version: 1.0.0
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # OpenSpec Task Loop

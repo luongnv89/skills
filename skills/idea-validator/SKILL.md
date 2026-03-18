@@ -1,7 +1,10 @@
 ---
 name: idea-validator
-version: 1.2.2
 description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability. Creates/updates idea.md and validate.md and always reports GitHub links to changed files.
+license: MIT
+metadata:
+  version: 1.2.2
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Idea Validator

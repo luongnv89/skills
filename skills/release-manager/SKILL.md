@@ -1,7 +1,10 @@
 ---
 name: release-manager
-version: 2.2.0
 description: Complete release automation — version bumping, changelog generation, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm. Use this skill whenever the user says "prepare a release", "bump the version", "cut a release", "do a release", "create a new version", "release v1.2.0", "tag a release", "publish a release", "publish to npm", "publish to pypi", "update the changelog", "generate release notes", or anything related to shipping a new version. Also trigger when the user asks "what changed since last release" or "what's ready to release". Even if they only mention one part (like "update changelog" or "bump version"), use this skill because releases have interdependent steps that should be done together.
+license: MIT
+metadata:
+  version: 2.2.0
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Release Manager

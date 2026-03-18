@@ -1,7 +1,10 @@
 ---
 name: prd-generator
-version: 1.2.2
 description: Generate comprehensive Product Requirements Documents (PRD) from idea validation files. Use when users ask to "create a PRD", "generate product requirements", "write a PRD", or want to turn validated ideas into actionable product specs. Works with idea.md and validate.md files and always reports GitHub links to changed files.
+license: MIT
+metadata:
+  version: 1.2.2
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # PRD Generator

@@ -1,6 +1,9 @@
 ---
 name: drawio-generator
 description: Generate diagrams, schemas, charts, and visualizations as draw.io (diagrams.net) XML files. Use this skill whenever the user asks to create a draw.io diagram, or wants a visualization that should be editable in draw.io, diagrams.net, or VS Code's draw.io extension. Supports flowcharts, system architecture, C4 models, ER diagrams, sequence diagrams, mind maps, org charts, network topology, swimlane diagrams, class diagrams, state machines, deployment diagrams, and any kind of visual representation in draw.io format. Trigger when the user says "draw.io", "drawio", "diagrams.net", ".drawio file", or explicitly wants draw.io format rather than Excalidraw. Also trigger when the user has existing .drawio files they want to extend, or when the context clearly calls for draw.io (e.g., corporate environments, Confluence/Jira integration, multi-page diagrams).
+license: MIT
+metadata:
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Draw.io Diagram Generator

@@ -1,6 +1,9 @@
 ---
 name: excalidraw-generator
 description: Generate diagrams, schemas, charts, flowcharts, architecture diagrams, mind maps, ER diagrams, sequence diagrams, Gantt charts, org charts, wireframes, Venn diagrams, and any other visualization as Excalidraw JSON. Use this skill whenever the user asks to create, draw, diagram, visualize, sketch, or chart anything — including flowcharts, system architecture, database schemas, mind maps, org charts, process flows, network topology, class diagrams, state machines, timelines, roadmaps, Kanban boards, SWOT analysis, comparison matrices, bar charts, wireframes, user flows, sitemaps, dependency graphs, C4 models, swimlane diagrams, or any kind of visual representation. Also trigger when the user says "excalidraw", "draw this", "make a diagram of", "visualize this", "sketch this out", "chart this", or shares data/code/structure they want turned into a visual. Even if the user doesn't explicitly say "diagram", if they describe relationships, flows, hierarchies, or structures that would benefit from visualization, suggest this skill.
+license: MIT
+metadata:
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Excalidraw Diagram Generator

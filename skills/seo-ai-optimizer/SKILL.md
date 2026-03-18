@@ -1,7 +1,10 @@
 ---
 name: seo-ai-optimizer
-version: 1.0.1
 description: Audits and optimizes website codebases for SEO and AI bot scanning. Covers technical SEO (meta tags, sitemaps, robots.txt, canonical URLs, page speed hints, structured data), content SEO (heading structure, alt text, readability), and AI bot accessibility (llms.txt, GPTBot/ClaudeBot directives, ai-plugin.json, Schema.org/JSON-LD). Use when user asks to "optimize for SEO", "audit SEO", "improve search rankings", "make site AI-friendly", "add structured data", "fix meta tags", or "optimize for AI bots". Works with any web framework.
+license: MIT
+metadata:
+  version: 1.0.1
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # SEO & AI Bot Optimizer

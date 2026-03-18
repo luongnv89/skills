@@ -1,7 +1,10 @@
 ---
 name: frontend-design
-version: 1.2.0
 description: Create distinctive, usability-focused, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include web apps, landing pages, dashboards, forms, portfolios). Generates creative, polished code that avoids generic AI aesthetics. Applies "Don't Make Me Think" usability principles and a default style guide (Black/White/Gray/Bright Green) when no style preference is provided.
+license: MIT
+metadata:
+  version: 1.2.0
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Frontend Design
