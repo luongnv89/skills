@@ -26,8 +26,8 @@ Every `.excalidraw` file is JSON with this structure:
   "source": "https://excalidraw.com",
   "elements": [],
   "appState": {
-    "theme": "light",
-    "viewBackgroundColor": "#ffffff",
+    "theme": "dark",
+    "viewBackgroundColor": "#0A0A0A",
     "gridMode": false
   },
   "files": {}
@@ -81,7 +81,7 @@ Every element MUST include ALL of these properties:
 | `x`, `y` | number | Top-left corner position. Origin (0,0) is top-left of canvas |
 | `width`, `height` | number | Dimensions in pixels |
 | `angle` | number | Rotation in radians. 0 = no rotation |
-| `strokeColor` | string | Hex color for border, e.g. `"#1e1e1e"` |
+| `strokeColor` | string | Hex color for border. Dark theme: `"#262626"` (default) or semantic color. Light theme: `"#1e1e1e"` |
 | `backgroundColor` | string | Fill color. `"transparent"` for no fill |
 | `fillStyle` | string | `"solid"`, `"hachure"`, `"cross-hatch"` |
 | `strokeWidth` | number | 1 (thin), 2 (normal), 4 (thick) |
@@ -148,7 +148,7 @@ Standalone or bound to a container.
 | Property | Values |
 |----------|--------|
 | `fontSize` | 16 (small), 20 (normal), 28 (heading), 36 (title) |
-| `fontFamily` | 1 (Virgil/hand-drawn), 2 (Helvetica), 3 (Cascadia/code) |
+| `fontFamily` | 1 (Virgil/hand-drawn), **2 (Helvetica — default, best readability)**, 3 (Cascadia/code) |
 | `textAlign` | `"left"`, `"center"`, `"right"` |
 | `verticalAlign` | `"top"`, `"middle"` |
 | `containerId` | ID of parent shape, or `null` for standalone text |
@@ -332,7 +332,36 @@ Nested groups: `"groupIds": ["inner-group", "outer-group"]`
 
 ## Color Palettes
 
-### Professional (default)
+### Dark Neon (default)
+
+Dark base with neon green accent — matches the brand style from logo-designer.
+
+| Role | Color |
+|------|-------|
+| Background | `"#0A0A0A"` |
+| Surface | `"#111111"` (node fill) |
+| Border/Stroke | `"#262626"` |
+| Accent | `"#00FF41"` (neon green — highlights, key nodes, start/end states) |
+| Text | `"#FAFAFA"` |
+| Muted text | `"#A1A1A1"` (annotations, secondary labels) |
+| Info | `"#3B82F6"` (blue — process nodes, informational) |
+| Warning | `"#F59E0B"` (amber — decisions, caution) |
+| Danger | `"#EF4444"` (red — error paths, critical) |
+| Purple | `"#A855F7"` (data layer, storage) |
+| Teal | `"#14B8A6"` (external services, integrations) |
+| Accent fill (dim) | `"#0A2A0A"` (subtle dark green fill for accent-highlighted shapes) |
+| Info fill (dim) | `"#0A1A2E"` (subtle dark blue fill) |
+| Warning fill (dim) | `"#2A1A0A"` (subtle dark amber fill) |
+| Danger fill (dim) | `"#2A0A0A"` (subtle dark red fill) |
+
+**Usage rules:**
+- `appState.theme` must be `"dark"` and `viewBackgroundColor` must be `"#0A0A0A"`
+- Node stroke uses the semantic color; node fill uses the corresponding dim fill
+- Text inside nodes uses `"#FAFAFA"`; standalone annotations use `"#A1A1A1"`
+- Neon green (`#00FF41`) is reserved for highlights — start/end nodes, key connections, emphasis. Never use it as a shape fill.
+- Arrow strokeColor should match the semantic color of the relationship, or default to `"#A1A1A1"`
+
+### Professional (light)
 | Role | Color |
 |------|-------|
 | Primary | `"#1971c2"` (blue) |

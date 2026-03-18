@@ -3,7 +3,7 @@ name: excalidraw-generator
 description: Generate diagrams and visualizations as Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, org charts, wireframes, C4 models, swimlanes, and more. Trigger when user asks to draw, diagram, visualize, sketch, or chart anything, says "excalidraw", "draw this", "make a diagram of", "visualize this", or shares data/structures that would benefit from visualization. Also suggest when the user describes relationships, flows, or hierarchies even without saying "diagram".
 license: MIT
 metadata:
-  version: 1.1.1
+  version: 1.2.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -44,11 +44,11 @@ Present your plan with selectable options so the user can pick:
 3. **Layout options** — propose 2-3 layout choices for the user to pick from:
    - e.g., `(A) Top-to-bottom flow`, `(B) Left-to-right flow`, `(C) Radial/centered`
 4. **Style options** — propose color palette and roughness as selectable options:
-   - **Color palette**: `(1) Professional` (blue/green/orange), `(2) Pastel` (soft tones), `(3) Monochrome` (grays)
-   - **Rendering style**: `(a) Hand-drawn` (roughness 1, Excalidraw signature look), `(b) Clean/geometric` (roughness 0, precise lines), `(c) Sketchy` (roughness 2, very informal)
+   - **Color palette**: `(1) Dark Neon` (dark base + neon green accent — default), `(2) Professional Light` (blue/green/orange on white), `(3) Pastel` (soft tones), `(4) Monochrome` (grays)
+   - **Rendering style**: `(a) Clean/geometric` (roughness 0, precise lines — default, best readability), `(b) Hand-drawn` (roughness 1, Excalidraw signature look), `(c) Sketchy` (roughness 2, very informal)
 5. **Estimated complexity** — small (< 10 elements), medium (10-30), large (30+)
 
-Wait for the user to confirm or select their preferred options before proceeding. If the user said "just do it" or the request is straightforward, use sensible defaults (Professional palette, Hand-drawn style, best-fit layout) and proceed directly.
+Wait for the user to confirm or select their preferred options before proceeding. If the user said "just do it" or the request is straightforward, use sensible defaults (Dark Neon palette, Clean/geometric style, Helvetica font, best-fit layout) and proceed directly.
 
 ### Phase 3: Generate
 
@@ -63,8 +63,8 @@ Generate the Excalidraw JSON and write it as a `.excalidraw` file (raw JSON, no 
   "source": "https://excalidraw.com",
   "elements": [...],
   "appState": {
-    "theme": "light",
-    "viewBackgroundColor": "#ffffff"
+    "theme": "dark",
+    "viewBackgroundColor": "#0A0A0A"
   },
   "files": {}
 }
@@ -149,7 +149,7 @@ Review the original user request and verify that every entity, relationship, or 
 - All text elements must have `lineHeight: 1.25` (not 1.35 — that causes overflow)
 - All text elements must have `autoResize: true`
 
-**Fix**: Set minimum fontSize to 16; set strokeColor to `"#1e1e1e"` if invisible; set lineHeight to 1.25; set autoResize to true.
+**Fix**: Set minimum fontSize to 16; set strokeColor to `"#FAFAFA"` (dark theme) or `"#1e1e1e"` (light theme) if invisible; set lineHeight to 1.25; set autoResize to true.
 
 #### Check 10: Shape-to-text size fit
 
@@ -188,25 +188,29 @@ Refer to the validation checks in Phase 4 and `references/excalidraw-format.md` 
 
 ## Style Guidelines
 
-### Default style: Professional
-- `roughness`: 1 (hand-drawn look — this is Excalidraw's signature)
+### Default style: Dark Neon
+- `roughness`: 0 (clean/geometric — precise lines for maximum readability)
 - `strokeWidth`: 2
-- `fontFamily`: 1 (Virgil — Excalidraw's hand-drawn font)
-- Color palette from `references/excalidraw-format.md` Professional section
-- Use color purposefully — different colors for different categories or layers, not random
+- `fontFamily`: 2 (Helvetica — clean sans-serif for best readability on dark backgrounds)
+- `appState.theme`: `"dark"` with `viewBackgroundColor`: `"#0A0A0A"`
+- Color palette: Dark Neon from `references/excalidraw-format.md` (dark base + neon green accent, matching logo-designer brand)
+- Use color purposefully — different semantic colors for different categories or layers, not random
+- Node text color: `"#FAFAFA"` for high contrast on dark fills
+- Arrow/annotation text: `"#A1A1A1"` (muted) for secondary information
 
 ### When to use other styles
 
-- **Clean/geometric** (`roughness: 0`, `fontFamily: 2`): Technical diagrams, ER diagrams, architecture docs
+- **Professional Light** (`roughness: 1`, `fontFamily: 2`, light background): When the user wants a light theme
+- **Hand-drawn** (`roughness: 1`, `fontFamily: 1`): When the user explicitly wants the Excalidraw hand-drawn look
 - **Sketchy** (`roughness: 2`, `fontFamily: 1`): Wireframes, brainstorming, informal diagrams
 - **Monochrome**: When the user wants something printable or formal
 
-### Color assignment strategy
+### Color assignment strategy (Dark Neon palette)
 
 Assign colors by semantic meaning:
-- **Flowcharts**: Blue for process steps, green for start/end, orange for decisions, red for error paths
-- **Architecture**: Color by layer (blue = frontend, green = backend, purple = data, orange = external)
-- **Status-based**: Green = active/success, yellow = warning, red = error/blocked, gray = inactive
+- **Flowcharts**: Info blue (`#3B82F6`) for process steps, Accent green (`#00FF41`) for start/end, Warning amber (`#F59E0B`) for decisions, Danger red (`#EF4444`) for error paths
+- **Architecture**: Info blue = frontend, Accent green = backend/API, Purple (`#A855F7`) = data layer, Teal (`#14B8A6`) = external services
+- **Status-based**: Accent green = active/success, Warning amber = warning, Danger red = error/blocked, Muted (`#A1A1A1`) = inactive
 
 ---
 
@@ -251,10 +255,12 @@ For a request like "draw a flowchart of a login process":
 **File**: `login-flow.excalidraw`
 
 The output is a raw JSON file containing the full Excalidraw document with:
-- An ellipse "Start" node at the top
-- Rectangle nodes for "Enter Credentials", "Validate", "Create Session"
-- A diamond for "Valid?" decision
-- An error rectangle for "Show Error"
-- Arrows connecting all nodes
+- Dark background (`#0A0A0A`), dark theme enabled
+- Clean geometric shapes (`roughness: 0`) with Helvetica font (`fontFamily: 2`)
+- An ellipse "Start" node — neon green stroke (`#00FF41`) with dim green fill (`#0A2A0A`)
+- Rectangle process nodes — info blue stroke (`#3B82F6`) with dim blue fill (`#0A1A2E`)
+- A diamond "Valid?" decision — warning amber stroke (`#F59E0B`) with dim amber fill (`#2A1A0A`)
+- An error rectangle — danger red stroke (`#EF4444`) with dim red fill (`#2A0A0A`)
+- All text in `#FAFAFA` for high contrast
+- Arrows in muted `#A1A1A1` connecting all nodes
 - Each shape has bound text labels
-- Green for start/end, blue for process, orange for decision, red for error path
