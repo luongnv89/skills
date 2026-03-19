@@ -32,6 +32,20 @@ graph TD
     style G fill:#2196F3,color:#fff
 ```
 
+## Installation
+
+Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
+
+```bash
+npx skills add https://github.com/luongnv89/skills --skill readme-to-landing-page
+```
+
+Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
+
+```bash
+asm install github:luongnv89/skills --skill readme-to-landing-page
+```
+
 ## Usage
 
 ```
