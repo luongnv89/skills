@@ -1,0 +1,23 @@
+{
+  "skill_name": "opencode-runner",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "use opencode to add error handling to this Python script: calculator.py - it should handle division by zero, invalid input, and missing operators",
+      "expected_output": "Opencode runs with the best free model (minimax-m2.5-free), adds try/except blocks for ZeroDivisionError, ValueError, and IndexError to calculator.py",
+      "files": ["test-files/calculator.py"]
+    },
+    {
+      "id": 2,
+      "prompt": "delegate to opencode: write unit tests for calculator.py using pytest",
+      "expected_output": "Opencode runs with a free model and produces a test_calculator.py file with pytest tests covering add, divide, and parse_input functions",
+      "files": ["test-files/calculator.py"]
+    },
+    {
+      "id": 3,
+      "prompt": "run with opencode using a free model: add a subtract and multiply function to calculator.py and update parse_input to support them",
+      "expected_output": "Opencode adds subtract and multiply functions, updates the parse_input function to handle - and * operators",
+      "files": ["test-files/calculator.py"]
+    }
+  ]
+}
