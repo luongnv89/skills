@@ -8,6 +8,7 @@
 - Discovers available free models and selects the best one by priority
 - Executes coding tasks with the selected free model
 - Monitors progress and provides periodic status reports
+- Automatically cleans up opencode processes after task completion to save resources
 
 ## When to Use
 
@@ -25,8 +26,9 @@ graph TD
     A["Check Installation"] --> B["Discover Free Models"]
     B --> C["Select Best Model"]
     C --> D["Execute & Monitor"]
+    D --> E["Cleanup Processes"]
     style A fill:#4CAF50,color:#fff
-    style D fill:#2196F3,color:#fff
+    style E fill:#2196F3,color:#fff
 ```
 
 ## Model Priority

@@ -3,7 +3,7 @@ name: opencode-runner
 description: Delegate coding tasks to opencode (opencode.ai) using free models. Checks installation, discovers free models, selects the best available one (preferring minimax > kimi > glm > MiMo, with Big Pickle as last resort), executes the task, and monitors progress. Use when asked to "run this with opencode", "use opencode for this", "opencode this task", "delegate to opencode", "run with a free model", or when the user wants to offload a coding task to opencode without paying for API credits. Also trigger when the user mentions opencode, free coding models, or wants a second AI opinion on a coding task.
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -18,6 +18,8 @@ OpenCode (opencode.ai) is a terminal AI coding assistant that supports multiple 
 1. **Never do the task yourself.** This skill exists solely to delegate work to opencode. If opencode is not installed, fails to run, or no free cloud model is available — report the problem to the user and **stop**. Do not fall back to editing files directly, writing code yourself, or using any other tool to accomplish the user's coding task. The whole point is that opencode does the work.
 
 2. **Only select cloud models.** Never select local models (e.g., `ollama/*`, `lmstudio/*`, or any model running on localhost). Only select models from the `opencode/*` provider namespace, which are cloud-hosted on OpenCode Zen. Local models have unpredictable availability, performance, and may not support the tool-use capabilities opencode needs.
+
+3. **Always clean up after yourself.** opencode spawns background processes (LSP servers, MCP servers, node workers) that persist after the task finishes. Every execution path — success, failure, error, timeout — must end with the cleanup steps in Phase 5. Orphaned opencode processes silently eat CPU and memory, and users won't notice until their machine slows to a crawl.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -184,6 +186,7 @@ When the task finishes:
 2. Show a summary of what opencode produced (files modified, code generated, etc.)
 3. Report token usage if available via `opencode stats`
 4. If the task failed, suggest the user try with a different free model from the priority list
+5. **Run Phase 5 cleanup** — this is mandatory, even on success
 
 ### On error or timeout
 
@@ -193,6 +196,58 @@ If opencode errors or takes too long (>5 minutes with no output):
 2. Suggest retrying with the next free cloud model in the priority list
 3. If all free cloud models have been tried, inform the user that no free option worked and suggest checking their opencode configuration
 4. **Never** attempt the task yourself as a fallback — the user invoked this skill because they want opencode to do the work, not you
+5. **Run Phase 5 cleanup** — even on error or timeout, always clean up
+
+## Phase 5: Cleanup (mandatory)
+
+Every execution — success, failure, error, or timeout — must end with cleanup. opencode spawns child processes (LSP servers, MCP servers, node workers) that persist after the main process exits. Without cleanup, these orphaned processes accumulate and drain system resources.
+
+### Step 1: Kill the opencode process tree
+
+If you launched opencode in the background with a tracked PID:
+
+```bash
+# Kill the main process and its children
+kill $OPENCODE_PID 2>/dev/null
+# Wait briefly for graceful shutdown
+sleep 2
+# Force kill if still running
+kill -9 $OPENCODE_PID 2>/dev/null
+```
+
+### Step 2: Find and kill orphaned opencode processes
+
+After the task completes, scan for any lingering opencode processes from this session:
+
+```bash
+# List any remaining opencode processes
+ps aux | grep '[o]pencode' | grep -v grep
+```
+
+If orphaned processes are found, kill them:
+
+```bash
+# Kill all opencode run processes (be specific to avoid killing the user's TUI)
+pkill -f "opencode run" 2>/dev/null
+```
+
+Be careful to only kill `opencode run` processes, not the user's interactive TUI session (`opencode` without subcommand). If the user has an interactive opencode session open, leave it alone.
+
+### Step 3: Clean up temp files
+
+```bash
+rm -f /tmp/opencode-output.json 2>/dev/null
+```
+
+### Step 4: Confirm cleanup
+
+Report to the user:
+
+> **Cleanup complete** — all opencode processes from this task have been terminated.
+
+If you couldn't kill some processes (permission denied, etc.), warn the user:
+
+> **Warning:** Some opencode processes may still be running. Run `pkill -f "opencode run"` manually to clean up.
 
 ## Quick Reference
 
@@ -204,3 +259,5 @@ If opencode errors or takes too long (>5 minutes with no output):
 | `opencode run -m MODEL "prompt"` | Run task with specific model |
 | `opencode stats` | View usage statistics |
 | `opencode auth list` | Check authenticated providers |
+| `pkill -f "opencode run"` | Kill orphaned run processes |
+| `ps aux \| grep opencode` | Find running opencode processes |
