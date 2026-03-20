@@ -12,7 +12,7 @@
 <h1 align="center">Ship Software 10x Faster with AI Agent Skills</h1>
 
 <p align="center">
-  32 plug-and-play skills that turn your AI coding agent into a full product team — from idea validation to App Store launch. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode.
+  34 plug-and-play skills that turn your AI coding agent into a full product team — from idea validation to App Store launch. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode.
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@ The AI is capable. It just doesn't have the playbook.
 
 ## Agent Skills Gives Your AI the Playbook
 
-**Agent Skills** is a collection of 32 reusable, battle-tested skills that plug directly into your AI coding agent. Each skill is a structured prompt with references, templates, and scripts — turning a generic AI into a specialist.
+**Agent Skills** is a collection of 34 reusable, battle-tested skills that plug directly into your AI coding agent. Each skill is a structured prompt with references, templates, and scripts — turning a generic AI into a specialist.
 
 - **Every skill works the same way, every time.** Code reviews follow the same checklist. Releases hit every step. PRDs match a proven template. No more "I forgot to mention…"
 - **Cover the full product lifecycle.** Validate an idea → generate a PRD → design the architecture → write code → review → test → release → optimize your App Store listing. One toolkit, zero context-switching.
@@ -57,8 +57,8 @@ flowchart LR
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i><br/>github-issue-creator"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
-    MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing"]
-    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
+    MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing<br/>appstore-review-checker"]
+    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker<br/>opencode-runner"]
 
     IDEATION --> PLANNING
     PLANNING --> DEVELOPMENT
@@ -136,7 +136,7 @@ asm search        # Search skills by name or description
 asm install github:luongnv89/skills   # Install skills from this repo
 ```
 
-## 32 Skills Across 6 Categories
+## 34 Skills Across 6 Categories
 
 ### Development Workflow
 
@@ -154,13 +154,14 @@ asm install github:luongnv89/skills   # Install skills from this repo
 | [**note-taker**](skills/note-taker/) | 1.4.1 | Capture notes (text, voice, images) into a git-backed repo with task extraction |
 | [**vscode-extension-publisher**](skills/vscode-extension-publisher/) | 1.0.0 | Publish VS Code extensions to the Marketplace without the ceremony |
 | [**github-issue-creator**](skills/github-issue-creator/) | 1.0.0 | Create or update GitHub issues from screenshots, emails, and bug reports with PII redaction |
+| [**opencode-runner**](skills/opencode-runner/) | 1.2.0 | Delegate coding tasks to opencode with free cloud models — automatic model selection and process cleanup |
 
 ### Product Development
 
 | Skill | Version | What You Get |
 |-------|---------|--------------|
 | [**idea-validator**](skills/idea-validator/) | 1.2.2 | Honest feasibility and market viability feedback before you build |
-| [**name-checker**](skills/name-checker/) | 1.0.1 | Trademark, domain, and social media conflict checks in one pass |
+| [**name-checker**](skills/name-checker/) | 1.1.0 | Trademark, domain, social media, and package registry (npm, PyPI, Homebrew, apt) conflict checks in one pass |
 | [**prd-generator**](skills/prd-generator/) | 1.2.2 | Structured Product Requirements Documents from a description |
 | [**tasks-generator**](skills/tasks-generator/) | 1.2.2 | Sprint-ready task breakdowns generated from your PRD |
 | [**system-design**](skills/system-design/) | 1.2.3 | Technical Architecture Documents with data flow and component diagrams |
@@ -170,6 +171,7 @@ asm install github:luongnv89/skills   # Install skills from this repo
 | Skill | Version | What You Get |
 |-------|---------|--------------|
 | [**aso-marketing**](skills/aso-marketing/) | 1.1.0 | Full-lifecycle App Store Optimization for iOS and Google Play — keywords, metadata, conversion, and store policy compliance |
+| [**appstore-review-checker**](skills/appstore-review-checker/) | 1.0.0 | Audit apps against Apple's App Store Review Guidelines before submission |
 
 ### Content & Documentation
 
@@ -224,6 +226,8 @@ Skills trigger from natural language. No commands to memorize.
 | "create a draw.io diagram" | drawio-generator |
 | "turn my README into a landing page" | readme-to-landing-page |
 | "create an issue from this screenshot" | github-issue-creator |
+| "run this with opencode" | opencode-runner |
+| "check App Store review guidelines" | appstore-review-checker |
 
 ## FAQ
 
@@ -233,7 +237,7 @@ Yes. Agent Skills is MIT licensed — use it in personal projects, commercial pr
 **Which AI tools are supported?**
 Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode. The installer handles the different file locations and formats for each tool automatically.
 
-**Do I need all 32 skills?**
+**Do I need all 34 skills?**
 No. Install only what you need — each skill is independent. Start with `code-review` and `auto-push`, add more as your workflow grows.
 
 **Is this actively maintained?**

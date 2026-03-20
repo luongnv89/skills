@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.9.0 — 2026-03-20
+
+### New Skills
+| Skill | Version |
+|-------|---------|
+| opencode-runner | 1.2.0 |
+| appstore-review-checker | 1.0.0 |
+
+### Features
+- **opencode-runner**: Delegate coding tasks to opencode using free cloud models with automatic model selection (minimax > kimi > glm > MiMo > Big Pickle), mandatory process cleanup, and progress monitoring
+- **appstore-review-checker**: Audit apps against Apple's App Store Review Guidelines
+- **name-checker**: Add package registry checks (npm, PyPI, Homebrew, apt) for comprehensive name availability
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| name-checker | 1.0.1 → 1.1.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.8.0...v1.9.0
+
 ## v1.8.0 — 2026-03-20
 
 ### Features
