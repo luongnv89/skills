@@ -12,7 +12,7 @@
 <h1 align="center">Ship Software 10x Faster with AI Agent Skills</h1>
 
 <p align="center">
-  31 plug-and-play skills that turn your AI coding agent into a full product team — from idea validation to App Store launch. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode.
+  32 plug-and-play skills that turn your AI coding agent into a full product team — from idea validation to App Store launch. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode.
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@ The AI is capable. It just doesn't have the playbook.
 
 ## Agent Skills Gives Your AI the Playbook
 
-**Agent Skills** is a collection of 31 reusable, battle-tested skills that plug directly into your AI coding agent. Each skill is a structured prompt with references, templates, and scripts — turning a generic AI into a specialist.
+**Agent Skills** is a collection of 32 reusable, battle-tested skills that plug directly into your AI coding agent. Each skill is a structured prompt with references, templates, and scripts — turning a generic AI into a specialist.
 
 - **Every skill works the same way, every time.** Code reviews follow the same checklist. Releases hit every step. PRDs match a proven template. No more "I forgot to mention…"
 - **Cover the full product lifecycle.** Validate an idea → generate a PRD → design the architecture → write code → review → test → release → optimize your App Store listing. One toolkit, zero context-switching.
@@ -55,7 +55,7 @@ flowchart LR
     IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
-    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i>"]
+    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i><br/>github-issue-creator"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
     MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing"]
     TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker"]
@@ -72,7 +72,7 @@ flowchart LR
 _* Skills marked with * can be used repeatedly during development iterations._
 
 <p align="center">
-  <a href="#get-started-in-30-seconds"><b>See All 31 Skills →</b></a>
+  <a href="#get-started-in-30-seconds"><b>See All 32 Skills →</b></a>
 </p>
 
 ## Get Started in 30 Seconds
@@ -136,7 +136,7 @@ asm search        # Search skills by name or description
 asm install github:luongnv89/skills   # Install skills from this repo
 ```
 
-## 31 Skills Across 6 Categories
+## 32 Skills Across 6 Categories
 
 ### Development Workflow
 
@@ -153,6 +153,7 @@ asm install github:luongnv89/skills   # Install skills from this repo
 | [**install-script-generator**](skills/install-script-generator/) | 2.0.0 | Cross-platform installers that detect the environment automatically |
 | [**note-taker**](skills/note-taker/) | 1.4.1 | Capture notes (text, voice, images) into a git-backed repo with task extraction |
 | [**vscode-extension-publisher**](skills/vscode-extension-publisher/) | 1.0.0 | Publish VS Code extensions to the Marketplace without the ceremony |
+| [**github-issue-creator**](skills/github-issue-creator/) | 1.0.0 | Create or update GitHub issues from screenshots, emails, and bug reports with PII redaction |
 
 ### Product Development
 
@@ -188,7 +189,7 @@ asm install github:luongnv89/skills   # Install skills from this repo
 | [**logo-designer**](skills/logo-designer/) | 1.2.0 | Professional logos with automatic project context detection |
 | [**frontend-design**](skills/frontend-design/) | 1.2.0 | Distinctive, usability-focused UIs — not generic AI slop |
 | [**theme-transformer**](skills/theme-transformer/) | 1.0.0 | Transform any UI into a cyberpunk neon-dark theme with branch-safe workflow |
-| [**excalidraw-generator**](skills/excalidraw-generator/) | 1.1.1 | 25+ diagram types as Excalidraw JSON with 10 automated quality checks |
+| [**excalidraw-generator**](skills/excalidraw-generator/) | 1.2.0 | 25+ diagram types as Excalidraw JSON with 10 automated quality checks |
 | [**drawio-generator**](skills/drawio-generator/) | 1.0.1 | Draw.io diagrams with multi-page support, C4 models, and 9 quality checks |
 
 ### Skill Development
@@ -222,6 +223,7 @@ Skills trigger from natural language. No commands to memorize.
 | "draw a flowchart" | excalidraw-generator |
 | "create a draw.io diagram" | drawio-generator |
 | "turn my README into a landing page" | readme-to-landing-page |
+| "create an issue from this screenshot" | github-issue-creator |
 
 ## FAQ
 
@@ -231,7 +233,7 @@ Yes. Agent Skills is MIT licensed — use it in personal projects, commercial pr
 **Which AI tools are supported?**
 Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode. The installer handles the different file locations and formats for each tool automatically.
 
-**Do I need all 31 skills?**
+**Do I need all 32 skills?**
 No. Install only what you need — each skill is independent. Start with `code-review` and `auto-push`, add more as your workflow grows.
 
 **Is this actively maintained?**

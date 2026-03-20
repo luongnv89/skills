@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.8.0 — 2026-03-20
+
+### Features
+- **excalidraw-generator**: adopt dark neon theme and Helvetica font for all diagrams
+
+### New Skills
+| Skill | Version |
+|-------|---------|
+| github-issue-creator | 1.0.0 |
+
+### Documentation
+- Add installation instructions (npx + asm) to all 32 skill READMEs
+- Fix asm install command format to `github:luongnv89/skills:skills/<name>`
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| excalidraw-generator | 1.1.1 → 1.2.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.7.0...v1.8.0
+
 ## v1.7.0 — 2026-03-18
 
 ### Features
