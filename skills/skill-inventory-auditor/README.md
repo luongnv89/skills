@@ -44,7 +44,7 @@ npx skills add https://github.com/luongnv89/skills --skill skill-inventory-audit
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill skill-inventory-auditor
+asm install github:luongnv89/skills:skills/skill-inventory-auditor
 ```
 
 ## Usage

@@ -41,7 +41,7 @@ npx skills add https://github.com/luongnv89/skills --skill frontend-design
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill frontend-design
+asm install github:luongnv89/skills:skills/frontend-design
 ```
 
 ## Usage

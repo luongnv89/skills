@@ -48,7 +48,7 @@ npx skills add https://github.com/luongnv89/skills --skill cli-builder
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill cli-builder
+asm install github:luongnv89/skills:skills/cli-builder
 ```
 
 ## Usage

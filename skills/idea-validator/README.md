@@ -41,7 +41,7 @@ npx skills add https://github.com/luongnv89/skills --skill idea-validator
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill idea-validator
+asm install github:luongnv89/skills:skills/idea-validator
 ```
 
 ## Usage

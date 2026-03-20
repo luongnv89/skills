@@ -45,7 +45,7 @@ npx skills add https://github.com/luongnv89/skills --skill drawio-generator
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill drawio-generator
+asm install github:luongnv89/skills:skills/drawio-generator
 ```
 
 ## Usage

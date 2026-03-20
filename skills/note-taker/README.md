@@ -41,7 +41,7 @@ npx skills add https://github.com/luongnv89/skills --skill note-taker
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill note-taker
+asm install github:luongnv89/skills:skills/note-taker
 ```
 
 ## Usage

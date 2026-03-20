@@ -42,7 +42,7 @@ npx skills add https://github.com/luongnv89/skills --skill vscode-extension-publ
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill vscode-extension-publisher
+asm install github:luongnv89/skills:skills/vscode-extension-publisher
 ```
 
 ## Usage

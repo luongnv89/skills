@@ -43,7 +43,7 @@ npx skills add https://github.com/luongnv89/skills --skill readme-to-landing-pag
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill readme-to-landing-page
+asm install github:luongnv89/skills:skills/readme-to-landing-page
 ```
 
 ## Usage

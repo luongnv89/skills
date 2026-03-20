@@ -44,7 +44,7 @@ npx skills add https://github.com/luongnv89/skills --skill code-review
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill code-review
+asm install github:luongnv89/skills:skills/code-review
 ```
 
 ## Usage

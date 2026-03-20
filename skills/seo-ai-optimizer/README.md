@@ -43,7 +43,7 @@ npx skills add https://github.com/luongnv89/skills --skill seo-ai-optimizer
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills --skill seo-ai-optimizer
+asm install github:luongnv89/skills:skills/seo-ai-optimizer
 ```
 
 ## Usage
