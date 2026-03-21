@@ -33,7 +33,7 @@ The AI is capable. It just doesn't have the playbook.
 
 ## Agent Skills Gives Your AI the Playbook
 
-**Agent Skills** is a collection of 34 reusable, battle-tested skills that plug directly into your AI coding agent. Each skill is a structured prompt with references, templates, and scripts — turning a generic AI into a specialist.
+**Agent Skills** is a collection of 35 reusable, battle-tested skills that plug directly into your AI coding agent. Each skill is a structured prompt with references, templates, and scripts — turning a generic AI into a specialist.
 
 - **Every skill works the same way, every time.** Code reviews follow the same checklist. Releases hit every step. PRDs match a proven template. No more "I forgot to mention…"
 - **Cover the full product lifecycle.** Validate an idea → generate a PRD → design the architecture → write code → review → test → release → optimize your App Store listing. One toolkit, zero context-switching.
@@ -54,11 +54,11 @@ The AI is capable. It just doesn't have the playbook.
 flowchart LR
     IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
-    DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
+    DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i><br/>cli-builder<br/>excalidraw-generator<br/>drawio-generator<br/>theme-transformer"]
     QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i><br/>github-issue-creator<br/><i>dont-make-me-think *</i>"]
-    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
+    RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer<br/>readme-to-landing-page<br/>vscode-extension-publisher"]
     MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing<br/>appstore-review-checker"]
-    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker<br/>opencode-runner"]
+    TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>skill-inventory-auditor<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker<br/>opencode-runner"]
 
     IDEATION --> PLANNING
     PLANNING --> DEVELOPMENT
@@ -72,7 +72,7 @@ flowchart LR
 _* Skills marked with * can be used repeatedly during development iterations._
 
 <p align="center">
-  <a href="#get-started-in-30-seconds"><b>See All 32 Skills →</b></a>
+  <a href="#get-started-in-30-seconds"><b>See All 35 Skills →</b></a>
 </p>
 
 ## Get Started in 30 Seconds
@@ -182,7 +182,7 @@ asm install github:luongnv89/skills   # Install skills from this repo
 | [**oss-ready**](skills/oss-ready/) | 1.1.0 | LICENSE, CONTRIBUTING, CODE_OF_CONDUCT, and GitHub templates — done |
 | [**agent-config**](skills/agent-config/) | 1.1.0 | CLAUDE.md and AGENTS.md files that follow best practices |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.0.1 | Technical SEO, structured data, and AI bot accessibility in one audit |
-| [**readme-to-landing-page**](skills/readme-to-landing-page/) | 1.0.0 | Turn any README into a persuasive landing page using PAS, AIDA, or StoryBrand frameworks |
+| [**readme-to-landing-page**](skills/readme-to-landing-page/) | 2.0.0 | Turn any README into a persuasive landing page using PAS, AIDA, or StoryBrand frameworks |
 
 ### Design & Branding
 
@@ -230,6 +230,11 @@ Skills trigger from natural language. No commands to memorize.
 | "run this with opencode" | opencode-runner |
 | "check App Store review guidelines" | appstore-review-checker |
 | "review my UI for usability" | dont-make-me-think |
+| "build a CLI for this" | cli-builder |
+| "check if this name is available" | name-checker |
+| "generate project docs" | docs-generator |
+| "reskin the UI" | theme-transformer |
+| "configure CLAUDE.md" | agent-config |
 
 ## FAQ
 

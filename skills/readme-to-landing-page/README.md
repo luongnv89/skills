@@ -1,49 +1,54 @@
 # README to Landing Page
 
-> Transform any project README.md into a persuasive, landing-page-structured markdown that sells the project to visitors — using proven copywriting frameworks, all in pure GitHub-rendered markdown.
+> Transform any README.md into a concise, visual, developer-friendly landing page — diagrams over paragraphs, tables over lists, code over prose.
 
 ## Highlights
 
-- Rewrites README.md using PAS, AIDA, or StoryBrand copywriting frameworks
-- Creates hero section, problem/solution narrative, social proof, FAQ, and CTAs
-- Preserves all original technical content in collapsible `<details>` sections
-- Always backs up the original as `README.backup.md` before changes
+- Mermaid diagrams for architecture and workflows — visuals first, text second
+- Anti-slop rules — bans filler phrases, rhetorical questions, empty adjectives
+- No emoji — clean, professional output
+- PAS, AIDA, or StoryBrand frameworks adapted for developer audiences
+- All original technical content preserved in collapsible `<details>` sections
 
 ## When to Use
 
 | Say this... | Skill will... |
 |---|---|
-| "Turn my README into a landing page" | Rewrite README with landing page structure |
-| "Make my README sell the project" | Apply copywriting frameworks to README |
-| "Rewrite README as a landing page" | Transform from technical to persuasive |
-| "Make my GitHub page more persuasive" | Optimize README for visitor conversion |
+| "Turn my README into a landing page" | Rewrite with visual-first landing page structure |
+| "Make my README sell the project" | Apply copywriting framework with mermaid diagrams |
+| "Make my GitHub page more persuasive" | Optimize for developer conversion |
 
 ## How It Works
 
 ```mermaid
-graph TD
-    A["Gather Project Context"] --> B["Identify Audience & Value Prop"]
-    B --> C["Select Copywriting Framework"]
-    C --> D["Back Up Original README"]
-    D --> E["Rewrite with Landing Page Structure"]
-    E --> F["Apply Copywriting Polish"]
-    F --> G["Present to User for Review"]
+graph LR
+    A["Read project"] --> B["Identify audience"]
+    B --> C["Rewrite"]
+    C --> D["Anti-slop check"]
+    D --> E["Present"]
     style A fill:#4CAF50,color:#fff
-    style G fill:#2196F3,color:#fff
+    style E fill:#2196F3,color:#fff
+```
+
+## Output Structure
+
+```mermaid
+graph TD
+    H["Hero: badges + value prop + CTA"] --> W["How It Works: mermaid diagram"]
+    W --> F["Features: table or short bullets"]
+    F --> Q["Quick Start: 3-5 commands"]
+    Q --> U["Usage: code examples"]
+    U --> S["Social Proof — only if real data"]
+    S --> C["Final CTA"]
+    C --> D["Technical Details — collapsed"]
+    style H fill:#4CAF50,color:#fff
+    style D fill:#2196F3,color:#fff
 ```
 
 ## Installation
 
-Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
-
 ```bash
 npx skills add https://github.com/luongnv89/skills --skill readme-to-landing-page
-```
-
-Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
-
-```bash
-asm install github:luongnv89/skills:skills/readme-to-landing-page
 ```
 
 ## Usage
@@ -54,6 +59,6 @@ asm install github:luongnv89/skills:skills/readme-to-landing-page
 
 ## Output
 
-- Rewritten `README.md` with landing-page section flow (hero, problem, solution, how it works, social proof, FAQ, CTA)
-- `README.backup.md` — exact copy of the original README (always created)
-- Original technical content preserved in collapsible `<details>` blocks
+- Rewritten `README.md` — visual-first, scannable, mermaid-driven, zero slop
+- `README.backup.md` — exact copy of original
+- Original technical content in collapsible `<details>` blocks

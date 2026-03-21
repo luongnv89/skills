@@ -1,19 +1,67 @@
 ---
 name: readme-to-landing-page
 description: Transform any project README.md into a persuasive, landing-page-structured markdown file using proven copywriting frameworks (PAS, AIDA, StoryBrand). Reads the existing README and project files, extracts the product story, and rewrites the README.md to follow a conversion-optimized section flow — hero, problem, solution, how it works, social proof, FAQ, and CTA — all in pure markdown that renders natively on GitHub. Use when users ask to "turn my README into a landing page", "make my README sell the project", "rewrite README as a landing page", "convert README to marketing style", "make my GitHub page more persuasive", "landing page my README", "optimize my README for conversions", or want their GitHub front page to persuade visitors rather than just inform them. Also trigger when a user has a dry technical README and wants more stars, users, or contributors — even if they don't explicitly mention "landing page".
+effort: high
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 2.0.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # README to Landing Page
 
-Transform a project's README.md into a persuasive, landing-page-structured markdown file that sells the project to visitors.
+Transform a project's README.md into a concise, visual, developer-friendly landing page.
+
+## Core Principle: Show, Don't Tell
+
+Developers skim — they don't read walls of text. The output README must:
+
+- **Prefer visuals over prose** — use mermaid diagrams for architecture, workflows, data flow
+- **Be concise** — every sentence must earn its place; cut ruthlessly
+- **Be scannable** — badges, tables, code blocks, diagrams; minimize paragraphs
+- **Be direct** — lead with what matters, skip the preamble
+- **No emoji** — never use emoji in headings, body text, badges, or section labels
+
+If something can be a diagram, make it a diagram. If something can be a table, make it a table. If something can be a one-liner, don't write three sentences.
+
+## Anti-Slop Rules
+
+AI-generated READMEs have predictable tells that make developers distrust the content. The output must avoid all of these patterns. This matters because slop signals "nobody reviewed this" and kills credibility.
+
+**Banned phrases** — never write these or close variants:
+
+| Pattern | Why it's slop | Write instead |
+|---|---|---|
+| "Whether you're a ... or a ..." | Fake inclusivity, says nothing | Name the primary audience directly |
+| "In today's fast-paced..." | Generic filler | Cut entirely |
+| "Seamless/seamlessly" | Meaningless modifier | Describe what actually happens |
+| "Robust/robust solution" | Empty adjective | State the specific capability |
+| "Leverage/utilize" | Jargon for "use" | "use" |
+| "Cutting-edge/state-of-the-art" | Unsubstantiated claim | Cite the specific technique or benchmark |
+| "Elevate/supercharge/turbocharge" | Hype with no content | State the measurable improvement |
+| "Dive deep/deep dive" | Padding | Cut or replace with "details" |
+| "Harness the power of" | Filler | Name what it does |
+| "It's worth noting that" | Throat-clearing | Cut — just state the thing |
+| "Streamline your workflow" | Generic promise | Describe the specific workflow change |
+| "Comprehensive solution" | Says nothing | State what it covers |
+| "Game-changer/revolutionary" | Unearned superlative | Let the reader decide |
+| "Look no further" | Salesy | Cut entirely |
+| "Say goodbye to X" | Cliche | State what the tool does instead |
+
+**Structural slop to avoid:**
+
+- Padding paragraphs that repeat the headline in different words
+- "Introduction" sections that delay the actual content
+- Multiple sentences saying the same thing for emphasis
+- Rhetorical questions ("Tired of X? Want to Y?")
+- Exclamation marks for artificial enthusiasm
+- Emoji in headings or body text
+- Vague benefit claims without specifics ("saves you time", "boosts productivity")
+- Filler transitions ("Furthermore", "Moreover", "Additionally", "In conclusion")
+
+**The test:** Read each sentence and ask "does this give the reader information they didn't already have?" If not, cut it.
 
 ## Repo Sync Before Edits (mandatory)
-
-Before modifying any project files, sync the current branch with remote:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,205 +69,298 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
-
-## Why This Matters
-
-GitHub renders README.md as the project's front page. Most READMEs explain *what* the project does — feature lists, install steps, API docs — but they don't *sell the idea*. A landing-page-structured README converts casual visitors into users and contributors by leading with the problem, presenting the solution as a story, and ending with clear calls to action. The technical content isn't lost — it's reorganized so it supports the narrative instead of burying the value proposition.
+If working tree is dirty: `git stash push -u -m "pre-sync"`, sync, then `git stash pop`.
+If `origin` is missing or conflicts occur, stop and ask the user.
 
 ## Workflow
 
-### Step 1: Gather Project Context
+### Step 1: Gather Context
 
-Read these files to build a complete picture:
+Read project files to build a picture:
 
-- **README.md** (required) — the source material
-- **package.json** / **pyproject.toml** / **Cargo.toml** / **go.mod** — project name, description, version, keywords
-- **CHANGELOG.md** — recent milestones and momentum signals
-- **LICENSE** — for the risk-reversal CTA ("MIT licensed, free forever")
-- **docs/** folder — any existing detailed documentation to preserve
+| File | Purpose |
+|---|---|
+| `README.md` | Source material (required) |
+| `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` | Name, description, version |
+| `CHANGELOG.md` | Momentum signals |
+| `LICENSE` | Risk reversal ("MIT licensed") |
+| `docs/` | Existing detailed docs to preserve |
 
-Also check for social proof data:
-- GitHub stars, forks, contributor count (from the repo itself)
-- Download stats if mentioned in existing README
-- Notable users, companies, or testimonials
+Also check: GitHub stars, forks, download stats, notable users. If purpose or audience is unclear, ask.
 
-If the project's purpose or target audience is unclear from the files, ask the user before proceeding.
+### Step 2: Identify Audience & Value Prop
 
-### Step 2: Identify Audience & Value Proposition
+Determine these three things — write them down before proceeding:
 
-Determine:
-1. **Who is this for?** — developers, designers, data scientists, ops teams, end users?
-2. **What pain does it solve?** — what's frustrating about the status quo?
-3. **What's the core benefit in one sentence?** — this becomes the H1 headline
+1. **Who** — primary audience (developers, data scientists, ops teams, etc.)
+2. **Pain** — what's frustrating about the status quo
+3. **Benefit** — one sentence, becomes the H1 headline
 
-If the project serves multiple audiences, pick the primary one and mention others secondarily. If you're unsure, ask.
+### Step 3: Select Framework
 
-### Step 3: Select Copywriting Framework
+| Project Type | Framework | Approach |
+|---|---|---|
+| CLI tools, libraries, infra | **PAS** | Problem → Agitate → Solution |
+| Apps, platforms, end-user products | **AIDA** | Attention → Interest → Desire → Action |
+| Strong narrative / user request | **StoryBrand** | Hero → Guide → Plan → CTA |
 
-Choose the framework that fits the project type:
+Tell the user which you picked. Let them override.
 
-**PAS (Problem-Agitate-Solution)** — best for developer tools and infrastructure
-- Identify the pain point
-- Amplify the consequences of not solving it
-- Present the project as the solution
-
-**AIDA (Attention-Interest-Desire-Action)** — best for end-user products and libraries
-- Bold headline grabs attention
-- Build interest with relatable scenarios
-- Create desire with benefits and proof
-- Prompt action with clear CTA
-
-**StoryBrand** — best when the user requests it, or for projects with a strong narrative
-- The user/developer is the hero
-- The project is the guide with a plan
-- CTA leads to success, avoids failure
-
-Default to PAS for CLI tools, libraries, and infrastructure. Default to AIDA for apps, platforms, and end-user products. Tell the user which framework you chose and why, and let them override.
-
-### Step 4: Back Up the Original
-
-This step is mandatory — always create the backup before any changes:
+### Step 4: Back Up Original
 
 ```bash
 cp README.md README.backup.md
 ```
 
-Inform the user: "I've saved your original README as `README.backup.md`."
-
 ### Step 5: Rewrite README.md
 
-Follow this section flow. Every section should earn its place — skip sections that don't apply (e.g., social proof if there's genuinely nothing to show), but the core structure should stay intact.
+Follow this section flow. Skip sections that don't apply — but keep the core structure.
 
-#### Hero Section (top of README)
+#### 5.1 Hero Section
 
-- **Badge row**: GitHub stars, npm/PyPI downloads, license, build status, version — whatever's relevant. Use shields.io badge format.
-- **H1 headline**: The value proposition in 10 words or fewer. Not the project name — the *benefit*. The project name can appear in the badge row or subtitle.
-- **Subheadline**: 2 sentences expanding the value. What it does + why it matters.
-- **Primary CTA**: Bold link pointing to the installation section or docs. Use action verb + specific outcome: "Get Started in 30 Seconds", "Start Optimizing Now" — never "Click Here".
+```
+[badges: stars, downloads, license, build status — shields.io format]
 
-#### Problem Section
+# [Value proposition in ≤10 words — NOT the project name]
 
-- H2 heading (e.g., "The Problem", "Sound Familiar?", or something that fits the tone)
-- 2-3 bullet points describing the pain in relatable, specific terms
-- Use "you" language — the reader should see themselves in the problem
-- Emotional but honest — no manufactured urgency
+[1-2 sentences: what it does + why it matters]
 
-#### Solution Section
+[**Get Started →**](#getting-started)
+```
 
-- H2 heading (e.g., "How [Project] Fixes This", "The Solution", "What [Project] Does")
-- 3-5 key features written as **benefits**, not feature dumps
-  - "Ship 10x faster" not "Has CI integration"
-  - "Zero config" not "Supports config file format X"
-  - Include specific numbers when available (benchmarks, size reduction, speed)
-- Brief comparison to alternatives if the original README mentioned them
+Keep the hero to **5 lines max** (excluding badges).
 
-#### How It Works
+#### 5.2 Architecture / How It Works (VISUAL)
 
-- H2 heading
-- 3-4 numbered steps extracted from the existing install/usage sections
-- Each step: concise, action-oriented, starts with a verb
-- End with a secondary CTA link
+This is the most important section. Replace text explanations with mermaid diagrams.
 
-#### Social Proof
+Use the right diagram type for the project:
 
-- H2 heading (e.g., "Trusted by Developers", "Used in Production")
-- GitHub stars, fork count, download numbers — with actual values
-- Notable users or companies if mentioned anywhere in the project
-- Testimonial quotes if available, otherwise placeholder format the maintainer can fill in
-- Skip this section entirely if there's no real data — don't fabricate social proof
+```markdown
+## How It Works
 
-#### FAQ
+` ` `mermaid
+graph LR
+    A[Input] --> B[Process]
+    B --> C[Output]
+` ` `
+```
 
-- H2 heading
-- 5-7 entries as **bold question** / paragraph answer
-- Derive from common objections:
-  - Is it free? (license info)
-  - Is it maintained? (last commit, release frequency)
-  - How does it compare to X? (if alternatives exist)
-  - How do I get started? (link back to install)
-  - Can I use it in production? (stability signals)
-- Address real concerns — don't pad with trivial questions
+**Diagram type selection:**
 
-#### Final CTA
+| Project has... | Use |
+|---|---|
+| A pipeline / workflow | `graph LR` or `graph TD` flowchart |
+| Client-server / microservices | `graph TD` architecture diagram |
+| State transitions | `stateDiagram-v2` |
+| Sequential steps | `sequenceDiagram` |
+| Timeline / phases | `gantt` or `timeline` |
+| Class structure | `classDiagram` |
 
-- H2 heading (e.g., "Get Started", "Start [Doing the Thing]")
-- Reinforced value proposition in 1-2 sentences
-- Risk reversal: open source, free, MIT licensed, easy to uninstall
-- Bold CTA link
+Add **at most** 2-3 sentences of context around the diagram — not more. The diagram is the explanation.
 
-#### Technical Details (collapsed)
+If the project has multiple layers (e.g., CLI + library + server), use multiple small diagrams rather than one huge one.
 
-Preserve the original technical content that doesn't fit the narrative flow:
-- API reference
-- Configuration options
-- Advanced usage
-- Contributing guide
-- Detailed architecture
+#### 5.3 Key Features
 
-Wrap each in a `<details>` block with a descriptive `<summary>`:
+Present as a **table** or **short bullet list with bold lead**. No paragraphs.
+
+Good:
+```markdown
+| Feature | What you get |
+|---|---|
+| Zero config | Works out of the box — no setup files |
+| 10x faster builds | Incremental compilation + smart caching |
+| Type safe | Catch errors at compile time, not runtime |
+```
+
+Or:
+```markdown
+- **Zero config** — works out of the box
+- **10x faster builds** — incremental compilation + smart caching
+- **Type safe** — catch errors at compile time, not runtime
+```
+
+Bad (too wordy):
+```markdown
+## Features
+
+Our tool provides a zero-configuration experience that allows you to get started
+without any setup files. It also features builds that are up to 10x faster thanks
+to incremental compilation and smart caching strategies...
+```
+
+Each feature: **≤15 words**. Lead with the benefit, not the mechanism.
+
+#### 5.4 Quick Start
+
+Each command or group of commands that can run independently gets its **own code block**. This lets users copy-paste one step at a time without editing. Only combine commands in the same block if they genuinely must run together (e.g., piped commands, or commands joined with `&&`).
+
+Good — separate blocks for independent steps:
+```markdown
+## Quick Start
+
+Install:
+
+` ` `bash
+npm install my-tool
+` ` `
+
+Initialize a new project:
+
+` ` `bash
+my-tool init
+` ` `
+
+Run:
+
+` ` `bash
+my-tool run
+` ` `
+```
+
+Bad — one block forcing the user to manually select lines:
+```markdown
+## Quick Start
+
+` ` `bash
+npm install my-tool
+my-tool init
+my-tool run
+` ` `
+```
+
+Commands that depend on each other and run as a unit can share a block:
+```markdown
+` ` `bash
+cd my-project && my-tool init
+` ` `
+```
+
+3-5 steps max. If the project needs more, link to full docs. Show the **fastest path to "hello world"** — nothing else.
+
+#### 5.5 Usage Examples (VISUAL)
+
+Show, don't tell. Use code blocks with realistic examples:
+
+```markdown
+## Usage
+
+` ` `typescript
+// Before: 12 lines of boilerplate
+const result = myTool.do(input)
+// After: done
+` ` `
+```
+
+If the project has a visual output (CLI output, generated files, screenshots), include them. Before/after comparisons are powerful.
+
+#### 5.6 Comparison (optional, if alternatives exist)
+
+Use a table — never prose paragraphs:
+
+```markdown
+## Comparison
+
+| | my-tool | alternative-a | alternative-b |
+|---|:---:|:---:|:---:|
+| Zero config | Yes | No | Partial |
+| Speed | 120ms | 3.4s | 890ms |
+| Bundle size | 12kb | 145kb | 67kb |
+```
+
+#### 5.7 Social Proof (optional, only if real data exists)
+
+One line per proof point. Never fabricate.
+
+```markdown
+## Adoption
+
+2,400+ GitHub stars · 50k weekly downloads · Used at Stripe, Vercel, Linear
+```
+
+Skip entirely if there's nothing real to show.
+
+#### 5.8 FAQ (optional, 3-5 entries max)
+
+Only include if there are genuine common questions. Keep answers to 1-2 sentences.
+
+#### 5.9 Final CTA
+
+```markdown
+## Get Started
+
+` ` `bash
+npm install my-tool
+` ` `
+
+[**Read the docs →**](./docs) · [**View examples →**](./examples) · MIT Licensed
+```
+
+If the CTA involves multiple steps (e.g., install then run), use separate code blocks — same rule as Quick Start.
+
+#### 5.10 Technical Details (collapsed)
+
+Preserve all original technical content in `<details>` blocks:
 
 ```markdown
 <details>
 <summary>API Reference</summary>
 
-[original content here]
+[original content]
+
+</details>
+
+<details>
+<summary>Configuration</summary>
+
+[original content]
 
 </details>
 ```
 
-This keeps technical depth accessible without overwhelming the landing page flow.
+### Step 6: Self-Review Checklist
 
-### Step 6: Apply Copywriting Polish
+Before presenting to the user, verify:
 
-Review the full rewrite and apply these principles throughout:
+| Check | Rule |
+|---|---|
+| Code blocks | Each independently-runnable command is in its own block (copy-paste friendly) |
+| Mermaid diagrams | ≥1 diagram showing how the project works |
+| Hero length | ≤5 lines (excluding badges) |
+| Feature descriptions | ≤15 words each |
+| Quick Start | ≤5 commands |
+| Paragraphs | No paragraph exceeds 3 sentences |
+| Total prose | Diagrams + tables + code ≥ 50% of content |
+| Original content | All preserved in `<details>` blocks |
+| Fabricated data | None — real numbers or placeholders only |
+| No emoji | Zero emoji anywhere in the output |
+| No slop phrases | None of the banned phrases from Anti-Slop Rules |
+| No filler | Every sentence adds information the reader didn't have |
+| No rhetorical questions | No "Tired of X?" or "Want to Y?" patterns |
 
-- **Active voice, present tense** — "dockslim analyzes your Dockerfile" not "your Dockerfile will be analyzed"
-- **Benefits over features** — always ask "so what?" about each feature and write the answer instead
-- **Specific numbers** — "80% smaller" not "much smaller", "2,400+ stars" not "popular"
-- **Short, scannable sentences** — if a sentence has a comma, consider splitting it
-- **"You" language** — the reader is the subject, not the project
-- **Power words where genuine** — proven, instant, effortless, lightweight, blazing-fast — but only when the project actually delivers on them
-- **Multiple CTAs** — at least in hero, after how-it-works, and at the end
-- **CTA format** — `[**Action Verb + Outcome →**](#section)` — bold, with arrow
+If any check fails, fix it before presenting.
 
 ### Step 7: Present to User
 
-Show the user the rewritten README.md and explain:
-1. Which copywriting framework you used and why
-2. What sections you added/reorganized
-3. Where original technical content ended up (collapsed sections)
-4. That `README.backup.md` contains their original
+Briefly explain:
+1. Framework chosen
+2. Where original content lives (`README.backup.md` + collapsed sections)
 
-Ask: "How does this look? Anything you'd like me to adjust — tone, section order, emphasis, specific wording?"
-
-Do NOT commit unless the user explicitly asks.
+Ask for feedback. Do NOT commit unless asked.
 
 ## Guidelines
 
-- Never fabricate data. If you don't have star counts or download numbers, either look them up or leave placeholders the maintainer can fill in.
-- Don't be sleazy. Landing page structure doesn't mean manipulative copy — it means leading with value and making the project easy to understand at a glance.
-- Respect the project's voice. A serious security tool shouldn't sound like a startup pitch deck. Match the energy of the project while making it more persuasive.
-- The H1 is a value proposition, not the project name. The project name should appear prominently (badges, first sentence) but the headline sells the benefit.
-- Preserve all original content. Nothing should be deleted — only reorganized. Technical details move into collapsed sections, not the trash.
-- One primary audience. If the README tries to speak to everyone, it speaks to no one. Pick the primary audience and mention others.
+- **One code block per copy-paste unit.** Commands that can run independently must be in separate code blocks so the user can click-to-copy one step at a time. Only combine commands that must run together (piped, `&&`-chained, or tightly coupled). This is the main objective — the output should be copy-paste friendly.
+- **Never fabricate data.** Use real numbers or leave `[placeholder]` markers.
+- **Respect the project's voice.** A security tool ≠ a startup pitch.
+- **H1 = value proposition**, not the project name.
+- **Preserve all original content** in collapsed sections.
+- **One primary audience.** Don't try to speak to everyone.
+- **When in doubt, cut text.** A shorter README that gets read beats a longer one that doesn't.
 
 ## Error Handling
 
-### No README.md found
-Inform the user: "I don't see a README.md in this project. Would you like me to create one from scratch based on the project files?" Then proceed with the landing page structure using project context files.
-
-### README is already marketing-style
-If the README already follows a landing page structure, tell the user what you found and offer to refine specific sections rather than doing a full rewrite.
-
-### Insufficient project context
-If neither the README nor project files give enough information to write compelling copy (e.g., the README is just a title and the project has 3 files with no comments), ask the user to describe: what the project does, who it's for, and what problem it solves.
+- **No README.md found** → Offer to create from scratch using project files.
+- **Already marketing-style** → Offer targeted refinements, not full rewrite.
+- **Insufficient context** → Ask: what it does, who it's for, what problem it solves.
