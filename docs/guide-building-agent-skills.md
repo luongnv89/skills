@@ -215,6 +215,7 @@ description: Implements the Project entity model with hierarchical relationships
 ---
 name: skill-name
 description: [required description]
+effort: high                    # Optional: low | medium | high | max (default: high)
 license: MIT                    # Optional: for open-source skills
 compatibility: "Requires Node.js 18+, works on macOS/Linux"  # Optional: 1-500 chars
 allowed-tools: "Bash(python:*) Bash(npm:*) WebFetch"         # Optional: restrict tool access
@@ -226,6 +227,15 @@ metadata:                       # Optional: custom key-value pairs
   tags: [project-management, automation]
 ---
 ```
+
+**`effort` (optional):**
+- Controls reasoning effort level for the skill
+- Valid values: `low`, `medium`, `high`, `max`
+- Defaults to `high` when omitted
+- `low`: simple lookups, template fills, quick transforms
+- `medium`: moderate multi-step tasks, standard workflows
+- `high`: complex workflows requiring deep reasoning (recommended default)
+- `max`: exhaustive analysis, comprehensive audits, maximum thoroughness
 
 ### Security Restrictions
 

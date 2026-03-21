@@ -39,7 +39,16 @@ def validate_skill(skill_path):
         return False, f"Invalid YAML in frontmatter: {e}"
 
     # Define allowed properties
-    ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata', 'compatibility'}
+    ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata', 'compatibility', 'effort'}
+
+    # Validate effort field if present (optional)
+    effort = frontmatter.get('effort', None)
+    if effort is not None:
+        VALID_EFFORT_LEVELS = {'low', 'medium', 'high', 'max'}
+        if not isinstance(effort, str):
+            return False, f"Effort must be a string, got {type(effort).__name__}"
+        if effort not in VALID_EFFORT_LEVELS:
+            return False, f"Effort '{effort}' is not valid. Allowed values: {', '.join(sorted(VALID_EFFORT_LEVELS))}"
 
     # Check for unexpected properties (excluding nested keys under metadata)
     unexpected_keys = set(frontmatter.keys()) - ALLOWED_PROPERTIES

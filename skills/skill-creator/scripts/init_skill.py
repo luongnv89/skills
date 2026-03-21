@@ -19,6 +19,7 @@ SKILL_TEMPLATE = """---
 name: {skill_name}
 version: 1.0.0
 description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
+effort: high
 ---
 
 # {skill_title}

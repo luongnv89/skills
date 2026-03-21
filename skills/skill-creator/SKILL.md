@@ -1,6 +1,7 @@
 ---
 name: skill-creator
 description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
+effort: high
 license: MIT
 metadata:
   version: 1.1.0
@@ -83,6 +84,7 @@ Based on the user interview, fill in these components:
 
 - **name**: Skill identifier
 - **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. **The description MUST be a single line (no newlines or line breaks)** — this is required for correct parsing by external tools and automation that process skill metadata. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
+- **effort** (optional): How much reasoning effort the skill requires. Valid values: `low`, `medium`, `high`, `max`. Defaults to `high` when omitted. Use `low` for simple lookups or template fills, `medium` for moderate multi-step tasks, `high` for complex workflows requiring deep reasoning, and `max` for tasks demanding exhaustive analysis. This is an optional attribute — not all tools support it yet.
 - **compatibility**: Required tools, dependencies (optional, rarely needed)
 - **the rest of the skill :)**
 
