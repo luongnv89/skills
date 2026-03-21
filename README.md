@@ -12,7 +12,7 @@
 <h1 align="center">Ship Software 10x Faster with AI Agent Skills</h1>
 
 <p align="center">
-  34 plug-and-play skills that turn your AI coding agent into a full product team — from idea validation to App Store launch. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode.
+  35 plug-and-play skills that turn your AI coding agent into a full product team — from idea validation to App Store launch. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode.
 </p>
 
 <p align="center">
@@ -55,7 +55,7 @@ flowchart LR
     IDEATION["<b>Ideation</b><br/>───────────<br/>idea-validator<br/>name-checker<br/>logo-designer"]
     PLANNING["<b>Planning</b><br/>───────────<br/>prd-generator<br/>system-design<br/><i>tasks-generator *</i>"]
     DEVELOPMENT["<b>Development</b><br/>───────────<br/><i>code-optimizer *</i><br/><i>test-coverage *</i><br/>agent-config<br/><i>openspec-task-loop *</i><br/><i>frontend-design *</i>"]
-    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i><br/>github-issue-creator"]
+    QUALITY["<b>Quality and CI/CD</b><br/>───────────<br/>devops-pipeline<br/><i>code-review *</i><br/><i>auto-push *</i><br/>github-issue-creator<br/><i>dont-make-me-think *</i>"]
     RELEASE["<b>Release and Docs</b><br/>───────────<br/>docs-generator<br/>release-manager<br/>oss-ready<br/>seo-ai-optimizer"]
     MARKETING["<b>Marketing</b><br/>───────────<br/>aso-marketing<br/>appstore-review-checker"]
     TOOLING["<b>Tooling</b><br/>───────────<br/>skill-creator<br/>context-hub<br/>ollama-optimizer<br/>install-script-generator<br/>note-taker<br/>opencode-runner"]
@@ -136,7 +136,7 @@ asm search        # Search skills by name or description
 asm install github:luongnv89/skills   # Install skills from this repo
 ```
 
-## 34 Skills Across 6 Categories
+## 35 Skills Across 6 Categories
 
 ### Development Workflow
 
@@ -193,12 +193,13 @@ asm install github:luongnv89/skills   # Install skills from this repo
 | [**theme-transformer**](skills/theme-transformer/) | 1.0.0 | Transform any UI into a cyberpunk neon-dark theme with branch-safe workflow |
 | [**excalidraw-generator**](skills/excalidraw-generator/) | 1.2.0 | 25+ diagram types as Excalidraw JSON with 10 automated quality checks |
 | [**drawio-generator**](skills/drawio-generator/) | 1.0.1 | Draw.io diagrams with multi-page support, C4 models, and 9 quality checks |
+| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.1.0 | Usability reviews using Krug's principles — visual scorecard, issue maps, and prioritized fixes |
 
 ### Skill Development
 
 | Skill | Version | What You Get |
 |-------|---------|--------------|
-| [**skill-creator**](skills/skill-creator/) | 1.0.1 | Create new skills with templates, validation, and packaging |
+| [**skill-creator**](skills/skill-creator/) | 1.1.0 | Create new skills with templates, validation, and packaging |
 | [**skill-inventory-auditor**](skills/skill-inventory-auditor/) | 1.0.0 | Find and remove duplicate skill installations |
 | [**context-hub**](skills/context-hub/) | 1.0.0 | Fetch current API/SDK docs before writing integration code |
 
@@ -228,6 +229,7 @@ Skills trigger from natural language. No commands to memorize.
 | "create an issue from this screenshot" | github-issue-creator |
 | "run this with opencode" | opencode-runner |
 | "check App Store review guidelines" | appstore-review-checker |
+| "review my UI for usability" | dont-make-me-think |
 
 ## FAQ
 
@@ -237,7 +239,7 @@ Yes. Agent Skills is MIT licensed — use it in personal projects, commercial pr
 **Which AI tools are supported?**
 Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, and OpenCode. The installer handles the different file locations and formats for each tool automatically.
 
-**Do I need all 34 skills?**
+**Do I need all 35 skills?**
 No. Install only what you need — each skill is independent. Start with `code-review` and `auto-push`, add more as your workflow grows.
 
 **Is this actively maintained?**

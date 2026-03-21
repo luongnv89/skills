@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.10.0 — 2026-03-21
+
+### New Skills
+| Skill | Version |
+|-------|---------|
+| dont-make-me-think | 1.1.0 |
+
+### Features
+- **dont-make-me-think**: Usability review and redesign skill based on Steve Krug's "Don't Make Me Think" principles — evaluates UIs through 10 lenses, produces concise visual reports with mermaid scorecard charts, issue maps, flow diagrams, and prioritized fix tables
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| skill-creator | 1.0.1 → 1.1.0 |
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.9.0...v1.10.0
+
 ## v1.9.0 — 2026-03-20
 
 ### New Skills
