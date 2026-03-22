@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.11.0 — 2026-03-22
+
+### Features
+- **skill-creator**: add optional effort level to skill frontmatter
+- **readme-to-landing-page**: v2.0.0 with copy-paste friendly code blocks
+- **effort levels**: add colored effort badges to all 35 skills in README
+- **product planning**: set all planning skills to max effort (idea-validator, name-checker, prd-generator, system-design, tasks-generator)
+
+### Documentation
+- Rewrite README as skill catalog with category index and copy-paste install commands
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.10.0...v1.11.0
+
 ## v1.10.0 — 2026-03-21
 
 ### New Skills

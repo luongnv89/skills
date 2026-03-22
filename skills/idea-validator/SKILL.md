@@ -1,7 +1,7 @@
 ---
 name: idea-validator
 description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability.
-effort: medium
+effort: max
 license: MIT
 metadata:
   version: 1.2.2

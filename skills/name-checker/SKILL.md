@@ -1,7 +1,7 @@
 ---
 name: name-checker
 description: Check product/brand names for trademark, domain, social media, and package registry conflicts. Use when users ask to "check this name", "validate a product name", "is this name available", "is this package name taken", or need to assess naming risks before publishing to npm, PyPI, Homebrew, or apt. Provides risk assessment and alternative suggestions. Also use when users want to secure a name early across registries to prevent namespace squatting, or ask "can I publish under this name".
-effort: low
+effort: max
 license: MIT
 metadata:
   version: 1.1.0

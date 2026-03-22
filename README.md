@@ -137,11 +137,11 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| <a id="idea-validator"></a>[**idea-validator**](skills/idea-validator/) | 1.2.2 | ![medium](https://img.shields.io/badge/medium-orange) | Feasibility and market viability feedback before you build |
-| <a id="name-checker"></a>[**name-checker**](skills/name-checker/) | 1.1.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Trademark, domain, social, npm, PyPI, Homebrew, apt -- one pass |
-| <a id="prd-generator"></a>[**prd-generator**](skills/prd-generator/) | 1.2.2 | ![medium](https://img.shields.io/badge/medium-orange) | Structured PRDs from a description or validated idea |
-| <a id="system-design"></a>[**system-design**](skills/system-design/) | 1.2.3 | ![medium](https://img.shields.io/badge/medium-orange) | Technical architecture docs with data flow diagrams |
-| <a id="tasks-generator"></a>[**tasks-generator**](skills/tasks-generator/) | 1.2.2 | ![medium](https://img.shields.io/badge/medium-orange) | Sprint-ready task breakdowns from your PRD |
+| <a id="idea-validator"></a>[**idea-validator**](skills/idea-validator/) | 1.2.2 | ![max](https://img.shields.io/badge/max-darkred) | Feasibility and market viability feedback before you build |
+| <a id="name-checker"></a>[**name-checker**](skills/name-checker/) | 1.1.0 | ![max](https://img.shields.io/badge/max-darkred) | Trademark, domain, social, npm, PyPI, Homebrew, apt -- one pass |
+| <a id="prd-generator"></a>[**prd-generator**](skills/prd-generator/) | 1.2.2 | ![max](https://img.shields.io/badge/max-darkred) | Structured PRDs from a description or validated idea |
+| <a id="system-design"></a>[**system-design**](skills/system-design/) | 1.2.3 | ![max](https://img.shields.io/badge/max-darkred) | Technical architecture docs with data flow diagrams |
+| <a id="tasks-generator"></a>[**tasks-generator**](skills/tasks-generator/) | 1.2.2 | ![max](https://img.shields.io/badge/max-darkred) | Sprint-ready task breakdowns from your PRD |
 
 ### Frontend and Design
 
