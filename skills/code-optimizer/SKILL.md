@@ -1,6 +1,7 @@
 ---
 name: code-optimizer
 description: Analyze code for performance issues and suggest optimizations. Use when users ask to "optimize this code", "find performance issues", "improve performance", "check for memory leaks", "review code efficiency", or want to identify bottlenecks, algorithmic improvements, caching opportunities, or concurrency problems.
+effort: medium
 license: MIT
 metadata:
   version: 1.2.0

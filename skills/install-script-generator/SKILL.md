@@ -1,6 +1,7 @@
 ---
 name: install-script-generator
 description: Generate cross-platform installation scripts for any software, library, or module. Use when users ask to "create an installer", "generate installation script", "automate installation", "setup script for X", "install X on any OS", or need automated deployment across Windows, Linux, and macOS. Generates a standalone install.sh (and optionally install.ps1) that can be run via a single curl/wget one-liner. Follows a four-phase approach — environment exploration, installation planning, script generation, and documentation.
+effort: high
 license: MIT
 metadata:
   version: 2.0.0

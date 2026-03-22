@@ -1,6 +1,7 @@
 ---
 name: cli-builder
 description: Guide users through building a CLI tool for any module or application. Use when users ask to "build a CLI", "create a command-line tool", "add CLI interface", "make this scriptable", "wrap this in a CLI", "add a terminal interface", or mention specific CLI frameworks like argparse, click, typer, commander, yargs, cobra, clap, picocli, or thor. Follows a strict 5-step approval-gated workflow: Analyze -> Design -> Plan -> Execute -> Summarize. Language-agnostic — auto-detects the project's language and recommends appropriate CLI libraries.
+effort: high
 license: MIT
 metadata:
   version: 1.0.0

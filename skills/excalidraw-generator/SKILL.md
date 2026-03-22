@@ -1,6 +1,7 @@
 ---
 name: excalidraw-generator
 description: Generate diagrams and visualizations as Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, org charts, wireframes, C4 models, swimlanes, and more. Trigger when user asks to draw, diagram, visualize, sketch, or chart anything, says "excalidraw", "draw this", "make a diagram of", "visualize this", or shares data/structures that would benefit from visualization. Also suggest when the user describes relationships, flows, or hierarchies even without saying "diagram".
+effort: high
 license: MIT
 metadata:
   version: 1.2.0

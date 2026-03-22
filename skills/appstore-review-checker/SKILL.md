@@ -1,6 +1,7 @@
 ---
 name: appstore-review-checker
 description: Pre-submission audit of iOS/macOS apps against 150+ Apple App Store Review Guidelines. Analyzes source code, project config, metadata, and screenshots to catch rejection risks before you submit. Provides per-guideline verdicts (PASS/FAIL/WARNING/N/A) with specific fix suggestions. Use this skill whenever someone wants to check if their app will pass App Store review, asks about App Store rejection risks, says "will Apple approve this", "check my app for review", "pre-submission audit", "App Store compliance check", "why might my app get rejected", "review guidelines check", or mentions preparing an app for App Store submission — even if they don't say "review guidelines" explicitly. Also trigger when someone is debugging a rejection and wants to know what else might fail.
+effort: high
 ---
 
 # App Store Review Checker

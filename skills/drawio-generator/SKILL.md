@@ -1,6 +1,7 @@
 ---
 name: drawio-generator
 description: Generate diagrams and visualizations as draw.io (diagrams.net) XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, swimlanes, and more. Trigger when user says "draw.io", "drawio", "diagrams.net", ".drawio file", or wants draw.io format. Also trigger when extending existing .drawio files or when context calls for draw.io (corporate environments, Confluence/Jira integration, multi-page diagrams).
+effort: high
 license: MIT
 metadata:
   version: 1.0.1

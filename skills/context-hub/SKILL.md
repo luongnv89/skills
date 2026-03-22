@@ -1,6 +1,7 @@
 ---
 name: context-hub
 description: Use Context Hub (`chub`) to fetch up-to-date third-party API/SDK docs before writing or reviewing integration code. Trigger this skill whenever a task mentions external APIs, SDKs, webhooks, auth flows, or library-specific method usage (OpenAI, Stripe, Anthropic, Pinecone, etc.), even if the user does not explicitly ask for documentation.
+effort: low
 license: MIT
 metadata:
   version: 1.0.0

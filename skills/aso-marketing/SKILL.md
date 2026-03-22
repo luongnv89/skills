@@ -1,6 +1,7 @@
 ---
 name: aso-marketing
 description: Full-lifecycle App Store Optimization (ASO) for mobile apps — keyword strategy, metadata optimization, visual assets, localization, conversion improvement, and store policy compliance for both Apple App Store and Google Play. Use when asked to "optimize my app store listing", "ASO plan", "improve app visibility", "increase app downloads", "keyword strategy", "store listing optimization", "check listing compliance", or any request about making a mobile app more discoverable. Also trigger when user mentions app store rankings, screenshot optimization, or app metadata — even without saying "ASO".
+effort: max
 license: MIT
 metadata:
   version: 1.1.0

@@ -1,6 +1,7 @@
 ---
 name: github-issue-creator
 description: Create or update GitHub issues from screenshots, bug report emails, messages, or any visual/text input. Extracts structured issue data from images or pasted text, detects the repo's issue templates, proposes issues for user approval, then creates or updates them via gh CLI. Use this skill whenever the user shares a screenshot of a bug, pastes an error report, forwards a bug email, wants to file issues from a conversation, says "create an issue from this", "turn this into a GitHub issue", "file a bug for this", "update the issue with this info", or has any visual or textual bug/feature report they want tracked as GitHub issues — even if they just drop an image and say "handle this".
+effort: medium
 ---
 
 # GitHub Issue Creator

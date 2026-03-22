@@ -1,6 +1,7 @@
 ---
 name: vscode-extension-publisher
 description: Publish VS Code extensions to the Visual Studio Marketplace. Use when asked to "publish my extension", "setup VS Code marketplace publishing", "package vscode extension", "create a publisher", "setup PAT for vsce", "automate extension releases with GitHub Actions", or need help with vsce commands.
+effort: high
 license: MIT
 metadata:
   version: 1.0.0

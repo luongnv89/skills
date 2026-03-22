@@ -1,6 +1,7 @@
 ---
 name: note-taker
 description: Capture chat notes (text, voice, image, video, file) into a git-backed notes repo, summarize and organize them, and extract tasks into KANBAN.md. Use when user says they want to take a note, save a note, capture this, or manage their notes/backlog.
+effort: low
 argument-hint: "[optional title or tags]"
 disable-model-invocation: true
 license: MIT

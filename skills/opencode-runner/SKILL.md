@@ -1,6 +1,7 @@
 ---
 name: opencode-runner
 description: Delegate coding tasks to opencode (opencode.ai) using free models. Checks installation, discovers free models, selects the best available one (preferring minimax > kimi > glm > MiMo, with Big Pickle as last resort), executes the task, and monitors progress. Use when asked to "run this with opencode", "use opencode for this", "opencode this task", "delegate to opencode", "run with a free model", or when the user wants to offload a coding task to opencode without paying for API credits. Also trigger when the user mentions opencode, free coding models, or wants a second AI opinion on a coding task.
+effort: medium
 license: MIT
 metadata:
   version: 1.2.0

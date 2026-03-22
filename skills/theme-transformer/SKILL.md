@@ -1,6 +1,7 @@
 ---
 name: theme-transformer
 description: Transform an existing website/app UI into a futuristic cyberpunk, neon, space, or digital-dark theme with user-adjustable colors. Use when asked to "reskin the UI", "apply a dark theme", "cyberpunk style this app", "make the interface futuristic", "apply neon command center style", or migrate a product to a new visual theme.
+effort: medium
 license: MIT
 metadata:
   version: 1.0.0

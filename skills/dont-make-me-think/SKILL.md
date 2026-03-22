@@ -1,6 +1,7 @@
 ---
 name: dont-make-me-think
 description: Review any UI for usability issues using Steve Krug's "Don't Make Me Think" principles, or redesign a UI to be more intuitive. Use this skill whenever the user asks to "review my UI", "check usability", "is this interface confusing", "why do users get lost", "simplify this design", "make this more intuitive", "UX review", "usability audit", "Krug review", "don't make me think", or shares a screenshot/URL/mockup and wants feedback on whether it's easy to use. Also trigger when the user describes user confusion, drop-off, or complaints about a flow being hard to understand — even if they don't mention "usability" explicitly. Works with screenshots, live URLs, HTML/CSS code, wireframes, and verbal descriptions of interfaces.
+effort: medium
 license: MIT
 metadata:
   version: 1.1.0
