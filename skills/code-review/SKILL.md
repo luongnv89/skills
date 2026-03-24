@@ -4,8 +4,9 @@ description: Perform code reviews following best practices from Code Smells and 
 effort: medium
 license: MIT
 metadata:
-  version: 1.0.1
+  version: 1.1.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
+  architecture: subagent (Pattern B+C: Parallel Workers + Review Loop)
 ---
 
 # Code Review
@@ -32,6 +33,137 @@ git stash pop
 ```
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
+## Environment Check
+
+Before proceeding with code review:
+
+1. **Verify Agent tool availability**: Check if `/Agent` subagent system is available
+2. **Codebase scope**: Determine if full audit or PR/diff review
+3. **Context budget**: Estimate file count and total lines to review
+   - Small PR/diff: <50 files, <5000 lines → run inline (fast path)
+   - Medium audit: 50-200 files, 5K-50K lines → use batch processing
+   - Large audit: >200 files, >50K lines → sample entry points and hot paths
+
+## Subagent Architecture
+
+### Pattern: B (Parallel Workers) + C (Review Loop)
+
+For full codebase audits and large PRs, use parallel subagent architecture:
+
+```
+┌─────────────────────────────────┐
+│  Main SKILL (Orchestrator)      │
+│  - Parse scope (PR/audit)       │
+│  - Batch files into groups      │
+│  - Check Agent availability     │
+└──────────────┬──────────────────┘
+               │
+       ┌───────┴───────┬───────────┬─────────────┐
+       │               │           │             │
+       v               v           v             v
+   ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
+   │ Reviewer 1 │ │ Reviewer 2 │ │ Reviewer 3 │ │ Reviewer N │
+   │   Batch 1  │ │   Batch 2  │ │   Batch 3  │ │  Batch N   │
+   │   5-10     │ │   5-10     │ │   5-10     │ │   5-10     │
+   │   files    │ │   files    │ │   files    │ │   files    │
+   │ (parallel) │ │ (parallel) │ │ (parallel) │ │ (parallel) │
+   └─────┬──────┘ └─────┬──────┘ └─────┬──────┘ └─────┬──────┘
+         │              │              │              │
+         │              └──────────────┴──────────────┘
+         │                             │
+         └─────────────────────────────┘
+                     │
+        ┌────────────v────────────────┐
+        │  Report Assembler           │
+        │  - Merge all findings       │
+        │  - Deduplicate issues       │
+        │  - Rank by severity         │
+        │  - Generate CODE_REVIEW.md  │
+        └────────────┬────────────────┘
+                     │
+             ┌───────v────────┐
+             │  Reviewer      │
+             │  Validator     │
+             │  - Fresh eyes  │
+             │  - Verify      │
+             │  - Completeness│
+             └────────────────┘
+```
+
+#### Agent Files
+
+- **agents/file-reviewer.md** — Review a batch of 5-10 files against the full checklist
+  - Returns structured JSON with findings, severity levels, and fix suggestions
+  - Run in parallel on multiple batches
+  - Input: file list, checklist config, language context
+  - Output: JSON with findings array
+
+- **agents/report-assembler.md** — Merge all batch results into one report
+  - Deduplicates findings by (file, line, smell)
+  - Ranks by severity (critical → major → minor → info)
+  - Identifies cross-file patterns (duplicate code, shotgun surgery)
+  - Generates final CODE_REVIEW.md
+  - Input: array of JSON outputs from file-reviewer
+  - Output: Markdown report + validation JSON
+
+- **agents/reviewer.md** — Fresh-context validation pass
+  - Verifies accuracy of all findings
+  - Catches false positives and severity miscategorizations
+  - Identifies missed issues
+  - Returns validation report with corrections
+  - Input: CODE_REVIEW.md + original source files
+  - Output: Validation JSON + updated CODE_REVIEW.md if corrections needed
+
+### Mode Selection & Degradation
+
+**Mode 1: Small PR/Diff (Fast Path - Inline)**
+- Changed files: <50
+- Total lines changed: <5000
+- Process: Run complete review inline in SKILL.md
+- No subagents needed
+- Output: CODE_REVIEW.md in seconds
+
+**Mode 2: Medium Audit (Batched with Subagents)**
+- Files: 50-200
+- Total lines: 5K-50K
+- Process:
+  1. Batch files into groups of 5-10
+  2. Launch parallel file-reviewer agents
+  3. Collect JSON outputs
+  4. Merge with report-assembler
+  5. Validate with reviewer
+- Output: CODE_REVIEW.md with comprehensive findings
+
+**Mode 3: Large Audit (Sampled with Subagents)**
+- Files: >200
+- Total lines: >50K
+- Process:
+  1. Identify and scan entry points (main, index, app files)
+  2. Scan business logic hotspots (most frequently modified)
+  3. Sample distributed files across codebase
+  4. Use parallel batching as in Mode 2
+  5. Full validation pass
+- Output: CODE_REVIEW.md with sampled findings + note about sampling strategy
+
+### Graceful Degradation
+
+If Agent tool unavailable:
+- Fall back to inline execution in main SKILL.md
+- Use sequential file processing instead of parallel batches
+- Return CODE_REVIEW.md without validation pass
+- Log message: "Subagent architecture unavailable; running inline review"
+
+### Risk Mitigation
+
+**Missed cross-file smells**: Report-assembler cross-file analysis partially mitigates by identifying:
+- Duplicate code patterns
+- Shotgun surgery risks
+- Architectural coupling
+
+**Context overflow**: Batching 5-10 files per agent keeps context manageable while maintaining review quality.
+
+**False positives**: Reviewer agent catches most false positives through fresh-context validation before final report.
 
 ## Review Modes
 

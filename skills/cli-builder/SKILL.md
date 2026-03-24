@@ -39,12 +39,15 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 
 ## Branch-First Safety Rule
 
-Before changing any file, create a dedicated branch (repo sync above must have run first):
+Before changing any file, check the current branch. Only create a new branch if on `main` or `master` — otherwise continue on the existing branch (the user likely set it up already or is resuming work):
 
 ```bash
-slug="$(echo "${CLI_NAME:-cli}" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9-')"
-ts="$(date +%Y%m%d-%H%M%S)"
-git checkout -b "feat/cli-${slug}-${ts}"
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+  slug="$(echo "${CLI_NAME:-cli}" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9-')"
+  ts="$(date +%Y%m%d-%H%M%S)"
+  git checkout -b "feat/cli-${slug}-${ts}"
+fi
 ```
 
 ## Mandatory 5-Step Workflow (approval-gated)

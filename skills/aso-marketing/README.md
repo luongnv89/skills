@@ -62,6 +62,11 @@ asm install github:luongnv89/skills:skills/aso-marketing
 
 | Path | Description |
 |---|---|
+| `agents/analyzer.md` | Read codebase and metadata files, produce Phase 1 analysis report |
+| `agents/plan-writer.md` | Generate ASO plan covering keywords, metadata, visuals, and localization |
+| `agents/compliance-checker.md` | Verify all proposed metadata against prohibited keyword and trademark rules |
+| `agents/executor.md` | Implement approved metadata changes into project files |
+| `agents/reviewer.md` | Run Phase 5 review checklist and Phase 6 best-practices verification |
 | `references/aso_best_practices.md` | Comprehensive ASO knowledge base covering keyword strategy, metadata rules, **store policy compliance (prohibited keywords, trademark rules, listing restrictions)**, conversion optimization, localization, and platform-specific techniques for 2025-2026 |
 
 ## Output

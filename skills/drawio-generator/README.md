@@ -7,6 +7,7 @@
 - Supports 25+ diagram types: flowcharts, C4 models, ER diagrams, architecture, swimlanes, and more
 - Multi-page diagrams in a single `.drawio` file (ideal for C4 context/container/component levels)
 - Built-in validation: 9 automated quality checks before writing output
+- Subagent architecture for large diagrams (30+ elements): fresh-context generator, validator, and fixer agents
 - Native `.drawio` format — opens in diagrams.net, VS Code, Confluence, and Jira
 - Multiple color palettes: Professional (draw.io defaults), C4 official, Monochrome
 
@@ -58,6 +59,9 @@ asm install github:luongnv89/skills:skills/drawio-generator
 
 | Path | Description |
 |---|---|
+| `agents/xml-generator.md` | Generate draw.io XML diagrams from user descriptions and requirements |
+| `agents/xml-validator.md` | Validate draw.io XML output against schema and quality standards |
+| `agents/xml-fixer.md` | Repair malformed or invalid draw.io XML files |
 | `references/drawio-format.md` | Complete draw.io XML schema, shapes, styles, and color palettes |
 
 ## Output

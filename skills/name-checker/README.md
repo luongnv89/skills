@@ -4,6 +4,7 @@
 
 ## Highlights
 
+- **Parallel subagents**: 5 agents run searches across social, registries, domains, trademarks independently (~4x speedup)
 - Priority-based checking: social handles, package registries, domains, then trademarks
 - Package registry checks: npm, PyPI, Homebrew, apt — prevent namespace squatting
 - Critical stop rule if exact social handle is already taken
@@ -26,13 +27,17 @@
 graph TD
     A["Check Social Handles"] --> B{"Exact Match Taken?"}
     B -->|Yes| C["Stop & Recommend Alternatives"]
-    B -->|No| D["Check Package Registries"]
-    D --> E["Check Domains"]
-    E --> G["Check Trademarks"]
-    G --> H["Risk Assessment & Report"]
+    B -->|No| D["Parallel Checks"]
+    D --> D1["Check Package Registries"]
+    D --> D2["Check Domains"]
+    D --> D3["Check Trademarks"]
+    D1 --> E["Risk Assessment & Report"]
+    D2 --> E
+    D3 --> E
     style A fill:#4CAF50,color:#fff
     style B fill:#FF9800,color:#fff
-    style H fill:#2196F3,color:#fff
+    style D fill:#FF9800,color:#fff
+    style E fill:#2196F3,color:#fff
 ```
 
 ## Installation
@@ -54,6 +59,16 @@ asm install github:luongnv89/skills:skills/name-checker
 ```
 /name-checker <name>
 ```
+
+## Resources
+
+| Path | Description |
+|---|---|
+| `agents/social-checker.md` | Search 6 social platforms (Twitter, Instagram, GitHub, LinkedIn, TikTok, Discord) in parallel |
+| `agents/registry-checker.md` | Check npm, PyPI, Homebrew, and apt availability with owner info |
+| `agents/domain-checker.md` | Check .com, .io, .app, .co, and regional TLD registration status |
+| `agents/trademark-checker.md` | Search WIPO, EUIPO, and INPI trademark databases for conflicts |
+| `agents/synthesizer.md` | Apply risk matrix and produce final recommendation with alternatives |
 
 ## Output
 

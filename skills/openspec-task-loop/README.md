@@ -4,6 +4,7 @@
 
 ## Highlights
 
+- **Sequential subagents**: 4-stage pipeline (spec → implement → verify → archive) with context accumulation
 - Atomic single-task workflow: one change equals one value unit
 - Spec artifact generation (proposal, design, tasks, specs) before implementation
 - Quality gate validation before archival
@@ -56,6 +57,10 @@ asm install github:luongnv89/skills:skills/openspec-task-loop
 
 | Path | Description |
 |---|---|
+| `agents/spec-scaffolder.md` | Initialize OpenSpec change folder with proposal and spec templates |
+| `agents/implementer.md` | Implement single task from the spec in isolated scope |
+| `agents/verifier.md` | Run quality gate checklist and validate deliverables |
+| `agents/archiver.md` | Merge task completion and archive the change folder |
 | `references/` | OpenSpec OPSX workflow documentation |
 | `scripts/` | Task management and archival scripts |
 

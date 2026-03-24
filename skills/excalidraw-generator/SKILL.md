@@ -4,13 +4,22 @@ description: Generate diagrams and visualizations as Excalidraw JSON files — f
 effort: high
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.1.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Excalidraw Diagram Generator
 
 You generate professional diagrams and visualizations as valid Excalidraw JSON. Every diagram goes through four phases: **Understand** the request, **Propose** options, **Generate** the JSON, and **Validate** it against 10 quality checks before writing the file.
+
+## Environment Check
+
+If the Agent tool is available, use subagents as described in the **Subagent Architecture** section below. This provides fresh-context validation loops and avoids single-pass context overflow for large diagrams.
+
+If the Agent tool is not available (e.g., Claude.ai), execute each phase inline instead:
+- Phase 1 (Understand) & Phase 2 (Propose): Gather requirements directly in conversation
+- Phase 3 (Generate): Generate the JSON in this context
+- Phase 4 (Validate): Self-review the output against the 10 checks (less rigorous, but functional)
 
 ## Core Workflow
 
@@ -246,6 +255,51 @@ After generating the first version, the user may want changes. Common requests:
 - **"More detail"** — break high-level nodes into sub-components
 
 When iterating, read the existing file, modify the JSON, and rewrite. Preserve element IDs that haven't changed so the user's manual edits (if any) in Excalidraw are compatible.
+
+---
+
+## Subagent Architecture
+
+When the diagram complexity exceeds 30 elements, spawn a review loop to ensure quality without single-context degradation:
+
+### Complexity Threshold Check
+
+At the end of Phase 2 (Propose), estimate element count:
+- **Small** (< 10 elements): Proceed inline (Phases 3-4 in main agent context)
+- **Medium** (10-30 elements): Proceed inline with careful validation
+- **Large** (> 30 elements): Spawn subagent review loop (recommended)
+
+### Phase 3: Generate → `json-generator` subagent
+
+Spawn `agents/json-generator.md` with the confirmed plan:
+- Receives: diagram type, elements list, arrows list, style options, complexity estimate
+- Outputs: Complete Excalidraw JSON object with all required fields per element
+- Key constraint: Must size shapes to fit all bound text (Check 10 validation rule)
+
+### Phase 4: Validate → Review Loop (max 3 cycles)
+
+If complexity > 30:
+
+1. **Cycle 1: Fresh Validation**
+   - Spawn `agents/json-validator.md` with generated JSON
+   - Receives: Complete JSON, original plan
+   - Outputs: Structured validation report with PASS/FAIL for all 10 checks
+
+2. **If NEEDS_FIX:**
+   - Spawn `agents/json-fixer.md` with validation report
+   - Receives: Original JSON, fix priorities, cycle number
+   - Outputs: Patched JSON (never regenerated from scratch)
+   - Constraint: Apply only targeted fixes; skip semantic/structure issues (require generator revision)
+
+3. **If still NEEDS_FIX and cycle < 3:**
+   - Return to step 1 (re-validate) with cycle++
+
+4. **If cycle == 3 or PASS:**
+   - Return to main agent for file write or user review
+
+### Fallback (if Agent tool unavailable)
+
+Execute validation inline with self-review against the 10 checks. Less rigorous but functional.
 
 ---
 

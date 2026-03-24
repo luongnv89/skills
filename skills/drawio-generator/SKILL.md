@@ -4,13 +4,22 @@ description: Generate diagrams and visualizations as draw.io (diagrams.net) XML 
 effort: high
 license: MIT
 metadata:
-  version: 1.0.1
+  version: 1.1.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Draw.io Diagram Generator
 
 You generate professional diagrams and visualizations as valid draw.io XML. Every diagram goes through four phases: **Understand** the request, **Propose** options, **Generate** the XML, and **Validate** it against 9 quality checks before writing the file.
+
+## Environment Check
+
+If the Agent tool is available, use subagents as described in the **Subagent Architecture** section below. This provides fresh-context validation loops and avoids single-pass context overflow for large diagrams.
+
+If the Agent tool is not available (e.g., Claude.ai), execute each phase inline instead:
+- Phase 1 (Understand) & Phase 2 (Propose): Gather requirements directly in conversation
+- Phase 3 (Generate): Generate the XML in this context
+- Phase 4 (Validate): Self-review the output against the 9 checks (less rigorous, but functional)
 
 ## Core Workflow
 
@@ -246,4 +255,49 @@ After generating the first version, the user may want changes:
 - **"Add a page"** — add another diagram page
 
 When iterating, read the existing file, modify the XML, and rewrite. Preserve element IDs that haven't changed.
+
+---
+
+## Subagent Architecture
+
+When the diagram complexity exceeds 30 elements, spawn a review loop to ensure quality without single-context degradation:
+
+### Complexity Threshold Check
+
+At the end of Phase 2 (Propose), estimate element count:
+- **Small** (< 10 elements): Proceed inline (Phases 3-4 in main agent context)
+- **Medium** (10-30 elements): Proceed inline with careful validation
+- **Large** (> 30 elements): Spawn subagent review loop (recommended)
+
+### Phase 3: Generate → `xml-generator` subagent
+
+Spawn `agents/xml-generator.md` with the confirmed plan:
+- Receives: diagram type, elements list, edges list, style options, complexity estimate
+- Outputs: Complete draw.io XML with all required shape and edge attributes
+- Key constraint: Must size shapes to fit all text labels
+
+### Phase 4: Validate → Review Loop (max 3 cycles)
+
+If complexity > 30:
+
+1. **Cycle 1: Fresh Validation**
+   - Spawn `agents/xml-validator.md` with generated XML
+   - Receives: Complete XML, original plan
+   - Outputs: Structured validation report with PASS/FAIL for all 9 checks
+
+2. **If NEEDS_FIX:**
+   - Spawn `agents/xml-fixer.md` with validation report
+   - Receives: Original XML, fix priorities, cycle number
+   - Outputs: Patched XML (never regenerated from scratch)
+   - Constraint: Apply only targeted fixes; skip semantic/structure issues (require generator revision)
+
+3. **If still NEEDS_FIX and cycle < 3:**
+   - Return to step 1 (re-validate) with cycle++
+
+4. **If cycle == 3 or PASS:**
+   - Return to main agent for file write or user review
+
+### Fallback (if Agent tool unavailable)
+
+Execute validation inline with self-review against the 9 checks. Less rigorous but functional.
 

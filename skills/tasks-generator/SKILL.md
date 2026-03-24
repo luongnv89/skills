@@ -4,13 +4,55 @@ description: Generate development tasks from a PRD file with sprint-based planni
 effort: max
 license: MIT
 metadata:
-  version: 1.2.2
+  version: 1.1.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Tasks Generator
 
 Transform PRD documents into structured, sprint-based development tasks with dependency analysis.
+
+## Environment Check
+
+Before running this skill, verify:
+- [ ] The project has a PRD file (prd.md or similar)
+- [ ] You have write access to the project directory
+- [ ] The project is a git repository with a remote
+- [ ] You can run bash commands in the project directory
+
+If any check fails, the skill will stop and ask for clarification.
+
+## Subagent Architecture
+
+This skill uses a **Staged Pipeline (E) + Parallel Workers (B)** architecture:
+
+```
+Phase 1: Requirements Extraction
+  ↓ (requirements-extractor agent)
+  ↓
+Phase 2-3: Sprint Planning
+  ↓ (sprint-planner agent)
+  ↓
+Phase 4-5: Parallel Sprint Task Generation
+  ├→ (sprint-worker agents, spawned in parallel — one per sprint)
+  ├→ sprint 1 tasks
+  ├→ sprint 2 tasks
+  ├→ sprint 3 tasks
+  └→ ...
+  ↓
+Phase 6: Cross-Sprint Dependency Resolution
+  ↓ (dependency-resolver agent)
+  ↓
+Final Output: tasks.md with all tasks and dependencies
+```
+
+**Agents**:
+1. `agents/requirements-extractor.md` — Reads PRD + supporting docs, produces structured feature list
+2. `agents/sprint-planner.md` — Defines sprint scope (POC, MVP, full features), produces sprint plan
+3. `agents/sprint-worker.md` — Generates tasks for ONE sprint (runs in parallel, one per sprint)
+4. `agents/dependency-resolver.md` — Wires cross-sprint dependencies, produces final tasks.md
+
+**Key Insight**: Per-sprint task generation is parallelizable. Large PRDs produce 30-80 tasks across 4+ sprints. Sprint tasks are not fully independent — Sprint 2 depends on Sprint 1 output — so the dependency-resolver does a final pass to wire cross-sprint relationships.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:

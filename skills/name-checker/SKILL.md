@@ -12,6 +12,35 @@ metadata:
 
 Check product and brand names for conflicts across trademarks, domains, social media, and package registries (npm, PyPI, Homebrew, apt).
 
+## Subagent Architecture
+
+This skill uses parallel subagents to handle 13+ sequential web fetches across independent sources. **Pattern**: B (Parallel Workers) + D (Research+Synthesis).
+
+### Agents
+
+| Agent | Role | Output |
+|-------|------|--------|
+| **social-checker** | Search 6 platforms (Twitter, Instagram, GitHub, LinkedIn, TikTok, Discord) in parallel | JSON: per-platform availability status |
+| **registry-checker** | Check npm, PyPI, Homebrew, apt availability with owner info | JSON: per-registry status and owner details |
+| **domain-checker** | Check .com, .io, .app, .co, regional TLDs availability | JSON: per-TLD registration status |
+| **trademark-checker** | Search WIPO, EUIPO, INPI trademark databases | JSON: conflict analysis per database |
+| **synthesizer** | Apply risk matrix and produce final recommendation | Markdown + JSON: Risk level, verdict, alternatives |
+
+### Parallelization Strategy
+
+- **Early Exit Logic**: If social-checker finds exact handle taken on main platform, skip steps 2-4 and jump to synthesizer with "Abandon" verdict
+- **Independent Workers**: Registry, domain, trademark checkers run in parallel without dependencies
+- **Sequential Flow**: Social → (if clear) → Parallel {Registry, Domain, Trademark} → Synthesizer
+
+**Speedup**: ~4x faster than sequential approach (13+ web fetches parallelized into 2-3 waves).
+
+## Environment Check
+
+Before executing:
+1. Verify WebSearch and WebFetch tools are available
+2. Confirm internet connectivity for external service queries
+3. Check rate limits on social platforms and registries
+
 ## Repo Sync Before Edits (mandatory)
 
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:

@@ -4,6 +4,7 @@
 
 ## Highlights
 
+- **Parallel research agents**: 5 independent research rounds (tech stack, infrastructure, security, risk, holistic) run concurrently
 - Extract requirements from PRD and conduct 5 research rounds
 - Cover tech stack, infrastructure, security, risks, and holistic review
 - Generate Mermaid architecture diagrams and cost estimates
@@ -54,6 +55,9 @@ asm install github:luongnv89/skills:skills/system-design
 
 | Path | Description |
 |---|---|
+| `agents/prd-reader.md` | Read PRD and supporting docs, produce structured extraction |
+| `agents/tech-researcher.md` | Research one technology domain round (spawned 5x in parallel) |
+| `agents/tad-writer.md` | Generate complete tad.md from all research inputs |
 | `references/tad-template.md` | Technical Architecture Document template |
 | `references/tech-stack.md` | Technology stack patterns and research guide |
 

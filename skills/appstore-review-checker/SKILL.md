@@ -2,6 +2,7 @@
 name: appstore-review-checker
 description: Pre-submission audit of iOS/macOS apps against 150+ Apple App Store Review Guidelines. Analyzes source code, project config, metadata, and screenshots to catch rejection risks before you submit. Provides per-guideline verdicts (PASS/FAIL/WARNING/N/A) with specific fix suggestions. Use this skill whenever someone wants to check if their app will pass App Store review, asks about App Store rejection risks, says "will Apple approve this", "check my app for review", "pre-submission audit", "App Store compliance check", "why might my app get rejected", "review guidelines check", or mentions preparing an app for App Store submission — even if they don't say "review guidelines" explicitly. Also trigger when someone is debugging a rejection and wants to know what else might fail.
 effort: high
+version: 1.1.0
 ---
 
 # App Store Review Checker
@@ -11,6 +12,82 @@ You are an expert App Store compliance auditor. Your job is to analyze an iOS/ma
 ## Why This Matters
 
 Apple rejects roughly 25% of all app submissions. The review process takes days, and each rejection-resubmission cycle can cost a week or more. Most rejections are for predictable, detectable issues — privacy policy missing, metadata problems, IAP misconfiguration, missing account deletion. By catching these before submission, you save developers significant time and frustration.
+
+## Environment Check
+
+This skill has two modes of operation:
+
+**With Subagent Architecture (Recommended):**
+If the Agent tool is available in your environment, the audit runs via a 4-phase subagent workflow for maximum accuracy and depth. See "Subagent Architecture" section below.
+
+**Without Subagent Tool (Fallback):**
+If Agent is not available, the skill still runs a complete audit in a single conversation, though without the structured intermediate data format. The end result (APPSTORE_AUDIT.md report) is the same.
+
+## Subagent Architecture
+
+When the Agent tool is available, this skill uses a 4-phase, multi-agent architecture optimized for large codebases:
+
+### Phase 1: Project Explorer Agent
+**Purpose:** Read all project files and build a structured app-profile.json inventory
+
+This agent:
+- Scans Xcode project configuration (pbxproj, targets, frameworks)
+- Reads Info.plist, entitlements, dependency files (Podfile, Package.swift)
+- Analyzes source code for permission/API usage patterns
+- Creates app-profile.json: a complete machine-readable inventory of the app's capabilities and patterns
+
+**Output artifact:** `<project>/app-profile.json`
+
+### Phase 2: Guideline Auditor Agent
+**Purpose:** Apply 150+ App Store guidelines against the app profile
+
+This agent:
+- Reads app-profile.json
+- Applies each guideline from `references/guidelines.md`
+- Produces per-guideline verdicts: PASS, FAIL, WARNING, or N/A
+- Creates audit-results.json: structured verdicts with evidence and remediation guidance
+
+**Output artifact:** `<project>/audit-results.json`
+
+### Phase 3: Report Writer Agent
+**Purpose:** Format audit results into human-readable markdown report
+
+This agent:
+- Reads audit-results.json
+- Groups FAILs by severity, highlights top rejection triggers
+- Generates APPSTORE_AUDIT.md with verdict summary, critical issues, warnings, and pre-submission checklist
+- Provides actionable fix guidance for each failure
+
+**Output artifact:** `<project>/APPSTORE_AUDIT.md`
+
+### Phase 4: Fixer Agent (Optional)
+**Purpose:** Apply code-level fixes for user-approved failures
+
+This agent:
+- Receives user-approved FAIL guideline IDs from the report
+- Implements fixes in Swift/Objective-C code and Info.plist
+- Handles: missing privacy descriptions, restore purchases, account deletion UI, deprecated APIs, etc.
+- Does NOT touch metadata or entitlements (those require App Store Connect or Xcode)
+
+**Output:** Modified source files with git-ready changes
+
+### Data Flow
+
+```
+Project Files
+    ↓
+[Project Explorer] → app-profile.json
+    ↓
+[Guideline Auditor] → audit-results.json
+    ↓
+[Report Writer] → APPSTORE_AUDIT.md
+    ↓
+(User approves fixes)
+    ↓
+[Fixer] → Source code changes
+```
+
+Each agent is self-contained, with clear responsibilities and structured outputs that can be reviewed independently.
 
 ## Audit Workflow
 

@@ -26,16 +26,18 @@ Read these references when running this skill:
 If the target repo already has local branding docs (for example `docs/branding.md`, `brand.md`, `design-system.md`), read them first and prioritize user/project brand constraints.
 
 ## Mandatory Safety Rule: branch first
-Before changing any file, create a dedicated branch.
+Before changing any file, sync with remote and check the current branch. Only create a new branch if on `main` or `master` — otherwise continue on the existing branch (the user likely set it up already or is resuming work):
 
 ```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
 git fetch origin
-git pull --rebase origin "$branch"
+git pull --rebase origin "$current_branch"
 
-slug="$(echo "${THEME_SLUG:-theme-transform}" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9-')"
-ts="$(date +%Y%m%d-%H%M%S)"
-git checkout -b "design/${slug}-${ts}"
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+  slug="$(echo "${THEME_SLUG:-theme-transform}" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9-')"
+  ts="$(date +%Y%m%d-%H%M%S)"
+  git checkout -b "design/${slug}-${ts}"
+fi
 ```
 
 If pull/rebase conflicts happen, stop and resolve with user before edits.

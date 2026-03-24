@@ -4,13 +4,51 @@ description: Generate Technical Architecture Documents (TAD) from PRD files. Use
 effort: max
 license: MIT
 metadata:
-  version: 1.2.3
+  version: 1.1.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # System Design
 
 Generate comprehensive Technical Architecture Documents with modular design for startups.
+
+## Subagent Architecture
+
+This skill uses parallel research agents with upfront content extraction. **Pattern**: D (Research+Synthesis) + E (Staged Pipeline).
+
+### Agents
+
+| Agent | Role | Parallelization |
+|-------|------|-----------------|
+| **prd-reader** | Read PRD + supporting docs, return structured extraction | Sequential (only once) |
+| **tech-researcher** | Handle one research round (spawned 5x in parallel) | Parallel (5 instances) |
+| **tad-writer** | Generate complete tad.md from all inputs | Sequential (after all research) |
+
+### Research Rounds (5 Parallel)
+
+- **Round 1**: Technology Stack validation (React, Node.js, PostgreSQL, Elasticsearch)
+- **Round 2**: Infrastructure validation (Vercel, AWS, CDN, cost estimation)
+- **Round 3**: Security review (auth, encryption, compliance, API security)
+- **Round 4**: Risk assessment (bottlenecks, vendor lock-in, team gaps)
+- **Round 5**: Holistic review (PRD alignment, team capability, quick wins)
+
+### Parallelization Strategy
+
+- **PRD Content**: Extracted once by prd-reader, stays out of main context
+- **Research Independence**: Each round researches conceptually different angle (tech vs. infra vs. security)
+- **Reasoning Isolation**: Parallel rounds keep each area's reasoning isolated, prevent groupthink
+- **Note**: Research rounds are conceptual reasoning, not data fetching — parallel rounds won't produce fundamentally different info, but isolation improves quality
+
+**Result**: All 5 rounds complete concurrently, tad-writer synthesizes outputs into unified TAD.
+
+## Environment Check
+
+Before executing:
+1. Verify prd.md exists in project directory
+2. Check for supporting docs (idea.md, validate.md) if available
+3. Confirm WebSearch and WebFetch tools available for research
+4. Verify write permissions to project root for tad.md creation
+5. Ensure git access for final commit
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:

@@ -7,6 +7,7 @@
 - Supports 25+ diagram types across 8 categories (flow, architecture, data, planning, comparison, charts, UX, custom)
 - Interactive workflow: analyzes input, proposes visualization type with selectable options, iterates until clear
 - Built-in validation: 10 automated quality checks with auto-fix before writing output
+- Subagent architecture for large diagrams (30+ elements): fresh-context generator, validator, and fixer agents
 - Outputs native `.excalidraw` files by default (can embed in `.md` on request)
 - Automatically extracts structure from code, SQL, config files, or plain descriptions
 - Multiple color palettes: professional, pastel, monochrome
@@ -74,6 +75,9 @@ asm install github:luongnv89/skills:skills/excalidraw-generator
 
 | Path | Description |
 |---|---|
+| `agents/json-generator.md` | Generate Excalidraw JSON diagrams from user descriptions and requirements |
+| `agents/json-validator.md` | Validate Excalidraw JSON output against schema and quality standards |
+| `agents/json-fixer.md` | Repair malformed or invalid Excalidraw JSON files |
 | `references/excalidraw-format.md` | Complete Excalidraw JSON schema and element reference |
 | `references/diagram-types.md` | All supported diagram types with layout guidance |
 

@@ -49,6 +49,14 @@ asm install github:luongnv89/skills:skills/logo-designer
 /logo-designer
 ```
 
+## Resources
+
+| Path | Description |
+|---|---|
+| `agents/brand-researcher.md` | Read project files to produce structured brand brief |
+| `agents/svg-generator.md` | Generate all 7 SVG logo files (full, mark, wordmark, icon, favicon, white, black) |
+| `agents/svg-reviewer.md` | Validate SVG structure, completeness, and compatibility |
+
 ## Output
 
 - 7 SVG files in `/assets/logo/` (full, mark, wordmark, icon, favicon, white, black)

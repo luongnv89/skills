@@ -8,6 +8,56 @@ metadata:
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
+## Environment Check
+
+Before running this skill, verify:
+- [ ] The project is a mobile app (iOS/Android or both)
+- [ ] You have access to the app's source code or metadata files
+- [ ] You can read project configuration files (build.gradle, Info.plist, etc.)
+- [ ] You can create/update metadata files in the project directory
+- [ ] You have write access to create files
+
+If any check fails, the skill will stop and ask for clarification.
+
+## Subagent Architecture
+
+This skill uses a **Staged Pipeline (E) + Review Loop (C)** architecture:
+
+```
+Phase 1: Analysis
+  ↓ (analyzer agent)
+  ↓
+Phase 2: Plan Writing
+  ↓ (plan-writer agent)
+  ↓
+Phase 3: Compliance Checking
+  ↓ (compliance-checker agent)
+  ↓
+[User Approval Gate] ← Main agent orchestrates
+  ↓
+Phase 4: Execution
+  ↓ (executor agent)
+  ↓
+Phase 5-6: Review + Best-Practices Verification
+  ↓ (reviewer agent)
+  ↓
+Phase 7: Summarize
+  ↓ (main agent)
+  ↓
+Final Output: ASO Summary Report + Updated Metadata Files
+```
+
+**Agents**:
+1. `agents/analyzer.md` — Reads codebase + metadata files, produces Phase 1 analysis report
+2. `agents/plan-writer.md` — Generates ASO plan (keywords, metadata, visuals, localization)
+3. `agents/compliance-checker.md` — Verifies all metadata against prohibited keywords/trademark rules
+4. `agents/executor.md` — Implements approved metadata changes into project files
+5. `agents/reviewer.md` — Runs Phase 5 review checklist + Phase 6 best-practices verification
+
+**Key Insight**: One of the most context-heavy skills (7-phase pipeline, heavy file reads). Each phase maps to a subagent. Main agent orchestrates phase transitions and manages the critical user approval gate after Phase 3 compliance check.
+
+---
+
 # ASO Marketing — Full-Lifecycle App Store Optimization
 
 A comprehensive, iterative ASO workflow that takes your mobile app from analysis through planning, execution, verification, and reporting — covering both Apple App Store and Google Play Store.

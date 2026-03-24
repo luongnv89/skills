@@ -56,6 +56,10 @@ asm install github:luongnv89/skills:skills/seo-ai-optimizer
 
 | Path | Description |
 |---|---|
+| `agents/auditor.md` | Scan codebase and generate comprehensive SEO & AI bot audit report |
+| `agents/researcher.md` | Identify framework-specific best practices and improvement opportunities |
+| `agents/implementer.md` | Apply SEO fixes (meta tags, robots.txt, llms.txt, structured data, sitemaps) |
+| `agents/validator.md` | Validate fixes and confirm improvements in generated report |
 | `references/` | Framework-specific configs and SEO checklists |
 | `scripts/` | Automated scanning and validation scripts |
 

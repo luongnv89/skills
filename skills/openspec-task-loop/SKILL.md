@@ -4,11 +4,40 @@ description: Apply OpenSpec OPSX in a strict one-task-at-a-time loop. Use when t
 effort: medium
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # OpenSpec Task Loop
+
+## Subagent Architecture
+
+This skill uses a strictly sequential pipeline of subagents, where each iteration accumulates context and depends on the previous step. **Pattern**: E (Staged Pipeline) + C (Review Loop).
+
+### Agents
+
+| Agent | Role | Trigger |
+|-------|------|---------|
+| **spec-scaffolder** | Create all OpenSpec artifacts (proposal.md, design.md, tasks.md, specs/) | After task selection |
+| **implementer** | Implement scoped task, update checkboxes, run validation | After spec scaffolding |
+| **verifier** | Independently check quality gate: scope atomicity, acceptance criteria, spec-to-test alignment | After implementation complete |
+| **archiver** | Merge spec deltas, move to archive, update parent tasks.md | After verification passed |
+
+### Sequential Dependency
+
+- **No Parallelism**: Step N+1 depends on Step N completion
+- **Context Accumulation**: Each agent reads previous artifacts and extends understanding
+- **Quality Gates**: Verifier ensures each stage is solid before proceeding
+
+**Why Sequential**: Multiple task iterations (5-10) degrade reasoning quality significantly without this staged approach. Each step builds confidence and catches issues early.
+
+## Environment Check
+
+Before executing:
+1. Verify git access to repository
+2. Confirm write permissions to openspec/ directory
+3. Check for existing task lists in project root (tasks.md)
+4. Ensure references/openspec-task-templates.md is available
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:

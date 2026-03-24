@@ -54,6 +54,10 @@ asm install github:luongnv89/skills:skills/tasks-generator
 
 | Path | Description |
 |---|---|
+| `agents/requirements-extractor.md` | Read PRD and produce structured feature and requirement list |
+| `agents/sprint-planner.md` | Define sprint scope (POC, MVP, full features) and produce sprint plan |
+| `agents/sprint-worker.md` | Generate tasks for a single sprint (runs in parallel, one per sprint) |
+| `agents/dependency-resolver.md` | Wire cross-sprint dependencies and produce final tasks.md |
 | `references/tasks-template.md` | Task format template and sprint structure |
 
 ## Output

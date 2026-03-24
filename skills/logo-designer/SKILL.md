@@ -4,8 +4,46 @@ description: Design professional, modern logos with automatic project context de
 effort: medium
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.1.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
+---
+
+## Environment Check
+
+Before running this skill, verify:
+- [ ] You're in a project directory with a README or package.json
+- [ ] You have write access to create `/assets/logo/` directory
+- [ ] The project directory is a git repository (optional, but recommended)
+
+If any check fails, the skill will stop and ask for clarification.
+
+## Subagent Architecture
+
+This skill uses an **Explorer+Executor (A) + Review Loop (C)** architecture:
+
+```
+Phase 1: Brand Research
+  ↓ (brand-researcher agent)
+  ↓
+Phase 2-3: SVG Generation (Interactive Style Selection)
+  ↓ Main agent: interactive style selection with user
+  ↓
+Phase 3: Generate All 7 SVGs
+  ↓ (svg-generator agent)
+  ↓
+Phase 4: SVG Validation
+  ↓ (svg-reviewer agent)
+  ↓
+Final Output: 7 SVG files in /assets/logo/ + Design Rationale
+```
+
+**Agents**:
+1. `agents/brand-researcher.md` — Reads project files, produces structured brand brief
+2. `agents/svg-generator.md` — Generates all 7 SVG files (mark, wordmark, full, icon, favicon, white, black)
+3. `agents/svg-reviewer.md` — Validates SVG structure (viewBox, no rasters, all files present, correct names)
+
+**Key Insight**: 7 SVG files generated inline is the single biggest context cost. Brand research across multiple project files adds to the burden. The reviewer acts as a quality gate to catch SVG structure issues before files are committed.
+
 ---
 
 # Logo Designer
