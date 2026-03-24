@@ -4,13 +4,39 @@ description: Complete release automation — version bumping, changelog generati
 effort: max
 license: MIT
 metadata:
-  version: 2.2.0
+  version: 2.3.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Release Manager
 
 Automate the entire release lifecycle: version bump, changelog, README update, documentation sync, build, git tag, GitHub release, and publishing to PyPI/npm.
+
+## Architecture
+
+This skill uses a **main-agent-as-orchestrator** pattern. The main agent handles user communication, confirmation gates, and lightweight steps. Heavy work (scanning files, generating changelogs, updating docs) is delegated to subagents that run in isolated context — keeping the main conversation clean and enabling parallel execution.
+
+```
+Main Agent (orchestrator)
+├── Step 1: Pre-flight checks (inline)
+├── Step 2: Determine version (inline — needs user input)
+│
+├── Steps 3-6: Spawn subagents in parallel ──────────────┐
+│   ├── version-bumper    — scan & propose version changes │
+│   ├── changelog-generator — generate changelog from git  │
+│   └── docs-updater      — find & propose doc updates     │
+│                                                          │
+├── Collect results, present to user for confirmation  ◄───┘
+├── Spawn: release-reviewer — independent quality check
+│
+├── Step 7: Build (inline — needs user confirmation)
+├── Step 8: Commit, tag, push (inline — needs user confirmation)
+├── Step 9: GitHub Release (inline — needs user confirmation)
+└── Step 10: Publish to registries (inline — needs user confirmation)
+```
+
+### Graceful degradation
+If the Agent tool is not available (e.g., Claude.ai), execute steps 3-6 inline instead of spawning subagents. Follow the same logic described in each agent file, but run it directly in the main conversation. This is less context-efficient but functionally identical.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -39,10 +65,10 @@ A release typically involves these steps in order. Some are optional depending o
 
 1. **Pre-flight checks** — clean working tree, synced with remote
 2. **Determine version** — analyze changes, suggest semver bump
-3. **Bump version numbers** — update all files that contain the version
-4. **Generate changelog / release notes** — from git history and PRs
-5. **Update README** — insert changelog entry or update version badges
-6. **Update documentation** — sync all project docs with the release changes
+3. **Bump version numbers** — *(subagent)* scan and propose version changes
+4. **Generate changelog / release notes** — *(subagent)* from git history and PRs
+5. **Update README** — *(subagent, combined with docs)* version badges, changelog entries
+6. **Update documentation** — *(subagent)* sync all project docs
 7. **Build** — run the project's build step if one exists
 8. **Commit, tag, push** — create the release commit and tag
 9. **GitHub Release** — publish on GitHub with release notes
@@ -50,7 +76,7 @@ A release typically involves these steps in order. Some are optional depending o
 
 ---
 
-## Step 1: Pre-flight Checks
+## Step 1: Pre-flight Checks (inline)
 
 Verify the repo is in a clean state before starting:
 
@@ -68,9 +94,23 @@ git status -sb
 
 If there are uncommitted changes, ask the user whether to stash them, commit them first, or abort. Do not silently discard work.
 
+### Check for existing release tools
+
+Before proceeding with manual steps, check if the project already uses a release tool:
+
+```bash
+# package.json scripts
+grep -E '"(release|version|publish)"' package.json 2>/dev/null
+
+# Config files
+ls .releaserc* .changeset/ .versionrc* lerna.json 2>/dev/null
+```
+
+If found, tell the user: "This project uses `<tool>`. I'll run its release command instead of manual steps." and defer to that tool.
+
 ---
 
-## Step 2: Determine Version
+## Step 2: Determine Version (inline)
 
 ### Analyze changes since last release
 
@@ -96,209 +136,72 @@ Based on conventional commits:
 
 Present the suggestion: "Based on N features, M fixes, and K breaking changes since vX.Y.Z, I recommend bumping to **vA.B.C**. Does that look right?"
 
-Always let the user override the version number.
+Always let the user override the version number. When in doubt, lean toward MINOR over PATCH — features are easy to miss in commit messages.
 
 ---
 
-## Step 3: Bump Version Numbers
+## Steps 3-6: Parallel Subagent Execution
 
-Search the project for all files that contain the current version string and update them. Common locations:
+Once the user confirms the version number, create a workspace directory and spawn three subagents in the same turn (parallel execution). This is where the orchestrator pattern pays off — all three agents work simultaneously in isolated context while the main conversation stays clean.
 
-| File | Pattern |
-|------|---------|
-| `package.json` | `"version": "X.Y.Z"` |
-| `pyproject.toml` | `version = "X.Y.Z"` |
-| `setup.py` / `setup.cfg` | `version='X.Y.Z'` or `version = X.Y.Z` |
-| `Cargo.toml` | `version = "X.Y.Z"` |
-| `build.gradle` / `build.gradle.kts` | `version = 'X.Y.Z'` |
-| `pom.xml` | `<version>X.Y.Z</version>` |
-| `*.md` frontmatter | `version: X.Y.Z` |
-| `VERSION` file | Plain version string |
-| `__version__` in Python | `__version__ = "X.Y.Z"` |
-| `Info.plist` | `<string>X.Y.Z</string>` under CFBundleShortVersionString |
+### Setup workspace
 
-### Strategy
+```bash
+WORKSPACE="/tmp/release-workspace-$(date +%s)"
+mkdir -p "$WORKSPACE"/{version-bumper,changelog-generator,docs-updater}
+```
 
-1. Find the previous version tag (strip the `v` prefix if present)
-2. Search for that version string across the project
-3. Show the user which files will be updated and the exact changes
-4. Apply changes only after user confirmation
+### Spawn subagents (all in the same turn)
 
-Be careful not to change version strings that refer to dependency versions or unrelated software. Only update the project's own version.
+**1. Version Bumper** — Read `agents/version-bumper.md` for the full prompt. Spawn with:
+- `PROJECT_PATH`: the project root
+- `OLD_VERSION`: confirmed old version
+- `NEW_VERSION`: confirmed new version
+- `OUTPUT_DIR`: `$WORKSPACE/version-bumper`
+
+**2. Changelog Generator** — Read `agents/changelog-generator.md` for the full prompt. Spawn with:
+- `PROJECT_PATH`: the project root
+- `OLD_VERSION`: confirmed old version
+- `NEW_VERSION`: confirmed new version
+- `OUTPUT_DIR`: `$WORKSPACE/changelog-generator`
+
+**3. Docs Updater** — Read `agents/docs-updater.md` for the full prompt. Spawn with:
+- `PROJECT_PATH`: the project root
+- `OLD_VERSION`: confirmed old version
+- `NEW_VERSION`: confirmed new version
+- `CHANGELOG_SUMMARY`: brief summary of changes from Step 2 analysis (e.g., "3 features, 2 fixes, 0 breaking changes")
+- `OUTPUT_DIR`: `$WORKSPACE/docs-updater`
+
+### Collect and present results
+
+After all three subagents complete, read their output files and present a consolidated summary to the user:
+
+1. **Version changes** — read `$WORKSPACE/version-bumper/version-changes.md` and show which files will be updated
+2. **Changelog** — read `$WORKSPACE/changelog-generator/changelog-entry.md` and show the formatted entry
+3. **Doc updates** — read `$WORKSPACE/docs-updater/docs-changes.md` and show proposed documentation changes
+
+Present all three together: "Here's the full picture of what this release will change. Review and confirm, or tell me what to adjust."
+
+### Independent review (optional but recommended)
+
+After the user has seen the proposed changes, spawn the release-reviewer subagent for an independent quality check. Read `agents/release-reviewer.md` for the full prompt. Spawn with:
+- `PROJECT_PATH`: the project root
+- `WORKSPACE_DIR`: `$WORKSPACE`
+- `OLD_VERSION`: confirmed old version
+- `NEW_VERSION`: confirmed new version
+
+If the reviewer returns `NEEDS_FIX`, present the issues to the user and address them before proceeding. If `PASS`, continue.
+
+### Apply changes
+
+Only after user confirmation, apply all changes:
+1. Update version strings in all files identified by the version-bumper
+2. Prepend the changelog entry to `CHANGELOG.md` (create the file with a `# Changelog` header if it doesn't exist). Do NOT create or update a `RELEASE_NOTES.md` file
+3. Apply documentation updates identified by the docs-updater
 
 ---
 
-## Step 4: Generate Changelog / Release Notes
-
-### Gather changes
-
-Run in parallel:
-
-```bash
-# Commits since last tag
-git log <old-tag>..HEAD --pretty=format:"%h %s (%an)" --no-merges
-
-# Merge commits (PRs)
-git log <old-tag>..HEAD --merges --pretty=format:"%h %s"
-```
-
-If this is a GitHub repo with `gh` available:
-
-```bash
-# Merged PRs since last release
-gh pr list --state merged --base main --json number,title,labels,author --limit 100
-
-# Closed issues
-gh issue list --state closed --json number,title,labels --limit 50
-```
-
-### Categorize
-
-Group changes by type based on commit prefixes and PR labels:
-
-| Category | Commit Prefixes | PR Labels |
-|----------|-----------------|-----------|
-| **Breaking Changes** | `BREAKING:`, `!:` | `breaking-change` |
-| **Features** | `feat:`, `feature:` | `enhancement`, `feature` |
-| **Bug Fixes** | `fix:`, `bugfix:` | `bug`, `fix` |
-| **Performance** | `perf:` | `performance` |
-| **Documentation** | `docs:` | `documentation` |
-| **Dependencies** | `deps:`, `chore(deps):` | `dependencies` |
-| **Other** | `chore:`, `refactor:`, `style:`, `test:`, `ci:` | — |
-
-### Format
-
-Generate the release notes entry:
-
-```markdown
-## vX.Y.Z — YYYY-MM-DD
-
-### Breaking Changes
-- Description of breaking change (#PR) @author
-
-### Features
-- Add new feature X (#123) @author
-
-### Bug Fixes
-- Fix issue with Z (#125) @author
-
-### Performance
-- Improve loading speed by 50% (#126) @author
-
-### Documentation
-- Update README with new examples (#127) @author
-
-### Dependencies
-- Bump package-name from 1.0 to 2.0 (#128)
-
-### Other Changes
-- Refactor internal APIs (#129) @author
-
-### New Contributors
-- @username made their first contribution in #123
-
-**Full Changelog**: https://github.com/OWNER/REPO/compare/vOLD...vNEW
-```
-
-Omit empty sections. Link PR numbers. Credit authors. Highlight breaking changes first with upgrade instructions if applicable.
-
----
-
-## Step 5: Update Project Files
-
-### CHANGELOG.md
-
-If the project has a `CHANGELOG.md`, prepend the new entry at the top (below any header). If it does not exist, create `CHANGELOG.md` with a `# Changelog` header and add the new entry below it. Do NOT create or update a `RELEASE_NOTES.md` file.
-
-Keep previous entries intact — only add the new version at the top.
-
-### README.md
-
-Look for version-related content in the README and update it:
-
-- Version badge: `![Version](https://img.shields.io/badge/version-X.Y.Z-blue)`
-- Version numbers in a packages/skills table
-- "Latest Release" or "What's New" section
-- Any hardcoded version strings that refer to the project's own version
-
-Show the user the proposed changes before applying.
-
----
-
-## Step 6: Update Documentation
-
-Update all project documentation to reflect the new version and changes. This happens before the release commit so that documentation is included in the tagged release.
-
-### Discover documentation files
-
-```bash
-# Find all documentation files in the project
-find . -maxdepth 4 \( -name "*.md" -o -name "*.rst" -o -name "*.txt" \) \
-  ! -path "./.git/*" ! -path "*/node_modules/*" ! -path "*/venv/*" \
-  ! -name "CHANGELOG.md" ! -name "LICENSE*" | head -50
-
-# Check for a dedicated docs directory
-ls -d docs/ doc/ documentation/ wiki/ site/ 2>/dev/null
-
-# Check for documentation site generators
-ls mkdocs.yml .readthedocs.yml docusaurus.config.js docs/.vitepress/ conf.py 2>/dev/null
-```
-
-### Identify docs that reference the version or changed features
-
-```bash
-# Find docs referencing the old version
-grep -rl "<old-version>" docs/ *.md 2>/dev/null
-
-# Find docs referencing APIs, features, or modules that changed in this release
-# Use the list of changed files/features from the changelog
-grep -rl "<changed-feature-or-module>" docs/ *.md 2>/dev/null
-```
-
-### Update documentation content
-
-For each relevant documentation file:
-
-1. **Version references** — update any hardcoded version strings (installation instructions, compatibility matrices, migration guides)
-2. **API documentation** — if public APIs changed, update usage examples, parameter descriptions, and return values
-3. **Installation / getting-started guides** — update install commands (`pip install pkg==X.Y.Z`, `npm install pkg@X.Y.Z`)
-4. **Migration / upgrade guides** — if there are breaking changes, add or update a migration guide section with clear before/after examples
-5. **Feature documentation** — add docs for new features, update docs for changed features, remove docs for deprecated/removed features
-6. **Configuration references** — update any new config options, environment variables, or CLI flags introduced in the release
-7. **Screenshots / diagrams** — flag any that may be outdated due to UI or architectural changes
-
-### Confirm with the user
-
-Show the user a summary of all documentation changes before applying:
-
-"I found N documentation files that need updates:
-- `docs/install.md` — version string in install command
-- `docs/api.md` — new parameter added to `createWidget()`
-- `README.md` — already updated in Step 5
-
-Should I apply these changes?"
-
-### Rebuild documentation site (if applicable)
-
-```bash
-# MkDocs
-[ -f mkdocs.yml ] && mkdocs build
-
-# Sphinx
-[ -f conf.py ] && make html
-
-# Docusaurus
-[ -f docusaurus.config.js ] && npm run build
-
-# VitePress
-[ -d docs/.vitepress ] && npm run docs:build
-```
-
-If the docs site has a separate deployment step (e.g., `mkdocs gh-deploy`, Netlify, Vercel), inform the user but do not trigger deployment without explicit confirmation.
-
----
-
-## Step 7: Build (if applicable)
+## Step 7: Build (inline)
 
 Check if the project has a build step:
 
@@ -321,7 +224,7 @@ If no build step is detected, skip this step and tell the user.
 
 ---
 
-## Step 8: Commit, Tag, Push
+## Step 8: Commit, Tag, Push (inline)
 
 ### Create the release commit
 
@@ -351,7 +254,7 @@ git push origin vX.Y.Z
 
 ---
 
-## Step 9: GitHub Release
+## Step 9: GitHub Release (inline)
 
 If `gh` CLI is available and this is a GitHub repo, offer to create a GitHub release:
 
@@ -376,7 +279,7 @@ After creating the release, share the release URL with the user.
 
 ---
 
-## Step 10: Publish to Package Registries
+## Step 10: Publish to Package Registries (inline)
 
 If the project publishes to PyPI and/or npm, read `references/publishing.md` for the full publishing workflow including pre-requisites, build, verify, upload, and post-publish verification steps.
 
@@ -394,24 +297,17 @@ After the release is complete, remind the user about common post-release tasks:
 
 ---
 
-## Existing Release Tools
-
-If the project already uses a release tool (e.g., `semantic-release`, `changesets`, `release-it`, `standard-version`, `lerna`), detect it and defer to that tool rather than running manual steps. Check for:
-
-```bash
-# package.json scripts
-grep -E '"(release|version|publish)"' package.json 2>/dev/null
-
-# Config files
-ls .releaserc* .changeset/ .versionrc* lerna.json 2>/dev/null
-```
-
-If found, tell the user: "This project uses `<tool>`. I'll run its release command instead of manual steps."
-
 ## Tips
 
 - Always confirm destructive or visible actions (push, release creation) with the user
 - For monorepos with multiple packages, handle each package's version independently
 - Respect existing CHANGELOG format — don't reformat the entire file, just add the new entry
-- When in doubt about the version bump, lean toward MINOR over PATCH — features are easy to miss in commit messages
 - If a release goes wrong mid-way, help the user roll back: delete the tag locally and remotely, revert the commit
+
+## Reference files
+
+- `agents/version-bumper.md` — Subagent prompt for scanning and proposing version string changes
+- `agents/changelog-generator.md` — Subagent prompt for generating categorized changelog from git history
+- `agents/docs-updater.md` — Subagent prompt for discovering and proposing documentation updates
+- `agents/release-reviewer.md` — Subagent prompt for independent quality review of all release changes
+- `references/publishing.md` — Full publishing workflow for PyPI and npm

@@ -4,15 +4,15 @@
 
 ## Highlights
 
+- Subagent architecture: heavy work (scanning, changelog, docs) runs in parallel via isolated subagents
 - Analyze commits to suggest the right semver bump (major/minor/patch)
 - Bump version numbers across all project files automatically
 - Generate categorized changelog from git history and GitHub PRs
-- Update README with new version info and changelog entries
-- Run project build step if one exists
+- Independent quality review of all release changes before commit
 - Create git tags, push, and publish GitHub Releases with artifacts
-- Sync all project documentation with the release changes
 - Publish to PyPI and/or npm registries
 - Detect and defer to existing release tools (semantic-release, changesets, etc.)
+- Graceful degradation: works without Agent tool (inline execution on Claude.ai)
 
 ## When to Use
 
@@ -33,16 +33,19 @@
 ```mermaid
 graph TD
     A["Pre-flight Checks"] --> B["Determine Version"]
-    B --> C["Bump Version Numbers"]
-    C --> D["Generate Changelog"]
-    D --> E["Update README"]
-    E --> F["Update Documentation"]
-    F --> G["Build (if needed)"]
-    G --> H["Commit, Tag, Push"]
-    H --> I["GitHub Release"]
-    I --> J["Publish to PyPI/npm"]
+    B --> C["Spawn Parallel Subagents"]
+    C --> D["Version Bumper"]
+    C --> E["Changelog Generator"]
+    C --> F["Docs Updater"]
+    D --> G["Collect & Present Results"]
+    E --> G
+    F --> G
+    G --> H["Release Reviewer"]
+    H --> I["Build, Commit, Tag, Push"]
+    I --> J["GitHub Release & Publish"]
     style A fill:#4CAF50,color:#fff
     style J fill:#2196F3,color:#fff
+    style C fill:#FF9800,color:#fff
 ```
 
 ## Installation
@@ -65,11 +68,19 @@ asm install github:luongnv89/skills:skills/release-manager
 /release-manager
 ```
 
+## Resources
+
+| Path | Description |
+|---|---|
+| `agents/` | Subagent prompts: version-bumper, changelog-generator, docs-updater, release-reviewer |
+| `references/` | Publishing workflows for PyPI and npm |
+
 ## Output
 
 - Updated version numbers across all project files
 - `CHANGELOG.md` with categorized changes
 - Updated `README.md` with version info
+- Independent quality review of all changes
 - Git commit tagged with the new version
 - GitHub Release with release notes and optional build artifacts
 - Synced project documentation (API docs, guides, migration notes)

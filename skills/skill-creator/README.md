@@ -5,6 +5,7 @@
 ## Highlights
 
 - Iterative skill loop: draft, test prompts, evaluate, refine
+- Subagent architecture guidance: design skills that delegate heavy work to subagents, keeping the main agent lean
 - Quantitative + qualitative eval workflow with baseline comparison
 - Benchmark aggregation, variance analysis, and report tooling
 - Description optimization flow to improve triggering accuracy
@@ -15,22 +16,24 @@
 | Say this... | Skill will... |
 |---|---|
 | "Create a skill for X" | Interview you, draft SKILL.md + README.md, run test cases |
-| "Improve this skill" | Run evals, collect feedback, iterate on the skill |
+| "Improve this skill" | Run evals, collect feedback, suggest subagent restructuring, iterate |
 | "Run evals for my skill" | Execute test prompts, grade results, show benchmark |
 | "Optimize skill triggering" | Generate trigger eval queries, run optimization loop |
+| "This skill is too slow / bloated" | Analyze for subagent refactoring opportunities |
 
 ## How It Works
 
 ```mermaid
 graph TD
-    A["Capture Intent & Interview"] --> B["Draft SKILL.md + README.md"]
-    B --> C["Run Test Cases & Baselines"]
-    C --> D["Evaluate: Viewer + Benchmarks"]
-    D --> E["Iterate Based on Feedback"]
-    E --> C
-    E --> F["Optimize Description & Package"]
+    A["Capture Intent & Interview"] --> B["Assess Subagent Architecture"]
+    B --> C["Draft SKILL.md + agents/ + README.md"]
+    C --> D["Run Test Cases & Baselines"]
+    D --> E["Evaluate: Viewer + Benchmarks"]
+    E --> F["Iterate & Refactor"]
+    F --> D
+    F --> G["Optimize Description & Package"]
     style A fill:#4CAF50,color:#fff
-    style F fill:#2196F3,color:#fff
+    style G fill:#2196F3,color:#fff
 ```
 
 ## Installation
@@ -58,11 +61,11 @@ asm install github:luongnv89/skills:skills/skill-creator
 | Path | Description |
 |---|---|
 | `scripts/` | Eval loop, benchmarking, packaging, validation utilities |
-| `references/` | Evals schema reference |
+| `references/` | Evals schema, subagent patterns, workflow patterns |
 | `eval-viewer/` | Generate/view review pages for eval results |
 | `agents/` | Analyzer, comparator, and grader agent prompts |
 | `assets/` | Viewer template assets |
 
 ## Output
 
-Produces complete skill packages (SKILL.md + README.md), eval results with benchmark reports, and optimized skill descriptions for accurate triggering.
+Produces complete skill packages (SKILL.md + README.md + agents/), eval results with benchmark reports, subagent restructuring recommendations, and optimized skill descriptions for accurate triggering.

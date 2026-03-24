@@ -4,7 +4,7 @@ description: Create new skills, modify and improve existing skills, and measure 
 effort: max
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -71,6 +71,12 @@ Start by understanding the user's intent. The current conversation might already
 2. When should this skill trigger? (what user phrases/contexts)
 3. What's the expected output format?
 4. Should we set up test cases to verify the skill works? Skills with objectively verifiable outputs (file transforms, data extraction, code generation, fixed workflow steps) benefit from test cases. Skills with subjective outputs (writing style, art) often don't need them. Suggest the appropriate default based on the skill type, but let the user decide.
+5. **Should this skill use subagents?** Evaluate whether the skill would benefit from delegating work to subagents via the Agent tool. Read `references/subagent-patterns.md` for the full guide, but the key signals are:
+   - Will the skill read many files or scan large codebases? → Explorer subagent
+   - Can parts of the work run in parallel? → Parallel worker subagents
+   - Does the skill need independent quality review? → Review loop with fresh subagents
+   - Will the skill produce large artifacts that require focused reasoning? → Executor subagent
+   If any of these apply, design the skill with a main-agent-as-orchestrator architecture where the main agent handles user communication and coordination, and subagents handle the heavy lifting. This keeps the main conversation context clean.
 
 ### Interview and Research
 
@@ -98,11 +104,17 @@ skill-name/
 │   ├── YAML frontmatter (name, description required)
 │   └── Markdown instructions
 ├── README.md (required — human-readable docs for catalog browsing)
+├── agents/ (optional — subagent prompt files)
+│   ├── explorer.md   - Codebase analysis subagent
+│   ├── executor.md   - Implementation subagent
+│   └── reviewer.md   - Quality review subagent
 └── Bundled Resources (optional)
     ├── scripts/    - Executable code for deterministic/repetitive tasks
     ├── references/ - Docs loaded into context as needed
     └── assets/     - Files used in output (templates, icons, fonts)
 ```
+
+The `agents/` directory is for skills that use the Agent tool to delegate work to subagents. Each file contains a complete prompt template for a specific subagent role (what it does, what it receives, what it returns). The SKILL.md references these files — e.g., "Read `agents/explorer.md` for the full explorer prompt" — so the main skill stays lean while subagents get detailed instructions. See `references/subagent-patterns.md` for when and how to use this pattern.
 
 #### Progressive Disclosure
 
@@ -248,6 +260,7 @@ See `references/schemas.md` for the full schema (including the `assertions` fiel
 
 Read `references/output-patterns.md` when designing output formats or file-writing behavior for a skill.
 Read `references/workflows.md` when structuring multi-phase workflows or iteration loops in a skill.
+Read `references/subagent-patterns.md` when the skill involves heavy exploration, parallel tasks, review loops, or large artifact generation — to design a subagent architecture that keeps the main agent's context clean.
 
 ## Running and evaluating test cases
 
@@ -391,6 +404,18 @@ This is the heart of the loop. You've run the test cases, the user has reviewed 
 3. **Explain the why.** Try hard to explain the **why** behind everything you're asking the model to do. Today's LLMs are *smart*. They have good theory of mind and when given a good harness can go beyond rote instructions and really make things happen. Even if the feedback from the user is terse or frustrated, try to actually understand the task and why the user is writing what they wrote, and what they actually wrote, and then transmit this understanding into the instructions. If you find yourself writing ALWAYS or NEVER in all caps, or using super rigid structures, that's a yellow flag — if possible, reframe and explain the reasoning so that the model understands why the thing you're asking for is important. That's a more humane, powerful, and effective approach.
 
 4. **Look for repeated work across test cases.** Read the transcripts from the test runs and notice if the subagents all independently wrote similar helper scripts or took the same multi-step approach to something. If all 3 test cases resulted in the subagent writing a `create_docx.py` or a `build_chart.py`, that's a strong signal the skill should bundle that script. Write it once, put it in `scripts/`, and tell the skill to use it. This saves every future invocation from reinventing the wheel.
+
+5. **Consider restructuring to use subagents.** When reviewing an existing skill (or after test runs reveal problems), look for signs that the skill would benefit from a subagent architecture. Read the transcripts and watch for these red flags:
+
+   - **Context bloat:** The main agent reads 10+ files, fills its context with source code, and then struggles to produce quality output because it's juggling too much.
+   - **Sequential bottlenecks:** The skill does A, then B, then C, but A and B are independent — they could run in parallel as subagents.
+   - **Self-review blindness:** The skill generates output and then reviews its own work, but the review is shallow because the agent is already biased by having created it.
+   - **Repeated heavy lifting:** Each invocation re-does expensive exploration (scanning the codebase, reading docs) that could be isolated in a subagent.
+   - **Monolithic SKILL.md:** The skill file is 400+ lines because it contains detailed instructions for every phase — a sign that phases should be split into subagent prompt files in `agents/`.
+
+   If you spot these patterns, suggest restructuring the skill to use the orchestrator pattern: the main agent coordinates and communicates with the user, while subagents handle exploration, execution, and review in isolated context. This makes the skill faster (parallel work), more reliable (fresh context per task), and easier to maintain (each subagent prompt is focused).
+
+   Read `references/subagent-patterns.md` for the full catalog of patterns (Explorer+Executor, Parallel Workers, Review Loop, Research+Synthesis, Staged Pipeline) and guidance on writing subagent prompts and handling graceful degradation.
 
 This task is pretty important (we are trying to create billions a year in economic value here!) and your thinking time is not the blocker; take your time and really mull things over. I'd suggest writing a draft revision and then looking at it anew and making improvements. Really do your best to get into the head of the user and understand what they want and need.
 
@@ -549,6 +574,8 @@ The agents/ directory contains instructions for specialized subagents. Read them
 
 The references/ directory has additional documentation:
 - `references/schemas.md` — JSON structures for evals.json, grading.json, etc.
+- `references/subagent-patterns.md` — When and how to design skills that use the Agent tool to delegate work to subagents. Read this when creating skills that involve heavy codebase exploration, parallel work, review loops, or large artifact generation.
+- `references/workflows.md` — Workflow patterns for structuring skill instructions, including the Subagent Orchestration pattern (Pattern 8).
 
 ---
 

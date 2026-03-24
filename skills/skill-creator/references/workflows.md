@@ -169,6 +169,50 @@ Key techniques:
 - Comprehensive documentation
 - Clear governance
 
+## Pattern 8: Subagent Orchestration
+
+Use when: The skill involves heavy work that would bloat the main agent's context, or multiple independent tasks that can run in parallel.
+
+The main agent acts as a lightweight orchestrator — it coordinates subagents, communicates with the user, and makes decisions. Subagents do the heavy lifting in isolated context.
+
+```markdown
+## Phase 1: Explore (subagent)
+Spawn an explorer subagent to analyze the current state.
+Read `agents/explorer.md` for the explorer prompt.
+
+The explorer returns structured findings (JSON or markdown summary).
+The main agent reviews findings — it does NOT read the raw files itself.
+
+## Phase 2: Decide (main agent)
+Based on the explorer's findings:
+1. Determine the approach
+2. Present the plan to the user
+3. Get confirmation before proceeding
+
+## Phase 3: Execute (subagent)
+Spawn an executor subagent with the confirmed plan.
+Read `agents/executor.md` for the executor prompt.
+
+For independent subtasks, spawn multiple workers in parallel.
+
+## Phase 4: Review (subagent, fresh context)
+Spawn a reviewer subagent to independently assess the output.
+The reviewer must be a NEW agent — never reuse a prior agent.
+Read `agents/reviewer.md` for the reviewer prompt.
+
+If NEEDS_FIX: spawn fixer + fresh reviewer, repeat up to 3 cycles.
+If PASS: report results to the user.
+```
+
+Key techniques:
+- Main agent stays lean — orchestration and user communication only
+- Subagents get focused prompts with explicit input/output contracts
+- Parallel spawn for independent work (`run_in_background: true`)
+- Fresh context per review cycle for objectivity
+- Graceful degradation: if Agent tool unavailable, execute inline
+
+For the full subagent pattern catalog (Explorer+Executor, Parallel Workers, Review Loop, Research+Synthesis, Staged Pipeline), see `references/subagent-patterns.md`.
+
 ## Guided Discovery Pattern
 
 Use when: The skill needs to gather information from the user before acting.
