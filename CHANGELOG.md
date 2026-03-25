@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.12.0 — 2026-03-25
+
+### Features
+- **subagent architecture**: Add pattern-based subagent specifications for 11 HIGH priority skills
+- **skill-creator, release-manager**: Add comprehensive subagent architecture guidance and restructure for multi-agent workflows
+
+### Documentation
+- Update adoption plan with documentation completion status
+- Fix skill documentation consistency and completeness
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.11.0...v1.12.0
+
 ## v1.11.0 — 2026-03-22
 
 ### Features
