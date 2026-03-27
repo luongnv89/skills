@@ -4,7 +4,7 @@ description: Implement pre-commit hooks and GitHub Actions for quality assurance
 effort: medium
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -101,6 +101,34 @@ Check GitHub Actions tab for workflow status.
 | Go | gofmt | golangci-lint | gosec | built-in |
 | Rust | rustfmt | Clippy | cargo-audit | built-in |
 | Java | google-java-format | Checkstyle | SpotBugs | - |
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Project Analysis** — checks: `Project detection`, `Pre-commit setup`
+
+**Phase: Pre-commit Configuration** — checks: `Pre-commit setup`, `Pipeline verification`
+
+**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `Pipeline verification`
+
+**Phase: Pipeline Verification** — checks: `Pipeline verification`, `Project detection`, `GitHub Actions config`
 
 ## Resources
 

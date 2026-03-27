@@ -4,7 +4,7 @@ description: Optimize Ollama configuration for maximum performance on the curren
 effort: medium
 license: MIT
 metadata:
-  version: 1.0.1
+  version: 1.0.2
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -127,6 +127,75 @@ nvidia-smi
 
 # Verify config is applied
 ollama run <model> "test" --verbose 2>&1 | head -20
+```
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Detection (step 1 of 4)
+
+```
+◆ Detection (step 1 of 4 — hardware profiling)
+··································································
+  Hardware detected:      √ pass — macOS 14, Apple M2
+  GPU identified:         √ pass — Apple Metal (unified memory)
+  RAM measured:           √ pass — 16GB unified memory
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Analysis (step 2 of 4)
+
+```
+◆ Analysis (step 2 of 4 — profile selection)
+··································································
+  Tier classified:        √ pass — Prosumer (16GB unified)
+  Profile selected:       √ pass — Flash attention, full offload
+  Bottlenecks identified: √ pass — memory bandwidth primary constraint
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Plan (step 3 of 4)
+
+```
+◆ Plan (step 3 of 4 — optimization guide)
+··································································
+  Guide generated:        √ pass — ollama-optimization-guide.md written
+  Parameters tuned:       √ pass — OLLAMA_FLASH_ATTENTION=1, KV_CACHE_TYPE=q8_0
+  Model recommendations ready: √ pass — llama3.1:14b-instruct-q4_K_M suggested
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Verification (step 4 of 4)
+
+```
+◆ Verification (step 4 of 4 — config validation)
+··································································
+  Benchmark commands listed: √ pass — python3 scripts/benchmark_ollama.py
+  Config verified:        √ pass — ollama run --verbose output checked
+  [Criteria]:             √ 2/2 met
+  ____________________________
+  Result:                 PASS
 ```
 
 ## Reference Files

@@ -4,7 +4,7 @@ description: Transform an existing website/app UI into a futuristic cyberpunk, n
 effort: medium
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -111,6 +111,32 @@ Run incremental execution loop:
 4. Ask for feedback and adjust if requested.
 
 Continue until user confirms satisfaction.
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+**Branch & Sync phase checks:** `Branch created`, `Remote synced`, `Working tree clean`
+
+**Audit phase checks:** `Current styles analyzed`, `Components cataloged`, `Color palette extracted`
+
+**Design phase checks:** `Theme proposed`, `Color scheme defined`, `User approved`
+
+**Execution phase checks:** `Styles applied`, `Components updated`, `Visual consistency verified`
 
 ## Color customization (mandatory)
 Theme colors must be adjustable based on user input.

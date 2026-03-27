@@ -4,7 +4,7 @@ description: Publish VS Code extensions to the Visual Studio Marketplace. Use wh
 effort: high
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -180,6 +180,32 @@ Then guide the user to:
 3. To release: `git tag v1.0.0 && git push origin v1.0.0`
 
 See `references/publishing-guide.md` for CI/CD customization options.
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+**Pre-flight phase checks:** `Node.js available`, `vsce installed`, `package.json valid`
+
+**Auth Setup phase checks:** `PAT configured`, `Publisher verified`
+
+**Package phase checks:** `Extension packaged`, `Size reasonable`, `Manifest correct`
+
+**Publish phase checks:** `Upload success`, `Marketplace live`, `CI/CD configured`
 
 ## Examples
 

@@ -4,7 +4,7 @@ description: Analyze code for performance issues and suggest optimizations. Use 
 effort: medium
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -81,6 +81,34 @@ For each issue found:
 **Fix**:
 [Code example showing the optimized version]
 ```
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Prerequisites** — checks: `Branch setup`, `Naming convention detected`, `Feature branch created`
+
+**Phase: Analysis** — checks: `Issue detection`, `Priority categories covered`, `Impact estimated`, `Findings sorted by severity`
+
+**Phase: Apply Fixes** — checks: `Fix application`, `User approval obtained`, `Existing tests run`, `No regressions introduced`
+
+**Phase: Verify** — checks: `Performance verified`, `Test suite passes`, `Critical issues resolved`, `Warnings documented`
 
 ## Severity Levels
 

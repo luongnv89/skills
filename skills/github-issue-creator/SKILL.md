@@ -2,6 +2,10 @@
 name: github-issue-creator
 description: Create or update GitHub issues from screenshots, bug report emails, messages, or any visual/text input. Extracts structured issue data from images or pasted text, detects the repo's issue templates, proposes issues for user approval, then creates or updates them via gh CLI. Use this skill whenever the user shares a screenshot of a bug, pastes an error report, forwards a bug email, wants to file issues from a conversation, says "create an issue from this", "turn this into a GitHub issue", "file a bug for this", "update the issue with this info", or has any visual or textual bug/feature report they want tracked as GitHub issues — even if they just drop an image and say "handle this".
 effort: medium
+license: MIT
+metadata:
+  version: 1.0.0
+  creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # GitHub Issue Creator
@@ -186,6 +190,58 @@ After each action, confirm success and report the issue URL back to the user. At
 > **Done!** Created/updated the following issues:
 > - #42: Login button unresponsive on mobile Safari
 > - #38: (updated) Add dark mode support — added reproduction details
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Phase-specific checks
+
+**Phase 1 — Extract**
+```
+◆ Extract (step 1 of 3 — [input type: screenshot/email/text])
+··································································
+  Input parsed:       √ pass | × fail — [parse error]
+  Data extracted:     √ pass ([N] issues identified)
+  PII redacted:       √ pass | × fail — [what was found/removed]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 2 — Template Detection & Proposal**
+```
+◆ Template Detection (step 2 of 3 — [repo name])
+··································································
+  Templates found:    √ pass ([N] templates) | × fail — using default
+  Fields mapped:      √ pass | × fail — [unmapped fields]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 3 — Create / Update**
+```
+◆ Create/Update (step 3 of 3 — [N issues])
+··································································
+  Issue created:      √ pass (#[number]: [title])
+  Labels applied:     √ pass | × fail — [labels missing]
+  Assignees set:      √ pass | × fail — [assignees not set]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
 
 ## Important Guidelines
 

@@ -4,7 +4,7 @@ description: Guide users through building a CLI tool for any module or applicati
 effort: high
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -157,6 +157,34 @@ Deliver a final summary:
 - **Test results**: pass/fail counts, coverage if available
 - **Usage quick-start**: install command, 3-5 example invocations
 - **Next steps**: suggested improvements, missing features, distribution TODO
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Analyze (Step 1)** — checks: `Project analysis`, `Language detected`, `Entry points identified`, `Clarifying questions asked`
+
+**Phase: Design (Step 2)** — checks: `Design approval`, `Command tree defined`, `I/O behavior specified`, `Example invocations provided`
+
+**Phase: Plan (Step 3)** — checks: `Plan approval`, `Phases broken down`, `Tasks have goals and tests`, `Effort estimated`
+
+**Phase: Execute + Summarize (Steps 4–5)** — checks: `Implementation`, `Test coverage`, `Phase demos completed`, `Summary delivered`
 
 ## Error Handling
 

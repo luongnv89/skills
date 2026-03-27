@@ -4,7 +4,7 @@ description: Critically evaluate and enhance app ideas, startup concepts, and pr
 effort: max
 license: MIT
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -111,6 +111,67 @@ Update `validate.md` with:
 - **How to Strengthen**: Specific, actionable improvements
 - **Enhanced Version**: Reworked, optimized concept
 - **Implementation Roadmap**: Phased approach (if applicable)
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Phase-specific checks
+
+**Setup**
+```
+◆ Setup (step 1 of 4 — [idea name])
+··································································
+  Storage resolved:   √ pass ([path])
+  Folder created:     √ pass ([YYYY_MM_DD_name/])
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 1 — Clarify**
+```
+◆ Clarify (step 2 of 4 — [idea name])
+··································································
+  Questions answered: √ pass ([N] responses collected)
+  idea.md updated:    √ pass | × fail — [missing sections]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 3 — Evaluate**
+```
+◆ Evaluate (step 3 of 4 — [idea name])
+··································································
+  Feasibility scored: √ pass ([score]/10)
+  Market assessed:    √ pass | × fail — [gaps in analysis]
+  validate.md updated:√ pass | × fail — [missing sections]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 4 — Improve**
+```
+◆ Improve (step 4 of 4 — [idea name])
+··································································
+  Enhancements identified:    √ pass ([N] improvements listed)
+  Recommendations added:      √ pass | × fail — [what's missing]
+  ____________________________
+  Result:                     PASS | FAIL | PARTIAL
+```
 
 ## Tone
 

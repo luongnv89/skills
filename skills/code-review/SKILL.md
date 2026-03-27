@@ -4,7 +4,7 @@ description: Perform code reviews following best practices from Code Smells and 
 effort: medium
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
   architecture: subagent (Pattern B+C: Parallel Workers + Review Loop)
 ---
@@ -312,6 +312,34 @@ Description of the issue.
 2. Refactoring suggestions
 3. Architecture improvements
 ```
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Scope Assessment** — checks: `Scope assessment`, `Code smell detection`
+
+**Phase: Review Execution** — checks: `Security scan`, `Severity classification`
+
+**Phase: Report Generation** — checks: `Report generation`, `Severity classification`, `Scope assessment`
+
+**Phase: Validation Pass** — checks: `Code smell detection`, `Security scan`, `Report generation`
 
 ## Severity Levels
 

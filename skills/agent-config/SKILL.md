@@ -4,7 +4,7 @@ description: Create or update CLAUDE.md and AGENTS.md files following official b
 effort: medium
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -193,6 +193,34 @@ Provide specific line references and suggested fixes.
    - Percentage of truly useful vs redundant content
    - Specific recommendations for improvement
 3. Do NOT modify the file, only report
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Determine Target File** — checks: `File detection`, `File type identified`, `Location confirmed`
+
+**Phase: Analyze Project** — checks: `File detection`, `Best practices`, `Content structure`, `Location accuracy`
+
+**Phase: Draft / Audit** — checks: `Content quality`, `Anti-patterns removed`, `Essential info present`, `Format compliance`
+
+**Phase: Finalize** — checks: `File written`, `Import syntax valid`, `Token efficiency block present`, `No redundant content`
 
 ## Token Efficiency
 

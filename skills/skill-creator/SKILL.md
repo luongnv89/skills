@@ -4,7 +4,7 @@ description: Create new skills, modify and improve existing skills, and measure 
 effort: max
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.4.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -34,6 +34,32 @@ Then after the skill is done (but again, the order is flexible), you can also ru
 
 Cool? Cool.
 
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+**Intent Capture phase checks:** `Goal defined`, `Triggers identified`, `Output format agreed`
+
+**Skill Writing phase checks:** `SKILL.md written`, `README generated`, `Subagents designed`
+
+**Testing phase checks:** `Evals created`, `Runs completed`, `Viewer launched`
+
+**Iteration phase checks:** `Feedback incorporated`, `Benchmarks improved`, `Description optimized`
+
 ## Communicating with the user
 
 The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven't heard (and how could you, it's only very recently that it started), there's a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google "how to install npm". On the other hand, the bulk of users are probably fairly computer-literate.
@@ -60,6 +86,29 @@ When creating or updating any skill that changes files in a git repository (code
 - If `origin` is missing or conflicts occur: stop and ask the user before continuing.
 
 Do not ship repo-mutating skills without this pre-sync guardrail.
+
+## Version Management (mandatory)
+
+Every skill must have a `metadata.version` field in its YAML frontmatter using semantic versioning (`MAJOR.MINOR.PATCH`). This version tracks the evolution of the skill itself — it tells users and tooling which iteration they're running.
+
+**When creating a new skill**, set `metadata.version: 1.0.0` in the frontmatter:
+```yaml
+---
+name: my-skill
+description: ...
+metadata:
+  version: 1.0.0
+---
+```
+
+**When updating or modifying an existing skill**, always bump the version before saving. Read the current version from the frontmatter and increment it:
+- **Patch** (`x.y.Z`): Bug fixes, typo corrections, minor wording tweaks that don't change behavior
+- **Minor** (`x.Y.0`): New capabilities, added sections, new subagents, expanded trigger phrases
+- **Major** (`X.0.0`): Breaking changes to the skill's workflow, output format changes, restructured architecture
+
+If the frontmatter has no `metadata.version` field, add one starting at `1.0.0`.
+
+This applies every time you write or edit a SKILL.md — whether creating from scratch, improving after eval feedback, optimizing the description, or any other modification. The version bump is part of the edit, not a separate step.
 
 ## Creating a skill
 
@@ -91,6 +140,7 @@ Based on the user interview, fill in these components:
 - **name**: Skill identifier
 - **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. **The description MUST be a single line (no newlines or line breaks)** — this is required for correct parsing by external tools and automation that process skill metadata. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
 - **effort** (optional): How much reasoning effort the skill requires. Valid values: `low`, `medium`, `high`, `max`. Defaults to `high` when omitted. Use `low` for simple lookups or template fills, `medium` for moderate multi-step tasks, `high` for complex workflows requiring deep reasoning, and `max` for tasks demanding exhaustive analysis. This is an optional attribute — not all tools support it yet.
+- **metadata.version**: Semantic version string (e.g., `1.0.0`). See "Version Management" below — this must be set on creation and bumped on every update.
 - **compatibility**: Required tools, dependencies (optional, rarely needed)
 - **the rest of the skill :)**
 
@@ -166,6 +216,34 @@ ALWAYS use this exact template:
 Input: Added user authentication with JWT tokens
 Output: feat(auth): implement JWT-based authentication
 ```
+
+#### Step Completion Reports (mandatory)
+
+Every skill must produce a structured status report after completing each major phase or step. This gives the user a clear, scannable summary of what happened and whether it passed. The format uses a monospace code block with checkmark-style rows and a summary result line — it's compact, works well in terminals and mobile apps, and makes pass/fail immediately visible.
+
+Include a section like this in every skill's SKILL.md:
+
+```markdown
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+` ` `
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+` ` `
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+```
+
+The specific check names will vary per skill — a code review skill might check `Correctness`, `Test coverage`, `Code quality`, `Security`, `Edge cases`; a deploy skill might check `Build`, `Tests`, `Lint`, `CI status`. Tailor them to whatever the step actually validates.
 
 ### Writing Style
 

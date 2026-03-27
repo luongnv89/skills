@@ -4,7 +4,7 @@ description: Generate cross-platform installation scripts for any software, libr
 effort: high
 license: MIT
 metadata:
-  version: 2.0.0
+  version: 2.0.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -371,6 +371,67 @@ https://raw.githubusercontent.com/<owner>/<repo>/<branch>/path/to/install.sh
 2. Generate `install.sh` that wraps the build/install process
 3. Add dependency installation (compilers, libraries, runtimes)
 4. Verify the module is available after install
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Phase-specific checks
+
+**Phase 1 — Exploration**
+```
+◆ Exploration (step 1 of 4 — [software name])
+··································································
+  Target identified:          √ pass ([software/tool name])
+  Dependencies mapped:        √ pass ([N] dependencies found)
+  OS compatibility checked:   √ pass | × fail — [unsupported OS]
+  ____________________________
+  Result:                     PASS | FAIL | PARTIAL
+```
+
+**Phase 2 — Planning**
+```
+◆ Planning (step 2 of 4 — [software name])
+··································································
+  Install order defined:      √ pass ([N] steps ordered)
+  Rollback planned:           √ pass | × fail — [what's missing]
+  ____________________________
+  Result:                     PASS | FAIL | PARTIAL
+```
+
+**Phase 3 — Generation**
+```
+◆ Generation (step 3 of 4 — [software name])
+··································································
+  Script created:             √ pass (install.sh written)
+  Cross-platform tested:      √ pass | × fail — [platform issues]
+  ____________________________
+  Result:                     PASS | FAIL | PARTIAL
+```
+
+**Phase 4 — Documentation**
+```
+◆ Documentation (step 4 of 4 — [software name])
+··································································
+  README updated:             √ pass | × fail — [what's missing]
+  One-liner works:            √ pass ([curl/wget URL confirmed])
+  ____________________________
+  Result:                     PASS | FAIL | PARTIAL
+```
 
 ## Error Handling
 

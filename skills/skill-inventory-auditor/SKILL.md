@@ -4,7 +4,7 @@ description: Audit all installed agent skills across global and project scopes t
 effort: low
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -85,6 +85,59 @@ rm -rf {directory_path}
 - When removing a symlink, only the link is deleted — the source remains intact
 
 After removals, rerun the scanner to verify no duplicates remain.
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Phase-specific checks
+
+**Phase 1 — Scan**
+```
+◆ Scan (step 1 of 3 — inventory collection)
+··································································
+  Global skills scanned:    √ pass (~/.claude/skills/, ~/.agents/skills/)
+  Project skills scanned:   √ pass (.claude/skills/)
+  Duplicates identified:    √ pass (N duplicate groups found)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 2 — Report**
+```
+◆ Report (step 2 of 3 — findings presentation)
+··································································
+  Findings presented:       √ pass (table shown per duplicate group)
+  Severity classified:      √ pass (exact name match | similar description)
+  Removal plan ready:       √ pass (keep/remove recommendations made)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 3 — Cleanup**
+```
+◆ Cleanup (step 3 of 3 — duplicate removal)
+··································································
+  Duplicates removed:       √ pass (N skills removed)
+  No side effects:          √ pass (source repos untouched)
+  Inventory verified:       √ pass (rescan: 0 duplicates remaining)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
 
 ## Important Notes
 
