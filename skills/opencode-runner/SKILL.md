@@ -306,6 +306,19 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:                 PARTIAL
 ```
 
+### Monitor and Report (phase 4 of 5)
+
+```
+◆ Monitor and Report (phase 4 of 5 — progress tracking)
+··································································
+  Progress observed:        √ pass — streaming output detected
+  Status reported:          √ pass — completion summary delivered
+  Token usage logged:       × fail — stats unavailable
+  [Criteria]:               √ 2/3 met
+  ____________________________
+  Result:                   PARTIAL
+```
+
 ### Cleanup (phase 5 of 5)
 
 ```

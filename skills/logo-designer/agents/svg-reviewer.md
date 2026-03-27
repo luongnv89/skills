@@ -176,7 +176,46 @@ Examples:
 - [ ] Has transparent background
 - [ ] Intended for light backgrounds (verify visually)
 
-### Step 4: Encoding and Format Checks
+### Step 4: Cross-File Mark Consistency
+
+This is the most critical validation step. The mark (symbol) must be visually identical across all variants that include it. Inconsistent marks are the #1 quality issue with generated logo suites.
+
+#### 4.1 Extract canonical paths from logo-mark.svg
+
+Read logo-mark.svg and extract all `<path d="...">` strings and `<circle>` elements. Record them as the canonical reference.
+
+#### 4.2 Compare against other mark-bearing files
+
+For each of these files, extract the `<path d="...">` strings used for the mark:
+- logo-full.svg
+- logo-icon.svg
+- logo-white.svg
+- logo-black.svg
+
+**Check:**
+- [ ] Path `d=""` values are identical to logo-mark.svg (or correctly scaled via `transform`)
+- [ ] Number of `<path>` elements in the mark matches (same layer count)
+- [ ] Any accent elements (circles, dots) are present in all variants
+- [ ] Monochrome variants (white, black) differ from the color version ONLY in fill/stroke color attributes — not in path geometry, layout, or element count
+
+**Common failure modes to catch:**
+- Different `d=""` strings between files (each file invented its own shape)
+- Missing layers (e.g., logo-icon has 3 layers but logo-white has 2)
+- Missing accent elements (e.g., lens circle in mark but not in icon)
+- Different SVG element types (e.g., mark uses `<path>` but icon uses `<rect>` + `<polygon>`)
+- Different notch/cut angles or directions between variants
+
+If ANY inconsistency is found: ❌ **FAIL** — report which files diverge and how. This is a critical issue that must be fixed before the logo suite can be accepted.
+
+#### 4.3 Wordmark consistency
+
+For files with wordmarks (logo-full, logo-wordmark, logo-white, logo-black):
+- [ ] Product name text is identical (same casing, same spelling)
+- [ ] Font family is identical across all wordmark files
+- [ ] Font weight is identical
+- [ ] Text positioning relative to mark is consistent (logo-full vs logo-white vs logo-black)
+
+### Step 5: Encoding and Format Checks
 
 For each file:
 - [ ] File encoding is UTF-8 (no encoding issues, no BOM)
@@ -184,7 +223,7 @@ For each file:
 - [ ] File size is reasonable (< 50KB for a logo, typically < 10KB)
 - [ ] No extra newlines or whitespace bloat at end of file
 
-### Step 5: Create Validation Report
+### Step 6: Create Validation Report
 
 Generate a comprehensive validation report:
 
@@ -443,6 +482,8 @@ Before PASS:
 - [ ] viewBox correctly set on all files
 - [ ] No rasters embedded (pure vector only)
 - [ ] Valid SVG XML structure
+- [ ] **Mark consistency**: identical `d=""` paths across logo-mark, logo-full, logo-icon, logo-white, logo-black
+- [ ] **Wordmark consistency**: identical text, font, weight across logo-full, logo-wordmark, logo-white, logo-black
 - [ ] Colors from brand palette
 - [ ] Product name is correct (not placeholder)
 - [ ] Text is readable and properly positioned

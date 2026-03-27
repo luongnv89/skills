@@ -122,13 +122,13 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Project Analysis** — checks: `Project detection`, `Pre-commit setup`
+**Phase: Project Analysis** — checks: `Project detection`, `Existing tooling scan`
 
-**Phase: Pre-commit Configuration** — checks: `Pre-commit setup`, `Pipeline verification`
+**Phase: Pre-commit Configuration** — checks: `Pre-commit setup`, `Hook installation`
 
-**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `Pipeline verification`
+**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `Workflow creation`
 
-**Phase: Pipeline Verification** — checks: `Pipeline verification`, `Project detection`, `GitHub Actions config`
+**Phase: Pipeline Verification** — checks: `Pipeline verification`, `All checks passing`
 
 ## Resources
 

@@ -4,7 +4,7 @@ description: Design professional, modern logos with automatic project context de
 effort: medium
 license: MIT
 metadata:
-  version: 1.2.1
+  version: 1.2.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 

@@ -111,13 +111,13 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Branch Setup** — checks: `Branch creation`, `Project analysis`
+**Phase: Branch Setup** — checks: `Branch creation`, `Repo sync`
 
-**Phase: Project Analysis** — checks: `Project analysis`, `Doc restructure`
+**Phase: Project Analysis** — checks: `Project analysis`, `Gap identification`
 
-**Phase: Documentation Restructure** — checks: `Doc restructure`, `Diagram creation`, `Validation pass`
+**Phase: Documentation Restructure** — checks: `Doc restructure`, `Diagram creation`
 
-**Phase: Validation** — checks: `Validation pass`, `Branch creation`, `Diagram creation`
+**Phase: Validation** — checks: `Validation pass`, `Link verification`
 
 ## Error Handling
 

@@ -229,6 +229,19 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:                 PARTIAL
 ```
 
+### Trademark Check (step 4 of 5)
+
+```
+◆ Trademark Check (step 4 of 5 — trademark conflicts)
+··································································
+  WIPO clear:              √ pass — no conflicts in classes 9/35/42
+  EUIPO clear:             √ pass
+  INPI clear:              × fail — similar mark in class 42
+  [Criteria]:              √ 2/3 met
+  ____________________________
+  Result:                  PARTIAL
+```
+
 ### Risk Assessment (step 5 of 5)
 
 ```

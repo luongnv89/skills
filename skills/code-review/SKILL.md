@@ -333,13 +333,13 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Scope Assessment** — checks: `Scope assessment`, `Code smell detection`
+**Phase: Scope Assessment** — checks: `Scope assessment`, `File count estimated`
 
-**Phase: Review Execution** — checks: `Security scan`, `Severity classification`
+**Phase: Review Execution** — checks: `Code smell detection`, `Security scan`
 
-**Phase: Report Generation** — checks: `Report generation`, `Severity classification`, `Scope assessment`
+**Phase: Report Generation** — checks: `Report generation`, `Severity classification`
 
-**Phase: Validation Pass** — checks: `Code smell detection`, `Security scan`, `Report generation`
+**Phase: Validation Pass** — checks: `Validation pass`, `False positive check`
 
 ## Severity Levels
 

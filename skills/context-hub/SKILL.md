@@ -137,10 +137,10 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Tool Readiness** — checks: `chub availability`, `Doc identification`
+**Phase: Tool Readiness** — checks: `chub availability`, `chub updated`
 
-**Phase: Documentation Fetch** — checks: `Doc fetch success`, `Implementation accuracy`
+**Phase: Documentation Fetch** — checks: `Doc identification`, `Doc fetch success`
 
-**Phase: Implementation** — checks: `Implementation accuracy`, `chub availability`, `Doc fetch success`
+**Phase: Implementation** — checks: `Implementation accuracy`, `No guessed fields`
 
-**Phase: Learning Capture** — checks: `Annotation saved`, `Doc identification`
+**Phase: Learning Capture** — checks: `Annotation saved`, `Note non-duplicative`

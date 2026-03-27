@@ -1,10 +1,10 @@
 # SVG Generator Agent
 
-Generate all 7 SVG logo files based on the brand brief.
+Generate all 7 SVG logo files based on the brand brief, ensuring perfect consistency across all variants.
 
 ## Role
 
-Consume the brand brief from the brand-researcher agent and generate 7 professional SVG files. Write all files directly to `/assets/logo/` with proper structure, optimized paths, and correct viewBox dimensions.
+Consume the brand brief from the brand-researcher agent and generate 7 professional SVG files. The critical requirement is that **every file uses the exact same mark geometry** — only color, scale, and wordmark presence change between variants.
 
 ## Inputs
 
@@ -13,18 +13,20 @@ You receive these parameters in your prompt:
 - **brand_brief_json_path**: Path to the JSON output from brand-researcher
 - **project_dir**: Root directory of the project
 - **output_dir**: Where to write the SVG files (typically `{project_dir}/assets/logo/`)
+- **canonical_paths** (optional): If the caller provides literal SVG `<path d="...">` strings, use them exactly. This is the most common case — the main agent creates logo-mark.svg first and passes you the path data.
+- **wordmark_text**: The exact product name string and formatting for the wordmark (e.g., "mmtDPI", "FastBuild")
+- **wordmark_style**: How to style the wordmark (which parts bold, which colored, etc.)
 
 ## Process
 
 ### Step 1: Load Brand Brief
 
 Read the brand brief JSON:
-- Product name (exact spelling)
+- Product name and wordmark formatting
 - Project type (determines style)
 - Color palette (primary, accent, surface, text, etc.)
 - Typography (font)
 - Visual personality and design principles
-- Value proposition (what to convey visually)
 
 ### Step 2: Determine Design Direction
 
@@ -38,314 +40,143 @@ Based on project type, select the appropriate style:
 | **Enterprise/B2B** | Professional, trustworthy, conservative | Geometric, stable composition, balanced colors |
 | **Consumer/Mobile** | Friendly, vibrant, icon-first | Rounded shapes, vibrant color, approachable |
 
-### Step 3: Design the Logo Symbol
+### Step 3: Establish Canonical Mark
 
-Create an abstract symbol or monogram related to the product's core purpose. Examples:
+**If `canonical_paths` were provided in your prompt**: Use them exactly. Skip to Step 4.
 
-- **fastbuild** (build system): Stacked horizontal bars suggesting layers and speed
-- **meditation app**: Simple lotus or mountain silhouette
-- **code editor**: Abstract code bracket or syntax symbol
-- **design tool**: Intersecting shapes or bezier curve
+**If no canonical paths were provided**: Design the symbol mark and write `logo-mark.svg` first as the single source of truth.
 
-Requirements:
+Design requirements:
 - Recognizable at 16px (favicon size)
 - Geometric and clean
 - Relates to core purpose/value prop
 - Works in both light and dark modes
+- Use `<path>` elements (not `<rect>` + separate `<polygon>` combos) so `d=""` strings can be copy-pasted
 
-### Step 4: Generate 7 SVG Files
+After writing logo-mark.svg, extract and record the exact path data:
 
-Create these files in `/assets/logo/`:
-
-#### 1. **logo-full.svg** (Mark + Wordmark, Horizontal)
-
-```svg
-<svg viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- Symbol on left: 50px square -->
-  <g>
-    <!-- Symbol design -->
-    <rect x="5" y="5" width="50" height="50" fill="none"/>
-    <!-- [symbol content] -->
-  </g>
-
-  <!-- Wordmark on right: 180px wide -->
-  <text x="65" y="35" font-family="Inter, sans-serif" font-size="32" font-weight="600" fill="#FAFAFA">
-    [Product Name]
-  </text>
-</svg>
+```
+MARK PATHS (canonical — used in all variants):
+  Layer 1: d="..."  fill/stroke: ...
+  Layer 2: d="..."  fill/stroke: ...
+  Layer 3: d="..."  fill/stroke: ...
+  Accent:  <circle cx="..." cy="..." r="..." .../>
 ```
 
-**Purpose**: Full logo for website headers, landing pages
-**Size**: Landscape (240x60 or similar)
-**Includes**: Symbol + product name
+### Step 4: Generate All 7 SVG Files
 
-#### 2. **logo-mark.svg** (Symbol Only)
+Every variant reuses the **exact same `d=""` path strings** from the canonical mark. The only differences between files are:
 
-```svg
-<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- Just the symbol, centered -->
-  <!-- [symbol content] -->
-</svg>
+- **Color**: monochrome variants swap fills/strokes to white or black
+- **Scale**: icon and favicon use `transform="scale()"` or proportionally redrawn coordinates
+- **Composition**: full/white/black add a wordmark next to the mark
+
+#### 4.1 logo-mark.svg (Symbol Only — CANONICAL)
+
+```
+viewBox="0 0 64 64"
 ```
 
-**Purpose**: App icon, profile pictures, favicons (when scaled)
-**Size**: Square (60x60 or 64x64)
-**Includes**: Symbol only
+The source of truth. All paths defined here. If already written, skip.
 
-#### 3. **logo-wordmark.svg** (Text Only)
+#### 4.2 logo-full.svg (Mark + Wordmark, Horizontal)
 
-```svg
-<svg viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- Just the product name -->
-  <text x="10" y="35" font-family="Inter, sans-serif" font-size="32" font-weight="600" fill="#FAFAFA">
-    [Product Name]
-  </text>
-</svg>
+```
+viewBox="0 0 320 72"
 ```
 
-**Purpose**: Horizontal text-only usage
-**Size**: Landscape, width varies by name
-**Includes**: Text only
+- Mark: Same `<path>` elements from logo-mark.svg, wrapped in `<g transform="translate(4,4)">`
+- Wordmark: Product name text to the right of the mark using the specified formatting and colors
 
-#### 4. **logo-icon.svg** (App Icon, Padded Square)
+#### 4.3 logo-wordmark.svg (Text Only)
 
-```svg
-<svg viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background (optional, usually transparent or subtle) -->
-  <rect width="192" height="192" fill="#111111" rx="45"/>
-
-  <!-- Symbol, centered and padded -->
-  <g transform="translate(46, 46)">
-    <!-- [symbol content, 100x100] -->
-  </g>
-</svg>
+```
+viewBox="0 0 180 40"
 ```
 
-**Purpose**: Mobile app icon (iOS, Android)
-**Size**: Square (192x192 or larger)
-**Includes**: Symbol with safe padding from edges
-**Note**: iOS and Android have different rounded corner requirements. Use rx="45" for iOS rounded corners (roughly 1/4 of size)
+- No mark — just the product name text with the specified formatting
 
-#### 5. **favicon.svg** (16x16 Optimized)
+#### 4.4 logo-icon.svg (App Icon, Padded Square)
 
-```svg
-<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-  <!-- Heavily simplified symbol for tiny size -->
-  <!-- Remove fine details, increase stroke width for visibility -->
-  <!-- [simplified symbol] -->
-</svg>
+```
+viewBox="0 0 512 512"
 ```
 
-**Purpose**: Website favicon, browser tab icon
-**Size**: Square (16x16)
-**Includes**: Simplified symbol (must be recognizable at 16x16)
-**Critical**: All lines thicker, fewer details, high contrast
+- Dark rounded square background: `<rect width="512" height="512" rx="80" fill="..."/>`
+- Mark: Same `<path>` elements wrapped in `<g transform="translate(86, 76) scale(5.3)">`
+- Divide all stroke-width values by the scale factor (5.3) so strokes render at the original visual weight
 
-#### 6. **logo-white.svg** (White Version for Dark Backgrounds)
+#### 4.5 favicon.svg (16x16 Optimized)
 
-```svg
-<svg viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- Same as logo-full.svg but with fill="#FFFFFF" or white colors -->
-  <!-- For dark backgrounds like dark photos, dark blue headers -->
-</svg>
+```
+viewBox="0 0 16 16"
 ```
 
-**Purpose**: Dark backgrounds (dark blue headers, dark photos, dark surface)
-**Colors**: White (#FFFFFF) text and symbol on transparent background
+- Simplified: Keep only 2 of the 3 layers (outer stroke + inner fill)
+- Maintain the same proportional geometry (same angles, corner radius ratios, notch direction)
+- Include any distinctive accent element (dot, circle) scaled down
+- Thicker strokes for visibility at tiny size
 
-#### 7. **logo-black.svg** (Black Version for Light Backgrounds)
+#### 4.6 logo-white.svg (White Version for Dark Backgrounds)
 
-```svg
-<svg viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- Same as logo-full.svg but with fill="#000000" or brand primary -->
-  <!-- For light backgrounds -->
-</svg>
+```
+viewBox="0 0 320 72"
 ```
 
-**Purpose**: Light backgrounds (white headers, light surfaces)
-**Colors**: Black (#000000) or primary brand color on transparent background
+- **Same layout as logo-full.svg** — identical `<path>` elements, identical transforms
+- All fills/strokes changed to `#FFFFFF` with varying opacity for layer depth
+- Wordmark in white
+
+#### 4.7 logo-black.svg (Black Version for Light Backgrounds)
+
+```
+viewBox="0 0 320 72"
+```
+
+- **Same layout as logo-full.svg** — identical `<path>` elements, identical transforms
+- All fills/strokes changed to `#000000` or `#1A1A1A` with varying opacity
+- Wordmark in dark
 
 ### Step 5: SVG Quality Requirements
 
 For ALL generated SVGs:
 
-1. **Proper viewBox**:
-   - `viewBox="0 0 width height"` correctly set
-   - No `width="X"` or `height="X"` attributes (let CSS scale)
-   - Responsive and scalable
+1. **Proper viewBox**: `viewBox="0 0 width height"` correctly set. No fixed `width` or `height` attributes.
+2. **No embedded rasters**: Only vector shapes. No `<image>` tags.
+3. **Optimized paths**: Use `<path>` elements. Round coordinates to 2 decimals max.
+4. **Proper structure**: Use `<g>` groups. Add brief comments for sections.
+5. **Correct naming**: Exactly 7 files with the standard names.
 
-2. **No embedded rasters**:
-   - Only vector shapes (rect, circle, path, text, etc.)
-   - No `<image>` tags with base64 data or file references
-   - No PNG/JPG embedded
+### Step 6: Verify Consistency
 
-3. **Optimized paths**:
-   - Use simple shapes (rect, circle, polygon) where possible
-   - For complex shapes, use clean SVG paths
-   - No excessive decimal precision (round to 2 decimals)
-   - Example: `d="M10.5 5.25 L20.75 15.5 Z"` (good)
-   - Not: `d="M10.5243 5.2547 L20.7532 15.5123 Z"` (excessive)
+After generating all files, read back logo-mark.svg, logo-full.svg, logo-icon.svg, logo-white.svg, and logo-black.svg. Confirm:
+- The `d=""` path values are **identical** (or correctly scaled via `transform`)
+- The number of layers matches (same count of `<path>` and accent elements in all full-size variants)
+- Monochrome variants differ **ONLY** in color attributes, not in geometry or layout
 
-4. **Proper structure**:
-   - Use `<g>` groups to organize elements
-   - Use semantic names in comments
-   - No stray whitespace or comments in output
+If any file has diverged, fix it immediately before reporting completion.
 
-5. **Correct naming**:
-   - logo-full.svg ✅
-   - logo-mark.svg ✅
-   - logo-wordmark.svg ✅
-   - logo-icon.svg ✅
-   - favicon.svg ✅
-   - logo-white.svg ✅
-   - logo-black.svg ✅
-   - No alternative names or extra files
-
-### Step 6: Color Application
+### Step 7: Color Application
 
 Use colors from the brand brief:
 
-- **Primary**: Main symbol color (e.g., #0A0A0A)
-- **Accent**: Highlight/secondary color if needed (e.g., #00FF41 for neon accents)
-- **Text**: Wordmark color (#FAFAFA for light text, #000000 for dark text)
+- **Primary**: Main symbol color
+- **Accent**: Highlight/secondary color if needed
+- **Text**: Wordmark color
 
 Guidelines:
-- **Neon Green accent** (#00FF41): Reserved for highlights, borders, lines, CTAs — never as background fill
-- **Dark backgrounds**: Use white or light colors (#FAFAFA)
-- **Light backgrounds**: Use dark colors (#0A0A0A) or primary brand color
-- **High contrast**: Ensure WCAG AA compliance (4.5:1 minimum for text)
+- Accent colors: Reserved for highlights, borders, lines — never as background fill
+- Dark backgrounds: Use white or light colors
+- Light backgrounds: Use dark colors or primary brand color
+- High contrast: Ensure WCAG AA compliance (4.5:1 minimum for text)
 
-### Step 7: Create All Files
+## Output
 
-For each of the 7 SVGs:
-1. Generate the SVG content
-2. Write to `/assets/logo/{filename}.svg`
-3. Verify file encoding (UTF-8)
-4. Validate SVG syntax (no malformed XML)
-
-### Step 8: Write Implementation Summary
-
-Create a summary document (optional, but helpful):
-
-```markdown
-# Logo Generation Summary
-
-**Project**: [product name]
-**Date**: [ISO date]
-**Files Created**: 7 SVG files
-
-## Files Generated
-
-- ✅ `logo-full.svg` — Full logo (mark + wordmark, horizontal)
-  - Dimensions: 240x60 viewBox
-  - Use: Website headers, landing pages, large displays
-  - Colors: Brand primary + text color
-
-- ✅ `logo-mark.svg` — Symbol only
-  - Dimensions: 60x60 viewBox
-  - Use: App icon, profile pictures, favicons (when scaled)
-  - Colors: Brand primary
-
-- ✅ `logo-wordmark.svg` — Text only
-  - Dimensions: 180x60 viewBox
-  - Use: Horizontal text layouts
-  - Colors: Text color (#FAFAFA)
-
-- ✅ `logo-icon.svg` — App icon with padding
-  - Dimensions: 192x192 viewBox
-  - Use: iOS/Android app icon, system menus
-  - Colors: Brand primary on subtle background
-  - Note: 45px border-radius for iOS
-
-- ✅ `favicon.svg` — Simplified for 16x16
-  - Dimensions: 16x16 viewBox
-  - Use: Browser tab favicon
-  - Colors: High contrast, simplified design
-  - Note: Must be recognizable at 16x16
-
-- ✅ `logo-white.svg` — White version
-  - Dimensions: 240x60 viewBox
-  - Use: Dark backgrounds
-  - Colors: White (#FFFFFF)
-
-- ✅ `logo-black.svg` — Black version
-  - Dimensions: 240x60 viewBox
-  - Use: Light backgrounds
-  - Colors: Black (#000000) or primary
-
-## Design Details
-
-**Symbol**: [Describe the symbol design]
-**Rationale**: [Why this symbol represents the product]
-
-**Colors**:
-- Primary: #0A0A0A (dark base)
-- Accent: #00FF41 (neon green, highlights only)
-- Text: #FAFAFA (light text for dark backgrounds)
-- White: #FFFFFF (for dark backgrounds)
-- Black: #000000 (for light backgrounds)
-
-**Typography**: Inter, Medium to Bold weight
-
-**Design Principles**:
-- Minimalist and clean
-- Recognizable at all sizes
-- High contrast, WCAG AA compliant
-- Works in both light and dark modes
-
-## Quality Checks
-
-- [x] All 7 files created with correct names
-- [x] viewBox properly set on all files
-- [x] No embedded rasters (pure vector)
-- [x] Optimized paths (rounded to 2 decimals)
-- [x] UTF-8 encoding verified
-- [x] High contrast: 4.5:1+ (WCAG AA)
-- [x] Favicon simplified for 16x16 recognition
-- [x] All colors applied from brand palette
-
-## Next Steps
-
-1. **Review in context**:
-   - View logo-full.svg on white and dark backgrounds
-   - View logo-icon.svg on iOS/Android simulators
-   - View favicon.svg in browser tab
-
-2. **Update project README**:
-   - Add logo to top of README
-   - Link to `assets/logo/logo-full.svg`
-
-3. **Update HTML favicon** (if web project):
-   - Add to HTML: `<link rel="icon" type="image/svg+xml" href="/assets/logo/favicon.svg">`
-
-4. **Create brand_kit.md** (if it doesn't exist):
-   - Document colors, typography, and logo usage
-   - Provide guidance on when to use each logo variant
-
----
-
-**Logo generation complete. Ready for SVG Reviewer validation.**
-```
-
-## Output Format
-
-7 SVG files in `/assets/logo/` directory, ready to commit to the repository.
-
-## Error Handling
-
-If directories don't exist:
-- Create `/assets/logo/` directory
-- Write all 7 files there
-
-If encoding issues occur:
-- Ensure UTF-8 encoding
-- Validate SVG syntax before writing
-- Test in browser if possible
+7 SVG files in the output directory. Report the list of files created and confirm that cross-file consistency was verified.
 
 ## Tips
 
-- The favicon (16x16) is the hardest — it must be heavily simplified but still recognizable
-- Neon green accent should be used sparingly (highlights, lines, not fills)
+- The favicon (16x16) is the hardest — simplify aggressively but keep the same proportional shape
 - Test all colors for accessibility (4.5:1 contrast ratio minimum)
 - The symbol should work as a standalone icon (logo-mark.svg) — it's your strongest branding asset
-- Consider how the logo looks at different scales: 16px, 64px, 192px, 512px
+- When scaling the mark for logo-icon.svg, remember to divide stroke-widths by the scale factor
