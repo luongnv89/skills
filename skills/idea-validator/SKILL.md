@@ -134,7 +134,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Setup**
 ```
-◆ Setup (step 1 of 4 — [idea name])
+◆ Setup (step 1 of 5 — [idea name])
 ··································································
   Storage resolved:   √ pass ([path])
   Folder created:     √ pass ([YYYY_MM_DD_name/])
@@ -144,7 +144,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 1 — Clarify**
 ```
-◆ Clarify (step 2 of 4 — [idea name])
+◆ Clarify (step 2 of 5 — [idea name])
 ··································································
   Questions answered: √ pass ([N] responses collected)
   idea.md updated:    √ pass | × fail — [missing sections]
@@ -152,9 +152,20 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:             PASS | FAIL | PARTIAL
 ```
 
+**Phase 2 — Gather Technical Context**
+```
+◆ Gather Technical Context (step 3 of 5 — [idea name])
+··································································
+  Context sources identified: √ pass ([N] inputs collected)
+  Technical feasibility assessed: √ pass | × fail — [gaps noted]
+  idea.md technical section updated: √ pass | × fail — [missing fields]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
 **Phase 3 — Evaluate**
 ```
-◆ Evaluate (step 3 of 4 — [idea name])
+◆ Evaluate (step 4 of 5 — [idea name])
 ··································································
   Feasibility scored: √ pass ([score]/10)
   Market assessed:    √ pass | × fail — [gaps in analysis]
@@ -165,7 +176,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 4 — Improve**
 ```
-◆ Improve (step 4 of 4 — [idea name])
+◆ Improve (step 5 of 5 — [idea name])
 ··································································
   Enhancements identified:    √ pass ([N] improvements listed)
   Recommendations added:      √ pass | × fail — [what's missing]

@@ -128,8 +128,19 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ◆ Validate Input (step 1 of 5 — input resolution)
 ··································································
   Input files found:        √ pass
-  Context extracted:        √ pass (idea.md + validate.md read)
   Dependencies resolved:    √ pass (PROJECT_DIR confirmed)
+  Backup created:           √ pass | — skipped (no existing prd.md)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 2 — Extract Context**
+```
+◆ Extract Context (step 2 of 5 — context extraction)
+··································································
+  idea.md parsed:           √ pass (concept + technical context read)
+  validate.md parsed:       √ pass (verdict + ratings extracted)
+  Context extracted:        √ pass (idea.md + validate.md read)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```

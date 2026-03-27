@@ -345,6 +345,39 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:             PASS | FAIL | PARTIAL
 ```
 
+**Step 3 — Research**
+```
+◆ Research (step 3 of 7 — best practices lookup)
+··································································
+  Web searches completed:   √ pass (N queries executed)
+  Latest practices fetched: √ pass (current year updates noted)
+  Gaps identified:          √ pass | × fail — [missing coverage areas]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Step 4 — Report**
+```
+◆ Report (step 4 of 7 — findings presentation)
+··································································
+  Issues categorized:       √ pass (critical/warning/info grouped)
+  Project-level findings:   √ pass (robots.txt, sitemap, llms.txt, JSON-LD)
+  Report presented:         √ pass
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Step 5 — Plan**
+```
+◆ Plan (step 5 of 7 — improvement planning)
+··································································
+  Priorities ranked:        √ pass (critical → warnings → enhancements)
+  New files identified:     √ pass (N files to create)
+  User approval received:   √ pass | × fail — [awaiting approval]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
 **Step 6 — Implementation**
 ```
 ◆ Implementation (step 6 of 7 — applying fixes)

@@ -188,11 +188,11 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Input Processing** — checks: `Input captured`, `Lens evaluation`
+**Phase: Input Processing** — checks: `Input captured`, `Type identified`
 
-**Phase: Usability Evaluation** — checks: `Lens evaluation`, `Issue prioritization`, `Report clarity`
+**Phase: Usability Evaluation** — checks: `Lens evaluation`, `Issue prioritization`
 
-**Phase: Report Generation** — checks: `Report clarity`, `Issue prioritization`, `Input captured`
+**Phase: Report Generation** — checks: `Report clarity`, `Format compliance`
 
 **Phase: Redesign (if requested)** — checks: `Redesign fidelity`, `Report clarity`, `Issue prioritization`
 

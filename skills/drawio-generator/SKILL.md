@@ -230,9 +230,9 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Understand** — checks: `Requirements gathered`, `Proposal approved`
+**Phase: Understand** — checks: `Requirements gathered`, `Scope confirmed`
 
-**Phase: Propose** — checks: `Proposal approved`, `Requirements gathered`
+**Phase: Propose** — checks: `Proposal approved`, `User confirmed`
 
 **Phase: Generate** — checks: `XML valid`, `Layout correct`, `Requirements gathered`
 
