@@ -4,7 +4,7 @@ description: Delegate coding tasks to opencode (opencode.ai) using free models. 
 effort: medium
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -249,6 +249,87 @@ Report to the user:
 If you couldn't kill some processes (permission denied, etc.), warn the user:
 
 > **Warning:** Some opencode processes may still be running. Run `pkill -f "opencode run"` manually to clean up.
+
+## Step Completion Reports
+
+After completing each major phase, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Installation (phase 1 of 5)
+
+```
+◆ Installation (phase 1 of 5 — opencode readiness)
+··································································
+  opencode found:         √ pass — /usr/local/bin/opencode
+  Version current:        √ pass — already at latest
+  [Criteria]:             √ 2/2 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Model Discovery (phase 2 of 5)
+
+```
+◆ Model Discovery (phase 2 of 5 — free model selection)
+··································································
+  Models queried:         √ pass — 12 models available
+  Free model selected:    √ pass — opencode/minimax-m2.5-free
+  Tier ranking applied:   √ pass — priority 1 model chosen
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Execution (phase 3 of 5)
+
+```
+◆ Execution (phase 3 of 5 — task delegation)
+··································································
+  Task submitted:         √ pass
+  Progress monitored:     √ pass — streaming output observed
+  Output captured:        × fail — timeout after 5 min with no output
+  [Criteria]:             √ 2/3 met
+  ____________________________
+  Result:                 PARTIAL
+```
+
+### Monitor and Report (phase 4 of 5)
+
+```
+◆ Monitor and Report (phase 4 of 5 — progress tracking)
+··································································
+  Progress observed:        √ pass — streaming output detected
+  Status reported:          √ pass — completion summary delivered
+  Token usage logged:       × fail — stats unavailable
+  [Criteria]:               √ 2/3 met
+  ____________________________
+  Result:                   PARTIAL
+```
+
+### Cleanup (phase 5 of 5)
+
+```
+◆ Cleanup (phase 5 of 5 — process termination)
+··································································
+  Processes killed:       √ pass — OPENCODE_PID terminated
+  Temp files cleaned:     √ pass — /tmp/opencode-output.json removed
+  [Criteria]:             √ 2/2 met
+  ____________________________
+  Result:                 PASS
+```
 
 ## Quick Reference
 

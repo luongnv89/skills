@@ -6,7 +6,7 @@ argument-hint: "[optional title or tags]"
 disable-model-invocation: true
 license: MIT
 metadata:
-  version: 1.4.1
+  version: 1.4.2
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -121,6 +121,76 @@ Link format:
 - `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
 
 Detect the remote URL from the notes repo's `git remote get-url origin` to build correct links.
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Intake (step 1 of 4)
+
+```
+◆ Intake (step 1 of 4 — input processing)
+··································································
+  Input received:         √ pass
+  Type detected:          √ pass (text/voice/image/file)
+  Content parsed:         √ pass
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Processing (step 2 of 4)
+
+```
+◆ Processing (step 2 of 4 — note creation)
+··································································
+  Note written:           √ pass
+  Attachments stored:     √ pass (same folder as note)
+  Secrets redacted:       √ pass — no secrets found
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Organization (step 3 of 4)
+
+```
+◆ Organization (step 3 of 4 — kanban and index)
+··································································
+  Tasks extracted:        √ pass — 2 tasks added
+  Kanban updated:         √ pass — tasks in Backlog
+  Index maintained:       × fail — README count not updated
+  [Criteria]:             √ 2/3 met
+  ____________________________
+  Result:                 PARTIAL
+```
+
+### Publish (step 4 of 4)
+
+```
+◆ Publish (step 4 of 4 — git push and reporting)
+··································································
+  Committed:              √ pass
+  Pushed:                 √ pass
+  Links reported:         √ pass — GitHub links included
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
 
 ## Daily routines
 - End-of-day: list today’s notes + propose re-organization (tags / merges / splits)

@@ -4,7 +4,7 @@ description: Create distinctive, usability-focused, production-grade frontend in
 effort: high
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -107,3 +107,45 @@ NEVER use generic AI-generated aesthetics like overused font families (Inter, Ro
 Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
 
 **IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Phase-specific checks
+
+**Design Thinking**
+```
+◆ Design Thinking (step 1 of 2 — [component/page type])
+··································································
+  Purpose understood:       √ pass (problem and audience identified)
+  Tone identified:          √ pass ([aesthetic direction] chosen)
+  Differentiation clear:    √ pass | × fail — [what's missing]
+  ____________________________
+  Result:                   PASS | FAIL | PARTIAL
+```
+
+**Implementation**
+```
+◆ Implementation (step 2 of 2 — [component/page type])
+··································································
+  Style guide applied:      √ pass | × fail — [deviations noted]
+  Usability principles met: √ pass | × fail — [which principle failed]
+  Aesthetics polished:      √ pass | × fail — [what needs refinement]
+  ____________________________
+  Result:                   PASS | FAIL | PARTIAL
+```

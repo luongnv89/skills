@@ -4,7 +4,7 @@ description: Generate comprehensive Product Requirements Documents (PRD) from id
 effort: max
 license: MIT
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -102,6 +102,81 @@ Read `references/prd-template.md` for the full template structure.
 2. Summarize sections created
 3. Highlight areas needing user review
 4. Suggest next steps
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Phase-specific checks
+
+**Phase 1 — Validate Input**
+```
+◆ Validate Input (step 1 of 5 — input resolution)
+··································································
+  Input files found:        √ pass
+  Dependencies resolved:    √ pass (PROJECT_DIR confirmed)
+  Backup created:           √ pass | — skipped (no existing prd.md)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 2 — Extract Context**
+```
+◆ Extract Context (step 2 of 5 — context extraction)
+··································································
+  idea.md parsed:           √ pass (concept + technical context read)
+  validate.md parsed:       √ pass (verdict + ratings extracted)
+  Context extracted:        √ pass (idea.md + validate.md read)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 3 — Clarify Requirements**
+```
+◆ Clarify Requirements (step 3 of 5 — requirements gathering)
+··································································
+  Questions answered:       √ pass
+  Scope defined:            √ pass (MVP timeframe confirmed)
+  Stakeholders identified:  √ pass (team size, compliance noted)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 4 — Generate PRD**
+```
+◆ Generate PRD (step 4 of 5 — document generation)
+··································································
+  10 sections written:      √ pass
+  prd.md created:           √ pass
+  Cross-references valid:   √ pass (mermaid diagrams render)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 5 — Output**
+```
+◆ Output (step 5 of 5 — delivery)
+··································································
+  File written:             √ pass
+  Summary presented:        √ pass
+  Next steps suggested:     √ pass
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
 
 ### Phase 6: README Maintenance (ideas repo)
 

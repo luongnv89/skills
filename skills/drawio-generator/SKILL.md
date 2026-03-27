@@ -4,7 +4,7 @@ description: Generate diagrams and visualizations as draw.io (diagrams.net) XML 
 effort: high
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -209,6 +209,34 @@ Validation: 9/9 checks passed
 ```
 
 ---
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Understand** — checks: `Requirements gathered`, `Scope confirmed`
+
+**Phase: Propose** — checks: `Proposal approved`, `User confirmed`
+
+**Phase: Generate** — checks: `XML valid`, `Layout correct`, `Requirements gathered`
+
+**Phase: Validate** — checks: `XML valid`, `Layout correct`, `Quality checks 9/9`
 
 ## Style Guidelines
 

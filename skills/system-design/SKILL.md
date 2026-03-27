@@ -4,7 +4,7 @@ description: Generate Technical Architecture Documents (TAD) from PRD files. Use
 effort: max
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -163,6 +163,70 @@ When reporting completion, include:
 
 Link format (derive `<owner>/<repo>` from `git remote get-url origin`):
 - `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Phase-specific checks
+
+**Phase 1 — Setup**
+```
+◆ Setup (step 1 of 8 — environment validation)
+··································································
+  PRD found:                    √ pass
+  Context extracted:            √ pass (product + features + NFRs read)
+  Architecture questions answered: √ pass (deployment, DB, auth, budget confirmed)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 4 — Research**
+```
+◆ Research (step 4 of 8 — validation rounds)
+··································································
+  5 parallel rounds completed:  √ pass
+  Best practices gathered:      √ pass (tech, infra, security, risk, holistic)
+  Patterns validated:           √ pass (OWASP, vendor lock-in, startup feasibility)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 5 — Generation**
+```
+◆ Generation (step 5 of 8 — TAD authoring)
+··································································
+  11 sections written:          √ pass
+  tad.md created:               √ pass
+  Diagrams included:            √ pass (mermaid architecture + flow diagrams)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+**Phase 8 — Output**
+```
+◆ Output (step 8 of 8 — delivery)
+··································································
+  Summary presented:            √ pass (architecture decisions highlighted)
+  README updated:               √ pass (TAD status ✅)
+  Committed and pushed:         √ pass (commit hash: ...)
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
 
 ## Modification Mode
 

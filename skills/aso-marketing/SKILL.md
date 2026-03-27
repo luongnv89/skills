@@ -4,7 +4,7 @@ description: Full-lifecycle App Store Optimization (ASO) for mobile apps — key
 effort: max
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -527,6 +527,34 @@ Produce a final summary report for the user:
 ```
 
 ---
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Analyze (Phase 1)** — checks: `Current state analysis`, `Metadata audit complete`, `Competitive landscape identified`, `Baseline documented`
+
+**Phase: Plan + Compliance (Phases 2–3)** — checks: `Plan completeness`, `Policy compliance`, `Prohibited keyword scan`, `Trademark check`
+
+**Phase: Execute (Phase 4)** — checks: `Metadata fields updated`, `Character limits respected`, `Keywords correctly formatted`, `Implementation quality`
+
+**Phase: Review + Verify (Phases 5–6)** — checks: `No policy violations re-introduced`, `Best practices met`, `Cross-field keyword combinations valid`, `Localization market-aware`
 
 ## Platform-Specific Notes
 

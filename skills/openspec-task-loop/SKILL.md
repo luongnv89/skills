@@ -4,7 +4,7 @@ description: Apply OpenSpec OPSX in a strict one-task-at-a-time loop. Use when t
 effort: medium
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -153,6 +153,74 @@ Next:
 - ...
 Risks/Notes:
 - ...
+```
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Selection (step 1 of 4)
+
+```
+◆ Selection (step 1 of 4 — task scoping)
+··································································
+  Task identified:        √ pass — task-2-3-pin-crud selected
+  Scope bounded:          √ pass — 1-3 dev days, atomic unit
+  Dependencies clear:     √ pass — no blockers in tasks.md
+  [Criteria]:             √ 3/3 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Planning (step 2 of 4)
+
+```
+◆ Planning (step 2 of 4 — spec scaffolding)
+··································································
+  Spec artifacts created: √ pass — proposal.md, design.md, tasks.md, spec.md
+  Implementation planned: √ pass — approach and tradeoffs documented
+  [Criteria]:             √ 2/2 met
+  ____________________________
+  Result:                 PASS
+```
+
+### Implementation (step 3 of 4)
+
+```
+◆ Implementation (step 3 of 4 — code delivery)
+··································································
+  Code written:           √ pass — all checkboxes updated
+  Tests pass:             × fail — 1 unit test failing
+  Scope respected:        √ pass — no unrelated files changed
+  [Criteria]:             √ 2/3 met
+  ____________________________
+  Result:                 PARTIAL
+```
+
+### Archive (step 4 of 4)
+
+```
+◆ Archive (step 4 of 4 — completion and sync)
+··································································
+  Artifacts synced:       √ pass — specs merged into openspec/specs/
+  Quality gate passed:    √ pass — all 6 criteria met
+  [Criteria]:             √ 2/2 met
+  ____________________________
+  Result:                 PASS
 ```
 
 ## Resources

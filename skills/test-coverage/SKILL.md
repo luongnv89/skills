@@ -4,7 +4,7 @@ description: Expand unit test coverage by targeting untested branches and edge c
 effort: low
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -83,6 +83,32 @@ Run coverage again and confirm measurable increase. Report:
 - Before/after coverage percentages
 - Number of new test cases added
 - Files with the biggest coverage gains
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+**Branch Setup phase checks:** `Feature branch created`, `Base coverage measured`
+
+**Analysis phase checks:** `Coverage report parsed`, `Gaps identified`, `Priority ranked`
+
+**Test Writing phase checks:** `Tests written`, `Edge cases covered`, `Framework conventions followed`
+
+**Verification phase checks:** `Tests pass`, `Coverage improved`, `No regressions`
 
 ## Error Handling
 

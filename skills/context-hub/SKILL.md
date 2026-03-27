@@ -4,7 +4,7 @@ description: Use Context Hub (`chub`) to fetch up-to-date third-party API/SDK do
 effort: low
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -116,3 +116,31 @@ chub get stripe/api --lang js
 chub annotate stripe/api "Webhook verification requires raw body"
 chub annotate --list
 ```
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Tool Readiness** — checks: `chub availability`, `chub updated`
+
+**Phase: Documentation Fetch** — checks: `Doc identification`, `Doc fetch success`
+
+**Phase: Implementation** — checks: `Implementation accuracy`, `No guessed fields`
+
+**Phase: Learning Capture** — checks: `Annotation saved`, `Note non-duplicative`

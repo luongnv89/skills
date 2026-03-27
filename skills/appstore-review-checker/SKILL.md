@@ -2,7 +2,7 @@
 name: appstore-review-checker
 description: Pre-submission audit of iOS/macOS apps against 150+ Apple App Store Review Guidelines. Analyzes source code, project config, metadata, and screenshots to catch rejection risks before you submit. Provides per-guideline verdicts (PASS/FAIL/WARNING/N/A) with specific fix suggestions. Use this skill whenever someone wants to check if their app will pass App Store review, asks about App Store rejection risks, says "will Apple approve this", "check my app for review", "pre-submission audit", "App Store compliance check", "why might my app get rejected", "review guidelines check", or mentions preparing an app for App Store submission — even if they don't say "review guidelines" explicitly. Also trigger when someone is debugging a rejection and wants to know what else might fail.
 effort: high
-version: 1.1.0
+version: 1.1.1
 ---
 
 # App Store Review Checker
@@ -217,6 +217,34 @@ Based on this audit, here's what to do before submitting:
 ### Phase 4: Offer to Fix
 
 After presenting the report, offer to help fix the identified issues. For code-level fixes (missing privacy descriptions, IAP restore button, account deletion flow), you can often implement them directly. For metadata issues, provide the exact text or configuration changes needed.
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Understand the App (Phase 1)** — checks: `App understanding`, `Project config read`, `Code patterns identified`, `App category classified`
+
+**Phase: Run the Audit (Phase 2)** — checks: `Guideline coverage`, `Evidence specificity`, `Top 20 triggers checked`, `Entitlements cross-referenced`
+
+**Phase: Generate the Report (Phase 3)** — checks: `Report completeness`, `Verdict accuracy`, `Fix suggestions`, `Pre-submission checklist present`
+
+**Phase: Offer to Fix (Phase 4)** — checks: `Fix scope confirmed`, `Code changes applied`, `Metadata guidance provided`, `No entitlements modified`
 
 ## Things You Cannot Check From Code Alone
 

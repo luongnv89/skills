@@ -4,7 +4,7 @@ description: Generate development tasks from a PRD file with sprint-based planni
 effort: max
 license: MIT
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -196,6 +196,32 @@ When reporting completion, include:
 
 Link format (derive `<owner>/<repo>` from `git remote get-url origin`):
 - `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+**Requirements phase checks:** `PRD parsed`, `Features extracted`, `Constraints identified`
+
+**Sprint Planning phase checks:** `Phases defined`, `Stories created`, `Dependencies mapped`
+
+**Generation phase checks:** `tasks.md written`, `Sprint breakdown complete`, `Estimates assigned`
+
+**Output phase checks:** `README updated`, `Committed`, `Links reported`
 
 ## Output Summary
 

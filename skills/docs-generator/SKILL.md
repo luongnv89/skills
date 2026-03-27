@@ -4,7 +4,7 @@ description: Restructure project documentation for clarity and accessibility. Us
 effort: low
 license: MIT
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -90,6 +90,34 @@ Use Mermaid for all visual documentation:
 4. Present a summary of changes to the user before committing
 
 Present changes to user for approval. Do not commit unless the user explicitly asks.
+
+## Step Completion Reports
+
+After completing each major step, output a status report in this format:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Check 4]:          √ pass
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+
+### Skill-specific checks per phase
+
+**Phase: Branch Setup** — checks: `Branch creation`, `Repo sync`
+
+**Phase: Project Analysis** — checks: `Project analysis`, `Gap identification`
+
+**Phase: Documentation Restructure** — checks: `Doc restructure`, `Diagram creation`
+
+**Phase: Validation** — checks: `Validation pass`, `Link verification`
 
 ## Error Handling
 
