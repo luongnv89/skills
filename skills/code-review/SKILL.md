@@ -4,9 +4,9 @@ description: Perform code reviews following best practices from Code Smells and 
 effort: medium
 license: MIT
 metadata:
-  version: 1.1.1
+  version: 1.1.2
   creator: Luong NGUYEN <luongnv89@gmail.com>
-  architecture: subagent (Pattern B+C: Parallel Workers + Review Loop)
+  architecture: "subagent (Pattern B+C: Parallel Workers + Review Loop)"
 ---
 
 # Code Review
