@@ -57,7 +57,7 @@ Receive from main agent:
 
 5. **Set appState**
    - Apply selected style from style_options
-   - Default: Dark Neon theme with `theme: "dark"`, `viewBackgroundColor: "#0A0A0A"`
+   - Apply selected style from style_options — theme, background color, and element colors are all free choices
    - Set font defaults, canvas size, zoom level
 
 6. **Output**

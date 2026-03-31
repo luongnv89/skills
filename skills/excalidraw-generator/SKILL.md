@@ -4,7 +4,7 @@ description: Generate diagrams and visualizations as Excalidraw JSON files — f
 effort: high
 license: MIT
 metadata:
-  version: 1.1.1
+  version: 1.2.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -53,12 +53,12 @@ Present your plan with selectable options so the user can pick:
 2. **Key elements** — list the nodes/shapes you'll include
 3. **Layout options** — propose 2-3 layout choices for the user to pick from:
    - e.g., `(A) Top-to-bottom flow`, `(B) Left-to-right flow`, `(C) Radial/centered`
-4. **Style options** — propose color palette and roughness as selectable options:
-   - **Color palette**: `(1) Dark Neon` (dark base + neon green accent — default), `(2) Professional Light` (blue/green/orange on white), `(3) Pastel` (soft tones), `(4) Monochrome` (grays)
-   - **Rendering style**: `(a) Clean/geometric` (roughness 0, precise lines — default, best readability), `(b) Hand-drawn` (roughness 1, Excalidraw signature look), `(c) Sketchy` (roughness 2, very informal)
+4. **Style options** — pick whatever feels most expressive for the diagram's purpose. No fixed palette or theme. Some dimensions to consider:
+   - **Colors**: choose freely — light or dark background, vibrant or muted, semantic coloring by role/category
+   - **Rendering style**: `(a) Clean/geometric` (roughness 0), `(b) Hand-drawn` (roughness 1 — default), `(c) Sketchy` (roughness 2, very informal)
 5. **Estimated complexity** — small (< 10 elements), medium (10-30), large (30+)
 
-Wait for the user to confirm or select their preferred options before proceeding. If the user said "just do it" or the request is straightforward, use sensible defaults (Dark Neon palette, Clean/geometric style, Helvetica font, best-fit layout) and proceed directly.
+Wait for the user to confirm or select their preferred options before proceeding. If the user said "just do it" or the request is straightforward, use sensible defaults (hand-drawn style, roughness 1, hand-writing font, best-fit layout) and proceed directly. Pick colors that feel natural for the diagram — no fixed palette required.
 
 ### Phase 3: Generate
 
@@ -73,12 +73,14 @@ Generate the Excalidraw JSON and write it as a `.excalidraw` file (raw JSON, no 
   "source": "https://excalidraw.com",
   "elements": [...],
   "appState": {
-    "theme": "dark",
-    "viewBackgroundColor": "#0A0A0A"
+    "theme": "light",
+    "viewBackgroundColor": "#ffffff"
   },
   "files": {}
 }
 ```
+
+(Set `theme` and `viewBackgroundColor` to whatever suits the diagram — light, dark, or any color.)
 
 **Embedding in Markdown**: If the user explicitly asks to embed the diagram in a `.md` file, or says they want a Markdown file, create the `.excalidraw` file first, then create a companion `.md` file that references or embeds it. Use a fenced code block with the `excalidraw` language tag:
 
@@ -159,7 +161,7 @@ Review the original user request and verify that every entity, relationship, or 
 - All text elements must have `lineHeight: 1.25` (not 1.35 — that causes overflow)
 - All text elements must have `autoResize: true`
 
-**Fix**: Set minimum fontSize to 16; set strokeColor to `"#FAFAFA"` (dark theme) or `"#1e1e1e"` (light theme) if invisible; set lineHeight to 1.25; set autoResize to true.
+**Fix**: Set minimum fontSize to 16; set strokeColor to a color that is visibly readable against the background if invisible; set lineHeight to 1.25; set autoResize to true.
 
 #### Check 10: Shape-to-text size fit
 
@@ -260,29 +262,21 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ## Style Guidelines
 
-### Default style: Dark Neon
-- `roughness`: 0 (clean/geometric — precise lines for maximum readability)
+### Default style: Hand-drawn
+- `roughness`: 1 (hand-drawn — the natural, expressive Excalidraw look)
 - `strokeWidth`: 2
-- `fontFamily`: 2 (Helvetica — clean sans-serif for best readability on dark backgrounds)
-- `appState.theme`: `"dark"` with `viewBackgroundColor`: `"#0A0A0A"`
-- Color palette: Dark Neon from `references/excalidraw-format.md` (dark base + neon green accent, matching logo-designer brand)
-- Use color purposefully — different semantic colors for different categories or layers, not random
-- Node text color: `"#FAFAFA"` for high contrast on dark fills
-- Arrow/annotation text: `"#A1A1A1"` (muted) for secondary information
+- `fontFamily`: 1 (Virgil — hand-writing font, the Excalidraw signature style)
+- Colors: choose freely based on what communicates the diagram's meaning well — light or dark theme, vibrant or muted, whatever fits the content
+- Use color purposefully to distinguish categories, layers, or semantic roles — but trust your judgment rather than a fixed palette
 
-### When to use other styles
+### Style variants
 
-- **Professional Light** (`roughness: 1`, `fontFamily: 2`, light background): When the user wants a light theme
-- **Hand-drawn** (`roughness: 1`, `fontFamily: 1`): When the user explicitly wants the Excalidraw hand-drawn look
-- **Sketchy** (`roughness: 2`, `fontFamily: 1`): Wireframes, brainstorming, informal diagrams
-- **Monochrome**: When the user wants something printable or formal
+- **Sketchy** (`roughness: 2`, `fontFamily: 1`): Wireframes, brainstorming, very informal diagrams
+- **Clean/geometric** (`roughness: 0`, `fontFamily: 2`): Precise, formal, presentation-ready
+- **Code/technical** (`roughness: 0`, `fontFamily: 3`): Diagrams with code snippets or technical labels
+- **Monochrome**: When the user wants something printable or minimal
 
-### Color assignment strategy (Dark Neon palette)
-
-Assign colors by semantic meaning:
-- **Flowcharts**: Info blue (`#3B82F6`) for process steps, Accent green (`#00FF41`) for start/end, Warning amber (`#F59E0B`) for decisions, Danger red (`#EF4444`) for error paths
-- **Architecture**: Info blue = frontend, Accent green = backend/API, Purple (`#A855F7`) = data layer, Teal (`#14B8A6`) = external services
-- **Status-based**: Accent green = active/success, Warning amber = warning, Danger red = error/blocked, Muted (`#A1A1A1`) = inactive
+Adapt the style to the diagram's purpose and the user's intent. The hand-drawn default works well for most cases — override when the content clearly calls for something different.
 
 ---
 
@@ -372,12 +366,10 @@ For a request like "draw a flowchart of a login process":
 **File**: `login-flow.excalidraw`
 
 The output is a raw JSON file containing the full Excalidraw document with:
-- Dark background (`#0A0A0A`), dark theme enabled
-- Clean geometric shapes (`roughness: 0`) with Helvetica font (`fontFamily: 2`)
-- An ellipse "Start" node — neon green stroke (`#00FF41`) with dim green fill (`#0A2A0A`)
-- Rectangle process nodes — info blue stroke (`#3B82F6`) with dim blue fill (`#0A1A2E`)
-- A diamond "Valid?" decision — warning amber stroke (`#F59E0B`) with dim amber fill (`#2A1A0A`)
-- An error rectangle — danger red stroke (`#EF4444`) with dim red fill (`#2A0A0A`)
-- All text in `#FAFAFA` for high contrast
-- Arrows in muted `#A1A1A1` connecting all nodes
-- Each shape has bound text labels
+- Hand-drawn style (`roughness: 1`) with Virgil hand-writing font (`fontFamily: 1`)
+- An ellipse "Start" node in a natural start color (e.g. soft green)
+- Rectangle process nodes in a distinct fill
+- A diamond "Valid?" decision node in a contrasting color
+- An error rectangle in red tones
+- Arrows connecting all nodes
+- Each shape has bound text labels sized to fit their content

@@ -26,7 +26,7 @@ Apply fixes in priority order from validator report.
   - `x`, `y`, `width`, `height`: use 0, 0, 100, 50 if missing
   - `angle`: 0
   - `strokeColor`: `"#A1A1A1"`
-  - `backgroundColor`: `"#0A0A0A"`
+  - `backgroundColor`: `"transparent"`
   - `fillStyle`: `"solid"`
   - `strokeWidth`: 2
   - `strokeStyle`: `"solid"`
@@ -45,7 +45,7 @@ Apply fixes in priority order from validator report.
 - **For text elements**, also add:
   - `text`: empty string if missing
   - `fontSize`: 16 (minimum readable)
-  - `fontFamily`: 2 (Helvetica)
+  - `fontFamily`: 1 (Virgil/hand-writing — default)
   - `textAlign`: `"center"`
   - `verticalAlign`: `"middle"`
   - `containerId`: `null` (unless bound to a shape)
@@ -101,7 +101,7 @@ Apply fixes in priority order from validator report.
 - Set to 16
 
 **For text with `strokeColor` same as `backgroundColor`**:
-- Set `strokeColor` to `"#FAFAFA"` (for dark backgrounds) or `"#1e1e1e"` (for light)
+- Set `strokeColor` to a color that is visibly readable against the background
 
 **For `lineHeight` not 1.25**:
 - Set to 1.25

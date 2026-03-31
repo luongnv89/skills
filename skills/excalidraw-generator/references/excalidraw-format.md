@@ -10,7 +10,7 @@ This reference documents the exact JSON structure that Excalidraw expects. Read 
 4. [Text Binding](#text-binding)
 5. [Arrow Bindings](#arrow-bindings)
 6. [Groups](#groups)
-7. [Color Palettes](#color-palettes)
+7. [Colors](#colors)
 8. [Layout Constants](#layout-constants)
 
 ---
@@ -26,8 +26,8 @@ Every `.excalidraw` file is JSON with this structure:
   "source": "https://excalidraw.com",
   "elements": [],
   "appState": {
-    "theme": "dark",
-    "viewBackgroundColor": "#0A0A0A",
+    "theme": "light",
+    "viewBackgroundColor": "#ffffff",
     "gridMode": false
   },
   "files": {}
@@ -148,7 +148,7 @@ Standalone or bound to a container.
 | Property | Values |
 |----------|--------|
 | `fontSize` | 16 (small), 20 (normal), 28 (heading), 36 (title) |
-| `fontFamily` | 1 (Virgil/hand-drawn), **2 (Helvetica — default, best readability)**, 3 (Cascadia/code) |
+| `fontFamily` | **1 (Virgil/hand-writing — default, the Excalidraw signature style)**, 2 (Helvetica, clean sans-serif), 3 (Cascadia/code) |
 | `textAlign` | `"left"`, `"center"`, `"right"` |
 | `verticalAlign` | `"top"`, `"middle"` |
 | `containerId` | ID of parent shape, or `null` for standalone text |
@@ -330,69 +330,9 @@ Nested groups: `"groupIds": ["inner-group", "outer-group"]`
 
 ---
 
-## Color Palettes
+## Colors
 
-### Dark Neon (default)
-
-Dark base with neon green accent — matches the brand style from logo-designer.
-
-| Role | Color |
-|------|-------|
-| Background | `"#0A0A0A"` |
-| Surface | `"#111111"` (node fill) |
-| Border/Stroke | `"#262626"` |
-| Accent | `"#00FF41"` (neon green — highlights, key nodes, start/end states) |
-| Text | `"#FAFAFA"` |
-| Muted text | `"#A1A1A1"` (annotations, secondary labels) |
-| Info | `"#3B82F6"` (blue — process nodes, informational) |
-| Warning | `"#F59E0B"` (amber — decisions, caution) |
-| Danger | `"#EF4444"` (red — error paths, critical) |
-| Purple | `"#A855F7"` (data layer, storage) |
-| Teal | `"#14B8A6"` (external services, integrations) |
-| Accent fill (dim) | `"#0A2A0A"` (subtle dark green fill for accent-highlighted shapes) |
-| Info fill (dim) | `"#0A1A2E"` (subtle dark blue fill) |
-| Warning fill (dim) | `"#2A1A0A"` (subtle dark amber fill) |
-| Danger fill (dim) | `"#2A0A0A"` (subtle dark red fill) |
-
-**Usage rules:**
-- `appState.theme` must be `"dark"` and `viewBackgroundColor` must be `"#0A0A0A"`
-- Node stroke uses the semantic color; node fill uses the corresponding dim fill
-- Text inside nodes uses `"#FAFAFA"`; standalone annotations use `"#A1A1A1"`
-- Neon green (`#00FF41`) is reserved for highlights — start/end nodes, key connections, emphasis. Never use it as a shape fill.
-- Arrow strokeColor should match the semantic color of the relationship, or default to `"#A1A1A1"`
-
-### Professional (light)
-| Role | Color |
-|------|-------|
-| Primary | `"#1971c2"` (blue) |
-| Secondary | `"#2f9e44"` (green) |
-| Accent | `"#e03131"` (red) |
-| Warning | `"#f08c00"` (orange) |
-| Purple | `"#9c36b5"` |
-| Teal | `"#0c8599"` |
-| Stroke | `"#1e1e1e"` |
-| Light fill | `"#a5d8ff"` (blue), `"#b2f2bb"` (green), `"#ffc9c9"` (red) |
-| Background | `"#ffffff"` |
-
-### Pastel
-| Role | Color |
-|------|-------|
-| Blue | `"#dbe4ff"` |
-| Green | `"#d3f9d8"` |
-| Yellow | `"#fff3bf"` |
-| Pink | `"#fcc2d7"` |
-| Purple | `"#e5dbff"` |
-| Orange | `"#ffe8cc"` |
-| Stroke | `"#495057"` |
-
-### Monochrome
-| Role | Color |
-|------|-------|
-| Dark | `"#343a40"` |
-| Medium | `"#868e96"` |
-| Light | `"#dee2e6"` |
-| Lightest | `"#f1f3f5"` |
-| Stroke | `"#1e1e1e"` |
+Choose colors freely based on what best communicates the diagram's content — there is no fixed palette. Use color purposefully to distinguish semantic roles (e.g. different node categories, flow states, layers) rather than decoratively. Ensure text color is always readable against its background.
 
 ---
 
