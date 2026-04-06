@@ -1,15 +1,23 @@
 # GitHub Actions Workflow Templates
 
+Philosophy: **lean CI**. Since pre-commit already handles format, lint, type-check, unit tests, and E2E tests locally, GitHub Actions only needs to do what can't run locally: multi-version matrix testing, coverage uploads, and deployment.
+
 ## Table of Contents
 
+- [Minimal (pre-commit already covers everything)](#minimal-pre-commit-already-covers-everything)
 - [JavaScript/TypeScript](#javascripttypescript)
 - [Python](#python)
 - [Go](#go)
 - [Rust](#rust)
 - [Java (Maven)](#java-maven)
 - [Multi-language](#multi-language)
+- [Common Additions](#common-additions)
 
-## JavaScript/TypeScript
+---
+
+## Minimal (pre-commit already covers everything)
+
+If your pre-commit setup runs format, lint, type-check, unit tests, and E2E tests — CI can be extremely thin:
 
 ```yaml
 name: CI
@@ -21,8 +29,63 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  pre-commit:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+        # Runs all pre-commit hooks (commit + push stages) on CI
+        env:
+          SKIP: ""  # add hook IDs here to skip on CI if needed
+```
+
+This single job re-runs everything pre-commit does locally, ensuring the same checks pass in a clean environment.
+
+---
+
+## JavaScript/TypeScript
+
+Add matrix version testing — the part pre-commit can't do locally:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Re-run pre-commit in CI (catches any env differences)
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+
+  matrix-test:
+    runs-on: ubuntu-latest
+    # Only run matrix test on push to main (not every PR commit)
+    if: github.event_name == 'push'
 
     strategy:
       matrix:
@@ -40,20 +103,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Prettier
-        run: npx prettier --check .
-
-      - name: Run ESLint
-        run: npx eslint .
-
-      - name: Type check
-        run: npx tsc --noEmit
-
       - name: Run tests
         run: npm test
 
       - name: Build
         run: npm run build
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.node-version == 20  # upload once
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 ```
 
 ### With pnpm
@@ -74,6 +134,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 ```
 
+---
+
 ## Python
 
 ```yaml
@@ -86,8 +148,27 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  quality:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      # Pre-commit re-runs all hooks (format, lint, type-check, tests, E2E)
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+
+  matrix-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     strategy:
       matrix:
@@ -103,25 +184,16 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-          # Or: pip install -r requirements-dev.txt
+        run: pip install -e ".[dev]"
 
-      - name: Run Ruff linter
-        run: ruff check .
+      - name: Run tests with coverage
+        run: pytest --cov --cov-report=xml -q
 
-      - name: Run Ruff formatter
-        run: ruff format --check .
-
-      - name: Run mypy
-        run: mypy .
-
-      - name: Run Bandit security check
-        run: bandit -r src/
-
-      - name: Run tests
-        run: pytest --cov
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.12'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 ```
 
 ### With Poetry
@@ -144,6 +216,8 @@ jobs:
         run: poetry install --no-interaction
 ```
 
+---
+
 ## Go
 
 ```yaml
@@ -156,8 +230,23 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  quality:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+
+  matrix-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     strategy:
       matrix:
@@ -172,32 +261,21 @@ jobs:
           go-version: ${{ matrix.go-version }}
           cache: true
 
-      - name: Run go fmt
-        run: |
-          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-            gofmt -s -l .
-            exit 1
-          fi
-
-      - name: Run go vet
-        run: go vet ./...
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: latest
-
-      - name: Run gosec
-        uses: securego/gosec@master
-        with:
-          args: ./...
-
-      - name: Run tests
+      - name: Run tests with coverage
         run: go test -race -coverprofile=coverage.out ./...
 
       - name: Build
         run: go build ./...
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.go-version == '1.22'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
 ```
+
+---
 
 ## Rust
 
@@ -211,9 +289,8 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  quality:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -225,32 +302,38 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
 
-      - name: Run rustfmt
-        run: cargo fmt --all -- --check
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
 
-      - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+  matrix-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
-      - name: Run cargo audit
-        uses: rustsec/audit-check@v1
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        rust: [stable, beta]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust ${{ matrix.rust }}
+        uses: dtolnay/rust-toolchain@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: ${{ matrix.rust }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
 
       - name: Run tests
         run: cargo test --all-features
 
-      - name: Build
+      - name: Build release
         run: cargo build --release
 ```
 
-### Multi-platform Rust
-
-```yaml
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-```
+---
 
 ## Java (Maven)
 
@@ -264,8 +347,24 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-test:
+  quality:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+
+  matrix-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     strategy:
       matrix:
@@ -281,22 +380,18 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Run Checkstyle
-        run: mvn checkstyle:check
-
-      - name: Run SpotBugs
-        run: mvn spotbugs:check
-
       - name: Run tests
-        run: mvn test
+        run: mvn test -q
 
       - name: Build
-        run: mvn package -DskipTests
+        run: mvn package -DskipTests -q
 ```
+
+---
 
 ## Multi-language
 
-For monorepos, use path filters:
+For monorepos, use path filters to only run relevant jobs:
 
 ```yaml
 name: CI
@@ -330,7 +425,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # ... frontend-specific steps
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Run pre-commit (frontend hooks)
+        uses: pre-commit/action@v3.0.1
 
   backend:
     needs: changes
@@ -338,16 +440,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # ... backend-specific steps
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e "backend/[dev]"
+      - name: Run pre-commit (backend hooks)
+        uses: pre-commit/action@v3.0.1
 ```
+
+---
 
 ## Common Additions
 
-### Dependency caching
-
-Already included in setup actions (`cache: true` or `cache: 'npm'`).
-
-### Upload coverage
+### Upload coverage to Codecov
 
 ```yaml
       - name: Upload coverage to Codecov
@@ -356,7 +462,7 @@ Already included in setup actions (`cache: true` or `cache: 'npm'`).
           token: ${{ secrets.CODECOV_TOKEN }}
 ```
 
-### PR status comments
+### PR status comment
 
 ```yaml
       - name: Comment PR
@@ -372,14 +478,25 @@ Already included in setup actions (`cache: true` or `cache: 'npm'`).
             })
 ```
 
-### Deployment (example)
+### Deployment (on merge to main)
 
 ```yaml
   deploy:
-    needs: lint-and-test
-    if: github.ref == 'refs/heads/main'
+    needs: [quality, matrix-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       # Add deployment steps
+```
+
+### Skipping specific pre-commit hooks in CI
+
+Some hooks (like interactive formatters) may not make sense in CI. Skip them with the `SKIP` env var:
+
+```yaml
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+        env:
+          SKIP: "no-commit-to-branch"  # comma-separated hook IDs to skip
 ```
