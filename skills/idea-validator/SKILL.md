@@ -4,7 +4,7 @@ description: Critically evaluate and enhance app ideas, startup concepts, and pr
 effort: max
 license: MIT
 metadata:
-  version: 1.2.3
+  version: 1.3.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -70,7 +70,35 @@ Ask user:
 
 Update `idea.md` technical section.
 
-## Phase 3: Critical Evaluation
+## Phase 3: Competitive Landscape Research
+
+Before evaluating the idea, search the internet to find what already exists in the space. This grounds the analysis in real-world data instead of guessing about competitors — it prevents the user from unknowingly building something that's already been done, and reveals gaps they can exploit.
+
+Use WebSearch to find:
+
+**Direct competitors** — products/services solving the same problem for the same audience. Search for the core problem statement plus keywords like "app", "tool", "platform", "SaaS", "startup". Try 2-3 different search queries to cover variations (e.g., both the problem description and the solution category).
+
+**Adjacent solutions** — products that solve a related problem or serve the same audience differently. These reveal how users currently cope without the proposed solution.
+
+**Failed attempts** — startups or products that tried something similar and shut down. Search for "[concept] startup failed", "[concept] post-mortem", or check product directories. Understanding why predecessors failed is often more valuable than knowing who succeeded.
+
+For each competitor found, capture:
+- **Name and URL**
+- **What they do** (one sentence)
+- **Pricing model** (free, freemium, paid, enterprise)
+- **Apparent traction** (user reviews, app store ratings, social media presence, funding if findable)
+- **Key weakness or gap** the user's idea could exploit
+
+Aim for 3-8 competitors total (direct + adjacent). If fewer than 3 are found, that's a signal — either the market is very niche (potential opportunity) or the search terms need refining.
+
+Update `validate.md` with a **## Competitive Landscape** section containing:
+1. A summary table of competitors found
+2. A "white space" analysis — what's missing in the current market
+3. Honest assessment: is the user's differentiation real or imagined given what exists?
+
+If WebSearch is unavailable, note it in the report and proceed to Phase 4 with best-effort analysis based on general knowledge. Flag that the competitive section should be verified manually.
+
+## Phase 4: Critical Evaluation
 
 Evaluate honestly and update `validate.md`:
 
@@ -104,7 +132,7 @@ Evaluate honestly and update `validate.md`:
 - Market Impact
 - Technical Execution
 
-## Phase 4: Improvements
+## Phase 5: Improvements
 
 Update `validate.md` with:
 
@@ -134,7 +162,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Setup**
 ```
-◆ Setup (step 1 of 5 — [idea name])
+◆ Setup (step 1 of 6 — [idea name])
 ··································································
   Storage resolved:   √ pass ([path])
   Folder created:     √ pass ([YYYY_MM_DD_name/])
@@ -144,7 +172,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 1 — Clarify**
 ```
-◆ Clarify (step 2 of 5 — [idea name])
+◆ Clarify (step 2 of 6 — [idea name])
 ··································································
   Questions answered: √ pass ([N] responses collected)
   idea.md updated:    √ pass | × fail — [missing sections]
@@ -154,7 +182,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 2 — Gather Technical Context**
 ```
-◆ Gather Technical Context (step 3 of 5 — [idea name])
+◆ Gather Technical Context (step 3 of 6 — [idea name])
 ··································································
   Context sources identified: √ pass ([N] inputs collected)
   Technical feasibility assessed: √ pass | × fail — [gaps noted]
@@ -163,9 +191,21 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:             PASS | FAIL | PARTIAL
 ```
 
-**Phase 3 — Evaluate**
+**Phase 3 — Competitive Landscape**
 ```
-◆ Evaluate (step 4 of 5 — [idea name])
+◆ Competitive Landscape (step 4 of 6 — [idea name])
+··································································
+  Web searches executed: √ pass ([N] queries run)
+  Competitors found:     √ pass ([N] direct + [N] adjacent)
+  Failed attempts checked: √ pass | × fail — [no results or skipped]
+  validate.md updated:   √ pass | × fail — [missing sections]
+  ____________________________
+  Result:                PASS | FAIL | PARTIAL
+```
+
+**Phase 4 — Evaluate**
+```
+◆ Evaluate (step 5 of 6 — [idea name])
 ··································································
   Feasibility scored: √ pass ([score]/10)
   Market assessed:    √ pass | × fail — [gaps in analysis]
@@ -174,9 +214,9 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:             PASS | FAIL | PARTIAL
 ```
 
-**Phase 4 — Improve**
+**Phase 5 — Improve**
 ```
-◆ Improve (step 5 of 5 — [idea name])
+◆ Improve (step 6 of 6 — [idea name])
 ··································································
   Enhancements identified:    √ pass ([N] improvements listed)
   Recommendations added:      √ pass | × fail — [what's missing]
@@ -263,6 +303,21 @@ After all phases:
 
 ## Why
 [2-3 sentence explanation]
+
+## Competitive Landscape
+
+| Competitor | What They Do | Pricing | Traction | Key Weakness |
+|---|---|---|---|---|
+| [Name](URL) | [One sentence] | [Model] | [Evidence] | [Gap to exploit] |
+
+### White Space Analysis
+[What's missing in the current market]
+
+### Differentiation Assessment
+[Is the proposed differentiation real or imagined given existing competitors?]
+
+### Failed Predecessors
+[Products that tried and failed — and why]
 
 ## Similar Products
 [Competitors]

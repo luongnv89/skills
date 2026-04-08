@@ -4,7 +4,8 @@
 
 ## Highlights
 
-- Multi-phase evaluation: clarify idea, gather context, critical analysis, improvements
+- Multi-phase evaluation: clarify idea, gather context, research competitors, critical analysis, improvements
+- Web search for real competitors and failed predecessors to avoid reinventing the wheel
 - Rate creativity, feasibility, impact, and technical execution
 - Deliver a clear verdict: Build it, Maybe, or Skip it
 - Generate improvement suggestions and enhanced roadmap
@@ -23,11 +24,12 @@
 ```mermaid
 graph TD
     A["Clarify the Idea"] --> B["Gather Technical Context"]
-    B --> C["Critical Evaluation"]
-    C --> D["Rate & Verdict"]
-    D --> E["Suggest Improvements"]
+    B --> C["Research Competitors"]
+    C --> D["Critical Evaluation"]
+    D --> E["Rate & Verdict"]
+    E --> F["Suggest Improvements"]
     style A fill:#4CAF50,color:#fff
-    style E fill:#2196F3,color:#fff
+    style F fill:#2196F3,color:#fff
 ```
 
 ## Installation
@@ -53,5 +55,5 @@ asm install github:luongnv89/skills:skills/idea-validator
 ## Output
 
 - `idea.md` with concept, clarifications, and technical context
-- `validate.md` with verdict, ratings, market analysis, and improvement roadmap
+- `validate.md` with competitive landscape, verdict, ratings, market analysis, and improvement roadmap
 - Updated README ideas index table with GitHub links
