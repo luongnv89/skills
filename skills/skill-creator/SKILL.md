@@ -4,7 +4,7 @@ description: Create new skills, modify and improve existing skills, and measure 
 effort: max
 license: MIT
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -109,6 +109,34 @@ metadata:
 If the frontmatter has no `metadata.version` field, add one starting at `1.0.0`.
 
 This applies every time you write or edit a SKILL.md — whether creating from scratch, improving after eval feedback, optimizing the description, or any other modification. The version bump is part of the edit, not a separate step.
+
+## YAML Frontmatter Safety (mandatory)
+
+YAML is surprisingly easy to break. An unquoted value containing a colon (`:`) causes many parsers to treat the rest of the line as a new mapping, silently producing wrong output or a hard parse error. This has bitten real skills — `cli-builder` and `code-review` both shipped with broken frontmatter for this reason.
+
+**Rule: quote every frontmatter string that contains any of these characters: `:`, `#`, `{`, `}`, `[`, `]`, `,`, `&`, `*`, `?`, `|`, `-`, `<`, `>`, `=`, `!`, `%`, `@`, `` ` ``.**
+
+In practice, the safest approach is to quote all multi-word string values in frontmatter by default — it costs nothing and prevents the whole class of bugs.
+
+**Examples of the problem and the fix:**
+
+```yaml
+# BROKEN — the : after "workflow" starts a new mapping in strict parsers
+description: Follows a 5-step workflow: Analyze -> Design -> Plan -> Execute -> Summarize.
+
+# FIXED
+description: "Follows a 5-step workflow: Analyze -> Design -> Plan -> Execute -> Summarize."
+```
+
+```yaml
+# BROKEN — the : after "B+C" breaks strict parsers
+architecture: subagent (Pattern B+C: Parallel Workers + Review Loop)
+
+# FIXED
+architecture: "subagent (Pattern B+C: Parallel Workers + Review Loop)"
+```
+
+When writing or editing any SKILL.md frontmatter, scan every value for colons and other special characters and wrap the value in double quotes if any are present. If the value itself contains double quotes, escape them with `\"`.
 
 ## Creating a skill
 
