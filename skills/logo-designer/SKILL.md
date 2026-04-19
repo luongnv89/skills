@@ -414,9 +414,9 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:                     PASS | FAIL | PARTIAL
 ```
 
-## Example Output
+### Example Console Output
 
-For a CLI tool called "fastbuild":
+For the same "fastbuild" example, the analysis and design rationale presented to the user:
 
 ```
 ## Analysis Summary
