@@ -43,8 +43,6 @@ git stash pop
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
-## Instructions
-
 ## 1) Ensure `chub` is ready
 
 Run:

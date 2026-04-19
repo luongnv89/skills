@@ -1,6 +1,6 @@
 ---
 name: skill-inventory-auditor
-description: Audit all installed agent skills across global and project scopes to find and remove duplicate skills. Use when asked to "audit my skills", "check for duplicate skills", "clean up skills", "deduplicate skills", "find duplicate skills", or when the user wants to find and remove duplicated skill installations.
+description: Audit all installed agent skills across global and project scopes to find and remove duplicate skills. Use when asked to "audit my skills", "deduplicate skills", "clean up skills", or "find duplicate skill installations".
 effort: low
 license: MIT
 metadata:
