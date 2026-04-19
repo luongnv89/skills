@@ -1,6 +1,6 @@
 ---
 name: skill-inventory-auditor
-description: Audit all installed agent skills across global and project scopes to find and remove duplicate skills. Use when asked to "audit my skills", "check for duplicate skills", "clean up skills", "deduplicate skills", "find duplicate skills", or when the user wants to find and remove duplicated skill installations.
+description: Audit all installed agent skills across global and project scopes to find and remove duplicate skills. Use when asked to "audit my skills", "deduplicate skills", "clean up skills", or "find duplicate skill installations".
 effort: low
 license: MIT
 metadata:
@@ -85,6 +85,40 @@ rm -rf {directory_path}
 - When removing a symlink, only the link is deleted — the source remains intact
 
 After removals, rerun the scanner to verify no duplicates remain.
+
+## Expected Output
+
+After the audit completes, the skill presents:
+
+```
+Skill Inventory Audit — 2 duplicate group(s) found
+
+Group 1: "release-manager"
+| Location                          | Version | Description excerpt              |
+|-----------------------------------|---------|----------------------------------|
+| ~/.claude/skills/release-manager  | 2.3.1   | Automate the full release...     |
+| .claude/skills/release-manager    | 2.1.0   | Complete release automation...   |
+Recommendation: keep ~/.claude/skills/release-manager (higher version)
+Similarity: exact name match
+
+Removed: .claude/skills/release-manager
+Rescan: 0 duplicates remaining.
+```
+
+## Edge Cases
+
+- **Symlink pointing to the same source as another entry**: Do not flag as a duplicate. The scanner excludes cross-linked entries that resolve to the same path; treat them as a single shared installation.
+- **Skill with no `skill.md` file**: If a directory in a skills folder lacks a `skill.md`, skip it during scanning and report it separately as an unrecognized entry. Do not attempt to remove it automatically.
+- **Scanner script not found**: If `scripts/scan_inventory.py` is missing (e.g., the skill was installed without its scripts), report the missing dependency and stop. Do not attempt to scan manually.
+
+## Acceptance Criteria
+
+- [ ] All configured skill directories (global and project) are scanned
+- [ ] Each duplicate group is presented with a table showing location, version, and description excerpt
+- [ ] A keep/remove recommendation is provided for each group based on version and feature richness
+- [ ] No skills are removed without explicit user confirmation
+- [ ] Source repositories are never touched — only installed copies in `~/.claude/skills/`, `~/.agents/skills/`, or `.claude/skills/` are eligible for removal
+- [ ] A rescan is run after removals to confirm zero duplicates remain
 
 ## Step Completion Reports
 

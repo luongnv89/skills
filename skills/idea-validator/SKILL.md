@@ -1,6 +1,6 @@
 ---
 name: idea-validator
-description: Critically evaluate and enhance app ideas, startup concepts, and product proposals. Use when users ask to "evaluate my idea", "review this concept", "is this a good idea", "validate my startup idea", or want honest feedback on technical feasibility and market viability.
+description: Evaluate app ideas and startup concepts across market viability, technical feasibility, and competitive landscape. Use when asked to validate, review, or score a product idea.
 effort: max
 license: MIT
 metadata:
@@ -11,6 +11,18 @@ metadata:
 # Idea Validator
 
 Critically evaluate ideas with honest feedback on market viability, technical feasibility, and actionable improvements.
+
+## When to Use
+
+Trigger this skill when the user asks to:
+- Evaluate, validate, or score an app idea or startup concept
+- Get honest feedback on whether an idea is worth building
+- Research what competitors already exist in a space
+- Turn a vague concept into a structured validation report
+
+## Instructions
+
+Follow the 5-phase pipeline in order: Clarify → Technical Context → Competitive Landscape Research → Critical Evaluation → Improvements. Do not skip phases or reorder them.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -139,6 +151,43 @@ Update `validate.md` with:
 - **How to Strengthen**: Specific, actionable improvements
 - **Enhanced Version**: Reworked, optimized concept
 - **Implementation Roadmap**: Phased approach (if applicable)
+
+## Expected Output
+
+After all phases complete, the output includes:
+
+```
+## Quick Verdict
+**Build it**
+
+## Ratings
+| Dimension         | Score |
+|-------------------|-------|
+| Creativity        | 7/10  |
+| Feasibility       | 8/10  |
+| Market Impact     | 6/10  |
+| Technical Execution | 8/10 |
+
+## Top Concerns
+1. Three direct competitors already exist with significant traction
+2. Monetization path unclear — target users expect free tools
+3. MVP scope likely exceeds 2-4 week estimate
+```
+
+## Edge Cases
+
+- **No clear target user**: If the idea is too broad (e.g., "an app for everyone"), push back in Phase 1 — ask the user to name one specific person who has this pain today. Do not proceed to evaluation without a defined user segment.
+- **Duplicate idea already exists**: If Phase 3 research finds a near-identical product, surface it immediately with evidence (URL, feature comparison) and ask whether the user still wants to proceed. Evaluation continues only if the user identifies a genuine differentiator.
+- **Technical feasibility unclear**: If the idea requires unproven technology, undisclosed APIs, or capabilities the stated team cannot build, flag it as a hard blocker in Phase 4 and lower the Feasibility score accordingly. Do not give a `Build it` verdict when fundamental technical risk is unresolved.
+
+## Acceptance Criteria
+
+- [ ] All 5 phases are completed in order (Clarify → Technical Context → Competitive Landscape → Evaluation → Improvements)
+- [ ] Competitive landscape research is performed via web search with at least 2-3 queries; competitors table populated in `validate.md`
+- [ ] A clear verdict (`Build it` / `Maybe` / `Skip it`) is given with a supporting rationale
+- [ ] All four ratings (Creativity, Feasibility, Market Impact, Technical Execution) are provided as scores out of 10
+- [ ] `idea.md` and `validate.md` are committed and pushed to the remote repository
+- [ ] GitHub links to both files are reported in the completion message
 
 ## Step Completion Reports
 

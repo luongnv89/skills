@@ -1,6 +1,6 @@
 ---
 name: drawio-generator
-description: Generate diagrams and visualizations as draw.io (diagrams.net) XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, swimlanes, and more. Trigger when user says "draw.io", "drawio", "diagrams.net", ".drawio file", or wants draw.io format. Also trigger when extending existing .drawio files or when context calls for draw.io (corporate environments, Confluence/Jira integration, multi-page diagrams).
+description: Generate professional diagrams as valid draw.io XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, and swimlanes.
 effort: high
 license: MIT
 metadata:
@@ -207,6 +207,54 @@ Validation: 9/9 checks passed
 - Containers: Z
 - All IDs unique, all edges bound, no overlaps
 ```
+
+---
+
+## Expected Output
+
+A valid `.drawio` file written to disk (raw XML). Example output for a two-node flowchart:
+
+```xml
+<mxfile>
+  <diagram name="Flow" id="page-1">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="node-start" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="100" y="80" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="node-process" value="Process Request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="100" y="200" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-start-process" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="node-start" target="node-process">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+```
+
+After file write, the skill reports:
+```
+Validation: 9/9 checks passed
+- Pages: 1
+- Elements: 2 shapes, 1 edge
+- Containers: 0
+- All IDs unique, all edges bound, no overlaps
+File written: flow.drawio
+```
+
+## Edge Cases
+
+- **Empty or vague input** (e.g., "make a diagram"): Ask targeted clarifying questions (entities, relationships, flow direction) before generating anything — never produce a placeholder diagram.
+- **Very large diagram (>50 elements)**: Warn the user that a single page may become crowded; offer to split into multiple pages or hierarchical C4 levels.
+- **Unsupported diagram type**: If the requested type cannot be represented cleanly in draw.io XML (e.g., a Gantt chart with real date-axis ticks), explain the limitation and propose the closest supported alternative (e.g., a swimlane timeline).
+- **Existing `.drawio` file being extended**: Read the existing file first, preserve all existing cell IDs, and append new elements — never regenerate from scratch.
+- **Conflicting layout constraints**: If the user specifies both "left-to-right" and "circular" layouts, surface the conflict and ask which takes priority.
+- **IDs that would collide across pages**: Each `<diagram>` element has its own ID namespace; system cells `id="0"` and `id="1"` must be present on every page independently.
+- **Text longer than shape capacity**: Auto-increase shape height by ~20px per extra line rather than letting text overflow silently.
 
 ---
 

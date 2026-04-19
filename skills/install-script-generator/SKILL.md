@@ -1,6 +1,6 @@
 ---
 name: install-script-generator
-description: Generate cross-platform installation scripts for any software, library, or module. Use when users ask to "create an installer", "generate installation script", "automate installation", "setup script for X", "install X on any OS", or need automated deployment across Windows, Linux, and macOS. Generates a standalone install.sh (and optionally install.ps1) that can be run via a single curl/wget one-liner. Follows a four-phase approach — environment exploration, installation planning, script generation, and documentation.
+description: Generate cross-platform installation scripts for any software, library, or module. Produces a standalone install.sh runnable via a single curl/wget one-liner, with automatic OS, architecture, and package manager detection.
 effort: high
 license: MIT
 metadata:
@@ -432,6 +432,36 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   ____________________________
   Result:                     PASS | FAIL | PARTIAL
 ```
+
+## Expected Output
+
+A complete `install.sh` at the repo root, plus a README one-liner block. Example snippet for a Python CLI tool called `mytool`:
+
+```bash
+#!/usr/bin/env bash
+# Usage: curl -sSL https://raw.githubusercontent.com/owner/mytool/main/install.sh | bash
+set -euo pipefail
+TOOL_NAME="mytool"
+...
+[INFO]  OS: linux | Arch: x86_64 | Package Manager: apt
+[INFO]  Installing dependencies: python3 python3-pip
+[ OK ]  Dependencies installed
+[ OK ]  mytool 1.2.0 installed successfully
+[ OK ]  Installation complete!
+```
+
+README section generated:
+```bash
+curl -sSL https://raw.githubusercontent.com/owner/mytool/main/install.sh | bash
+```
+
+## Edge Cases
+
+- **Unsupported OS**: Script calls `die "Unsupported operating system: $os"` and exits non-zero; user is told which OS was detected.
+- **Missing dependencies / no package manager**: The `detect_package_manager` function returns `unknown`; `install_deps` calls `die` with a clear message listing the missing package manager.
+- **No sudo access**: `need_sudo` checks `id -u` and the presence of `sudo`; if neither root nor sudo is available, the script exits with "Please run as root or install sudo."
+- **Windows without PowerShell**: `install.sh` detects MSYS/Cygwin and warns; an `install.ps1` is generated separately for native Windows.
+- **Non-standard repo structure**: If the script lives in a subdirectory, the URL path is adjusted and documented in the README.
 
 ## Error Handling
 

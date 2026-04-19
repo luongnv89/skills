@@ -1,6 +1,6 @@
 ---
 name: devops-pipeline
-description: Implement pre-commit hooks and GitHub Actions for quality assurance. Use when asked to "setup CI/CD", "add pre-commit hooks", "create GitHub Actions", "setup quality gates", "automate testing", "add linting to CI", "reduce GitHub Actions dependency", "run tests locally before push", "shift-left testing", "end-to-end pre-commit", or any DevOps automation for code quality. Detects project type and configures appropriate tools. Prioritizes running as many tests as possible locally in pre-commit to reduce CI cost and catch issues before they reach GitHub.
+description: Implement pre-commit hooks and lean GitHub Actions for shift-left quality assurance — maximizing local test coverage and minimizing CI cost.
 effort: medium
 license: MIT
 metadata:
@@ -208,6 +208,53 @@ If all local checks pass, GitHub Actions becomes a thin verification layer, not 
 | CLI E2E tests | — | ✓ | — |
 | Multi-version matrix | — | — | ✓ |
 | Deploy | — | — | ✓ |
+
+## Expected Output
+
+After running the skill, the repository contains:
+
+1. **`.pre-commit-config.yaml`** — hooks for formatting, linting, type-checking, and unit tests on `commit` stage; full test suite and E2E tests on `push` stage.
+2. **`.github/workflows/ci.yml`** — lean CI that re-runs pre-commit and uploads coverage; no duplicate lint/format steps.
+3. **`scripts/e2e_test.sh`** (CLI projects only) — executable script exercising every CLI command/subcommand.
+
+Example `.pre-commit-config.yaml` snippet for a Python project:
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        stages: [commit]
+      - id: ruff-format
+        stages: [commit]
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy type check
+        entry: mypy src/
+        language: system
+        stages: [commit]
+      - id: pytest-fast
+        name: fast unit tests
+        entry: pytest tests/unit -x -q
+        language: system
+        stages: [commit]
+      - id: pytest-full
+        name: full test suite
+        entry: pytest --cov=src --cov-report=xml
+        language: system
+        stages: [push]
+```
+
+## Edge Cases
+
+- **No package manager detected**: Prompt the user for the language/build system before generating hooks; never guess silently.
+- **Pre-commit not installed**: Emit the install command (`pip install pre-commit` or `brew install pre-commit`) and stop; don't generate config files for a tool that isn't present.
+- **Existing `.pre-commit-config.yaml`**: Merge new hooks into the existing file rather than overwriting; preserve user-defined hooks and pinned revs.
+- **Monorepo with multiple languages**: Generate one config with per-language hook sections and `files:` path filters so hooks only run on relevant subdirectories.
+- **No `origin` remote**: Skip the repo-sync step and inform the user; proceed with local-only setup.
+- **Tests take >60 seconds**: Move slow tests to `push` stage or GitHub Actions only; note the decision explicitly in the generated config with a comment.
+- **Windows-only repo**: Substitute PowerShell-compatible hook entries and flag any Unix-specific commands.
 
 ## Step Completion Reports
 

@@ -1,6 +1,6 @@
 ---
 name: seo-ai-optimizer
-description: Audits and optimizes website codebases for SEO and AI bot scanning. Covers technical SEO (meta tags, sitemaps, robots.txt, canonical URLs, page speed hints, structured data), content SEO (heading structure, alt text, readability), and AI bot accessibility (llms.txt, GPTBot/ClaudeBot directives, ai-plugin.json, Schema.org/JSON-LD). Use when user asks to "optimize for SEO", "audit SEO", "improve search rankings", "make site AI-friendly", "add structured data", "fix meta tags", or "optimize for AI bots". Works with any web framework.
+description: Audit and optimize website codebases for technical SEO, content SEO, and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, llms.txt, and GPTBot/ClaudeBot directives across any web framework.
 effort: high
 license: MIT
 metadata:
@@ -417,4 +417,42 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ### Large Codebase
 **Cause:** 100+ HTML/template files.
 **Solution:** The audit script samples 50 representative files by default. Offer to increase with `--max-files N`.
+
+## Expected Output
+
+After a full run on a Next.js project, the audit report looks like:
+
+```markdown
+## SEO & AI Bot Audit Report
+
+**Project:** my-saas-app
+**Framework:** Next.js 14
+**Files audited:** 24 / 24
+**Date:** 2026-04-19
+
+### Critical Issues (must fix)
+1. [pages/about.tsx:1] Missing <title> tag
+2. [pages/blog/[slug].tsx:14] Duplicate H1 — 2 H1 tags found
+
+### Warnings (should fix)
+1. [public/robots.txt] GPTBot not listed — AI crawlers get no explicit directive
+
+### Project-Level Findings
+- robots.txt: present, missing AI bot directives
+- sitemap.xml: absent — install next-sitemap
+- llms.txt: absent — AI-friendly summary missing
+- Structured data: partial (homepage only)
+- AI bot directives: not configured
+```
+
+And after implementation, validation shows: `critical issues: 2 → 0`, `llms.txt created`, `sitemap.xml generated`.
+
+## Edge Cases
+
+- **No HTML files found**: Project is API-only or a non-web backend — skill exits gracefully with a message explaining it targets web frontends.
+- **Framework not detected**: Generic HTML analysis proceeds; framework-specific config steps are skipped with a warning.
+- **Web search fails**: Falls back to embedded best practices in `references/`; output notes that latest guidelines could not be fetched.
+- **robots.txt already exists with custom rules**: Merges AI bot directives without overwriting existing Allow/Disallow entries; shows diff before writing.
+- **Conflicting canonical URLs**: Flags each conflict individually; does not auto-fix without user approval since canonical choice affects link equity.
+- **Large codebase (100+ pages)**: Audits a representative 50-file sample; offers `--max-files N` flag to expand scope.
 

@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Create distinctive, usability-focused, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include web apps, landing pages, dashboards, forms, portfolios). Generates creative, polished code that avoids generic AI aesthetics. Applies "Don't Make Me Think" usability principles and a default style guide (Black/White/Gray/Bright Green) when no style preference is provided.
+description: Design and implement production-grade frontend interfaces with distinctive aesthetics and working code. Use when asked to build a UI, component, page, or frontend feature.
 effort: high
 license: MIT
 metadata:
@@ -12,7 +12,21 @@ metadata:
 
 Create distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
 
-The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+## When to Use
+
+Trigger this skill when the user asks to:
+- Build a UI component, page, or full frontend application
+- Design or implement a frontend feature (navigation, forms, data tables, dashboards)
+- Redesign an existing interface for better aesthetics or usability
+- Convert a mockup, wireframe, or spec into working code
+
+## Instructions
+
+1. Clarify the requirements (component type, framework, target audience, design constraints)
+2. Propose an aesthetic direction and get user approval before coding
+3. Implement the full working code with distinctive visual choices
+4. Validate responsiveness and accessibility basics
+5. Deliver the code with inline annotations for key design decisions
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -107,6 +121,30 @@ NEVER use generic AI-generated aesthetics like overused font families (Inter, Ro
 Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
 
 **IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+
+## Expected Output
+
+Production-ready frontend code delivered as one or more files. Example for a landing page request:
+
+- **`index.html`** — fully self-contained HTML with embedded CSS and JS (or separate files if a framework is used)
+- Implemented features: hero section, CTA button, responsive navigation, and a features grid
+- Typography: a distinctive display/body font pairing (e.g., Playfair Display + DM Sans), not Inter/Roboto
+- Color palette: strictly four colors per the default style guide, or user-provided palette
+- Interactions: CSS-only hover states on buttons, a staggered reveal animation on page load
+- WCAG AA contrast on all text elements
+- Mobile-responsive layout verified at 375px, 768px, and 1280px breakpoints
+
+After delivery, the skill emits a step-completion report confirming design thinking choices, style guide adherence, and usability self-test results.
+
+## Edge Cases
+
+- **No description provided**: Ask the user for purpose, target audience, and any brand/style constraints before writing a single line of code.
+- **Conflicting style constraints** (e.g., user says "minimalist" but also "lots of animations"): Surface the tension and ask which constraint takes priority; don't silently pick one.
+- **Existing codebase to extend**: Read existing CSS variables and component patterns before adding new code; match the existing style vocabulary rather than introducing a second design system.
+- **Framework mismatch** (e.g., user says "React" but the repo uses Vue): Confirm the framework before generating; never output React JSX into a Vue project.
+- **Very large or complex UIs** (>5 distinct page sections): Offer to deliver in phases — core layout first, then secondary sections — rather than one oversized artifact.
+- **Accessibility conflict with aesthetic direction**: Never sacrifice WCAG AA contrast for aesthetic reasons; adapt the palette instead of dropping the requirement.
+- **No internet/CDN access in deployment**: Use locally bundled assets or inline critical CSS/JS rather than CDN links, if the user indicates an offline or air-gapped environment.
 
 ## Step Completion Reports
 

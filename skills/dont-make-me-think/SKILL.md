@@ -1,6 +1,6 @@
 ---
 name: dont-make-me-think
-description: Review any UI for usability issues using Steve Krug's "Don't Make Me Think" principles, or redesign a UI to be more intuitive. Use this skill whenever the user asks to "review my UI", "check usability", "is this interface confusing", "why do users get lost", "simplify this design", "make this more intuitive", "UX review", "usability audit", "Krug review", "don't make me think", or shares a screenshot/URL/mockup and wants feedback on whether it's easy to use. Also trigger when the user describes user confusion, drop-off, or complaints about a flow being hard to understand — even if they don't mention "usability" explicitly. Works with screenshots, live URLs, HTML/CSS code, wireframes, and verbal descriptions of interfaces.
+description: Review UI for usability issues using Steve Krug's principles and produce a scannable report. Use when asked for a usability audit, UX review, or UI feedback on screenshots, URLs, or code.
 effort: medium
 license: MIT
 metadata:
@@ -11,6 +11,12 @@ metadata:
 # Don't Make Me Think — Usability Review & Redesign
 
 Evaluate and improve UIs through Steve Krug's "Don't Make Me Think" principles. The report itself must practice what Krug preaches: scannable, visual, zero fluff. A human should skim it in 30 seconds; an AI agent should be able to parse it and start fixing.
+
+## Prerequisites
+
+- **Browser access**: `/browse` skill available for live URL analysis
+- **Input available**: one of — live URL, screenshot/image, HTML/CSS code, wireframe, or verbal description
+- **Code editor access** (Redesign Mode only): write permission to the UI source files being modified
 
 ## Input Handling
 
@@ -161,12 +167,56 @@ Bullet list — protect these during redesign:
 When the user wants fixes applied (not just reported):
 
 1. Produce the review first (same format above)
-2. Fix critical (🔴) issues first, then moderate (🟡)
-3. Change the minimum necessary — surgical, not a rewrite
-4. Preserve brand/aesthetic — make it more intuitive, not different
-5. For each fix, show a before/after in the commit or response
+2. Before any file edit: show the planned changes (file path, selector, and what will change) and wait for user confirmation. For screenshot/spec output only, no confirmation is needed.
+3. Fix critical (🔴) issues first, then moderate (🟡)
+4. Change the minimum necessary — surgical, not a rewrite
+5. Preserve brand/aesthetic — make it more intuitive, not different
+6. For each fix, show a before/after in the commit or response
 
 If working with code, edit the files directly. If working with screenshots, provide specs an AI agent or developer can implement without guessing.
+
+## Error Handling
+
+| Situation | Action |
+|---|---|
+| `/browse` fails or URL is unreachable | Ask user for a screenshot or HTML export; do not proceed with assumptions |
+| Screenshot cannot be loaded or parsed | Ask user to re-share as PNG/JPEG or paste the relevant HTML |
+| HTML/CSS code is incomplete | Note missing sections in the review; evaluate only what is present |
+| No input provided | Ask for one of: URL, screenshot, code snippet, or verbal description before starting |
+| Redesign Mode — file not writable | Report the permission issue; provide specs as code comments instead |
+
+## Expected Output
+
+A completed usability review delivers a structured `Usability Review` markdown report containing:
+- **Thinking Cost** rating (LOW / MODERATE / HIGH)
+- **Scorecard** table with 0-10 scores per applicable lens
+- **Issues** list with 🔴🟡🟢 severity icons, one-line problem/impact/fix per item
+- **Issue Map** mermaid diagram showing where problems cluster
+- **Fix Priority** table ordered by effort/impact
+
+Example summary line:
+```
+Thinking Cost: HIGH — 3 critical issues found (disabled button, missing nav labels, no landing clarity)
+```
+
+## Edge Cases
+
+| Scenario | Handling |
+|---|---|
+| Input is a verbal description only | Ask clarifying questions before evaluating; do not guess at UI elements not described |
+| Screenshot of a native mobile app (not web) | Apply mobile-specific lenses (9 — Mobile) with extra weight; note platform-specific conventions |
+| User wants "just a quick check" | Deliver a condensed review (top 3 issues only) rather than the full 10-lens report |
+| Redesign Mode on a CSS framework (Tailwind, Bootstrap) | Preserve the framework classes; only change values, not the framework itself |
+| UI has no issues | Output the scorecard with high scores and a "What Works" section only; do not fabricate problems |
+
+## Acceptance Criteria
+
+- [ ] Review covers all applicable lenses from The Ten Lenses table
+- [ ] Every issue entry includes Problem, Impact, Fix, and Where fields (one line each)
+- [ ] Mermaid Issue Map diagram is included showing issue locations on the page
+- [ ] Fix Priority table is sorted by impact (highest first)
+- [ ] Redesign Mode shows a before/after for each fix applied
+- [ ] Report is skimmable in 30 seconds — no long paragraphs, tables and bullets only
 
 ## Step Completion Reports
 

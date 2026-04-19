@@ -1,6 +1,6 @@
 ---
 name: name-checker
-description: Check product/brand names for trademark, domain, social media, and package registry conflicts. Use when users ask to "check this name", "validate a product name", "is this name available", "is this package name taken", or need to assess naming risks before publishing to npm, PyPI, Homebrew, or apt. Provides risk assessment and alternative suggestions. Also use when users want to secure a name early across registries to prevent namespace squatting, or ask "can I publish under this name".
+description: Check product and brand names for conflicts across trademarks, domains, social media handles, and package registries (npm, PyPI, Homebrew, apt). Delivers a risk assessment and actionable Proceed, Modify, or Abandon recommendation.
 effort: max
 license: MIT
 metadata:
@@ -254,6 +254,35 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   ____________________________
   Result:                 PASS
 ```
+
+## Acceptance Criteria
+
+- Social media check completed across all 6 platforms with clear available/taken status
+- Package registry status confirmed for npm, PyPI, Homebrew, and apt
+- Domain availability checked for .com and at least two alternative TLDs
+- Trademark search completed against WIPO, EUIPO, and INPI
+- Risk level assigned (Low / Moderate / High) with supporting rationale
+- Final recommendation delivered (Proceed / Modify / Abandon) with named alternatives if needed
+
+## Expected Output
+
+```
+SOCIAL: Clear (Twitter, Instagram, GitHub, LinkedIn, TikTok, Discord all available)
+REGISTRY: npm (available) | PyPI (TAKEN — owner: example-org, last publish: 2022-03) | Homebrew (available) | apt (available)
+DOMAIN: .com (active — unrelated industry) | .io (available) | .app (available)
+TM: WIPO (clear) | EUIPO (clear) | INPI (similar mark in class 42 — "Acme Tools SAS", filed 2021)
+RISK: Moderate — PyPI name taken on a target registry; .com parked; minor trademark similarity in France
+RECOMMEND: Modify — use "acme-cli" (npm/PyPI clear, .com available, no TM conflicts)
+```
+
+## Edge Cases
+
+- **Exact social handle taken on primary platform**: Skip all remaining checks and immediately return an Abandon recommendation with alternative name suggestions.
+- **Rate-limited registry API**: Retry once after 5 seconds; if still blocked, mark the registry as "unchecked" and note it in the report — do not skip silently.
+- **Trademark database unavailable**: Note the outage per database; downgrade risk only if all three TM sources are inaccessible (warn user).
+- **Name contains special characters or spaces**: Normalize to slug form (e.g., `my tool` → `my-tool`) before all checks; report both the original and normalized forms.
+- **Very short names (1–3 characters)**: Flag high trademark collision risk upfront; abbreviations are almost always claimed across social and TM databases.
+- **Name already in use by a well-known brand (typosquat risk)**: Escalate to High risk even if all technical checks pass.
 
 ## Final Action
 

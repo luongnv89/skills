@@ -1,6 +1,6 @@
 ---
 name: theme-transformer
-description: Transform an existing website/app UI into a futuristic cyberpunk, neon, space, or digital-dark theme with user-adjustable colors. Use when asked to "reskin the UI", "apply a dark theme", "cyberpunk style this app", "make the interface futuristic", "apply neon command center style", or migrate a product to a new visual theme.
+description: Transform an existing website/app UI into a futuristic cyberpunk, neon, space, or digital-dark theme with user-adjustable colors. Use when asked to "reskin the UI", "dark theme", "cyberpunk style", or "make the interface futuristic".
 effort: medium
 license: MIT
 metadata:
@@ -111,6 +111,31 @@ Run incremental execution loop:
 4. Ask for feedback and adjust if requested.
 
 Continue until user confirms satisfaction.
+
+## Prerequisites
+
+- **Git** with write access to the repository (branching is mandatory before any file changes)
+- **Reference files present**: `references/theme-tokens.md` and `references/neon-command-center.md` in the repo; the skill reads these before generating any token proposals
+- **Build tooling available**: the project must be buildable locally (e.g., `npm run build` or equivalent) so the execution phase can verify changes compile without errors
+- **Optional**: an existing design system or branding doc (`docs/branding.md`, `brand.md`, `design-system.md`) — if present, the skill reads it first to honor brand constraints
+
+## Expected Output
+
+After completing all four workflow steps on a React/Tailwind project, you should see:
+- A new git branch named `design/theme-transform-<timestamp>` with all changes committed
+- Updated design tokens file (e.g., `tailwind.config.js`, `tokens.css`, or equivalent) with the full Neon Command Center color, typography, radius, shadow, and motion values
+- Updated shared component files (buttons, inputs, nav, cards, tables, charts) with the new visual treatment applied
+- Updated target pages/screens applying the theme end-to-end
+- A verification summary listing every changed file, the before/after intent, and instructions for visual QA (contrast ratios, focus states, responsive checks)
+
+## Edge Cases
+
+- **No design token system exists**: Introduce a minimal tokens file (CSS custom properties or JS theme object) and migrate existing hardcoded values into it before applying the new theme.
+- **User provides a custom accent color**: Derive `primary-400` hover and glow alpha variants automatically; do not override `bg/surface/text` dark structure unless explicitly requested.
+- **Project uses a CSS-in-JS runtime theme**: Apply tokens through the runtime's theme API rather than static files; verify hot-reload picks up changes during execution.
+- **Accessibility conflict**: If a proposed neon color combination fails WCAG AA contrast, replace with a higher-contrast variant and note the substitution in the verification summary.
+- **Existing local branding docs found**: Treat them as hard constraints — do not override brand colors or typography unless the user explicitly asks.
+- **Large codebase with hundreds of components**: Scope Step 4 execution to the highest-traffic pages first; create a follow-up task list for remaining components rather than attempting everything in one pass.
 
 ## Step Completion Reports
 

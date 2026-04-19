@@ -1,6 +1,6 @@
 ---
 name: context-hub
-description: Use Context Hub (`chub`) to fetch up-to-date third-party API/SDK docs before writing or reviewing integration code. Trigger this skill whenever a task mentions external APIs, SDKs, webhooks, auth flows, or library-specific method usage (OpenAI, Stripe, Anthropic, Pinecone, etc.), even if the user does not explicitly ask for documentation.
+description: Fetch up-to-date third-party API/SDK docs via `chub` before writing or reviewing integration code — so method names, payload fields, and auth headers are always sourced from live docs, not stale training data.
 effort: low
 license: MIT
 metadata:
@@ -11,6 +11,16 @@ metadata:
 # Context Hub
 
 Use `chub` as the default source of truth for third-party API/SDK behavior.
+
+## When to Use
+
+Trigger this skill whenever a task involves:
+- Writing or reviewing code that calls an external API or SDK (OpenAI, Stripe, Anthropic, Pinecone, Twilio, etc.)
+- Implementing webhooks, auth flows (OAuth, API keys, JWTs), or library-specific method calls
+- Debugging integration errors where the root cause may be an outdated API contract
+- Migrating to a new version of an SDK or third-party library
+
+Even if the user does not explicitly ask for documentation — fetch first, code second.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -116,6 +126,33 @@ chub get stripe/api --lang js
 chub annotate stripe/api "Webhook verification requires raw body"
 chub annotate --list
 ```
+
+## Expected Output
+
+After a successful doc fetch, the skill provides:
+
+1. **Confirmation** of which doc ID was fetched, e.g.:
+   ```
+   Fetched: stripe/api (Python) — 42 KB, last updated 2025-03-14
+   ```
+2. **Implementation** — code written strictly from the fetched docs, with no guessed fields or method names
+3. **Annotation** (when a new gotcha is discovered):
+   ```
+   Annotated stripe/api: "Webhook verification requires raw request body, not parsed JSON"
+   ```
+
+If `chub` is unavailable and installation is blocked, the skill falls back to the official docs URL and states this explicitly.
+
+## Edge Cases
+
+| Scenario | Handling |
+|---|---|
+| `chub` not installed, installation blocked | Inform user; fetch docs directly from the official library website via `/browse` |
+| `chub search` returns no results | Retry with broader keywords; if still empty, use official docs URL directly |
+| Fetched docs are clearly outdated | Annotate the issue; cross-reference with official changelog before coding |
+| Multiple language variants available | Ask the user which language to fetch if not determinable from project context |
+| `chub annotate` or `feedback` commands fail | Log the failure; continue with implementation; do not block on annotation errors |
+| `chub update` hangs or errors | Skip update, use cached docs, and note that docs may not be the latest version |
 
 ## Step Completion Reports
 

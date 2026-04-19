@@ -1,6 +1,6 @@
 ---
 name: aso-marketing
-description: Full-lifecycle App Store Optimization (ASO) for mobile apps — keyword strategy, metadata optimization, visual assets, localization, conversion improvement, and store policy compliance for both Apple App Store and Google Play. Use when asked to "optimize my app store listing", "ASO plan", "improve app visibility", "increase app downloads", "keyword strategy", "store listing optimization", "check listing compliance", or any request about making a mobile app more discoverable. Also trigger when user mentions app store rankings, screenshot optimization, or app metadata — even without saying "ASO".
+description: Optimize App Store and Google Play listings with keyword strategy, metadata, and localization. Use when asked to improve app store visibility, ASO, or app discoverability.
 effort: max
 license: MIT
 metadata:
@@ -525,6 +525,94 @@ Produce a final summary report for the user:
 ### Files Modified
 - [list all files created or modified with paths]
 ```
+
+---
+
+## Expected Output
+
+A complete run produces the following artifacts:
+
+**1. ASO Analysis Report** (Phase 1)
+```
+## ASO Analysis Report
+
+### App Overview
+- App Name: FocusFlow – Deep Work Timer
+- Platforms: iOS, Android
+- Category: Productivity
+- Core Value Proposition: Distraction-free Pomodoro-style focus sessions with team accountability
+- Target Audience: Knowledge workers, students, remote teams
+
+### Current Metadata Status
+| Field         | Platform | Current Value                        | Length | Limit | Usage % | Issues                       |
+|---------------|----------|--------------------------------------|--------|-------|---------|------------------------------|
+| Title         | iOS      | FocusFlow: Work Timer                | 22     | 30    | 73%     | No primary keyword in title  |
+| Keywords      | iOS      | timer,focus,work,productivity        | 34     | 100   | 34%     | 66 chars unused              |
+| Short Desc    | Android  | A simple timer for focused work.     | 36     | 80    | 45%     | Weak value prop, low density |
+```
+
+**2. ASO Plan + Compliance Report** (Phases 2–3), then **Updated Metadata Files** (Phase 4):
+
+Example `metadata/app-info/en-US.json` after execution:
+```json
+{
+  "name": "FocusFlow: Focus & Work Timer",
+  "subtitle": "Deep Work Sessions & Tracking"
+}
+```
+Example iOS keywords field (Phase 4):
+```
+pomodoro,deep,work,concentration,study,block,distraction,habit,goal,flow,task
+```
+(97/100 chars, all prohibited terms cleared, no title/subtitle duplicates)
+
+**3. ASO Marketing Summary Report** (Phase 7)
+```
+## ASO Marketing Summary Report
+
+### Changes Made
+| # | Area         | Change                          | Before                        | After                          | Expected Impact              |
+|---|--------------|---------------------------------|-------------------------------|--------------------------------|------------------------------|
+| 1 | iOS Title    | Added primary keyword           | FocusFlow: Work Timer         | FocusFlow: Focus & Work Timer  | +rankings for "focus timer"  |
+| 2 | iOS Keywords | Expanded from 34 to 97 chars    | timer,focus,work,productivity | pomodoro,deep,work,...         | 3× more indexable queries    |
+| 3 | Android Desc | Rewrote opening hook + keywords | A simple timer for focused... | Block distractions. Build...   | Higher conversion rate       |
+
+### Store Policy Compliance
+- Prohibited keyword check: PASS — no banned terms in any metadata field
+- Trademark check: PASS — no competitor or third-party trademarks used
+- Overall compliance: PASS for App Store + Google Play
+```
+
+---
+
+## Edge Cases
+
+- **No local metadata files** — The app has no `metadata/`, `fastlane/`, or equivalent directory. The skill creates the canonical directory structure and writes optimized files from scratch, then provides upload instructions for each store.
+- **Single-platform app** — User wants to optimize only the App Store or only Google Play. Skip all phases and checks for the irrelevant store. Do not propose a keywords field for Android (it has none).
+- **No competitor access** — User cannot name competitors or has no market data. Skip Phase 1.3; base keyword strategy on app features alone. Flag this gap in the analysis report.
+- **Unverifiable keyword volume data** — No ASO tool is available. Proceed with heuristic priority (feature-specific terms over generic terms, long-tail phrases over head terms) and note the limitation.
+- **Pre-launch app** — No live listing, no existing downloads or ratings data. Skip all performance-baseline steps; focus on metadata creation and visual guidance only.
+- **Metadata policy violation in proposed plan** — The compliance check (Phase 3) catches a prohibited keyword in the draft. The skill revises the plan silently, replaces the violation, re-runs the compliance check, and only presents the corrected plan to the user.
+- **Non-English primary locale** — If the app's main locale is not `en-US`, adapt all metadata templates, character limits, and keyword strategies to the target language. Note that some languages require more characters to express the same concept.
+- **User rejects the plan** — Do not execute. Iterate on the plan in Phase 2, incorporating the user's feedback, then re-run the Phase 3 compliance check before presenting the revised plan.
+
+---
+
+## Acceptance Criteria
+
+The skill run is considered successful when all of the following are verifiable:
+
+- [ ] **Description ≤40 words with imperative verb** — The skill frontmatter description passes the asm eval description check.
+- [ ] **Analysis report produced** — Phase 1 output includes App Overview, Current Metadata Status table, and Key Findings.
+- [ ] **ASO plan covers all required fields** — Plan includes title, subtitle/short description, keywords (iOS), full description, and visual asset recommendations for each targeted store.
+- [ ] **Compliance check ran and passed** — Phase 3 compliance report is present and shows PASS overall status before any plan is presented to the user.
+- [ ] **User approval gate respected** — Phase 4 execution does not begin until the user explicitly approves the plan.
+- [ ] **All metadata fields within character limits** — Title ≤30, subtitle ≤30, iOS keywords ≤100, Android short description ≤80, full description ≤4000. No truncation.
+- [ ] **No prohibited keywords in any output metadata** — Final scan finds zero banned terms (no "free", "best", "#1", competitor names, etc.) in any field.
+- [ ] **No trademark violations** — No competitor brand names appear in any proposed metadata field.
+- [ ] **iOS keywords field has no duplicates with title/subtitle** — The keyword field does not repeat words already in the title or subtitle.
+- [ ] **Metadata files written** — At least one metadata file (or the correct directory structure) exists on disk after Phase 4.
+- [ ] **Summary report produced** — Phase 7 output includes a Changes Made table, Metadata Comparison, Store Policy Compliance section, and Next Steps.
 
 ---
 

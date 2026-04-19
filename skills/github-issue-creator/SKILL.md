@@ -1,6 +1,6 @@
 ---
 name: github-issue-creator
-description: Create or update GitHub issues from screenshots, bug report emails, messages, or any visual/text input. Extracts structured issue data from images or pasted text, detects the repo's issue templates, proposes issues for user approval, then creates or updates them via gh CLI. Use this skill whenever the user shares a screenshot of a bug, pastes an error report, forwards a bug email, wants to file issues from a conversation, says "create an issue from this", "turn this into a GitHub issue", "file a bug for this", "update the issue with this info", or has any visual or textual bug/feature report they want tracked as GitHub issues — even if they just drop an image and say "handle this".
+description: "Create or update GitHub issues from screenshots, emails, messages, or any visual/text input. Extracts structured data, redacts PII, detects issue templates, proposes issues for approval, then files them via gh CLI."
 effort: medium
 license: MIT
 metadata:
@@ -190,6 +190,66 @@ After each action, confirm success and report the issue URL back to the user. At
 > **Done!** Created/updated the following issues:
 > - #42: Login button unresponsive on mobile Safari
 > - #38: (updated) Add dark mode support — added reproduction details
+
+## Expected Output
+
+After the user approves the proposal, the skill creates the issue and reports:
+
+```
+Done! Created/updated the following issues:
+- #47: Login button unresponsive on mobile Safari
+  https://github.com/acme/webapp/issues/47
+  Labels: bug, ui, mobile
+```
+
+The created issue body looks like:
+
+```markdown
+## Description
+The login button does not respond to taps on mobile Safari (iOS 17). Tapping the
+button produces no visual feedback and the login flow never initiates.
+
+## Steps to Reproduce
+1. Open https://app.example.com on iPhone with Safari (iOS 17)
+2. Enter valid credentials
+3. Tap the "Log In" button
+
+## Expected Behavior
+The login flow initiates and the user is redirected to the dashboard.
+
+## Actual Behavior
+Nothing happens. No spinner, no error message, no navigation.
+
+## Environment
+- OS: iOS 17.4
+- Browser: Safari (mobile)
+- App Version: 2.3.1
+
+## Additional Context
+Reported via screenshot on 2026-04-19. Note: reporter email and user ID were
+redacted before filing.
+```
+
+## Edge Cases
+
+- **No repo access / gh not authenticated**: Run `gh auth status` at the start; stop and tell the user what's missing before extracting any data.
+- **Duplicate issue**: Search open issues for keyword matches before proposing creation; if a near-duplicate is found, offer to update it with a comment instead.
+- **Missing required fields**: If the input lacks enough detail to write a meaningful description or steps to reproduce, ask clarifying questions rather than filing a skeletal issue.
+- **PII-heavy input**: If redacting sensitive data would make the report meaningless, flag this to the user and offer to create a private/internal issue or use generic descriptions.
+- **Multiple issues in one input**: Extract each distinct problem as a separate numbered proposal; let the user approve, skip, or modify each independently.
+- **YAML issue templates**: Parse `.yml` templates with structured fields and map extracted data to the template's field IDs and types; respect required fields.
+- **User drops image without context**: Read the image to extract all visible text, UI state, error codes, and URLs; infer the issue from the visual context before asking for clarification.
+
+## Acceptance Criteria
+
+- [ ] `gh auth status` and `gh repo view` succeed before any extraction begins
+- [ ] Each issue identified in the input is proposed individually with title, labels, template, and full body preview
+- [ ] PII (names, emails, API keys, internal IPs) is redacted before issue body is shown to the user
+- [ ] Existing open issues are searched for potential duplicates; matches are flagged
+- [ ] No issue is created or updated without explicit user approval ("go" / "approve")
+- [ ] Each created issue returns a URL confirming the issue number
+- [ ] Labels used exist in the repo (`gh label list`) or are clearly flagged as new
+- [ ] Sensitive data removal is disclosed in the proposal (e.g., "Note: removed API key")
 
 ## Step Completion Reports
 

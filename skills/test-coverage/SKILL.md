@@ -1,6 +1,6 @@
 ---
 name: test-coverage
-description: Expand unit test coverage by targeting untested branches and edge cases. Use when users ask to "increase test coverage", "add more tests", "expand unit tests", "cover edge cases", "improve test coverage", or want to identify and fill gaps in existing test suites. Adapts to project's testing framework.
+description: Expand unit test coverage by targeting untested branches and edge cases in any language. Identifies coverage gaps, writes new tests using the project's existing framework, and verifies measurable improvement.
 effort: low
 license: MIT
 metadata:
@@ -11,6 +11,23 @@ metadata:
 # Test Coverage Expander
 
 Expand unit test coverage by targeting untested branches and edge cases.
+
+## When to Use
+
+- User asks to "increase test coverage", "add more tests", "expand unit tests", or "cover edge cases"
+- A CI pipeline reports low coverage and the user wants it improved
+- A code review flags untested error paths or boundary conditions
+- The user wants to identify and fill gaps in an existing test suite before a release
+
+## Instructions
+
+1. Sync the branch with remote (see Repo Sync section below)
+2. Create a feature branch for the new tests
+3. Run the project's coverage tool to get a baseline report
+4. Identify the lowest-coverage files and untested code paths
+5. Write tests for error paths, boundary values, and missing branches
+6. Re-run coverage to confirm improvement
+7. Commit the new tests with a descriptive message
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -83,6 +100,31 @@ Run coverage again and confirm measurable increase. Report:
 - Before/after coverage percentages
 - Number of new test cases added
 - Files with the biggest coverage gains
+
+## Expected Output
+
+After a successful run on a Python project, the final verification report shows:
+
+```
+Coverage before: 61% (47/77 statements)
+Coverage after:  84% (65/77 statements)
+
+New tests added: 9
+Files improved:
+  - src/parser.py        52% → 91%  (+7 tests: null input, empty string, unicode overflow)
+  - src/auth.py          71% → 88%  (+2 tests: expired token, missing header)
+
+All 56 tests passing. No regressions.
+```
+
+## Edge Cases
+
+- **No test framework detected**: Skill checks `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` for test dependencies; if none found, asks the user which framework to use before writing any tests.
+- **Coverage tool not installed**: Installs the appropriate tool (`pytest-cov`, `nyc`, `cargo tarpaulin`, etc.) and retries rather than failing silently.
+- **Existing tests are already failing**: Does not add new tests until existing failures are resolved; reports the failing tests to the user first.
+- **100% coverage already reached**: Reports this to the user and exits — no tests are added unnecessarily.
+- **Generated code or vendored files in coverage report**: Excludes auto-generated and third-party directories from analysis to avoid writing tests for code the project does not own.
+- **Async / concurrent code paths**: Uses framework-appropriate async test utilities (e.g., `pytest-asyncio`, `jest fakeTimers`) rather than bare sync wrappers.
 
 ## Step Completion Reports
 
