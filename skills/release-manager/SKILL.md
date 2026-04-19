@@ -1,10 +1,10 @@
 ---
 name: release-manager
-description: Automate the full release lifecycle — version bump, changelog, README update, git tag, GitHub release, and PyPI/npm publishing.
+description: Automate the full release lifecycle — version bump, changelog, README update, git tag, GitHub release, and PyPI/npm publishing. Use this skill whenever the user wants to cut a release, bump a version, tag and push, create a GitHub release, generate release notes or a changelog, publish to PyPI or npm, or asks what changed since the last release. Even if the user just says "ship it", "make a release", or "tag this version" — this skill should handle it.
 effort: max
 license: MIT
 metadata:
-  version: 2.3.1
+  version: 2.4.0
   creator: Luong NGUYEN <luongnv89@gmail.com>
 ---
 

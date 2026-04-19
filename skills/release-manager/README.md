@@ -1,6 +1,6 @@
 # Release Manager
 
-> Complete release automation — version bumps, changelog, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm.
+> Complete release automation — version bumps, changelog, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm. Use whenever you need to cut a release, tag a version, or publish a package.
 
 ## Highlights
 
