@@ -1,6 +1,6 @@
 ---
 name: auto-push
-description: Stage all changes, create commit, and push to remote. Use when asked to "push everything", "commit and push all", "push all my changes", or for bulk operations. Includes safety checks for secrets, API keys, and large files. Execute immediately after safety checks (no extra confirmation step). Use with caution.
+description: Stage all changes, commit with a generated message, and push to remote — with safety checks for secrets, large files, and protected branches. Executes immediately after checks pass; no extra confirmation needed.
 effort: low
 license: MIT
 metadata:
@@ -138,6 +138,40 @@ Commit: [hash] [message]
 Branch: [branch] → origin/[branch]
 Files changed: X (+insertions, -deletions)
 ```
+
+## Expected Output
+
+On success, the skill outputs a confirmation block:
+
+```
+✅ Successfully pushed to remote!
+
+Commit: abc1234 feat: add login page with OAuth support
+Branch: feature/auth → origin/feature/auth
+Files changed: 4 (+112, -8)
+```
+
+If safety checks block the push, the skill outputs:
+
+```
+❌ Push blocked — secrets detected
+
+  .env: OPENAI_API_KEY=sk-proj-xxxxx (real key)
+
+Action required: remove or rotate the key, then re-run /auto-push.
+```
+
+## Edge Cases
+
+| Scenario | Handling |
+|---|---|
+| Merge conflict detected | Stop; show conflicting files; tell user to resolve conflicts then re-run |
+| Protected branch (main/master) | Warn with a 🔴 banner; recommend creating a branch and using a PR instead |
+| Empty commit (nothing staged) | Detect with `git status`; report "nothing to commit" and exit cleanly |
+| No remote configured | Report "no remote origin"; suggest `git remote add origin <url>` |
+| Push rejected (non-fast-forward) | Run `git pull --rebase && git push`; if rebase fails, stop and report |
+| Pre-commit hook fails | Surface hook output; do not retry; ask user to fix the hook issue |
+| Binary or large file (>10 MB) | Block and suggest Git LFS; do not stage the file |
 
 ## Step Completion Reports
 

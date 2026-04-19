@@ -1,6 +1,6 @@
 ---
 name: logo-designer
-description: Design professional, modern logos with automatic project context detection. Use when users ask to "create a logo", "design a logo", "generate brand identity", "make a favicon", or need visual brand assets. Analyzes project files (README, package.json, etc.) to understand product name, purpose, and existing brand colors before generating logo concepts.
+description: "Design professional SVG logos by analyzing project context and generating 7 brand asset variants — mark, full, wordmark, icon, favicon, white, and black — plus a brand showcase HTML page."
 effort: medium
 license: MIT
 metadata:
@@ -303,6 +303,53 @@ The showcase page must:
 5. **Reference SVGs via relative `src` paths** (e.g., `<img src="logo-full.svg">`), not inline SVG — except for the hero mark which should be inline for the glow/filter effect.
 
 6. **Open the file in the browser** after generating: `open /path/to/brand-showcase.html` (macOS) or equivalent.
+
+## Expected Output
+
+For a CLI tool called "fastbuild", the skill produces:
+
+```
+/assets/logo/
+├── logo-mark.svg          — 64×64 abstract "F" mark (canonical geometry)
+├── logo-full.svg          — 320×72 mark + "FASTBUILD" wordmark
+├── logo-wordmark.svg      — 180×40 text-only wordmark
+├── logo-icon.svg          — 512×512 mark centered in rounded square
+├── favicon.svg            — 16×16 simplified 2-layer mark
+├── logo-white.svg         — 320×72 full logo in white (for dark backgrounds)
+├── logo-black.svg         — 320×72 full logo in black (for light backgrounds)
+└── brand-showcase.html    — self-contained brand identity presentation page
+```
+
+Design rationale summary presented to the user:
+```
+Product: fastbuild
+Type: Developer/CLI Tool
+Symbol: Abstract "F" from stacked horizontal speed bars
+Colors: #0A0A0A base, #00FF41 neon green accent (borders and highlights only)
+Typography: Inter Bold for wordmark
+```
+
+## Edge Cases
+
+- **No project context found**: Ask the user for product name, product type, and one-sentence purpose before generating anything.
+- **Existing brand colors detected**: Use them instead of the default dark/neon-green palette; confirm with the user before proceeding.
+- **User does not specify wordmark casing**: Ask explicitly — do not assume README casing matches the desired logo stylization (e.g., "fastBuild" vs "FASTBUILD" vs "fastbuild").
+- **SVG geometry diverges across variants**: After writing all 7 files, read back mark, full, icon, white, and black variants and verify `d=""` path strings are identical (or correctly scaled); fix before finishing.
+- **No git repository**: Skip the branch and sync steps; write directly to the current directory and note this in the summary.
+- **favicon.svg complexity**: At 16×16 the full mark is unreadable — always simplify to 2 layers (outer + inner) and drop the middle detail layer; preserve proportional geometry.
+- **User rejects the proposed style**: Iterate on Phase 2 (style selection) until the user approves before generating any SVG files.
+
+## Acceptance Criteria
+
+- [ ] All 7 SVG files are written to `/assets/logo/` with the correct filenames
+- [ ] `logo-mark.svg` is created first and its `d=""` path strings are used verbatim in all derived variants
+- [ ] Every SVG has a correct `viewBox` attribute and contains no embedded rasters
+- [ ] Monochrome variants (`logo-white.svg`, `logo-black.svg`) differ from `logo-full.svg` only in color, not geometry
+- [ ] `favicon.svg` is a simplified 2-layer version of the mark at 16×16
+- [ ] `brand-showcase.html` is written and opens correctly in a browser
+- [ ] Design rationale (symbol meaning, color choices, typography) is documented in the response
+- [ ] Color specification includes hex codes for all palette roles
+- [ ] Wordmark casing is confirmed with the user before any SVG containing text is generated
 
 ## Step Completion Reports
 

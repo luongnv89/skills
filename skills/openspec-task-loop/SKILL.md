@@ -1,6 +1,6 @@
 ---
 name: openspec-task-loop
-description: Apply OpenSpec OPSX in a strict one-task-at-a-time loop. Use when the user asks to execute work as single-task changes, wants spec-first implementation per task, or says to use OpenSpec method for each task from a task list. Supports both native /opsx command environments and manual fallback by creating OpenSpec artifact files directly.
+description: Execute a spec-first one-task-at-a-time loop using OpenSpec OPSX. Use when asked to implement tasks from a list with single-task scope, spec artifacts, and sequential verification before archiving.
 effort: medium
 license: MIT
 metadata:
@@ -154,6 +154,25 @@ Next:
 Risks/Notes:
 - ...
 ```
+
+## Expected Output
+
+For each completed task iteration you should see:
+- An OpenSpec change folder at `openspec/changes/<change-id>/` containing `proposal.md`, `design.md`, `tasks.md`, and `specs/<capability>/spec.md`
+- Implemented code with all task checkboxes checked off
+- A verifier report confirming scope atomicity, acceptance criteria met, and spec-to-test alignment
+- The change folder moved to `openspec/changes/archive/<date>-<change-id>/`
+- Parent `tasks.md` updated with the completed task marked done
+- A progress report in the Output Format block showing `Status: archived`
+
+## Edge Cases
+
+- **Task is too large**: Split into smaller atomic subtasks (1–3 dev days each) before proceeding; do not start implementation on an oversized task.
+- **No `/opsx` command support**: Fall back to manual file scaffolding under `openspec/changes/` and follow the Manual Fallback Path steps.
+- **Missing `references/openspec-task-templates.md`**: Warn the user and proceed with minimal artifacts; request the templates file to improve scaffold quality.
+- **Verifier finds critical mismatch**: Block archiving, surface the specific gap, and fix before re-verifying; never archive a failing quality gate.
+- **Merge conflicts during rebase**: Stop, surface the conflict to the user, and do not auto-resolve changes in spec or implementation files.
+- **Tasks.md does not exist**: Ask the user to provide or create a task list before entering the loop.
 
 ## Step Completion Reports
 

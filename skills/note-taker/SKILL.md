@@ -122,6 +122,40 @@ Link format:
 
 Detect the remote URL from the notes repo's `git remote get-url origin` to build correct links.
 
+## Expected Output
+
+After a note is saved and pushed, the completion report looks like:
+
+```
+Note saved: notes/2026/04/2026-04-19--project-meeting.md
+
+## Summary
+Quick sync on Q2 roadmap priorities.
+
+## Tasks added to KANBAN.md
+- [ ] Draft PRD for feature X  → notes/2026/04/2026-04-19--project-meeting.md
+- [ ] Schedule follow-up with design team
+
+Committed: 3e4f1a2
+GitHub: https://github.com/user/notes/blob/main/notes/2026/04/2026-04-19--project-meeting.md
+```
+
+## Edge Cases
+
+- **Duplicate note**: If a note file for the same slug already exists on the same date, append a `-2` suffix to the slug (e.g., `2026-04-19--standup-2.md`) rather than overwriting. Warn the user before committing.
+- **Attachment too large**: If a binary attachment exceeds 50 MB, do not commit it directly. Store it outside the repo, add a placeholder comment in the note (`<!-- attachment too large to commit: original-filename.mp4 -->`), and notify the user.
+- **No git repo configured**: If `NOTES_REPO` is not set and no marker file exists, ask the user for the repo path before doing any file writes. Do not silently write to the current working directory.
+
+## Acceptance Criteria
+
+- [ ] Note is created at the correct path (`notes/YYYY/MM/YYYY-MM-DD--<slug>.md`)
+- [ ] All attachments are stored in the same folder as the note with deterministic suffixes
+- [ ] Images are embedded inline in the note with `![alt](./filename)` syntax
+- [ ] Secrets in note content are detected and redacted before committing
+- [ ] Tasks extracted from the note are added to `KANBAN.md` under Backlog with a link back to the note
+- [ ] `README.md` index is updated with the note count and a link to the new note
+- [ ] Changes are committed and pushed; GitHub links are reported in the completion message
+
 ## Step Completion Reports
 
 After completing each major step, output a status report in this format:

@@ -1,6 +1,6 @@
 ---
 name: excalidraw-generator
-description: Generate diagrams and visualizations as Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, org charts, wireframes, C4 models, swimlanes, and more. Trigger when user asks to draw, diagram, visualize, sketch, or chart anything, says "excalidraw", "draw this", "make a diagram of", "visualize this", or shares data/structures that would benefit from visualization. Also suggest when the user describes relationships, flows, or hierarchies even without saying "diagram".
+description: "Generate professional diagrams as valid Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, wireframes, C4 models, and more. Understands text, code, schemas, or verbal descriptions."
 effort: high
 license: MIT
 metadata:
@@ -197,6 +197,69 @@ If any check required auto-fixes, mention what was corrected so the user knows.
 Refer to the validation checks in Phase 4 and `references/excalidraw-format.md` for the complete JSON schema and format rules.
 
 ---
+
+## Expected Output
+
+For a request like "draw a flowchart of the user login process", the skill produces a file `login-flow.excalidraw` containing valid Excalidraw JSON:
+
+```json
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "start-1", "type": "ellipse",
+      "x": 300, "y": 40, "width": 120, "height": 56,
+      "strokeColor": "#1e1e1e", "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid", "roughness": 1, "opacity": 100,
+      "boundElements": [{"id": "txt-start", "type": "text"}],
+      ...
+    },
+    {
+      "id": "txt-start", "type": "text",
+      "text": "Start", "fontSize": 18, "fontFamily": 1,
+      "containerId": "start-1", "autoResize": true, "lineHeight": 1.25,
+      ...
+    },
+    ...
+  ],
+  "appState": { "theme": "light", "viewBackgroundColor": "#ffffff" },
+  "files": {}
+}
+```
+
+Along with a validation summary in the response:
+```
+Validation: 10/10 checks passed
+- Elements: 6 shapes, 6 text labels, 5 arrows
+- Bindings: 6 text bindings, 10 arrow bindings (all two-way)
+- Text fits: all shapes sized to fit their bound text
+- No overlaps, no missing fields
+```
+
+## Edge Cases
+
+- **Complex diagram (30+ elements)**: Spawn the subagent review loop (json-generator → json-validator → json-fixer) to avoid single-context degradation. Cap at 3 fix cycles before surfacing remaining issues to the user.
+- **Text-heavy input (long labels, multi-line node text)**: Apply Check 10 strictly — calculate `min_shape_height = line_count * fontSize * 1.25 + 40` and increase container dimensions before writing the file. Garbled text is the most common failure mode.
+- **Ambiguous relationships**: If connections between entities are unclear, ask the user to clarify direction and cardinality before generating rather than guessing and requiring regeneration.
+- **User says "just do it"**: Use sensible defaults (hand-drawn style, roughness 1, Virgil font, best-fit layout) and skip the proposal step.
+- **Large diagram with overlapping nodes**: Apply Check 7 — shift overlapping elements by adjusting `x`/`y` coordinates. Never allow bounding boxes to overlap by more than 10px outside of containers.
+- **Iteration request on existing file**: Read the existing `.excalidraw` file first, preserve unchanged element IDs, apply only the requested modifications, then rewrite the file.
+
+## Acceptance Criteria
+
+- [ ] Output file is valid JSON with top-level keys `type`, `version`, `elements`, `appState`, `files`
+- [ ] Every element has all required fields (id, type, x, y, width, height, strokeColor, backgroundColor, fillStyle, strokeWidth, strokeStyle, roughness, opacity, groupIds, frameId, roundness, isDeleted, boundElements, updated, link, locked, seed)
+- [ ] Text elements include `fontSize >= 16`, `lineHeight: 1.25`, `autoResize: true`
+- [ ] All IDs are unique within the `elements` array
+- [ ] Text-to-shape bindings are two-way (containerId on text ↔ boundElements on shape)
+- [ ] Arrow bindings are two-way (startBinding/endBinding on arrow ↔ boundElements on shape)
+- [ ] Every arrow has `points[0] === [0, 0]` and at least 2 points
+- [ ] No unintentional overlapping shapes (bounding boxes do not overlap by more than 10px)
+- [ ] Every entity/relationship from the user's request is represented in the diagram
+- [ ] All container shapes are sized to fit their bound text (Check 10 passes)
+- [ ] Validation report (10/10 checks summary) is included in the response
 
 ## Step Completion Reports
 

@@ -1,6 +1,6 @@
 ---
 name: slop-code
-description: "Aggressively clean up a codebase by removing AI slop, dead code, weak types, defensive over-engineering, duplication, and legacy cruft. Orchestrates 8 specialized subagents in parallel to deduplicate code, consolidate types, kill unused code, untangle circular dependencies, strengthen weak types, remove unnecessary try/catch, delete deprecated/legacy paths, and strip unhelpful comments. Use when the user asks to 'clean up the codebase', 'remove slop', 'improve code quality', 'remove dead code', 'kill AI slop', 'tighten types', 'remove legacy code', 'deduplicate code', 'DRY this up', 'untangle dependencies', or wants a thorough code quality pass. Also use when the user mentions code smells, technical debt cleanup, or refactoring for clarity — even if they don't use the word 'slop'."
+description: "Clean up a codebase by removing AI slop, dead code, weak types, duplication, defensive over-engineering, and legacy cruft using 8 parallel specialized subagents across two cleanup waves."
 effort: high
 license: MIT
 metadata:
@@ -251,3 +251,37 @@ After each wave and at the end, output a status report in this format:
 ```
 
 Use `√` for pass, `×` for fail. Keep the adapted check names specific to what actually ran.
+
+## Expected Output
+
+After a full run on a TypeScript monorepo, the final `SLOP_CLEANUP.md` summary looks like:
+
+```markdown
+# Slop Cleanup Report
+
+**Branch:** chore/slop-cleanup-20260419
+**Commits:** 8  (one per category)
+**Tests:** passing  |  **Typecheck:** clean
+
+## Summary
+- Files deleted: 12
+- Lines removed: 847
+- Lines added: 134
+- Types consolidated: 9
+- Duplicates merged: 23
+- Try/catch removed: 17
+- Circular deps broken: 4
+- Weak types replaced: 61
+- Slop comments removed: 198
+```
+
+And the terminal handoff message: "Cleaned up 8 categories across 43 files, removed 847 lines, tests passing on branch chore/slop-cleanup-20260419. Review `SLOP_CLEANUP.md` and merge when ready."
+
+## Edge Cases
+
+- **Dirty working tree at start**: Skill refuses to proceed and instructs the user to commit or stash before running.
+- **No Agent tool available**: Falls back to running all 8 categories sequentially in a single conversation; warns user the process will be slower.
+- **Required tool missing (e.g., knip not installed)**: Affected subagent falls back to grep-based manual cross-reference and notes degraded mode in its category report.
+- **Tests fail after a wave**: Pipeline stops immediately; the failing commit is identified by bisect; subsequent waves do not run on a broken tree.
+- **Subagent finds nothing in its category**: Records an empty findings table and moves on — not every codebase has every type of slop.
+- **Deletion count exceeds 50 or crosses module boundaries**: Subagent surfaces the deletion list to the user for explicit approval before writing changes.

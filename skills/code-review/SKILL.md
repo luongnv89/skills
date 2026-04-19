@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Perform code reviews following best practices from Code Smells and The Pragmatic Programmer. Use when asked to "review this code", "check for code smells", "review my PR", "audit the codebase", or need quality feedback on code changes. Supports both full codebase audits and focused PR/diff reviews. Outputs structured markdown reports grouped by severity.
+description: Review code changes for bugs, security vulnerabilities, and code quality issues — producing prioritized findings with specific fix suggestions.
 effort: medium
 license: MIT
 metadata:
@@ -312,6 +312,61 @@ Description of the issue.
 2. Refactoring suggestions
 3. Architecture improvements
 ```
+
+## Expected Output
+
+A `CODE_REVIEW.md` file with findings grouped by severity. Example:
+
+```markdown
+# Code Review Report
+
+**Date**: 2024-01-15
+**Scope**: PR #42 — auth module refactor
+**Files Reviewed**: 8
+
+## Summary
+
+| Severity | Count |
+|----------|-------|
+| Critical | 1     |
+| Major    | 3     |
+| Minor    | 5     |
+| Info     | 2     |
+
+## Critical Issues
+
+### [Security]: Hardcoded API Secret
+**File**: `src/auth/client.ts:17`
+**Smell**: Hardcoded secrets
+
+API key is embedded directly in source code and will be committed to version control.
+
+**Before**:
+```typescript
+const API_KEY = "sk-prod-abc123xyz";
+```
+
+**Suggested Fix**:
+```typescript
+const API_KEY = process.env.API_KEY;
+if (!API_KEY) throw new Error("API_KEY env var is required");
+```
+
+## Recommendations
+
+1. Move all secrets to environment variables immediately
+2. Add `.env` to `.gitignore` and document required vars in README
+3. Consider extracting the 240-line `UserService` class into smaller focused services
+```
+
+## Edge Cases
+
+- **Empty or whitespace-only diff**: Report scope as zero files reviewed; skip review and inform the user.
+- **Binary files or generated code**: Skip minified/generated files (e.g., `dist/`, `*.min.js`, `package-lock.json`) and note them as excluded in the report header.
+- **Single-language vs. polyglot repos**: Apply language-appropriate checks for each file; don't flag Python idioms as issues in JS files.
+- **No issues found**: Produce a report with all-zero severity counts and a brief "LGTM" summary — don't fabricate findings.
+- **Files exceeding context limits**: Fall back to mode 3 (sampling) and note which files were sampled vs. fully reviewed.
+- **Merge conflict markers**: Flag any `<<<<<<<` / `=======` / `>>>>>>>` as a Critical issue — never silently ignore them.
 
 ## Step Completion Reports
 

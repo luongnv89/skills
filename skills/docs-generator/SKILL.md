@@ -1,6 +1,6 @@
 ---
 name: docs-generator
-description: Restructure project documentation for clarity and accessibility. Use when users ask to "organize docs", "generate documentation", "improve doc structure", "restructure README", or need to reorganize scattered documentation into a coherent structure. Analyzes project type and creates appropriate documentation hierarchy.
+description: Generate and restructure project documentation into a clear, accessible hierarchy. Use when asked to "organize docs", "generate documentation", "improve doc structure", or "restructure README".
 effort: low
 license: MIT
 metadata:
@@ -90,6 +90,23 @@ Use Mermaid for all visual documentation:
 4. Present a summary of changes to the user before committing
 
 Present changes to user for approval. Do not commit unless the user explicitly asks.
+
+## Expected Output
+
+After running this skill on a mid-size Node.js API project, you should see:
+- A clean root `README.md` with project overview, quickstart, module links, and license
+- Per-package `README.md` files for each service or library
+- A `docs/` folder with relevant files such as `architecture.md`, `api-reference.md`, `deployment.md`, and `development.md`
+- Mermaid diagrams embedded in architecture and data-flow docs
+- A validation summary listing all internal links checked and any gaps found
+
+## Edge Cases
+
+- **No existing documentation**: Skill generates from scratch using code analysis. Starts with `README.md` and adds `docs/` files based on project complexity.
+- **Conflicting or outdated docs**: Flags conflicts to the user. Prefers code-derived information over stale docs; marks outdated sections for review.
+- **Monorepo with many packages**: Limits per-package README creation to packages with actual public APIs or user-facing functionality; skips auto-generated or build-output packages.
+- **Private or secret-adjacent content**: Never documents credentials, tokens, or internal-only endpoints beyond what already exists in code comments.
+- **Read-only repository**: If git write access is unavailable, outputs documentation as a diff or inline summary rather than committing files.
 
 ## Step Completion Reports
 

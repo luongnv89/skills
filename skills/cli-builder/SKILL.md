@@ -1,6 +1,6 @@
 ---
 name: cli-builder
-description: "Guide users through building a CLI tool for any module or application. Use when users ask to \"build a CLI\", \"create a command-line tool\", \"add CLI interface\", \"make this scriptable\", \"wrap this in a CLI\", \"add a terminal interface\", or mention specific CLI frameworks like argparse, click, typer, commander, yargs, cobra, clap, picocli, or thor. Follows a strict 5-step approval-gated workflow: Analyze -> Design -> Plan -> Execute -> Summarize. Language-agnostic — auto-detects the project's language and recommends appropriate CLI libraries."
+description: "Build a production-quality CLI tool for any module or application. Auto-detects language, recommends CLI libraries, and follows a 5-step approval-gated workflow: Analyze, Design, Plan, Execute, Summarize."
 effort: high
 license: MIT
 metadata:
@@ -157,6 +157,62 @@ Deliver a final summary:
 - **Test results**: pass/fail counts, coverage if available
 - **Usage quick-start**: install command, 3-5 example invocations
 - **Next steps**: suggested improvements, missing features, distribution TODO
+
+## Expected Output
+
+After running this skill on a Python module called `mylib`, the final deliverable looks like:
+
+```
+feat/cli-mylib-20260419-143200 branch created
+
+Files created:
+  cli/main.py          — entry point with argparse/click/typer wiring
+  cli/commands/run.py  — "mylib run" subcommand
+  cli/commands/info.py — "mylib info" subcommand
+  tests/test_cli.py    — CLI smoke tests (help, version, run)
+  pyproject.toml       — updated with [project.scripts] entry point
+
+Usage quick-start:
+  pip install -e .
+  mylib --help
+  mylib run --input data.csv --output results.json
+  mylib info --format json
+```
+
+Step Completion Report (Steps 4-5):
+```
+◆ Execute + Summarize (step 4-5 of 5 — mylib CLI)
+··································································
+  Implementation:        √ pass (3 commands, 2 files)
+  Test coverage:         √ pass (8/8 tests passing)
+  Phase demos completed: √ pass (help, version, run verified)
+  Summary delivered:     √ pass
+  Criteria:              √ 4/4 met
+  ____________________________
+  Result:                PASS
+```
+
+## Edge Cases
+
+- **No clear module to wrap**: Ask the user what functions/features the CLI should expose before proceeding with analysis.
+- **Multiple languages detected**: Present a choice; recommend the language with the most existing CLI-related code.
+- **Existing CLI found**: Offer to extend or refactor rather than rebuild; audit what already exists first.
+- **Monorepo with many packages**: Ask which package/service should get the CLI; scope the analysis to that subtree.
+- **No test framework present**: Add a minimal test setup (pytest, jest, go test) as part of Phase 1 foundation tasks.
+- **Binary output required (standalone .exe / compiled)**: Note distribution method during Design phase and add build step (PyInstaller, pkg, goreleaser) to Phase 3 polish.
+- **User approves design but rejects implementation**: Return to Design phase; do not silently proceed with the rejected approach.
+
+## Acceptance Criteria
+
+- [ ] Language is auto-detected from manifest files before asking clarifying questions
+- [ ] CLI design document is presented and explicitly approved before any implementation begins
+- [ ] Implementation plan is presented and explicitly approved before execution starts
+- [ ] `--help` works at every command level and `--version` is implemented
+- [ ] Exit codes follow POSIX convention (0 = success, 1 = runtime error, 2 = usage error)
+- [ ] Error messages go to stderr; clean output goes to stdout (pipeable)
+- [ ] `NO_COLOR` env var or `--no-color` flag is respected
+- [ ] Tests are written and pass before moving to the next phase
+- [ ] Final summary includes install command and at least 3 usage examples
 
 ## Step Completion Reports
 

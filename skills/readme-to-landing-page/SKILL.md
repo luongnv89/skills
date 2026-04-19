@@ -1,6 +1,6 @@
 ---
 name: readme-to-landing-page
-description: Transform any project README.md into a persuasive, landing-page-structured markdown file using proven copywriting frameworks (PAS, AIDA, StoryBrand). Reads the existing README and project files, extracts the product story, and rewrites the README.md to follow a conversion-optimized section flow — hero, problem, solution, how it works, social proof, FAQ, and CTA — all in pure markdown that renders natively on GitHub. Use when users ask to "turn my README into a landing page", "make my README sell the project", "rewrite README as a landing page", "convert README to marketing style", "make my GitHub page more persuasive", "landing page my README", "optimize my README for conversions", or want their GitHub front page to persuade visitors rather than just inform them. Also trigger when a user has a dry technical README and wants more stars, users, or contributors — even if they don't explicitly mention "landing page".
+description: "Transform a project README.md into a conversion-optimized landing page using PAS, AIDA, or StoryBrand frameworks — hero, value prop, how it works, quick start, and CTA in pure GitHub-renderable markdown."
 effort: high
 license: MIT
 metadata:
@@ -348,6 +348,66 @@ Briefly explain:
 2. Where original content lives (`README.backup.md` + collapsed sections)
 
 Ask for feedback. Do NOT commit unless asked.
+
+## Expected Output
+
+For a CLI tool called "fastbuild", the rewritten README.md opens with:
+
+```markdown
+![stars](https://img.shields.io/github/stars/acme/fastbuild)
+![license](https://img.shields.io/badge/license-MIT-blue)
+
+# Incremental builds in under a second
+
+fastbuild watches your source tree and recompiles only changed modules —
+no config files, no daemon, no warm-up time.
+
+[**Get Started →**](#getting-started)
+
+## How It Works
+
+` ` `mermaid
+graph LR
+    A[Source files] --> B[fastbuild watcher]
+    B --> C{Changed?}
+    C -->|Yes| D[Compile changed modules]
+    C -->|No| E[Skip]
+    D --> F[Output bundle]
+` ` `
+
+| Feature | What you get |
+|---|---|
+| Zero config | Works out of the box — no setup files |
+| Incremental | Recompiles only changed modules |
+| Fast | < 1s on codebases with 10k+ files |
+```
+
+Original content is preserved in `README.backup.md` and in `<details>` blocks at the end of the new README.
+
+## Edge Cases
+
+- **No README.md found**: Offer to create one from scratch using project manifest files (package.json, pyproject.toml, etc.).
+- **README is already marketing-style**: Offer targeted section-by-section refinements instead of a full rewrite; preserve what's already working.
+- **Insufficient context to determine value prop**: Ask the user directly — what it does, who it's for, and what problem it solves — before proceeding with the rewrite.
+- **No real social proof or adoption data**: Skip the social proof section entirely; never fabricate stars, download counts, or user testimonials.
+- **Highly technical README (API reference, config specs)**: Preserve all technical content in `<details>` blocks; the landing page sections should be brief and scannable rather than comprehensive.
+- **Project with no visual output**: Focus on code-before/after comparisons and terminal output snippets instead of screenshots.
+- **README longer than 300 lines**: Preserve the full original in README.backup.md and summarize the original technical sections as collapsed `<details>` blocks to keep the rewritten README scannable.
+
+## Acceptance Criteria
+
+- [ ] Original README is backed up to `README.backup.md` before any rewrite
+- [ ] Rewritten README uses one of the three frameworks (PAS, AIDA, or StoryBrand) and names which one was chosen
+- [ ] H1 is the value proposition (≤10 words), not the project name
+- [ ] At least one mermaid diagram shows how the project works
+- [ ] Hero section is ≤5 lines (excluding badges)
+- [ ] Each feature description is ≤15 words
+- [ ] Quick Start section has ≤5 steps; each independently-runnable command is in its own code block
+- [ ] No banned slop phrases appear in the output
+- [ ] All original technical content is preserved in `<details>` blocks
+- [ ] No fabricated data — real numbers or `[placeholder]` markers only
+- [ ] Zero emoji in the output
+- [ ] Self-review checklist (13 checks) passes before presenting to the user
 
 ## Step Completion Reports
 

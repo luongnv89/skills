@@ -1,6 +1,6 @@
 ---
 name: release-manager
-description: Complete release automation — version bumping, changelog generation, README updates, documentation sync, builds, git tags, GitHub releases, and publishing to PyPI/npm. Use when asked to "prepare a release", "bump the version", "cut a release", "publish to npm/pypi", "update the changelog", "generate release notes", "what changed since last release", or anything related to shipping a new version. Even if they only mention one part (like "update changelog"), use this skill because releases have interdependent steps.
+description: Automate the full release lifecycle — version bump, changelog, README update, git tag, GitHub release, and PyPI/npm publishing.
 effort: max
 license: MIT
 metadata:
@@ -284,6 +284,39 @@ After creating the release, share the release URL with the user.
 If the project publishes to PyPI and/or npm, read `references/publishing.md` for the full publishing workflow including pre-requisites, build, verify, upload, and post-publish verification steps.
 
 ---
+
+## Expected Output
+
+After the release completes, a summary is presented:
+
+```
+Release v2.4.0 complete.
+
+Version bumped: pyproject.toml, package.json (1.3.1 → 2.4.0)
+Changelog: CHANGELOG.md updated (8 commits: 3 features, 4 fixes, 1 breaking change)
+Git tag: v2.4.0 (annotated) pushed to origin
+GitHub release: https://github.com/owner/repo/releases/tag/v2.4.0
+Published: PyPI — https://pypi.org/project/mypackage/2.4.0/
+
+Post-release reminders:
+- [ ] Announce on Discord
+- [ ] Monitor for install issues (pip install mypackage==2.4.0)
+```
+
+## Edge Cases
+
+- **No conventional commits**: If commit messages do not follow the `feat:` / `fix:` / `BREAKING:` convention, the version bump suggestion cannot be automated. Present the raw commit list to the user and ask them to confirm the semver bump explicitly.
+- **No remote configured**: If `git remote` returns nothing, skip the push and GitHub release steps. Warn the user and offer to create a local tag only.
+- **Already published version**: If the target version already exists on PyPI or npm (detected via `pip index versions` or `npm view`), abort the publish step and ask whether to bump to a new patch version or skip publishing.
+
+## Acceptance Criteria
+
+- [ ] Version string is bumped consistently in all detected files (e.g., `pyproject.toml`, `package.json`, `__version__`)
+- [ ] `CHANGELOG.md` is updated with a new entry for the release version
+- [ ] An annotated git tag is created and pushed to origin
+- [ ] A GitHub release is created with release notes when `gh` CLI is available
+- [ ] The user is asked to confirm before each destructive or visible action (push, publish, GitHub release)
+- [ ] Post-release checklist is presented to the user after completion
 
 ## Step Completion Reports
 

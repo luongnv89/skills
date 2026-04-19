@@ -1,6 +1,6 @@
 ---
 name: opencode-runner
-description: Delegate coding tasks to opencode (opencode.ai) using free models. Checks installation, discovers free models, selects the best available one (preferring minimax > kimi > glm > MiMo, with Big Pickle as last resort), executes the task, and monitors progress. Use when asked to "run this with opencode", "use opencode for this", "opencode this task", "delegate to opencode", "run with a free model", or when the user wants to offload a coding task to opencode without paying for API credits. Also trigger when the user mentions opencode, free coding models, or wants a second AI opinion on a coding task.
+description: Delegate coding tasks to opencode using free cloud models. Use when asked to run a task with opencode, use a free model, or offload coding work to opencode.ai.
 effort: medium
 license: MIT
 metadata:
@@ -13,6 +13,12 @@ metadata:
 Delegate coding tasks to opencode using free models — zero cost, fully automated.
 
 OpenCode (opencode.ai) is a terminal AI coding assistant that supports multiple providers and models. This skill automates the process of selecting the best available free model, launching the task, and reporting progress back to you.
+
+## Prerequisites
+
+- **opencode installed**: `which opencode` must succeed; install via `npm i -g opencode-ai@latest` or `brew install opencode` if missing
+- **Internet access**: required for cloud model selection and task execution via OpenCode Zen
+- **Project context**: the current working directory should be the project root for file-context tasks
 
 ## Critical Rules
 
@@ -249,6 +255,69 @@ Report to the user:
 If you couldn't kill some processes (permission denied, etc.), warn the user:
 
 > **Warning:** Some opencode processes may still be running. Run `pkill -f "opencode run"` manually to clean up.
+
+## Expected Output
+
+A successful run produces the following visible output to the user:
+
+**Phase 2 — Model selection report:**
+```
+Selected free model: MiniMax M2.5 Free (opencode/minimax-m2.5-free)
+Reason: Highest priority free model available.
+
+Note: Free models on OpenCode Zen may use collected data for model improvement.
+```
+
+**Phase 4 — Progress report (streaming):**
+```
+OpenCode Progress Report
+- Model: MiniMax M2.5 Free
+- Status: Completed
+- Duration: 1m 42s
+- Current activity: Wrote 3 files, 147 lines added
+
+Summary: opencode added a `retry` decorator to `utils/http.py`, updated
+`tests/test_http.py` with 4 new test cases, and modified `README.md` to
+document the retry behavior. All tests pass per the final output.
+```
+
+**Phase 5 — Cleanup confirmation:**
+```
+Cleanup complete — all opencode processes from this task have been terminated.
+```
+
+If the task fails or times out, the output instead shows which model was tried, the error message from opencode, a recommendation to retry with the next free model in the priority list, and the cleanup confirmation.
+
+---
+
+## Edge Cases
+
+- **opencode not installed** — `which opencode` returns nothing. The skill prints installation instructions for three methods (curl, npm, brew) and stops. It does not attempt the coding task itself.
+- **opencode upgrade fails** — The upgrade command errors. The skill reports the failure, suggests running the command manually, and stops. It does not continue with a potentially broken binary.
+- **No free cloud models available** — `opencode models` output contains no `opencode/*` models with $0 or "Free" pricing. The skill informs the user that no free option is available and stops. It does not fall back to local models (ollama, lmstudio) or paid models.
+- **All priority free models tried and all fail** — After retrying with every model in the priority list, none produced usable output. The skill reports this, suggests the user check their opencode auth configuration (`opencode auth list`), and stops.
+- **Task timeout (>5 minutes with no output)** — The skill kills the opencode process tree, suggests retrying with the next free model, and runs Phase 5 cleanup. It does not attempt the task itself.
+- **User has an interactive opencode TUI session open** — The cleanup step detects running opencode processes. The skill kills only `opencode run` child processes, leaving the interactive TUI (`opencode` without a subcommand) untouched.
+- **Task prompt contains multi-line content or file references** — Use the `--file` flag to pass context files separately, keeping the command-line prompt concise and avoiding shell escaping issues.
+- **opencode produces output but exits non-zero** — Report the exit code and last lines of output to the user, run cleanup, and suggest verifying the task result manually before relying on it.
+
+---
+
+## Acceptance Criteria
+
+The skill run is considered successful when all of the following are verifiable:
+
+- [ ] **Installation verified** — Phase 1 confirms `opencode` is on PATH and reports its version before any other action.
+- [ ] **Only cloud models considered** — The model selection step filters out all `ollama/*`, `lmstudio/*`, and any other local-provider models. No local model is ever selected.
+- [ ] **Selected model reported to user** — Before execution begins, the user sees the chosen model name, its ID, and the privacy note about free-tier data collection.
+- [ ] **Task delegated to opencode** — The coding task is executed via `opencode run`, not by the skill editing files directly or writing code itself.
+- [ ] **Progress reported** — At least one progress update is provided while the task runs, showing model, status, duration, and current activity.
+- [ ] **Completion summary delivered** — After opencode finishes, the user receives a summary of what was produced (files modified, lines changed, etc.).
+- [ ] **Cleanup runs on every exit path** — Phase 5 runs whether the task succeeded, failed, errored, or timed out. No orphaned `opencode run` processes remain after the skill exits.
+- [ ] **Temp files removed** — `/tmp/opencode-output.json` (and any other temp files created) are deleted during cleanup.
+- [ ] **No fallback to self** — If opencode is unavailable or all free models fail, the skill stops and reports the problem. It never falls back to editing files or writing code itself.
+
+---
 
 ## Step Completion Reports
 

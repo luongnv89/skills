@@ -1,6 +1,6 @@
 ---
 name: appstore-review-checker
-description: Pre-submission audit of iOS/macOS apps against 150+ Apple App Store Review Guidelines. Analyzes source code, project config, metadata, and screenshots to catch rejection risks before you submit. Provides per-guideline verdicts (PASS/FAIL/WARNING/N/A) with specific fix suggestions. Use this skill whenever someone wants to check if their app will pass App Store review, asks about App Store rejection risks, says "will Apple approve this", "check my app for review", "pre-submission audit", "App Store compliance check", "why might my app get rejected", "review guidelines check", or mentions preparing an app for App Store submission — even if they don't say "review guidelines" explicitly. Also trigger when someone is debugging a rejection and wants to know what else might fail.
+description: Audit iOS/macOS app projects against Apple App Store Review Guidelines to catch rejection risks before submission, with per-guideline PASS/FAIL/WARNING verdicts and fix suggestions.
 effort: high
 version: 1.1.1
 ---
@@ -217,6 +217,80 @@ Based on this audit, here's what to do before submitting:
 ### Phase 4: Offer to Fix
 
 After presenting the report, offer to help fix the identified issues. For code-level fixes (missing privacy descriptions, IAP restore button, account deletion flow), you can often implement them directly. For metadata issues, provide the exact text or configuration changes needed.
+
+## Expected Output
+
+A complete run produces `APPSTORE_AUDIT.md` in the project root. Example snippet:
+
+```markdown
+# App Store Review Audit Report
+
+**App:** NutriTrack – Meal Planner
+**Date:** 2026-04-19
+**Platform:** iOS 16+
+**App Type:** Health & Fitness — uses HealthKit, has user accounts, offers subscriptions
+
+## Verdict: AT RISK
+
+**Summary:** Two critical issues will likely cause rejection: missing account deletion flow (Guideline 5.1.1) and UIWebView usage (Guideline 4.2). Fix these before submitting.
+
+- Total checks: 47
+- Pass: 38 | Fail: 2 | Warning: 5 | N/A: 2
+
+---
+
+## Critical Issues (FAIL)
+
+### 5.1.1 — Account Deletion
+**Verdict:** FAIL
+**Evidence:** `AccountViewController.swift` has a "Delete Account" button (line 142) that calls `deleteAccountAPI()` but no confirmation screen or in-app deletion flow was found. The API call is stubbed and returns a 501 Not Implemented response in `NetworkClient.swift:87`.
+**Why it matters:** Apple requires apps with account creation to provide an in-app account deletion option that fully removes user data.
+**Fix:** Implement a two-step deletion flow (confirm dialog → API call → sign out → clear local data). See Human Interface Guidelines: Deleting an account.
+
+### 4.2 — Minimum Functionality (UIWebView)
+**Verdict:** FAIL
+**Evidence:** `LegacyBrowserViewController.swift:14` imports `UIKit` and declares `var webView: UIWebView`. UIWebView is deprecated since iOS 12 and forbidden in new submissions.
+**Fix:** Replace with `WKWebView` from `WebKit`. Import `WebKit` and update the property type and any delegate methods.
+
+---
+
+## Warnings
+
+### 3.1.2 — Accurate Metadata
+**Verdict:** WARNING
+**Evidence:** App Store description claims "Real-time nutritionist AI chat" but no chat UI or AI integration was found in source code.
+**Recommendation:** Either implement the feature before submitting or remove the claim from the description to avoid a 2.1 rejection for "spam/misleading".
+```
+
+---
+
+## Edge Cases
+
+- **No source code available** — User provides only an IPA binary or no project files. Run a metadata-only audit covering title, subtitle, keywords, description, privacy policy URL, and screenshot accuracy. Mark all code-level guideline checks as `N/A (no source)` and flag them for manual verification. Deliver a partial audit report with clear scope disclaimer.
+- **Metadata-only audit** — User wants to check only App Store Connect metadata (description, keywords, screenshots) without a codebase. Skip all Xcode, Info.plist, entitlements, and source-code phases. Focus on guideline sections 2.3 (Accurate Metadata), 5.2 (Intellectual Property), and prohibited keyword checks.
+- **Existing rejection** — User shares an Apple rejection notice. Start from the cited guideline ID, verify the specific violation in code or metadata, and provide a targeted fix. Then run the full audit to surface any additional issues that may cause a second-round rejection.
+- **Kids Category app** — Activate the Kids Category checklist: no third-party analytics SDKs, no behavioral advertising, no external links (except privacy policy), no social networking features. Flag every third-party SDK found in Podfile/Package.swift for review.
+- **App with no IAP despite StoreKit import** — StoreKit may be imported for non-purchase features (e.g., SKStoreReviewController). Do not flag as a FAIL; note as WARNING to confirm restore-purchases handling is not needed.
+- **Multiple targets in one project** — Audit each target separately. Flag targets that produce nearly identical apps (same icon, same bundle ID prefix, same feature set) as WARNING under Guideline 4.3 (Spam).
+- **macOS (Catalyst or native) app** — Apply macOS-specific guidelines in addition to iOS guidelines: sandbox entitlements, notarization requirements, appropriate use of macOS APIs. Note that some iOS guidelines (e.g., Sign in with Apple for social login) still apply on Catalyst.
+
+---
+
+## Acceptance Criteria
+
+The skill run is considered successful when all of the following are verifiable:
+
+- [ ] **`APPSTORE_AUDIT.md` created** — The report file exists at the project root (or a clearly specified path) after the skill completes.
+- [ ] **Overall verdict present** — The report begins with one of: `LIKELY PASS`, `AT RISK`, or `LIKELY REJECT`.
+- [ ] **All Top 20 rejection triggers evaluated** — Each trigger from the guidelines reference has a verdict (PASS, FAIL, WARNING, or N/A). No trigger is silently skipped.
+- [ ] **Every FAIL includes evidence** — Each Critical Issue entry names a specific file, line number, or config key where the violation was found. No vague "might have issues" language.
+- [ ] **Every FAIL includes a concrete fix** — Each fix is actionable: a specific API change, a missing Info.plist key, a required UI element — not just "fix the issue."
+- [ ] **Pre-submission checklist present** — The report ends with a numbered checklist of required actions before submitting.
+- [ ] **Scope of static analysis declared** — The report includes a section or note listing items that require manual verification (runtime behavior, screenshot accuracy, backend API behavior, etc.).
+- [ ] **Phase 4 (Fixer) conditional** — The fixer agent is only offered after the user reviews the report and explicitly approves which FAILs to fix. No code changes are made automatically.
+- [ ] **No entitlements modified** — The fixer agent does not touch `.entitlements` files or App Store Connect configuration.
+
+---
 
 ## Step Completion Reports
 
