@@ -94,6 +94,27 @@ def validate_skill(skill_path):
         # Check description length (max 1024 characters per spec)
         if len(description) > 1024:
             return False, f"Description is too long ({len(description)} characters). Maximum is 1024 characters."
+        # Warn (non-fatal) if the description appears to lack a "negative trigger" clause.
+        # Descriptions benefit from explicitly naming adjacent domains that should NOT
+        # trigger the skill — this reduces false positives. See SKILL.md "Writing a good
+        # description" for guidance and examples.
+        negative_trigger_pattern = re.compile(
+            r"don'?t use (?:for|when|if|on)"
+            r"|not (?:for|intended for|suitable for|meant for)\b"
+            r"|skip (?:for|when|if)"
+            r"|avoid (?:using )?(?:for|when|on)"
+            r"|never (?:use )?for\b"
+            r"|only (?:use )?for\b",
+            re.IGNORECASE,
+        )
+        if not negative_trigger_pattern.search(description):
+            print(
+                "WARNING: description appears to lack a negative-trigger clause "
+                "(e.g., \"Don't use for X, Y, Z\"). Consider naming adjacent domains "
+                "that should NOT trigger this skill to reduce false positives. "
+                "See skill-creator SKILL.md 'Writing a good description' for examples.",
+                file=sys.stderr,
+            )
 
     # Validate compatibility field if present (optional)
     compatibility = frontmatter.get('compatibility', '')
