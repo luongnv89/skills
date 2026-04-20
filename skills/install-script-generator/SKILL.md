@@ -1,11 +1,11 @@
 ---
 name: install-script-generator
-description: Generate cross-platform installation scripts for any software, library, or module. Produces a standalone install.sh runnable via a single curl/wget one-liner, with automatic OS, architecture, and package manager detection.
+description: "Generate cross-platform installation scripts for any software, library, or module. Produces a standalone install.sh runnable via a single curl/wget one-liner, with automatic OS, architecture, and package manager detection. Don't use for authoring Dockerfiles, CI/CD pipelines, or one-off local shell scripts."
 effort: high
 license: MIT
 metadata:
-  version: 2.0.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 2.0.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Install Script Generator

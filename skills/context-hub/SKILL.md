@@ -1,11 +1,11 @@
 ---
 name: context-hub
-description: Fetch up-to-date third-party API/SDK docs via `chub` before writing or reviewing integration code — so method names, payload fields, and auth headers are always sourced from live docs, not stale training data.
+description: "Fetch up-to-date third-party API/SDK docs via chub before writing or reviewing integration code — so method names, payload fields, and auth headers are always sourced from live docs, not stale training data. Don't use for first-party project docs, generic programming questions, or when the user only wants a conceptual answer rather than integration code."
 effort: low
 license: MIT
 metadata:
-  version: 1.0.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.0.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Context Hub

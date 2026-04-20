@@ -1,11 +1,11 @@
 ---
 name: idea-validator
-description: Evaluate app ideas and startup concepts across market viability, technical feasibility, and competitive landscape. Use when asked to validate, review, or score a product idea.
+description: "Evaluate app ideas and startup concepts across market viability, technical feasibility, and competitive landscape. Use when asked to validate, review, or score a product idea. Don't use for writing a PRD, detailed go-to-market plans, or financial/investor pitch decks."
 effort: max
 license: MIT
 metadata:
-  version: 1.3.0
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.3.1
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Idea Validator

@@ -1,11 +1,11 @@
 ---
 name: aso-marketing
-description: Optimize App Store and Google Play listings with keyword strategy, metadata, and localization. Use when asked to improve app store visibility, ASO, or app discoverability.
+description: "Optimize App Store and Google Play listings with keyword strategy, metadata, and localization. Use when asked to improve app store visibility, ASO, or app discoverability. Don't use for web SEO, paid UA/ad campaigns, or pre-submission compliance/review audits."
 effort: max
 license: MIT
 metadata:
-  version: 1.1.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 ## Environment Check

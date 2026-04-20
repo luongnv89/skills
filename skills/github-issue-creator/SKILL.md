@@ -1,11 +1,11 @@
 ---
 name: github-issue-creator
-description: "Create or update GitHub issues from screenshots, emails, messages, or any visual/text input. Extracts structured data, redacts PII, detects issue templates, proposes issues for approval, then files them via gh CLI."
+description: "Create or update GitHub issues from screenshots, emails, messages, or any visual/text input. Extracts structured data, redacts PII, detects issue templates, proposes issues for approval, then files them via gh CLI. Don't use for GitLab/Jira tickets, opening pull requests, or fixing the bug described in the issue."
 effort: medium
 license: MIT
 metadata:
-  version: 1.0.0
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.0.1
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # GitHub Issue Creator

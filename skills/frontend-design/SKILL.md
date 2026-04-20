@@ -1,11 +1,11 @@
 ---
 name: frontend-design
-description: Design and implement production-grade frontend interfaces with distinctive aesthetics and working code. Use when asked to build a UI, component, page, or frontend feature.
+description: "Design and implement production-grade frontend interfaces with distinctive aesthetics and working code. Use when asked to build a UI, component, page, or frontend feature. Don't use for backend/API work, usability-only audits, or reskinning an existing theme to a cyberpunk/dark variant."
 effort: high
 license: MIT
 metadata:
-  version: 1.2.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Frontend Design

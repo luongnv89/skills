@@ -1,11 +1,11 @@
 ---
 name: opencode-runner
-description: Delegate coding tasks to opencode using free cloud models. Use when asked to run a task with opencode, use a free model, or offload coding work to opencode.ai.
+description: "Delegate coding tasks to opencode using free cloud models. Use when asked to run a task with opencode, use a free model, or offload coding work to opencode.ai. Don't use for running local models (Ollama/LM Studio), Claude/OpenAI-hosted calls, or when the user wants Claude itself to do the work."
 effort: medium
 license: MIT
 metadata:
-  version: 1.2.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # OpenCode Runner

@@ -1,11 +1,11 @@
 ---
 name: code-review
-description: Review code changes for bugs, security vulnerabilities, and code quality issues — producing prioritized findings with specific fix suggestions.
+description: "Review code changes for bugs, security vulnerabilities, and code quality issues — producing prioritized findings with specific fix suggestions. Don't use for performance tuning, writing new features from scratch, or generating test cases."
 effort: medium
 license: MIT
 metadata:
-  version: 1.1.2
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.3
+  author: Luong NGUYEN <luongnv89@gmail.com>
   architecture: "subagent (Pattern B+C: Parallel Workers + Review Loop)"
 ---
 

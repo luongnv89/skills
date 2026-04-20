@@ -1,11 +1,11 @@
 ---
 name: devops-pipeline
-description: Implement pre-commit hooks and lean GitHub Actions for shift-left quality assurance — maximizing local test coverage and minimizing CI cost.
+description: "Implement pre-commit hooks and lean GitHub Actions for shift-left quality assurance — maximizing local test coverage and minimizing CI cost. Don't use for cloud infrastructure provisioning (Terraform, K8s), application deployment pipelines, or non-GitHub CI providers (GitLab, CircleCI)."
 effort: medium
 license: MIT
 metadata:
-  version: 2.0.0
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 2.0.1
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # DevOps Pipeline

@@ -1,11 +1,11 @@
 ---
 name: openspec-task-loop
-description: Execute a spec-first one-task-at-a-time loop using OpenSpec OPSX. Use when asked to implement tasks from a list with single-task scope, spec artifacts, and sequential verification before archiving.
+description: "Execute a spec-first one-task-at-a-time loop using OpenSpec OPSX. Use when asked to implement tasks from a list with single-task scope, spec artifacts, and sequential verification before archiving. Don't use for ad-hoc multi-task implementation, non-OpenSpec task trackers, or writing the specs themselves from scratch."
 effort: medium
 license: MIT
 metadata:
-  version: 1.1.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # OpenSpec Task Loop

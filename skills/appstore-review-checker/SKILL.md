@@ -1,8 +1,11 @@
 ---
 name: appstore-review-checker
-description: Audit iOS/macOS app projects against Apple App Store Review Guidelines to catch rejection risks before submission, with per-guideline PASS/FAIL/WARNING verdicts and fix suggestions.
+description: "Audit iOS/macOS app projects against Apple App Store Review Guidelines to catch rejection risks before submission, with per-guideline PASS/FAIL/WARNING verdicts and fix suggestions. Don't use for Google Play/Android submissions, general code review, or post-rejection appeal drafting."
 effort: high
-version: 1.1.1
+license: MIT
+metadata:
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # App Store Review Checker

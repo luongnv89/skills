@@ -1,11 +1,11 @@
 ---
 name: oss-ready
-description: Transform projects into professional open-source repositories with standard components. Use when users ask to "make this open source", "add open source files", "setup OSS standards", "create contributing guide", "add license", or want to prepare a project for public release with README, CONTRIBUTING, LICENSE, and GitHub templates.
+description: "Transform projects into professional open-source repositories with standard components. Use when users ask to make this open source, add open source files, setup OSS standards, create contributing guide, add license, or want to prepare a project for public release with README, CONTRIBUTING, LICENSE, and GitHub templates. Don't use for documentation structure overhauls, landing-page generation, or releasing/publishing to registries."
 effort: low
 license: MIT
 metadata:
-  version: 1.1.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # OSS Ready
