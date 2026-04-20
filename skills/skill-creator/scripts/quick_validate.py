@@ -99,7 +99,12 @@ def validate_skill(skill_path):
         # trigger the skill — this reduces false positives. See SKILL.md "Writing a good
         # description" for guidance and examples.
         negative_trigger_pattern = re.compile(
-            r"don'?t use (?:for|when|if)|not for(?:\s|,|\.)|skip (?:for|when|if)|avoid (?:using )?for",
+            r"don'?t use (?:for|when|if|on)"
+            r"|not (?:for|intended for|suitable for|meant for)\b"
+            r"|skip (?:for|when|if)"
+            r"|avoid (?:using )?(?:for|when|on)"
+            r"|never (?:use )?for\b"
+            r"|only (?:use )?for\b",
             re.IGNORECASE,
         )
         if not negative_trigger_pattern.search(description):
@@ -107,7 +112,8 @@ def validate_skill(skill_path):
                 "WARNING: description appears to lack a negative-trigger clause "
                 "(e.g., \"Don't use for X, Y, Z\"). Consider naming adjacent domains "
                 "that should NOT trigger this skill to reduce false positives. "
-                "See skill-creator SKILL.md 'Writing a good description' for examples."
+                "See skill-creator SKILL.md 'Writing a good description' for examples.",
+                file=sys.stderr,
             )
 
     # Validate compatibility field if present (optional)
