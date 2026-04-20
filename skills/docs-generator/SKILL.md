@@ -1,11 +1,11 @@
 ---
 name: docs-generator
-description: Generate and restructure project documentation into a clear, accessible hierarchy. Use when asked to "organize docs", "generate documentation", "improve doc structure", or "restructure README".
+description: "Generate and restructure project documentation into a clear, accessible hierarchy. Use when asked to organize docs, generate documentation, improve doc structure, or restructure README. Don't use for API reference generation from code (JSDoc/Sphinx), authoring a landing page, or agent-config files like CLAUDE.md."
 effort: low
 license: MIT
 metadata:
-  version: 1.2.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Documentation Generator

@@ -1,11 +1,11 @@
 ---
 name: system-design
-description: Generate Technical Architecture Documents (TAD) from PRD files. Use when users ask to "design the architecture", "create a TAD", "system design", or want to define how a product will be built. Creates/updates tad.md and always reports GitHub links to changed files.
+description: "Generate Technical Architecture Documents (TAD) from PRD files. Use when users ask to design the architecture, create a TAD, system design, or want to define how a product will be built. Creates/updates tad.md and always reports GitHub links to changed files. Don't use for writing the PRD itself, generating sprint tasks, or implementing code from the architecture."
 effort: max
 license: MIT
 metadata:
-  version: 1.1.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # System Design

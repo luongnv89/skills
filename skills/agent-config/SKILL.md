@@ -1,11 +1,11 @@
 ---
 name: agent-config
-description: Create or update CLAUDE.md and AGENTS.md files following official best practices. Use when asked to create, update, audit, or improve project configuration files for AI agents, or when users mention "CLAUDE.md", "AGENTS.md", "agent config", or "agent instructions".
+description: "Create or update CLAUDE.md and AGENTS.md files following official best practices. Use when asked to create, update, audit, or improve project configuration files for AI agents, or when users mention CLAUDE.md, AGENTS.md, agent config, or agent instructions. Don't use for editing README/contributor docs, writing generic prompts, or configuring non-Claude IDE plugins."
 effort: medium
 license: MIT
 metadata:
-  version: 1.1.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 ## Repo Sync Before Edits (mandatory)

@@ -1,11 +1,11 @@
 ---
 name: readme-to-landing-page
-description: "Transform a project README.md into a conversion-optimized landing page using PAS, AIDA, or StoryBrand frameworks — hero, value prop, how it works, quick start, and CTA in pure GitHub-renderable markdown."
+description: "Transform a project README.md into a conversion-optimized landing page using PAS, AIDA, or StoryBrand frameworks — hero, value prop, how it works, quick start, and CTA in pure GitHub-renderable markdown. Don't use for full HTML/CSS marketing sites, rewriting the README itself, or general blog copy."
 effort: high
 license: MIT
 metadata:
-  version: 2.0.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 2.0.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # README to Landing Page

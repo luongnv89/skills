@@ -1,11 +1,11 @@
 ---
 name: drawio-generator
-description: Generate professional diagrams as valid draw.io XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, and swimlanes.
+description: "Generate professional diagrams as valid draw.io XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, and swimlanes. Don't use for Excalidraw or Mermaid output, hand-drawn sketch styles, or slide decks/presentations."
 effort: high
 license: MIT
 metadata:
-  version: 1.1.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Draw.io Diagram Generator

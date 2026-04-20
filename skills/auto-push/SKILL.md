@@ -1,11 +1,11 @@
 ---
 name: auto-push
-description: Stage all changes, commit with a generated message, and push to remote — with safety checks for secrets, large files, and protected branches. Executes immediately after checks pass; no extra confirmation needed.
+description: "Stage all changes, commit with a generated message, and push to remote — with safety checks for secrets, large files, and protected branches. Executes immediately after checks pass; no extra confirmation needed. Don't use for opening PRs, performing code review, or cutting releases/tags."
 effort: low
 license: MIT
 metadata:
-  version: 1.0.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.0.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Commit and Push Everything

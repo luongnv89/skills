@@ -1,11 +1,11 @@
 ---
 name: excalidraw-generator
-description: "Generate professional diagrams as valid Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, wireframes, C4 models, and more. Understands text, code, schemas, or verbal descriptions."
+description: "Generate professional diagrams as valid Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, wireframes, C4 models, and more. Understands text, code, schemas, or verbal descriptions. Don't use for draw.io/Mermaid output, polished production slide decks, or pixel-perfect brand graphics."
 effort: high
 license: MIT
 metadata:
-  version: 1.2.0
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.1
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Excalidraw Diagram Generator

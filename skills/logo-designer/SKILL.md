@@ -1,11 +1,11 @@
 ---
 name: logo-designer
-description: "Design professional SVG logos by analyzing project context and generating 7 brand asset variants — mark, full, wordmark, icon, favicon, white, and black — plus a brand showcase HTML page."
+description: "Design professional SVG logos by analyzing project context and generating 7 brand asset variants — mark, full, wordmark, icon, favicon, white, and black — plus a brand showcase HTML page. Don't use for raster-only logos, product illustration/marketing graphics, or full brand-guideline documents."
 effort: medium
 license: MIT
 metadata:
-  version: 1.2.0
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.1
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 ## Environment Check

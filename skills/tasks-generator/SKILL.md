@@ -1,11 +1,11 @@
 ---
 name: tasks-generator
-description: Generate development tasks from a PRD file with sprint-based planning. Use when users ask to "create tasks from PRD", "break down the PRD", "generate sprint tasks", or want to convert product requirements into actionable development tasks. Creates/updates tasks.md and always reports GitHub links to changed files.
+description: "Generate development tasks from a PRD file with sprint-based planning. Use when users ask to create tasks from PRD, break down the PRD, generate sprint tasks, or want to convert product requirements into actionable development tasks. Creates/updates tasks.md and always reports GitHub links to changed files. Don't use for writing a PRD, authoring a TAD, or executing tasks (see openspec-task-loop)."
 effort: max
 license: MIT
 metadata:
-  version: 1.1.1
-  creator: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Tasks Generator
