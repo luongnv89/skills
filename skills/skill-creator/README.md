@@ -2,6 +2,9 @@
 
 > Create, evaluate, benchmark, and iteratively improve agent skills.
 
+<!-- README.md is for human catalog browsing. It ships inside the .skill package but is never auto-loaded into agent context. -->
+
+
 ## Highlights
 
 - Iterative skill loop: draft, test prompts, evaluate, refine
