@@ -111,7 +111,7 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | [Frontend and Design](#frontend-and-design) | UIs, logos, themes, diagrams |
 | [Documentation](#documentation) | Docs, README, SEO, open source, agent config |
 | [App Store](#app-store) | ASO, review guideline compliance |
-| [Tooling](#tooling) | CLI builder, local LLMs, notes, scripts, skill management |
+| [Tooling](#tooling) | CLI builder, local LLMs, scripts, skill management |
 
 ---
 
@@ -177,7 +177,6 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 |---|---|---|---|
 | <a id="cli-builder"></a>[**cli-builder**](skills/cli-builder/) | 1.0.0 | ![high](https://img.shields.io/badge/high-red) | Build production CLI tools via 5-step approval-gated workflow |
 | <a id="ollama-optimizer"></a>[**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.1 | ![medium](https://img.shields.io/badge/medium-orange) | Tune Ollama for max speed based on your GPU/RAM/CPU |
-| <a id="note-taker"></a>[**note-taker**](skills/note-taker/) | 1.4.1 | ![low](https://img.shields.io/badge/low-brightgreen) | Git-backed notes (text, voice, images) with task extraction |
 | <a id="install-script-generator"></a>[**install-script-generator**](skills/install-script-generator/) | 2.0.0 | ![high](https://img.shields.io/badge/high-red) | Cross-platform installers with environment detection |
 | <a id="github-issue-creator"></a>[**github-issue-creator**](skills/github-issue-creator/) | 1.0.0 | ![medium](https://img.shields.io/badge/medium-orange) | Issues from screenshots, emails, bug reports -- with PII redaction |
 | <a id="opencode-runner"></a>[**opencode-runner**](skills/opencode-runner/) | 1.2.0 | ![medium](https://img.shields.io/badge/medium-orange) | Delegate tasks to opencode with free cloud models |
