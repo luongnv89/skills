@@ -35,10 +35,14 @@ Each skill must follow this structure:
 ```
 skill-name/
 ├── SKILL.md              # Required: Skill definition
+├── docs/                 # Optional: human-only docs, never auto-loaded
+│   └── README.md         # Optional: catalog-browsing docs (AI-skip notice at top)
+├── references/           # Optional: docs the agent loads on demand
 ├── scripts/              # Optional: Executable scripts
-├── references/           # Optional: Reference documentation
 └── assets/               # Optional: Templates and resources
 ```
+
+If a skill ships a `README.md`, place it under `docs/` (not at the skill root and not under `references/`) and start it with the AI-skip HTML comment. The runtime loader reads `SKILL.md` + `references/` + `scripts/` + `agents/` when a skill triggers; `docs/` sits outside that set, so a README parked there costs zero runtime tokens.
 
 ### SKILL.md Requirements
 

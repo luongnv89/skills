@@ -203,14 +203,16 @@ skill-name/
 ├── SKILL.md (required)
 │   ├── YAML frontmatter (name, description required)
 │   └── Markdown instructions
-├── README.md (required — human-readable docs for catalog browsing)
+├── docs/ (optional — human-only, never auto-loaded)
+│   └── README.md (optional — catalog-browsing docs with AI-skip notice)
+├── references/ (optional — loaded into agent context when SKILL.md points to them)
+│   └── *.md (optional — additional docs loaded as needed)
 ├── agents/ (optional — subagent prompt files)
 │   ├── explorer.md   - Codebase analysis subagent
 │   ├── executor.md   - Implementation subagent
 │   └── reviewer.md   - Quality review subagent
 └── Bundled Resources (optional)
     ├── scripts/    - Executable code for deterministic/repetitive tasks
-    ├── references/ - Docs loaded into context as needed
     └── assets/     - Files used in output (templates, icons, fonts)
 ```
 
@@ -314,13 +316,31 @@ Try to explain to the model why things are important in lieu of heavy-handed mus
 
 ### Generate README.md
 
-Every skill must include a README.md. **README.md is for human catalog browsing. It ships inside the `.skill` package but is never auto-loaded into agent context.** The runtime loader only pulls in `name` + `description` from frontmatter (always), `SKILL.md` body (on trigger), and files under `scripts/` / `references/` / `assets/` (only when SKILL.md tells the agent to read them). README.md sits outside all three, so keeping it focused on what humans need when deciding whether to install a skill — capabilities, triggers, workflow diagram, usage — costs zero runtime tokens.
+If the skill ships a README.md, place it in a dedicated `docs/` directory. **README.md is for human catalog browsing. It ships inside the `.skill` package but is never auto-loaded into agent context.** The runtime loader only pulls in `name` + `description` from frontmatter (always), `SKILL.md` body (on trigger), and files under `scripts/` / `references/` / `assets/` (only when SKILL.md tells the agent to read them). `docs/` sits outside all four, so a README parked there costs zero runtime tokens. Keep the file focused on what humans need when deciding whether to install a skill — capabilities, triggers, workflow diagram, usage.
 
-This also means the rule "don't dump human prose that wastes tokens" applies to `SKILL.md` and `references/` (which *do* get loaded), not to README.md itself.
+This also means the rule "don't dump human prose that wastes tokens" applies to `SKILL.md` and `references/` (which *do* get loaded), not to `docs/README.md`.
+
+**Critical:** Add this warning comment at the top of every README.md file to prevent AI agents from accidentally reading it:
+
+```markdown
+<!--
+  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
+  It ships inside the .skill package but is NEVER auto-loaded into agent context.
+  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
+  If you're an AI agent, read the SKILL.md file instead for skill instructions.
+-->
+```
 
 Use the following template:
 
 ```markdown
+<!--
+  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
+  It ships inside the .skill package but is NEVER auto-loaded into agent context.
+  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
+  If you're an AI agent, read the SKILL.md file instead for skill instructions.
+-->
+
 # [Skill Display Name]
 
 > [One-line description of what the skill does]

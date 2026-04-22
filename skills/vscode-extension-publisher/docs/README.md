@@ -1,0 +1,72 @@
+<!--
+  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
+  It ships inside the .skill package but is NEVER auto-loaded into agent context.
+  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
+  If you're an AI agent, read the SKILL.md file instead for skill instructions.
+-->
+
+# VS Code Extension Publisher
+
+> Publish VS Code extensions to the Visual Studio Marketplace with guided setup, validation, and CI/CD automation.
+
+## Highlights
+
+- Pre-flight validation of environment and package.json before publishing
+- Step-by-step PAT creation and publisher identity setup
+- Automated packaging, local testing, and marketplace publishing
+- GitHub Actions workflow template for CI/CD auto-publishing on tags
+
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| "publish my vscode extension" | Run pre-flight checks, validate package.json, guide through full publish flow |
+| "setup marketplace publishing" | Walk through PAT creation, publisher registration, and first publish |
+| "publish a minor update" | Bump version and publish with `vsce publish minor` |
+| "setup GitHub Actions to auto-publish" | Generate CI/CD workflow with tag-based publishing |
+
+## How It Works
+
+```mermaid
+graph TD
+    A["Pre-flight Check"] --> B["Validate package.json"]
+    B --> C["Setup PAT & Publisher"]
+    C --> D["Package & Test Locally"]
+    D --> E["Publish to Marketplace"]
+    E --> F["Setup CI/CD (Optional)"]
+    style A fill:#4CAF50,color:#fff
+    style F fill:#2196F3,color:#fff
+```
+
+## Installation
+
+Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
+
+```bash
+npx skills add https://github.com/luongnv89/skills --skill vscode-extension-publisher
+```
+
+Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
+
+```bash
+asm install github:luongnv89/skills:skills/vscode-extension-publisher
+```
+
+## Usage
+
+```
+/vscode-extension-publisher
+```
+
+## Output
+
+- Validated and published `.vsix` extension on the VS Code Marketplace
+- (Optional) `.github/workflows/publish.yml` for automated releases
+
+## Resources
+
+| Path | Description |
+|---|---|
+| `scripts/preflight-check.sh` | Validates Node.js, npm, vsce, and package.json fields |
+| `references/publishing-guide.md` | Detailed reference for PAT, publisher, packaging, and CI/CD |
+| `assets/github-actions-publish.yml` | GitHub Actions workflow template for auto-publishing |

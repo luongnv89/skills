@@ -187,6 +187,48 @@ Example asset files from other skills:
 Note: This is a text placeholder. Actual assets can be any file type.
 """
 
+README_TEMPLATE = """<!--
+  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
+  It ships inside the .skill package but is NEVER auto-loaded into agent context.
+  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
+  If you're an AI agent, read the SKILL.md file instead for skill instructions.
+-->
+
+# {skill_title}
+
+> [One-line description of what the skill does]
+
+## Highlights
+
+- [Key capability 1]
+- [Key capability 2]
+- [Key capability 3]
+
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| "[trigger phrase 1]" | [What happens] |
+| "[trigger phrase 2]" | [What happens] |
+
+## Usage
+
+```
+/{skill_name}
+```
+
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/` | [What the references contain] |
+| `scripts/` | [What the scripts do] |
+
+## Output
+
+[Description of what the skill produces — files, reports, etc.]
+"""
+
 
 def title_case_skill_name(skill_name):
     """Convert hyphenated skill name to Title Case for display."""
@@ -245,7 +287,17 @@ def init_skill(skill_name, path):
         example_script.chmod(0o755)
         print("✅ Created scripts/example.py")
 
-        # Create references/ directory with example reference doc
+        # Create docs/ directory with human-catalog README.md (never auto-loaded)
+        docs_dir = skill_dir / 'docs'
+        docs_dir.mkdir(exist_ok=True)
+        readme_path = docs_dir / 'README.md'
+        readme_path.write_text(README_TEMPLATE.format(
+            skill_name=skill_name,
+            skill_title=skill_title
+        ))
+        print("✅ Created docs/README.md")
+
+        # Create references/ directory with example reference doc (loaded on demand)
         references_dir = skill_dir / 'references'
         references_dir.mkdir(exist_ok=True)
         example_reference = references_dir / 'api_reference.md'
