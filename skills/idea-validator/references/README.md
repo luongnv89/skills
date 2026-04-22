@@ -1,0 +1,66 @@
+<!--
+  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
+  It ships inside the .skill package but is NEVER auto-loaded into agent context.
+  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
+  If you're an AI agent, read the SKILL.md file instead for skill instructions.
+-->
+
+# Idea Validator
+
+> Critically evaluate app ideas, startup concepts, and product proposals with market viability analysis.
+
+## Highlights
+
+- Multi-phase evaluation: clarify idea, gather context, research competitors, critical analysis, improvements
+- Web search for real competitors and failed predecessors to avoid reinventing the wheel
+- Rate creativity, feasibility, impact, and technical execution
+- Deliver a clear verdict: Build it, Maybe, or Skip it
+- Generate improvement suggestions and enhanced roadmap
+
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| "Evaluate my idea" | Run full validation with ratings |
+| "Is this a good idea?" | Assess market viability and feasibility |
+| "Validate my startup idea" | Analyze demand, competition, and risks |
+| "Review this concept" | Provide verdict with improvements |
+
+## How It Works
+
+```mermaid
+graph TD
+    A["Clarify the Idea"] --> B["Gather Technical Context"]
+    B --> C["Research Competitors"]
+    C --> D["Critical Evaluation"]
+    D --> E["Rate & Verdict"]
+    E --> F["Suggest Improvements"]
+    style A fill:#4CAF50,color:#fff
+    style F fill:#2196F3,color:#fff
+```
+
+## Installation
+
+Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
+
+```bash
+npx skills add https://github.com/luongnv89/skills --skill idea-validator
+```
+
+Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
+
+```bash
+asm install github:luongnv89/skills:skills/idea-validator
+```
+
+## Usage
+
+```
+/idea-validator <idea description>
+```
+
+## Output
+
+- `idea.md` with concept, clarifications, and technical context
+- `validate.md` with competitive landscape, verdict, ratings, market analysis, and improvement roadmap
+- Updated README ideas index table with GitHub links
