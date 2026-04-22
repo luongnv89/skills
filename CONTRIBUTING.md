@@ -35,13 +35,13 @@ Each skill must follow this structure:
 ```
 skill-name/
 ├── SKILL.md              # Required: Skill definition
-├── references/           # Required: contains README.md; may hold additional docs
-│   └── README.md         # Required: human-readable catalog docs (AI-skip notice at top)
+├── references/           # Optional: reference docs; may include README.md
+│   └── README.md         # Optional: human-readable catalog docs (AI-skip notice at top)
 ├── scripts/              # Optional: Executable scripts
 └── assets/               # Optional: Templates and resources
 ```
 
-`references/README.md` must start with the AI-skip HTML comment so agents don't accidentally load it into context — the runtime loads `SKILL.md` as the canonical skill definition.
+If a skill ships a `README.md`, place it under `references/` (not at the skill root) and start it with the AI-skip HTML comment so agents don't accidentally load it into context — the runtime loads `SKILL.md` as the canonical skill definition.
 
 ### SKILL.md Requirements
 
