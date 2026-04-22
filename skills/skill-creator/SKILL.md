@@ -203,15 +203,15 @@ skill-name/
 ├── SKILL.md (required)
 │   ├── YAML frontmatter (name, description required)
 │   └── Markdown instructions
-├── references/ (required — place README.md here for human catalog browsing)
-│   └── README.md (human-readable docs for catalog browsing)
+├── references/ (required)
+│   ├── README.md (required — human-readable docs for catalog browsing)
+│   └── *.md (optional — additional docs loaded into context as needed)
 ├── agents/ (optional — subagent prompt files)
 │   ├── explorer.md   - Codebase analysis subagent
 │   ├── executor.md   - Implementation subagent
 │   └── reviewer.md   - Quality review subagent
 └── Bundled Resources (optional)
     ├── scripts/    - Executable code for deterministic/repetitive tasks
-    ├── references/ - Additional Docs loaded into context as needed
     └── assets/     - Files used in output (templates, icons, fonts)
 ```
 
@@ -333,6 +333,13 @@ This also means the rule "don't dump human prose that wastes tokens" applies to 
 Use the following template:
 
 ```markdown
+<!--
+  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
+  It ships inside the .skill package but is NEVER auto-loaded into agent context.
+  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
+  If you're an AI agent, read the SKILL.md file instead for skill instructions.
+-->
+
 # [Skill Display Name]
 
 > [One-line description of what the skill does]

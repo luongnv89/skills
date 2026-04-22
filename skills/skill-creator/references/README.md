@@ -75,4 +75,4 @@ asm install github:luongnv89/skills:skills/skill-creator
 
 ## Output
 
-Produces complete skill packages (SKILL.md + README.md + agents/), eval results with benchmark reports, subagent restructuring recommendations, and optimized skill descriptions for accurate triggering.
+Produces complete skill packages (SKILL.md + references/README.md + agents/), eval results with benchmark reports, subagent restructuring recommendations, and optimized skill descriptions for accurate triggering.
