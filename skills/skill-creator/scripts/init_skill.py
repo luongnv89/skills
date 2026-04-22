@@ -287,15 +287,19 @@ def init_skill(skill_name, path):
         example_script.chmod(0o755)
         print("✅ Created scripts/example.py")
 
-        # Create references/ directory with README.md (required) and example reference doc
-        references_dir = skill_dir / 'references'
-        references_dir.mkdir(exist_ok=True)
-        readme_path = references_dir / 'README.md'
+        # Create docs/ directory with human-catalog README.md (never auto-loaded)
+        docs_dir = skill_dir / 'docs'
+        docs_dir.mkdir(exist_ok=True)
+        readme_path = docs_dir / 'README.md'
         readme_path.write_text(README_TEMPLATE.format(
             skill_name=skill_name,
             skill_title=skill_title
         ))
-        print("✅ Created references/README.md")
+        print("✅ Created docs/README.md")
+
+        # Create references/ directory with example reference doc (loaded on demand)
+        references_dir = skill_dir / 'references'
+        references_dir.mkdir(exist_ok=True)
         example_reference = references_dir / 'api_reference.md'
         example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title))
         print("✅ Created references/api_reference.md")
