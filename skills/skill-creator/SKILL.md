@@ -4,7 +4,7 @@ description: "Create new skills, modify and improve existing skills, and measure
 effort: max
 license: MIT
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
