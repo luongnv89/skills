@@ -4,7 +4,7 @@ description: "Create new skills, modify and improve existing skills, and measure
 effort: max
 license: MIT
 metadata:
-  version: 1.3.1
+  version: 1.4.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -137,6 +137,34 @@ architecture: "subagent (Pattern B+C: Parallel Workers + Review Loop)"
 ```
 
 When writing or editing any SKILL.md frontmatter, scan every value for colons and other special characters and wrap the value in double quotes if any are present. If the value itself contains double quotes, escape them with `\"`.
+
+## Frontmatter Audit on Review/Evaluation (mandatory)
+
+Whenever this skill is used to **review, evaluate, improve, or iterate on an existing skill** (not just author a new one), audit the target skill's YAML frontmatter as part of the review. Broken or outdated frontmatter is one of the most common defects in published skills, and it silently degrades triggering, validation, and catalog display — so reviewers should not let it slide.
+
+**What to check on every review:**
+
+- **Required fields present**: `name` and `description` exist and are non-empty strings.
+- **`name` matches the parent directory** exactly (e.g., `skills/my-skill/SKILL.md` → `name: my-skill`). Mismatches fail `scripts/quick_validate.py`.
+- **`name` format**: 1–64 chars, lowercase letters/digits/hyphens only, no leading/trailing or consecutive hyphens.
+- **`description` is a single line** (no newlines) and under 1024 characters, with no angle brackets.
+- **Negative-trigger clause**: description names adjacent domains that should *not* trigger the skill (e.g., "Don't use for …"). `quick_validate.py` emits a warning when it's missing — treat that as a review finding, not noise.
+- **Only allowed top-level keys** appear: `name`, `description`, `license`, `allowed-tools`, `metadata`, `compatibility`, `effort`. Anything else is a typo or a stale field (e.g., a flat `version:` or `author:` at the top level — both belong under `metadata:`).
+- **`metadata.version`** is present and follows `MAJOR.MINOR.PATCH`. If missing, flag it and propose `1.0.0`.
+- **`metadata.author`** is present when the skill is published/shared. If the skill uses a different key for authorship (e.g., `creator`, `owner`, `maintainer`), normalize it to `author` under `metadata:` — this is the convention in this repo.
+- **`effort`** (if set) is one of `low | medium | high | max`.
+- **YAML safety**: any string value containing `:`, `#`, `-`, `<`, `>`, `|`, `{`, `}`, `[`, `]`, `,`, `&`, `*`, `?`, `=`, `!`, `%`, `@`, or `` ` `` is wrapped in double quotes. See "YAML Frontmatter Safety" above.
+- **Consistency with `docs/README.md`**: the skill name, description summary, and author shown to humans should match what's in the frontmatter.
+
+**How to apply the findings:**
+
+1. Run `python scripts/quick_validate.py <skill-path>` first — it catches the mechanical issues (allowed keys, name format, description length, missing negative trigger) without any LLM reasoning.
+2. For each issue found:
+   - If the user asked to **fix** the skill (review-and-improve workflow, `/ship`-style commands, or an explicit "update this"), apply the correction directly as part of the edit and **bump `metadata.version`** per the Version Management rules above. A frontmatter fix is typically a **patch** bump; renaming a field or restructuring metadata is **minor**.
+   - If the user asked only to **review / evaluate** (read-only assessment, PR review, audit), surface the issues as concrete suggestions in the review output — include the exact before/after YAML so the user can paste it in. Do not silently edit the file in review-only mode.
+3. Include the frontmatter audit in the step-completion report under a check named `Frontmatter valid` (pass/fail with a brief note on what was fixed or suggested).
+
+This audit is cheap and catches real regressions, so run it on every review pass — not just on the first one.
 
 ## Creating a skill
 
@@ -445,6 +473,8 @@ Do NOT use `/skill-test` or any other testing skill — the flow in `references/
 ## Improving the skill
 
 Read `references/iteration.md` for the improvement loop. That file covers five principles for revising a skill based on feedback (generalize, stay lean, explain the why, spot repeated work, consider subagents) plus the iteration loop itself and the optional blind comparison system.
+
+Before (or alongside) any content revision, run the **Frontmatter Audit on Review/Evaluation** described above — fix or surface frontmatter defects in the same pass. A polished body on top of broken frontmatter still fails validation and silently hurts triggering.
 
 ## Description Optimization
 
