@@ -4,7 +4,7 @@ description: "Create new skills, modify and improve existing skills, and measure
 effort: max
 license: MIT
 metadata:
-  version: 1.4.1
+  version: 1.5.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -152,7 +152,7 @@ Whenever this skill is used to **review, evaluate, improve, or iterate on an exi
 - **Only allowed top-level keys** appear: `name`, `description`, `license`, `allowed-tools`, `metadata`, `compatibility`, `effort`. Anything else is a typo or a stale field (e.g., a flat `version:` or `author:` at the top level — both belong under `metadata:`).
 - **`metadata.version`** is present and follows `MAJOR.MINOR.PATCH`. If missing, flag it and propose `1.0.0`.
 - **`metadata.author`** is present when the skill is published/shared. If the skill uses a different key for authorship (e.g., `creator`, `owner`, `maintainer`), normalize it to `author` under `metadata:` — this is the convention in this repo.
-- **`effort`** (if set) is one of `low | medium | high | max`.
+- **`effort`** (if set) is one of `low | medium | high | xhigh | max`.
 - **YAML safety**: any string value containing `:`, `#`, `-`, `<`, `>`, `|`, `{`, `}`, `[`, `]`, `,`, `&`, `*`, `?`, `=`, `!`, `%`, `@`, or `` ` `` is wrapped in double quotes. See "YAML Frontmatter Safety" above.
 - **Consistency with `docs/README.md`**: the skill name, description summary, and author shown to humans should match what's in the frontmatter.
 
@@ -195,7 +195,7 @@ Based on the user interview, fill in these components:
 
 - **name**: Skill identifier. Must be **1-64 characters**, **lowercase letters, digits, and hyphens only**, **no consecutive hyphens**, and must **exactly match the parent directory name**. Example: a skill at `skills/my-skill/SKILL.md` must have `name: my-skill`. These rules are enforced by `scripts/quick_validate.py` — mismatches will fail validation.
 - **description**: When to trigger, what it does. This is the primary triggering mechanism — include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. **The description MUST be a single line (no newlines or line breaks)** — this is required for correct parsing by external tools and automation that process skill metadata. Claude currently tends to *undertrigger* skills — to skip them when they'd be useful — so make descriptions a little bit "pushy." But pushy has a complement: **negative triggers** (see below).
-- **effort** (optional): How much reasoning effort the skill requires. Valid values: `low`, `medium`, `high`, `max`. Defaults to `high` when omitted. Use `low` for simple lookups or template fills, `medium` for moderate multi-step tasks, `high` for complex workflows requiring deep reasoning, and `max` for tasks demanding exhaustive analysis. This is an optional attribute — not all tools support it yet.
+- **effort** (optional): How much reasoning effort the skill requires. Valid values: `low`, `medium`, `high`, `xhigh`, `max`. Defaults to `high` when omitted. Use `low` for simple lookups or template fills, `medium` for moderate multi-step tasks, `high` for complex workflows requiring deep reasoning, `xhigh` for tasks needing extended deliberation beyond `high` but short of full exhaustive analysis, and `max` for tasks demanding exhaustive analysis. This is an optional attribute — not all tools support it yet.
 - **metadata.version**: Semantic version string (e.g., `1.0.0`). See "Version Management" above — this must be set on creation and bumped on every update.
 - **compatibility**: Required tools, dependencies (optional, rarely needed)
 - **the rest of the skill :)**
