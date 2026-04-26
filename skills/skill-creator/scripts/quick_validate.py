@@ -94,6 +94,22 @@ def validate_skill(skill_path):
         # Check description length (max 1024 characters per spec)
         if len(description) > 1024:
             return False, f"Description is too long ({len(description)} characters). Maximum is 1024 characters."
+        # Soft warning: descriptions over 250 chars often get truncated tail-first
+        # by the runtime when the harness exceeds its skills context budget (~2%).
+        # Tail-first truncation tends to chop off the negative-trigger clause,
+        # which is the part that prevents false-positive triggering.
+        # See SKILL.md "Description length budget" for guidance.
+        DESCRIPTION_RUNTIME_TARGET = 250
+        if len(description) > DESCRIPTION_RUNTIME_TARGET:
+            print(
+                f"WARNING: description is {len(description)} characters, over the "
+                f"recommended runtime target of {DESCRIPTION_RUNTIME_TARGET}. "
+                "When the harness exceeds its skills context budget, descriptions "
+                "get truncated tail-first — usually chopping the negative-trigger "
+                "clause. Consider trimming. See skill-creator SKILL.md "
+                "'Description length budget' for techniques.",
+                file=sys.stderr,
+            )
         # Warn (non-fatal) if the description appears to lack a "negative trigger" clause.
         # Descriptions benefit from explicitly naming adjacent domains that should NOT
         # trigger the skill — this reduces false positives. See SKILL.md "Writing a good
