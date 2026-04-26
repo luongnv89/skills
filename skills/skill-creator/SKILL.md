@@ -1,10 +1,10 @@
 ---
 name: skill-creator
-description: "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy. Don't use for running skills themselves, generating prose/blog content, or scaffolding unrelated Python projects — this is only for authoring and evaluating skill-packaged capabilities."
+description: "Author, improve, evaluate, and benchmark skills. Use when creating a skill, updating one, running evals, or optimizing a skill's description for triggering. Don't use for invoking skills, writing prose, or scaffolding Python projects."
 effort: max
 license: MIT
 metadata:
-  version: 1.5.0
+  version: 1.7.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -12,27 +12,27 @@ metadata:
 
 A skill for creating new skills and iteratively improving them.
 
-At a high level, the process of creating a skill goes like this:
+The core loop:
 
-- Decide what you want the skill to do and roughly how it should do it
-- Write a draft of the skill
-- Create a few test prompts and run claude-with-access-to-the-skill on them
-- Help the user evaluate the results both qualitatively and quantitatively
-  - While the runs happen in the background, draft some quantitative evals if there aren't any (if there are some, you can either use as is or modify if you feel something needs to change about them). Then explain them to the user (or if they already existed, explain the ones that already exist)
-  - Use the `eval-viewer/generate_review.py` script to show the user the results for them to look at, and also let them look at the quantitative metrics
-- Rewrite the skill based on feedback from the user's evaluation of the results (and also if there are any glaring flaws that become apparent from the quantitative benchmarks)
-- Repeat until you're satisfied
-- Expand the test set and try again at larger scale
+1. Decide what the skill should do and how it should do it
+2. Write a draft
+3. Run test prompts against claude-with-access-to-the-skill
+4. Evaluate results with the user (qualitative review via `eval-viewer/generate_review.py`, plus quantitative evals)
+5. Revise the skill based on feedback and benchmarks
+6. Repeat until satisfied; expand the test set and try again at scale
 
-Your job when using this skill is to figure out where the user is in this process and then jump in and help them progress through these stages. So for instance, maybe they're like "I want to make a skill for X". You can help narrow down what they mean, write a draft, write the test cases, figure out how they want to evaluate, run all the prompts, and repeat.
+Identify where the user is in this loop and jump in there. New skill from scratch → start at step 1. Existing draft → jump to step 3 or 4. User wants to vibe-iterate without formal evals → support that. After the skill stabilizes, optionally run the description improver to optimize triggering.
 
-On the other hand, maybe they already have a draft of the skill. In this case you can go straight to the eval/iterate part of the loop.
+## Two entry paths
 
-Of course, you should always be flexible and if the user is like "I don't need to run a bunch of evaluations, just vibe with me", you can do that instead.
+The skill supports two distinct workflows. **Identify which one the user is on before you do anything else** — they don't share a starting step.
 
-Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
+- **Path A — Create a new skill from scratch.** The user wants to capture a workflow, codify a pattern, or build a new capability. Start at **"Creating a skill"** below (Capture Intent → Interview → Write SKILL.md → Test → Eval).
+- **Path B — Improve an existing skill.** The user points to a skill that already exists and wants it brought up to standard, fixed, optimized, or iterated based on eval feedback. **Do not start with Capture Intent** — the intent is already encoded in the existing SKILL.md. Start at **"Improving an existing skill"** below.
 
-Cool? Cool.
+If the user's request is ambiguous ("can you look at this skill?"), assume **Path B** and ask them to confirm before interviewing them as if it were a new skill. Path B is also the one that fires when the user invokes `/skill-creator` while pointing at a skill directory or file.
+
+Both paths share the mandatory rules above the "Creating a skill" section: **Repo Sync Before Edits**, **Version Management**, **YAML Frontmatter Safety**, and **Frontmatter Audit on Review/Evaluation**. Apply them in either path.
 
 ## Step Completion Reports
 
@@ -62,14 +62,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ## Communicating with the user
 
-The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven't heard (and how could you, it's only very recently that it started), there's a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google "how to install npm". On the other hand, the bulk of users are probably fairly computer-literate.
-
-So please pay attention to context cues to understand how to phrase your communication! In the default case, just to give you some idea:
-
-- "evaluation" and "benchmark" are borderline, but OK
-- for "JSON" and "assertion" you want to see serious cues from the user that they know what those things are before using them without explaining them
-
-It's OK to briefly explain terms if you're in doubt, and feel free to clarify terms with a short definition if you're unsure if the user will get it.
+Users span a wide range of technical familiarity. Match jargon to context cues: "evaluation" and "benchmark" are borderline-fine; "JSON" and "assertion" need clear cues that the user knows the term before you use it without explaining. Briefly define terms when in doubt.
 
 ---
 
@@ -147,7 +140,7 @@ Whenever this skill is used to **review, evaluate, improve, or iterate on an exi
 - **Required fields present**: `name` and `description` exist and are non-empty strings.
 - **`name` matches the parent directory** exactly (e.g., `skills/my-skill/SKILL.md` → `name: my-skill`). Mismatches fail `scripts/quick_validate.py`.
 - **`name` format**: 1–64 chars, lowercase letters/digits/hyphens only, no leading/trailing or consecutive hyphens.
-- **`description` is a single line** (no newlines) and under 1024 characters, with no angle brackets.
+- **`description` is a single line** (no newlines), with no angle brackets. Target **≤250 characters** to stay within the runtime context budget; **1024 is a hard ceiling** but only the spec-level limit. See "Description length budget" below.
 - **Negative-trigger clause**: description names adjacent domains that should *not* trigger the skill (e.g., "Don't use for …"). `quick_validate.py` emits a warning when it's missing — treat that as a review finding, not noise.
 - **Only allowed top-level keys** appear: `name`, `description`, `license`, `allowed-tools`, `metadata`, `compatibility`, `effort`. Anything else is a typo or a stale field (e.g., a flat `version:` or `author:` at the top level — both belong under `metadata:`).
 - **`metadata.version`** is present and follows `MAJOR.MINOR.PATCH`. If missing, flag it and propose `1.0.0`.
@@ -221,6 +214,20 @@ A description has two jobs: pull in the queries that *should* trigger the skill,
 Write the positive and negative halves as one continuous sentence or two back-to-back sentences — not a structured list. The description field is prose the model reads at trigger-time; the goal is for it to naturally rule out near-misses without feeling like a contract.
 
 `scripts/quick_validate.py` emits a non-fatal warning if a description appears to lack a negative-trigger clause. It's a nudge, not a blocker — sometimes the skill's domain genuinely has no close neighbors, and that's fine.
+
+#### Description length budget
+
+Three limits on a skill's description, in order of which one bites first:
+
+1. **250 chars** — Claude Code's `/skills` listing cap. Anything beyond is **truncated tail-first**, chopping the negative-trigger clause that prevents false-positive triggering. This is the limit that actually shapes triggering behavior.
+2. **~2% of context window** (~16k chars total, ~109 chars overhead per skill) — the shared `available_skills` budget. When it overflows, extra skills become **invisible to the agent**. Override with `SLASH_COMMAND_TOOL_CHAR_BUDGET`, but this does not lift limit #1.
+3. **1024 chars** — the API spec ceiling. `quick_validate.py` rejects anything longer.
+
+**Rule: target ≤250 characters.** Treat 1024 as a hard error, not a goal. Writing past 250 wastes effort — the tail never reaches the model. `quick_validate.py` warns (non-fatal) when a description exceeds 250 chars.
+
+For very large skill collections (60+ installed), some authors push to ~130 chars to stay visible inside the total budget. Situational — start with 250.
+
+**How to fit ≤250 chars without losing the negative-trigger clause:** lead with verbs (not "this is a skill that helps…"), drop hedge words ("helps", "allows you to", "users want to"), collapse synonyms, and keep the negative half to two or three adjacent domains. Long examples belong in the SKILL.md body or `references/`, not in the description.
 
 ### Skill Writing Guide
 
@@ -344,88 +351,9 @@ Try to explain to the model why things are important in lieu of heavy-handed mus
 
 ### Generate README.md
 
-If the skill ships a README.md, place it in a dedicated `docs/` directory. **README.md is for human catalog browsing. It ships inside the `.skill` package but is never auto-loaded into agent context.** The runtime loader only pulls in `name` + `description` from frontmatter (always), `SKILL.md` body (on trigger), and files under `scripts/` / `references/` / `assets/` (only when SKILL.md tells the agent to read them). `docs/` sits outside all four, so a README parked there costs zero runtime tokens. Keep the file focused on what humans need when deciding whether to install a skill — capabilities, triggers, workflow diagram, usage.
+If the skill ships a README.md, place it in `docs/README.md`. **README.md is for human catalog browsing only — it ships inside the `.skill` package but is never auto-loaded into agent context**, so it costs zero runtime tokens. Every README.md must carry an AI-skip HTML comment at the top so agents don't accidentally read it.
 
-This also means the rule "don't dump human prose that wastes tokens" applies to `SKILL.md` and `references/` (which *do* get loaded), not to `docs/README.md`.
-
-**Critical:** Add this warning comment at the top of every README.md file to prevent AI agents from accidentally reading it:
-
-```markdown
-<!--
-  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
-  It ships inside the .skill package but is NEVER auto-loaded into agent context.
-  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
-  If you're an AI agent, read the SKILL.md file instead for skill instructions.
--->
-```
-
-Use the following template:
-
-```markdown
-<!--
-  DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
-  It ships inside the .skill package but is NEVER auto-loaded into agent context.
-  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
-  If you're an AI agent, read the SKILL.md file instead for skill instructions.
--->
-
-# [Skill Display Name]
-
-> [One-line description of what the skill does]
-
-## Highlights
-
-- [Key capability 1]
-- [Key capability 2]
-- [Key capability 3]
-- [Key capability 4]
-
-## When to Use
-
-| Say this... | Skill will... |
-|---|---|
-| "[trigger phrase 1]" | [What happens] |
-| "[trigger phrase 2]" | [What happens] |
-| "[trigger phrase 3]" | [What happens] |
-
-## How It Works
-
-` ` `mermaid
-graph TD
-    A["[First Step]"] --> B["[Second Step]"]
-    B --> C["[Third Step]"]
-    C --> D["[Final Step]"]
-    style A fill:#4CAF50,color:#fff
-    style D fill:#2196F3,color:#fff
-` ` `
-
-## Usage
-
-` ` `
-/[skill-name]
-` ` `
-
-## Resources
-
-| Path | Description |
-|---|---|
-| `references/` | [What the references contain] |
-| `scripts/` | [What the scripts do] |
-
-## Output
-
-[Description of what the skill produces — files, reports, etc.]
-```
-
-**README rules:**
-- Title: Use the human-readable display name (e.g., "Code Optimizer", not "code-optimizer")
-- Tagline: One sentence in blockquote format (> prefix)
-- Highlights: 3-5 bullet points of key capabilities
-- When to Use: Table with 3-4 trigger phrases mapping to actions
-- How It Works: Mermaid `graph TD` diagram showing the main workflow steps. First node green (#4CAF50), last node blue (#2196F3)
-- Usage: Code block with the slash command invocation
-- Output: Brief description of what the skill produces
-- Optional **Resources** section: Table with `| Path | Description |` columns if the skill has `scripts/`, `references/`, or `assets/` directories
+Read `references/readme-template.md` when authoring or updating a `docs/README.md` — it contains the AI-skip notice, the full template (title, highlights, when-to-use table, mermaid `How It Works` diagram, usage, resources, output), and the rules for each section.
 
 ### Test Cases
 
@@ -470,11 +398,42 @@ Read `references/eval-loop.md` for the full 5-step sequence (spawn runs, draft a
 
 Do NOT use `/skill-test` or any other testing skill — the flow in `references/eval-loop.md` is the one this skill expects.
 
-## Improving the skill
+## Improving an existing skill
 
-Read `references/iteration.md` for the improvement loop. That file covers five principles for revising a skill based on feedback (generalize, stay lean, explain the why, spot repeated work, consider subagents) plus the iteration loop itself and the optional blind comparison system.
+This is **Path B** from the entry-paths block at the top. There are two distinct subpaths inside it. Pick the right one based on what the user is actually asking for — they need different opening moves.
 
-Before (or alongside) any content revision, run the **Frontmatter Audit on Review/Evaluation** described above — fix or surface frontmatter defects in the same pass. A polished body on top of broken frontmatter still fails validation and silently hurts triggering.
+### Subpath B1 — Retrofit an existing skill to the standard
+
+Use this when the user says "update this skill to match the standard," "fix this skill," "review and improve," or invokes `/skill-creator` on a published skill that hasn't been touched in a while. The goal is mechanical conformance, not behavioral redesign. **Do not interview the user about purpose, triggers, or output format** — those are already encoded in the existing SKILL.md.
+
+Sequence:
+
+1. **Read the existing SKILL.md and surrounding directory.** Note the current frontmatter, body length, references, scripts, and version. Skim `docs/README.md` if it exists for human-facing claims to keep consistent.
+2. **Run `python scripts/quick_validate.py <skill-path>`.** This catches the mechanical issues (allowed keys, name format, description over 250, missing negative trigger, broken YAML) without reasoning.
+3. **Run the Frontmatter Audit** described in "Frontmatter Audit on Review/Evaluation" above. Cover every checklist item, not just what `quick_validate.py` flagged — required fields, name/dir match, allowed keys, `metadata.version`, `metadata.author`, YAML safety, and consistency with `docs/README.md`.
+4. **Inspect the body** against the standards in this file:
+   - SKILL.md under 500 lines (split to `references/` if not).
+   - Step Completion Reports section present.
+   - "Repo Sync Before Edits" section if the skill mutates a git repo.
+   - Bundled scripts print descriptive errors before exiting.
+   - Progressive disclosure used appropriately; references one level deep.
+5. **Decide fix vs. review-only mode** (per the Frontmatter Audit rules): if the user asked to fix, apply edits and **bump `metadata.version`** — typically a patch for frontmatter-only fixes, minor for new sections or capabilities, major for restructuring. If the user asked only to review, surface findings as before/after suggestions and do not silently edit.
+6. **Re-run `quick_validate.py`** after fixes to confirm clean. Output a Step Completion Report with a `Frontmatter valid` check.
+7. **Optional: offer description optimization.** If the description is fine but triggering still feels off, offer the 4-step flow in "Description Optimization" below. Don't run it automatically — it costs eval tokens.
+
+This subpath does **not** require running evals. Retrofitting frontmatter, sections, and structure does not change behavior in a way that needs benchmark comparison. Skip to subpath B2 only if the body changes are substantive enough that the user wants verification.
+
+### Subpath B2 — Iterate on a skill based on eval feedback
+
+Use this when the user has eval results (or wants to run evals) and wants the skill revised based on what the evals show. The opening move is the **eval loop**, not interviewing.
+
+1. If evals already exist, read the latest results and the user's `feedback.json`. If not, run them per "Running and evaluating test cases" above.
+2. Read `references/iteration.md` for the five principles of revision (generalize, stay lean, explain the why, spot repeated work, consider subagents) and the iteration loop itself (apply → rerun → review → repeat).
+3. Before or alongside content revision, run the **Frontmatter Audit on Review/Evaluation** — a polished body on top of broken frontmatter still fails validation and silently hurts triggering. Don't skip this even when the focus is body content.
+4. Bump `metadata.version` per the Version Management rules — typically minor for new capabilities or expanded triggers from feedback, patch for wording fixes.
+5. Re-run evals into a new `iteration-<N+1>/` directory and let the user compare.
+
+`references/iteration.md` also documents the optional blind A/B comparison system for "is the new version actually better?" questions.
 
 ## Description Optimization
 
@@ -516,20 +475,8 @@ The `references/` directory has additional documentation:
 - `references/iteration.md` — Principles for improving a skill based on feedback; blind comparison.
 - `references/description-optimization.md` — 4-step description-tuning workflow.
 - `references/environment-modes.md` — Claude.ai and Cowork-specific adaptations.
+- `references/readme-template.md` — AI-skip notice, template, and rules for `docs/README.md`.
 
 ---
 
-Repeating one more time the core loop here for emphasis:
-
-- Figure out what the skill is about
-- Draft or edit the skill
-- Run claude-with-access-to-the-skill on test prompts
-- With the user, evaluate the outputs:
-  - Create benchmark.json and run `eval-viewer/generate_review.py` to help the user review them
-  - Run quantitative evals
-- Repeat until you and the user are satisfied
-- Package the final skill and return it to the user.
-
-Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" in your TodoList to make sure it happens.
-
-Good luck!
+If you maintain a task list, include "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" — especially in Cowork, where it's easy to skip.
