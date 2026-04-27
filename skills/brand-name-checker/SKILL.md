@@ -1,14 +1,14 @@
 ---
-name: name-checker
+name: brand-name-checker
 description: "Check product and brand names for conflicts across trademarks, domains, social media handles, and package registries (npm, PyPI, Homebrew, apt). Delivers a risk assessment and actionable Proceed, Modify, or Abandon recommendation. Don't use for brainstorming name ideas from scratch, logo design, or filing/registering a trademark."
 effort: max
 license: MIT
 metadata:
-  version: 1.1.2
+  version: 1.2.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
-# Name Checker
+# Brand Name Checker
 
 Check product and brand names for conflicts across trademarks, domains, social media, and package registries (npm, PyPI, Homebrew, apt).
 

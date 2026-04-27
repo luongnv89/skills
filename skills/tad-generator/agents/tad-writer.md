@@ -567,4 +567,4 @@ Write `tad.md` to project root:
 
 ## Return to Main Skill
 
-Pass tad.md path and summary to system-design SKILL.md for final commit and GitHub links generation.
+Pass tad.md path and summary to tad-generator SKILL.md for final commit and GitHub links generation.

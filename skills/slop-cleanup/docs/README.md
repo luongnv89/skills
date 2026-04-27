@@ -60,7 +60,7 @@ graph TD
 ## Usage
 
 ```
-/slop-code
+/slop-cleanup
 ```
 
 Works best on a clean working tree. The skill creates its own branch (`chore/slop-cleanup-YYYYMMDD`) before any edits, commits one category at a time, and runs tests between waves.

@@ -122,7 +122,7 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | <a id="code-review"></a>[**code-review**](skills/code-review/) | 1.0.1 | ![medium](https://img.shields.io/badge/medium-orange) | Reviews based on Code Smells + The Pragmatic Programmer. Structured reports by severity |
 | <a id="code-optimizer"></a>[**code-optimizer**](skills/code-optimizer/) | 1.2.0 | ![medium](https://img.shields.io/badge/medium-orange) | Finds bottlenecks, memory leaks, caching gaps, concurrency issues |
 | <a id="test-coverage"></a>[**test-coverage**](skills/test-coverage/) | 1.2.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Targets untested branches and edge cases in your existing test suite |
-| <a id="dont-make-me-think"></a>[**dont-make-me-think**](skills/dont-make-me-think/) | 1.1.0 | ![medium](https://img.shields.io/badge/medium-orange) | Usability reviews using Krug's principles with visual scorecards |
+| <a id="usability-review"></a>[**usability-review**](skills/usability-review/) | 1.2.0 | ![medium](https://img.shields.io/badge/medium-orange) | Usability reviews using Krug's principles with visual scorecards |
 
 ### Shipping
 
@@ -138,9 +138,9 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | <a id="idea-validator"></a>[**idea-validator**](skills/idea-validator/) | 1.2.2 | ![max](https://img.shields.io/badge/max-darkred) | Feasibility and market viability feedback before you build |
-| <a id="name-checker"></a>[**name-checker**](skills/name-checker/) | 1.1.0 | ![max](https://img.shields.io/badge/max-darkred) | Trademark, domain, social, npm, PyPI, Homebrew, apt -- one pass |
+| <a id="brand-name-checker"></a>[**brand-name-checker**](skills/brand-name-checker/) | 1.2.0 | ![max](https://img.shields.io/badge/max-darkred) | Trademark, domain, social, npm, PyPI, Homebrew, apt -- one pass |
 | <a id="prd-generator"></a>[**prd-generator**](skills/prd-generator/) | 1.2.2 | ![max](https://img.shields.io/badge/max-darkred) | Structured PRDs from a description or validated idea |
-| <a id="system-design"></a>[**system-design**](skills/system-design/) | 1.2.3 | ![max](https://img.shields.io/badge/max-darkred) | Technical architecture docs with data flow diagrams |
+| <a id="tad-generator"></a>[**tad-generator**](skills/tad-generator/) | 1.2.0 | ![max](https://img.shields.io/badge/max-darkred) | Technical architecture docs with data flow diagrams |
 | <a id="tasks-generator"></a>[**tasks-generator**](skills/tasks-generator/) | 1.2.2 | ![max](https://img.shields.io/badge/max-darkred) | Sprint-ready task breakdowns from your PRD |
 
 ### Frontend and Design

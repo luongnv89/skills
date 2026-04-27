@@ -52,19 +52,19 @@ graph TD
 Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill name-checker
+npx skills add https://github.com/luongnv89/skills --skill brand-name-checker
 ```
 
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/name-checker
+asm install github:luongnv89/skills:skills/brand-name-checker
 ```
 
 ## Usage
 
 ```
-/name-checker <name>
+/brand-name-checker <name>
 ```
 
 ## Resources

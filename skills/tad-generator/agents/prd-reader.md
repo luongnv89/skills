@@ -238,4 +238,4 @@ If supporting docs missing:
 
 ## Return to Main Skill
 
-Pass full extraction JSON to system-design SKILL.md for research phase initiation. Used by 5 parallel tech-researcher agent instances.
+Pass full extraction JSON to tad-generator SKILL.md for research phase initiation. Used by 5 parallel tech-researcher agent instances.

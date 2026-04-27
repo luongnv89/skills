@@ -43,19 +43,19 @@ graph TD
 Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill system-design
+npx skills add https://github.com/luongnv89/skills --skill tad-generator
 ```
 
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/system-design
+asm install github:luongnv89/skills:skills/tad-generator
 ```
 
 ## Usage
 
 ```
-/system-design
+/tad-generator
 ```
 
 ## Resources

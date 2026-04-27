@@ -128,4 +128,4 @@ If parallel execution unavailable:
 
 ## Return to Main Skill
 
-Pass entire JSON output to main name-checker SKILL.md for risk assessment and final recommendation.
+Pass entire JSON output to main brand-name-checker SKILL.md for risk assessment and final recommendation.

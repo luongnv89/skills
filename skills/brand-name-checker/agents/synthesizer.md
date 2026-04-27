@@ -223,4 +223,4 @@ This assessment is based on:
 
 ## Return to Main Skill
 
-Pass both markdown report and JSON output to main name-checker SKILL.md for final presentation to user.
+Pass both markdown report and JSON output to main brand-name-checker SKILL.md for final presentation to user.

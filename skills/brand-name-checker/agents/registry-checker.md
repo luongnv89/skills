@@ -130,4 +130,4 @@ If WebFetch unavailable:
 
 ## Return to Main Skill
 
-Pass entire JSON output to main name-checker SKILL.md for risk assessment and recommendation.
+Pass entire JSON output to main brand-name-checker SKILL.md for risk assessment and recommendation.
