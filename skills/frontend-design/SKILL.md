@@ -1,8 +1,8 @@
 ---
 name: frontend-design
-description: "Design and implement production-grade frontend interfaces with distinctive aesthetics and working code. Use when asked to build a UI, component, page, or frontend feature. Don't use for backend/API work, usability-only audits, or reskinning an existing theme to a cyberpunk/dark variant."
-effort: high
+description: "Build production-grade frontend interfaces with distinctive aesthetics and working code. Use when asked to create a UI, component, page, or frontend feature. Skip for backend/API work or usability-only audits."
 license: MIT
+effort: high
 metadata:
   version: 1.2.2
   author: Luong NGUYEN <luongnv89@gmail.com>
@@ -134,7 +134,7 @@ Production-ready frontend code delivered as one or more files. Example for a lan
 - WCAG AA contrast on all text elements
 - Mobile-responsive layout verified at 375px, 768px, and 1280px breakpoints
 
-After delivery, the skill emits a step-completion report confirming design thinking choices, style guide adherence, and usability self-test results.
+After delivery, the skill emits a step-completion report confirming design thinking choices, style guide adherence, and usability self-test results. See `references/step-reports.md` for the full report template and phase-specific check formats.
 
 ## Edge Cases
 
@@ -148,42 +148,4 @@ After delivery, the skill emits a step-completion report confirming design think
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
-
-```
-◆ [Step Name] ([step N of M] — [context])
-··································································
-  [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
-  [Criteria]:         √ N/M met
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-### Phase-specific checks
-
-**Design Thinking**
-```
-◆ Design Thinking (step 1 of 2 — [component/page type])
-··································································
-  Purpose understood:       √ pass (problem and audience identified)
-  Tone identified:          √ pass ([aesthetic direction] chosen)
-  Differentiation clear:    √ pass | × fail — [what's missing]
-  ____________________________
-  Result:                   PASS | FAIL | PARTIAL
-```
-
-**Implementation**
-```
-◆ Implementation (step 2 of 2 — [component/page type])
-··································································
-  Style guide applied:      √ pass | × fail — [deviations noted]
-  Usability principles met: √ pass | × fail — [which principle failed]
-  Aesthetics polished:      √ pass | × fail — [what needs refinement]
-  ____________________________
-  Result:                   PASS | FAIL | PARTIAL
-```
+After completing each major step (Design Thinking, Implementation), emit a structured status report. See `references/step-reports.md` for the full template, symbol legend, and phase-specific check lists. Keep these reports concise to preserve the agent's context budget.

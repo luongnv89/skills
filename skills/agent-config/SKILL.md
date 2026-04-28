@@ -1,32 +1,43 @@
 ---
 name: agent-config
-description: "Create or update CLAUDE.md and AGENTS.md files following official best practices. Use when asked to create, update, audit, or improve project configuration files for AI agents, or when users mention CLAUDE.md, AGENTS.md, agent config, or agent instructions. Don't use for editing README/contributor docs, writing generic prompts, or configuring non-Claude IDE plugins."
-effort: medium
+description: "Create or update CLAUDE.md and AGENTS.md files following official best practices. Use when asked to create, audit, or improve agent config files (CLAUDE.md, AGENTS.md). Don't use for README/contributor docs or non-Claude IDE plugins."
 license: MIT
+effort: medium
 metadata:
-  version: 1.1.2
+  version: 1.2.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
+## When to Use
+
+Use when the user asks to create, update, audit, or improve `CLAUDE.md` or `AGENTS.md`. Skip for generic README or contributor-doc work.
+
+## Prerequisites
+
+- Run inside a git repo with `origin` set; the skill **requires** a clean tree before destructive edits.
+- Tools: `git`, file write access to the target path.
+- Confirm whether the user wants `CLAUDE.md`, `AGENTS.md`, or both before writing.
+
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+
+Sync the current branch with remote before any create/update/delete. This is a destructive workflow — always **dry-run first** with `git fetch` (read-only) and inspect status before pulling.
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
+git fetch origin                       # dry-run: read-only preview
+git status                             # validate clean tree
+git pull --rebase origin "$branch"     # only after confirmation
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
+If the working tree is dirty, **back up via stash** before syncing:
 
 ```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
+git stash push -u -m "pre-sync-backup"  # backup
 git fetch origin && git pull --rebase origin "$branch"
-git stash pop
+git stash pop                            # restore
 ```
 
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+If `origin` is missing, rebase conflicts occur, or stash pop fails, **stop and confirm** with the user before continuing. Never overwrite an existing `CLAUDE.md` / `AGENTS.md` without first reading it and showing a diff.
 
 ## User Input
 
@@ -34,98 +45,68 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 $ARGUMENTS
 ```
 
-Consider user input for:
-- `create` - Create new file from scratch
-- `update` - Improve existing file
-- `audit` - Analyze and report on current file quality
-- A specific path (e.g., `src/api/CLAUDE.md` for directory-specific instructions)
+Recognised inputs: `create`, `update`, `audit`, or a path (e.g., `src/api/CLAUDE.md`).
 
 ## Step 1: Determine Target File
 
-If not specified in user input, ask the user which file type to work with:
+If unspecified, ask which file:
 
-**CLAUDE.md** - Project context file loaded at the start of every conversation. Contains:
-- Bash commands Claude cannot guess
-- Code style rules that differ from defaults
-- Testing instructions and preferred test runners
-- Repository etiquette (branch naming, PR conventions)
-- Architectural decisions specific to the project
-- Developer environment quirks (required env vars)
-- Common gotchas or non-obvious behaviors
-
-**AGENTS.md** - Custom subagent definitions file. Contains:
-- Specialized assistant definitions
-- Tool permissions for each agent
-- Model preferences (opus, sonnet, haiku)
-- Focused instructions for isolated tasks
+- **CLAUDE.md** — project context loaded each conversation: bash commands Claude can't guess, code-style overrides, test runners, repo etiquette, env quirks, gotchas.
+- **AGENTS.md** — subagent definitions: tool permissions, model preferences, focused single-domain instructions.
 
 ## CLAUDE.md Guidelines
 
-Based on official Claude Code documentation.
+CLAUDE.md gives Claude persistent context **it cannot infer from code alone**.
 
-### Core Principle
+### Include vs Exclude
 
-CLAUDE.md is a special file Claude reads at the start of every conversation. Include Bash commands, code style, and workflow rules. This gives Claude persistent context **it cannot infer from code alone**.
-
-### What to Include
-
-| ✅ Include | ❌ Exclude |
+| Include | Exclude |
 |-----------|-----------|
-| Bash commands Claude cannot guess | Anything Claude can figure out by reading code |
-| Code style rules that differ from defaults | Standard language conventions Claude already knows |
-| Testing instructions and preferred test runners | Detailed API documentation (link to docs instead) |
-| Repository etiquette (branch naming, PR conventions) | Information that changes frequently |
-| Architectural decisions specific to your project | Long explanations or tutorials |
-| Developer environment quirks (required env vars) | File-by-file descriptions of the codebase |
+| Bash commands Claude cannot guess | Anything Claude can figure out from code |
+| Code style rules that differ from defaults | Standard language conventions |
+| Testing instructions and preferred runners | Detailed API docs (link instead) |
+| Repository etiquette (branch naming, PRs) | Information that changes frequently |
+| Architectural decisions specific to project | Long explanations or tutorials |
+| Developer environment quirks (env vars) | File-by-file codebase descriptions |
 | Common gotchas or non-obvious behaviors | Self-evident practices like "write clean code" |
 
-### Quality Test
-
-For each line, ask: *"Would removing this cause Claude to make mistakes?"* If not, cut it.
-
-If Claude keeps ignoring a rule, the file is probably too long and the rule is getting lost. If Claude asks questions answered in CLAUDE.md, the phrasing might be ambiguous.
+See `references/anti-patterns.md` for the full quality test and failure modes.
 
 ### Example Format
 
 ```markdown
 # Code style
-- Use ES modules (import/export) syntax, not CommonJS (require)
-- Destructure imports when possible (eg. import { foo } from 'bar')
+- Use ES modules (import/export), not CommonJS (require)
+- Destructure imports when possible
 
 # Workflow
-- Be sure to typecheck when you're done making a series of code changes
-- Prefer running single tests, and not the whole test suite, for performance
+- Typecheck after a series of code changes
+- Prefer single-test runs over the full suite for performance
 ```
 
 ### File Locations
 
-- **Home folder (`~/.claude/CLAUDE.md`)**: Applies to all Claude sessions
-- **Project root (`./CLAUDE.md`)**: Check into git to share with your team
-- **Local only (`CLAUDE.local.md`)**: Add to `.gitignore` for personal overrides
-- **Parent directories**: Useful for monorepos where both `root/CLAUDE.md` and `root/foo/CLAUDE.md` are pulled in automatically
-- **Child directories**: Claude pulls in child CLAUDE.md files on demand
+- `~/.claude/CLAUDE.md` — applies to all sessions
+- `./CLAUDE.md` — checked into git, shared with team
+- `CLAUDE.local.md` — gitignored personal overrides
+- Parent dirs (monorepos) and child dirs (on-demand) both load
 
 ### Import Syntax
 
-CLAUDE.md files can import additional files using `@path/to/import` syntax:
-
 ```markdown
-See @README.md for project overview and @package.json for available npm commands.
-
-# Additional Instructions
+See @README.md and @package.json.
 - Git workflow: @docs/git-instructions.md
-- Personal overrides: @~/.claude/my-project-instructions.md
 ```
 
-### Emphasis for Critical Rules
+### Emphasis
 
-Add emphasis (e.g., "IMPORTANT" or "YOU MUST") to improve adherence for critical rules.
+Add **IMPORTANT** or **YOU MUST** for critical rules to improve adherence.
 
 ## AGENTS.md Guidelines
 
-Custom subagents run in their own context with their own set of allowed tools. Useful for tasks that read many files or need specialized focus.
+Subagents run in their own context with restricted tools.
 
-### Agent Definition Format
+### Definition Format
 
 ```markdown
 ---
@@ -134,154 +115,107 @@ description: Reviews code for security vulnerabilities
 tools: Read, Grep, Glob, Bash
 model: opus
 ---
-You are a senior security engineer. Review code for:
+You are a senior security engineer. Review for:
 - Injection vulnerabilities (SQL, XSS, command injection)
-- Authentication and authorization flaws
-- Secrets or credentials in code
-- Insecure data handling
-
-Provide specific line references and suggested fixes.
+- Auth/authorization flaws
+- Secrets in code
+Provide line references and concrete fixes.
 ```
 
-### Required Fields
+**Required**: `name`, `description`, `tools`. **Optional**: `model`.
 
-- **name**: Identifier to invoke the agent
-- **description**: What the agent does (helps Claude decide when to use it)
-- **tools**: Comma-separated list of allowed tools (Read, Grep, Glob, Bash, Edit, Write, etc.)
+Best practices: single-domain focus, specific scope, concrete output format, minimum tool surface.
 
-### Optional Fields
+## Token Efficiency Block (always inject)
 
-- **model**: Preferred model (opus, sonnet, haiku)
+**Always** append the block from `references/token-efficiency-block.md` to every generated `CLAUDE.md` / `AGENTS.md`. This is non-negotiable — it protects the agent's context window and budget.
 
-### Best Practices for Agents
+## Optional Blocks (only when requested)
 
-1. Keep agent instructions focused on a single domain
-2. Be specific about what the agent should look for
-3. Request concrete output formats (line references, specific fixes)
-4. Limit tool access to what's actually needed
+If the user asks for orchestration rigor or stricter coding rules, copy verbatim the relevant block from `references/optional-blocks.md` (Workflow Orchestration / Mandatory Coding Discipline). Do not inject blindly.
 
 ## Execution Flow
 
-### For `create` or default:
+### `create` (default)
 
-1. Ask which file type (CLAUDE.md or AGENTS.md) if not specified
-2. Analyze the project:
-   - Check for existing files at standard locations
-   - Identify technology stack, project type, development tools
-   - Review README.md, CONTRIBUTING.md, package.json, etc.
-3. Draft the file following guidelines above
-4. If the user explicitly asked to apply now, write directly; otherwise present draft for review
-5. Finalize at the appropriate location
+1. Ask which file type if unspecified.
+2. Analyze project: existing files, stack, README, package manifests.
+3. Draft following guidelines + inject token-efficiency block.
+4. If user said "apply now", write directly; otherwise present draft.
+5. Finalize at the right path.
 
-### For `update`:
+### `update`
 
-1. Read existing file
-2. Audit against best practices
-3. Identify:
-   - Content to remove (redundant, obvious, style rules)
-   - Content to condense
-   - Missing essential information
-4. If the user explicitly asked to apply now, implement directly; otherwise present changes for review
-5. Finalize updates in place
+1. Read existing file (do not skip — used to compute diff).
+2. Audit against guidelines.
+3. Identify content to remove, condense, or add.
+4. Apply if asked, else show diff.
 
-### For `audit`:
+### `audit`
 
-1. Read existing file
-2. Generate a report with:
-   - Assessment of content quality
-   - List of anti-patterns found
-   - Percentage of truly useful vs redundant content
-   - Specific recommendations for improvement
-3. Do NOT modify the file, only report
+1. Read existing file.
+2. Report: content quality, anti-patterns, useful-vs-redundant ratio, recommendations.
+3. **Do NOT modify the file** — report only.
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After each major step, output:
 
 ```
-◆ [Step Name] ([step N of M] — [context])
+◆ [Step Name] ([step N of M])
 ··································································
   [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
+  [Check 2]:          × fail — [reason]
   [Criteria]:         √ N/M met
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+Use `√` for pass, `×` for fail. Adapt check names per step.
 
-### Skill-specific checks per phase
+## Acceptance Criteria
 
-**Phase: Determine Target File** — checks: `File detection`, `File type identified`, `Location confirmed`
+A run passes when **all** of the following are true:
 
-**Phase: Analyze Project** — checks: `File detection`, `Best practices`, `Content structure`, `Location accuracy`
+- [ ] Target file path confirmed (CLAUDE.md, AGENTS.md, or explicit path).
+- [ ] Repo synced clean OR user explicitly authorised proceeding without sync.
+- [ ] Token-efficiency block present in the generated/updated file (verify by grep `## Token Efficiency`).
+- [ ] No anti-pattern from `references/anti-patterns.md` appears in the new content.
+- [ ] For `audit`: no file was modified (verify with `git diff --stat`).
+- [ ] Final step-completion report emitted with `Result: PASS`.
 
-**Phase: Draft / Audit** — checks: `Content quality`, `Anti-patterns removed`, `Essential info present`, `Format compliance`
+## Expected Output
 
-**Phase: Finalize** — checks: `File written`, `Import syntax valid`, `Token efficiency block present`, `No redundant content`
-
-## Token Efficiency
-
-IMPORTANT: Always include the following section in generated CLAUDE.md and AGENTS.md files to ensure efficient token usage:
+**For `create` / `update`:** writes one file at the chosen path. Example tail of the file:
 
 ```markdown
 ## Token Efficiency
 - Never re-read files you just wrote or edited. You know the contents.
 - Never re-run commands to "verify" unless the outcome was uncertain.
-- Don't echo back large blocks of code or file contents unless asked.
-- Batch related edits into single operations. Don't make 5 edits when 1 handles it.
-- Skip confirmations like "I'll continue..." Just do it.
-- If a task needs 1 tool call, don't use 3. Plan before acting.
-- Do not summarize what you just did unless the result is ambiguous or you need additional input.
+... (rest of token-efficiency block)
 ```
 
-## Workflow Orchestration (optional, when requested)
+Followed by a step-completion report ending in `Result: PASS`.
 
-When users ask for stronger execution discipline, include a concise orchestration block in generated CLAUDE.md/AGENTS.md.
+**For `audit`:** prints a markdown report (no file writes), e.g.:
 
-Use this pattern (keep it short and enforceable):
-
-```markdown
-## Workflow Orchestration (Balanced)
-- For non-trivial tasks (3+ steps, architecture choices, or unclear dependencies), write a short plan first.
-- If assumptions break, stop and re-plan before continuing.
-- Use subagents strategically for parallel exploration; keep one focused goal per subagent.
-- Do not mark tasks done without evidence (tests, logs, diffs, or output proof).
-- Prefer elegant solutions for non-trivial work; keep simple fixes minimal.
-- If logs/tests clearly show root cause, fix directly; ask only when risk or ambiguity is high.
-- Capture lessons after corrections in durable docs to reduce repeat mistakes.
-
-Core bias:
-- Simplicity first
-- Root-cause over patchwork
-- Minimal-impact changes
+```
+◆ Audit (step 1 of 1)
+  Content quality:    √ pass — 12 useful lines, 3 redundant
+  Anti-patterns:      × fail — found 2 (generic style rules)
+  Token block:        × fail — missing
+  Result:             PARTIAL
 ```
 
-Do not inject this section blindly—add it when the user asks for orchestration/process rigor.
+## Edge Cases
 
-## Mandatory Coding Discipline Block (when requested)
-
-When users ask for stricter coding workflow rules, include this exact numbered block in generated config files:
-
-```markdown
-1. Before writing any code, describe your approach and wait for approval.
-2. If the requirements I give you are ambiguous, ask clarifying questions before writing any code.
-3. After you finish writing any code, list the edge cases and suggest test cases to cover them.
-4. If a task requires changes to more than 3 files, stop and break it into smaller tasks first.
-5. When there’s a bug, start by writing a test that reproduces it, then fix it until the test passes.
-6. Every time I correct you, reflect on what you did wrong and come up with a plan to never make the same mistake again.
-```
+- **No existing CLAUDE.md and `update` requested** → fall back to `create`, confirm with user first.
+- **Both root and child `CLAUDE.md` exist** → ask which scope to edit; never silently overwrite both.
+- **Dirty working tree** → stash backup before sync; if `stash pop` conflicts, stop and ask.
+- **Missing `origin`** → skip sync, warn user, require explicit confirmation to proceed.
+- **User pastes raw `$ARGUMENTS`** with no recognised verb → ask which mode (create/update/audit).
+- **Generated file would exceed 500 lines** → reject; CLAUDE.md must stay terse, link out instead.
 
 ## Anti-Patterns to Avoid
 
-**DO NOT include:**
-- Code style guidelines (use linters/formatters)
-- Generic best practices Claude already knows
-- Long explanations of obvious patterns
-- Copy-pasted code examples
-- Information that changes frequently
-- Instructions for specific one-time tasks
-- File-by-file codebase descriptions
-
+See `references/anti-patterns.md` for the full list (style rules linters cover, generic advice, file-by-file dumps, etc.).

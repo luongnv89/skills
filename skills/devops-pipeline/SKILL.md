@@ -1,8 +1,8 @@
 ---
 name: devops-pipeline
-description: "Implement pre-commit hooks and lean GitHub Actions for shift-left quality assurance — maximizing local test coverage and minimizing CI cost. Don't use for cloud infrastructure provisioning (Terraform, K8s), application deployment pipelines, or non-GitHub CI providers (GitLab, CircleCI)."
-effort: medium
+description: "Configure pre-commit hooks and lean GitHub Actions for shift-left quality assurance. Use when adding or auditing CI/CD on a Git repo to maximize local test coverage and minimize CI cost. Skip for Terraform/K8s, deployment pipelines, or non-GitHub CI providers."
 license: MIT
+effort: medium
 metadata:
   version: 2.0.1
   author: Luong NGUYEN <luongnv89@gmail.com>
@@ -13,6 +13,8 @@ metadata:
 Implement comprehensive DevOps quality gates adapted to project type, with a **shift-left philosophy**: run as many checks as possible locally via pre-commit so developers get fast feedback and CI is a safety net rather than the primary gate.
 
 **Core principle**: If a check can run locally in under ~60 seconds, it belongs in pre-commit. GitHub Actions should handle things that can't run locally: matrix version testing, secrets-based security scans, deployment, and reporting.
+
+To stay within the agent's context budget, this SKILL keeps templates short and links to `references/*.md` for language-specific configs, workflow templates, and the CLI E2E script.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -86,56 +88,9 @@ Create `.pre-commit-config.yaml` based on detected stack. See [references/precom
 
 #### CLI End-to-End Testing
 
-If the project is a CLI tool, create a local E2E test script that exercises every command and subcommand. The goal is to verify the CLI actually works end-to-end, not just that the code compiles.
+If the project is a CLI tool, create `scripts/e2e_test.sh` that exercises every command/subcommand to verify the CLI works end-to-end (not just compiles). Wire it into pre-commit on the `push` stage.
 
-**Discover all commands:**
-```bash
-# For Python click/typer apps:
-python -m myapp --help
-python -m myapp <subcommand> --help
-
-# For Go cobra/urfave apps:
-./myapp --help
-./myapp <subcommand> --help
-
-# For Node.js commander/yargs:
-node cli.js --help
-```
-
-Create `scripts/e2e_test.sh` (or `scripts/e2e_test.py` for Python) that:
-1. Builds/installs the CLI in a temp environment
-2. Runs each command with representative inputs (including edge cases: empty input, invalid flags, `--help`)
-3. Asserts exit codes and key output patterns
-4. Cleans up temp artifacts
-
-Example structure for a Python CLI:
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-echo "=== E2E: CLI smoke tests ==="
-# Test each command/subcommand
-python -m myapp --version
-python -m myapp --help
-python -m myapp subcommand1 --help
-python -m myapp subcommand1 --input tests/fixtures/sample.txt
-python -m myapp subcommand2 --flag value
-# Test error paths
-python -m myapp unknown-command 2>&1 | grep -q "Error" && echo "✓ unknown command error"
-echo "=== E2E: All passed ==="
-```
-
-Wire this into pre-commit on the `push` stage:
-```yaml
-- repo: local
-  hooks:
-    - id: e2e-cli
-      name: CLI end-to-end tests
-      entry: bash scripts/e2e_test.sh
-      language: system
-      pass_filenames: false
-      stages: [push]
-```
+See [references/cli-e2e.md](references/cli-e2e.md) for command discovery patterns, the script template, and the pre-commit hook snippet.
 
 Install hooks:
 

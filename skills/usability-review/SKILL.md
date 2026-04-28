@@ -1,8 +1,8 @@
 ---
 name: usability-review
 description: "Review UI for usability issues using Steve Krug's principles and produce a scannable report. Use when asked for a usability audit, UX review, or UI feedback on screenshots, URLs, or code. Don't use for visual/brand design critique, accessibility (WCAG) audits, or backend/API review."
-effort: medium
 license: MIT
+effort: medium
 metadata:
   version: 1.2.0
   author: Luong NGUYEN <luongnv89@gmail.com>
@@ -11,6 +11,20 @@ metadata:
 # Don't Make Me Think — Usability Review & Redesign
 
 Evaluate and improve UIs through Steve Krug's "Don't Make Me Think" principles. The report itself must practice what Krug preaches: scannable, visual, zero fluff. A human should skim it in 30 seconds; an AI agent should be able to parse it and start fixing.
+
+## When to Use
+
+Trigger this skill when the user asks for a usability audit, UX review, or UI feedback on a screenshot, live URL, or HTML/CSS code. Do not use for visual/brand critique, WCAG accessibility audits, or backend/API review — route those elsewhere.
+
+## Instructions
+
+Follow this workflow to keep the agent's context budget tight:
+
+1. **Check Prerequisites** — confirm input type and access (see below).
+2. **Process Input** — handle per the Input Handling table.
+3. **Evaluate** — apply applicable lenses from The Ten Lenses (see `references/krug-principles.md` for token-efficient deep dives).
+4. **Generate Report** — use the Report Format template verbatim.
+5. **Redesign (optional)** — only if user requests fixes; always confirm before destructive edits.
 
 ## Prerequisites
 
@@ -164,16 +178,16 @@ Bullet list — protect these during redesign:
 
 ## Redesign Mode
 
-When the user wants fixes applied (not just reported):
+When the user wants fixes applied (not just reported), every destructive edit requires an explicit dry-run preview and user confirmation before writing:
 
-1. Produce the review first (same format above)
-2. Before any file edit: show the planned changes (file path, selector, and what will change) and wait for user confirmation. For screenshot/spec output only, no confirmation is needed.
-3. Fix critical (🔴) issues first, then moderate (🟡)
-4. Change the minimum necessary — surgical, not a rewrite
-5. Preserve brand/aesthetic — make it more intuitive, not different
-6. For each fix, show a before/after in the commit or response
+1. Produce the review first (same format above).
+2. **Dry-run first** — show the planned diff (file path, selector, before/after) and wait for explicit user confirmation. Treat unconfirmed edits as a backup safety check; never write without an approval.
+3. Fix critical (🔴) issues first, then moderate (🟡).
+4. Change the minimum necessary — surgical, not a rewrite.
+5. Preserve brand/aesthetic — make it more intuitive, not different.
+6. After each fix, show before/after; if a write fails, rollback by reverting the file from git.
 
-If working with code, edit the files directly. If working with screenshots, provide specs an AI agent or developer can implement without guessing.
+If working with code, edit files directly only after confirmation. For screenshots, provide specs an AI agent or developer can implement without guessing.
 
 ## Error Handling
 
@@ -220,31 +234,7 @@ Thinking Cost: HIGH — 3 critical issues found (disabled button, missing nav la
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
-
-```
-◆ [Step Name] ([step N of M] — [context])
-··································································
-  [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
-  [Criteria]:         √ N/M met
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-### Skill-specific checks per phase
-
-**Phase: Input Processing** — checks: `Input captured`, `Type identified`
-
-**Phase: Usability Evaluation** — checks: `Lens evaluation`, `Issue prioritization`
-
-**Phase: Report Generation** — checks: `Report clarity`, `Format compliance`
-
-**Phase: Redesign (if requested)** — checks: `Redesign fidelity`, `Report clarity`, `Issue prioritization`
+After each major phase, emit a status report. See `references/step-completion-reports.md` for the template and per-phase check names.
 
 ## Working With Live Sites
 
