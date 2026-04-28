@@ -1,16 +1,22 @@
 ---
 name: ollama-optimizer
-description: "Optimize Ollama configuration for maximum performance on the current machine. Use when asked to optimize Ollama, configure Ollama, speed up Ollama, tune LLM performance, setup local LLM, fix Ollama performance, Ollama running slow, or when users want to maximize inference speed, reduce memory usage, or select appropriate models for their hardware. Analyzes system hardware (GPU, RAM, CPU) and provides tailored recommendations. Don't use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers (OpenAI, Anthropic)."
-effort: medium
+description: "Optimize Ollama configuration for the current machine's hardware. Use when asked to speed up Ollama, tune local LLM performance, or pick models that fit available GPU/RAM."
 license: MIT
+effort: medium
 metadata:
-  version: 1.0.3
+  version: 1.0.4
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Ollama Optimizer
 
 Optimize Ollama configuration based on system hardware analysis.
+
+## When to Use
+
+Use this skill when the user asks to optimize Ollama, configure Ollama, speed up Ollama, fix Ollama running slow, set up a local LLM, tune inference speed, reduce memory usage, or select models that fit their GPU/RAM. The skill analyzes hardware (GPU, VRAM, RAM, CPU) and produces tailored recommendations.
+
+Do not use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers (OpenAI, Anthropic) — those use different runtimes and tuning surfaces.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -129,6 +135,17 @@ nvidia-smi
 ollama run <model> "test" --verbose 2>&1 | head -20
 ```
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Hardware tier (CPU-only / Low-VRAM / Entry / Prosumer / Workstation / High-end) is identified explicitly in the report.
+- [ ] Recommended model size fits within detected VRAM/unified-memory budget (no recommending a 14B model on an 8GB Mac).
+- [ ] Required Ollama environment variables (e.g., `OLLAMA_FLASH_ATTENTION`, KV-cache quantisation) are written to a shell init file the user actually uses, with a backup of the prior file.
+- [ ] Apple Silicon special case is applied when detected — unified memory is not double-counted as separate VRAM + RAM.
+- [ ] Verification step runs `ollama run <model>` with `--verbose` and captures the actual offload/cache numbers.
+- [ ] Rollback instructions are included so the user can revert all env changes with one command.
+
 ## Step Completion Reports
 
 After completing each major step, output a status report in this format:
@@ -204,7 +221,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 - [Environment Variables](references/environment_variables.md) - Complete env var reference
 - [Platform-Specific Setup](references/platform_specific.md) - OS-specific installation and configuration
 
-## Output Format
+## Expected Output
 
 Generate an `ollama-optimization-guide.md` file. Ask the user where to save it (suggest `~/.config/ollama/optimization-guide.md` or current directory). Contents:
 

@@ -1,223 +1,90 @@
 ---
 name: drawio-generator
 description: "Generate professional diagrams as valid draw.io XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, and swimlanes. Don't use for Excalidraw or Mermaid output, hand-drawn sketch styles, or slide decks/presentations."
-effort: high
 license: MIT
+effort: high
 metadata:
-  version: 1.1.2
+  version: 1.2.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Draw.io Diagram Generator
 
-You generate professional diagrams and visualizations as valid draw.io XML. Every diagram goes through four phases: **Understand** the request, **Propose** options, **Generate** the XML, and **Validate** it against 9 quality checks before writing the file.
+Generate professional diagrams as valid draw.io XML. Every request flows through four phases — **Understand**, **Propose**, **Generate**, **Validate** — before the file is written. Body content is intentionally lean to respect the agent's context budget; depth lives in `references/`.
 
 ## Environment Check
 
-If the Agent tool is available, use subagents as described in the **Subagent Architecture** section below. This provides fresh-context validation loops and avoids single-pass context overflow for large diagrams.
+If the Agent tool is available, use subagents per the **Subagent Architecture** section. This provides fresh-context validation loops and avoids single-pass context overflow on large diagrams.
 
-If the Agent tool is not available (e.g., Claude.ai), execute each phase inline instead:
-- Phase 1 (Understand) & Phase 2 (Propose): Gather requirements directly in conversation
-- Phase 3 (Generate): Generate the XML in this context
-- Phase 4 (Validate): Self-review the output against the 9 checks (less rigorous, but functional)
+If the Agent tool is unavailable (e.g., Claude.ai), execute each phase inline:
+- Phase 1 & 2: Gather requirements directly in conversation
+- Phase 3: Generate the XML in this context
+- Phase 4: Self-review against the 9 checks (less rigorous, but functional)
 
 ## Core Workflow
 
-Follow these four phases for every diagram request:
-
 ### Phase 1: Understand
 
-Before generating anything, make sure you know what to draw.
+Confirm what to draw before generating anything.
 
-**If the user provides a clear description**, confirm briefly and propose the visualization type:
-> "I'll create a C4 container diagram showing your microservices. I'll use a layered layout with the API gateway at top, services in the middle, and databases at the bottom. Sound good?"
-
-**If the input is ambiguous**, ask targeted questions:
-- What are the main entities/nodes?
-- What are the relationships/connections?
-- Is there a natural flow direction?
-- Do you need multiple pages (e.g., C4 levels)?
-
-**If the user provides code, data, or files**, analyze them to extract structure:
-- Code → class diagrams, dependency graphs, architecture diagrams
-- SQL/schema → ER diagrams
-- JSON/YAML config → system architecture, deployment diagrams
-- Steps/process → flowcharts, sequence diagrams
+- **Clear request** — restate briefly and propose a visualization type:
+  > "I'll create a C4 container diagram with a layered layout: API gateway on top, services in the middle, databases at the bottom. Sound good?"
+- **Ambiguous input** — ask targeted questions: main entities, relationships, flow direction, multi-page need.
+- **Code, schema, or config provided** — extract structure:
+  - Code → class/dependency/architecture
+  - SQL/schema → ER diagram
+  - JSON/YAML config → architecture, deployment
+  - Steps/process → flowchart, sequence
 
 ### Phase 2: Propose
 
-Present your plan with selectable options:
+Present a numbered plan and wait for confirmation. For straightforward requests, use sensible defaults and proceed.
 
-1. **Diagram type** — which visualization fits best. If multiple types could work, present numbered options.
-2. **Key elements** — list the nodes/shapes you'll include
-3. **Layout options** — propose 2-3 layouts:
-   - e.g., `(A) Top-to-bottom`, `(B) Left-to-right`, `(C) Layered/grouped`
-4. **Style options**:
-   - **Color palette**: `(1) Professional` (draw.io defaults), `(2) C4 official colors`, `(3) Monochrome`
-5. **Multi-page?** — for C4 models, offer separate pages for each level
-6. **Estimated complexity** — small (< 10 elements), medium (10-30), large (30+)
-
-Wait for the user to confirm before proceeding. For straightforward requests, use sensible defaults and proceed directly.
+1. **Diagram type** (offer alternatives if multiple fit)
+2. **Key elements** — list nodes/shapes
+3. **Layout** — e.g. `(A) Top-to-bottom`, `(B) Left-to-right`, `(C) Layered`
+4. **Style** — `(1) Professional`, `(2) C4 official`, `(3) Monochrome`
+5. **Multi-page?** — for C4, offer one page per level
+6. **Estimated complexity** — small (<10), medium (10–30), large (30+)
 
 ### Phase 3: Generate
 
-Generate the draw.io XML and write it as a `.drawio` file (raw XML).
+Generate the draw.io XML and write a `.drawio` file (raw XML).
 
-Read `references/drawio-format.md` for the exact XML schema. Here are the critical rules:
+Read `references/xml-authoring.md` for shape/edge/container syntax, sizing rules, multi-page structure, and file naming. Read `references/drawio-format.md` for the full XML schema and color palettes.
 
-#### File structure
-
-Every `.drawio` file must have:
-1. `<mxfile>` root element
-2. One or more `<diagram>` elements (one per page)
-3. `<mxGraphModel>` with canvas settings
-4. `<root>` containing all cells
-5. System cells: `<mxCell id="0"/>` and `<mxCell id="1" parent="0"/>` — these are mandatory
-
-#### Shape cells
-
-Every shape is an `<mxCell>` with `vertex="1"`:
-
-```xml
-<mxCell id="unique-id" value="Label Text" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
-  <mxGeometry x="100" y="50" width="160" height="80" as="geometry"/>
-</mxCell>
-```
-
-Key rules:
-- Always include `html=1;whiteSpace=wrap;` in every shape's style — this enables proper text rendering
-- Use descriptive IDs: `"node-api-gateway"`, `"db-postgres"`
-- Set `parent="1"` for top-level shapes, or the container's ID for children
-- Size shapes to fit their text (see sizing guide below)
-
-#### Edge cells
-
-Every connection is an `<mxCell>` with `edge="1"`:
-
-```xml
-<mxCell id="edge-a-to-b" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" edge="1" parent="1" source="node-a" target="node-b">
-  <mxGeometry relative="1" as="geometry"/>
-</mxCell>
-```
-
-Key rules:
-- Set `source` and `target` to the connected shape IDs
-- Use `edgeStyle=orthogonalEdgeStyle;rounded=1;` for clean routing
-- Always include `html=1` in edge styles
-- Edge labels go in the `value` attribute
-
-#### Text and sizing
-
-Draw.io wraps text within shapes automatically, but shapes must be large enough:
-- **Single-line label**: width 120+, height 40–50
-- **Title + 1-2 description lines**: width 160+, height 80
-- **Title + 3-4 lines**: width 160+, height 100–120
-- For multi-line text in `value`, use `&lt;br/&gt;` for line breaks
-- Use `&lt;b&gt;...&lt;/b&gt;` for bold titles
-
-#### Containers and boundaries
-
-For system boundaries, swimlanes, and groups:
-
-```xml
-<mxCell id="boundary" value="System Boundary" style="rounded=1;container=1;swimlane=1;startSize=30;fillColor=none;strokeColor=#666;dashed=1;html=1;" vertex="1" parent="1" connectable="0">
-  <mxGeometry x="50" y="50" width="500" height="400" as="geometry"/>
-</mxCell>
-```
-
-Children use `parent="boundary"` and coordinates relative to the container.
-
-#### Multi-page diagrams
-
-For C4 models or complex systems, use multiple `<diagram>` elements:
-
-```xml
-<mxfile>
-  <diagram name="Context" id="page-1">...</diagram>
-  <diagram name="Container" id="page-2">...</diagram>
-</mxfile>
-```
-
-Each page has its own independent cell IDs and system cells (`id="0"`, `id="1"`).
-
-#### File naming
-
-Use descriptive kebab-case names: `auth-flow.drawio`, `system-architecture.drawio`. If the user specifies a path, use that instead.
+Critical rules every shape must follow:
+- Always include `html=1;whiteSpace=wrap;` in the style string
+- Use descriptive kebab-case IDs (`node-api-gateway`)
+- Provide `<mxGeometry x y width height as="geometry"/>` sized to fit the label
+- Edges need `source`, `target`, and `<mxGeometry relative="1" as="geometry"/>`
 
 ### Phase 4: Validate
 
-After generating the XML but **before writing the file**, run every check below. Fix any failures and re-check until all pass.
+Run all 9 checks before writing the file. Fix and re-check until every check passes. See `references/validation-checks.md` for the full check list, fix patterns, and the validation-report template.
 
-#### Check 1: Valid XML structure
-- The XML parses without error
-- Has `<mxfile>` → `<diagram>` → `<mxGraphModel>` → `<root>` hierarchy
-- Each page has system cells `id="0"` and `id="1" parent="0"`
+Summary of checks:
 
-#### Check 2: All shapes have required attributes
-Every vertex cell must have: `id`, `value`, `style`, `vertex="1"`, `parent`, and a child `<mxGeometry>` with `x`, `y`, `width`, `height`, `as="geometry"`.
-
-Every style string must include `html=1;whiteSpace=wrap;`.
-
-**Fix**: Add missing attributes with defaults.
-
-#### Check 3: Unique IDs
-All `id` values must be unique within each page. No duplicates.
-
-**Fix**: Append suffix to duplicates.
-
-#### Check 4: Edge bindings valid
-Every edge with `source` or `target` must reference an existing vertex ID in the same page.
-
-**Fix**: Remove broken references or add missing shapes.
-
-#### Check 5: Edge geometry
-Every edge must have `<mxGeometry relative="1" as="geometry"/>`.
-
-**Fix**: Add missing geometry.
-
-#### Check 6: No overlapping shapes
-Check that vertex bounding boxes don't overlap by more than 10px (unless one is a container parent of the other).
-
-**Fix**: Shift overlapping shapes.
-
-#### Check 7: Container hierarchy valid
-Every cell with `parent="X"` (where X is not "0" or "1") must reference an existing container cell. Children coordinates must be relative to the container.
-
-**Fix**: Correct parent references.
-
-#### Check 8: Semantic completeness
-Every entity, relationship, or concept from the user's request is represented.
-
-**Fix**: Add missing elements.
-
-#### Check 9: Text readable and shapes sized
-- All `fontSize` >= 11
-- All shapes are wide/tall enough for their `value` text
-- Single line: height >= 40. Multi-line: add ~20px per extra line.
-
-**Fix**: Increase shape dimensions or font size.
-
-#### Validation report
-
-After all checks pass:
-```
-Validation: 9/9 checks passed
-- Pages: N
-- Elements: X shapes, Y edges
-- Containers: Z
-- All IDs unique, all edges bound, no overlaps
-```
+1. Valid XML structure (mxfile → diagram → mxGraphModel → root, system cells present)
+2. All shapes have required attributes (`html=1;whiteSpace=wrap;` mandatory)
+3. Unique IDs per page
+4. Edge `source`/`target` reference existing vertices
+5. Every edge has `<mxGeometry relative="1" as="geometry"/>`
+6. No overlapping shapes (>10px)
+7. Container hierarchy valid; child coordinates relative to container
+8. Semantic completeness — every requested entity/relationship is represented
+9. Text readable: `fontSize` ≥ 11, shapes sized to fit `value`
 
 ---
 
 ## Expected Output
 
-A valid `.drawio` file written to disk (raw XML). Example output for a two-node flowchart:
+A valid `.drawio` file written to disk (raw XML). Minimal example:
 
 ```xml
 <mxfile>
   <diagram name="Flow" id="page-1">
-    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" page="1" pageWidth="1169" pageHeight="827">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
@@ -246,21 +113,33 @@ Validation: 9/9 checks passed
 File written: flow.drawio
 ```
 
+## Acceptance Criteria
+
+Verify these for every run:
+
+- [ ] A `.drawio` file is written to disk with valid XML (parses without error).
+- [ ] Every page contains system cells `id="0"` and `id="1" parent="0"`.
+- [ ] Every shape style includes `html=1;whiteSpace=wrap;` and every edge has `<mxGeometry relative="1" as="geometry"/>`.
+- [ ] Edge `source`/`target` attributes resolve to existing vertex IDs in the same page.
+- [ ] No two vertex bounding boxes overlap by >10px (containers excluded).
+- [ ] All `fontSize` values ≥ 11; shapes are sized so labels fit without overflow.
+- [ ] The validation report prints `9/9 checks passed`. Given the user's request, then every entity and relationship described is represented in the output.
+
 ## Edge Cases
 
-- **Empty or vague input** (e.g., "make a diagram"): Ask targeted clarifying questions (entities, relationships, flow direction) before generating anything — never produce a placeholder diagram.
-- **Very large diagram (>50 elements)**: Warn the user that a single page may become crowded; offer to split into multiple pages or hierarchical C4 levels.
-- **Unsupported diagram type**: If the requested type cannot be represented cleanly in draw.io XML (e.g., a Gantt chart with real date-axis ticks), explain the limitation and propose the closest supported alternative (e.g., a swimlane timeline).
-- **Existing `.drawio` file being extended**: Read the existing file first, preserve all existing cell IDs, and append new elements — never regenerate from scratch.
-- **Conflicting layout constraints**: If the user specifies both "left-to-right" and "circular" layouts, surface the conflict and ask which takes priority.
-- **IDs that would collide across pages**: Each `<diagram>` element has its own ID namespace; system cells `id="0"` and `id="1"` must be present on every page independently.
-- **Text longer than shape capacity**: Auto-increase shape height by ~20px per extra line rather than letting text overflow silently.
+- **Empty or vague input** ("make a diagram"): ask targeted clarifying questions before generating — never produce a placeholder.
+- **Very large diagram (>50 elements)**: warn that one page will be crowded; offer multi-page or hierarchical C4.
+- **Unsupported diagram type** (e.g., Gantt with real date-axis ticks): explain the limitation and propose the closest supported alternative (e.g., swimlane timeline).
+- **Existing `.drawio` file extension**: read it first, preserve existing cell IDs, append new elements — never regenerate from scratch.
+- **Conflicting layout constraints**: surface the conflict and ask which takes priority.
+- **Cross-page ID collision**: each `<diagram>` has its own ID namespace; system cells `id="0"` and `id="1"` must be present on every page independently.
+- **Text exceeds shape capacity**: auto-grow shape height ~20px per extra line rather than letting text overflow silently.
 
 ---
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After completing each major step, output a status report:
 
 ```
 ◆ [Step Name] ([step N of M] — [context])
@@ -268,42 +147,24 @@ After completing each major step, output a status report in this format:
   [Check 1]:          √ pass
   [Check 2]:          √ pass (note if relevant)
   [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
   [Criteria]:         √ N/M met
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-### Skill-specific checks per phase
-
-**Phase: Understand** — checks: `Requirements gathered`, `Scope confirmed`
-
-**Phase: Propose** — checks: `Proposal approved`, `User confirmed`
-
-**Phase: Generate** — checks: `XML valid`, `Layout correct`, `Requirements gathered`
-
-**Phase: Validate** — checks: `XML valid`, `Layout correct`, `Quality checks 9/9`
+Per-phase checks:
+- **Understand** — `Requirements gathered`, `Scope confirmed`
+- **Propose** — `Proposal approved`, `User confirmed`
+- **Generate** — `XML valid`, `Layout correct`, `Requirements covered`
+- **Validate** — `XML valid`, `Layout correct`, `Quality checks 9/9`
 
 ## Style Guidelines
 
-### Default style: Professional
-- Font: Helvetica (draw.io default)
-- Font size: 14 for labels, 11 for descriptions
-- Colors: draw.io Professional palette from `references/drawio-format.md`
-- Edge routing: `orthogonalEdgeStyle` with `rounded=1`
+- **Professional (default)** — Helvetica, fontSize 14 for labels / 11 for descriptions, draw.io Professional palette, `orthogonalEdgeStyle` with `rounded=1`.
+- **C4** — official C4 colors, white text on dark fills, bold titles, dashed boundaries.
+- **Color assignment** — flowcharts: blue=process, green=start/end, orange=decision, red=error. Architecture: color by layer (frontend/backend/data/external). C4: depth-by-blue.
 
-### C4 style
-- Use official C4 colors from `references/drawio-format.md`
-- White text on dark backgrounds
-- Bold titles, regular descriptions
-- Dashed boundaries for system/container scopes
-
-### Color assignment strategy
-- **Flowcharts**: Blue for process, green for start/end, orange for decisions, red for errors
-- **Architecture**: Color by layer — blue for frontend, green for backend, purple for data, gray for external
-- **C4**: Use official C4 palette (blue tones by depth level)
+Full palettes and tokens: `references/drawio-format.md`.
 
 ---
 
@@ -311,69 +172,39 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 | Category | Types |
 |---|---|
-| Flow & Process | Flowchart, sequence diagram, swimlane, state machine, activity diagram, BPMN |
-| Architecture | System architecture, microservices, network topology, cloud, C4 model, deployment |
-| Data & Relationships | ER diagram, class diagram, dependency graph, mind map, tree, org chart |
-| Planning | Gantt chart, roadmap, timeline, Kanban board |
-| Comparison | Quadrant chart, SWOT, comparison matrix, Venn diagram |
+| Flow & Process | Flowchart, sequence, swimlane, state machine, activity, BPMN |
+| Architecture | System, microservices, network, cloud, C4, deployment |
+| Data & Relationships | ER, class, dependency graph, mind map, tree, org chart |
+| Planning | Gantt, roadmap, timeline, Kanban |
+| Comparison | Quadrant, SWOT, comparison matrix, Venn |
 | UX/Design | Wireframe, user flow, sitemap |
-| Custom | Any freeform diagram from description |
-
----
+| Custom | Any freeform diagram |
 
 ## Iteration
 
-After generating the first version, the user may want changes:
-- **"Add X"** — add new shapes/connections
-- **"Remove Y"** — remove elements
-- **"Change layout"** — rearrange positions
-- **"Change style"** — adjust colors, fonts
-- **"Add a page"** — add another diagram page
-
-When iterating, read the existing file, modify the XML, and rewrite. Preserve element IDs that haven't changed.
+When iterating on an existing diagram, read the file, modify the XML in place, and rewrite. Preserve element IDs that haven't changed. Common requests: add/remove elements, change layout, adjust style, add a page.
 
 ---
 
 ## Subagent Architecture
 
-When the diagram complexity exceeds 30 elements, spawn a review loop to ensure quality without single-context degradation:
+When a diagram exceeds 30 elements, spawn a review loop to avoid single-context degradation.
 
-### Complexity Threshold Check
+**Complexity threshold (set at end of Phase 2):**
+- Small (<10): proceed inline
+- Medium (10–30): proceed inline with careful validation
+- Large (>30): spawn the subagent review loop
 
-At the end of Phase 2 (Propose), estimate element count:
-- **Small** (< 10 elements): Proceed inline (Phases 3-4 in main agent context)
-- **Medium** (10-30 elements): Proceed inline with careful validation
-- **Large** (> 30 elements): Spawn subagent review loop (recommended)
+**Phase 3 — `agents/xml-generator.md`**
+- Receives: diagram type, elements, edges, style, complexity
+- Outputs: complete draw.io XML with all required attributes
+- Constraint: shapes sized to fit text labels
 
-### Phase 3: Generate → `xml-generator` subagent
+**Phase 4 — review loop (max 3 cycles)**
 
-Spawn `agents/xml-generator.md` with the confirmed plan:
-- Receives: diagram type, elements list, edges list, style options, complexity estimate
-- Outputs: Complete draw.io XML with all required shape and edge attributes
-- Key constraint: Must size shapes to fit all text labels
+1. **Validate** — spawn `agents/xml-validator.md`. Outputs PASS/FAIL for all 9 checks.
+2. **Fix** — if NEEDS_FIX, spawn `agents/xml-fixer.md` with the report. Patches XML; never regenerates. Skips semantic/structure issues (those require generator revision).
+3. **Re-validate** with cycle++ until PASS or cycle == 3.
+4. Return to main agent for file write or user review.
 
-### Phase 4: Validate → Review Loop (max 3 cycles)
-
-If complexity > 30:
-
-1. **Cycle 1: Fresh Validation**
-   - Spawn `agents/xml-validator.md` with generated XML
-   - Receives: Complete XML, original plan
-   - Outputs: Structured validation report with PASS/FAIL for all 9 checks
-
-2. **If NEEDS_FIX:**
-   - Spawn `agents/xml-fixer.md` with validation report
-   - Receives: Original XML, fix priorities, cycle number
-   - Outputs: Patched XML (never regenerated from scratch)
-   - Constraint: Apply only targeted fixes; skip semantic/structure issues (require generator revision)
-
-3. **If still NEEDS_FIX and cycle < 3:**
-   - Return to step 1 (re-validate) with cycle++
-
-4. **If cycle == 3 or PASS:**
-   - Return to main agent for file write or user review
-
-### Fallback (if Agent tool unavailable)
-
-Execute validation inline with self-review against the 9 checks. Less rigorous but functional.
-
+**Fallback** — without the Agent tool, validate inline using `references/validation-checks.md`. Less rigorous but functional.

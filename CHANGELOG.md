@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Skills Renamed
+| Old name | New name | Reason |
+|----------|----------|--------|
+| dont-make-me-think | usability-review | Action-oriented and searchable; matches description |
+| name-checker | brand-name-checker | Disambiguates from generic "name" (variable, file, etc.) |
+| slop-code | slop-cleanup | Verb form matches the action (cleanup, not "code that is slop") |
+| system-design | tad-generator | Aligns with sibling `prd-generator`/`tasks-generator` chain |
+
+All four skills bumped to a minor version (renaming is a breaking change for invocation but internal behavior is unchanged).
+
 ## v1.12.0 — 2026-03-25
 
 ### Features

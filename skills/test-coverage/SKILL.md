@@ -1,10 +1,10 @@
 ---
 name: test-coverage
-description: "Expand unit test coverage by targeting untested branches and edge cases in any language. Identifies coverage gaps, writes new tests using the project's existing framework, and verifies measurable improvement. Don't use for integration/E2E test suites, migrating between test frameworks, or fixing bugs in production code."
-effort: low
+description: "Generate unit tests for untested branches and edge cases. Use when coverage is low, CI flags gaps, or a release needs hardening. Not for integration/E2E suites, framework migrations, or fixing production bugs."
 license: MIT
+effort: low
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -116,6 +116,17 @@ Files improved:
 
 All 56 tests passing. No regressions.
 ```
+
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Coverage report exists from a runnable command for the detected stack (e.g., `jest --coverage`, `pytest --cov`, `go test -cover`).
+- [ ] Post-run total coverage is strictly higher than the pre-run baseline — no test additions that fail to move the metric.
+- [ ] New tests target previously-untested branches, error paths, or boundary values — not duplicates of existing assertions.
+- [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.).
+- [ ] All new tests live on a feature branch (e.g., `feat/test-coverage`), never on `main`/`master`.
+- [ ] Commit message records the before/after coverage percentages and the files newly covered.
 
 ## Edge Cases
 

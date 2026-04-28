@@ -1,16 +1,29 @@
 ---
 name: docs-generator
 description: "Generate and restructure project documentation into a clear, accessible hierarchy. Use when asked to organize docs, generate documentation, improve doc structure, or restructure README. Don't use for API reference generation from code (JSDoc/Sphinx), authoring a landing page, or agent-config files like CLAUDE.md."
-effort: low
 license: MIT
+effort: low
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Documentation Generator
 
 Restructure and organize project documentation for clarity and accessibility.
+
+## Prerequisites
+
+This skill requires (validate each before starting; if any check fails, stop and ask the user):
+
+- **Git working tree**: clean or stashable. Run `git status` first; if dirty, back up via `git stash push -u -m "pre-docs-sync"` before any sync that could rebase or overwrite local changes.
+- **Tools required**: `git` >= 2.30, a Markdown-aware editor, and `mermaid-cli` (or a renderer) only if diagrams must be exported. Confirm availability with `git --version` and `command -v mmdc`.
+- **Repo permissions**: read access for analysis; write access only when the user explicitly approves commits. For read-only repos, fall back to emitting a diff or inline summary instead of writing files.
+- **Branch state**: an `origin` remote that is reachable (`git remote get-url origin`); if missing, do not attempt rebase/pull — ask the user.
+- **Backups**: confirm the repo is pushed or otherwise backed up before any restructure that deletes or moves doc files. Pair every destructive `rm`/`git mv` with a prior `git status` check and explicit user confirmation; never run `git reset --hard`, `git push --force`, or `rm -rf` without a dry-run preview and user approval.
+- **Safety defaults**: prefer dry-run previews (`git mv -n`, `rm -i`) and require user confirmation before any irreversible action.
+
+If any prerequisite fails, halt and surface the blocker to the user rather than proceeding.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -99,6 +112,17 @@ After running this skill on a mid-size Node.js API project, you should see:
 - A `docs/` folder with relevant files such as `architecture.md`, `api-reference.md`, `deployment.md`, and `development.md`
 - Mermaid diagrams embedded in architecture and data-flow docs
 - A validation summary listing all internal links checked and any gaps found
+
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Root `README.md` contains an overview, a quickstart (install + first use), and links to component or `docs/` files.
+- [ ] A `docs/` directory exists with at least one of: `architecture.md`, `api-reference.md`, `deployment.md`, `development.md` — and only the files relevant to the project type.
+- [ ] Every internal Markdown link resolves to an existing file (no broken `[text](path)` references).
+- [ ] No orphaned files: every `docs/*.md` is reachable from `README.md` or another `docs/` page within one hop.
+- [ ] Mermaid diagrams in architecture or data-flow docs render without syntax errors (`mmdc` validation if available).
+- [ ] No commits land on `main`/`master`; all changes are on a feature branch following the repo's naming convention.
 
 ## Edge Cases
 

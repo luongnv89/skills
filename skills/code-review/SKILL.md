@@ -1,10 +1,10 @@
 ---
 name: code-review
 description: "Review code changes for bugs, security vulnerabilities, and code quality issues — producing prioritized findings with specific fix suggestions. Don't use for performance tuning, writing new features from scratch, or generating test cases."
-effort: medium
 license: MIT
+effort: medium
 metadata:
-  version: 1.1.3
+  version: 1.1.4
   author: Luong NGUYEN <luongnv89@gmail.com>
   architecture: "subagent (Pattern B+C: Parallel Workers + Review Loop)"
 ---
@@ -12,6 +12,18 @@ metadata:
 # Code Review
 
 Review code for quality issues, code smells, and pragmatic programming violations.
+
+## When to Use
+
+Use this skill when the user asks for a code review, PR review, audit, security check, or "review my changes". Trigger on phrases like "review this code", "audit this repo", "check this PR for issues", or "find bugs in these files". Do not trigger for performance profiling, writing new features from scratch, or test-case generation.
+
+## Quick Start
+
+First, run the Repo Sync workflow below. Then complete the Environment Check to pick a mode (PR/diff vs full audit). Next, follow the Instructions phases (checklist scan -> findings synthesis -> validation). Finally, emit the Output Format report and verify Acceptance Criteria.
+
+## Overview
+
+The skill orchestrates parallel reviewer subagents over batched files, then runs a validator pass. Each phase has explicit steps below. Read only the section you need; the rest is reference material.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -358,6 +370,17 @@ if (!API_KEY) throw new Error("API_KEY env var is required");
 2. Add `.env` to `.gitignore` and document required vars in README
 3. Consider extracting the 240-line `UserService` class into smaller focused services
 ```
+
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] `CODE_REVIEW.md` exists in the repo root with `# Code Review Report` as the first heading.
+- [ ] Report includes a `## Summary` table with rows for Critical, Major, Minor, and Info severities.
+- [ ] Every reported finding cites a `path/to/file.ext:line` reference and a code smell or category label.
+- [ ] Critical findings include both a "Before" and "Suggested Fix" code block when a code change is proposed.
+- [ ] Mode used (Mode 1/2/3) is recorded in the report header along with the file count.
+- [ ] No merge-conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) are silently dropped — they appear as Critical findings if present in the source.
 
 ## Edge Cases
 

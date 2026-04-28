@@ -1,10 +1,10 @@
 ---
 name: code-optimizer
-description: "Analyze code for performance issues and suggest optimizations. Use when users ask to optimize this code, find performance issues, improve performance, check for memory leaks, review code efficiency, or want to identify bottlenecks, algorithmic improvements, caching opportunities, or concurrency problems. Don't use for bug-hunting code review, security audits, or general refactoring without a perf goal."
-effort: medium
+description: "Analyze code for performance bottlenecks, memory leaks, and algorithmic inefficiencies. Use when asked to optimize, find bottlenecks, or improve efficiency. Don't use for bug-hunting code review, security audits, or refactoring without a perf goal."
 license: MIT
+effort: medium
 metadata:
-  version: 1.2.2
+  version: 1.3.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -164,3 +164,57 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Optimization breaks existing tests
 **Solution:** Revert the change immediately. Re-examine the optimization and adjust the approach to preserve existing behavior.
+
+## Acceptance Criteria
+
+A run is acceptable only when all of the following are verifiable:
+
+- Produces an optimization report grouped by severity (Critical, High, Medium, Low) — assert at least one severity bucket appears or the "no issues found" branch fires.
+- Each reported issue includes `Location`, `Category`, `Problem`, `Impact`, and `Fix` — verify by checking the rendered template fields are non-empty.
+- Impact statement includes a quantitative estimate (e.g., "~500ms → ~50ms", "O(n²) → O(n log n)") — assert the Impact line contains a number, complexity class, or before/after pair.
+- Fixes are applied only after explicit user approval — verify the agent emits an approval prompt before any `Edit`/`Write` tool call.
+- Existing tests run after each applied fix and the result is reported — verify a test command was executed and its pass/fail status is logged.
+- A feature branch following the repo convention is checked out before edits — verify with `git rev-parse --abbrev-ref HEAD` matching `feat/*` or repo equivalent.
+- Each phase emits a Step Completion Report block with `Result: PASS | FAIL | PARTIAL` — assert the block is present in the transcript.
+
+## Expected Output
+
+Given a Node.js file `src/api/handlers.js` with an N+1 query in `listUsers()`, the skill should emit:
+
+```
+◆ Analysis (step 1 of 3 — src/api/handlers.js)
+··································································
+  Issue detection:           √ pass (3 issues found)
+  Priority categories:       √ pass (Performance, Caching covered)
+  Impact estimated:          √ pass
+  Findings sorted:           √ pass
+  Criteria:                  4/4 met
+  ____________________________
+  Result:                    PASS
+
+### [Critical] N+1 query in listUsers
+**Location**: src/api/handlers.js:42
+**Category**: Performance
+
+**Problem**: `users.forEach(u => db.query(...))` issues one query per user.
+
+**Impact**: For 1000 users, ~1000 round-trips (~2000ms) → 1 batched query (~50ms). 40x speedup.
+
+**Fix**:
+\`\`\`js
+const ids = users.map(u => u.id);
+const rows = await db.query('SELECT * FROM orders WHERE user_id = ANY($1)', [ids]);
+\`\`\`
+```
+
+Expected result: a markdown report with one block per issue, sorted Critical → Low, followed by a phase completion report. See `docs/README.md` for a longer end-to-end example.
+
+## Edge Cases
+
+- **No performance issues found**: emit a "code is already well-optimized" note and recommend runtime profiling tools (`perf`, `py-spy`, Chrome DevTools) — do NOT invent low-severity findings to fill the report.
+- **File exceeds 2000 lines**: stop and ask the user which functions/sections to focus on; do not silently truncate.
+- **Tests are absent**: warn the user before applying any fix and require explicit confirmation; never apply changes silently.
+- **Optimization regresses tests**: revert the specific change immediately via `git checkout -- <file>` after `git diff` confirms the scope and the user confirms the revert; never force-push, and back up the diff with `git stash` before discarding so work is recoverable.
+- **Repo lacks `origin` or rebase fails**: stop and ask the user to confirm before any recovery; run `git status` and `git stash --dry-run`-style inspection first, take a backup branch (`git branch backup/pre-recovery`), and never run destructive `reset --hard` or `rm` without explicit confirmation.
+- **Mixed-language project**: analyze each language with its own checklist; do not apply JavaScript heuristics to Python code.
+- **Premature optimization candidates**: skip micro-optimizations unless a measurable hot path is identified — flag them as Low only when a profile or benchmark backs the claim.

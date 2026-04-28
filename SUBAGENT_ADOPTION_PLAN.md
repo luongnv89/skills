@@ -97,7 +97,7 @@
 
 ---
 
-### 4. name-checker (Score: 5/5)
+### 4. brand-name-checker (Score: 5/5)
 
 **Pattern**: B (Parallel Workers) + D (Research+Synthesis)
 
@@ -157,7 +157,7 @@
 
 ---
 
-### 7. system-design (Score: 4/5)
+### 7. tad-generator (Score: 4/5)
 
 **Pattern**: D (Research+Synthesis) + E (Staged Pipeline)
 
@@ -259,7 +259,7 @@
 
 | Skill | Score | Pattern | Key Change |
 |---|---|---|---|
-| **dont-make-me-think** | 4/5 | C: Review Loop | Add `agents/ui-analyst.md` + `agents/report-writer.md` + `agents/fixer.md` |
+| **usability-review** | 4/5 | C: Review Loop | Add `agents/ui-analyst.md` + `agents/report-writer.md` + `agents/fixer.md` |
 | **readme-to-landing-page** | 4/5 | C: Review Loop | Add `agents/researcher.md` + `agents/writer.md` + `agents/reviewer.md` |
 | **cli-builder** | 4/5 | A: Explorer+Executor | Add `agents/analyzer.md` + `agents/implementer.md` + `agents/reviewer.md` |
 | **theme-transformer** | 4/5 | A: Explorer+Executor | Add `agents/style-auditor.md` + `agents/theme-executor.md` + `agents/accessibility-checker.md` |
@@ -301,7 +301,7 @@ The order prioritizes skills where subagents provide the clearest, most testable
 Phase 1 — Quick wins with shared patterns
   1. excalidraw-generator  ←→  drawio-generator  (identical Review Loop pattern)
   2. code-review                                   (Parallel Workers + Review)
-  3. name-checker                                  (Parallel Workers — ~4x speed)
+  3. brand-name-checker                                  (Parallel Workers — ~4x speed)
 
 Phase 2 — High-impact complex skills
   4. appstore-review-checker                       (Explorer + Guideline Auditor)
@@ -309,7 +309,7 @@ Phase 2 — High-impact complex skills
   6. openspec-task-loop                            (Staged Pipeline per task)
 
 Phase 3 — Workflow chain (compounding benefit)
-  7. system-design + tasks-generator               (same PRD→TAD→Tasks chain)
+  7. tad-generator + tasks-generator               (same PRD→TAD→Tasks chain)
   8. aso-marketing + logo-designer                 (brand/marketing pipeline)
 
 Phase 4 — Refactoring existing
@@ -355,10 +355,10 @@ This ensures skills work everywhere, with varying levels of context efficiency.
 | appstore-review-checker | project-explorer, guideline-auditor, report-writer, fixer |
 | seo-ai-optimizer | auditor, researcher, implementer, validator |
 | code-review | file-reviewer, report-assembler, reviewer |
-| name-checker | social-checker, registry-checker, domain-checker, trademark-checker, synthesizer |
+| brand-name-checker | social-checker, registry-checker, domain-checker, trademark-checker, synthesizer |
 | excalidraw-generator | json-generator, json-validator, json-fixer |
 | openspec-task-loop | spec-scaffolder, implementer, verifier, archiver |
-| system-design | prd-reader, tech-researcher, tad-writer |
+| tad-generator | prd-reader, tech-researcher, tad-writer |
 | tasks-generator | requirements-extractor, sprint-planner, sprint-worker, dependency-resolver |
 | drawio-generator | xml-generator, xml-validator, xml-fixer |
 | aso-marketing | analyzer, plan-writer, compliance-checker, executor, reviewer |

@@ -1,8 +1,8 @@
 ---
 name: seo-ai-optimizer
-description: "Audit and optimize website codebases for technical SEO, content SEO, and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, llms.txt, and GPTBot/ClaudeBot directives across any web framework. Don't use for App Store/Play Store ASO, paid search campaigns, or writing blog content from scratch."
-effort: high
+description: "Audit and optimize websites for technical SEO, content SEO, and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, llms.txt, and GPTBot/ClaudeBot directives. Not for App Store ASO, paid search, or blog writing."
 license: MIT
+effort: high
 metadata:
   version: 1.1.2
   author: Luong NGUYEN <luongnv89@gmail.com>
@@ -52,71 +52,9 @@ If Agent is not available, the skill still runs a complete audit in a single con
 
 ## Subagent Architecture
 
-When the Agent tool is available, this skill uses a 4-phase, multi-agent architecture optimized for large websites:
+When the Agent tool is available, this skill uses a 4-phase, multi-agent architecture (Auditor → Researcher → Implementer → Validator) optimized for large websites. Each agent produces a structured JSON artifact that can be reviewed independently.
 
-### Phase 1: Auditor Agent
-**Purpose:** Run automated SEO audit and manual review checklist
-
-This agent:
-- Scans website files for technical SEO issues (meta tags, headings, canonical URLs, structured data)
-- Checks project-level files (robots.txt, sitemap.xml, llms.txt, ai-plugin.json)
-- Performs manual review of content quality, internal linking, and framework configuration
-- Creates seo-audit.json: a complete machine-readable inventory of all SEO issues with severity levels
-
-**Output artifact:** `<project>/seo-audit.json`
-
-### Phase 2: Researcher Agent
-**Purpose:** Fetch latest SEO and AI-bot best practices via web search
-
-This agent:
-- Performs 4+ targeted web searches covering SEO best practices, meta tags, AI-bot directives, framework-specific guidance
-- Synthesizes findings into actionable recommendations
-- Compares research against audit findings to identify gaps
-- Creates seo-research-findings.json: structured research results and recommendations with citations
-
-**Output artifact:** `<project>/seo-research-findings.json`
-
-### Phase 3: Implementer Agent
-**Purpose:** Apply user-approved changes per category (meta tags, robots.txt, llms.txt, structured data, sitemaps)
-
-This agent:
-- Receives user-approved list of improvements to apply
-- Implements changes categorized by type (meta tags, robots.txt, AI bot directives, JSON-LD, sitemap, etc.)
-- Handles framework-specific implementation (Next.js, Nuxt, Astro, Hugo, SvelteKit, static HTML)
-- Produces modified source files ready for testing
-
-**Output:** Modified project files with git-ready changes
-
-### Phase 4: Validator Agent
-**Purpose:** Re-run audit on modified site, return before/after comparison
-
-This agent:
-- Re-runs the audit script on the modified website
-- Produces before/after comparison showing what was fixed
-- Validates critical files (robots.txt syntax, JSON-LD validity, canonical URLs, image links)
-- Creates seo-validation-report.json: detailed delta report with recommendations for remaining work
-
-**Output artifact:** `<project>/seo-validation-report.json`
-
-### Data Flow
-
-```
-Website Project
-    ↓
-[Auditor] → seo-audit.json
-    ↓
-[Researcher] → seo-research-findings.json
-    ↓
-(User reviews & approves improvements)
-    ↓
-[Implementer] → Modified source files
-    ↓
-[Validator] → seo-validation-report.json
-    ↓
-(User reviews improvements & validates results)
-```
-
-Each agent is self-contained, with clear responsibilities and structured outputs that can be reviewed independently.
+For the full phase-by-phase breakdown, agent responsibilities, output artifacts, and data flow, see `references/subagent-architecture.md`.
 
 ## Important
 
@@ -306,99 +244,9 @@ After implementing changes:
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After each step, emit a `◆` status block that lists the checks performed, marks each `√ pass` / `× fail`, and ends with `Result: PASS | FAIL | PARTIAL`.
 
-```
-◆ [Step Name] ([step N of M] — [context])
-··································································
-  [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
-  [Criteria]:         √ N/M met
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-### Phase-specific checks
-
-**Step 1 — Detection**
-```
-◆ Detection (step 1 of 7 — project scan)
-··································································
-  Framework identified:     √ pass (Next.js | Nuxt | Astro | ...)
-  File structure mapped:    √ pass (N HTML/template files found)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Step 2 — Audit**
-```
-◆ Audit (step 2 of 7 — SEO analysis)
-··································································
-  Meta tags checked:        √ pass (N files scanned)
-  Structured data validated: √ pass (JSON-LD present/valid)
-  AI bot access verified:   √ pass (robots.txt + llms.txt checked)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Step 3 — Research**
-```
-◆ Research (step 3 of 7 — best practices lookup)
-··································································
-  Web searches completed:   √ pass (N queries executed)
-  Latest practices fetched: √ pass (current year updates noted)
-  Gaps identified:          √ pass | × fail — [missing coverage areas]
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Step 4 — Report**
-```
-◆ Report (step 4 of 7 — findings presentation)
-··································································
-  Issues categorized:       √ pass (critical/warning/info grouped)
-  Project-level findings:   √ pass (robots.txt, sitemap, llms.txt, JSON-LD)
-  Report presented:         √ pass
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Step 5 — Plan**
-```
-◆ Plan (step 5 of 7 — improvement planning)
-··································································
-  Priorities ranked:        √ pass (critical → warnings → enhancements)
-  New files identified:     √ pass (N files to create)
-  User approval received:   √ pass | × fail — [awaiting approval]
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Step 6 — Implementation**
-```
-◆ Implementation (step 6 of 7 — applying fixes)
-··································································
-  Fixes applied:            √ pass (N issues resolved)
-  Sitemaps updated:         √ pass
-  Schema.org added:         √ pass (Organization + Article JSON-LD)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Step 7 — Validation**
-```
-◆ Validation (step 7 of 7 — post-fix verification)
-··································································
-  SEO score improved:       √ pass (critical issues: N → 0)
-  No regressions:           √ pass
-  AI crawl accessible:      √ pass (llms.txt + GPTBot/ClaudeBot allowed)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
+For the full template and per-step check lists (Detection, Audit, Research, Report, Plan, Implementation, Validation), see `references/step-reports.md`.
 
 ## Error Handling
 
@@ -446,6 +294,17 @@ After a full run on a Next.js project, the audit report looks like:
 ```
 
 And after implementation, validation shows: `critical issues: 2 → 0`, `llms.txt created`, `sitemap.xml generated`.
+
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Audit report identifies the framework detected (Next.js, Nuxt, Astro, Hugo, SvelteKit, static HTML) or explicitly states "generic HTML".
+- [ ] Findings are grouped by severity (Critical / Major / Minor) and each cites the affected file path.
+- [ ] User explicitly approved the improvement plan before any file was modified.
+- [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0.
+- [ ] `llms.txt`, `robots.txt`, and `sitemap.xml` are present (or explicitly justified as not-applicable for the project type).
+- [ ] `robots.txt` AI-bot directives (GPTBot, ClaudeBot, etc.) are merged without overwriting existing `Allow`/`Disallow` rules.
 
 ## Edge Cases
 

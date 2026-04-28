@@ -1,10 +1,10 @@
 ---
 name: prd-generator
-description: "Generate comprehensive Product Requirements Documents (PRD) from idea validation files. Use when users ask to create a PRD, generate product requirements, write a PRD, or want to turn validated ideas into actionable product specs. Works with idea.md and validate.md files. Don't use for technical architecture design (TAD), sprint/task breakdown, or raw idea validation."
-effort: max
+description: "Generate Product Requirements Documents from `idea.md` and `validate.md` files. Use when asked to create or update a PRD. Don't use for TAD, sprint tasks, or raw idea validation."
 license: MIT
+effort: max
 metadata:
-  version: 1.2.4
+  version: 1.3.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -184,13 +184,16 @@ After writing `prd.md`, if the project folder is inside an `ideas` repo, update 
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure PRD status becomes ✅ for that idea)
 
-### Phase 7: Commit and push (mandatory)
+### Phase 7: Commit and push
 
 - Commit immediately after updates.
-- Push immediately to remote.
-- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+- Confirm before pushing — this is a visible action:
 
-Do not ask for additional push permission once this skill is invoked.
+```bash
+git push origin <branch>
+```
+
+- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
 
 ## Reporting with GitHub links (mandatory)
 When reporting completion, include:
@@ -216,3 +219,35 @@ If user wants to modify existing PRD:
 - **Specific**: Include concrete metrics and criteria
 - **Actionable**: Every section guides implementation
 - **Visual**: Include mermaid diagrams for architecture and flows
+
+## Acceptance Criteria
+
+A run is considered successful only when every item below is verifiable in the produced `prd.md`. Use these as a checklist; reject and regenerate the section if any check fails.
+
+- [ ] `prd.md` is written to `PROJECT_DIR` (same folder as `idea.md`).
+- [ ] File contains all 10 top-level sections (verify with `grep -c '^## '` returns >= 10): Product Overview, User Personas, Feature Requirements, User Flows, Non-Functional Requirements, Technical Specifications, Analytics & Monitoring, Release Planning, Open Questions & Risks, Appendix.
+- [ ] Product Overview cites the source idea.md (explicit phrase like "Source: idea.md" or quoted concept text from idea.md).
+- [ ] Success Metrics subsection lists at least 3 metrics, each with a measurable target (number + unit + timeframe, e.g. "DAU >= 1000 within 90 days post-launch").
+- [ ] User Personas section contains 2-3 persona blocks; each persona has Name, Role, Goals, Pain Points, and a representative quote.
+- [ ] Feature Requirements use MoSCoW labels (`Must`, `Should`, `Could`, `Won't`) and at least 5 items total.
+- [ ] Each Must/Should feature has at least one acceptance criterion in `Given <context> / When <action> / Then <outcome>` format (verify with `grep -E "Given .* When .* Then"`).
+- [ ] User Flows section contains at least one fenced ` ```mermaid ` block with valid `flowchart` or `sequenceDiagram` syntax.
+- [ ] Non-Functional Requirements lists numeric targets for performance (e.g. p95 latency, throughput) and at least one security/privacy requirement.
+- [ ] Open Questions & Risks lists at least 3 risks, each with likelihood, impact, and mitigation.
+- [ ] Appendix.Revision History records this generation event with date and "v1.0 — initial PRD".
+- [ ] If a previous `prd.md` existed, a `prd.backup.YYYYMMDD_HHMMSS.md` sibling file was written before overwrite.
+- [ ] Step Completion Reports are emitted for phases 1-5 with `Result: PASS` (or explicit PARTIAL/FAIL with reason).
+
+Always verify the checklist explicitly in the final completion report (echo each item with √ or ×).
+
+## Expected Output
+
+The generated `prd.md` follows a fixed 10-section skeleton (Product Overview, Personas, Feature Requirements, User Flows, NFRs, Tech Specs, Analytics, Release Planning, Risks, Appendix) with a header citing `Source: idea.md, validate.md` and a final console summary line. See `references/expected-output.md` for the full skeleton and console summary template.
+
+## Edge Cases
+
+Handle missing inputs, verdict=REJECT, conflicting requirements, existing PRDs (always backup), unclear tech/compliance context, and Mermaid validation failures. See `references/edge-cases.md` for the full list and required behaviour.
+
+## Verification Steps
+
+After generation, verify file exists, has >=10 `^## ` headings, >=1 mermaid block, >=1 `Given/When/Then` line, >=4 MoSCoW labels, cites `idea.md`, and (if applicable) a `prd.backup.*.md` sibling exists. See `references/verification-steps.md` for the exact shell checks.

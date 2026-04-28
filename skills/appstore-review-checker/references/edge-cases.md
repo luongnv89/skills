@@ -1,0 +1,9 @@
+# Edge Cases
+
+- **No source code available** — User provides only an IPA binary or no project files. Run a metadata-only audit covering title, subtitle, keywords, description, privacy policy URL, and screenshot accuracy. Mark all code-level guideline checks as `N/A (no source)` and flag them for manual verification. Deliver a partial audit report with clear scope disclaimer.
+- **Metadata-only audit** — User wants to check only App Store Connect metadata (description, keywords, screenshots) without a codebase. Skip all Xcode, Info.plist, entitlements, and source-code phases. Focus on guideline sections 2.3 (Accurate Metadata), 5.2 (Intellectual Property), and prohibited keyword checks.
+- **Existing rejection** — User shares an Apple rejection notice. Start from the cited guideline ID, verify the specific violation in code or metadata, and provide a targeted fix. Then run the full audit to surface any additional issues that may cause a second-round rejection.
+- **Kids Category app** — Activate the Kids Category checklist: no third-party analytics SDKs, no behavioral advertising, no external links (except privacy policy), no social networking features. Flag every third-party SDK found in Podfile/Package.swift for review.
+- **App with no IAP despite StoreKit import** — StoreKit may be imported for non-purchase features (e.g., SKStoreReviewController). Do not flag as a FAIL; note as WARNING to confirm restore-purchases handling is not needed.
+- **Multiple targets in one project** — Audit each target separately. Flag targets that produce nearly identical apps (same icon, same bundle ID prefix, same feature set) as WARNING under Guideline 4.3 (Spam).
+- **macOS (Catalyst or native) app** — Apply macOS-specific guidelines in addition to iOS guidelines: sandbox entitlements, notarization requirements, appropriate use of macOS APIs. Note that some iOS guidelines (e.g., Sign in with Apple for social login) still apply on Catalyst.
