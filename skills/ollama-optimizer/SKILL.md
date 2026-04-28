@@ -221,7 +221,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 - [Environment Variables](references/environment_variables.md) - Complete env var reference
 - [Platform-Specific Setup](references/platform_specific.md) - OS-specific installation and configuration
 
-## Output Format
+## Expected Output
 
 Generate an `ollama-optimization-guide.md` file. Ask the user where to save it (suggest `~/.config/ollama/optimization-guide.md` or current directory). Contents:
 

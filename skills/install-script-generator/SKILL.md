@@ -119,7 +119,7 @@ See `references/edge-cases.md` for the full list. Highlights:
 
 After each phase, emit a `◆` block with `√`/`×` checks and a `Result: PASS | FAIL | PARTIAL` line. The exact templates for the four phases live in `references/edge-cases.md` so you can copy them verbatim without bloating SKILL.md.
 
-## Example One-Liner Output
+## Expected Output
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/owner/mytool/main/install.sh | bash

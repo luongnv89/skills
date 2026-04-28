@@ -142,7 +142,7 @@ If the project publishes to PyPI and/or npm, read `references/publishing.md` for
 
 ---
 
-## Example / Expected Output
+## Expected Output
 
 A successful release ends with the agent printing this expected output:
 

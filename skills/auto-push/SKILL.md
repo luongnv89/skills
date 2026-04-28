@@ -88,7 +88,7 @@ Present a short summary as a dry-run preview, then proceed directly when safety 
 Proceeding now: git add . → commit → push
 ```
 
-Do not ask for additional yes/no confirmation after this skill is invoked.
+When all safety checks pass, proceed directly without an additional yes/no confirmation prompt.
 
 ### Step 4: Stage Files
 
@@ -164,6 +164,17 @@ If safety checks block the push, the skill outputs:
 
 Action required: remove or rotate the key, then re-run /auto-push.
 ```
+
+## Acceptance Criteria
+
+The skill run is successful when all of the following hold:
+
+- [ ] Working tree synced with origin (`git fetch` ran; rebase clean or stash/pop completed without conflicts)
+- [ ] Safety scan reported no secrets, no real API keys, and no large binaries — or the user explicitly confirmed each warning
+- [ ] Branch is correct (warned and confirmed if `main`/`master`)
+- [ ] Commit message follows the conventional format from Step 5
+- [ ] `git push` exited 0 and `git log -1` shows the new commit on the remote-tracking ref
+- [ ] Final success report printed (commit hash, branch, file counts)
 
 ## Handle Edge Cases and Errors
 
