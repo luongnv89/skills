@@ -1,6 +1,6 @@
 ---
 name: oss-ready
-description: "Transform projects into professional open-source repositories with standard components. Use when users ask to make this open source, add open source files, setup OSS standards, create contributing guide, add license, or want to prepare a project for public release with README, CONTRIBUTING, LICENSE, and GitHub templates. Don't use for documentation structure overhauls, landing-page generation, or releasing/publishing to registries."
+description: "Transform a project into a professional open-source repository by adding LICENSE, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, and GitHub issue/PR templates. Don't use for documentation overhauls, landing-page generation, or registry publishing."
 license: MIT
 effort: low
 metadata:

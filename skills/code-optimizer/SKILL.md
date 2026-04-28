@@ -1,6 +1,6 @@
 ---
 name: code-optimizer
-description: "Analyze code for performance issues and suggest optimizations. Use when users ask to optimize this code, find performance issues, improve performance, check for memory leaks, review code efficiency, or want to identify bottlenecks, algorithmic improvements, caching opportunities, or concurrency problems. Don't use for bug-hunting code review, security audits, or general refactoring without a perf goal."
+description: "Analyze code for performance bottlenecks, memory leaks, and algorithmic inefficiencies. Use when asked to optimize, find bottlenecks, or improve efficiency. Don't use for bug-hunting code review, security audits, or refactoring without a perf goal."
 license: MIT
 effort: medium
 metadata:
