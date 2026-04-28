@@ -143,7 +143,7 @@ Branch: [branch] → origin/[branch]
 Files changed: X (+insertions, -deletions)
 ```
 
-## Verify Expected Output
+## Expected Output
 
 On success, the skill outputs a confirmation block:
 
