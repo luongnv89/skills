@@ -2,6 +2,59 @@
 
 ## Unreleased
 
+## v1.13.0 — 2026-04-28
+
+### Skills Updated
+| Skill | Version Change |
+|-------|---------------|
+| release-manager | 2.4.0 → 2.4.1 |
+| devops-pipeline | 2.0.0 → 2.0.1 |
+| idea-validator | 1.3.0 → 1.3.1 |
+| readme-to-landing-page | 2.0.0 → 2.1.0 |
+| install-script-generator | 2.0.0 → 2.1.0 |
+| excalidraw-generator | 1.2.1 → 1.3.0 |
+| frontend-design | 1.2.1 → 1.2.2 |
+| ollama-optimizer | 1.0.3 → 1.0.4 |
+| seo-ai-optimizer | 1.1.1 → 1.1.2 |
+| logo-designer | 1.2.0 → 1.2.1 |
+| code-review | 1.1.3 → 1.1.4 |
+| code-optimizer | 1.3.0 → 1.3.1 |
+| docs-generator | 1.2.2 → 1.2.3 |
+| cli-builder | 1.0.2 → 1.0.3 |
+| auto-push | 1.0.1 → 1.0.2 |
+| brand-name-checker | 1.2.1 → 1.3.0 |
+|aso-marketing | 1.1.0 → 1.2.0 |
+| agent-config | 1.1.0 → 1.2.0 |
+| appstore-review-checker | 1.1.0 → 1.2.0 |
+| oss-ready | 1.1.0 → 1.2.0 |
+| prd-generator | 1.3.0 → 1.3.1 |
+| readme-to-landing-page | 2.0.0 → 2.1.0 |
+| tad-generator | 1.2.0 → 1.3.0 |
+| tasks-generator | 1.2.0 → 1.2.1 |
+| usability-review | 1.1.0 → 1.2.0 |
+| test-coverage | 1.2.2 → 1.2.3 |
+| slop-cleanup | 1.1.0 → 1.1.1 |
+
+### Features
+- **quality improvements**: Improve 27 skills past the 85/8 quality floor
+- **skill-creator**: Address context budget warning, clarify two entry paths, add xhigh effort value, nest version under metadata, add metadata.author to init template, add mandatory frontmatter audit
+- **release-manager**: Expand trigger description and sync catalog version
+- **slop-code**: Add codebase cleanup skill with 8 parallel subagents
+- **idea-validator**: Add competitive landscape research phase
+- **devops-pipeline**: Shift-left testing — maximize pre-commit coverage, lean CI
+- **excalidraw-generator**: Use hand-writing font as default, remove all color/theme bias
+
+### Bug Fixes
+- **skills**: Quote YAML values with colons and bump patch versions
+- **skill-creator**: Add YAML frontmatter safety rule to prevent colon-in-value parse errors
+- **skills**: Move README.md to docs/ and add AI-skip notice
+
+### Refactoring
+- **skills**: Remove deprecated skills and note-taker from shared skills repo
+- **skills**: Add negative-trigger clauses and fix frontmatter
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v1.12.0...v1.13.0
+
 ### Skills Renamed
 | Old name | New name | Reason |
 |----------|----------|--------|
