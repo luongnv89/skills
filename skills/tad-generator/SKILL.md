@@ -143,7 +143,7 @@ After writing `tad.md`, if the project folder is inside an `ideas` repo, update 
 
 - Commit immediately after updates.
 - Push immediately to remote.
-- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+- If push is rejected: rebase against the actual upstream tracking branch and retry: `branch="$(git rev-parse --abbrev-ref HEAD)"; git fetch origin && git rebase "origin/$branch" && git push`.
 
 Do not ask for additional push permission once this skill is invoked.
 

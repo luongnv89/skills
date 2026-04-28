@@ -8,6 +8,10 @@ metadata:
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
+# Logo Designer
+
+Design modern, professional logos by analyzing project context and generating SVG-based brand assets.
+
 ## Environment Check
 
 Before running this skill, verify:
@@ -43,12 +47,6 @@ Final Output: 7 SVG files in /assets/logo/ + brand-showcase.html + Design Ration
 3. `agents/svg-reviewer.md` — Validates SVG structure (viewBox, no rasters, all files present, correct names)
 
 **Key Insight**: 7 SVG files generated inline is the single biggest context cost. Brand research across multiple project files adds to the burden. The reviewer acts as a quality gate to catch SVG structure issues before files are committed.
-
----
-
-# Logo Designer
-
-Design modern, professional logos by analyzing project context and generating SVG-based brand assets.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
