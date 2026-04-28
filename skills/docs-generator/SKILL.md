@@ -113,6 +113,17 @@ After running this skill on a mid-size Node.js API project, you should see:
 - Mermaid diagrams embedded in architecture and data-flow docs
 - A validation summary listing all internal links checked and any gaps found
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Root `README.md` contains an overview, a quickstart (install + first use), and links to component or `docs/` files.
+- [ ] A `docs/` directory exists with at least one of: `architecture.md`, `api-reference.md`, `deployment.md`, `development.md` — and only the files relevant to the project type.
+- [ ] Every internal Markdown link resolves to an existing file (no broken `[text](path)` references).
+- [ ] No orphaned files: every `docs/*.md` is reachable from `README.md` or another `docs/` page within one hop.
+- [ ] Mermaid diagrams in architecture or data-flow docs render without syntax errors (`mmdc` validation if available).
+- [ ] No commits land on `main`/`master`; all changes are on a feature branch following the repo's naming convention.
+
 ## Edge Cases
 
 - **No existing documentation**: Skill generates from scratch using code analysis. Starts with `README.md` and adds `docs/` files based on project complexity.

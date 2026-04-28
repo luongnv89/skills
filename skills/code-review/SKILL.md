@@ -371,6 +371,17 @@ if (!API_KEY) throw new Error("API_KEY env var is required");
 3. Consider extracting the 240-line `UserService` class into smaller focused services
 ```
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] `CODE_REVIEW.md` exists in the repo root with `# Code Review Report` as the first heading.
+- [ ] Report includes a `## Summary` table with rows for Critical, Major, Minor, and Info severities.
+- [ ] Every reported finding cites a `path/to/file.ext:line` reference and a code smell or category label.
+- [ ] Critical findings include both a "Before" and "Suggested Fix" code block when a code change is proposed.
+- [ ] Mode used (Mode 1/2/3) is recorded in the report header along with the file count.
+- [ ] No merge-conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) are silently dropped — they appear as Critical findings if present in the source.
+
 ## Edge Cases
 
 - **Empty or whitespace-only diff**: Report scope as zero files reviewed; skip review and inform the user.

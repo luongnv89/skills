@@ -295,6 +295,17 @@ After a full run on a Next.js project, the audit report looks like:
 
 And after implementation, validation shows: `critical issues: 2 → 0`, `llms.txt created`, `sitemap.xml generated`.
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Audit report identifies the framework detected (Next.js, Nuxt, Astro, Hugo, SvelteKit, static HTML) or explicitly states "generic HTML".
+- [ ] Findings are grouped by severity (Critical / Major / Minor) and each cites the affected file path.
+- [ ] User explicitly approved the improvement plan before any file was modified.
+- [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0.
+- [ ] `llms.txt`, `robots.txt`, and `sitemap.xml` are present (or explicitly justified as not-applicable for the project type).
+- [ ] `robots.txt` AI-bot directives (GPTBot, ClaudeBot, etc.) are merged without overwriting existing `Allow`/`Disallow` rules.
+
 ## Edge Cases
 
 - **No HTML files found**: Project is API-only or a non-web backend — skill exits gracefully with a message explaining it targets web frontends.

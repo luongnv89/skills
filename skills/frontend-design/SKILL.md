@@ -136,6 +136,17 @@ Production-ready frontend code delivered as one or more files. Example for a lan
 
 After delivery, the skill emits a step-completion report confirming design thinking choices, style guide adherence, and usability self-test results. See `references/step-reports.md` for the full report template and phase-specific check formats.
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] User explicitly approved the aesthetic direction before any code was written.
+- [ ] Delivered code is production-grade and runs without errors in the target framework (HTML/CSS/JS, React, Vue, etc.).
+- [ ] Layout is responsive across mobile, tablet, and desktop viewports — verified at 375px, 768px, and 1280px without horizontal overflow.
+- [ ] Accessibility basics covered: semantic HTML, sufficient colour contrast (WCAG AA), keyboard focus states, and `alt`/`aria-label` where applicable.
+- [ ] Default Style Guide colour palette is respected when no user palette was provided (and Bright Green is never used as a background).
+- [ ] Every "Don't Make Me Think" usability rule from the section above is satisfied — the user shouldn't have to guess what is clickable or where they are.
+
 ## Edge Cases
 
 - **No description provided**: Ask the user for purpose, target audience, and any brand/style constraints before writing a single line of code.

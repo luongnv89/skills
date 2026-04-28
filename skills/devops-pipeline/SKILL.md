@@ -201,6 +201,17 @@ repos:
         stages: [push]
 ```
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] `.pre-commit-config.yaml` exists at the repo root and lists at least one hook for the detected primary language (formatter, linter, or type checker).
+- [ ] All checks runnable locally in under ~60 seconds are configured in pre-commit, not GitHub Actions.
+- [ ] At least one `.github/workflows/*.yml` exists and runs only the things pre-commit cannot (matrix builds, secret-scanning, deployment, or release).
+- [ ] `pre-commit run --all-files` succeeds (or its failures are surfaced explicitly to the user, not auto-suppressed).
+- [ ] For CLI projects, an E2E test step is wired into either pre-commit or CI per the language reference files.
+- [ ] No duplication: the same check (e.g., `eslint`, `ruff`) does not run in both pre-commit and CI on the same trigger.
+
 ## Edge Cases
 
 - **No package manager detected**: Prompt the user for the language/build system before generating hooks; never guess silently.

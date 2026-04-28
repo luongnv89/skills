@@ -117,6 +117,17 @@ Files improved:
 All 56 tests passing. No regressions.
 ```
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Coverage report exists from a runnable command for the detected stack (e.g., `jest --coverage`, `pytest --cov`, `go test -cover`).
+- [ ] Post-run total coverage is strictly higher than the pre-run baseline — no test additions that fail to move the metric.
+- [ ] New tests target previously-untested branches, error paths, or boundary values — not duplicates of existing assertions.
+- [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.).
+- [ ] All new tests live on a feature branch (e.g., `feat/test-coverage`), never on `main`/`master`.
+- [ ] Commit message records the before/after coverage percentages and the files newly covered.
+
 ## Edge Cases
 
 - **No test framework detected**: Skill checks `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` for test dependencies; if none found, asks the user which framework to use before writing any tests.

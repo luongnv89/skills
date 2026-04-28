@@ -277,6 +277,17 @@ After a full run on a TypeScript monorepo, the final `SLOP_CLEANUP.md` summary l
 
 And the terminal handoff message: "Cleaned up 8 categories across 43 files, removed 847 lines, tests passing on branch chore/slop-cleanup-20260419. Review `SLOP_CLEANUP.md` and merge when ready."
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Working tree is clean at start; the run is on a dedicated cleanup branch (e.g., `chore/slop-cleanup-YYYYMMDD`), not on `main`/`master`.
+- [ ] Each of the 8 cleanup categories produces its own commit with a descriptive message — never one monolithic commit.
+- [ ] Test suite and typecheck pass between Wave 1 and Wave 2; the pipeline stops if either fails.
+- [ ] Final `SLOP_CLEANUP.md` report exists and lists per-category counts (files touched, lines removed, deletions skipped).
+- [ ] Deletions exceeding 50 items or crossing module boundaries were surfaced for user approval before being applied.
+- [ ] Subagents missing their required tool (knip, madge, ts-prune, vulture, ruff) fall back to manual analysis and note "degraded mode" in their category report.
+
 ## Edge Cases
 
 - **Dirty working tree at start**: Skill refuses to proceed and instructs the user to commit or stash before running.

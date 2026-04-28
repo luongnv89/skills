@@ -135,6 +135,17 @@ nvidia-smi
 ollama run <model> "test" --verbose 2>&1 | head -20
 ```
 
+## Acceptance Criteria
+
+A run passes when **all** of the following are true:
+
+- [ ] Hardware tier (CPU-only / Low-VRAM / Entry / Prosumer / Workstation / High-end) is identified explicitly in the report.
+- [ ] Recommended model size fits within detected VRAM/unified-memory budget (no recommending a 14B model on an 8GB Mac).
+- [ ] Required Ollama environment variables (e.g., `OLLAMA_FLASH_ATTENTION`, KV-cache quantisation) are written to a shell init file the user actually uses, with a backup of the prior file.
+- [ ] Apple Silicon special case is applied when detected — unified memory is not double-counted as separate VRAM + RAM.
+- [ ] Verification step runs `ollama run <model>` with `--verbose` and captures the actual offload/cache numbers.
+- [ ] Rollback instructions are included so the user can revert all env changes with one command.
+
 ## Step Completion Reports
 
 After completing each major step, output a status report in this format:
