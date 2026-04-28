@@ -1,6 +1,6 @@
 ---
 name: tad-generator
-description: "Generate Technical Architecture Documents (TAD) from PRD files. Use when users ask to design the architecture, create a TAD, system design, or want to define how a product will be built. Creates/updates tad.md and always reports GitHub links to changed files. Don't use for writing the PRD itself, generating sprint tasks, or implementing code from the architecture."
+description: "Generate a Technical Architecture Document (TAD) from a PRD. Use when asked to design the architecture, create a TAD, or define how a product is built. Creates/updates tad.md and reports GitHub links. Skip PRD authoring, sprint-tasks, or code implementation."
 license: MIT
 effort: max
 metadata:
