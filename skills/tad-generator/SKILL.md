@@ -139,13 +139,16 @@ After writing `tad.md`, if the project folder is inside an `ideas` repo, update 
 - Preferred: `cd` to repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure TAD status becomes ✅ for that idea)
 
-### Phase 7: Commit and push (mandatory)
+### Phase 7: Commit and push
 
 - Commit immediately after updates.
-- Push immediately to remote.
-- If push is rejected: rebase against the actual upstream tracking branch and retry: `branch="$(git rev-parse --abbrev-ref HEAD)"; git fetch origin && git rebase "origin/$branch" && git push`.
+- Confirm before pushing — this is a visible action:
 
-Do not ask for additional push permission once this skill is invoked.
+```bash
+git push origin <branch>
+```
+
+- If push is rejected: rebase against the actual upstream tracking branch and retry: `branch="$(git rev-parse --abbrev-ref HEAD)"; git fetch origin && git rebase "origin/$branch" && git push`.
 
 ### Phase 8: Output
 

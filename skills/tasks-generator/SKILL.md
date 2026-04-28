@@ -180,13 +180,16 @@ After writing `tasks.md`, if the PRD lives inside an `ideas` repo, update the re
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure Tasks status becomes ✅ for that idea)
 
-## Commit and push (mandatory)
+## Commit and push
 
 - Commit immediately after updates.
-- Push immediately to remote.
-- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+- Confirm before pushing — this is a visible action:
 
-Do not ask for additional push permission once this skill is invoked.
+```bash
+git push origin <branch>
+```
+
+- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
 
 ## Reporting with GitHub links (mandatory)
 When reporting completion, include:

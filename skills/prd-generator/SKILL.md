@@ -1,6 +1,6 @@
 ---
 name: prd-generator
-description: "Generate comprehensive Product Requirements Documents (PRD) from idea validation files. Use when users ask to create a PRD, generate product requirements, write a PRD, or want to turn validated ideas into actionable product specs. Works with idea.md and validate.md files. Don't use for technical architecture design (TAD), sprint/task breakdown, or raw idea validation."
+description: "Generate Product Requirements Documents from `idea.md` and `validate.md` files. Use when asked to create or update a PRD. Don't use for TAD, sprint tasks, or raw idea validation."
 license: MIT
 effort: max
 metadata:
@@ -184,13 +184,16 @@ After writing `prd.md`, if the project folder is inside an `ideas` repo, update 
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
 - Fallback: update `README.md` manually (ensure PRD status becomes ✅ for that idea)
 
-### Phase 7: Commit and push (mandatory)
+### Phase 7: Commit and push
 
 - Commit immediately after updates.
-- Push immediately to remote.
-- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+- Confirm before pushing — this is a visible action:
 
-Do not ask for additional push permission once this skill is invoked.
+```bash
+git push origin <branch>
+```
+
+- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
 
 ## Reporting with GitHub links (mandatory)
 When reporting completion, include:
