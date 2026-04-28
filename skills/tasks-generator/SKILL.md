@@ -1,10 +1,10 @@
 ---
 name: tasks-generator
 description: "Generate development tasks from a PRD file with sprint-based planning. Use when users ask to create tasks from PRD, break down the PRD, generate sprint tasks, or want to convert product requirements into actionable development tasks. Creates/updates tasks.md and always reports GitHub links to changed files. Don't use for writing a PRD, authoring a TAD, or executing tasks (see openspec-task-loop)."
-effort: max
 license: MIT
+effort: max
 metadata:
-  version: 1.1.2
+  version: 1.2.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -232,3 +232,25 @@ After generating, provide:
 4. Dependency analysis (waves, critical path, bottlenecks)
 5. Flagged ambiguous requirements
 6. Next steps: Review Sprint 1 and Wave 1 tasks first
+
+## Acceptance Criteria
+
+The skill run is considered successful only if ALL of the following hold:
+
+- [ ] `tasks.md` exists in the same directory as the input PRD.
+- [ ] `tasks.md` contains at least 3 sprints (POC, MVP Foundation, MVP Completion at minimum).
+- [ ] Each sprint contains at least 3 tasks; total task count is between 15 and 80.
+- [ ] Every task includes ALL of: `Description`, `Acceptance Criteria` (>=2 testable items), `Dependencies` (explicit `None` or task IDs), `PRD Reference`, and an effort estimate (e.g., `Effort: 1-3 days` or `S/M/L`).
+- [ ] Every task ID follows the `Task <sprint>.<index>` pattern (e.g., `Task 1.1`, `Task 2.3`).
+- [ ] A dependency table is present and references only tasks that exist in the file (no broken IDs).
+- [ ] No circular dependencies (dependency graph is a DAG).
+- [ ] At least one task per PRD requirement; ambiguous PRD items are flagged in a dedicated section.
+- [ ] Critical path is identified and stated explicitly.
+- [ ] If a prior `tasks.md` existed, a `tasks_backup_YYYY_MM_DD_HHMMSS.md` file is created.
+- [ ] Final report includes GitHub links to `tasks.md` (and `README.md` if updated) plus the commit hash.
+
+If any criterion fails, the skill must report it as a `FAIL` row in the Step Completion Report and not claim success.
+
+## Expected Output
+
+The skill produces `tasks.md` next to the PRD, plus a final agent message with GitHub links and commit hash. See [references/tasks-template.md](references/tasks-template.md) for the full reviewable shape, dependency table, critical path, and final-message format. See [references/self-test.md](references/self-test.md) for the pre-success self-test checklist.

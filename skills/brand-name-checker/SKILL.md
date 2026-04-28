@@ -1,16 +1,20 @@
 ---
 name: brand-name-checker
 description: "Check product and brand names for conflicts across trademarks, domains, social media handles, and package registries (npm, PyPI, Homebrew, apt). Delivers a risk assessment and actionable Proceed, Modify, or Abandon recommendation. Don't use for brainstorming name ideas from scratch, logo design, or filing/registering a trademark."
-effort: max
 license: MIT
+effort: max
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Brand Name Checker
 
 Check product and brand names for conflicts across trademarks, domains, social media, and package registries (npm, PyPI, Homebrew, apt).
+
+## When to Use
+
+Use this skill before adopting a product or brand name. To stay within the agent's context budget, lean sections (templates, examples) live in `references/*.md` and per-source workers live in `agents/*.md` — only the orchestrator instructions are inlined here.
 
 ## Subagent Architecture
 
@@ -43,24 +47,7 @@ Before executing:
 
 ## Repo Sync Before Edits (mandatory)
 
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
-
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
-
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote. See `references/repo-sync.md` for the exact `git fetch` / `git pull --rebase` commands and stash recovery flow.
 
 ## Input
 
@@ -174,86 +161,7 @@ If `prd.md` found, add:
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
-
-```
-◆ [Step Name] ([step N of M] — [context])
-··································································
-  [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
-  [Criteria]:         √ N/M met
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-### Social Media Check (step 1 of 5)
-
-```
-◆ Social Media Check (step 1 of 5 — handle availability)
-··································································
-  Twitter available:      √ pass
-  GitHub available:       √ pass
-  Reddit available:       × fail — r/[name] subreddit exists
-  [Criteria]:             √ 2/3 met
-  ____________________________
-  Result:                 PARTIAL
-```
-
-### Package Registry (step 2 of 5)
-
-```
-◆ Package Registry (step 2 of 5 — namespace availability)
-··································································
-  npm clear:              √ pass
-  PyPI clear:             × fail — package exists (owner: example)
-  Homebrew clear:         √ pass
-  [Criteria]:             √ 2/3 met
-  ____________________________
-  Result:                 PARTIAL
-```
-
-### Domain Check (step 3 of 5)
-
-```
-◆ Domain Check (step 3 of 5 — domain availability)
-··································································
-  .com available:         × fail — active site in same industry
-  .dev available:         √ pass
-  .io available:          √ pass
-  [Criteria]:             √ 2/3 met
-  ____________________________
-  Result:                 PARTIAL
-```
-
-### Trademark Check (step 4 of 5)
-
-```
-◆ Trademark Check (step 4 of 5 — trademark conflicts)
-··································································
-  WIPO clear:              √ pass — no conflicts in classes 9/35/42
-  EUIPO clear:             √ pass
-  INPI clear:              × fail — similar mark in class 42
-  [Criteria]:              √ 2/3 met
-  ____________________________
-  Result:                  PARTIAL
-```
-
-### Risk Assessment (step 5 of 5)
-
-```
-◆ Risk Assessment (step 5 of 5 — final verdict)
-··································································
-  Trademark risk level:   √ pass — Low, no conflicts in classes 9/35/42
-  Overall risk score:     √ pass — Moderate
-  Recommendation generated: √ pass — Modify: use variant
-  [Criteria]:             √ 3/3 met
-  ____________________________
-  Result:                 PASS
-```
+After each major step, emit a status report. The general template, plus per-step examples (Social, Registry, Domain, Trademark, Risk), live in `references/step-reports.md`. Adapt check names to what the step actually validates; use `√` for pass, `×` for fail.
 
 ## Acceptance Criteria
 

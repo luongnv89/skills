@@ -1,19 +1,47 @@
 ---
 name: install-script-generator
 description: "Generate cross-platform installation scripts for any software, library, or module. Produces a standalone install.sh runnable via a single curl/wget one-liner, with automatic OS, architecture, and package manager detection. Don't use for authoring Dockerfiles, CI/CD pipelines, or one-off local shell scripts."
-effort: high
 license: MIT
+effort: high
 metadata:
-  version: 2.0.2
+  version: 2.1.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Install Script Generator
 
-Generate robust, cross-platform installation scripts that users can run with a **single bash command** via GitHub raw URLs.
+Generate robust, cross-platform installation scripts that users can run with a **single bash command** via GitHub raw URLs. This SKILL.md is a lean index — long templates and tables live under `references/` to protect the agent's context budget.
 
-## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+## When to Use
+
+- The user asks for a `curl | bash` one-liner for their project.
+- A repo needs a `install.sh` that auto-detects OS, arch, and package manager.
+- A Python/Go/Node/Rust module should be installable in one command from a fresh machine.
+
+Skip this skill for Dockerfiles, CI/CD pipelines, or one-off local shell scripts.
+
+## Prerequisites
+
+- The repo has a known `<owner>/<repo>` (check `git remote -v`) and a default branch.
+- The target software's build system is identifiable (`Makefile`, `package.json`, `setup.py`, `Cargo.toml`, `go.mod`, etc.).
+- `python3` is available locally if you plan to run the helper scripts under `scripts/`.
+
+## Reference Files (read on demand to save tokens)
+
+| File | When to read |
+|------|--------------|
+| `references/install-template.md` | When generating `install.sh` — full bash template with detection helpers, dependency installer, and main entry point |
+| `references/readme-snippet.md` | When updating the README — copy-paste install block plus URL format notes |
+| `references/edge-cases.md` | When handling unusual OS/sudo/path scenarios and writing step reports |
+| `scripts/env_explorer.py` | Local environment probe (OS, arch, package managers, sudo) |
+| `scripts/plan_generator.py` | Generates `installation_plan.yaml` from env + target |
+| `scripts/doc_generator.py` | Renders user-facing `USAGE_GUIDE.md` |
+
+Do not inline these contents into the conversation; link to them. Keeping SKILL.md short preserves the context window for the actual install logic.
+
+## Repo Sync (mandatory before edits)
+
+Before creating, updating, or deleting files in an existing repo, sync the current branch with remote:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,452 +49,87 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
-
-## Primary Goal
-
-Generate a **self-contained `install.sh`** script that:
-1. Detects the user's OS, architecture, and package manager automatically
-2. Installs all dependencies and the target software
-3. Verifies the installation
-4. Can be executed via a **one-liner** using GitHub raw user content:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh | bash
-```
-
-or with wget:
-
-```bash
-wget -qO- https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh | bash
-```
+If the working tree is dirty, `git stash push -u -m pre-sync` first, sync, then `git stash pop`. If `origin` is missing or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Workflow
 
-### Phase 1: Environment Exploration
+### Phase 1 — Exploration
 
-Before generating the script, understand the project context:
+1. Identify the target software/module/tool.
+2. Inspect the repo for build files (`Makefile`, `package.json`, `setup.py`, `Cargo.toml`, `go.mod`, ...).
+3. List dependencies the software needs to build and run.
+4. Capture `<owner>/<repo>` and the default branch from `git remote -v` and `git branch --show-current`. Ask the user if missing.
+5. Run `python3 scripts/env_explorer.py` to capture OS, arch, package managers, shell, and sudo availability into `env_info.json`.
 
-1. **Identify the target** — What software/module/tool is being installed?
-2. **Check the repository** — Look for existing build files, `Makefile`, `package.json`, `setup.py`, `Cargo.toml`, `go.mod`, etc.
-3. **Identify dependencies** — What does the software need to build/run?
-4. **Determine the GitHub repo** — The `<owner>/<repo>` for the raw URL (check git remote or ask user)
+### Phase 2 — Planning
 
-Run the environment explorer for local testing:
+1. Resolve the dependency graph and order operations.
+2. Detect existing installations to avoid duplicate work.
+3. Plan a verification step for each phase.
+4. Plan rollback / cleanup on failure.
+5. Run `python3 scripts/plan_generator.py --target "<name>" --env-file env_info.json` to emit `installation_plan.yaml`.
 
-```bash
-python3 scripts/env_explorer.py
-```
+### Phase 3 — Generation (primary output)
 
-The script detects:
-- Operating system (Windows/Linux/macOS) and version
-- CPU architecture (x86_64, ARM64, etc.)
-- Package managers available (apt, yum, brew, choco, winget)
-- Shell environment (bash, zsh, powershell, cmd)
-- Existing dependencies and versions
-- User permissions (admin/sudo availability)
+Generate `install.sh` at the repo root using `references/install-template.md`. The template contains four sections you compose:
 
-### Phase 2: Installation Planning
+1. Header + colour helpers (`info`, `ok`, `warn`, `err`, `die`).
+2. Detection helpers (`detect_os`, `detect_arch`, `detect_package_manager`, `need_sudo`).
+3. `install_deps` switch covering apt/dnf/yum/pacman/brew/zypper.
+4. `install_<tool>` (customised per target), `verify_installation`, and `main`.
 
-Based on the environment analysis and target software:
+Read `references/install-template.md` for the exact code; do not paste it into chat. If Windows support is needed, also generate `install.ps1` (one-liner: `irm <raw_url> | iex`).
 
-1. **Identify dependencies** — List all required packages/libraries
-2. **Check existing installations** — Avoid reinstalling what exists
-3. **Order operations** — Resolve dependency graph
-4. **Add verification steps** — Each step must be verifiable
-5. **Plan rollback** — Define cleanup on failure
+### Phase 4 — Documentation
 
-Use the plan generator for structured planning:
-
-```bash
-python3 scripts/plan_generator.py --target "<software_name>" --env-file env_info.json
-```
-
-### Phase 3: Script Generation (Primary Output)
-
-Generate a **self-contained `install.sh`** script at the project root. The script MUST follow this structure:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# ============================================================================
-# <Software Name> Installer
-# Usage: curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh | bash
-# ============================================================================
-
-# --- Configuration ---
-TOOL_NAME="<software_name>"
-REPO_OWNER="<owner>"
-REPO_NAME="<repo>"
-DEFAULT_BRANCH="<branch>"
-INSTALL_PREFIX="${INSTALL_PREFIX:-/usr/local}"
-
-# --- Color Output ---
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-info()  { printf "${BLUE}[INFO]${NC}  %s\n" "$*"; }
-ok()    { printf "${GREEN}[ OK ]${NC}  %s\n" "$*"; }
-warn()  { printf "${YELLOW}[WARN]${NC}  %s\n" "$*"; }
-err()   { printf "${RED}[ERR ]${NC}  %s\n" "$*" >&2; }
-die()   { err "$@"; exit 1; }
-
-# --- OS / Arch Detection ---
-detect_os() {
-    local os
-    os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-    case "$os" in
-        linux*)  echo "linux" ;;
-        darwin*) echo "macos" ;;
-        mingw*|msys*|cygwin*) echo "windows" ;;
-        *)       die "Unsupported operating system: $os" ;;
-    esac
-}
-
-detect_arch() {
-    local arch
-    arch="$(uname -m)"
-    case "$arch" in
-        x86_64|amd64)  echo "x86_64" ;;
-        aarch64|arm64) echo "arm64" ;;
-        armv7l)        echo "armv7" ;;
-        *)             die "Unsupported architecture: $arch" ;;
-    esac
-}
-
-detect_package_manager() {
-    if command -v apt-get &>/dev/null; then echo "apt"
-    elif command -v dnf &>/dev/null; then echo "dnf"
-    elif command -v yum &>/dev/null; then echo "yum"
-    elif command -v pacman &>/dev/null; then echo "pacman"
-    elif command -v brew &>/dev/null; then echo "brew"
-    elif command -v zypper &>/dev/null; then echo "zypper"
-    else echo "unknown"
-    fi
-}
-
-need_sudo() {
-    if [ "$(id -u)" -ne 0 ]; then
-        if command -v sudo &>/dev/null; then
-            echo "sudo"
-        else
-            die "This script requires root privileges. Please run as root or install sudo."
-        fi
-    else
-        echo ""
-    fi
-}
-
-# --- Dependency Installation ---
-install_deps() {
-    local pm="$1"
-    local sudo_cmd="$2"
-    shift 2
-    local deps=("$@")
-
-    [ ${#deps[@]} -eq 0 ] && return 0
-
-    info "Installing dependencies: ${deps[*]}"
-    case "$pm" in
-        apt)    $sudo_cmd apt-get update -qq && $sudo_cmd apt-get install -y -qq "${deps[@]}" ;;
-        dnf)    $sudo_cmd dnf install -y -q "${deps[@]}" ;;
-        yum)    $sudo_cmd yum install -y -q "${deps[@]}" ;;
-        pacman) $sudo_cmd pacman -Sy --noconfirm "${deps[@]}" ;;
-        brew)   brew install "${deps[@]}" ;;
-        zypper) $sudo_cmd zypper install -y "${deps[@]}" ;;
-        *)      die "Cannot install dependencies: unsupported package manager '$pm'" ;;
-    esac
-    ok "Dependencies installed"
-}
-
-# --- Main Installation Logic ---
-install_<tool>() {
-    # ... tool-specific installation steps ...
-    # This section is customized per target software
-    :
-}
-
-# --- Verification ---
-verify_installation() {
-    info "Verifying installation..."
-    if command -v "$TOOL_NAME" &>/dev/null; then
-        ok "$TOOL_NAME $(${TOOL_NAME} --version 2>/dev/null || echo '') installed successfully"
-    else
-        die "$TOOL_NAME installation could not be verified"
-    fi
-}
-
-# --- Entry Point ---
-main() {
-    info "Installing $TOOL_NAME"
-    info "============================================"
-
-    local os arch pm sudo_cmd
-    os="$(detect_os)"
-    arch="$(detect_arch)"
-    pm="$(detect_package_manager)"
-    sudo_cmd="$(need_sudo)"
-
-    info "OS: $os | Arch: $arch | Package Manager: $pm"
-
-    # Install dependencies (customize per target)
-    # install_deps "$pm" "$sudo_cmd" dep1 dep2 dep3
-
-    # Install the tool
-    install_<tool>
-
-    # Verify
-    verify_installation
-
-    info "============================================"
-    ok "Installation complete!"
-    info "Run '$TOOL_NAME --help' to get started."
-}
-
-main "$@"
-```
-
-#### Script Requirements
-
-The generated `install.sh` MUST:
-- Start with `#!/usr/bin/env bash` and `set -euo pipefail`
-- Be fully self-contained (no external script dependencies)
-- Auto-detect OS (Linux, macOS, Windows/MSYS), architecture, and package manager
-- Handle `sudo` gracefully (detect if needed, fail with clear message if unavailable)
-- Use colored output for readability
-- Verify the installation at the end
-- Exit with non-zero code on any failure
-- Include the one-liner command in the header comment
-- Support `INSTALL_PREFIX` environment variable override where applicable
-
-#### Optional: Windows Support
-
-If Windows support is needed, also generate `install.ps1`:
-
-```powershell
-# Usage: irm https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.ps1 | iex
-```
-
-### Phase 4: Documentation Generation
-
-After generating the install script, update the project's README (or generate a section) with the one-liner:
-
-**Example output for README:**
-
-````markdown
-## Installation
-
-### Quick Install (one command)
-
-```bash
-curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
-```
-
-Or with wget:
-
-```bash
-wget -qO- https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
-```
-
-### Advanced Options
-
-```bash
-# Install to a custom prefix
-INSTALL_PREFIX=~/.local curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
-
-# Download and inspect before running
-curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh -o install.sh
-less install.sh  # review the script
-bash install.sh
-```
-````
-
-Also generate the full usage documentation:
-
-```bash
-python3 scripts/doc_generator.py --target "<software_name>" --plan installation_plan.yaml
-```
+1. Insert the install block from `references/readme-snippet.md` into the project README, substituting `<owner>/<repo>/<branch>`.
+2. Run `python3 scripts/doc_generator.py --target "<name>" --plan installation_plan.yaml` to emit `USAGE_GUIDE.md`.
+3. Print the final one-liner so the user can copy it.
 
 ## Output Files
 
-The skill generates these files:
-
 | File | Description |
 |------|-------------|
-| `install.sh` | **Primary output** — standalone install script for `curl \| bash` |
-| `install.ps1` | *(Optional)* Windows PowerShell installer |
-| `env_info.json` | System environment analysis (local testing) |
-| `installation_plan.yaml` | Detailed installation steps |
-| `USAGE_GUIDE.md` | User documentation |
+| `install.sh` | Primary output — standalone installer for `curl \| bash` |
+| `install.ps1` | Optional Windows PowerShell installer |
+| `env_info.json` | Local environment probe |
+| `installation_plan.yaml` | Ordered install steps |
+| `USAGE_GUIDE.md` | User-facing docs |
 
-## Determining the GitHub Raw URL
+## Acceptance Criteria
 
-To construct the one-liner URL, the skill needs:
+- `install.sh` exists at repo root, starts with `#!/usr/bin/env bash` and `set -euo pipefail`.
+- Auto-detects OS, architecture, and package manager; exits non-zero with a clear message on unsupported targets.
+- Handles `sudo` gracefully (root, sudo, or fail-fast).
+- Verifies the installation at the end (`command -v $TOOL_NAME` plus `--version` when available).
+- README contains a `curl -sSL ... | bash` one-liner that resolves to the raw GitHub URL.
+- Expected output on success ends with `[ OK ]  Installation complete!`.
 
-1. **Repository owner and name** — Check `git remote -v` for origin URL, or ask the user
-2. **Branch** — Default to `main`, check with `git branch --show-current`
-3. **File path** — `install.sh` at the repo root
+## Edge Cases
 
-The raw URL format is:
-```
-https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh
-```
+See `references/edge-cases.md` for the full list. Highlights:
 
-If the repo uses a non-standard structure (e.g., the script is in a subdirectory), adjust the path:
-```
-https://raw.githubusercontent.com/<owner>/<repo>/<branch>/path/to/install.sh
-```
-
-## Platform-Specific Notes
-
-### Windows
-- Prefer `winget` over `choco` when available
-- Use PowerShell for script execution (`install.ps1`)
-- Handle UAC elevation requirements
-- One-liner: `irm https://raw.githubusercontent.com/<owner>/<repo>/main/install.ps1 | iex`
-
-### Linux
-- Detect distro family (Debian/RedHat/Arch)
-- Use appropriate package manager
-- Handle sudo requirements gracefully
-- Support both `curl` and `wget` for the one-liner
-
-### macOS
-- Use Homebrew as primary package manager
-- Handle Apple Silicon vs Intel differences
-- Respect Gatekeeper and notarization
-
-## Example Usage
-
-### Example 1: "Create an install script for this project"
-
-1. Detect the project type (e.g., Python package, Go binary, Node module)
-2. Check `git remote -v` to get `<owner>/<repo>`
-3. Generate `install.sh` with proper dependency installation and build steps
-4. Output the one-liner command for the README
-
-### Example 2: "Generate a curl install command for my CLI tool"
-
-1. Analyze the project's build system
-2. Generate `install.sh` that downloads the latest release binary or builds from source
-3. Include architecture detection for pre-built binaries
-4. Output: `curl -sSL https://raw.githubusercontent.com/user/tool/main/install.sh | bash`
-
-### Example 3: "Make my module installable with a single command"
-
-1. Check for existing `Makefile`, `setup.py`, `package.json`, etc.
-2. Generate `install.sh` that wraps the build/install process
-3. Add dependency installation (compilers, libraries, runtimes)
-4. Verify the module is available after install
+- **Unsupported OS / architecture** — `die` with the detected value; user sees what failed.
+- **No package manager** — `install_deps` aborts with the manager it expected.
+- **No sudo** — `need_sudo` exits with `Run as root or install sudo`.
+- **Windows native** — generate `install.ps1` separately; `install.sh` warns under MSYS/Cygwin.
+- **Script in subdirectory** — adjust the raw URL path; note it in the README snippet.
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After each phase, emit a `◆` block with `√`/`×` checks and a `Result: PASS | FAIL | PARTIAL` line. The exact templates for the four phases live in `references/edge-cases.md` so you can copy them verbatim without bloating SKILL.md.
 
-```
-◆ [Step Name] ([step N of M] — [context])
-··································································
-  [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
-  [Criteria]:         √ N/M met
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
+## Example One-Liner Output
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-### Phase-specific checks
-
-**Phase 1 — Exploration**
-```
-◆ Exploration (step 1 of 4 — [software name])
-··································································
-  Target identified:          √ pass ([software/tool name])
-  Dependencies mapped:        √ pass ([N] dependencies found)
-  OS compatibility checked:   √ pass | × fail — [unsupported OS]
-  ____________________________
-  Result:                     PASS | FAIL | PARTIAL
-```
-
-**Phase 2 — Planning**
-```
-◆ Planning (step 2 of 4 — [software name])
-··································································
-  Install order defined:      √ pass ([N] steps ordered)
-  Rollback planned:           √ pass | × fail — [what's missing]
-  ____________________________
-  Result:                     PASS | FAIL | PARTIAL
-```
-
-**Phase 3 — Generation**
-```
-◆ Generation (step 3 of 4 — [software name])
-··································································
-  Script created:             √ pass (install.sh written)
-  Cross-platform tested:      √ pass | × fail — [platform issues]
-  ____________________________
-  Result:                     PASS | FAIL | PARTIAL
-```
-
-**Phase 4 — Documentation**
-```
-◆ Documentation (step 4 of 4 — [software name])
-··································································
-  README updated:             √ pass | × fail — [what's missing]
-  One-liner works:            √ pass ([curl/wget URL confirmed])
-  ____________________________
-  Result:                     PASS | FAIL | PARTIAL
-```
-
-## Expected Output
-
-A complete `install.sh` at the repo root, plus a README one-liner block. Example snippet for a Python CLI tool called `mytool`:
-
-```bash
-#!/usr/bin/env bash
-# Usage: curl -sSL https://raw.githubusercontent.com/owner/mytool/main/install.sh | bash
-set -euo pipefail
-TOOL_NAME="mytool"
-...
-[INFO]  OS: linux | Arch: x86_64 | Package Manager: apt
-[INFO]  Installing dependencies: python3 python3-pip
-[ OK ]  Dependencies installed
-[ OK ]  mytool 1.2.0 installed successfully
-[ OK ]  Installation complete!
-```
-
-README section generated:
 ```bash
 curl -sSL https://raw.githubusercontent.com/owner/mytool/main/install.sh | bash
 ```
 
-## Edge Cases
+Expected runtime banner:
 
-- **Unsupported OS**: Script calls `die "Unsupported operating system: $os"` and exits non-zero; user is told which OS was detected.
-- **Missing dependencies / no package manager**: The `detect_package_manager` function returns `unknown`; `install_deps` calls `die` with a clear message listing the missing package manager.
-- **No sudo access**: `need_sudo` checks `id -u` and the presence of `sudo`; if neither root nor sudo is available, the script exits with "Please run as root or install sudo."
-- **Windows without PowerShell**: `install.sh` detects MSYS/Cygwin and warns; an `install.ps1` is generated separately for native Windows.
-- **Non-standard repo structure**: If the script lives in a subdirectory, the URL path is adjusted and documented in the README.
-
-## Error Handling
-
-- All scripts exit with non-zero codes on failure (`set -e`)
-- Each step logs what it's doing before execution
-- Failed dependency installs show the exact missing package and package manager
-- Verification failure at the end gives clear remediation steps
-- Colored output makes errors easy to spot in terminal
+```
+[INFO]  OS: linux | Arch: x86_64 | Package Manager: apt
+[ OK ]  Dependencies installed
+[ OK ]  mytool 1.2.0 installed successfully
+[ OK ]  Installation complete!
+```

@@ -1,10 +1,10 @@
 ---
 name: tad-generator
 description: "Generate Technical Architecture Documents (TAD) from PRD files. Use when users ask to design the architecture, create a TAD, system design, or want to define how a product will be built. Creates/updates tad.md and always reports GitHub links to changed files. Don't use for writing the PRD itself, generating sprint tasks, or implementing code from the architecture."
-effort: max
 license: MIT
+effort: max
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -227,6 +227,65 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
+
+## Acceptance Criteria
+
+The skill is considered successful when the following are all true. Verify each before reporting completion.
+
+- [ ] `tad.md` exists at the project root and contains all 11 required sections (System Overview, Architecture Diagram, Technology Stack, System Components, Data Architecture, Infrastructure, Security, Performance, Development, Risks, Appendix).
+- [ ] Architecture Diagram section contains at least one ` ```mermaid ` fenced block that parses (no `graph` typos, balanced braces).
+- [ ] Technology Stack names specific versions or LTS labels for each layer (e.g. `Node.js 20 LTS`, `PostgreSQL 16`) — no bare "latest" without a date.
+- [ ] Each item in the Risks section has a paired `Mitigation:` line (assert one mitigation per risk row).
+- [ ] Infrastructure section lists concrete cost estimates with currency and cadence (e.g. `~$45/mo`).
+- [ ] Security section references at least one OWASP control or auth standard (OAuth2, OIDC, JWT, etc.).
+- [ ] Final report includes the GitHub blob URL to `tad.md`, the commit hash, and (if updated) the README link.
+- [ ] Repo is clean after push: `git status` returns "nothing to commit, working tree clean".
+
+## Expected Output
+
+Example final agent report:
+
+```
+◆ TAD Generation Complete (8 of 8 — delivery)
+··································································
+  tad.md written:               √ pass (11 sections, 2 mermaid diagrams)
+  Versions specified:           √ pass (Node 20 LTS, Postgres 16)
+  Risks mitigated:              √ pass (6/6 risks have mitigation)
+  Cost estimates:               √ pass (~$45/mo MVP, ~$220/mo scale)
+  Committed and pushed:         √ pass (commit a1b2c3d)
+  ____________________________
+  Result:             PASS
+
+GitHub links:
+- tad.md:    https://github.com/acme/my-idea/blob/main/projects/foo/tad.md
+- README.md: https://github.com/acme/my-idea/blob/main/README.md
+- Commit:    a1b2c3d
+```
+
+Expected `tad.md` Architecture Diagram excerpt:
+
+```markdown
+## 2. Architecture Diagram
+
+```mermaid
+graph TD
+  U[User] --> CDN[Vercel CDN]
+  CDN --> APP[Next.js App]
+  APP --> API[Node API]
+  API --> DB[(PostgreSQL 16)]
+  API --> CACHE[(Redis 7)]
+```
+```
+
+## Edge Cases
+
+- **Missing `prd.md`**: stop and ask the user to run `/prd-generator` first; do not invent requirements.
+- **PRD too thin (<200 words)**: warn the user, ask for clarifications on user flows and NFRs before proceeding to Phase 4.
+- **Conflicting stack hints in PRD**: surface the conflict in Phase 3 clarifying questions; never silently pick one.
+- **No git remote `origin`**: skip Phase 7 push, write `tad.md` locally, and tell the user how to add the remote.
+- **Existing `tad.md` already up to date**: enter Modification Mode rather than overwriting; preserve revision history.
+- **Non-`ideas` repo layout**: skip Phase 6 README index update; do not create a `scripts/update_readme_ideas_index.py` if absent.
+- **Mermaid render fails locally**: validate syntax with `mmdc -i tad.md -o /tmp/check.svg` (or visual inspection) before commit.
 
 ## Modification Mode
 

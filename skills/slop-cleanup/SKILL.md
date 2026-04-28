@@ -1,10 +1,10 @@
 ---
 name: slop-cleanup
-description: "Clean up a codebase by removing AI slop, dead code, weak types, duplication, defensive over-engineering, and legacy cruft using 8 parallel specialized subagents across two cleanup waves. Don't use for adding new features, performance tuning, or security-only audits."
-effort: high
+description: "Refactor a codebase to remove AI slop, dead code, weak types, duplication, defensive over-engineering, and legacy cruft using 8 parallel specialized subagents across two cleanup waves. Don't use for adding new features, performance tuning, or security-only audits."
 license: MIT
+effort: high
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: Luong NGUYEN <luongnv89@gmail.com>
   architecture: "subagent (Pattern B: Parallel Workers, 8 specialized cleaners)"
 ---

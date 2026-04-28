@@ -1,10 +1,10 @@
 ---
 name: oss-ready
 description: "Transform projects into professional open-source repositories with standard components. Use when users ask to make this open source, add open source files, setup OSS standards, create contributing guide, add license, or want to prepare a project for public release with README, CONTRIBUTING, LICENSE, and GitHub templates. Don't use for documentation structure overhauls, landing-page generation, or releasing/publishing to registries."
-effort: low
 license: MIT
+effort: low
 metadata:
-  version: 1.1.2
+  version: 1.2.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -189,6 +189,64 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 - Use professional, welcoming tone
 - Adapt to project's actual tech stack
 - Include working examples from the actual codebase
+
+## Acceptance Criteria
+
+The skill is complete when every item below can be verified with `test -f`, `grep`, or a quick visual check. Treat this as a checklist the agent must assert before reporting success.
+
+- [ ] `LICENSE` exists at repo root and contains a valid SPDX identifier (e.g., `MIT`, `Apache-2.0`). Verify: `grep -E "MIT License|Apache License" LICENSE`.
+- [ ] `README.md` exists, is at least 40 lines, and includes sections for Installation, Usage, and License. Verify: `grep -iE "^#+ (install|usage|license)" README.md | wc -l` returns >= 3.
+- [ ] `CONTRIBUTING.md` exists and references the issue tracker plus a branching/PR workflow. Verify: `grep -iE "issue|pull request|branch" CONTRIBUTING.md`.
+- [ ] `CODE_OF_CONDUCT.md` exists and mentions the Contributor Covenant. Verify: `grep -i "contributor covenant" CODE_OF_CONDUCT.md`.
+- [ ] `SECURITY.md` exists and lists at least one vulnerability-reporting contact (email or form URL). Verify: `grep -E "@|https?://" SECURITY.md`.
+- [ ] `.github/ISSUE_TEMPLATE/bug_report.md` and `.github/ISSUE_TEMPLATE/feature_request.md` both exist with YAML frontmatter (`name:`, `about:`).
+- [ ] `.github/PULL_REQUEST_TEMPLATE.md` exists and contains a checklist (`- [ ]`).
+- [ ] `.gitignore` exists and excludes the language-appropriate build/temp artefacts (e.g., `node_modules/`, `dist/`, `__pycache__/`, `target/`).
+- [ ] Project metadata file (`package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod`) declares `license`, `description`, and `repository` fields where the format supports them.
+- [ ] No previously committed files were deleted; only additions and non-destructive enhancements were made.
+
+## Expected Output
+
+After a successful run on a TypeScript CLI project that started with only a partial `README.md`, the agent emits a final report shaped like this:
+
+```
+◆ OSS Ready summary (4 of 4 steps complete)
+··································································
+  Files created:
+    √ LICENSE                                  (MIT)
+    √ CONTRIBUTING.md                          (33 lines)
+    √ CODE_OF_CONDUCT.md                       (Contributor Covenant 2.1)
+    √ SECURITY.md                              (reporting via security@example.com)
+    √ .github/ISSUE_TEMPLATE/bug_report.md
+    √ .github/ISSUE_TEMPLATE/feature_request.md
+    √ .github/PULL_REQUEST_TEMPLATE.md
+    √ docs/ARCHITECTURE.md, DEVELOPMENT.md, DEPLOYMENT.md, CHANGELOG.md
+  Files updated:
+    √ README.md                                (+ Quick Start, Usage, License badge)
+    √ package.json                             (license, repository, keywords)
+    √ .gitignore                               (added dist/, .env)
+  Acceptance criteria:    √ 10/10 met
+  Manual review needed:
+    - Confirm SECURITY.md contact email is monitored
+    - Add real maintainer names to CODE_OF_CONDUCT enforcement section
+  ____________________________
+  Result:                 PASS
+```
+
+The agent must list the manual-review items explicitly so the user can finish what cannot be automated. Assert that the file tree printed by the agent matches what is actually on disk before declaring PASS.
+
+## Edge Cases
+
+The skill should detect and handle these inputs explicitly rather than fail silently:
+
+- **Existing LICENSE with a non-MIT identifier** — never overwrite. Read it, log the detected license, and skip the LICENSE step.
+- **Monorepo with multiple `package.json` files** — update only the root metadata file unless the user names a sub-package.
+- **Repo with no detectable language** (empty repo or only docs) — pause and ask the user which template stack to assume.
+- **Existing `CODE_OF_CONDUCT.md` or `SECURITY.md`** — diff against the template; only append a missing section, never replace user content.
+- **Private/internal projects** — confirm with the user before adding public-facing files like SECURITY.md or community templates.
+- **Pre-existing `.github/` workflows or templates** — preserve them; merge only the missing files.
+- **Non-English README** — keep the existing language; do not translate, only add structurally missing sections in the same language.
+- **Detached HEAD or dirty working tree** — abort with the sync warning above; never force changes onto an unstable branch.
 
 ## Assets
 

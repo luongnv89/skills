@@ -1,16 +1,22 @@
 ---
 name: ollama-optimizer
-description: "Optimize Ollama configuration for maximum performance on the current machine. Use when asked to optimize Ollama, configure Ollama, speed up Ollama, tune LLM performance, setup local LLM, fix Ollama performance, Ollama running slow, or when users want to maximize inference speed, reduce memory usage, or select appropriate models for their hardware. Analyzes system hardware (GPU, RAM, CPU) and provides tailored recommendations. Don't use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers (OpenAI, Anthropic)."
-effort: medium
+description: "Optimize Ollama configuration for the current machine's hardware. Use when asked to speed up Ollama, tune local LLM performance, or pick models that fit available GPU/RAM."
 license: MIT
+effort: medium
 metadata:
-  version: 1.0.3
+  version: 1.0.4
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Ollama Optimizer
 
 Optimize Ollama configuration based on system hardware analysis.
+
+## When to Use
+
+Use this skill when the user asks to optimize Ollama, configure Ollama, speed up Ollama, fix Ollama running slow, set up a local LLM, tune inference speed, reduce memory usage, or select models that fit their GPU/RAM. The skill analyzes hardware (GPU, VRAM, RAM, CPU) and produces tailored recommendations.
+
+Do not use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers (OpenAI, Anthropic) — those use different runtimes and tuning surfaces.
 
 ## Repo Sync Before Edits (mandatory)
 
