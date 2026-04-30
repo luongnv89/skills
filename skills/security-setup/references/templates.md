@@ -6,9 +6,10 @@ the pre-commit hook and CI workflow run the same local runner.
 ## `.pre-commit-config.yaml`
 
 Merge this local hook into the existing config. Preserve existing repos and hooks.
-The entry invokes Python directly (no shell wrapper) so it works the same on
-macOS, Linux, and Windows. The runner reads extra args from the
-`SECURITY_CHECK_ARGS` environment variable, which all three OSes support.
+The entry invokes `python3` directly (no shell wrapper). On macOS and most Linux
+distros `python3` resolves to the active interpreter; on Windows the official
+Python launcher also exposes `python3`. If a target environment has only bare
+`python` available, override the entry locally to `python scripts/security_check.py`.
 
 ```yaml
 repos:
@@ -16,7 +17,7 @@ repos:
     hooks:
       - id: security-check
         name: local security hardening check
-        entry: python scripts/security_check.py
+        entry: python3 scripts/security_check.py
         language: system
         pass_filenames: false
         stages: [pre-commit]
@@ -29,17 +30,23 @@ pre-commit install
 pre-commit run security-check --all-files
 ```
 
-Force-bypass invocation by OS (only after a typed `YES` confirmation):
+Force-bypass: run the runner directly (not through `git commit`) and type `YES`
+at the prompt, then commit with `--no-verify`. `pre-commit` closes hook stdin,
+so `--force` cannot be answered from inside `git commit`. See SKILL.md
+§"4. Bypass Policy" for the full policy.
 
 ```bash
 # macOS / Linux (bash, zsh)
-SECURITY_CHECK_ARGS=--force git commit
+SECURITY_CHECK_ARGS=--force python3 scripts/security_check.py
+git commit --no-verify
 
 # Windows PowerShell
-$env:SECURITY_CHECK_ARGS = "--force"; git commit; Remove-Item Env:SECURITY_CHECK_ARGS
+$env:SECURITY_CHECK_ARGS = "--force"; python scripts\security_check.py; Remove-Item Env:SECURITY_CHECK_ARGS
+git commit --no-verify
 
 # Windows cmd.exe
-set SECURITY_CHECK_ARGS=--force && git commit && set SECURITY_CHECK_ARGS=
+set SECURITY_CHECK_ARGS=--force && python scripts\security_check.py && set SECURITY_CHECK_ARGS=
+git commit --no-verify
 ```
 
 ## `security/security-tools.json`
@@ -184,12 +191,17 @@ pre-commit run security-check --all-files
 
 ### Explicit Bypass
 
-Bypass is discouraged. When it is necessary, it requires an interactive
-confirmation:
+Bypass is discouraged. When necessary, run the runner directly with
+`--force`, type `YES` at the prompt, then commit with `--no-verify`.
+`pre-commit` closes hook stdin, so the prompt cannot be answered from
+inside `git commit`.
 
 ```bash
-SECURITY_CHECK_ARGS=--force git commit
+SECURITY_CHECK_ARGS=--force python3 scripts/security_check.py
+# Type YES at the prompt, then:
+git commit --no-verify
 ```
 
-You must type `YES` at the prompt.
+You must type the literal string `YES`. Record the bypass in this file
+(date, reason, link to the report) so the override is auditable.
 ```

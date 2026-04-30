@@ -5,8 +5,8 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.1.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Security Setup
@@ -26,17 +26,18 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
+If the working tree is not clean, stash first as a backup, sync, then restore:
 
 ```bash
-git stash push -u -m "pre-sync"
+git stash push -u -m "pre-sync"           # backup local changes
 branch="$(git rev-parse --abbrev-ref HEAD)"
 git fetch origin && git pull --rebase origin "$branch"
-git stash pop
+git stash pop                              # rollback by restoring the backup
 ```
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop
-and ask the user before continuing.
+and ask the user before continuing. Never use `--force` rollback options without
+confirmation.
 
 ## Operating Model
 
@@ -99,6 +100,12 @@ gap in `SECURITY.md` and do not pretend the criterion is satisfied.
 
 ### 3. Generate Local Files
 
+Before writing files, dry-run the changes: list every target path, diff any
+existing file against the planned content, and confirm with the user. If a
+target file already exists, back it up to `<path>.bak` so the user can
+rollback. Treat any overwrite of `.pre-commit-config.yaml` or `SECURITY.md`
+as destructive and require explicit confirmation.
+
 Create or update these files:
 
 - `.pre-commit-config.yaml` - merge a local `security-check` hook into existing
@@ -114,39 +121,44 @@ Use `references/templates.md` for starter snippets.
 
 ### 4. Bypass Policy
 
-Never add a silent bypass. The only approved bypass path sets the
-`SECURITY_CHECK_ARGS` environment variable for one `git commit` invocation:
+Never add a silent bypass. Bypass cannot be performed through `git commit`
+because `pre-commit` redirects hook stdin to `/dev/null`, so the runner's
+TTY check refuses `--force` from inside the hook. The approved bypass is a
+two-step, explicit override:
 
-```bash
-# macOS / Linux
-SECURITY_CHECK_ARGS=--force git commit
-```
+1. Run the runner directly with `--force` and type `YES` at the prompt:
 
-```powershell
-# Windows PowerShell
-$env:SECURITY_CHECK_ARGS = "--force"; git commit; Remove-Item Env:SECURITY_CHECK_ARGS
-```
+   ```bash
+   # macOS / Linux
+   SECURITY_CHECK_ARGS=--force python3 scripts/security_check.py
+   ```
 
-```bat
-:: Windows cmd.exe
-set SECURITY_CHECK_ARGS=--force && git commit && set SECURITY_CHECK_ARGS=
-```
+   ```powershell
+   # Windows PowerShell
+   $env:SECURITY_CHECK_ARGS = "--force"; python scripts\security_check.py; Remove-Item Env:SECURITY_CHECK_ARGS
+   ```
 
-The runner reads `SECURITY_CHECK_ARGS` itself (no shell wrapper required) and
-prompts the user to type exactly:
+   ```bat
+   :: Windows cmd.exe
+   set SECURITY_CHECK_ARGS=--force && python scripts\security_check.py && set SECURITY_CHECK_ARGS=
+   ```
 
-```text
-YES
-```
+   The runner prints the prompt:
 
-using the prompt:
+   ```text
+   Type YES to override security checks and force-push:
+   ```
 
-```text
-Type YES to override security checks and force-push:
-```
+   It accepts only the literal string `YES`. Any other input, EOF, or a
+   non-TTY context exits non-zero and refuses the bypass.
 
-If the user does not type `YES`, or the hook is running without a TTY (CI,
-piped input), the hook exits non-zero.
+2. After the override is recorded in the report, commit with
+   `git commit --no-verify`. Document the bypass in `SECURITY.md` (date,
+   reason, link to the recorded report) so the override is auditable.
+
+Do not add `--force` to the pre-commit hook entry, and do not wrap
+`git commit` in a script that opens `/dev/tty` for the hook — both routes
+hide the bypass from review.
 
 ### 5. Verify Locally
 
@@ -171,6 +183,31 @@ If `pre-commit` is not installed, print the install command and stop:
 python3 -m pip install pre-commit   # use `python` on Windows
 pre-commit install
 ```
+
+#### Expected output
+
+A successful first run prints a summary to stdout and exits 0. Verify the
+output matches this shape (exact counts vary):
+
+```text
+Security Check Summary
+======================
+Checks run: 3
+Findings: 1
+Severity: HIGH=1
+Categories: dependencies=1
+JSON report: security/security-report.json
+Markdown report: security/security-report.md
+
+Top findings:
+- HIGH [dependencies/trivy] CVE-XXXX-XXXX in <pkg> (<lockfile>)
+  Hint: Upgrade to <version>.
+```
+
+Assert: a clean run exits 0, both report paths exist, and
+`security-report.json` parses as valid JSON with a top-level `summary`
+object. Any `HIGH` or `CRITICAL` finding exits non-zero unless the bypass
+in §"4. Bypass Policy" was completed.
 
 ## Phase 2 - CI/CD Mirror (`--ci`)
 

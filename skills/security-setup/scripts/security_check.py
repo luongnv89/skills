@@ -128,7 +128,12 @@ def run_check(check: dict[str, Any], tmpdir: Path) -> dict[str, Any]:
     result["stdout"] = proc.stdout.strip()
     result["stderr"] = proc.stderr.strip()
 
-    raw = read_json_output(output, proc.stdout)
+    try:
+        raw = read_json_output(output, proc.stdout)
+    except JsonOutputError as exc:
+        result["raw_output"] = None
+        result["tool_error"] = str(exc)
+        return result
     result["raw_output"] = raw
     result["findings"] = parse_findings(check["name"], check.get("category", "other"), raw)
 
@@ -136,6 +141,10 @@ def run_check(check: dict[str, Any], tmpdir: Path) -> dict[str, Any]:
         result["tool_error"] = result["stderr"] or result["stdout"] or "Tool failed"
 
     return result
+
+
+class JsonOutputError(Exception):
+    """Raised when a tool's report file or stdout exists but is not valid JSON."""
 
 
 def read_json_output(output_path: Path, stdout: str) -> Any:
@@ -146,8 +155,10 @@ def read_json_output(output_path: Path, stdout: str) -> Any:
                 return json.loads(text)
         if stdout.strip().startswith(("{", "[")):
             return json.loads(stdout)
-    except (json.JSONDecodeError, OSError):
-        return None
+    except json.JSONDecodeError as exc:
+        raise JsonOutputError(f"malformed JSON output: {exc}") from exc
+    except OSError as exc:
+        raise JsonOutputError(f"failed to read report file: {exc}") from exc
     return None
 
 
@@ -247,10 +258,11 @@ def parse_cargo_audit(raw: Any, category: str, tool: str) -> list[dict[str, str]
         advisory = item.get("advisory", {})
         package = item.get("package", {})
         title = f"{advisory.get('id', 'Advisory')} in {package.get('name', 'crate')}"
+        severity = advisory.get("severity") or "HIGH"
         findings.append(
             finding(
                 category,
-                "HIGH",
+                severity,
                 tool,
                 title,
                 "Cargo.lock",
