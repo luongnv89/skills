@@ -4,7 +4,7 @@ description: "Create or update CLAUDE.md and AGENTS.md files following official 
 license: MIT
 effort: medium
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -70,7 +70,7 @@ CLAUDE.md gives Claude persistent context **it cannot infer from code alone**.
 | Developer environment quirks (env vars) | File-by-file codebase descriptions |
 | Common gotchas or non-obvious behaviors | Self-evident practices like "write clean code" |
 
-See `references/anti-patterns.md` for the full quality test and failure modes.
+See `references/anti-patterns.md` for the full quality test and failure modes, and `references/claude-md-checklist.md` for the structural audit checklist (length budget, hierarchy, 5 required sections).
 
 ### Example Format
 
@@ -154,8 +154,10 @@ If the user asks for orchestration rigor or stricter coding rules, copy verbatim
 ### `audit`
 
 1. Read existing file.
-2. Report: content quality, anti-patterns, useful-vs-redundant ratio, recommendations.
-3. **Do NOT modify the file** — report only.
+2. Walk every item in `references/claude-md-checklist.md` (length budget, content quality, hierarchy, 5 required sections, final quality checks). Report each as pass / fail / N/A with a one-line reason.
+3. Cross-check against `references/anti-patterns.md`.
+4. Report: checklist results, anti-patterns found, useful-vs-redundant ratio, top recommendations.
+5. **Do NOT modify the file** — report only.
 
 ## Step Completion Reports
 
@@ -181,7 +183,8 @@ A run passes when **all** of the following are true:
 - [ ] Repo synced clean OR user explicitly authorised proceeding without sync.
 - [ ] Token-efficiency block present in the generated/updated file (verify by grep `## Token Efficiency`).
 - [ ] No anti-pattern from `references/anti-patterns.md` appears in the new content.
-- [ ] For `audit`: no file was modified (verify with `git diff --stat`).
+- [ ] For `create` / `update`: result passes every section of `references/claude-md-checklist.md` (length budget, content quality, hierarchy, 5 required sections).
+- [ ] For `audit`: every checklist item is reported with pass / fail / N/A, and no file was modified (verify with `git diff --stat`).
 - [ ] Final step-completion report emitted with `Result: PASS`.
 
 ## Expected Output
@@ -197,11 +200,14 @@ A run passes when **all** of the following are true:
 
 Followed by a step-completion report ending in `Result: PASS`.
 
-**For `audit`:** prints a markdown report (no file writes), e.g.:
+**For `audit`:** prints a markdown report (no file writes) covering every checklist section, e.g.:
 
 ```
 ◆ Audit (step 1 of 1)
-  Content quality:    √ pass — 12 useful lines, 3 redundant
+  Length budget:      √ pass — 64 lines
+  Content quality:    × fail — 3 fluff lines ("be a senior engineer", motivational)
+  Hierarchy split:    √ pass — global / project / local in use
+  5 required sections: × fail — missing "Hard rules" and "Workflow preferences"
   Anti-patterns:      × fail — found 2 (generic style rules)
   Token block:        × fail — missing
   Result:             PARTIAL
