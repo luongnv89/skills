@@ -2,10 +2,10 @@
 name: security-setup
 description: "Install local-first security hardening: pre-commit secret detection, offline dependency scans, static analysis, reports, and gated free CI. Use when hardening repos or adding security hooks. Don't use for incident response or cloud security reviews."
 license: MIT
-compatibility: Requires git, a local shell, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate.
+compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.0.1
+  version: 1.1.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -53,12 +53,23 @@ Do not create CI files until Phase 1 is installed and passing.
 
 ### 1. Detect the Project
 
-Inspect the repo before choosing tools:
+Inspect the repo before choosing tools. The runner and skill instructions work
+on macOS, Linux, and Windows; pick the matching shell snippet.
+
+**macOS / Linux (bash, zsh):**
 
 ```bash
 ls -la package.json package-lock.json pnpm-lock.yaml yarn.lock pyproject.toml requirements.txt Cargo.toml Cargo.lock go.mod pom.xml build.gradle 2>/dev/null
 ls -la .pre-commit-config.yaml SECURITY.md .github/workflows/security.yml 2>/dev/null
 command -v gitleaks trivy semgrep detect-secrets bandit cargo-audit pre-commit 2>/dev/null
+```
+
+**Windows PowerShell:**
+
+```powershell
+Get-ChildItem -Force -ErrorAction SilentlyContinue package.json,package-lock.json,pnpm-lock.yaml,yarn.lock,pyproject.toml,requirements.txt,Cargo.toml,Cargo.lock,go.mod,pom.xml,build.gradle
+Get-ChildItem -Force -ErrorAction SilentlyContinue .pre-commit-config.yaml,SECURITY.md,.github\workflows\security.yml
+foreach ($t in 'gitleaks','trivy','semgrep','detect-secrets','bandit','cargo-audit','pre-commit') { Get-Command $t -ErrorAction SilentlyContinue }
 ```
 
 Identify:
@@ -103,13 +114,26 @@ Use `references/templates.md` for starter snippets.
 
 ### 4. Bypass Policy
 
-Never add a silent bypass. The only approved bypass path is explicit:
+Never add a silent bypass. The only approved bypass path sets the
+`SECURITY_CHECK_ARGS` environment variable for one `git commit` invocation:
 
 ```bash
+# macOS / Linux
 SECURITY_CHECK_ARGS=--force git commit
 ```
 
-The hook must require the user to type exactly:
+```powershell
+# Windows PowerShell
+$env:SECURITY_CHECK_ARGS = "--force"; git commit; Remove-Item Env:SECURITY_CHECK_ARGS
+```
+
+```bat
+:: Windows cmd.exe
+set SECURITY_CHECK_ARGS=--force && git commit && set SECURITY_CHECK_ARGS=
+```
+
+The runner reads `SECURITY_CHECK_ARGS` itself (no shell wrapper required) and
+prompts the user to type exactly:
 
 ```text
 YES
@@ -121,21 +145,30 @@ using the prompt:
 Type YES to override security checks and force-push:
 ```
 
-If the user does not type `YES`, the hook exits non-zero.
+If the user does not type `YES`, or the hook is running without a TTY (CI,
+piped input), the hook exits non-zero.
 
 ### 5. Verify Locally
 
-Run the local checks after writing files:
+Run the local checks after writing files. Use `python3` on macOS/Linux and
+`python` on Windows (the Python launcher routes to the active interpreter).
 
 ```bash
+# macOS / Linux
 python3 scripts/security_check.py --no-fail-on-missing-tools
+pre-commit run security-check --all-files
+```
+
+```powershell
+# Windows PowerShell
+python scripts\security_check.py --no-fail-on-missing-tools
 pre-commit run security-check --all-files
 ```
 
 If `pre-commit` is not installed, print the install command and stop:
 
 ```bash
-python3 -m pip install pre-commit
+python3 -m pip install pre-commit   # use `python` on Windows
 pre-commit install
 ```
 

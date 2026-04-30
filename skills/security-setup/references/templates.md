@@ -6,6 +6,9 @@ the pre-commit hook and CI workflow run the same local runner.
 ## `.pre-commit-config.yaml`
 
 Merge this local hook into the existing config. Preserve existing repos and hooks.
+The entry invokes Python directly (no shell wrapper) so it works the same on
+macOS, Linux, and Windows. The runner reads extra args from the
+`SECURITY_CHECK_ARGS` environment variable, which all three OSes support.
 
 ```yaml
 repos:
@@ -13,7 +16,7 @@ repos:
     hooks:
       - id: security-check
         name: local security hardening check
-        entry: bash -c 'python3 scripts/security_check.py ${SECURITY_CHECK_ARGS:-}'
+        entry: python scripts/security_check.py
         language: system
         pass_filenames: false
         stages: [pre-commit]
@@ -24,6 +27,19 @@ Install the hook:
 ```bash
 pre-commit install
 pre-commit run security-check --all-files
+```
+
+Force-bypass invocation by OS (only after a typed `YES` confirmation):
+
+```bash
+# macOS / Linux (bash, zsh)
+SECURITY_CHECK_ARGS=--force git commit
+
+# Windows PowerShell
+$env:SECURITY_CHECK_ARGS = "--force"; git commit; Remove-Item Env:SECURITY_CHECK_ARGS
+
+# Windows cmd.exe
+set SECURITY_CHECK_ARGS=--force && git commit && set SECURITY_CHECK_ARGS=
 ```
 
 ## `security/security-tools.json`
@@ -108,7 +124,8 @@ on:
 
 permissions:
   contents: read
-  security-events: write
+  # Add `security-events: write` only if you also add a SARIF upload step
+  # (e.g. github/codeql-action/upload-sarif). See SKILL.md "Phase 2".
 
 jobs:
   local-security:

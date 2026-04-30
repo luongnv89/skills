@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -138,11 +140,13 @@ def run_check(check: dict[str, Any], tmpdir: Path) -> dict[str, Any]:
 
 def read_json_output(output_path: Path, stdout: str) -> Any:
     try:
-        if output_path.exists() and output_path.read_text().strip():
-            return json.loads(output_path.read_text())
+        if output_path.exists():
+            text = output_path.read_text()
+            if text.strip():
+                return json.loads(text)
         if stdout.strip().startswith(("{", "[")):
             return json.loads(stdout)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, OSError):
         return None
     return None
 
@@ -360,7 +364,17 @@ def should_fail(findings: list[dict[str, str]], fail_on: list[str]) -> bool:
 def maybe_force_override(force: bool) -> bool:
     if not force:
         return False
-    answer = input("Type YES to override security checks and force-push: ")
+    if not sys.stdin.isatty():
+        print(
+            "Refusing --force in a non-interactive context. Run from a terminal and type YES.",
+            file=sys.stderr,
+        )
+        return False
+    try:
+        answer = input("Type YES to override security checks and force-push: ")
+    except EOFError:
+        print("No confirmation received; bypass denied.", file=sys.stderr)
+        return False
     return answer == "YES"
 
 
@@ -371,7 +385,9 @@ def main() -> int:
     parser.add_argument("--markdown", default="security/security-report.md", help="Path for Markdown report.")
     parser.add_argument("--force", action="store_true", help="Allow explicit YES-confirmed bypass when findings would fail.")
     parser.add_argument("--no-fail-on-missing-tools", action="store_true", help="Treat missing tools as info for first-run verification.")
-    args = parser.parse_args()
+    extra = os.environ.get("SECURITY_CHECK_ARGS", "").strip()
+    argv = sys.argv[1:] + (shlex.split(extra, posix=os.name != "nt") if extra else [])
+    args = parser.parse_args(argv)
 
     config = load_config(Path(args.config))
     with tempfile.TemporaryDirectory(prefix="security-check-") as tmp:
