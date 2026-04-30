@@ -29,11 +29,12 @@ This agent:
 
 This agent:
 - Receives user-approved list of improvements to apply
+- **Follows Safety Protocol:** Generates diffs and requests confirmation for each file modification
 - Implements changes categorized by type (meta tags, robots.txt, AI bot directives, JSON-LD, sitemap, etc.)
 - Handles framework-specific implementation (Next.js, Nuxt, Astro, Hugo, SvelteKit, static HTML)
 - Produces modified source files ready for testing
 
-**Output:** Modified project files with git-ready changes
+**Output:** Modified project files with git-ready changes (diffs confirmed by user)
 
 ## Phase 4: Validator Agent
 **Purpose:** Re-run audit on modified site, return before/after comparison

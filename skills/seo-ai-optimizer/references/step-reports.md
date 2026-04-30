@@ -79,6 +79,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Fixes applied:            √ pass (N issues resolved)
   Sitemaps updated:         √ pass
   Schema.org added:         √ pass (Organization + Article JSON-LD)
+  Safety protocol followed: √ pass (diffs shown + confirmed)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
