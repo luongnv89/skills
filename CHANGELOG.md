@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### New Skills
+| Skill | Version |
+|-------|---------|
+| security-setup | 1.0.1 |
+
+### Features
+- **security-setup**: Local-first security hardening skill — installs offline pre-commit hooks for secrets (gitleaks/detect-secrets), dependency scanning (trivy), and static analysis (semgrep with local rules); prints comprehensive severity-bucketed reports; requires explicit `YES` confirmation for `--force` bypass; gates free-tier GitHub Actions CI on Phase 1 passing. Runner enforces a per-check subprocess timeout (default 120s, configurable via `timeout_seconds`) to prevent hung pre-commit hooks.
+
 ## v1.13.0 — 2026-04-28
 
 ### Skills Updated

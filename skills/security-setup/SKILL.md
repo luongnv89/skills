@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires git, a local shell, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate.
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 

@@ -21,6 +21,7 @@ from typing import Any
 
 
 SEVERITY_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]
+DEFAULT_TIMEOUT_SECONDS = 120
 DEFAULT_CONFIG = {
     "fail_on": ["CRITICAL", "HIGH"],
     "checks": [
@@ -107,12 +108,20 @@ def run_check(check: dict[str, Any], tmpdir: Path) -> dict[str, Any]:
         result["tool_error"] = f"Missing tool: {command[0]}"
         return result
 
-    proc = subprocess.run(
-        command,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    timeout = int(check.get("timeout_seconds", DEFAULT_TIMEOUT_SECONDS))
+    try:
+        proc = subprocess.run(
+            command,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        result["tool_error"] = f"Tool timed out after {timeout}s: {' '.join(command)}"
+        result["stdout"] = (exc.stdout or "").strip() if isinstance(exc.stdout, str) else ""
+        result["stderr"] = (exc.stderr or "").strip() if isinstance(exc.stderr, str) else ""
+        return result
     result["returncode"] = proc.returncode
     result["stdout"] = proc.stdout.strip()
     result["stderr"] = proc.stderr.strip()
