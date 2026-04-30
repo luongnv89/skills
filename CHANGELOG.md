@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### New Skills
+| Skill | Version |
+|-------|---------|
+| security-setup | 1.1.0 |
+
+### Features
+- **security-setup**: Local-first security hardening skill — installs offline pre-commit hooks for secrets (gitleaks/detect-secrets), dependency scanning (trivy), and static analysis (semgrep with local rules); prints comprehensive severity-bucketed reports; requires explicit `YES` confirmation for `--force` bypass; gates free-tier GitHub Actions CI on Phase 1 passing. Runner enforces a per-check subprocess timeout (default 120s, configurable via `timeout_seconds`) and refuses bypass without an interactive TTY.
+- **security-setup**: Cross-platform support (macOS, Linux, Windows). Pre-commit entry now invokes Python directly so it works without a bash wrapper; the runner reads `SECURITY_CHECK_ARGS` from the environment itself. `references/tool-selection.md` adds winget/Chocolatey/Scoop install commands and documents the WSL2 path for semgrep on Windows.
+
 ## v1.13.0 — 2026-04-28
 
 ### Skills Updated

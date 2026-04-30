@@ -130,6 +130,7 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 |---|---|---|---|
 | <a id="auto-push"></a>[**auto-push**](skills/auto-push/) | 1.0.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Stage, commit, push with secret and large-file detection |
 | <a id="devops-pipeline"></a>[**devops-pipeline**](skills/devops-pipeline/) | 1.0.0 | ![medium](https://img.shields.io/badge/medium-orange) | Pre-commit hooks + GitHub Actions for quality gates |
+| <a id="security-setup"></a>[**security-setup**](skills/security-setup/) | 1.1.0 | ![high](https://img.shields.io/badge/high-red) | Local-first security hardening with pre-commit hooks, offline scanners, reports, and gated CI |
 | <a id="release-manager"></a>[**release-manager**](skills/release-manager/) | 2.4.0 | ![max](https://img.shields.io/badge/max-darkred) | Version bump, changelog, tags, GitHub release, PyPI/npm publish |
 | <a id="vscode-extension-publisher"></a>[**vscode-extension-publisher**](skills/vscode-extension-publisher/) | 1.0.0 | ![high](https://img.shields.io/badge/high-red) | Publish VS Code extensions to the marketplace with CI setup |
 
