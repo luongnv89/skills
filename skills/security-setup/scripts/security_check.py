@@ -24,6 +24,14 @@ from typing import Any
 
 SEVERITY_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]
 DEFAULT_TIMEOUT_SECONDS = 120
+DEFAULT_EXPECTED_RETURNCODES: tuple[int, ...] = (0, 1)
+EXPECTED_RETURNCODES: dict[str, tuple[int, ...]] = {
+    "gitleaks": (0, 1),
+    "trivy": (0, 1),
+    "semgrep": (0, 1),
+    "bandit": (0, 1),
+    "cargo-audit": (0, 1),
+}
 DEFAULT_CONFIG = {
     "fail_on": ["CRITICAL", "HIGH"],
     "checks": [
@@ -137,8 +145,23 @@ def run_check(check: dict[str, Any], tmpdir: Path) -> dict[str, Any]:
     result["raw_output"] = raw
     result["findings"] = parse_findings(check["name"], check.get("category", "other"), raw)
 
-    if proc.returncode not in (0, 1) and not result["findings"]:
-        result["tool_error"] = result["stderr"] or result["stdout"] or "Tool failed"
+    if not has_parser(check["name"]):
+        result["tool_error"] = (
+            f"No parser registered for tool {check['name']!r}; findings cannot be extracted. "
+            "Add a parser in scripts/security_check.py or use a supported tool name "
+            f"({', '.join(sorted(PARSERS))})."
+        )
+        return result
+
+    expected = check.get("expected_returncodes")
+    if expected is None:
+        expected = EXPECTED_RETURNCODES.get(check["name"], DEFAULT_EXPECTED_RETURNCODES)
+    if proc.returncode not in tuple(expected):
+        result["tool_error"] = (
+            result["stderr"]
+            or result["stdout"]
+            or f"Tool exited with code {proc.returncode}"
+        )
 
     return result
 
@@ -196,17 +219,14 @@ def normalize_severity(value: str | None) -> str:
 def parse_findings(tool: str, category: str, raw: Any) -> list[dict[str, str]]:
     if raw is None:
         return []
-    if tool == "gitleaks":
-        return parse_gitleaks(raw, category, tool)
-    if tool == "trivy":
-        return parse_trivy(raw, category, tool)
-    if tool == "semgrep":
-        return parse_semgrep(raw, category, tool)
-    if tool == "bandit":
-        return parse_bandit(raw, category, tool)
-    if tool == "cargo-audit":
-        return parse_cargo_audit(raw, category, tool)
-    return []
+    parser = PARSERS.get(tool)
+    if parser is None:
+        return []
+    return parser(raw, category, tool)
+
+
+def has_parser(tool: str) -> bool:
+    return tool in PARSERS
 
 
 def parse_gitleaks(raw: Any, category: str, tool: str) -> list[dict[str, str]]:
@@ -270,6 +290,15 @@ def parse_cargo_audit(raw: Any, category: str, tool: str) -> list[dict[str, str]
             )
         )
     return findings
+
+
+PARSERS = {
+    "gitleaks": parse_gitleaks,
+    "trivy": parse_trivy,
+    "semgrep": parse_semgrep,
+    "bandit": parse_bandit,
+    "cargo-audit": parse_cargo_audit,
+}
 
 
 def add_tool_error_findings(results: list[dict[str, Any]], no_fail_on_missing_tools: bool) -> None:

@@ -35,6 +35,10 @@ at the prompt, then commit with `--no-verify`. `pre-commit` closes hook stdin,
 so `--force` cannot be answered from inside `git commit`. See SKILL.md
 §"4. Bypass Policy" for the full policy.
 
+`SECURITY_CHECK_ARGS` is shell-split and appended after `sys.argv[1:]`, so env
+flags override CLI flags on conflict (argparse last-wins for booleans). Set
+the variable only for the bypass invocation and unset it afterwards.
+
 ```bash
 # macOS / Linux (bash, zsh)
 SECURITY_CHECK_ARGS=--force python3 scripts/security_check.py
@@ -106,6 +110,26 @@ rules:
       - pattern: eval(...)
       - pattern: new Function(...)
 
+  - id: javascript-child-process-exec-dynamic
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Avoid child_process.exec with a dynamic command. Use execFile or spawn with an args array.
+    metadata:
+      cwe: "CWE-78"
+      owasp: "A03:2021-Injection"
+    patterns:
+      - pattern-either:
+          - pattern: child_process.exec($CMD, ...)
+          - pattern: require('child_process').exec($CMD, ...)
+          - pattern: |
+              import { exec } from 'child_process'
+              ...
+              exec($CMD, ...)
+      # Filter out string-literal calls like exec("ls -la") — only flag dynamic input.
+      - metavariable-pattern:
+          metavariable: $CMD
+          pattern-not-regex: ^(['"`]).*\1$
+
   - id: hardcoded-debug-mode
     languages: [python, javascript, typescript]
     severity: WARNING
@@ -149,6 +173,20 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install semgrep
           # Install gitleaks/trivy using package-manager steps selected for this repo.
+
+      - name: Compute weekly cache stamp
+        id: cache-stamp
+        run: echo "week=$(date -u +%Y-%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache trivy vulnerability DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          # Rotate weekly so DB stays fresh without writing a new cache entry on
+          # every run. Avoid keys based on github.run_id — they grow unbounded.
+          key: trivy-db-${{ runner.os }}-${{ steps.cache-stamp.outputs.week }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
 
       - name: Warm vulnerability databases
         run: |
