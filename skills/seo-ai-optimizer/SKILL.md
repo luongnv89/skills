@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.1.2
+  version: 1.2.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -38,7 +38,7 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 Before starting the SEO audit, ensure the following:
 - **Environment:** The project must be managed by a git repository.
 - **Tools:** Python 3.x must be installed and available in the path.
-- **Audit Script:** The `scripts/audit_seo.py` tool must be present in the project root.
+- **Audit Script:** `scripts/audit_seo.py` (shipped with this skill) is invoked against the audited project: `python scripts/audit_seo.py <project-root>`.
 - **Access:** You must have write access to the project files and permission to create new files (robots.txt, llms.txt, etc.).
 
 ## Quick Reference

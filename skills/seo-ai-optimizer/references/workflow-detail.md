@@ -90,8 +90,33 @@ Use this template when presenting the prioritized improvement plan to the user:
 - **Large Codebase:** The audit script samples 50 representative files by default. Offer to increase with `--max-files N`.
 
 ### Expected Output
-- After a full run, the audit report should clearly group findings by severity and cite file paths.
-- Validation should show the critical-issue count drop to 0.
+
+After a full run on a Next.js project, the audit report looks like:
+
+```markdown
+## SEO & AI Bot Audit Report
+
+**Project:** my-saas-app
+**Framework:** Next.js 14
+**Files audited:** 24 / 24
+**Date:** 2026-04-19
+
+### Critical Issues (must fix)
+1. [pages/about.tsx:1] Missing <title> tag
+2. [pages/blog/[slug].tsx:14] Duplicate H1 — 2 H1 tags found
+
+### Warnings (should fix)
+1. [public/robots.txt] GPTBot not listed — AI crawlers get no explicit directive
+
+### Project-Level Findings
+- robots.txt: present, missing AI bot directives
+- sitemap.xml: absent — install next-sitemap
+- llms.txt: absent — AI-friendly summary missing
+- Structured data: partial (homepage only)
+- AI bot directives: not configured
+```
+
+After implementation, validation shows: `critical issues: 2 → 0`, `llms.txt created`, `sitemap.xml generated`.
 
 ### Acceptance Criteria
 - [ ] Audit report identifies the framework detected or explicitly states "generic HTML".
