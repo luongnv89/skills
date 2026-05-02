@@ -55,33 +55,85 @@ git commit --no-verify
 
 ## `security/security-tools.json`
 
-Write only the tools selected for the current project.
+Write only the tools selected for the current project. Each check declares
+`triggers` so pre-commit only runs the work the staged file set actually
+implies. Omit `triggers` to inherit the per-tool defaults baked into
+`scripts/security_check.py` for known names (`gitleaks`, `trivy`, `semgrep`,
+`bandit`, `cargo-audit`).
 
 ```json
 {
   "fail_on": ["CRITICAL", "HIGH"],
+  "trip_all_paths": [
+    ".pre-commit-config.yaml",
+    "security/**",
+    ".github/workflows/**",
+    "Dockerfile",
+    "Dockerfile.*",
+    "**/Dockerfile",
+    "**/Dockerfile.*",
+    ".dockerignore",
+    "scripts/security_check.py"
+  ],
   "checks": [
     {
       "name": "gitleaks",
       "category": "secrets",
       "required": true,
+      "triggers": { "always": true },
       "command": ["gitleaks", "detect", "--source", ".", "--redact", "--report-format", "json", "--report-path", "{output}"]
     },
     {
       "name": "trivy",
       "category": "dependencies",
       "required": true,
+      "triggers": {
+        "paths": [
+          "package-lock.json", "pnpm-lock.yaml", "yarn.lock",
+          "Cargo.lock", "Cargo.toml",
+          "go.mod", "go.sum",
+          "requirements*.txt", "pyproject.toml", "Pipfile.lock",
+          "composer.lock", "Gemfile.lock", "pom.xml", "build.gradle",
+          "**/package-lock.json", "**/pnpm-lock.yaml", "**/yarn.lock",
+          "**/Cargo.lock", "**/go.mod", "**/go.sum",
+          "**/requirements*.txt", "**/pyproject.toml"
+        ]
+      },
       "command": ["trivy", "fs", "--scanners", "vuln", "--skip-db-update", "--format", "json", "--exit-code", "0", "."]
     },
     {
       "name": "semgrep",
       "category": "static",
       "required": true,
+      "triggers": {
+        "paths": [
+          "**/*.py", "**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx",
+          "**/*.go", "**/*.rb", "**/*.php", "**/*.java",
+          "**/*.rs", "**/*.swift", "**/*.sh", "**/*.bash",
+          "**/*.yaml", "**/*.yml", "**/Dockerfile", "**/Dockerfile.*"
+        ]
+      },
       "command": ["semgrep", "--config", "security/semgrep-rules.yml", "--json", "--error", "."]
     }
   ]
 }
 ```
+
+### Trigger semantics
+
+| Field | Meaning |
+|---|---|
+| `triggers.always: true` | Run on every commit. Use for secret scanners. |
+| `triggers.paths: [globs]` | Run only when at least one staged file matches. |
+| `trip_all_paths` (top-level) | Globs that force every applicable check to run when staged. Defaults to `.pre-commit-config.yaml`, `security/**`, `.github/workflows/**`, `Dockerfile*`, `.dockerignore`, `scripts/security_check.py`. |
+
+Globs are matched with `fnmatch` against the POSIX path returned by
+`git diff --cached --name-only --diff-filter=ACMR -z`. Use `**/foo` to match
+in any subdirectory.
+
+`SECURITY_CHECK_SCOPE=all` (env) or `--all` (flag) forces a full scan.
+`SECURITY_CHECK_SCOPE=staged` or `--staged-only` requires staged files and
+errors otherwise.
 
 ## `security/semgrep-rules.yml`
 
@@ -193,7 +245,10 @@ jobs:
           trivy fs --download-db-only . || true
 
       - name: Run local security checks
-        run: python3 scripts/security_check.py
+        # CI is the safety net: always full-scan, never apply staged-file
+        # scoping. Developers get fast scoped scans locally; CI verifies
+        # nothing slipped through.
+        run: python3 scripts/security_check.py --all
 
       - name: Upload security reports
         if: always()

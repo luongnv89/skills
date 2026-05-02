@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -98,6 +98,31 @@ database, warm that database during setup and run with offline flags in the hook
 If offline dependency scanning cannot be configured for an ecosystem, document the
 gap in `SECURITY.md` and do not pretend the criterion is satisfied.
 
+#### File-aware scoping (per-check triggers)
+
+Pre-commit must be fast on small commits without losing coverage. Each check
+declares **its own relevance rule** — never a global "skip on .md only" filter.
+
+Trigger semantics in `security/security-tools.json`:
+
+| Trigger | Behavior |
+|---|---|
+| `"always": true` | Always run. Use for secret scanners — secrets land in `.md`, `.json`, `.env.example`, `Dockerfile`, anywhere. |
+| `"paths": [globs]` | Run only when at least one staged file matches a glob. Use for lockfile-driven (`trivy`, `cargo-audit`) or language-driven (`semgrep`, `bandit`) checks. |
+| (omitted) | Runner falls back to the per-tool defaults baked into `scripts/security_check.py` for the recognized tool name. |
+
+A repo-wide `trip_all_paths` list (default: `.pre-commit-config.yaml`, `security/**`,
+`.github/workflows/**`, `Dockerfile*`, `.dockerignore`, `scripts/security_check.py`)
+forces every applicable check to run when any of those files is staged. This
+catches workflow-injection edits, hook-tampering, and Dockerfile RCE that would
+otherwise slip past purely category-based scoping.
+
+CI runs full scans (`--all`). Scoping only applies on developer commits; the CI
+mirror is the safety net.
+
+**Mandatory invariant:** secret scanning runs on every commit. Do not move
+gitleaks (or its replacement) into a path-restricted trigger.
+
 ### 3. Generate Local Files
 
 Before writing files, dry-run the changes: list every target path, diff any
@@ -164,18 +189,26 @@ hide the bypass from review.
 
 Run the local checks after writing files. Use `python3` on macOS/Linux and
 `python` on Windows (the Python launcher routes to the active interpreter).
+Verification uses `--all` so every configured check runs regardless of what
+happens to be staged.
 
 ```bash
 # macOS / Linux
-python3 scripts/security_check.py --no-fail-on-missing-tools
+python3 scripts/security_check.py --all --no-fail-on-missing-tools
 pre-commit run security-check --all-files
 ```
 
 ```powershell
 # Windows PowerShell
-python scripts\security_check.py --no-fail-on-missing-tools
+python scripts\security_check.py --all --no-fail-on-missing-tools
 pre-commit run security-check --all-files
 ```
+
+When run from a `pre-commit` hook with no flags, the runner inspects
+`git diff --cached` and scopes checks to the staged file set per the trigger
+table in §2. `--all` overrides this for verification or one-off full scans;
+`--staged-only` errors if no staged files are found (useful for guarded
+hooks).
 
 If `pre-commit` is not installed, print the install command and stop:
 
@@ -192,7 +225,8 @@ output matches this shape (exact counts vary):
 ```text
 Security Check Summary
 ======================
-Checks run: 3
+Mode: full
+Checks run: 3 of 3 (skipped: 0)
 Findings: 1
 Severity: HIGH=1
 Categories: dependencies=1
@@ -203,6 +237,18 @@ Top findings:
 - HIGH [dependencies/trivy] CVE-XXXX-XXXX in <pkg> (<lockfile>)
   Hint: Upgrade to <version>.
 ```
+
+A scoped run on a docs-only commit looks like:
+
+```text
+Mode: staged
+Staged files: 2
+Checks run: 1 of 3 (skipped: 2)
+Skipped: trivy, semgrep
+```
+
+Skipped checks are recorded in both reports with their scope reason — they
+are not silent.
 
 Assert: a clean run exits 0, both report paths exist, and
 `security-report.json` parses as valid JSON with a top-level `summary`
@@ -255,6 +301,25 @@ A completed setup passes when:
 - [ ] `SECURITY.md` documents selected tools, omissions, run commands, and CI
       status.
 - [ ] `--ci` creates `.github/workflows/security.yml` only after Phase 1 passes.
+
+### File-aware scoping (no-blindspot scenarios)
+
+Walk through these manually after install. Each one is a real failure mode
+naive scoping creates:
+
+1. **Docs-only with leaked key.** Stage a `README.md` containing a synthetic
+   `AKIA…` AWS key. Hook fails HIGH (gitleaks ran).
+2. **Docs-only clean.** Stage a `README.md` with no secrets. Exit 0;
+   `trivy`/`semgrep`/`bandit` reported as skipped with reason; runtime is
+   measurably faster than `--all`.
+3. **Lockfile change.** Stage `package-lock.json`. `trivy` runs.
+4. **Source code with anti-pattern.** Stage a `.py` file containing
+   `eval(user_input)`. `semgrep` and `bandit` run; exit non-zero.
+5. **Workflow tampering.** Stage `.github/workflows/foo.yml` with
+   `${{ github.event.issue.title }}` interpolated into a `run:` step. The
+   trip-all rule fires; `semgrep` runs.
+6. **Full scan.** `python3 scripts/security_check.py --all` behaves like
+   pre-1.3.0 (every configured check executes).
 
 ## Edge Cases
 

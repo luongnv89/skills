@@ -13,6 +13,7 @@
 
 - Detect project language and choose the smallest useful security tool set
 - Add pre-commit checks for secrets, dependencies, and static analysis
+- File-aware scoping: only run the checks the staged file set implies, while keeping secret scanning always-on as a safety floor
 - Run hooks offline using local rules and warmed vulnerability databases
 - Print JSON, Markdown, and terminal summary reports with severity counts
 - Gate CI workflow creation until local Phase 1 checks are installed and passing

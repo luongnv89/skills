@@ -21,6 +21,28 @@ runtime dependencies.
 - Use `semgrep --config security/semgrep-rules.yml` to avoid registry fetches.
 - Do not use hosted scanners or tools that require API keys for the local hook.
 
+## Scoping Rules
+
+Pre-commit must be fast on small commits without dropping coverage. Each tool
+declares its own relevance rule via `triggers` in `security/security-tools.json`.
+
+| Tool | Trigger | Why |
+|---|---|---|
+| gitleaks (or detect-secrets) | `always: true` | Secrets land in `.md`, `.json`, `.env.example`, `Dockerfile`, anywhere. Never path-restrict the secret scanner. |
+| trivy | lockfiles + manifests (`package-lock.json`, `Cargo.lock`, `go.mod`, etc.) | Dep scanners are lockfile-driven; running on a commit that touches no lockfile produces no signal. |
+| semgrep | source-language extensions (`**/*.py`, `**/*.ts`, `**/Dockerfile`, etc.) | Rules apply to specific languages — match the staged set against rule `languages:`. |
+| bandit | `**/*.py` | Python-only. |
+| cargo-audit | `Cargo.lock`, `Cargo.toml` | Crate advisories require Cargo metadata. |
+
+A repo-wide `trip_all_paths` list catches files where category-based scoping is
+unsafe — `.pre-commit-config.yaml`, `security/**`, `.github/workflows/**`,
+`Dockerfile*`, `.dockerignore`, `scripts/security_check.py`. When any of those
+is staged, every applicable check runs (workflow injection and Dockerfile RCE
+must not slip past because no `.py` happened to be in the same commit).
+
+CI always runs `python3 scripts/security_check.py --all`. Scoping is a
+developer-experience win on commits, not a coverage compromise overall.
+
 ## Install Commands
 
 Prefer existing project package managers. Use only what the detected project needs.

@@ -9,6 +9,7 @@ tools selected by security/security-tools.json.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import shlex
@@ -31,6 +32,106 @@ EXPECTED_RETURNCODES: dict[str, tuple[int, ...]] = {
     "semgrep": (0, 1),
     "bandit": (0, 1),
     "cargo-audit": (0, 1),
+}
+
+# File globs that force a full scan (every applicable check runs) when staged.
+# Workflow injection, hook tampering, and Dockerfile RCE shouldn't slip past
+# scoping just because no source file was in the same commit.
+DEFAULT_TRIP_ALL_PATHS: tuple[str, ...] = (
+    ".pre-commit-config.yaml",
+    "security/**",
+    ".github/workflows/**",
+    "Dockerfile",
+    "Dockerfile.*",
+    "**/Dockerfile",
+    "**/Dockerfile.*",
+    ".dockerignore",
+    "scripts/security_check.py",
+)
+
+# Per-tool default triggers. Used when a check has no explicit `triggers` field.
+# gitleaks runs on every commit (secrets land in .md, .json, .env.example, etc.).
+DEFAULT_TRIGGERS: dict[str, dict[str, Any]] = {
+    "gitleaks": {"always": True},
+    "trivy": {
+        "paths": [
+            "package.json",
+            "package-lock.json",
+            "pnpm-lock.yaml",
+            "yarn.lock",
+            "Cargo.lock",
+            "Cargo.toml",
+            "go.mod",
+            "go.sum",
+            "requirements*.txt",
+            "Pipfile",
+            "Pipfile.lock",
+            "pyproject.toml",
+            "poetry.lock",
+            "composer.json",
+            "composer.lock",
+            "Gemfile",
+            "Gemfile.lock",
+            "pom.xml",
+            "build.gradle",
+            "build.gradle.kts",
+            "**/package.json",
+            "**/package-lock.json",
+            "**/pnpm-lock.yaml",
+            "**/yarn.lock",
+            "**/Cargo.lock",
+            "**/Cargo.toml",
+            "**/go.mod",
+            "**/go.sum",
+            "**/requirements*.txt",
+            "**/Pipfile",
+            "**/Pipfile.lock",
+            "**/pyproject.toml",
+            "**/poetry.lock",
+            "**/composer.json",
+            "**/composer.lock",
+            "**/Gemfile",
+            "**/Gemfile.lock",
+            "**/pom.xml",
+            "**/build.gradle",
+            "**/build.gradle.kts",
+        ],
+    },
+    "semgrep": {
+        "paths": [
+            "**/*.py",
+            "**/*.js",
+            "**/*.jsx",
+            "**/*.ts",
+            "**/*.tsx",
+            "**/*.mjs",
+            "**/*.cjs",
+            "**/*.go",
+            "**/*.rb",
+            "**/*.php",
+            "**/*.java",
+            "**/*.kt",
+            "**/*.kts",
+            "**/*.scala",
+            "**/*.cs",
+            "**/*.c",
+            "**/*.h",
+            "**/*.cc",
+            "**/*.cpp",
+            "**/*.hpp",
+            "**/*.rs",
+            "**/*.swift",
+            "**/*.sh",
+            "**/*.bash",
+            "**/*.zsh",
+            "**/*.yaml",
+            "**/*.yml",
+            "**/Dockerfile",
+            "**/Dockerfile.*",
+        ],
+    },
+    "bandit": {"paths": ["**/*.py"]},
+    "cargo-audit": {"paths": ["Cargo.lock", "Cargo.toml", "**/Cargo.lock", "**/Cargo.toml"]},
 }
 DEFAULT_CONFIG = {
     "fail_on": ["CRITICAL", "HIGH"],
@@ -99,7 +200,113 @@ def materialize_command(command: list[str], output: Path) -> list[str]:
     return [part.replace("{output}", str(output)) for part in command]
 
 
-def run_check(check: dict[str, Any], tmpdir: Path) -> dict[str, Any]:
+def staged_files() -> list[str] | None:
+    """Return staged files (added/copied/modified/renamed) as POSIX paths.
+
+    Returns None when not in a git repo or git is unavailable, so callers can
+    fall through to a full scan instead of silently skipping checks.
+    """
+    if not shutil.which("git"):
+        return None
+    try:
+        proc = subprocess.run(
+            ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z"],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return None
+    if proc.returncode != 0:
+        return None
+    return [p for p in proc.stdout.split("\0") if p]
+
+
+def matches_any(path: str, patterns: list[str]) -> bool:
+    return any(fnmatch.fnmatch(path, pattern) for pattern in patterns)
+
+
+def evaluate_scope(
+    config: dict[str, Any],
+    files: list[str] | None,
+) -> tuple[list[str], dict[str, dict[str, Any]]]:
+    """Decide which checks apply to the staged file set.
+
+    Returns (resolved_files, decisions) where `decisions[check_name]` has:
+      - run: bool                — should this check execute?
+      - reason: str              — human-readable explanation
+      - matched_paths: list[str] — staged files that matched this check (or [])
+
+    A None `files` argument means "no staged-file context available" → run every
+    check (full scan). Empty list means "git found no staged files" → also run
+    every check, because that's the `--all` / verification case.
+    """
+    decisions: dict[str, dict[str, Any]] = {}
+    full_scan = files is None or not files
+
+    trip_globs = list(config.get("trip_all_paths", DEFAULT_TRIP_ALL_PATHS))
+    tripped: list[str] = []
+    if not full_scan:
+        tripped = [p for p in (files or []) if matches_any(p, trip_globs)]
+
+    for check in config.get("checks", []):
+        name = check.get("name", "")
+        triggers = check.get("triggers")
+        if triggers is None:
+            triggers = DEFAULT_TRIGGERS.get(name, {"always": True})
+
+        if full_scan:
+            decisions[name] = {
+                "run": True,
+                "reason": "full scan (no staged files or --all)",
+                "matched_paths": [],
+            }
+            continue
+
+        if triggers.get("always"):
+            decisions[name] = {
+                "run": True,
+                "reason": "always-on (e.g. secret scanner)",
+                "matched_paths": list(files or []),
+            }
+            continue
+
+        if tripped:
+            decisions[name] = {
+                "run": True,
+                "reason": f"trip-all path staged ({tripped[0]})",
+                "matched_paths": tripped,
+            }
+            continue
+
+        patterns = triggers.get("paths", [])
+        if not patterns:
+            decisions[name] = {
+                "run": False,
+                "reason": "no triggers configured and no staged files match",
+                "matched_paths": [],
+            }
+            continue
+
+        matched = [p for p in (files or []) if matches_any(p, patterns)]
+        if matched:
+            decisions[name] = {
+                "run": True,
+                "reason": f"matched {len(matched)} staged file(s)",
+                "matched_paths": matched,
+            }
+        else:
+            decisions[name] = {
+                "run": False,
+                "reason": "no staged file matches this check's triggers",
+                "matched_paths": [],
+            }
+
+    return list(files or []), decisions
+
+
+def run_check(check: dict[str, Any], tmpdir: Path, decision: dict[str, Any]) -> dict[str, Any]:
     output = tmpdir / f"{check['name']}.json"
     command = materialize_command(check["command"], output)
     result: dict[str, Any] = {
@@ -112,7 +319,14 @@ def run_check(check: dict[str, Any], tmpdir: Path) -> dict[str, Any]:
         "stderr": "",
         "raw_output": None,
         "findings": [],
+        "skipped": not decision["run"],
+        "skip_reason": decision["reason"] if not decision["run"] else "",
+        "scope_reason": decision["reason"],
+        "matched_paths": decision.get("matched_paths", []),
     }
+
+    if not decision["run"]:
+        return result
 
     if not command_exists(command):
         result["tool_error"] = f"Missing tool: {command[0]}"
@@ -303,6 +517,8 @@ PARSERS = {
 
 def add_tool_error_findings(results: list[dict[str, Any]], no_fail_on_missing_tools: bool) -> None:
     for result in results:
+        if result.get("skipped"):
+            continue
         error = result.get("tool_error")
         if not error:
             continue
@@ -323,8 +539,12 @@ def summarize(results: list[dict[str, Any]]) -> tuple[list[dict[str, str]], dict
     findings = [item for result in results for item in result["findings"]]
     severity_counts = Counter(item["severity"] for item in findings)
     category_counts = Counter(item["category"] for item in findings)
+    executed = [r for r in results if not r.get("skipped")]
+    skipped = [r for r in results if r.get("skipped")]
     return findings, {
-        "checks_run": len(results),
+        "checks_run": len(executed),
+        "checks_skipped": len(skipped),
+        "checks_configured": len(results),
         "finding_count": len(findings),
         "severity_counts": dict(severity_counts),
         "category_counts": dict(category_counts),
@@ -340,6 +560,7 @@ def write_reports(json_path: Path, md_path: Path, payload: dict[str, Any]) -> No
 
 def render_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
+    scope = payload.get("scope", {})
     lines = [
         "# Security Check Report",
         "",
@@ -347,14 +568,22 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Summary",
         "",
-        f"- Checks run: {summary['checks_run']}",
+        f"- Mode: {scope.get('mode', 'full')}",
+        f"- Staged files considered: {len(scope.get('files', []))}",
+        f"- Checks run: {summary['checks_run']} of {summary.get('checks_configured', summary['checks_run'])}"
+        f" (skipped: {summary.get('checks_skipped', 0)})",
         f"- Findings: {summary['finding_count']}",
         f"- Severity: {format_counter(summary['severity_counts'])}",
         f"- Categories: {format_counter(summary['category_counts'])}",
         "",
-        "## Findings",
+        "## Scope Decisions",
         "",
     ]
+    for check in payload.get("checks", []):
+        status = "skipped" if check.get("skipped") else "ran"
+        reason = check.get("scope_reason") or check.get("skip_reason") or ""
+        lines.append(f"- **{check['name']}**: {status} — {reason}")
+    lines.extend(["", "## Findings", ""])
     if not payload["findings"]:
         lines.append("No findings.")
     for item in payload["findings"]:
@@ -380,9 +609,18 @@ def format_counter(counter: dict[str, int]) -> str:
 
 def print_summary(payload: dict[str, Any], json_path: Path, md_path: Path) -> None:
     summary = payload["summary"]
+    scope = payload.get("scope", {})
     print("Security Check Summary")
     print("======================")
-    print(f"Checks run: {summary['checks_run']}")
+    print(f"Mode: {scope.get('mode', 'full')}")
+    if scope.get("mode") == "staged":
+        print(f"Staged files: {len(scope.get('files', []))}")
+    skipped = summary.get("checks_skipped", 0)
+    configured = summary.get("checks_configured", summary["checks_run"])
+    print(f"Checks run: {summary['checks_run']} of {configured} (skipped: {skipped})")
+    if skipped:
+        skipped_names = [c["name"] for c in payload.get("checks", []) if c.get("skipped")]
+        print(f"Skipped: {', '.join(skipped_names)}")
     print(f"Findings: {summary['finding_count']}")
     print(f"Severity: {format_counter(summary['severity_counts'])}")
     print(f"Categories: {format_counter(summary['category_counts'])}")
@@ -426,18 +664,46 @@ def main() -> int:
     parser.add_argument("--markdown", default="security/security-report.md", help="Path for Markdown report.")
     parser.add_argument("--force", action="store_true", help="Allow explicit YES-confirmed bypass when findings would fail.")
     parser.add_argument("--no-fail-on-missing-tools", action="store_true", help="Treat missing tools as info for first-run verification.")
+    parser.add_argument("--all", dest="all_files", action="store_true", help="Force a full repo scan even when run from pre-commit.")
+    parser.add_argument("--staged-only", action="store_true", help="Force staged-file scoping; error if no staged files.")
     extra = os.environ.get("SECURITY_CHECK_ARGS", "").strip()
     argv = sys.argv[1:] + (shlex.split(extra, posix=os.name != "nt") if extra else [])
     args = parser.parse_args(argv)
 
     config = load_config(Path(args.config))
+
+    scope_env = os.environ.get("SECURITY_CHECK_SCOPE", "").strip().lower()
+    if args.all_files or scope_env == "all":
+        files: list[str] | None = None
+        mode = "full"
+    elif args.staged_only or scope_env == "staged":
+        files = staged_files()
+        if files is None:
+            print("--staged-only requires a git repo with staged files.", file=sys.stderr)
+            return 2
+        mode = "staged"
+    else:
+        files = staged_files()
+        mode = "staged" if files else "full"
+        if files is None:
+            files = []
+
+    _, decisions = evaluate_scope(config, files if mode == "staged" else None)
+
     with tempfile.TemporaryDirectory(prefix="security-check-") as tmp:
-        results = [run_check(check, Path(tmp)) for check in config.get("checks", [])]
+        results = [
+            run_check(check, Path(tmp), decisions[check["name"]])
+            for check in config.get("checks", [])
+        ]
 
     add_tool_error_findings(results, args.no_fail_on_missing_tools)
     findings, summary = summarize(results)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "scope": {
+            "mode": mode,
+            "files": files if mode == "staged" else [],
+        },
         "summary": summary,
         "findings": findings,
         "checks": results,
