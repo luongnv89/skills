@@ -224,7 +224,16 @@ def staged_files() -> list[str] | None:
 
 
 def matches_any(path: str, patterns: list[str]) -> bool:
-    return any(fnmatch.fnmatch(path, pattern) for pattern in patterns)
+    # fnmatch's `*` does not cross `/`, so `**/*.py` matches `src/app.py` but
+    # not root-level `app.py`. Treat a leading `**/` as "match anywhere,
+    # including the repo root" so a config that uses `**/Cargo.lock` still
+    # catches `Cargo.lock` at the top level.
+    for pattern in patterns:
+        if fnmatch.fnmatch(path, pattern):
+            return True
+        if pattern.startswith("**/") and fnmatch.fnmatch(path, pattern[3:]):
+            return True
+    return False
 
 
 def evaluate_scope(
@@ -678,7 +687,7 @@ def main() -> int:
         mode = "full"
     elif args.staged_only or scope_env == "staged":
         files = staged_files()
-        if files is None:
+        if not files:
             print("--staged-only requires a git repo with staged files.", file=sys.stderr)
             return 2
         mode = "staged"
