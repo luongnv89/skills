@@ -18,6 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OS=""
 SKILLS=()           # discovered skill folder names
 SKILL_DESCS=()      # one-line descriptions (from frontmatter)
+SKILL_PATHS=()      # absolute source path per skill (parallel to SKILLS)
 SKILL_SEL=()        # 1/0 toggle per skill
 TOOLS=("Claude Code" "Cursor" "Windsurf" "GitHub Copilot" "OpenAI Codex" "OpenCode" "Google Antigravity")
 TOOL_SEL=()         # 1/0 toggle per tool
@@ -41,9 +42,11 @@ detect_os() {
 }
 
 # ─── Discover skills (folders containing SKILL.md) ─────────────────────────
+# Walks top-level skills/*/ and one extra level skills/*/*/ so suite umbrellas
+# (e.g., website-cloner/) and their child skills are both installable.
 discover_skills() {
   local dir desc
-  for dir in "$SCRIPT_DIR"/skills/*/; do
+  for dir in "$SCRIPT_DIR"/skills/*/ "$SCRIPT_DIR"/skills/*/*/; do
     [[ -f "$dir/SKILL.md" ]] || continue
     local name
     name="$(basename "$dir")"
@@ -55,6 +58,7 @@ discover_skills() {
     fi
     SKILLS+=("$name")
     SKILL_DESCS+=("$desc")
+    SKILL_PATHS+=("${dir%/}")
     SKILL_SEL+=(0)
   done
 
@@ -192,8 +196,7 @@ strip_frontmatter() {
 
 # ─── Install one skill for one tool ────────────────────────────────────────
 install_skill_for_tool() {
-  local skill="$1" tool="$2"
-  local src="$SCRIPT_DIR/skills/$skill"
+  local skill="$1" tool="$2" src="$3"
   local skill_dir dest_file
 
   case "$tool" in
@@ -298,8 +301,7 @@ install_skill_for_tool() {
 
 # ─── Install one skill for ALL tools (shared .agents/skills + symlink) ────
 install_skill_all_tools() {
-  local skill="$1"
-  local src="$SCRIPT_DIR/skills/$skill"
+  local skill="$1" src="$2"
   local shared_dir dest_file
 
   # Step 1: Copy skill files to the shared canonical location (.agents/skills/)
@@ -504,12 +506,12 @@ main() {
     [[ ${SKILL_SEL[$i]} -eq 0 ]] && continue
     if [[ $INSTALL_ALL_TOOLS -eq 1 ]]; then
       echo "  ${GREEN}✔${RESET} ${BOLD}${SKILLS[$i]}${RESET} → All tools (shared + symlinks)"
-      install_skill_all_tools "${SKILLS[$i]}"
+      install_skill_all_tools "${SKILLS[$i]}" "${SKILL_PATHS[$i]}"
     else
       for (( j = 0; j < ${#TOOLS[@]}; j++ )); do
         [[ ${TOOL_SEL[$j]} -eq 0 ]] && continue
         echo "  ${GREEN}✔${RESET} ${BOLD}${SKILLS[$i]}${RESET} → ${TOOLS[$j]}"
-        install_skill_for_tool "${SKILLS[$i]}" "${TOOLS[$j]}"
+        install_skill_for_tool "${SKILLS[$i]}" "${TOOLS[$j]}" "${SKILL_PATHS[$i]}"
       done
     fi
   done

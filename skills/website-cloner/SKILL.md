@@ -4,7 +4,7 @@ description: "6-phase website cloning and improvement orchestrator. Takes a URL 
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -33,6 +33,25 @@ Phase 6 — Final Report   → website-clone-final-report
 ```
 
 Approval gates after Phase 2, 3, and 4: the orchestrator **must not advance** without explicit user approval.
+
+## Layout
+
+This umbrella and its phase skills live together in a single suite folder:
+
+```
+skills/website-cloner/                    ← this umbrella
+├── SKILL.md                              ← orchestrator (you are here)
+├── website-analyzer/                     ← Phase 1
+├── website-clone-report/                 ← Phase 2
+├── website-improvement-prd/              ← Phase 3
+├── website-implementation-plan/          ← Phase 4
+├── website-builder/                      ← Phase 5
+└── website-clone-final-report/           ← Phase 6
+```
+
+Why nested: the phases are tightly coupled to this umbrella's data flow (analysis JSON → report → PRD → tasks → built site → final report). Keeping them in one folder makes the suite easy to browse, audit, and ship together. Each phase skill stays independently installable — the installers (`install.sh`, `remote-install.sh`) discover both top-level and nested skills.
+
+When invoking phase skills below, refer to them by name (`/website-analyzer`, `/website-clone-report`, …); the runtime resolves names regardless of filesystem path.
 
 ## Repo Sync Before Edits (mandatory)
 

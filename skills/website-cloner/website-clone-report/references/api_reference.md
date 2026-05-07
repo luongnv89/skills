@@ -4,7 +4,7 @@ This skill consumes the JSON output produced by `website-analyzer` (Phase 1 of t
 
 ## Input Shape
 
-The skill expects JSON in this shape (see `skills/website-analyzer/SKILL.md` for the canonical definition):
+The skill expects JSON in this shape (see `skills/website-cloner/website-analyzer/SKILL.md` for the canonical definition):
 
 ```json
 {
@@ -102,6 +102,6 @@ The orchestrator (`website-cloner`) invokes this skill with `--output "$PROJECT_
 
 ## Cross-References
 
-- `skills/website-analyzer/SKILL.md` — upstream producer; canonical schema definition.
+- `skills/website-cloner/website-analyzer/SKILL.md` — upstream producer; canonical schema definition.
 - `skills/website-cloner/SKILL.md` — orchestrator; defines `$PROJECT_DIR` and the approval-gate contract.
-- `skills/website-improvement-prd/SKILL.md` — downstream consumer of the approved report.
+- `skills/website-cloner/website-improvement-prd/SKILL.md` — downstream consumer of the approved report.

@@ -154,8 +154,13 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | <a id="excalidraw-generator"></a>[**excalidraw-generator**](skills/excalidraw-generator/) | 1.2.0 | ![high](https://img.shields.io/badge/high-red) | 25+ diagram types as Excalidraw JSON |
 | <a id="drawio-generator"></a>[**drawio-generator**](skills/drawio-generator/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | Draw.io diagrams with multi-page and C4 support |
 | <a id="openspec-task-loop"></a>[**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | ![medium](https://img.shields.io/badge/medium-orange) | Spec-first, one-task-at-a-time implementation loop |
-| <a id="website-analyzer"></a>[**website-analyzer**](skills/website-analyzer/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | 6-dimension website analysis (UI/UX, category, style, perf, security, SEO) as JSON |
-| <a id="website-cloner"></a>[**website-cloner**](skills/website-cloner/) | 1.0.0 | ![high](https://img.shields.io/badge/high-red) | 6-phase clone-and-improve orchestrator: URL → improved Vite/React/Tailwind site |
+| <a id="website-cloner"></a>[**website-cloner**](skills/website-cloner/) | 1.1.0 | ![high](https://img.shields.io/badge/high-red) | 6-phase clone-and-improve orchestrator: URL → improved Vite/React/Tailwind site |
+| &nbsp;&nbsp;↳ [website-analyzer](skills/website-cloner/website-analyzer/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | Phase 1 — 6-dimension website analysis (UI/UX, category, style, perf, security, SEO) as JSON |
+| &nbsp;&nbsp;↳ [website-clone-report](skills/website-cloner/website-clone-report/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | Phase 2 — Stakeholder-friendly clone report from analysis JSON |
+| &nbsp;&nbsp;↳ [website-improvement-prd](skills/website-cloner/website-improvement-prd/) | 1.1.0 | ![high](https://img.shields.io/badge/high-red) | Phase 3 — Improvement PRD from analysis + report |
+| &nbsp;&nbsp;↳ [website-implementation-plan](skills/website-cloner/website-implementation-plan/) | 1.1.0 | ![high](https://img.shields.io/badge/high-red) | Phase 4 — Sprint-ready tasks.md from the PRD |
+| &nbsp;&nbsp;↳ [website-builder](skills/website-cloner/website-builder/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | Phase 5 — Build the improved Vite/React/Tailwind site from tasks |
+| &nbsp;&nbsp;↳ [website-clone-final-report](skills/website-cloner/website-clone-final-report/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | Phase 6 — Before/after delivery report comparing original to clone |
 
 ### Documentation
 
@@ -186,6 +191,14 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | <a id="context-hub"></a>[**context-hub**](skills/context-hub/) | 1.0.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Fetch current API/SDK docs before writing integration code |
 | <a id="skill-creator"></a>[**skill-creator**](skills/skill-creator/) | 1.1.0 | ![max](https://img.shields.io/badge/max-darkred) | Create, validate, and package your own skills |
 | <a id="skill-inventory-auditor"></a>[**skill-inventory-auditor**](skills/skill-inventory-auditor/) | 1.0.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Find and remove duplicate skill installations |
+
+### Suite Folders
+
+Most skills live directly under `skills/<name>/`. Multi-skill products that share a single domain group their pieces in a **suite folder** — an umbrella skill at `skills/<umbrella>/` with its phase skills nested at `skills/<umbrella>/<phase-skill>/`. The umbrella orchestrates the phases; each phase skill stays independently installable.
+
+The current suite is [**website-cloner**](skills/website-cloner/) (6 phases nested under `skills/website-cloner/`, indented in the catalog above with `↳`). The installers (`install.sh`, `remote-install.sh`) discover both top-level and nested skills, so you can install the whole suite or a single phase.
+
+When building your own multi-skill product, mirror this layout: one umbrella + N phase skills under it.
 
 ---
 
