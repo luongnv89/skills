@@ -154,6 +154,8 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | <a id="excalidraw-generator"></a>[**excalidraw-generator**](skills/excalidraw-generator/) | 1.2.0 | ![high](https://img.shields.io/badge/high-red) | 25+ diagram types as Excalidraw JSON |
 | <a id="drawio-generator"></a>[**drawio-generator**](skills/drawio-generator/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | Draw.io diagrams with multi-page and C4 support |
 | <a id="openspec-task-loop"></a>[**openspec-task-loop**](skills/openspec-task-loop/) | 1.0.0 | ![medium](https://img.shields.io/badge/medium-orange) | Spec-first, one-task-at-a-time implementation loop |
+| <a id="website-analyzer"></a>[**website-analyzer**](skills/website-analyzer/) | 1.0.1 | ![high](https://img.shields.io/badge/high-red) | 6-dimension website analysis (UI/UX, category, style, perf, security, SEO) as JSON |
+| <a id="website-cloner"></a>[**website-cloner**](skills/website-cloner/) | 1.0.0 | ![high](https://img.shields.io/badge/high-red) | 6-phase clone-and-improve orchestrator: URL → improved Vite/React/Tailwind site |
 
 ### Documentation
 

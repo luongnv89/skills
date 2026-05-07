@@ -4,7 +4,7 @@ description: "Analyze any website URL across 6 dimensions: UI/UX, category, styl
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -144,15 +144,17 @@ Always label as surface-level.
 
 ## Step 5: SEO Scoring
 
-Compute 0–100 score from weighted dimensions:
+Compute each dimension's 0–100 sub-score using the rubrics below, then combine with the weights to yield the overall `seo.score`. Round each sub-score to the nearest integer; the final score is `round(Σ weight_i × sub_i)`.
 
-| Dimension | Weight |
-|-----------|--------|
-| Meta tags (title + description) | 20% |
-| Heading structure | 15% |
-| Image alt text coverage | 15% |
-| Structured data | 20% |
-| Crawlability (canonical, robots, sitemap) | 30% |
+| Dimension | Weight | Sub-score rubric (0–100) |
+|-----------|--------|--------------------------|
+| Meta tags (title + description) | 20% | Start at 0. +50 if `<title>` is present and 10–60 chars. +50 if `<meta name="description">` is present and 50–160 chars. Subtract 25 each for: title outside 10–60, description outside 50–160, duplicate title across siblings (when crawlable). Floor at 0. |
+| Heading structure | 15% | 100 if exactly one `<h1>` and at least one `<h2>`. 70 if exactly one `<h1>` but no `<h2>`. 40 if zero or multiple `<h1>`s. Subtract 20 if any heading level is skipped (e.g. h2 → h4). Floor at 0. |
+| Image alt text coverage | 15% | `round(100 × non_empty_alt_count / total_img_count)`. If `total_img_count == 0`, report 100 (no images = no alt-text debt). Decorative images using `alt=""` count as "non-empty intent" only when paired with `role="presentation"`; otherwise count as missing. |
+| Structured data | 20% | 100 if at least one valid JSON-LD block is present and parses (any schema). 60 if only Open Graph or Twitter Card meta tags are present (no JSON-LD). 30 if only microdata or RDFa. 0 if none. |
+| Crawlability (canonical, robots, sitemap) | 30% | Start at 0. +40 if a `<link rel="canonical">` resolves to an absolute URL. +30 if `robots.txt` is fetchable and not `Disallow: /`. +30 if a sitemap is referenced (via `robots.txt` `Sitemap:` directive, `<link rel="sitemap">`, or a fetchable `/sitemap.xml`). Cap at 100. |
+
+When a sub-score cannot be computed (e.g. `robots.txt` unreachable), record the dimension as `null` in `dimension_scores` and exclude it from the weighted sum, redistributing its weight proportionally across the remaining dimensions. Note any nulls in `seo.notes`.
 
 ## Step 6: UI/UX, Category, Style
 
