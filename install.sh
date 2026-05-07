@@ -45,7 +45,9 @@ detect_os() {
 # Walks top-level skills/*/ and one extra level skills/*/*/ so suite umbrellas
 # (e.g., website-cloner/) and their child skills are both installable.
 discover_skills() {
-  local dir desc
+  local dir desc prev_nullglob
+  prev_nullglob=$(shopt -p nullglob)
+  shopt -s nullglob
   for dir in "$SCRIPT_DIR"/skills/*/ "$SCRIPT_DIR"/skills/*/*/; do
     [[ -f "$dir/SKILL.md" ]] || continue
     local name
@@ -61,6 +63,7 @@ discover_skills() {
     SKILL_PATHS+=("${dir%/}")
     SKILL_SEL+=(0)
   done
+  eval "$prev_nullglob"
 
   if [[ ${#SKILLS[@]} -eq 0 ]]; then
     echo "${RED}No skills found (no subdirectories with SKILL.md in skills/).${RESET}"
