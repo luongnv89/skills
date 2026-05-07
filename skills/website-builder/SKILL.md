@@ -4,7 +4,7 @@ description: "Execute the approved tasks.md to build a Vite + React + shadcn/ui 
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -164,7 +164,7 @@ Create or update a GitHub repository for the site:
 
 ```bash
 git init
-git remote add origin git@gh-luongnv89:<user>/<repo>.git
+git remote add origin git@github.com:<user>/<repo>.git
 git add .
 git commit -m "chore: initial site build"
 git push -u origin main
