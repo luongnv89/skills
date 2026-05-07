@@ -4,7 +4,7 @@ description: "Produce a before/after comparison report of a website clone projec
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -179,15 +179,11 @@ No approval gate is required for this phase — it's the last step and informati
 
 ## Step 6: Save Report
 
-Write to output path:
+Persist the assembled report using the Write tool — never `echo > path`, since markdown bodies routinely contain backticks, dollar signs, and backslashes that the shell would mangle.
 
-```bash
-echo "$REPORT_CONTENT" > "$OUTPUT_PATH"
-```
+Default output path: `$PROJECT_DIR/final-report.md`, falling back to `~/workspace/clones/YYYY_MM_DD_slug/final-report.md` when no project dir is set.
 
-Default: `$PROJECT_DIR/final-report.md` or `~/workspace/clones/YYYY_MM_DD_slug/final-report.md`.
-
-If `$ARGUMENTS` includes `--output <path>`, use that.
+If `$ARGUMENTS` includes `--output <path>`, use that path verbatim.
 
 Confirm:
 
@@ -203,12 +199,3 @@ GitHub Pages URL: <url>
 | No analysis input | Note missing baseline, proceed with qualitative comparison |
 | No builder metadata | Note missing after data, request builder metadata from orchestrator |
 | No tasks.md | Describe what was implemented based on available data only |
-
-## Acceptance Criteria
-
-- [ ] Report uses Phase-1 analysis as baseline and builder metadata as "after" snapshot
-- [ ] Performance, SEO, security shown as before/after pairs with clear delta
-- [ ] UI/UX changes in plain language with concrete examples
-- [ ] Deviations from prd.md or tasks.md listed explicitly
-- [ ] GitHub Pages URL included prominently
-- [ ] Output written to known file path for stakeholder handoff
