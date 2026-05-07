@@ -30,13 +30,6 @@
 /website-cloner https://example.com
 ```
 
-## Resources
-
-| Path | Description |
-|---|---|
-| `references/` | Sibling skill API reference and phase coordination details |
-| `scripts/` | Phase invocation helpers |
-
 ## Output
 
 - `analysis.json` — Phase 1 structured analysis
