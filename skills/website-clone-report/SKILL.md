@@ -4,7 +4,7 @@ description: "Convert website analyzer output into a comprehensive plain-languag
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -160,17 +160,12 @@ Do **not** persist the file until explicit approval.
 
 ## Step 6: Persist Final Report
 
-Once approved, write the report to the output path:
+Once approved, persist the report using the `Write` tool — do not shell out to `echo` or `cat` redirection.
 
-```bash
-echo "$REPORT_CONTENT" > "$OUTPUT_PATH"
-```
+- **Path:** the value passed via `--output <path>`. If absent, fall back to `$PROJECT_DIR/report.md` when the orchestrator set `$PROJECT_DIR`, otherwise to `report.md` in the current working directory.
+- **Content:** the approved markdown report assembled in Step 3, with any edits from Step 5 applied.
 
-Default output path: `$PROJECT_DIR/report.md` or `~/workspace/clones/YYYY_MM_DD_slug/report.md`.
-
-If `$ARGUMENTS` includes `--output <path>`, use that path. Otherwise use the default.
-
-After writing, confirm:
+After the `Write` call returns, confirm to the user:
 
 ```
 Report saved to: <absolute-path>
