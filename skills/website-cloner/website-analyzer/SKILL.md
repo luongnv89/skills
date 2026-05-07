@@ -4,7 +4,7 @@ description: "Analyze any website URL across 6 dimensions: UI/UX, category, styl
 license: MIT
 effort: high
 metadata:
-  version: 1.0.1
+  version: 1.0.2
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -172,12 +172,3 @@ When a sub-score cannot be computed (e.g. `robots.txt` unreachable), record the 
 | Redirect loop | `{"error": "redirect-loop"}` — stop |
 | Empty page | `{"error": "empty"}` — stop |
 
-## Acceptance Criteria
-
-- [ ] `/website-analyzer <url>` accepts a single URL and runs without further prompting
-- [ ] Output covers all six dimensions: UI/UX, category, style, performance, security, SEO
-- [ ] Performance includes LCP, CLS, total page weight, request count
-- [ ] Security results are labelled as surface-level check
-- [ ] SEO includes overall score (0–100) plus per-dimension breakdown
-- [ ] Output is structured JSON consumable by downstream skills
-- [ ] Handles common failure modes with clear error output

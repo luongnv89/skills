@@ -4,7 +4,7 @@ description: "Execute the approved tasks.md to build a Vite + React + shadcn/ui 
 license: MIT
 effort: high
 metadata:
-  version: 1.0.1
+  version: 1.0.2
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -199,16 +199,6 @@ Write a JSON metadata file for the final report phase:
 ```
 
 Write to: `$PROJECT_DIR/builder-metadata.json`
-
-## Acceptance Criteria
-
-- [ ] Consumes approved tasks.md and prd.md without additional spec input
-- [ ] Uses Vite + React + shadcn/ui + Tailwind CSS
-- [ ] Produced site is serverless, front-end only, deployable to GitHub Pages
-- [ ] Landing/home page built first and independently usable
-- [ ] Asset collection and creation follow tasks.md plan
-- [ ] GitHub Pages URL reported on completion
-- [ ] Builder metadata emitted for website-clone-final-report
 
 ## Step Completion Reports
 

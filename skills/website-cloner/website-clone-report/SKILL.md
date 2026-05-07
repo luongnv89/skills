@@ -4,7 +4,7 @@ description: "Convert website analyzer output into a comprehensive plain-languag
 license: MIT
 effort: high
 metadata:
-  version: 1.0.1
+  version: 1.0.2
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -179,11 +179,3 @@ Report saved to: <absolute-path>
 | Invalid JSON | Report error and ask for valid input |
 | User never approves | Keep the loop going; do not auto-save |
 
-## Acceptance Criteria
-
-- [ ] The skill consumes the website-analyzer output without re-scraping the original site
-- [ ] The report is written in plain language; technical metrics are translated
-- [ ] The skill explicitly prompts the user to validate or edit the report before persisting
-- [ ] The final report is written to a known file path only after user approval
-- [ ] If the user requests edits, the skill incorporates them and re-prompts for approval
-- [ ] When run inside website-cloner, the orchestrator does not advance until "approved"

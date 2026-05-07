@@ -4,7 +4,7 @@ description: "Turn approved end-user report into a full improvement proposal wit
 license: MIT
 effort: high
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -160,7 +160,7 @@ Do **not** persist until explicit approval.
 Write to output path:
 
 ```bash
-echo "$PRD_CONTENT" > "$OUTPUT_PATH"
+printf '%s\n' "$PRD_CONTENT" > "$OUTPUT_PATH"
 ```
 
 Default: `$PROJECT_DIR/prd.md` or `~/workspace/clones/YYYY_MM_DD_slug/prd.md`.
@@ -197,11 +197,3 @@ still holds: no approval, no `prd.md`.
 | Invalid input format | Report error and ask for valid files |
 | User never approves | Keep looping; do not auto-save |
 
-## Acceptance Criteria
-
-- [ ] Proposal generated from approved Phase-2 report and Phase-1 analysis, not re-scraping
-- [ ] Every change includes what, why, and measurable expected-value statement
-- [ ] Explicitly prompts for user validation before writing prd.md
-- [ ] prd.md written to known location only after approval
-- [ ] Edits incorporated and re-prompted
-- [ ] prd.md structured cleanly for website-implementation-plan to consume

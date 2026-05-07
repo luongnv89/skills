@@ -4,7 +4,7 @@ description: "6-phase website cloning and improvement orchestrator. Takes a URL 
 license: MIT
 effort: high
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -252,11 +252,3 @@ This skill produces a before/after comparison covering performance, SEO, securit
 - **Missing sibling skill**: If a sibling skill is not available, skip that phase and note it in the report. Continue with remaining phases if possible.
 - **Partial Phase 1 results**: If the analyzer returns partial data (e.g., no SEO score), proceed to Phase 2 with a note that the missing dimension was not evaluated.
 
-## Acceptance Criteria
-
-- [ ] Invoking `/website-cloner <url>` runs the six phases in order, calling each sibling skill at the right step
-- [ ] After phases 2, 3, and 4 the orchestrator stops and waits for explicit user approval before advancing
-- [ ] Phase 3 produces a `prd.md` file and phase 4 produces a `tasks.md` file, both in the project directory
-- [ ] Phases can also be invoked individually (by calling the sibling skill directly with the right inputs)
-- [ ] The final phase emits a comparison report covering performance deltas, UI/UX changes, SEO score change, and the GitHub Pages URL
-- [ ] The skill description and trigger phrases make it discoverable ("clone this site", "rebuild this website", "make a better version of <url>")
