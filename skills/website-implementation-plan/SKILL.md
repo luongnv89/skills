@@ -4,7 +4,7 @@ description: "Turn approved prd.md into a phased implementation plan with landin
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -207,7 +207,7 @@ Do **not** persist until explicit approval.
 ## Step 8: Persist tasks.md
 
 ```bash
-echo "$TASKS_CONTENT" > "$OUTPUT_PATH"
+printf '%s\n' "$TASKS_CONTENT" > "$OUTPUT_PATH"
 ```
 
 Default: `$PROJECT_DIR/tasks.md` or `~/workspace/clones/YYYY_MM_DD_slug/tasks.md`.
@@ -218,7 +218,23 @@ Confirm:
 
 ```
 tasks.md saved to: <absolute-path>
+STATUS: approved
 ```
+
+## Return Contract
+
+When invoked by the `website-cloner` umbrella (Phase 4 gate), the orchestrator
+gates Phase 5 on this skill's outcome. The contract:
+
+| Outcome  | Signal                                                              |
+|----------|---------------------------------------------------------------------|
+| approved | `tasks.md` exists at the resolved output path AND final line of stdout reads `STATUS: approved` |
+| pending  | no `tasks.md` written; final line reads `STATUS: pending` (user still iterating) |
+| aborted  | no `tasks.md` written; final line reads `STATUS: aborted` (user declined) |
+
+The orchestrator MUST NOT advance to Phase 5 unless the outcome is `approved`.
+A standalone invocation may ignore the status line, but the file-existence rule
+still holds: no approval, no `tasks.md`.
 
 ## Error Handling
 
@@ -227,13 +243,3 @@ tasks.md saved to: <absolute-path>
 | No prd.md provided | Ask for the PRD file path |
 | Invalid PRD format | Report error and ask for valid file |
 | User never approves | Keep looping; do not auto-save |
-
-## Acceptance Criteria
-
-- [ ] Plan generated from approved prd.md, not re-scraping
-- [ ] Split into multiple sequenced phases (not one flat list)
-- [ ] Phase 1 covers landing/home page for early showability
-- [ ] Each task has scope, outputs, and acceptance criteria
-- [ ] Assets distinguished: collect from original vs. create new
-- [ ] Prompts for user approval before writing tasks.md
-- [ ] Orchestrator does not advance until "approved"
