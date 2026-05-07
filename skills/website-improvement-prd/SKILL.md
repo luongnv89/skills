@@ -4,7 +4,7 @@ description: "Turn approved end-user report into a full improvement proposal wit
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -171,7 +171,23 @@ Confirm:
 
 ```
 prd.md saved to: <absolute-path>
+STATUS: approved
 ```
+
+## Return Contract
+
+When invoked by the `website-cloner` umbrella (Phase 3 gate), the orchestrator
+gates Phase 4 on this skill's outcome. The contract:
+
+| Outcome  | Signal                                                              |
+|----------|---------------------------------------------------------------------|
+| approved | `prd.md` exists at the resolved output path AND final line of stdout reads `STATUS: approved` |
+| pending  | no `prd.md` written; final line reads `STATUS: pending` (user still iterating) |
+| aborted  | no `prd.md` written; final line reads `STATUS: aborted` (user declined) |
+
+The orchestrator MUST NOT advance to Phase 4 unless the outcome is `approved`.
+A standalone invocation may ignore the status line, but the file-existence rule
+still holds: no approval, no `prd.md`.
 
 ## Error Handling
 
