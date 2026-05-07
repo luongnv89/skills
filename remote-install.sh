@@ -341,6 +341,23 @@ strip_frontmatter() {
   awk 'BEGIN{n=0} /^---$/{n++; next} n>=2{print}' "$file"
 }
 
+# ─── Copy skill source into destination, skipping nested child skills ──────
+# Suite umbrellas (e.g., website-cloner/) physically contain their phase
+# children. Each child is independently installable via its own discover_skills
+# entry, so a plain `cp -r "$src"/*` would duplicate every child inside the
+# umbrella's destination. Skip any subdirectory that has its own SKILL.md.
+copy_skill_files() {
+  local src="$1" dest="$2"
+  local entry
+  for entry in "$src"/*; do
+    [[ -e "$entry" ]] || continue
+    if [[ -d "$entry" && -f "$entry/SKILL.md" ]]; then
+      continue
+    fi
+    cp -r "$entry" "$dest"/
+  done
+}
+
 # ─── Install one skill for one tool ────────────────────────────────────────
 install_skill_for_tool() {
   local skill="$1" tool="$2" src="$3"
@@ -354,7 +371,7 @@ install_skill_for_tool() {
         skill_dir=".claude/skills/$skill"
       fi
       mkdir -p "$skill_dir"
-      cp -r "$src"/* "$skill_dir"/
+      copy_skill_files "$src" "$skill_dir"
       INSTALLED+=("${skill}|${tool}|${skill_dir}/")
       ;;
 
@@ -365,7 +382,7 @@ install_skill_for_tool() {
         skill_dir=".agents/skills/$skill"
       fi
       mkdir -p "$skill_dir"
-      cp -r "$src"/* "$skill_dir"/
+      copy_skill_files "$src" "$skill_dir"
       mkdir -p .cursor/rules
       dest_file=".cursor/rules/${skill}.mdc"
       strip_frontmatter "$src/SKILL.md" > "$dest_file"
@@ -379,7 +396,7 @@ install_skill_for_tool() {
         skill_dir=".agents/skills/$skill"
       fi
       mkdir -p "$skill_dir"
-      cp -r "$src"/* "$skill_dir"/
+      copy_skill_files "$src" "$skill_dir"
       mkdir -p .windsurf/rules
       dest_file=".windsurf/rules/${skill}.md"
       strip_frontmatter "$src/SKILL.md" > "$dest_file"
@@ -393,7 +410,7 @@ install_skill_for_tool() {
         skill_dir=".agents/skills/$skill"
       fi
       mkdir -p "$skill_dir"
-      cp -r "$src"/* "$skill_dir"/
+      copy_skill_files "$src" "$skill_dir"
       mkdir -p .github/instructions
       dest_file=".github/instructions/${skill}.instructions.md"
       strip_frontmatter "$src/SKILL.md" > "$dest_file"
@@ -404,13 +421,13 @@ install_skill_for_tool() {
       if [[ "$INSTALL_SCOPE" == "global" ]]; then
         skill_dir="$HOME/.agents/skills/$skill"
         mkdir -p "$skill_dir"
-        cp -r "$src"/* "$skill_dir"/
+        copy_skill_files "$src" "$skill_dir"
         mkdir -p "$HOME/.codex"
         dest_file="$HOME/.codex/AGENTS.md"
       else
         skill_dir=".agents/skills/$skill"
         mkdir -p "$skill_dir"
-        cp -r "$src"/* "$skill_dir"/
+        copy_skill_files "$src" "$skill_dir"
         dest_file="AGENTS.md"
       fi
       {
@@ -429,7 +446,7 @@ install_skill_for_tool() {
         skill_dir=".agents/skills/$skill"
       fi
       mkdir -p "$skill_dir"
-      cp -r "$src"/* "$skill_dir"/
+      copy_skill_files "$src" "$skill_dir"
       INSTALLED+=("${skill}|${tool}|${skill_dir}/")
       ;;
 
@@ -440,7 +457,7 @@ install_skill_for_tool() {
         skill_dir=".agents/skills/$skill"
       fi
       mkdir -p "$skill_dir"
-      cp -r "$src"/* "$skill_dir"/
+      copy_skill_files "$src" "$skill_dir"
       INSTALLED+=("${skill}|${tool}|${skill_dir}/")
       ;;
   esac
@@ -458,7 +475,7 @@ install_skill_all_tools() {
     shared_dir=".agents/skills/$skill"
   fi
   mkdir -p "$shared_dir"
-  cp -r "$src"/* "$shared_dir"/
+  copy_skill_files "$src" "$shared_dir"
 
   # Step 2: Create symlink for Claude Code
   local claude_dir
