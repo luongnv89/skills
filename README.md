@@ -123,7 +123,7 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | <a id="code-review"></a>[**code-review**](skills/code-review/) | 1.0.1 | ![medium](https://img.shields.io/badge/medium-orange) | Reviews based on Code Smells + The Pragmatic Programmer. Structured reports by severity |
 | <a id="code-optimizer"></a>[**code-optimizer**](skills/code-optimizer/) | 1.2.0 | ![medium](https://img.shields.io/badge/medium-orange) | Finds bottlenecks, memory leaks, caching gaps, concurrency issues |
 | <a id="test-coverage"></a>[**test-coverage**](skills/test-coverage/) | 1.2.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Targets untested branches and edge cases in your existing test suite |
-| <a id="usability-review"></a>[**usability-review**](skills/usability-review/) | 1.2.0 | ![medium](https://img.shields.io/badge/medium-orange) | Usability reviews using Krug's principles with visual scorecards |
+| <a id="dont-make-me-think"></a>[**dont-make-me-think**](skills/dont-make-me-think/) | 1.2.1 | ![medium](https://img.shields.io/badge/medium-orange) | Usability reviews using Krug's principles with visual scorecards |
 
 ### Shipping
 

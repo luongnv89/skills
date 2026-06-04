@@ -40,7 +40,7 @@ graph TD
 ## Usage
 
 ```
-/usability-review
+/dont-make-me-think
 ```
 
 ## Resources

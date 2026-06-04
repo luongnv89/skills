@@ -9,6 +9,7 @@
 | website-analyzer | 1.0.1 |
 
 ### Repo Structure
+- **dont-make-me-think restored**: Brought back the `dont-make-me-think` skill name (1.2.1), which had been renamed to `usability-review` in #16. The improved content from `usability-review` (1.2.0) is preserved verbatim under the original name — `When to Use`/`Instructions` sections, dry-run safety wording, and the `references/step-completion-reports.md` extraction all carry over. Removed the duplicate `usability-review` directory so the skill exists once. Catalog references updated in `README.md` and `SUBAGENT_ADOPTION_PLAN.md`; the historical rename rows in this changelog are left intact as a record.
 - **website-cloner suite consolidation**: Moved the six sibling skills (`website-analyzer`, `website-clone-report`, `website-improvement-prd`, `website-implementation-plan`, `website-builder`, `website-clone-final-report`) into `skills/website-cloner/<name>/`, with the umbrella `website-cloner` staying at the top level. Git history preserved via `git mv`. No phase-skill logic or version changes. Installer discovery (`install.sh`, `remote-install.sh`) now walks one extra level deep so suite umbrellas and child skills are both installable individually. Catalog references updated in `README.md` and `skills/website-cloner/website-clone-report/references/api_reference.md`. README adds a "Suite Folders" section establishing the convention for future multi-skill products. **website-cloner**: 1.0.0 → 1.1.0 — adds a "Layout" section documenting the suite topology (no behavior change). (#43)
 
 ### Bug Fixes

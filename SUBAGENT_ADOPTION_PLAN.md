@@ -259,7 +259,7 @@
 
 | Skill | Score | Pattern | Key Change |
 |---|---|---|---|
-| **usability-review** | 4/5 | C: Review Loop | Add `agents/ui-analyst.md` + `agents/report-writer.md` + `agents/fixer.md` |
+| **dont-make-me-think** | 4/5 | C: Review Loop | Add `agents/ui-analyst.md` + `agents/report-writer.md` + `agents/fixer.md` |
 | **readme-to-landing-page** | 4/5 | C: Review Loop | Add `agents/researcher.md` + `agents/writer.md` + `agents/reviewer.md` |
 | **cli-builder** | 4/5 | A: Explorer+Executor | Add `agents/analyzer.md` + `agents/implementer.md` + `agents/reviewer.md` |
 | **theme-transformer** | 4/5 | A: Explorer+Executor | Add `agents/style-auditor.md` + `agents/theme-executor.md` + `agents/accessibility-checker.md` |
