@@ -1,0 +1,23 @@
+{
+  "skill_name": "tmux-agent-comms",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have another Claude Code agent running in a tmux session called 'reviewer'. Ask it to summarize the open PRs and show me what it says back.",
+      "expected_output": "Resolves/verifies the 'reviewer' session (has-session or list-sessions), sends the message with send-keys + Enter, waits for the pane to settle (wait_for_idle.py or a capture-compare loop rather than a blind fixed sleep), captures the pane, and relays the reviewer's reply.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Spin up two tmux agents for me — one named 'tests' and one named 'docs' — and launch claude in each, in the current project directory.",
+      "expected_output": "Creates two detached named sessions (tmux new-session -d -s tests / -s docs), uses -c for the project directory, launches the agent in each, and waits for each to finish booting before considering them ready. No destructive commands.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I'm done with all my tmux agents, just kill everything.",
+      "expected_output": "Treats teardown as destructive: confirms with the user before killing, prefers killing the named sessions individually over kill-server unless a full reset is explicitly wanted, and warns that unsaved agent state is lost.",
+      "files": []
+    }
+  ]
+}

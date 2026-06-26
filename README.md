@@ -195,6 +195,7 @@ npx skills add https://github.com/luongnv89/skills --skill <skill-name>
 | <a id="install-script-generator"></a>[**install-script-generator**](skills/install-script-generator/) | 2.0.0 | ![high](https://img.shields.io/badge/high-red) | Cross-platform installers with environment detection |
 | <a id="github-issue-creator"></a>[**github-issue-creator**](skills/github-issue-creator/) | 1.0.0 | ![medium](https://img.shields.io/badge/medium-orange) | Issues from screenshots, emails, bug reports -- with PII redaction |
 | <a id="opencode-runner"></a>[**opencode-runner**](skills/opencode-runner/) | 1.2.0 | ![medium](https://img.shields.io/badge/medium-orange) | Delegate tasks to opencode with free cloud models |
+| <a id="tmux-agent-comms"></a>[**tmux-agent-comms**](skills/tmux-agent-comms/) | 1.2.0 | ![medium](https://img.shields.io/badge/medium-orange) | Spawn, message, and tear down AI agents in tmux sessions |
 | <a id="context-hub"></a>[**context-hub**](skills/context-hub/) | 1.0.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Fetch current API/SDK docs before writing integration code |
 | <a id="skill-creator"></a>[**skill-creator**](skills/skill-creator/) | 1.1.0 | ![max](https://img.shields.io/badge/max-darkred) | Create, validate, and package your own skills |
 | <a id="skill-inventory-auditor"></a>[**skill-inventory-auditor**](skills/skill-inventory-auditor/) | 1.0.0 | ![low](https://img.shields.io/badge/low-brightgreen) | Find and remove duplicate skill installations |
