@@ -101,32 +101,26 @@ tmux send-keys -t agent1 "your message"
 tmux send-keys -t agent1 Enter
 ```
 
-**Verify delivery before you wait (don't skip this).** A keystroke can drop, an `Enter` can go unsubmitted, or a busy/blocked pane can swallow the input — and you'd then wait on a reply that will never come. The trap: the message text appears in `capture-pane` whether it was **submitted** (echoed into the transcript) or is merely **typed and still parked in the input box** — both render as the same characters. So checking that the text is *present* only proves it was typed, not sent. After send, before Phase 4, run a **bounded** check (one short fixed delay, then a single capture — never a poll loop that can hang) that confirms **submission**: the agent started working, or the input line cleared.
+**Verify delivery before you wait (don't skip this).** A keystroke can drop, an `Enter` can go unsubmitted, or a busy/blocked pane can swallow the input — and you'd then wait on a reply that will never come. The trap: the message text appears in `capture-pane` whether it was **submitted** or is merely **typed and still parked in the input box** — both render as the same characters, so "the text is on screen" only proves it was typed, not sent. The one signal that reliably means *submitted* is **post-send activity**: once the agent accepts the message it starts working (a spinner / `esc to interrupt`). So after send, before Phase 4, run a **bounded** check (one short fixed delay, then a single capture — never a poll loop that can hang) and key it off that activity:
 
 ```bash
 tmux send-keys -t agent1 "summarize the changes in src/"
 tmux send-keys -t agent1 Enter
 sleep 5                                          # bounded: one fixed wait, ~5s
 pane=$(tmux capture-pane -t agent1 -p -S -40)    # ~40 scrollback lines + visible pane
-busy=$(printf '%s\n' "$pane" | grep -Ec 'esc to interrupt|[⠁-⣿]')  # post-send activity = it was submitted
-if [ "$busy" -gt 0 ] || ! printf '%s\n' "$pane" | tail -3 | grep -qF "summarize the changes in src/"; then
-  echo "delivered"          # agent busy, or text left the input box (now in transcript)
-elif printf '%s\n' "$pane" | grep -qF "summarize the changes in src/"; then
-  echo "UNSUBMITTED"        # text still parked in input box, no activity
+if printf '%s\n' "$pane" | grep -Eq 'esc to interrupt|[⠁-⣿]'; then
+  echo "delivered"          # agent is working → input was accepted and submitted
 else
-  echo "DROPPED"            # text absent entirely
+  echo "NOT-DELIVERED"      # no activity → it didn't land; re-send (below)
 fi
 ```
 
-Three **distinct** outcomes (none of them a reply timeout — that's Phase 4):
+Two outcomes — and neither is a reply timeout (that's Phase 4):
 
-- **`delivered`** — the agent is busy (spinner / `esc to interrupt`) or the typed text has left the input box into the transcript. Input was accepted *and* submitted → proceed to Phase 4.
-- **`UNSUBMITTED`** — the text is on screen but still sitting unsent in the input box with no activity. This is the active form of the separate-Enter gotcha above: send a lone `Enter` (`tmux send-keys -t agent1 Enter`), then re-check once.
-- **`DROPPED`** — the text never appeared (dropped/swallowed keystroke). Re-type the message, then re-check once.
+- **`delivered`** — the agent is busy (spinner / `esc to interrupt`), which only appears once the message was accepted *and* submitted → proceed to Phase 4.
+- **`NOT-DELIVERED`** — no post-send activity. The cause is usually the separate-Enter gotcha above (the message typed but the `Enter` didn't submit) or a dropped/swallowed keystroke. The fix covers both: **send a lone `Enter`** (`tmux send-keys -t agent1 Enter`) and re-check once — a no-op if it was already submitted; if there's still nothing, **re-type** the message. Report this **distinctly** from a Phase 4 reply timeout: nothing was submitted, so don't start waiting until it lands.
 
-Report `UNSUBMITTED`/`DROPPED` distinctly — nothing was submitted, so don't start waiting until it lands. This is the `send → verify-delivered → wait → bounded-tail capture` sequence the rest of the workflow follows.
-
-If your agent's spinner glyphs differ, key the activity check off its busy marker (the same `--busy-marker` / `TAC_BUSY_MARKERS` vocabulary Phase 4 uses) — don't rely on `esc to interrupt` alone.
+This is the `send → verify-delivered → wait → bounded-tail capture` sequence the rest of the workflow follows. Don't try to read the message text back out of the pane to confirm it — a single capture can't tell "echoed in the transcript" from "still parked in the input box," so trust the activity signal, not the presence of the text. If your agent's spinner glyphs differ, key the check off its busy marker (the same `--busy-marker` / `TAC_BUSY_MARKERS` vocabulary Phase 4 uses) rather than `esc to interrupt` alone.
 
 ## Phase 4: Wait for the Reply, Then Read It
 
@@ -212,7 +206,7 @@ echo "wait exit=$?"                               # 0 idle · 3 blocked-on-promp
 tmux capture-pane -t reviewer -p -S -40           # bounded tail (~40 scrollback + visible pane), Phase 5
 ```
 
-The delivery check here keys off **post-send activity** (the agent is now busy), which only appears once the message was accepted *and* submitted — see Phase 3 for the full three-way `delivered` / `UNSUBMITTED` / `DROPPED` branch. Expected output (the bounded tail — a complete answer, low-noise, not the whole scrollback):
+The delivery check here keys off **post-send activity** (the agent is now busy), which only appears once the message was accepted *and* submitted — see Phase 3 for the `delivered` / `NOT-DELIVERED` branch and the re-send remedy. Expected output (the bounded tail — a complete answer, low-noise, not the whole scrollback):
 
 ```
 delivered
@@ -228,7 +222,7 @@ Relay that answer to the user. If the bounded-tail read starts mid-sentence, wid
 - **Reply ends in a numbered list** ("1. yes 2. no") — handled: block detection uses only verified dialog strings, so a normal reply is not mistaken for a prompt.
 - **Duplicate session name** — `tmux new-session` exits 1 ("duplicate session"); resolve a free name first (Phase 1).
 - **Agent reply contains "running"/"loading"/"…"** — handled: busy detection scans only spinner *chrome* in the last lines, never reply prose.
-- **Message never landed** — the Phase 3 check verifies *submission* (post-send activity / input cleared), not just that the text is on screen, and splits it into two distinct outcomes *before* waiting: `UNSUBMITTED` (text parked in the input box, no activity → send a lone `Enter`) and `DROPPED` (text absent → re-type). Both differ from a reply timeout: nothing was submitted, so re-send rather than wait longer.
+- **Message never landed** (dropped keystroke, unsubmitted `Enter`, input swallowed by a busy pane) — the Phase 3 check keys off *post-send activity*, not the mere presence of the text on screen, so it catches this **before** waiting and reports `NOT-DELIVERED`. The remedy covers every cause: send a lone `Enter`, re-check, then re-type if still nothing. Distinct from a reply timeout — nothing was submitted, so re-send rather than wait longer.
 - **Agent stalled** (pane unchanged across reads, no spinner, no completion) — distinct from "still working" (spinner/`esc to interrupt` or a changing tail) and from a dropped delivery. Surface it; don't silently re-wait (Phase 4).
 - **Re-wait/re-send loop won't terminate** — enforce the overall budget (Phase 4): cap total re-waits/wall-clock and escalate to the user; never poll indefinitely.
 - **Bounded-tail capture starts mid-sentence** — the reply is longer than ~40 lines; widen stepwise (`-S -80`, …) and only reach for unbounded `-S -` if even a wide tail truncates (Phase 5).
