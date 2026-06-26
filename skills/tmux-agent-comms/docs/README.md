@@ -47,6 +47,71 @@ graph TD
 
 Or just describe the goal in natural language — "talk to my other Claude agent in tmux", "launch a couple of agents and coordinate them" — and the skill triggers.
 
+## Popular Use Cases
+
+Each example is something you type to your agent. Start with `/tmux-agent-comms` to load the skill, then describe the goal — the skill handles the tmux mechanics (spawning, escaping, waiting for replies, confirming before anything destructive).
+
+### 1. Talk to another agent you already have running
+
+You've got a second Claude Code (or Gemini) running in a tmux session called `reviewer` and want to ask it something without switching windows.
+
+```
+/tmux-agent-comms ask the "reviewer" agent to summarize the open PRs, show me its reply
+```
+
+The skill resolves the `reviewer` session, sends the message, waits for the pane to settle (no fixed `sleep` guessing), and relays just the answer back to you — not the whole screen of box-drawing.
+
+### 2. Launch a fleet and give them a shared task
+
+Spin up several agents, each scoped to a job, and kick them all off at once.
+
+```
+/tmux-agent-comms launch three Claude agents in tmux named reviewer, tests, and docs in this repo, then ask each to report what it would work on first
+```
+
+The skill creates three named detached sessions, boots an agent in each, waits for each to clear its boot/trust prompt, then messages them. Naming sessions by job (`reviewer`, `tests`, `docs`) keeps later messages self-documenting.
+
+### 3. Broadcast one instruction to the whole fleet
+
+Send the same message to every agent and collect all the replies together — the waits run concurrently, so it takes as long as the *slowest* agent, not the sum.
+
+```
+/tmux-agent-comms tell all my running agents to pull the latest main and report status
+```
+
+You get one labeled block per agent with its reply and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), so you can see at a glance which agents are done and which need attention.
+
+### 4. Hand a long prompt or a code block to an agent
+
+Pasting multi-line text or code into another agent normally breaks on shell quoting (`$`, backticks, `;`, newlines). The skill loads it via a tmux paste-buffer instead, so it lands literally.
+
+```
+/tmux-agent-comms send this function to the "tests" agent and ask it to write unit tests:
+def f(x): return x * 2
+```
+
+No manual escaping — the skill writes the message to a buffer and pastes it into the target.
+
+### 5. A fresh agent is stuck on a trust / auth prompt
+
+A newly launched Gemini or Claude in an untrusted folder parks on a "Do you trust this folder?" dialog before its input box works. The skill detects this and refuses to type into it (a typed message would be read as menu input).
+
+```
+/tmux-agent-comms is my new "docs" agent ready to take a message yet?
+```
+
+If it's still on a dialog, the skill shows you the prompt and asks how to respond — it won't fire a message blind.
+
+### 6. Shut an agent down (safely)
+
+Killing a session loses that agent's unsaved work, so the skill always confirms first.
+
+```
+/tmux-agent-comms shut down the "tests" agent, I'm done with it
+```
+
+The skill confirms the target with you, then `kill-session`. (A full reset of every agent via `kill-server` likewise asks first — see the safety reminders below.)
+
 ## Resources
 
 | Path | Description |
