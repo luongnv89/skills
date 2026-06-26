@@ -62,14 +62,15 @@ List panes and their indices with `tmux list-panes -t agent1`.
 
 ## Reading scrollback robustly
 
-`capture-pane -p` only returns the **visible** pane. A long reply that scrolled off needs scrollback:
+The **default** read for a full reply is a bounded tail of ~20–40 lines (`-S -40`) — see SKILL.md Phase 5. This section is the **expand** case: a reply long enough that the bounded tail truncated (the capture starts mid-sentence). Widen the window stepwise rather than jumping straight to the whole history:
 
 ```bash
-tmux capture-pane -t agent1 -p -S -500      # last 500 lines
-tmux capture-pane -t agent1 -p -S -          # entire scrollback (can be large)
+tmux capture-pane -t agent1 -p -S -80       # widen the tail when ~40 lines truncates
+tmux capture-pane -t agent1 -p -S -500      # last 500 lines, for a very long reply
+tmux capture-pane -t agent1 -p -S -          # entire scrollback — last resort, can be large
 ```
 
-`-S -` (start at the very top of history) grabs everything — useful when you don't know how long the reply was, but it can be large, so prefer a bounded `-S -<N>` and increase if truncated. The bundled `wait_for_idle.py` accepts `--scrollback N` to factor history into its stability check.
+`-S -` (start at the very top of history) grabs everything — useful when you genuinely don't know how long the reply was, but it floods the capture with old turns and chrome, so reach for it **only** when even a wide tail truncates. Keep captures bounded by default and increase the window only as far as needed. The bundled `wait_for_idle.py` accepts `--scrollback N` to factor history into its stability check.
 
 ## Stripping TUI chrome from a capture
 
@@ -86,12 +87,14 @@ This is best-effort — always sanity-check the result rather than trusting it b
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Message typed but never submitted | TUI didn't accept `Enter` in the same call | Send `Enter` as its own `send-keys` call (SKILL.md Phase 3) |
+| Message never reached the agent (dropped) | Keystroke dropped / `Enter` unsubmitted / busy pane swallowed input | Caught by the Phase 3 delivery check (`sleep 5` then `capture-pane … \| grep -qF`). Re-send the `Enter` or re-type; report **distinctly** from a reply timeout — nothing was submitted |
 | `can't find session` / nothing happens | Wrong or non-existent target | `tmux has-session -t <name>`; then `tmux list-sessions` to find the real name |
 | Captured pane is empty or all chrome | Read too early, or wrong pane | Re-run `wait_for_idle.py`; check pane index with `tmux list-panes` |
-| Reply cut off | Answer scrolled past the visible pane | Re-capture with `-S -<N>` scrollback (see above) |
+| Reply cut off | Bounded-tail window too small for this reply | Widen the tail stepwise — `-S -80`, then larger; unbounded `-S -` only as last resort (SKILL.md Phase 5; "Reading scrollback robustly" above) |
 | `;` or `$...` came out wrong / executed | Shell/tmux interpreted special chars | Quote the message; use `send-keys -l` or paste-buffer (see above) |
 | Agent stuck on a yes/no or trust prompt | It's waiting for a keypress, not a typed line | `wait_for_idle.py` flags this as exit 3 (BLOCKED) for known dialogs. Send the exact key it expects (e.g. `tmux send-keys -t agent1 "1" Enter`), but confirm with the user first for any permission/trust prompt |
-| `wait_for_idle.py` times out repeatedly | Agent genuinely slow, or a persistent spinner | Raise `--timeout`; if a static UI element matches a busy marker, fall back to the manual capture-compare loop |
+| Can't tell if the agent is stuck or still working | Trusting the helper's exit code without a look | Verdict is advisory — read the pane yourself (`-S -40`). Spinner / changing tail = working (wait); unchanged + no spinner + no completion = stalled (surface to user). SKILL.md Phase 4 |
+| `wait_for_idle.py` times out repeatedly | Agent genuinely slow, or a persistent spinner | Raise `--timeout` for a single wait; if a static UI element matches a busy marker, fall back to the manual capture-compare loop. Bound the **overall** re-wait/re-send loop and escalate when the budget is spent — never poll forever (SKILL.md Phase 4) |
 | New session dies immediately | Agent binary not found in that shell | Launch the agent manually once to see the error; ensure it's on PATH in a login shell |
 
 ## Safety reminders
