@@ -62,7 +62,7 @@ List panes and their indices with `tmux list-panes -t agent1`.
 
 ## Reading scrollback robustly
 
-The **default** read for a full reply is a bounded tail of ~20–40 lines (`-S -40`) — see SKILL.md Phase 5. This section is the **expand** case: a reply long enough that the bounded tail truncated (the capture starts mid-sentence). Widen the window stepwise rather than jumping straight to the whole history:
+The **default** read for a full reply is a bounded tail — `-S -40`, which returns ~40 lines of scrollback plus the visible pane — see SKILL.md Phase 5. This section is the **expand** case: a reply long enough that the bounded tail truncated (the capture starts mid-sentence). Widen the window stepwise rather than jumping straight to the whole history:
 
 ```bash
 tmux capture-pane -t agent1 -p -S -80       # widen the tail when ~40 lines truncates
@@ -87,7 +87,9 @@ This is best-effort — always sanity-check the result rather than trusting it b
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Message typed but never submitted | TUI didn't accept `Enter` in the same call | Send `Enter` as its own `send-keys` call (SKILL.md Phase 3) |
-| Message never reached the agent (dropped) | Keystroke dropped / `Enter` unsubmitted / busy pane swallowed input | Caught by the Phase 3 delivery check (`sleep 5` then `capture-pane … \| grep -qF`). Re-send the `Enter` or re-type; report **distinctly** from a reply timeout — nothing was submitted |
+| Delivery check says `delivered` but no reply ever comes | Checked that the text is *present*, not that it was *submitted* — `capture-pane` shows input-box text and transcript text identically | Verify **submission**, not presence: after send+5s, confirm post-send activity (spinner / `esc to interrupt`) or that the input line cleared. Don't gate on `grep -qF "<text>"` alone (SKILL.md Phase 3) |
+| Message present on screen but unsubmitted (sitting in input box) | `Enter` rode in the same call and wasn't accepted | Phase 3 check reports this as `UNSUBMITTED` (text present, no activity). Send a lone `Enter`, re-check — distinct from a dropped keystroke and from a reply timeout |
+| Message never reached the agent (dropped) | Keystroke dropped / busy pane swallowed input | Phase 3 check reports this as `DROPPED` (text absent). Re-type, re-check; report **distinctly** from a reply timeout — nothing was submitted |
 | `can't find session` / nothing happens | Wrong or non-existent target | `tmux has-session -t <name>`; then `tmux list-sessions` to find the real name |
 | Captured pane is empty or all chrome | Read too early, or wrong pane | Re-run `wait_for_idle.py`; check pane index with `tmux list-panes` |
 | Reply cut off | Bounded-tail window too small for this reply | Widen the tail stepwise — `-S -80`, then larger; unbounded `-S -` only as last resort (SKILL.md Phase 5; "Reading scrollback robustly" above) |
