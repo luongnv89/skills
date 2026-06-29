@@ -38,3 +38,35 @@ PHASE_1_SUMMARY.md
 # Skill auto-improver iteration artifacts
 .asm-improver/
 SKILL.md.bak
+
+# AI tool config/scratch folders (per-vendor, not part of the catalog)
+.ai-tools/
+.adal/
+.augment/
+.codebuddy/
+.codex/
+.commandcode/
+.continue/
+.crush/
+.factory/
+.gemini/
+.goose/
+.hermes/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.opencode/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.vibe/
+.zencoder/
