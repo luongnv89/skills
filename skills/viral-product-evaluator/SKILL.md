@@ -23,8 +23,8 @@ Trigger when the user wants to:
 - Check a product against "the 32 principles" (Marc Lou-style viral-product rules)
 
 Do **not** use for: technical SEO (`seo-ai-optimizer`), App Store ASO (`aso-marketing`),
-writing landing-page copy from scratch (`landing-page-copywriter`), turning a README into a
-page (`readme-to-landing-page`), or bug-hunting code review (`code-review`). This skill
+turning a README into a page (`readme-to-landing-page`), or bug-hunting code review
+(`code-review`). This skill
 **evaluates and prioritizes**; it does not rewrite the product.
 
 ## What this skill does and does not touch
@@ -71,9 +71,9 @@ Run these in sequence. Emit the matching Step Completion Report (see
   paywall/auth gating, trial logic. Grep for `price`, `plan`, `tier`, `checkout`,
   `subscription`, `free`, `trial`, `stripe`, `paddle`.
 - Skim the **feature surface** (routes, nav items, top-level modules) to judge "does one thing".
-- For a large codebase, spawn an **Explore** subagent to collect the pricing + feature evidence
-  so the main context stays clean. Give it the grep targets above and ask for: tier list,
-  billing type (one-time vs subscription), free-plan yes/no, and a one-line feature inventory.
+- For a large codebase, use **grep/read** (or a one-off **Agent** task scoped to pricing +
+  feature evidence) so the main context stays clean. Collect: tier list, billing type (one-time
+  vs subscription), free-plan yes/no, and a one-line feature inventory.
 - Note any extra instructions from the user.
 
 ### Phase 2 — Evaluate against the 32 principles
