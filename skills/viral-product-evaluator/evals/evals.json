@@ -1,0 +1,23 @@
+{
+  "skill_name": "viral-product-evaluator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Here's my SaaS at https://example-saas.com and the code is in this repo. What do I need to change to make it more viral?",
+      "expected_output": "Fetches the landing page via /browse and reads the repo for pricing/feature evidence. Scores all 32 principles PASS/PARTIAL/FAIL with product-specific evidence, computes a Virality Score /100 and tier, and writes viral-evaluation.md. The main deliverable is a prioritized fix list ordered by impact, each with current-vs-proposed. Low-confidence (visual/judgment) verdicts are flagged.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Review my landing page against the 32 viral product principles. It's the index.html in ./landing/. We keep a free tier on purpose because it's our growth loop.",
+      "expected_output": "Reads ./landing/index.html directly (no network). Scores all 32 principles. Still marks principle #1 (no free plan) as FAIL per the rubric but notes in the caveats that the free tier is a deliberate strategic choice, so the score is read in context. Produces scorecard + prioritized fixes + strengths + caveats.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Grade this product for shareability and tell me, in priority order, the top things to fix first.",
+      "expected_output": "Asks for / resolves the landing page and codebase inputs. Evaluates all 32 principles, then leads with the prioritized top-fixes list (highest impact x ease first: hero, paywall, headline, proof, single CTA), merging principles that share a root cause into single actionable fixes. Includes the Virality Score and what's already working.",
+      "files": []
+    }
+  ]
+}
