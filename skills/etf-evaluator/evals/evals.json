@@ -1,0 +1,23 @@
+{
+  "skill_name": "etf-evaluator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Is VWCE a good ETF to buy as the core of my long-term portfolio? I'm an EU investor on Trade Republic, base currency EUR.",
+      "expected_output": "Captures goal = core holding (long horizon, EUR, EU/Trade Republic). Identifies the exact instrument by ISIN (IE00BK5BQT80, Vanguard FTSE All-World UCITS, Acc) and confirms the index. Researches and CITES each figure (TER, AUM, replication, domicile, tracking) from live sources with as-of dates; marks anything unfound as Unverified, never guesses. Rates all 10 points against CORE thresholds (e.g. TER judged strictly vs <0.20% Good). Surfaces 1-2 same-index alternatives (e.g. VWRL dist, or FTSE All-World twins). Produces a single self-contained HTML file at ~/etf-evaluations/IE00BK5BQT80_etf_evaluation.html with embedded CSS, no external deps. HTML includes: navy header, color-coded verdict card, 10-row scorecard with rating badges, comparison table, risks, sources, disclaimer. Echoes the absolute file path.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Evaluate the Amundi MSCI World Financials ETF before I put money in.",
+      "expected_output": "Notes the name is ambiguous and anchors on the ISIN + share class (acc/dist, currency, listing) before evaluating, asking the user to confirm if needed. Treats it as a THEMATIC/sector bet, so rates TER/volatility against sector-peer thresholds (not core thresholds) and recommends a position-size cap (e.g. 5-15% of portfolio, satellite only). Flags synthetic replication counterparty risk if applicable and sector concentration. Every figure cited or marked Unverified with an as-of date. Produces a single self-contained HTML file (no external deps) with embedded CSS, color-coded verdict, 10-row scorecard, comparison table, risks, and disclaimer. Echoes the absolute file path.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Should I pick IWDA or SWDA for my MSCI World allocation? Which is better?",
+      "expected_output": "Recognizes these track the same index (MSCI World) and confirms each ISIN/share class (IWDA = IE00B4L5Y983 acc; SWDA is the same fund/ISIN on the LSE GBP line) before scoring. Researches and cites TER, AUM, replication, domicile, and tracking for both with as-of dates. Compares them head-to-head in the comparison table on cost/size/domicile/listing/currency rather than scoring them as different funds, and explains that the choice is largely about exchange/currency. Produces a single self-contained HTML file (no external deps) with embedded CSS, verdict card, scorecard, comparison table, and disclaimer. Echoes the absolute file path. Does not fabricate figures.",
+      "files": []
+    }
+  ]
+}
