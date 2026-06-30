@@ -12,7 +12,7 @@
 ## Highlights
 
 - Proven copywriting frameworks: PAS, AIDA, and StoryBrand
-- Complete page sections: hero, problem, solution, how it works, social proof, FAQ, final CTA
+- Complete page sections: framework-specific narrative blocks, how it works, social proof, FAQ, and closing CTA
 - Anti-slop rules to avoid generic AI marketing filler
 - A/B test ideas and conversion optimization notes with every deliverable
 - CTA best practices for action-oriented, outcome-specific button copy

@@ -4,7 +4,7 @@ description: "Generate conversion-focused landing page copy with PAS, AIDA, or S
 license: MIT
 effort: high
 metadata:
-  version: 1.1.2
+  version: 1.1.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

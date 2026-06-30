@@ -63,9 +63,9 @@ Why it beats alternatives: [Specific differentiator]
 HOW IT WORKS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 1: [Simple action]
-Step 2: [Simple action]
-Step 3: [Simple action]
+Step 1: [Icon concept] — [Simple action]
+Step 2: [Icon concept] — [Simple action]
+Step 3: [Icon concept] — [Simple action]
 
 CTA: "[Action-oriented text]"
 
@@ -160,9 +160,11 @@ Outcome statement: [Life or workflow after adopting the product]
 HOW IT WORKS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 1: [Simple action]
-Step 2: [Simple action]
-Step 3: [Simple action]
+Step 1: [Icon concept] — [Simple action]
+Step 2: [Icon concept] — [Simple action]
+Step 3: [Icon concept] — [Simple action]
+
+CTA: "[Action-oriented text]"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SOCIAL PROOF
@@ -247,9 +249,9 @@ Authority proof: [Credentials, results, or experience that earns trust]
 PLAN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 1: [Simple action the customer takes]
-Step 2: [Simple action the customer takes]
-Step 3: [Simple action the customer takes]
+Step 1: [Icon concept] — [Simple action the customer takes]
+Step 2: [Icon concept] — [Simple action the customer takes]
+Step 3: [Icon concept] — [Simple action the customer takes]
 
 Plan summary: [One sentence — "Do X, then Y, then Z to get the outcome"]
 
@@ -278,6 +280,9 @@ A: [Clear, confident answer]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CALL TO ACTION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Urgency/scarcity element — only if genuine]
+[Risk reversal — guarantee, trial, or low-friction start]
 
 Direct CTA: [Clear invitation to start]
 Transitional CTA (optional): [Lower-commitment offer — lead magnet, demo, guide]
