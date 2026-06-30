@@ -94,8 +94,8 @@
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text);
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       border-radius: 6px;
       font-size: 1.25rem;
       line-height: 1;
@@ -126,6 +126,14 @@
     .btn:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 3px;
+    }
+
+    .nav-links a:focus-visible,
+    .menu-toggle:focus-visible,
+    .tag:focus-visible,
+    .copy-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     .btn-primary {
@@ -373,7 +381,9 @@
       right: 0.6rem;
       font-family: "IBM Plex Mono", monospace;
       font-size: 0.68rem;
-      padding: 0.25rem 0.6rem;
+      padding: 0.5rem 0.75rem;
+      min-height: 44px;
+      min-width: 44px;
       background: var(--surface-2);
       color: var(--accent);
       border: 1px solid var(--border);
@@ -483,13 +493,17 @@
 
     @media (prefers-reduced-motion: reduce) {
       .hero .container,
-      .card, .feature, .steps > * {
+      .card,
+      .feature,
+      .steps > *,
+      .features > * {
         animation: none;
+        opacity: 1;
+        transform: none;
       }
     }
 
     @media (max-width: 640px) {
-      .nav-links .hide-mobile { display: none; }
       .hero { padding-top: 3rem; padding-bottom: 3rem; }
 
       .nav-links {
@@ -697,7 +711,7 @@
   </section>
 
   <!-- CATALOG PREVIEW -->
-  <section>
+  <section id="catalog">
     <div class="container">
       <div class="section-label">Catalog</div>
       <h2>Pick what you need today</h2>
