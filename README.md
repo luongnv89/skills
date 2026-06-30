@@ -11,9 +11,9 @@
 
 # Ready-Made Skills for AI Coding Agents
 
-Browse the catalog. Pick what you need. Install with one command. Each skill is independent -- no bundle, no framework, no lock-in.
+Stop rebuilding the same instructions on every project. Install standalone, versioned skills with one command. Your agent follows the exact workflow every time.
 
-Works with any AI coding tool that supports agent skills -- Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, and more.
+Each skill is independent — no bundle, no framework, no lock-in. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, and more.
 
 [**Browse the catalog**](#skill-catalog) | [**Install a skill**](#install)
 
