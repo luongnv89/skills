@@ -4,15 +4,15 @@ description: "Manage AI agents in tmux: spawn or kill sessions and message any C
 license: MIT
 effort: medium
 metadata:
-  version: 1.3.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.4.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Tmux Agent Comms
 
-Manage and talk to AI agents (another Claude Code, Gemini CLI, or any CLI) running in separate tmux sessions. This skill covers the full loop: **create** sessions for agents, **send** them messages, **wait** for them to finish thinking, **capture** their replies, and **tear down** sessions when done.
+Manage and talk to AI agents (another Claude Code, Gemini CLI, or any CLI) running in separate tmux sessions. Covers the full loop: **create** sessions, **send** messages, **wait** for the agent to finish, **capture** replies, and **tear down** when done.
 
-The mental model: each tmux session is one agent. You orchestrate them from the outside by writing to their input and reading their pane — exactly what a human would do by switching windows, but scripted. Because the orchestrating agent's context budget is finite, relay each agent's answer, not its whole screen (the bundled helper extracts just the reply).
+The mental model: each tmux session is one agent. You orchestrate from outside by writing to its input and reading its pane — what a human does by switching windows, but scripted. Because your context budget is finite, relay each agent's answer, not its whole screen (the bundled helper extracts just the reply).
 
 ## When to Use
 
@@ -101,26 +101,18 @@ tmux send-keys -t agent1 "your message"
 tmux send-keys -t agent1 Enter
 ```
 
-**Verify delivery before you wait (don't skip this).** A keystroke can drop, an `Enter` can go unsubmitted, or a busy/blocked pane can swallow the input — and you'd then wait on a reply that will never come. The trap: the message text appears in `capture-pane` whether it was **submitted** or is merely **typed and still parked in the input box** — both render as the same characters, so "the text is on screen" only proves it was typed, not sent. The one signal that reliably means *submitted* is **post-send activity**: once the agent accepts the message it starts working (a spinner / `esc to interrupt`). So after send, before Phase 4, run a **bounded** check (one short fixed delay, then a single capture — never a poll loop that can hang) and key it off that activity:
+**Verify delivery before you wait (don't skip this).** A keystroke can drop or an `Enter` can go unsubmitted, and you'd then wait on a reply that never comes. On-screen text only proves the message was *typed* — it looks identical whether submitted or parked in the input box. The reliable "submitted" signal is **post-send activity** (a spinner / `esc to interrupt`). After send, run a **bounded** check (one ~5s delay, then a single capture — never a poll loop) and grep the pane for that activity:
 
 ```bash
-tmux send-keys -t agent1 "summarize the changes in src/"
-tmux send-keys -t agent1 Enter
-sleep 5                                          # bounded: one fixed wait, ~5s
-pane=$(tmux capture-pane -t agent1 -p -S -40)    # ~40 scrollback lines + visible pane
-if printf '%s\n' "$pane" | grep -Eq 'esc to interrupt|[⠁-⣿]'; then
-  echo "delivered"          # agent is working → input was accepted and submitted
-else
-  echo "NOT-DELIVERED"      # no activity → it didn't land; re-send (below)
-fi
+tmux send-keys -t agent1 "..."; tmux send-keys -t agent1 Enter; sleep 5
+tmux capture-pane -t agent1 -p -S -40 | grep -Eq 'esc to interrupt|[⠁-⣿]' \
+  && echo delivered || echo NOT-DELIVERED
 ```
 
-Two outcomes — and neither is a reply timeout (that's Phase 4):
+- **`delivered`** — agent is busy → submitted → proceed to Phase 4.
+- **`NOT-DELIVERED`** — no activity (usually the separate-Enter gotcha or a dropped keystroke). Send a lone `Enter` and re-check; if still nothing, re-type. Distinct from a Phase 4 reply timeout — nothing was submitted, so don't start waiting.
 
-- **`delivered`** — the agent is busy (spinner / `esc to interrupt`), which only appears once the message was accepted *and* submitted → proceed to Phase 4.
-- **`NOT-DELIVERED`** — no post-send activity. The cause is usually the separate-Enter gotcha above (the message typed but the `Enter` didn't submit) or a dropped/swallowed keystroke. The fix covers both: **send a lone `Enter`** (`tmux send-keys -t agent1 Enter`) and re-check once — a no-op if it was already submitted; if there's still nothing, **re-type** the message. Report this **distinctly** from a Phase 4 reply timeout: nothing was submitted, so don't start waiting until it lands.
-
-This is the `send → verify-delivered → wait → bounded-tail capture` sequence the rest of the workflow follows. Don't try to read the message text back out of the pane to confirm it — a single capture can't tell "echoed in the transcript" from "still parked in the input box," so trust the activity signal, not the presence of the text. If your agent's spinner glyphs differ, key the check off its busy marker (the same `--busy-marker` / `TAC_BUSY_MARKERS` vocabulary Phase 4 uses) rather than `esc to interrupt` alone.
+This is the `send → verify-delivered → wait → bounded-tail capture` loop. Trust the activity signal, not the text. Full rationale and the verbose branch logic: `references/delivery-and-waiting.md`.
 
 ## Phase 4: Wait for the Reply, Then Read It
 
@@ -136,19 +128,11 @@ It returns one of three states — **branch on the exit code:**
 - **3 — blocked:** settled but parked on a prompt that needs a human (trust/auth dialog). It prints the full pane so you can show the dialog. **Do not send a message** — it would be read as menu input. Surface it and ask the user how to respond (Rule 1).
 - **2 — timeout:** never settled within `--timeout` (agent still working, or genuinely stuck). This bounds **one** wait — it does not bound a loop that keeps re-waiting (see the anti-deadloop cap below).
 
-Content stability is the universal signal (works for any CLI agent); spinner chrome (`esc to interrupt`) and dialog text only refine the verdict. For an agent whose chrome differs, add markers with `--busy-marker`/`--block-marker` or the `TAC_BUSY_MARKERS`/`TAC_BLOCK_MARKERS` env vars — no code edit. Other flags: `--timeout`, `--quiet-cycles`, `--interval`, `--full` (print the whole pane), `--scrollback N`. Run with `--help` for details.
+Content stability is the universal signal (works for any CLI agent); spinner chrome and dialog text only refine the verdict. For an agent whose chrome differs, add markers with `--busy-marker`/`--block-marker` or the `TAC_BUSY_MARKERS`/`TAC_BLOCK_MARKERS` env vars — no code edit. Other flags: `--timeout`, `--quiet-cycles`, `--interval`, `--full`, `--scrollback N`; run `--help` for details.
 
-**The helper's verdict is advisory — verify it yourself when in doubt.** Exit 0 means *the pane stopped changing*, which is usually "done" but can also be a paused agent or a UI that quiesced mid-task. When the verdict matters (before relaying a result the user will act on, or on any exit-2 timeout), do an **independent, human-style read** — capture the pane yourself (Phase 5) and look at the actual content — rather than trusting the exit code alone:
+**The verdict is advisory — verify it when it matters.** Exit 0 means *the pane stopped changing*, usually "done" but possibly a paused agent. Before relaying a result the user will act on, or on any exit-2 timeout, do an independent human-style read (`tmux capture-pane -t agent1 -p -S -40`, Phase 5): a spinner or a changing tail = **still working** (keep waiting, don't send — Rule 3); unchanged + no spinner + no completion = **stalled** (surface it, don't silently re-wait).
 
-```bash
-tmux capture-pane -t agent1 -p -S -40        # bounded tail: ~40 scrollback lines + visible pane
-```
-
-This lets you **distinguish a stalled agent from a working one** — the third failure mode, separate from a dropped delivery (Phase 3) and a reply timeout (exit 2):
-- **Still working:** a spinner / `esc to interrupt` is showing, or the tail differs from a capture you took moments ago → keep waiting; **don't send a new message yet** (Rule 3).
-- **Stuck / stalled:** the pane is unchanged across reads, with no spinner and no completion (no prompt returned, answer never finished) → it won't resolve on its own. Surface it to the user; do not silently re-wait.
-
-**Anti-deadloop — bound the whole loop, not just one wait.** `--timeout` caps a single call; the real risk is a re-wait / re-send loop (here and in Phase 6 "Continue") that polls forever. Set a **hard overall budget** before you start — a small number of re-waits (e.g. 2–3) or a total wall-clock cap — and when it's spent, **stop and escalate to the user** with what you observed (last capture, how long you waited). Never poll indefinitely and never auto-re-send past the cap; an agent that hasn't settled within the budget is a stall to report, not a loop to keep running.
+**Anti-deadloop — bound the whole loop, not just one wait.** `--timeout` caps a single call; the real risk is a re-wait / re-send loop that polls forever. Set a **hard overall budget** before you start — a small number of re-waits (e.g. 2–3) or a total wall-clock cap — and when it's spent, **stop and escalate to the user** with what you observed. Never poll indefinitely. Full details in `references/delivery-and-waiting.md`.
 
 If you can't run the script (no Python, restricted env), fall back to a manual loop: capture (below), `sleep 3`, capture again, compare — under the same overall budget. Matching captures with no spinner = done. A spinner or `esc to interrupt` still showing → wait and re-capture; **don't send a new message yet** (Rule 3). If the budget runs out with no resolution, stop and surface it.
 
@@ -229,7 +213,9 @@ Relay that answer to the user. If the bounded-tail read starts mid-sentence, wid
 
 ## Reference
 
-Read `references/tmux-recipes.md` for: broadcasting to a fleet, sending multi-line/code messages safely, splitting a session into panes, reading scrollback robustly, and a troubleshooting table (message didn't send, pane empty, session not found, agent stuck on a prompt).
+Read `references/delivery-and-waiting.md` for the full rationale behind delivery verification (Phase 3) and waiting (Phase 4).
+
+Read `references/tmux-recipes.md` for: broadcasting to a fleet, sending multi-line/code messages safely, splitting a session into panes, reading scrollback robustly, and a troubleshooting table.
 
 ## Step Completion Report
 
