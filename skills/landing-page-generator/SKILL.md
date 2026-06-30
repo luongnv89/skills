@@ -4,7 +4,7 @@ description: "Generate conversion-focused landing page copy with PAS, AIDA, or S
 license: MIT
 effort: high
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -59,7 +59,8 @@ Tell the user which framework you picked. Let them override.
 
 ### Step 3: Generate Landing Page Sections
 
-Produce all sections below. Use `references/section-templates.md` for the output format.
+Produce all sections below. Use the framework-specific template in `references/section-templates.md`
+that matches the framework chosen in Step 2.
 
 **Hero Section**
 - Headline: value proposition in 10 words or fewer
@@ -103,9 +104,10 @@ Produce all sections below. Use `references/section-templates.md` for the output
 
 ### Step 4: Format Output
 
-Follow the template in `references/section-templates.md`. Keep large reusable structures in references to
-protect the agent's context budget; read only the reference needed for the requested output. End with
-optimization notes: A/B test ideas and conversion tips.
+Use the template matching the chosen framework in `references/section-templates.md` (PAS, AIDA, or
+StoryBrand). Keep large reusable structures in references to protect the agent's context budget; read
+only the reference needed for the requested output. End with optimization notes: A/B test ideas and
+conversion tips.
 
 ### Step 5: Copywriting Best Practices
 
@@ -182,7 +184,8 @@ A/B Test Ideas: test speed-focused vs founder-control headlines.
 
 Verify before delivering:
 
-- Output follows `references/section-templates.md` or a user-specified subset.
+- Output follows the framework-specific template in `references/section-templates.md` or a user-specified
+  subset.
 - Chosen framework is named and consistently applied.
 - Hero headline is 10 words or fewer, specific, and value-led.
 - Every CTA starts with an action verb and states the outcome.
