@@ -492,6 +492,7 @@
     .grid-3 > *:nth-child(3) { animation-delay: 140ms; }
 
     @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
       .hero .container,
       .card,
       .feature,
@@ -835,13 +836,24 @@
       if (!code || !btn) return;
 
       const text = code.innerText.trim();
+      // Robust original state capture (data attrs survive rapid clicks; prevents capturing 'Copied' as original)
+      if (!btn.dataset.originalText) {
+        btn.dataset.originalText = btn.textContent;
+      }
+      if (!btn.dataset.originalLabel) {
+        btn.dataset.originalLabel = btn.getAttribute('aria-label') || 'Copy install command';
+      }
+      const original = btn.dataset.originalText;
+      const originalLabel = btn.dataset.originalLabel;
+
       navigator.clipboard.writeText(text).then(() => {
-        const original = btn.textContent;
         btn.textContent = 'Copied';
         btn.classList.add('copied');
+        btn.setAttribute('aria-label', 'Copied to clipboard');
         setTimeout(() => {
           btn.textContent = original;
           btn.classList.remove('copied');
+          btn.setAttribute('aria-label', originalLabel);
         }, 1600);
       }).catch(() => {
         // Fallback for very old browsers
@@ -852,7 +864,13 @@
         document.execCommand('copy');
         document.body.removeChild(ta);
         btn.textContent = 'Copied';
-        setTimeout(() => { btn.textContent = 'Copy'; }, 1400);
+        btn.classList.add('copied');
+        btn.setAttribute('aria-label', 'Copied to clipboard');
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+          btn.setAttribute('aria-label', originalLabel);
+        }, 1400);
       });
     }
   </script>
