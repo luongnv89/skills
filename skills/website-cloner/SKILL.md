@@ -1,11 +1,11 @@
 ---
 name: website-cloner
-description: "6-phase website cloning and improvement orchestrator. Takes a URL and produces an improved version (performance + UI/UX) via Vite/React/shadcn/Tailwind hosted on GitHub Pages. Use when asked to clone a site, rebuild a website, or make a better version of a URL. Orchestrates sibling skills with approval gates — don't use for single-phase work."
+description: "Build an improved website clone from a URL via 6-phase gated workflow (Vite/React/shadcn/Tailwind + GitHub Pages). Use for end-to-end site rebuilds. Don't use for single-phase work."
 license: MIT
 effort: high
 metadata:
-  version: 1.1.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.5
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Website Cloner
@@ -20,6 +20,16 @@ Trigger when the user asks to:
 - Start a full website improvement workflow from a URL
 
 Do **not** use for single-phase work (use the specific sibling skill directly).
+
+## Prerequisites
+
+- A target URL (publicly reachable preferred).
+- Write access to create a local project dir (defaults under `~/workspace/clones` or `$CLONE_DIR`).
+- The sibling phase skills installed (website-analyzer, website-clone-report, etc.).
+- Optional: GitHub token if you want Pages deploy automation in Phase 5.
+- User approval at gates (explicit confirmation before Phases 3, 4, 5 advance).
+
+If a prerequisite is missing, stop and report it — do not guess paths or credentials.
 
 ## Workflow
 
@@ -52,6 +62,8 @@ skills/website-cloner/                    ← this umbrella
 Why nested: the phases are tightly coupled to this umbrella's data flow (analysis JSON → report → PRD → tasks → built site → final report). Keeping them in one folder makes the suite easy to browse, audit, and ship together. Each phase skill stays independently installable — the installers (`install.sh`, `remote-install.sh`) discover both top-level and nested skills.
 
 When invoking phase skills below, refer to them by name (`/website-analyzer`, `/website-clone-report`, …); the runtime resolves names regardless of filesystem path.
+
+See the individual phase skill docs for their full references/ and scripts/. This orchestrator stays short to fit the agent's context budget.
 
 ## Repo Sync Before Edits (mandatory)
 

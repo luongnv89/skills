@@ -3,7 +3,7 @@ name: subagent-creator
 description: "Create, evaluate, or improve Claude Code subagent files (.claude/agents/*.md) — the frontmatter + system prompt defining a delegatable specialist. Don't use for skills (skill-creator), CLAUDE.md/AGENTS.md (agent-config), or running an agent."
 effort: high
 metadata:
-  version: 1.0.1
+  version: 1.1.1
   author: "Luong NGUYEN <edgardo.montesdeoca@montimage.eu>"
 ---
 
@@ -12,6 +12,12 @@ metadata:
 Create, evaluate, and improve **Claude Code subagents** — the `.md` files (in `.claude/agents/` for a project or `~/.claude/agents/` for personal use) whose YAML frontmatter plus system prompt define a specialist the main agent can delegate to with an isolated context window and restricted tools.
 
 This is **not** about skills (`skill-creator` owns those) or `CLAUDE.md`/`AGENTS.md` (`agent-config` owns those). A subagent is one file: frontmatter (`name`, `description`, `tools`, `model`, …) + a system-prompt body.
+
+## When to Use
+
+Use when the user asks to create, review, or fix a Claude Code subagent definition file (`.claude/agents/*.md` or personal `~/.claude/agents/*.md`). Do not use for skills or for editing CLAUDE.md/AGENTS.md.
+
+## Instructions
 
 ## Pick the branch first
 
@@ -144,6 +150,38 @@ Close any create/evaluate/improve run with three short lists:
 - **Checked** — rubric categories inspected (frontmatter, responsibility, tools, description, body structure, anti-patterns).
 - **Verified** — what proves the result (frontmatter parses, file path written, rubric pass).
 - **Improved** — concrete changes by field/concern (or `none — review only` for an Evaluate run).
+
+## Acceptance Criteria
+
+A successful run produces:
+- A subagent file with valid YAML frontmatter, `name` (kebab), description containing when+what + negative-trigger, and least-privilege `tools`.
+- Step Completion Report with per-rubric-item √/× and overall PASS|PARTIAL|FAIL.
+- For Improve: before/after rubric comparison showing net positive change.
+- No edits outside the confirmed target path (project `.claude/agents/` or `~/.claude/agents/`).
+
+## Expected output
+
+For a Create on "a read-only PR diff reviewer":
+
+```
+◆ Create subagent (step 4 of 4 — pr-diff-reviewer.md)
+  Frontmatter parses:    √ pass
+  name == filename:      √ pass
+  Single responsibility: √ pass
+  Tools least-privilege: √ pass (read-only: Read, Grep, Glob)
+  Description: when+what: √ pass
+  ____________________________
+  Result:                PASS
+```
+
+The file is written and ready for use.
+
+## Edge cases
+
+- User points at a file but the request is "make a new one for X": treat as Create after confirming path.
+- Ambiguous trigger language: default to Evaluate and ask for clarification.
+- Target path is inside a git repo with dirty tree: perform Repo Sync (stash / pull / pop) before write.
+- Subagent name would collide with skill or agent-config names: reject and suggest different name (see negative triggers in description).
 
 ---
 

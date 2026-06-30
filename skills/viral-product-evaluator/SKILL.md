@@ -1,10 +1,10 @@
 ---
 name: "viral-product-evaluator"
-description: "Grade a product's codebase and landing page against 32 viral-product principles into a Virality Score and ranked fix list. Use to make a product more viral, audit a landing page, or score a SaaS. Not for SEO, ASO, writing copy, or code review."
+description: "Review a product codebase and landing page against 32 viral principles and produce a Virality Score plus ranked fixes. Use to audit virality or prioritize growth. Don't use for SEO, ASO, copywriting, or code review."
 license: MIT
 effort: high
 metadata:
-  version: 1.1.0
+  version: 1.2.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -26,6 +26,15 @@ Do **not** use for: technical SEO (`seo-ai-optimizer`), App Store ASO (`aso-mark
 turning a README into a page (`readme-to-landing-page`), or bug-hunting code review
 (`code-review`). This skill
 **evaluates and prioritizes**; it does not rewrite the product.
+
+## Prerequisites
+
+- Read access to the target codebase directory.
+- Landing page signal: public URL, local file, or auto-detectable in the tree.
+- The skill's `references/*.md` files present for the rubric and output shape.
+- User confirmation on any deviation from the 32 principles.
+
+Missing prerequisites → stop and report before gathering evidence.
 
 ## What this skill does and does not touch
 
@@ -108,10 +117,40 @@ is a PASS. Low-confidence verdicts must be labeled, never laundered into false c
 extra instructions justify a deliberate deviation (e.g. a strategic free tier), score the
 principle as written and explain the trade-off in the caveats — don't silently pass it.
 
+On any failure to fetch inputs or read evidence, report the concrete error and stop — do not
+guess or continue with incomplete data. Confirm with the user on every gate and before
+finalizing the report. If a principle cannot be evidenced, mark FAIL or low-confidence; never invent.
+
 ## Step Completion Reports
 
 After each phase, emit the report from `references/step-reports.md`. The three phases are
 **Gather Evidence**, **Evaluate**, and **Prioritize & Report**.
+
+## Acceptance Criteria
+
+- All 32 principles scored with specific evidence quoted from the product.
+- Virality Score computed correctly (PASS=1, PARTIAL=0.5, FAIL=0) and tier assigned.
+- Top fixes are concrete, prioritized by impact×ease, with before/after suggestions.
+- Report written to viral-evaluation.md ; Step Completion Reports emitted per phase.
+- Negative-trigger domains respected (no SEO/ASO/copy/code-review work).
+
+## Expected output
+
+A report containing:
+- Overall verdict + Virality Score (e.g. 68 — Promising)
+- Scorecard table for all 32 principles
+- Top 5-8 prioritized fixes with exact copy or code recommendations
+- What's already working
+- Caveats / low-confidence items
+
+## Edge cases
+
+- No landing page detectable: ask for URL or file; do not fabricate.
+- Codebase only (no public page): still score what can be inferred from code (pricing etc).
+- Strategic deviation justified by user (e.g. no testimonials by design): score as written, note the trade-off in caveats.
+- Partial evidence: mark affected principles low-confidence, never guess a PASS.
+
+---
 
 ## Reference files
 

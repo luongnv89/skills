@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.3.2
+  version: 1.3.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -14,6 +14,19 @@ metadata:
 Install a local-first security hardening stack for a project. Favor checks that run
 offline at hook time, produce machine-readable output, and give developers a clear
 summary before code leaves their machine.
+
+Keep the orchestrator short for the agent's context budget: detailed matrices, templates,
+and long verification scenarios live in `references/`. Link, don't inline.
+
+## Prerequisites
+
+- Git repo with a branch you can commit to.
+- Python 3.8+ and pip.
+- Permission to create `.pre-commit-config.yaml`, `scripts/`, `security/`, `SECURITY.md`.
+- (Optional for `--ci`) GitHub Actions enabled on the repo.
+- Network for initial tool/db installs (subsequent hook runs are offline).
+
+Confirm these before Phase 1. If a tool cannot be made offline, document the gap instead of pretending.
 
 ## Repo Sync Before Edits (mandatory)
 
