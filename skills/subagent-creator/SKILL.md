@@ -17,8 +17,6 @@ This is **not** about skills (`skill-creator` owns those) or `CLAUDE.md`/`AGENTS
 
 Use when the user asks to create, review, or fix a Claude Code subagent definition file (`.claude/agents/*.md` or personal `~/.claude/agents/*.md`). Do not use for skills or for editing CLAUDE.md/AGENTS.md.
 
-## Instructions
-
 ## Pick the branch first
 
 Three branches. Identify which one the user is on before doing anything else — they don't share a starting step.
