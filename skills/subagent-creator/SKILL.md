@@ -3,7 +3,7 @@ name: subagent-creator
 description: "Create, evaluate, or improve Claude Code subagent files (.claude/agents/*.md) — the frontmatter + system prompt defining a delegatable specialist. Don't use for skills (skill-creator), CLAUDE.md/AGENTS.md (agent-config), or running an agent."
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <edgardo.montesdeoca@montimage.eu>"
 ---
 
@@ -43,7 +43,7 @@ If the working tree is dirty: stash → sync → pop. If `origin` is missing or 
 
 ### Frontmatter safety + version
 
-- **Subagent file** `name` must be lowercase letters/digits/hyphens, no consecutive hyphens, and match the filename stem (`code-reviewer` → `code-reviewer.md`).
+- **Subagent file** `name` must be lowercase letters/digits/hyphens, no consecutive hyphens. Identity comes from `name`, not the filename — they need not match, but keeping `name` == filename stem (`code-reviewer` → `code-reviewer.md`) is a recommended convention.
 - Quote any frontmatter string value containing `:` `#` `-` `<` `>` `|` `,` `&` `?` `!` `[` `]` `{` `}` `*` to keep YAML valid. `description` almost always needs quotes.
 - This **SKILL.md** itself follows the catalog's own rule: bump `metadata.version` on every edit.
 

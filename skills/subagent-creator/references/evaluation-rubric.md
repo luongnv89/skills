@@ -7,7 +7,7 @@ Read the target file once (frontmatter + body), state its claimed responsibility
 ## 1. Frontmatter validity
 
 - [ ] `name` and `description` both present (the two required fields).
-- [ ] `name` is lowercase letters/digits/hyphens, no consecutive hyphens, and **matches the filename stem** (`code-reviewer` ⇒ `code-reviewer.md`).
+- [ ] `name` is lowercase letters/digits/hyphens, no consecutive hyphens. (Identity comes from `name`, not the filename — a mismatch is **not** a failure; flag it only as a `~ partial` convention note, e.g. `code-reviewer` ⇒ `code-reviewer.md`.)
 - [ ] YAML parses — string values containing `:` `#` `-` `,` `<` `>` `|` `[` `]` `{` `}` `*` `&` `?` `!` are quoted. (`description` almost always needs quotes.)
 - [ ] No unknown/misspelled fields. Advanced fields (`isolation`, `context`, `memory`, `hooks`, `permissionMode`, …) are present only with a clear reason.
 - [ ] If plugin-bundled: no `hooks`, `mcpServers`, or `permissionMode` (forbidden for plugin agents).

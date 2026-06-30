@@ -6,10 +6,13 @@ The YAML frontmatter at the top of a `.claude/agents/<name>.md` (or `~/.claude/a
 
 A subagent file lives in one of these, highest priority first:
 
-1. `--agents` CLI flag (JSON, session-only) — highest
-2. `.claude/agents/` — project-level, version-controlled, team-shared
-3. `~/.claude/agents/` — user-level, personal, cross-project
-4. Plugin `agents/` folders — lowest
+1. Managed settings (enterprise/org-deployed) — highest
+2. `--agents` CLI flag (JSON, session-only)
+3. `.claude/agents/` — project-level, version-controlled, team-shared
+4. `~/.claude/agents/` — user-level, personal, cross-project
+5. Plugin `agents/` folders — lowest
+
+(Managed settings are enterprise-only; for a typical user `--agents` is the highest source you control.)
 
 In a monorepo with nested `.claude/agents/` dirs, the one closest to the working directory wins. When the same `name` exists at multiple levels, the higher-priority one overrides.
 
@@ -17,10 +20,10 @@ In a monorepo with nested `.claude/agents/` dirs, the one closest to the working
 
 | Field | Required | Type | Notes |
 |-------|----------|------|-------|
-| `name` | **yes** | string | Lowercase letters/digits/hyphens, no consecutive hyphens. Must match the filename stem. |
+| `name` | **yes** | string | Lowercase letters/digits/hyphens, no consecutive hyphens. Identity comes only from this field, **not** the filename — they need not match, but keeping `name` == filename stem is a recommended convention for findability. |
 | `description` | **yes** | string | The primary trigger. When to invoke + what it does. Add `Use PROACTIVELY` or `MUST BE USED` to encourage auto-delegation. Quote it (it usually contains `:` or `,`). |
 | `tools` | no | CSV | Tools the agent may use. **Omit to inherit ALL tools.** Least privilege: list only what's needed. |
-| `model` | no | string | `inherit` \| `sonnet` \| `opus` \| `haiku` (or a full model ID). Defaults to the subagent model if omitted. `inherit` uses the caller's model. |
+| `model` | no | string | `inherit` \| `sonnet` \| `opus` \| `haiku` \| `fable` (or a full model ID). **Defaults to `inherit`** (the caller's model) when omitted. |
 
 A minimal, complete subagent:
 
@@ -51,17 +54,19 @@ These appeared in the source reference but are **version-dependent** and easy to
 | Field | Type | What it does | When to reach for it |
 |-------|------|--------------|----------------------|
 | `disallowedTools` | CSV | Explicitly forbid tools even if otherwise inherited. | Lock a near-general agent out of a dangerous tool. |
-| `permissionMode` | string | `default` \| `acceptEdits` \| `dontAsk` \| `bypassPermissions` \| `plan`. Controls the edit-approval workflow. | Rarely. `bypassPermissions` is dangerous — avoid unless deliberate. |
+| `permissionMode` | string | `default` \| `acceptEdits` \| `auto` \| `dontAsk` \| `bypassPermissions` \| `plan`. Controls the edit-approval workflow. | Rarely. `bypassPermissions` is dangerous — avoid unless deliberate. |
 | `maxTurns` | int | Hard cap on agentic iterations. | Bound a long-running or runaway agent. |
 | `skills` | CSV | Skills auto-injected into the agent at startup. | The agent depends on a specific skill's discipline. |
 | `mcpServers` | YAML map | MCP server definitions for the agent. | The agent needs a specific external data source. |
 | `memory` | string | `user` \| `project` \| `local`. Persists `MEMORY.md` across sessions (first ~200 lines auto-load; Read/Write/Edit auto-enabled). | A research/assistant agent that should accumulate knowledge. |
 | `background` | bool | Run as a background task by default. | Long jobs the user shouldn't block on. |
-| `effort` | string | `low` \| `medium` \| `high` \| `max`. Reasoning strength. | Cheap mechanical agent (`low`) vs. hard reasoning (`max`). |
+| `effort` | string | `low` \| `medium` \| `high` \| `xhigh` \| `max`. Reasoning strength (available levels depend on the model). | Cheap mechanical agent (`low`) vs. hard reasoning (`max`). |
 | `isolation` | string | `worktree` runs the agent in an isolated git worktree on its own branch. | Parallel agents that would otherwise conflict on files. Expensive. |
 | `initialPrompt` | string | Auto-submitted first turn when run as a main agent. | Session-wide agents (`claude --agent <name>`). |
-| `context` | string | `fork` inherits the parent's full conversation instead of a clean slate. | Exploring an alternative approach without losing current context. |
+| `color` | string | Display color in the task list/transcript (`red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan`). | Tell concurrent subagents apart in the UI. |
 | `hooks` | YAML | Component-scoped lifecycle hooks (e.g. a `PreToolUse` command). | Enforce a guard (lint, security check) around the agent's tool use. |
+
+**Forking is *not* a frontmatter field.** Running a subagent with the parent's full conversation (instead of a clean context) is a *session* feature — triggered by the `/fork` command or the `CLAUDE_CODE_FORK_SUBAGENT` env var, or by Claude spawning the special `fork` subagent type. Don't add a `context: fork` key to a definition file; it isn't honored.
 
 **Rule of thumb:** if you can't say in one sentence why the agent needs an advanced field, leave it out. A subagent with just `name` + `description` + `tools` + `model` is the norm, not the exception.
 

@@ -207,7 +207,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.2.0 | high | Technical SEO + AI-bot directives |
 | [**oss-ready**](skills/oss-ready/) | 1.2.0 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 1.3.0 | medium | CLAUDE.md + AGENTS.md per best practices |
-| [**subagent-creator**](skills/subagent-creator/) | 1.0.0 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
+| [**subagent-creator**](skills/subagent-creator/) | 1.0.1 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
 
 ### App Store
 
