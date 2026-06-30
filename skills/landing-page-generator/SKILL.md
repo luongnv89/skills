@@ -4,7 +4,7 @@ description: "Generate conversion-focused landing page copy with PAS, AIDA, or S
 license: MIT
 effort: high
 metadata:
-  version: 1.1.1
+  version: 1.1.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -45,7 +45,9 @@ Collect before writing:
 | Desired visitor action | Primary CTA |
 | Social proof | Testimonials, metrics, logos |
 
-If any input is missing, ask before proceeding.
+If any **core** input is missing—product/service name, target audience, problem solved, or primary
+CTA—ask before proceeding. For missing proof, pricing, or guarantee details, proceed with `[proof needed]`
+placeholders per Prerequisites and guardrails.
 
 ### Step 2: Choose Copywriting Framework
 
@@ -59,48 +61,21 @@ Tell the user which framework you picked. Let them override.
 
 ### Step 3: Generate Landing Page Sections
 
-Produce all sections below. Use the framework-specific template in `references/section-templates.md`
-that matches the framework chosen in Step 2.
+Populate **every section** in the framework-specific template from `references/section-templates.md`
+that matches the framework chosen in Step 2. Use that template's section names and order exactly—do not
+substitute a generic Hero/Problem/Solution layout when another framework applies.
 
-**Hero Section**
-- Headline: value proposition in 10 words or fewer
-- Subheadline: 1–2 sentences expanding the value
-- Primary CTA button text
-- Trust indicators (logos, review count, user count)
-
-**Problem Section**
-- Pain point the audience feels
-- Emotional, specific language
-- 2–3 concrete scenarios
-
-**Solution Section**
-- How the product solves the problem
-- 3–5 features described as benefits
-- Why it beats alternatives
-
-**How It Works**
-- 3–4 simple steps
-- Icon concept + description per step
-- CTA at the end
-
-**Social Proof**
-- Testimonial structure: quote + name + role + company
-- Case study snippet or metric
-- Trust badges
-
-**Pricing/Plans** (if applicable)
-- Feature comparison
-- Recommended plan callout
-- Money-back guarantee copy
-
-**FAQ**
-- 5–7 common objections
-- Clear, confident answers
-
-**Final CTA**
-- Urgency or scarcity (only if genuine)
-- Risk reversal (guarantee, trial)
-- Button text reinforcing value
+**Content quality (all frameworks):**
+- Headlines: 10 words or fewer, value-led, specific to the audience
+- Subheadlines: 1–2 sentences that expand the headline without repeating it
+- Body copy: active voice, benefit-led; address pain points with concrete scenarios where the template calls for them
+- Features: 3–5 items described as outcomes, not feature lists
+- How It Works: 3–4 simple steps; icon concept + description per step; CTA at the end
+- Social proof: quote + name + role + company, or `[proof needed]` when proof is unavailable
+- Pricing (if applicable): feature comparison, recommended plan callout, guarantee copy or `[proof needed]`
+- FAQ: 5–7 common objections with clear, confident answers
+- CTAs: follow CTA Button Rules; place primary and secondary CTAs where the template specifies
+- Final CTA: risk reversal (guarantee, trial); urgency or scarcity only when genuine; button text reinforces value
 
 ### Step 4: Format Output
 
