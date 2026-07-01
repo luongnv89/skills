@@ -4,7 +4,7 @@ description: "Manage AI agents in tmux: spawn or kill sessions and message any C
 license: MIT
 effort: medium
 metadata:
-  version: 1.5.1
+  version: 1.5.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -70,14 +70,14 @@ To launch a **fleet**, repeat with distinct job-named sessions (`reviewer`, `tes
 
 ### Show the agent's terminal (optional)
 
-The default workflow stays detached — you drive the agent with `send-keys`/`capture-pane` and never open its terminal. If the user wants to *see* the live CLI (a trust/auth prompt, debugging, or hands-on steering), there are two commands, and **who runs which matters**:
+The default workflow stays detached — you drive the agent with `send-keys`/`capture-pane` and never open its terminal. If the user wants to *see* the live CLI (a trust/auth prompt, debugging, or hands-on steering), there are two commands, and **neither is something the agent can use on its own behalf**:
 
 ```bash
 tmux attach-session -t "$name"     # HUMAN runs this in their own interactive terminal
-tmux switch-client -t "$name"      # agent can run this itself, if it is already a tmux client ($TMUX set)
+tmux switch-client -t "$name"      # HUMAN runs this, only if already attached to a different session/client
 ```
 
-`attach-session` needs a controlling TTY. If you (the agent) invoke it through a non-interactive Bash tool, it fails with `open terminal failed: not a terminal` — it does not open anything. Never run `attach-session` yourself; instead tell the human the exact command to type in their own terminal. `switch-client` is different: it's a control-mode command that reuses your *own* existing tmux client, so it's safe for you to run it yourself when you're already inside a tmux client (`$TMUX` is set) and want to hand your own view over.
+`attach-session` needs a controlling TTY. If you (the agent) invoke it through a non-interactive Bash tool, it fails with `open terminal failed: not a terminal`. `switch-client` needs an *attached* tmux client to act on — it fails with `no current client` unless the invoking process already is one. Having `$TMUX` set in your own shell does **not** make you an attached client: `$TMUX` is set in every pane, including the detached sessions this skill spawns via `tmux new-session -d`, which is the agent's normal execution context and has no attached client at all. So in this skill's default spawn model, the agent has no self-service way to show its own terminal — never attempt `attach-session` or `switch-client` yourself; instead tell the human the exact command to type in their own terminal. `switch-client` only comes into play when a human is already attached to one session and wants that same client to switch to a different one.
 
 Detach with `Ctrl-b d` (default prefix + `d`) to return control to the orchestrator without killing the session. This is opt-in and does not replace the default detached flow — see `references/tmux-recipes.md` ("Showing an agent's live terminal") for the when-to-use guidance, the correct command for each starting context, and a worked example that names the exact session attached to.
 

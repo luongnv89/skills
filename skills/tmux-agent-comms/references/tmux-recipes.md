@@ -74,16 +74,16 @@ The default orchestrator flow stays detached — `send-keys` writes to a session
 | Mid-run correction or manual input only a human should give | Show — type directly into that agent's input |
 | Everything else — scripted send/wait/capture loop, broadcasts | Detached (default) |
 
-**Attaching — pick the command for who is running it, not just your starting context:**
+**Attaching — both commands here are things a human runs, not the agent:**
 
 ```bash
 tmux attach-session -t agent1     # HUMAN, in their own real interactive terminal
-tmux switch-client -t agent1      # agent itself, only if already a tmux client ($TMUX set)
+tmux switch-client -t agent1      # HUMAN, only if already attached to a different session/client
 ```
 
 `attach-session` requires a controlling TTY. A human runs it fine in their own terminal — but if an agent invokes it through a non-interactive shell/Bash tool, it fails immediately with `open terminal failed: not a terminal` (verified: `tmux new-session -d -s test 'sleep 60'; tmux attach-session -t test </dev/null` exits 1 with that error). **The agent must never try to run `attach-session` itself** — instead, tell the human the exact command to type in their own terminal.
 
-`switch-client` has no such restriction: it's a control-mode command that reuses the *existing* client rather than opening a new TTY, so it's safe for an agent to invoke on itself when it's already inside a tmux client (`$TMUX` is set) and wants to hand its own view over. Separately, running `attach-session` from a shell that is itself already inside a tmux client (`$TMUX` is set) fails with `sessions should be nested with care, unset $TMUX to force` — another reason a human should use `switch-client` in that starting context, or `unset TMUX` first if a nested attach is deliberate.
+`switch-client` needs an *attached* tmux client to act on, and fails with `no current client` (exit 1) if the invoking process isn't one — verified by running it from a plain shell and from a detached-session pane, both non-attached contexts. This is a different condition than "`$TMUX` is set": `$TMUX` is present in every pane's environment, including the detached sessions this skill spawns via `tmux new-session -d`, which is the agent's normal execution context and is never an attached client. So the agent cannot use `switch-client` on itself either — it only works for a human who is *already attached* to one session and wants that same client to switch to viewing a different one. Separately, running `attach-session` from a shell that is itself already inside a tmux client fails with `sessions should be nested with care, unset $TMUX to force` — another reason a human in that starting context should use `switch-client` instead, or `unset TMUX` first if a nested attach is deliberate.
 
 **Name the session before attaching — don't guess.** Reuse the same target-resolution step as Phase 2 so the human attaches to the confirmed name, not a guess (spawn can rename on collision, e.g. `agent1-1730000000`):
 
@@ -92,7 +92,7 @@ tmux has-session -t agent1 2>/dev/null && echo "OK: agent1 exists" || tmux list-
 tmux attach-session -t agent1     # human runs this, attaching to the confirmed name from the line above
 ```
 
-**Safety notes (consistent with Critical Rule 1):** for a human running it in their own terminal, attaching and scrolling to read is always safe; *typing* into the session is a write, the same hazard as `send-keys` — confirm with the user before typing into another agent's session on their behalf. For the agent, `attach-session` isn't a safety question so much as a hard failure — it needs a TTY the agent's Bash tool doesn't have; only `switch-client` (agent already a tmux client) is something the agent can invoke itself. If the orchestrator's scripted send-keys loop is still running while a human is attached and typing, both are writing to the same input and will fight each other — pause the scripted loop during hands-on takeover. Detach with `Ctrl-b d` (default tmux prefix `Ctrl-b`, then `d`) when done; this returns control to the orchestrator **without** killing the session, so the scripted loop can resume.
+**Safety notes (consistent with Critical Rule 1):** for a human running it in their own terminal, attaching and scrolling to read is always safe; *typing* into the session is a write, the same hazard as `send-keys` — confirm with the user before typing into another agent's session on their behalf. For the agent, neither command is a safety question so much as a hard failure — `attach-session` needs a TTY the agent's Bash tool doesn't have, and `switch-client` needs an attached client the agent's own detached execution context never is; both require a human to run them from their own terminal. If the orchestrator's scripted send-keys loop is still running while a human is attached and typing, both are writing to the same input and will fight each other — pause the scripted loop during hands-on takeover. Detach with `Ctrl-b d` (default tmux prefix `Ctrl-b`, then `d`) when done; this returns control to the orchestrator **without** killing the session, so the scripted loop can resume.
 
 ## Reading scrollback robustly
 
