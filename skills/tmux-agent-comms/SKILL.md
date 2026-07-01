@@ -4,7 +4,7 @@ description: "Manage AI agents in tmux: spawn or kill sessions and message any C
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.0
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -33,6 +33,7 @@ Quick start: the six phases below run in order — discover/spawn a session, res
 2. **Verify the target before sending.** A typo'd session name silently sends keystrokes nowhere (or to the wrong agent). Always resolve the exact target with `has-session` first (Phase 2).
 3. **Wait for the agent, don't race it.** Agents take seconds to respond. Sending a follow-up while the target is still working corrupts its input. Always wait until the pane output settles (Phase 4) before reading a reply or sending again.
 4. **Escape what you send.** `send-keys` interprets `;` as a command separator and the shell interprets `$`, backticks, and quotes. Mishandled, your message gets mangled or — worse — executes. Follow the escaping rules in Phase 3.
+5. **Attaching is opt-in, not a replacement.** Showing an agent's terminal (Phase 1) is an alternative for a human to drive by hand; it does not replace the default detached, scripted workflow — don't attach unless the user wants to see or steer the live UI.
 
 ## Phase 1: Create or Discover Sessions
 
@@ -66,6 +67,17 @@ python3 scripts/wait_for_idle.py "$name" --timeout 30 --no-print; echo "ready=$?
 ```
 
 To launch a **fleet**, repeat with distinct job-named sessions (`reviewer`, `tests`, `docs`) so later messages are self-documenting.
+
+### Show the agent's terminal (optional)
+
+The default workflow stays detached — you drive the agent with `send-keys`/`capture-pane` and never open its terminal. If the user wants to *see* the live CLI (a trust/auth prompt, debugging, or hands-on steering), attach to the same session name instead of reading it from outside:
+
+```bash
+tmux attach-session -t "$name"     # from a plain (non-tmux) shell
+tmux switch-client -t "$name"      # from inside tmux already (your own terminal is a tmux client)
+```
+
+Detach with `Ctrl-b d` (default prefix + `d`) to return control to the orchestrator without killing the session. This is opt-in and does not replace the default detached flow — see `references/tmux-recipes.md` ("Showing an agent's live terminal") for the when-to-use guidance, the correct command for each starting context, and a worked example that names the exact session attached to.
 
 ## Phase 2: Resolve the Exact Target
 
@@ -210,12 +222,13 @@ Relay that answer to the user. If the bounded-tail read starts mid-sentence, wid
 - **Agent stalled** (pane unchanged across reads, no spinner, no completion) — distinct from "still working" (spinner/`esc to interrupt` or a changing tail) and from a dropped delivery. Surface it; don't silently re-wait (Phase 4).
 - **Re-wait/re-send loop won't terminate** — enforce the overall budget (Phase 4): cap total re-waits/wall-clock and escalate to the user; never poll indefinitely.
 - **Bounded-tail capture starts mid-sentence** — the reply is longer than ~40 lines; widen stepwise (`-S -80`, …) and only reach for unbounded `-S -` if even a wide tail truncates (Phase 5).
+- **Returning to orchestrator control after attaching** — detach with `Ctrl-b d` (default prefix + `d`); this leaves the session running so the scripted send-keys/capture-pane loop can resume. Never `kill-session` just to "get back" (Phase 1, "Show the agent's terminal").
 
 ## Reference
 
 Read `references/delivery-and-waiting.md` for the full rationale behind delivery verification (Phase 3) and waiting (Phase 4).
 
-Read `references/tmux-recipes.md` for: broadcasting to a fleet, sending multi-line/code messages safely, splitting a session into panes, reading scrollback robustly, and a troubleshooting table.
+Read `references/tmux-recipes.md` for: broadcasting to a fleet, sending multi-line/code messages safely, splitting a session into panes, showing an agent's live terminal, reading scrollback robustly, and a troubleshooting table.
 
 ## Step Completion Report
 

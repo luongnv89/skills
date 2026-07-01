@@ -60,6 +60,38 @@ tmux capture-pane -t agent1:0.1 -p    # read just that pane
 
 List panes and their indices with `tmux list-panes -t agent1`.
 
+## Showing an agent's live terminal
+
+The default orchestrator flow stays detached — `send-keys` writes to a session's pane and `capture-pane` reads it, without ever opening a terminal on the session. Sometimes a human needs to see or drive the live CLI directly instead: a trust/auth dialog that needs a keypress the orchestrator won't fire (SKILL.md Phase 1, Phase 4 exit 3), debugging a stuck agent, or mid-run steering a scripted loop can't express.
+
+**When to use show vs. detached:**
+
+| Situation | Use |
+| --- | --- |
+| Routine messaging, waiting, capturing replies | Detached (default) — `send-keys` / `wait_for_idle.py` / `capture-pane`, no terminal needed |
+| Agent parked on a trust/auth prompt (`wait_for_idle.py` exit 3) | Show — a human must see the exact dialog text and pick the right key |
+| Debugging why an agent looks stalled or is behaving oddly | Show — watch it live rather than repeatedly capturing snapshots |
+| Mid-run correction or manual input only a human should give | Show — type directly into that agent's input |
+| Everything else — scripted send/wait/capture loop, broadcasts | Detached (default) |
+
+**Attaching — pick the command for your starting context:**
+
+```bash
+tmux attach-session -t agent1     # from a plain (non-tmux) shell — your terminal is not already a tmux client
+tmux switch-client -t agent1      # from inside tmux already — e.g. your own terminal is itself a tmux client
+```
+
+These are **not interchangeable**: running `attach-session` from a shell that is itself already inside a tmux client (`$TMUX` is set) fails with `sessions should be nested with care, unset $TMUX to force`. If you hit that, either use `switch-client` instead, or `unset TMUX` first if you deliberately want a nested attach.
+
+**Name the session before attaching — don't guess.** Reuse the same target-resolution step as Phase 2 so you attach to the confirmed name, not a guess (spawn can rename on collision, e.g. `agent1-1730000000`):
+
+```bash
+tmux has-session -t agent1 2>/dev/null && echo "OK: agent1 exists" || tmux list-sessions
+tmux attach-session -t agent1     # attach to the confirmed name from the line above
+```
+
+**Safety notes (consistent with Critical Rule 1):** attaching and scrolling to read is always safe; *typing* into the session is a write, the same hazard as `send-keys` — confirm with the user before typing into another agent's session on their behalf. If the orchestrator's scripted send-keys loop is still running while a human is attached and typing, both are writing to the same input and will fight each other — pause the scripted loop during hands-on takeover. Detach with `Ctrl-b d` (default tmux prefix `Ctrl-b`, then `d`) when done; this returns control to the orchestrator **without** killing the session, so the scripted loop can resume.
+
 ## Reading scrollback robustly
 
 The **default** read for a full reply is a bounded tail — `-S -40`, which returns ~40 lines of scrollback plus the visible pane — see SKILL.md Phase 5. This section is the **expand** case: a reply long enough that the bounded tail truncated (the capture starts mid-sentence). Widen the window stepwise rather than jumping straight to the whole history:
@@ -94,6 +126,8 @@ This is best-effort — always sanity-check the result rather than trusting it b
 | Reply cut off | Bounded-tail window too small for this reply | Widen the tail stepwise — `-S -80`, then larger; unbounded `-S -` only as last resort (SKILL.md Phase 5; "Reading scrollback robustly" above) |
 | `;` or `$...` came out wrong / executed | Shell/tmux interpreted special chars | Quote the message; use `send-keys -l` or paste-buffer (see above) |
 | Agent stuck on a yes/no or trust prompt | It's waiting for a keypress, not a typed line | `wait_for_idle.py` flags this as exit 3 (BLOCKED) for known dialogs. Send the exact key it expects (e.g. `tmux send-keys -t agent1 "1" Enter`), but confirm with the user first for any permission/trust prompt |
+| Attached to the wrong session / can't find my agent's window | Guessed a name instead of resolving it, or the spawn renamed on collision (`agent1-<timestamp>`) | Run `tmux has-session -t <name>` or `tmux list-sessions` first, then attach to the confirmed name (see "Showing an agent's live terminal" above) |
+| `attach-session` errors with "sessions should be nested with care, unset $TMUX to force" | Ran `attach-session` from a shell that's already inside a tmux client | Use `tmux switch-client -t <name>` instead, or `unset TMUX` first if a nested attach is intentional |
 | Can't tell if the agent is stuck or still working | Trusting the helper's exit code without a look | Verdict is advisory — read the pane yourself (`-S -40`). Spinner / changing tail = working (wait); unchanged + no spinner + no completion = stalled (surface to user). SKILL.md Phase 4 |
 | `wait_for_idle.py` times out repeatedly | Agent genuinely slow, or a persistent spinner | Raise `--timeout` for a single wait; if a static UI element matches a busy marker, fall back to the manual capture-compare loop. Bound the **overall** re-wait/re-send loop and escalate when the budget is spent — never poll forever (SKILL.md Phase 4) |
 | New session dies immediately | Agent binary not found in that shell | Launch the agent manually once to see the error; ensure it's on PATH in a login shell |
