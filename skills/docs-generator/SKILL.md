@@ -1,10 +1,10 @@
 ---
 name: docs-generator
-description: "Generate and restructure project documentation into a clear, accessible hierarchy. Use when asked to organize docs, generate documentation, improve doc structure, or restructure README. Don't use for API reference generation from code (JSDoc/Sphinx), authoring a landing page, or agent-config files like CLAUDE.md."
+description: "Generate and restructure project docs into a clear, accessible hierarchy. Use to organize, generate, or restructure a README. Don't use for API reference generation (JSDoc/Sphinx), landing pages, or agent-config files like CLAUDE.md."
 license: MIT
 effort: low
 metadata:
-  version: 1.2.3
+  version: 1.2.5
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -159,14 +159,6 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 **Phase: Documentation Restructure** — checks: `Doc restructure`, `Diagram creation`
 
 **Phase: Validation** — checks: `Validation pass`, `Link verification`
-
-## Error Handling
-
-### No existing documentation found
-**Solution:** Generate documentation from scratch based on code analysis. Start with README.md and add docs/ files based on project complexity.
-
-### Conflicting or outdated docs
-**Solution:** Flag conflicts to the user. Prefer code-derived information over stale docs. Mark outdated sections for user review.
 
 ## Guidelines
 

@@ -1,10 +1,10 @@
 ---
 name: aso-marketing
-description: "Optimize App Store and Google Play listings with keyword strategy, metadata, and localization. Use when asked to improve app store visibility or ASO. Don't use for web SEO, paid UA campaigns, or pre-submission compliance audits."
+description: "Optimize App Store and Google Play listings via a 7-phase, plan-approval-gated ASO workflow (keyword strategy, metadata, localization). Don't use for web SEO, paid UA campaigns, or pre-submission compliance audits."
 license: MIT
 effort: max
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -160,7 +160,7 @@ Apple App Store, Google Play Store, and cross-store conventions (indexed fields,
 
 ## Cross-Skill Integration
 
-This skill complements `asc-aso-audit` (deep iOS audit), `asc-localize-metadata` (bulk localization), `asc-metadata-sync` (App Store Connect sync), `asc-whats-new-writer`, `asc-shots-pipeline`, and `seo-ai-optimizer`. See `references/edge-cases.md` (Cross-Skill Integration section) for when to combine.
+This skill complements `seo-ai-optimizer`. See `references/edge-cases.md` (Cross-Skill Integration section) for when to combine.
 
 ## Safety and Caution
 

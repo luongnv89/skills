@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -128,7 +128,7 @@ After each step, emit a `◆` status block. For templates and per-step check lis
 
 ## Acceptance Criteria
 
-A run passes when the audit report is complete, the improvement plan was user-approved, the **Safety Protocol (diff + confirmation) was followed**, and validation shows critical issues are resolved.
+See the itemized checklist in `references/workflow-detail.md` (Acceptance Criteria) — a run only passes when every item there is checked.
 
 ## Expected Output
 

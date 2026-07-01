@@ -1,11 +1,11 @@
 ---
 name: tad-generator
-description: "Generate a Technical Architecture Document (TAD) from a PRD. Use when asked to design the architecture, create a TAD, or define how a product is built. Creates/updates tad.md and reports GitHub links. Skip PRD authoring, sprint-tasks, or code implementation."
+description: "Generate a Technical Architecture Document (TAD) from a PRD. Use when asked to design system architecture or define how a product is built. Updates tad.md and reports GitHub links. Don't use for PRD authoring, sprint tasks, or code implementation."
 license: MIT
 effort: max
 metadata:
-  version: 1.3.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.4.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # TAD Generator
@@ -78,6 +78,8 @@ Project folder path in `$ARGUMENTS` containing:
 
 ## Workflow
 
+**Mode check (do this first):** if `tad.md` already exists in the project folder, this is a **Modification** run — skip straight to [Modification Mode](#modification-mode). Otherwise it's a **Create** run — continue through Phases 1-8 below.
+
 ### Phase 1: Setup & Validation
 
 1. Verify `prd.md` exists
@@ -108,12 +110,7 @@ Ask user (if not clear):
 
 ### Phase 4: Research & Validation
 
-Conduct 5 research rounds:
-1. **Technology Stack**: Validate choices against industry standards
-2. **Infrastructure**: Compare hosting for cost and scalability
-3. **Security**: Review OWASP guidelines for chosen stack
-4. **Risk Assessment**: Identify bottlenecks, vendor lock-in
-5. **Holistic Review**: Ensure PRD alignment and startup feasibility
+Conduct the [5 research rounds](#research-rounds-5-parallel) defined under Subagent Architecture above.
 
 ### Phase 5: Generate TAD
 
@@ -185,51 +182,7 @@ After completing each major step, output a status report in this format:
 
 Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
 
-### Phase-specific checks
-
-**Phase 1 — Setup**
-```
-◆ Setup (step 1 of 8 — environment validation)
-··································································
-  PRD found:                    √ pass
-  Context extracted:            √ pass (product + features + NFRs read)
-  Architecture questions answered: √ pass (deployment, DB, auth, budget confirmed)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 4 — Research**
-```
-◆ Research (step 4 of 8 — validation rounds)
-··································································
-  5 parallel rounds completed:  √ pass
-  Best practices gathered:      √ pass (tech, infra, security, risk, holistic)
-  Patterns validated:           √ pass (OWASP, vendor lock-in, startup feasibility)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 5 — Generation**
-```
-◆ Generation (step 5 of 8 — TAD authoring)
-··································································
-  11 sections written:          √ pass
-  tad.md created:               √ pass
-  Diagrams included:            √ pass (mermaid architecture + flow diagrams)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 8 — Output**
-```
-◆ Output (step 8 of 8 — delivery)
-··································································
-  Summary presented:            √ pass (architecture decisions highlighted)
-  README updated:               √ pass (TAD status ✅)
-  Committed and pushed:         √ pass (commit hash: ...)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
+See [references/step-completion-reports.md](references/step-completion-reports.md) for worked examples per phase (Setup, Research, Generation, Output).
 
 ## Acceptance Criteria
 
@@ -292,11 +245,12 @@ graph TD
 
 ## Modification Mode
 
-For existing TAD changes:
-1. Create timestamped backup
-2. Ask what to modify (stack, infrastructure, security, data, scaling)
-3. Apply changes preserving structure
-4. Update revision history
+Triggered by the mode check above when `tad.md` already exists.
+
+1. Create a timestamped backup (`tad.md.bak.<timestamp>`).
+2. Ask which area changed — Stack | Infrastructure | Security | Data | Scaling — and map the answer to its matching numbered section in [Phase 5](#phase-5-generate-tad).
+3. Apply changes to that section only, preserving the rest of the structure.
+4. Append a revision-history entry (date + summary) at the end of `tad.md`.
 
 ## Guidelines
 

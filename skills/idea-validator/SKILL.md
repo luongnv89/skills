@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.4.0
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -22,7 +22,7 @@ Trigger this skill when the user asks to:
 
 ## Instructions
 
-Follow the 5-phase pipeline in order: Clarify → Technical Context → Competitive Landscape Research → Critical Evaluation → Improvements. Do not skip phases or reorder them.
+Follow the 5-phase pipeline in order: Clarify → Technical Context → Competitive Landscape Research → Critical Evaluation → Improvements. Do not skip phases or reorder them. One conditional branch applies on top of the pipeline: if the working directory is the root of an `ideas` repo, also do the README Maintenance step below after each file update — see that section for the detection rule.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -224,74 +224,7 @@ After completing each major step, output a status report in this format:
 
 Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
 
-### Phase-specific checks
-
-**Setup**
-```
-◆ Setup (step 1 of 6 — [idea name])
-··································································
-  Storage resolved:   √ pass ([path])
-  Folder created:     √ pass ([YYYY_MM_DD_name/])
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 1 — Clarify**
-```
-◆ Clarify (step 2 of 6 — [idea name])
-··································································
-  Questions answered: √ pass ([N] responses collected)
-  idea.md updated:    √ pass | × fail — [missing sections]
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 2 — Gather Technical Context**
-```
-◆ Gather Technical Context (step 3 of 6 — [idea name])
-··································································
-  Context sources identified: √ pass ([N] inputs collected)
-  Technical feasibility assessed: √ pass | × fail — [gaps noted]
-  idea.md technical section updated: √ pass | × fail — [missing fields]
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 3 — Competitive Landscape**
-```
-◆ Competitive Landscape (step 4 of 6 — [idea name])
-··································································
-  Web searches executed:  √ pass ([N] live queries run)
-  Commercial coverage:    √ pass ([N] tools/services found)
-  Open-source coverage:   √ pass ([N] OSS options found or no credible result documented)
-  Competitors found:      √ pass ([N] direct + [N] adjacent)
-  Failed attempts checked:√ pass | × fail — [no results or skipped]
-  Reuse potential assessed: √ pass | × fail — [OSS build-on/fork path missing]
-  validate.md updated:    √ pass | × fail — [missing sections]
-  ____________________________
-  Result:                 PASS | FAIL | PARTIAL
-```
-
-**Phase 4 — Evaluate**
-```
-◆ Evaluate (step 5 of 6 — [idea name])
-··································································
-  Feasibility scored: √ pass ([score]/10)
-  Market assessed:    √ pass | × fail — [gaps in analysis]
-  validate.md updated:√ pass | × fail — [missing sections]
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 5 — Improve**
-```
-◆ Improve (step 6 of 6 — [idea name])
-··································································
-  Enhancements identified:    √ pass ([N] improvements listed)
-  Recommendations added:      √ pass | × fail — [what's missing]
-  ____________________________
-  Result:                     PASS | FAIL | PARTIAL
-```
+Per-phase check blocks (Setup, Phase 1-5) live in `references/step-completion-reports.md` — read the block matching the phase you just completed.
 
 ## Tone
 
@@ -337,90 +270,4 @@ After all phases:
 
 ## File Templates
 
-### idea.md
-```markdown
-# Idea: [Name]
-
-## Original Concept
-[From $ARGUMENTS]
-
-## Clarified Understanding
-[After Phase 1]
-
-## Target Audience
-[Specific user profile]
-
-## Goals & Objectives
-[Success criteria]
-
-## Technical Context
-- Stack:
-- Timeline:
-- Budget:
-- Constraints:
-
-## Discussion Notes
-[Updates from conversation]
-```
-
-### validate.md
-```markdown
-# Validation: [Name]
-
-## Quick Verdict
-**[Build it / Maybe / Skip it]**
-
-## Why
-[2-3 sentence explanation]
-
-## Competitive Landscape
-
-| Competitor | Type | What They Do | Pricing / License | Traction / Health | Reuse Potential | Key Weakness |
-|---|---|---|---|---|---|---|
-| [Name](URL) | [Commercial / OSS / Hybrid / Adjacent / Failed] | [One sentence] | [Model or license] | [Evidence] | [Fork/build-on/plugin/reference/not suitable] | [Gap to exploit] |
-
-### Commercial Tools & Services
-[Commercial competitors, pricing, traction, and market positioning]
-
-### Open-source Alternatives & Reuse Potential
-[Maintained OSS projects, license/health, and whether to build on, fork, contribute, or avoid rebuilding]
-
-### White Space Analysis
-[What's missing in the current market]
-
-### Differentiation Assessment
-[Is the proposed differentiation real or imagined given existing commercial and open-source competitors?]
-
-### Build vs. Base Recommendation
-[Whether to build from scratch, build on existing OSS, fork, contribute, or narrow the idea]
-
-### Failed Predecessors
-[Products or OSS projects that tried and failed, stalled, or were abandoned — and why]
-
-## Similar Products
-[Competitors]
-
-## Differentiation
-[Unique angle]
-
-## Strengths
--
-
-## Concerns
--
-
-## Ratings
-- Creativity: /10
-- Feasibility: /10
-- Market Impact: /10
-- Technical Execution: /10
-
-## How to Strengthen
-[Actionable improvements]
-
-## Enhanced Version
-[Optimized concept]
-
-## Implementation Roadmap
-[Phased approach]
-```
+The canonical `idea.md` and `validate.md` header structure lives in `references/file-templates.md`. Read it when creating either file (Setup step 2/3) or updating a section named in Phases 1-5 above — that file owns header names and order; phase instructions above own what content goes in them.

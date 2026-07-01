@@ -1,10 +1,10 @@
 ---
 name: devops-pipeline
-description: "Configure pre-commit hooks and lean GitHub Actions for shift-left quality assurance. Use when adding or auditing CI/CD on a Git repo to maximize local test coverage and minimize CI cost. Skip for Terraform/K8s, deployment pipelines, or non-GitHub CI providers."
+description: "Configure pre-commit hooks and lean GitHub Actions for shift-left quality assurance. Use when adding or auditing CI/CD to maximize local test coverage and minimize CI cost. Skip for Terraform/K8s, deployment pipelines, or non-GitHub CI providers."
 license: MIT
 effort: medium
 metadata:
-  version: 2.0.1
+  version: 2.0.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -150,19 +150,7 @@ If all local checks pass, GitHub Actions becomes a thin verification layer, not 
 | Rust | rustfmt | Clippy | built-in | cargo-audit | cargo test |
 | Java | google-java-format | Checkstyle | - | SpotBugs | mvn test |
 
-## What Runs Where
-
-| Check | Pre-commit (commit) | Pre-commit (push) | GitHub Actions |
-|-------|---------------------|-------------------|----------------|
-| Formatting | ✓ | — | — |
-| Linting | ✓ | — | — |
-| Type checking | ✓ | — | — |
-| Security scan (offline) | ✓ | — | — |
-| Unit tests (fast) | ✓ | — | — |
-| Full test suite | — | ✓ | ✓ (coverage upload) |
-| CLI E2E tests | — | ✓ | — |
-| Multi-version matrix | — | — | ✓ |
-| Deploy | — | — | ✓ |
+Where each check runs (commit-stage pre-commit, push-stage pre-commit, or GitHub Actions only) is set out in Workflow steps 2 and 3 above — do not re-split checks differently here.
 
 ## Expected Output
 

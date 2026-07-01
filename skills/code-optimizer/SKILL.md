@@ -4,8 +4,8 @@ description: "Analyze code for performance bottlenecks, memory leaks, and algori
 license: MIT
 effort: medium
 metadata:
-  version: 1.3.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.4.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Code Optimization
@@ -106,9 +106,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase: Analysis** — checks: `Issue detection`, `Priority categories covered`, `Impact estimated`, `Findings sorted by severity`
 
-**Phase: Apply Fixes** — checks: `Fix application`, `User approval obtained`, `Existing tests run`, `No regressions introduced`
-
-**Phase: Verify** — checks: `Performance verified`, `Test suite passes`, `Critical issues resolved`, `Warnings documented`
+**Phase: Apply Fixes** — checks: `Fix application`, `User approval obtained`, `Existing tests run`, `No regressions introduced`, `Critical issues resolved`, `Warnings documented`
 
 ## Severity Levels
 
@@ -119,51 +117,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ## Language-Specific Checks
 
-### JavaScript/TypeScript
-- Array methods inside loops (map/filter/find in forEach)
-- Missing async/await causing blocking
-- Event listener leaks
-- Unbounded arrays/objects
-
-### Python
-- List comprehensions vs generator expressions for large data
-- Global interpreter lock considerations
-- Context manager usage for resources
-- N+1 query patterns
-
-### Go
-- Goroutine leaks (unbounded `go func()` without context cancellation)
-- Unnecessary allocations in hot paths (use `sync.Pool`, pre-allocate slices)
-- String concatenation in loops (use `strings.Builder`)
-- Missing `defer` for resource cleanup
-
-### Rust
-- Unnecessary cloning (use references or `Cow<>` instead)
-- Lock contention with `Mutex` when `RwLock` would suffice
-- Unbounded `Vec` growth without `with_capacity`
-- Blocking operations in async contexts
-
-### Java
-- Autoboxing in tight loops (use primitive types)
-- String concatenation with `+` in loops (use `StringBuilder`)
-- Synchronized blocks that are too broad
-- Stream API misuse (unnecessary intermediate collections)
-
-### General
-- Premature optimization warnings (only flag if genuinely impactful)
-- Database query patterns (N+1, missing indexes)
-- I/O in hot paths
-
-## Error Handling
-
-### No obvious performance issues found
-**Solution:** Report that the code is already well-optimized. Suggest profiling with runtime tools (e.g., `perf`, Chrome DevTools, `py-spy`) to find runtime-specific bottlenecks.
-
-### Target file is too large (>2000 lines)
-**Solution:** Ask the user to specify which functions or sections to focus on. Analyze the most performance-critical paths first.
-
-### Optimization breaks existing tests
-**Solution:** Revert the change immediately. Re-examine the optimization and adjust the approach to preserve existing behavior.
+Read `references/language-checks.md` for the detected language's specific checks (covers JavaScript/TypeScript, Python, Go, Rust, Java, and general cross-language patterns) — load only the section matching the target code's language.
 
 ## Acceptance Criteria
 

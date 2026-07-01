@@ -4,7 +4,7 @@ description: "Build an improved website clone from a URL via 6-phase gated workf
 license: MIT
 effort: high
 metadata:
-  version: 1.1.5
+  version: 1.1.6
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -43,6 +43,8 @@ Phase 6 — Final Report   → website-clone-final-report
 ```
 
 Approval gates after Phase 2, 3, and 4: the orchestrator **must not advance** without explicit user approval.
+
+**Artifacts** (each written once, then referenced by name in the phases below): `analysis.json` — Phase 1's structured findings; `report.md` — Phase 2's plain-language summary; `prd.md` — Phase 3's improvement proposal; `tasks.md` — Phase 4's phased implementation plan; `builder-metadata.json` — Phase 5's build-output metadata (asset counts, Pages URL) consumed by Phase 6.
 
 ## Layout
 

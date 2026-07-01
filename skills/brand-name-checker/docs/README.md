@@ -5,7 +5,7 @@
   If you're an AI agent, read the SKILL.md file instead for skill instructions.
 -->
 
-# Name Checker
+# Brand Name Checker
 
 > Check product and brand names for social media, package registry, domain, and trademark conflicts with risk assessment.
 

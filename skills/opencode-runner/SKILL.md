@@ -4,7 +4,7 @@ description: "Run coding tasks via opencode using free cloud models. Use when as
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -279,14 +279,14 @@ See `references/expected-output.md` for the full set of example blocks the user 
 
 ## Edge Cases
 
-- **opencode not installed** — `which opencode` returns nothing. The skill prints installation instructions for three methods (curl, npm, brew) and stops. It does not attempt the coding task itself.
-- **opencode upgrade fails** — The upgrade command errors. The skill reports the failure, suggests running the command manually, and stops. It does not continue with a potentially broken binary.
-- **No free cloud models available** — `opencode models` output contains no `opencode/*` models with $0 or "Free" pricing. The skill informs the user that no free option is available and stops. It does not fall back to local models (ollama, lmstudio) or paid models.
-- **All priority free models tried and all fail** — After retrying with every model in the priority list, none produced usable output. The skill reports this, suggests the user check their opencode auth configuration (`opencode auth list`), and stops.
-- **Task timeout (>5 minutes with no output growth)** — The skill confirms with the user, kills the opencode process tree, suggests retrying with the next free model, and runs Phase 6 cleanup. It does not attempt the task itself.
-- **User rejects the Phase 3 confirmation** — If the user replies "no" / "change something" / edits the prompt or model, loop back to Phase 2 (model pick) or Phase 3 (re-show summary). Never invoke `opencode run` without explicit confirmation.
-- **User has an interactive opencode TUI session open** — The cleanup step detects running opencode processes. The skill kills only `opencode run` child processes, leaving the interactive TUI (`opencode` without a subcommand) untouched.
-- **Task prompt contains multi-line content or file references** — Use the `--file` flag to pass context files separately, keeping the command-line prompt concise and avoiding shell escaping issues.
+- **opencode not installed** — see Phase 1, Step 1 (install instructions, then stop).
+- **opencode upgrade fails** — see Phase 1, Step 2 (report and stop, don't continue on a broken binary).
+- **No free cloud models available** — see Phase 2, Selection logic step 6 (inform user, stop; no fallback to local/paid models).
+- **All priority free models tried and all fail** — see Phase 5, "On error, stall, or timeout" (suggest `opencode auth list`, stop).
+- **Task timeout (>5 minutes with no output growth)** — see Phase 5, Cadence and "On error, stall, or timeout" (confirm, kill, retry suggestion, Phase 6 cleanup).
+- **User rejects the Phase 3 confirmation** — see Phase 3, final paragraph (loop back to Phase 2 or 3; never invoke `opencode run` unconfirmed).
+- **User has an interactive opencode TUI session open** — see Phase 6, Step 2 (kill only `opencode run` children, leave the TUI alone).
+- **Task prompt contains multi-line content or file references** — see Phase 4, "Handling multi-line or complex prompts" (use `--file`).
 - **opencode produces output but exits non-zero** — Report the exit code and last lines of output to the user, run cleanup, and suggest verifying the task result manually before relying on it.
 
 ---

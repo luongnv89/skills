@@ -4,7 +4,7 @@ description: "Generate unit tests for untested branches and edge cases. Use when
 license: MIT
 effort: low
 metadata:
-  version: 1.2.3
+  version: 1.3.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -19,15 +19,18 @@ Expand unit test coverage by targeting untested branches and edge cases.
 - A code review flags untested error paths or boundary conditions
 - The user wants to identify and fill gaps in an existing test suite before a release
 
-## Instructions
+## Stack (detect before Step 1 of Workflow)
 
-1. Sync the branch with remote (see Repo Sync section below)
-2. Create a feature branch for the new tests
-3. Run the project's coverage tool to get a baseline report
-4. Identify the lowest-coverage files and untested code paths
-5. Write tests for error paths, boundary values, and missing branches
-6. Re-run coverage to confirm improvement
-7. Commit the new tests with a descriptive message
+Detect the project's language from its manifest file and use the matching commands throughout the Workflow below:
+
+| Manifest | Stack | Coverage command | Test framework |
+|---|---|---|---|
+| `package.json` | JavaScript/TypeScript | `npx jest --coverage` or `npx vitest --coverage` | Jest, Vitest, Mocha |
+| `pyproject.toml` | Python | `pytest --cov=. --cov-report=term-missing` | pytest, unittest |
+| `go.mod` | Go | `go test -coverprofile=coverage.out ./...` | testing, testify |
+| `Cargo.toml` | Rust | `cargo tarpaulin` or `cargo llvm-cov` | built-in test framework |
+
+If none of these manifests is found, see [Edge Cases](#edge-cases) — "No test framework detected".
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -60,11 +63,7 @@ Before making any changes:
 
 ### 1. Analyze Coverage
 
-Detect the project's test runner and run the coverage report:
-- **JavaScript/TypeScript**: `npx jest --coverage` or `npx vitest --coverage`
-- **Python**: `pytest --cov=. --cov-report=term-missing`
-- **Go**: `go test -coverprofile=coverage.out ./...`
-- **Rust**: `cargo tarpaulin` or `cargo llvm-cov`
+Run the coverage command for the detected [Stack](#stack-detect-before-step-1-of-workflow) above.
 
 From the report, identify:
 - Untested branches and code paths
@@ -82,11 +81,7 @@ Review code for:
 
 ### 3. Write Tests
 
-Use project's testing framework:
-- **JavaScript/TypeScript**: Jest, Vitest, Mocha
-- **Python**: pytest, unittest
-- **Go**: testing, testify
-- **Rust**: built-in test framework
+Use the test framework for the detected [Stack](#stack-detect-before-step-1-of-workflow) above.
 
 Target scenarios:
 - Error handling and exceptions
@@ -162,17 +157,6 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 **Test Writing phase checks:** `Tests written`, `Edge cases covered`, `Framework conventions followed`
 
 **Verification phase checks:** `Tests pass`, `Coverage improved`, `No regressions`
-
-## Error Handling
-
-### No test framework detected
-**Solution:** Check `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` for test dependencies. If none found, ask the user which framework to use and install it.
-
-### Coverage tool not installed
-**Solution:** Install the appropriate coverage tool (`nyc`, `pytest-cov`, etc.) and retry.
-
-### Existing tests failing
-**Solution:** Do not add new tests until existing failures are resolved. Report failing tests to the user first.
 
 ## Guidelines
 

@@ -4,7 +4,7 @@ description: "Transform a project into a professional open-source repository by 
 license: MIT
 effort: low
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -33,6 +33,8 @@ git stash pop
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Workflow
+
+> Before proceeding, check **Edge Cases** below for a non-MIT LICENSE, a monorepo, no detectable language, a private/internal repo, or a dirty/detached HEAD — handle the matching case first if it applies.
 
 ### 0. Create Feature Branch
 
@@ -144,49 +146,10 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:                  PASS
 ```
 
-### Core Files (step 2 of 4)
-
-```
-◆ Core Files (step 2 of 4 — community standards)
-··································································
-  README created:          √ pass — enhanced with badges, examples
-  LICENSE added:           √ pass — MIT from assets/LICENSE-MIT
-  CONTRIBUTING written:    √ pass — branching strategy included
-  CODE_OF_CONDUCT added:   × fail — assets/CODE_OF_CONDUCT.md missing
-  [Criteria]:              √ 3/4 met
-  ____________________________
-  Result:                  PARTIAL
-```
-
-### GitHub Setup (step 3 of 4)
-
-```
-◆ GitHub Setup (step 3 of 4 — issue and PR templates)
-··································································
-  Issue templates created: √ pass — bug_report.md, feature_request.md
-  PR template created:     √ pass — PULL_REQUEST_TEMPLATE.md
-  [Criteria]:              √ 2/2 met
-  ____________________________
-  Result:                  PASS
-```
-
-### Documentation (step 4 of 4)
-
-```
-◆ Documentation (step 4 of 4 — docs structure)
-··································································
-  ARCHITECTURE written:    √ pass — system components documented
-  CHANGELOG created:       √ pass — version history initialized
-  Metadata updated:        √ pass — package.json keywords, license, repo
-  [Criteria]:              √ 3/3 met
-  ____________________________
-  Result:                  PASS
-```
+Repeat this format for each subsequent step (Core Files, GitHub Setup, Documentation), adapting the check names to what that step actually validates.
 
 ## Guidelines
 
-- Preserve existing content - enhance, don't replace
-- Use professional, welcoming tone
 - Adapt to project's actual tech stack
 - Include working examples from the actual codebase
 

@@ -4,8 +4,8 @@ description: "Generate development tasks from a PRD file with sprint-based plann
 license: MIT
 effort: max
 metadata:
-  version: 1.2.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.3.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Tasks Generator
@@ -74,6 +74,13 @@ git stash pop
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
+## Modes (check before running)
+
+- **Input resolution**: `$ARGUMENTS` present → use it directly; empty → auto-pick (see [Input](#input) below).
+- **Repo state**: dirty working tree → stash before sync (see [Repo Sync](#repo-sync-before-edits-mandatory)); no `origin` → stop and ask.
+- **Existing `tasks.md`**: back it up before regenerating (see [Pre-checks](#pre-checks)).
+- **README update**: only if the PRD lives inside an `ideas` repo (see [README Maintenance](#readme-maintenance-ideas-repo-only)) — skip otherwise.
+
 ## Input
 
 Preferred: PRD file path provided in `$ARGUMENTS`.
@@ -131,8 +138,8 @@ From PRD, extract:
 
 1. **Map Dependencies**: For each task, identify "Depends On" and "Blocks"
 2. **Group Parallel Tasks**: Assign tasks to execution waves
-3. **Calculate Critical Path**: Longest dependency chain = minimum duration
-4. **Validate**: Check for circular dependencies, broken references
+3. **Calculate Critical Path** — the longest dependency chain; it sets the minimum duration. Referred to as "critical path" everywhere below.
+4. **Validate**: reject **circular dependencies** (the dependency graph must be a DAG — no cycles) and broken references
 
 ### Phase 5: Generate tasks.md
 
@@ -174,7 +181,7 @@ Before finalizing:
 - [ ] All tasks in dependency table
 - [ ] Critical path identified
 
-## README Maintenance (ideas repo)
+## README Maintenance (ideas repo only)
 
 After writing `tasks.md`, if the PRD lives inside an `ideas` repo, update the repo README ideas table:
 - Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
@@ -246,7 +253,7 @@ The skill run is considered successful only if ALL of the following hold:
 - [ ] Every task includes ALL of: `Description`, `Acceptance Criteria` (>=2 testable items), `Dependencies` (explicit `None` or task IDs), `PRD Reference`, and an effort estimate (e.g., `Effort: 1-3 days` or `S/M/L`).
 - [ ] Every task ID follows the `Task <sprint>.<index>` pattern (e.g., `Task 1.1`, `Task 2.3`).
 - [ ] A dependency table is present and references only tasks that exist in the file (no broken IDs).
-- [ ] No circular dependencies (dependency graph is a DAG).
+- [ ] No circular dependencies (see Phase 4).
 - [ ] At least one task per PRD requirement; ambiguous PRD items are flagged in a dedicated section.
 - [ ] Critical path is identified and stated explicitly.
 - [ ] If a prior `tasks.md` existed, a `tasks_backup_YYYY_MM_DD_HHMMSS.md` file is created.

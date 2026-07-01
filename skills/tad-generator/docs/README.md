@@ -5,7 +5,7 @@
   If you're an AI agent, read the SKILL.md file instead for skill instructions.
 -->
 
-# System Design
+# TAD Generator
 
 > Generate Technical Architecture Documents (TAD) from PRD files with modular, startup-appropriate design.
 

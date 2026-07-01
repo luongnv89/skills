@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.3.3
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -17,6 +17,11 @@ summary before code leaves their machine.
 
 Keep the orchestrator short for the agent's context budget: detailed matrices, templates,
 and long verification scenarios live in `references/`. Link, don't inline.
+
+This skill may trigger automatically per its description, but it never writes
+silently: Phase 1 always dry-runs the planned changes and waits for explicit
+user confirmation before touching files, and Phase 2 (CI) only runs when the
+user explicitly asks for it (e.g. `--ci`).
 
 ## Prerequisites
 
@@ -256,36 +261,8 @@ pre-commit install
 
 #### Expected output
 
-A successful first run prints a summary to stdout and exits 0. Verify the
-output matches this shape (exact counts vary):
-
-```text
-Security Check Summary
-======================
-Mode: full
-Checks run: 3 of 3 (skipped: 0)
-Findings: 1
-Severity: HIGH=1
-Categories: dependencies=1
-JSON report: security/security-report.json
-Markdown report: security/security-report.md
-
-Top findings:
-- HIGH [dependencies/trivy] CVE-XXXX-XXXX in <pkg> (<lockfile>)
-  Hint: Upgrade to <version>.
-```
-
-A scoped run on a docs-only commit looks like:
-
-```text
-Mode: staged
-Staged files: 2
-Checks run: 1 of 3 (skipped: 2)
-Skipped: trivy, semgrep
-```
-
-Skipped checks are recorded in both reports with their scope reason — they
-are not silent.
+A successful first run prints a summary to stdout and exits 0. See
+"Report Requirements" below for the exact shape and content of that summary.
 
 Assert: a clean run exits 0, both report paths exist, and
 `security-report.json` parses as valid JSON with a top-level `summary`
@@ -325,6 +302,36 @@ The local runner must print a concise report with:
 The default exit behavior is strict: any `HIGH` or `CRITICAL` finding exits
 non-zero.
 
+A successful full run looks like this (exact counts vary):
+
+```text
+Security Check Summary
+======================
+Mode: full
+Checks run: 3 of 3 (skipped: 0)
+Findings: 1
+Severity: HIGH=1
+Categories: dependencies=1
+JSON report: security/security-report.json
+Markdown report: security/security-report.md
+
+Top findings:
+- HIGH [dependencies/trivy] CVE-XXXX-XXXX in <pkg> (<lockfile>)
+  Hint: Upgrade to <version>.
+```
+
+A scoped run on a docs-only commit looks like:
+
+```text
+Mode: staged
+Staged files: 2
+Checks run: 1 of 3 (skipped: 2)
+Skipped: trivy, semgrep
+```
+
+Skipped checks are recorded in both reports with their scope reason — they
+are not silent.
+
 ## Acceptance Criteria
 
 A completed setup passes when:
@@ -338,25 +345,8 @@ A completed setup passes when:
 - [ ] `SECURITY.md` documents selected tools, omissions, run commands, and CI
       status.
 - [ ] `--ci` creates `.github/workflows/security.yml` only after Phase 1 passes.
-
-### File-aware scoping (no-blindspot scenarios)
-
-Walk through these manually after install. Each one is a real failure mode
-naive scoping creates:
-
-1. **Docs-only with leaked key.** Stage a `README.md` containing a synthetic
-   `AKIA…` AWS key. Hook fails HIGH (gitleaks ran).
-2. **Docs-only clean.** Stage a `README.md` with no secrets. Exit 0;
-   `trivy`/`semgrep`/`bandit` reported as skipped with reason; runtime is
-   measurably faster than `--all`.
-3. **Lockfile change.** Stage `package-lock.json`. `trivy` runs.
-4. **Source code with anti-pattern.** Stage a `.py` file containing
-   `eval(user_input)`. `semgrep` and `bandit` run; exit non-zero.
-5. **Workflow tampering.** Stage `.github/workflows/foo.yml` with
-   `${{ github.event.issue.title }}` interpolated into a `run:` step. The
-   trip-all rule fires; `semgrep` runs.
-6. **Full scan.** `python3 scripts/security_check.py --all` behaves like
-   pre-1.3.0 (every configured check executes).
+- [ ] File-aware scoping has been walked through manually against the
+      no-blindspot scenarios in `references/verification-scenarios.md`.
 
 ## Edge Cases
 
@@ -391,4 +381,5 @@ After each phase, report:
 
 - `references/tool-selection.md` - offline-first tool matrix and install notes
 - `references/templates.md` - target repo file templates
+- `references/verification-scenarios.md` - no-blindspot manual verification scenarios
 - `scripts/security_check.py` - reusable local security summary runner

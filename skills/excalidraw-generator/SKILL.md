@@ -1,10 +1,10 @@
 ---
 name: excalidraw-generator
-description: "Generate professional diagrams as valid Excalidraw JSON files — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, wireframes, C4 models, and more. Understands text, code, schemas, or verbal descriptions. Don't use for draw.io/Mermaid output, polished production slide decks, or pixel-perfect brand graphics."
+description: "Generate diagrams as valid Excalidraw JSON — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, wireframes, C4 models, and more. Don't use for draw.io/Mermaid output, slide decks, or pixel-perfect brand graphics."
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.3.2
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -16,7 +16,7 @@ This SKILL.md is intentionally compact to fit the agent's context budget (token-
 
 ## When to Use
 
-Use when the user asks for a diagram, flowchart, architecture sketch, ER/class/sequence diagram, mind map, wireframe, or C4 model and wants the output as an Excalidraw file (or embedded in Markdown via the `excalidraw` fenced block).
+Triggers/exclusions are set by the frontmatter `description` above. Output is an Excalidraw file, or embedded in Markdown via the `excalidraw` fenced block if the user asks for that.
 
 ## Environment Check
 

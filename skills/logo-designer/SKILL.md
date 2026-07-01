@@ -4,7 +4,7 @@ description: "Generate professional SVG logos from project context, producing 7 
 license: MIT
 effort: medium
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -167,8 +167,8 @@ Typography: Inter Bold for wordmark
 
 - **No project context found**: Ask the user for product name, product type, and one-sentence purpose before generating anything.
 - **Existing brand colors detected**: Use them instead of the default dark/neon-green palette; confirm with the user before proceeding.
-- **User does not specify wordmark casing**: Ask explicitly — do not assume README casing matches the desired logo stylization (e.g., "fastBuild" vs "FASTBUILD" vs "fastbuild").
-- **SVG geometry diverges across variants**: After writing all 7 files, read back mark, full, icon, white, and black variants and verify `d=""` path strings are identical (or correctly scaled); fix before finishing.
+- **User does not specify wordmark casing**: Ask explicitly before proceeding (see `references/design-principles.md` for the casing rule and examples).
+- **SVG geometry diverges across variants**: Re-run the Phase 3 verification step (read back and diff `d=""` strings) and fix before finishing.
 - **No git repository**: Skip the branch and sync steps; write directly to the current directory and note this in the summary.
 - **favicon.svg complexity**: At 16×16 the full mark is unreadable — always simplify to 2 layers (outer + inner) and drop the middle detail layer; preserve proportional geometry.
 - **User rejects the proposed style**: Iterate on Phase 2 (style selection) until the user approves before generating any SVG files.
@@ -194,7 +194,7 @@ See `references/step-reports.md` for the full report template, per-phase check l
 ## Notes
 
 - Always show logo previews on both light (#FAFAFA) and dark (#0A0A0A) backgrounds
-- Ask the user how they want the product name formatted in the wordmark before generating — do not assume README casing
+- Confirm wordmark casing before generating (see Phase 2 and Edge Cases)
 - If no project context is found, ask the user for: product name, type, and purpose
 - Prefer simplicity — a logo should be recognizable at 16x16 pixels
 - **Consistency is non-negotiable**: every variant must be visually recognizable as the same logo. The mark shape, number of layers, and accent elements must match across all files. The only things that change between variants are: color (monochrome), scale (favicon, icon), and presence of wordmark. If you cannot verify that paths match, the deliverable is incomplete.

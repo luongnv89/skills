@@ -1,10 +1,10 @@
 ---
 name: release-manager
-description: "Manage software releases end-to-end: bump version, generate changelog, tag, push, GitHub release, publish to PyPI/npm. Use when user asks to ship, cut a release, tag a version, or list changes since last tag. Skip routine commits and marketplace publishing."
+description: "Manage software releases end-to-end: bump version, generate changelog, tag, push, GitHub release, publish to PyPI/npm. Use when asked to ship, cut a release, or tag a version. Don't use for routine commits or marketplace publishing."
 license: MIT
 effort: max
 metadata:
-  version: 2.5.0
+  version: 2.6.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -38,9 +38,32 @@ A release typically involves these steps in order. Walk through each, confirming
 - Local branch synced with `origin` (see `references/orchestration.md` for sync commands)
 - For publishing: PyPI/npm credentials configured; for GitHub release: `gh` CLI authenticated
 
+## Repo Sync Before Edits (mandatory)
+
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is not clean, stash first, sync, then restore:
+
+```bash
+git stash push -u -m "pre-sync"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+git stash pop
+```
+
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
 ---
 
 ## Step 1: Pre-flight Checks (inline)
+
+> If an existing release tool (`.changeset`, `.releaserc`, semantic-release config, etc.) is detected, defer to it instead of running the manual steps below — see "Check for existing release tools" further down in this step.
 
 Verify the repo is in a clean state:
 
@@ -113,7 +136,7 @@ git commit -m "chore(release): vX.Y.Z"
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 ```
 
-Confirm before pushing — this is a visible action:
+Confirm before pushing (see Acceptance Criteria):
 
 ```bash
 git push origin <branch>
@@ -203,7 +226,7 @@ Remind the user about common follow-ups:
 
 ## Tips
 
-- Always confirm destructive or visible actions (push, release creation)
+- Confirmation gate for destructive/visible actions: see Acceptance Criteria
 - For monorepos, handle each package's version independently
 - Respect the existing CHANGELOG format — only add the new entry, don't reformat
 - If a release goes wrong mid-way, help the user roll back: delete the tag locally and remotely, revert the commit

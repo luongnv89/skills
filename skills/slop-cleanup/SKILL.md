@@ -4,8 +4,8 @@ description: "Refactor a codebase to remove AI slop, dead code, weak types, dupl
 license: MIT
 effort: high
 metadata:
-  version: 1.1.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "subagent (Pattern B: Parallel Workers, 8 specialized cleaners)"
 ---
 

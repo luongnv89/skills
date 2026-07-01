@@ -3,7 +3,7 @@ name: subagent-creator
 description: "Create, evaluate, or improve Claude Code subagent files (.claude/agents/*.md) — the frontmatter + system prompt defining a delegatable specialist. Don't use for skills (skill-creator), CLAUDE.md/AGENTS.md (agent-config), or running an agent."
 effort: high
 metadata:
-  version: 1.1.1
+  version: 1.1.2
   author: "Luong NGUYEN <edgardo.montesdeoca@montimage.eu>"
 ---
 
@@ -140,14 +140,6 @@ Goal: apply concrete fixes to an existing file and leave it measurably better.
 5. Emit a Step Completion Report showing each prior `× fail` now `√ pass`.
 
 ---
-
-## Final summary
-
-Close any create/evaluate/improve run with three short lists:
-
-- **Checked** — rubric categories inspected (frontmatter, responsibility, tools, description, body structure, anti-patterns).
-- **Verified** — what proves the result (frontmatter parses, file path written, rubric pass).
-- **Improved** — concrete changes by field/concern (or `none — review only` for an Evaluate run).
 
 ## Acceptance Criteria
 

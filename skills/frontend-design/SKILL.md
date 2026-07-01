@@ -4,7 +4,7 @@ description: "Build production-grade frontend interfaces with distinctive aesthe
 license: MIT
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -78,7 +78,7 @@ If the user provides their own colors, brand kit, or style direction, use those 
 
 ## Usability Principles — "Don't Make Me Think"
 
-Every design MUST follow these usability rules derived from Steve Krug's principles. These are non-negotiable regardless of aesthetic direction.
+Every design MUST follow these usability rules derived from Steve Krug's principles. These are non-negotiable regardless of aesthetic direction. This is the same source the `dont-make-me-think` skill audits against — condensed here for inline use during generation; keep the two in sync if Krug-principle guidance changes.
 
 ### 1. Design for Scanning, Not Reading
 - Users scan pages — they do not read them. Use clear headings, short paragraphs, bullet points, and visual hierarchy (bigger/bolder = more important).

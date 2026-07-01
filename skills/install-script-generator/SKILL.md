@@ -1,10 +1,10 @@
 ---
 name: install-script-generator
-description: "Generate cross-platform installation scripts for any software, library, or module. Produces a standalone install.sh runnable via a single curl/wget one-liner, with automatic OS, architecture, and package manager detection. Don't use for authoring Dockerfiles, CI/CD pipelines, or one-off local shell scripts."
+description: "Generate cross-platform install scripts for any software or library — a standalone install.sh runnable via a curl/wget one-liner with OS, arch, and package manager detection. Don't use for Dockerfiles, CI/CD pipelines, or one-off shell scripts."
 license: MIT
 effort: high
 metadata:
-  version: 2.1.0
+  version: 2.2.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -35,6 +35,7 @@ Skip this skill for Dockerfiles, CI/CD pipelines, or one-off local shell scripts
 | `references/edge-cases.md` | When handling unusual OS/sudo/path scenarios and writing step reports |
 | `scripts/env_explorer.py` | Local environment probe (OS, arch, package managers, sudo) |
 | `scripts/plan_generator.py` | Generates `installation_plan.yaml` from env + target |
+| `scripts/executor.py` | Dry-runs `installation_plan.yaml` with rollback, before Phase 3 generation |
 | `scripts/doc_generator.py` | Renders user-facing `USAGE_GUIDE.md` |
 
 Do not inline these contents into the conversation; link to them. Keeping SKILL.md short preserves the context window for the actual install logic.
@@ -68,6 +69,7 @@ If the working tree is dirty, `git stash push -u -m pre-sync` first, sync, then 
 3. Plan a verification step for each phase.
 4. Plan rollback / cleanup on failure.
 5. Run `python3 scripts/plan_generator.py --target "<name>" --env-file env_info.json` to emit `installation_plan.yaml`.
+6. Run `python3 scripts/executor.py --plan installation_plan.yaml --dry-run` to verify the plan executes cleanly and rollback triggers correctly before Phase 3 generates `install.sh` from it.
 
 ### Phase 3 — Generation (primary output)
 

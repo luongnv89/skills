@@ -4,7 +4,7 @@ description: "Transform a project README.md into a conversion-optimized landing 
 license: MIT
 effort: high
 metadata:
-  version: 2.1.0
+  version: 2.1.1
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -42,6 +42,8 @@ If the working tree is dirty: `git stash push -u -m "pre-sync"`, sync, then `git
 If `origin` is missing or conflicts occur, stop and ask the user.
 
 ## Workflow
+
+If no `README.md` exists, or the existing one is already marketing-style, see **Edge Cases** below before starting Step 1 — a different mode applies.
 
 ### Step 1: Gather Context
 
@@ -172,16 +174,8 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 
 - [ ] Original README backed up to `README.backup.md` before any rewrite
 - [ ] Rewritten README uses one of PAS, AIDA, or StoryBrand and names which one was chosen
-- [ ] H1 is the value proposition (<=10 words), not the project name
-- [ ] At least one mermaid diagram shows how the project works
-- [ ] Hero section is <=5 lines (excluding badges)
-- [ ] Each feature description is <=15 words
-- [ ] Quick Start has <=5 steps; each independently-runnable command in its own code block
-- [ ] No banned slop phrases appear in the output
-- [ ] All original technical content preserved in `<details>` blocks
-- [ ] No fabricated data — real numbers or `[placeholder]` markers only
-- [ ] Zero emoji in the output
-- [ ] Self-review checklist (13 checks) passes before presenting
+- [ ] H1 follows the value-proposition rule (see Step 5)
+- [ ] Step 6 Self-Review Checklist (13 checks) passes before presenting
 
 ## Step Completion Reports
 
@@ -192,13 +186,7 @@ After each major step, output a status report. See `references/step-reports.md` 
 - **One code block per copy-paste unit.** Commands that can run independently must be in separate code blocks. Only combine commands that must run together.
 - **Never fabricate data.** Use real numbers or leave `[placeholder]` markers.
 - **Respect the project's voice.** A security tool != a startup pitch.
-- **H1 = value proposition**, not the project name.
+- **H1 follows the value-proposition rule** (see Step 5).
 - **Preserve all original content** in collapsed sections.
 - **One primary audience.** Don't try to speak to everyone.
 - **When in doubt, cut text.** A shorter README that gets read beats a longer one that doesn't.
-
-## Error Handling
-
-- **No README.md found** -> Offer to create from scratch using project files.
-- **Already marketing-style** -> Offer targeted refinements, not full rewrite.
-- **Insufficient context** -> Ask: what it does, who it's for, what problem it solves.

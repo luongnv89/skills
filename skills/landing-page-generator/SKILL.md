@@ -4,7 +4,7 @@ description: "Generate conversion-focused landing page copy with PAS, AIDA, or S
 license: MIT
 effort: high
 metadata:
-  version: 1.1.3
+  version: 1.1.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -167,18 +167,3 @@ Verify before delivering:
 - Unsupported proof is labeled `[proof needed]`; no fake claims are present.
 - Copy passes `references/anti-slop-rules.md`.
 - Final response includes A/B test ideas and conversion tips unless the user asked for a single section.
-
-## Output Quality Checklist
-
-Before delivering, confirm all copy:
-
-- Leads with value, not features
-- Addresses target audience pain points
-- Uses emotional and logical appeals
-- Has clear, compelling CTAs
-- Includes social proof elements
-- Handles objections proactively
-- Creates urgency only when justified
-- Is scannable and easy to read
-- Follows the chosen framework consistently
-- Passes the anti-slop rules

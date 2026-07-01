@@ -1,10 +1,10 @@
 ---
 name: ollama-optimizer
-description: "Optimize Ollama configuration for the current machine's hardware. Use when asked to speed up Ollama, tune local LLM performance, or pick models that fit available GPU/RAM."
+description: "Optimize Ollama configuration for the current machine's hardware. Use when asked to speed up Ollama, tune local LLM performance, or pick models that fit available GPU/RAM. Don't use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers."
 license: MIT
 effort: medium
 metadata:
-  version: 1.0.4
+  version: 1.1.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -17,27 +17,6 @@ Optimize Ollama configuration based on system hardware analysis.
 Use this skill when the user asks to optimize Ollama, configure Ollama, speed up Ollama, fix Ollama running slow, set up a local LLM, tune inference speed, reduce memory usage, or select models that fit their GPU/RAM. The skill analyzes hardware (GPU, VRAM, RAM, CPU) and produces tailored recommendations.
 
 Do not use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers (OpenAI, Anthropic) — those use different runtimes and tuning surfaces.
-
-## Repo Sync Before Edits (mandatory)
-
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
-
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
-
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Workflow
 
@@ -260,27 +239,6 @@ Generate an `ollama-optimization-guide.md` file. Ask the user where to save it (
 <commands to revert changes if needed>
 ```
 
-## Quick Optimization Commands
+## Quick Optimization Commands (opt-in only)
 
-For users who want immediate results without full analysis:
-
-**macOS (Apple Silicon):**
-```bash
-export OLLAMA_FLASH_ATTENTION=1
-export OLLAMA_KV_CACHE_TYPE=q8_0
-ollama pull llama3.2:3b  # Safe for 8GB, fast
-```
-
-**Linux/Windows with 8GB NVIDIA GPU:**
-```bash
-export OLLAMA_FLASH_ATTENTION=1
-export OLLAMA_KV_CACHE_TYPE=q8_0
-ollama pull llama3.1:8b-instruct-q4_K_M
-```
-
-**CPU-only systems:**
-```bash
-export CUDA_VISIBLE_DEVICES=-1
-ollama pull llama3.2:3b
-# Create Modelfile with: PARAMETER num_thread 4
-```
+Only use this fast path if the user explicitly asks to skip full hardware analysis. Otherwise always run Phases 1-3 and follow the tier-based recommendation — do not apply these shortcuts by default, and do not let them override a tier decision already made. For the actual per-platform commands and env vars, see [Platform-Specific Setup](references/platform_specific.md) and [Environment Variables](references/environment_variables.md).

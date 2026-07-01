@@ -1,10 +1,10 @@
 ---
 name: dont-make-me-think
-description: "Review UI for usability issues using Steve Krug's principles and produce a scannable report. Use when asked for a usability audit, UX review, or UI feedback on screenshots, URLs, or code. Don't use for visual/brand design critique, accessibility (WCAG) audits, or backend/API review."
+description: "Review UI for usability using Steve Krug's principles; produce a scannable report. Use for usability audits, UX review, or UI feedback on screenshots, URLs, or code. Don't use for brand design critique, WCAG audits, or backend/API review."
 license: MIT
 effort: medium
 metadata:
-  version: 1.2.1
+  version: 1.2.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -12,9 +12,7 @@ metadata:
 
 Evaluate and improve UIs through Steve Krug's "Don't Make Me Think" principles. The report itself must practice what Krug preaches: scannable, visual, zero fluff. A human should skim it in 30 seconds; an AI agent should be able to parse it and start fixing.
 
-## When to Use
-
-Trigger this skill when the user asks for a usability audit, UX review, or UI feedback on a screenshot, live URL, or HTML/CSS code. Do not use for visual/brand critique, WCAG accessibility audits, or backend/API review — route those elsewhere.
+Triggers and exclusions are set by the frontmatter `description` above. Accepted inputs are listed in Input Handling below.
 
 ## Instructions
 

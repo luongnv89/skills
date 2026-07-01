@@ -10,19 +10,7 @@ The one signal that reliably means *submitted* is **post-send activity**: once t
 
 ### The bounded delivery check (one fixed wait, then one capture)
 
-```bash
-tmux send-keys -t agent1 "summarize the changes in src/"
-tmux send-keys -t agent1 Enter
-sleep 5                                          # bounded: one fixed wait, ~5s
-pane=$(tmux capture-pane -t agent1 -p -S -40)    # ~40 scrollback lines + visible pane
-if printf '%s\n' "$pane" | grep -Eq 'esc to interrupt|[⠁-⣿]'; then
-  echo "delivered"          # agent is working → input was accepted and submitted
-else
-  echo "NOT-DELIVERED"      # no activity → it didn't land; re-send
-fi
-```
-
-Keep this **bounded** — one short fixed delay, then a single capture. Never a poll loop here; that can hang. The reply-settling poll belongs to Phase 4, not the delivery check.
+See SKILL.md Phase 3 for the exact command — one short fixed delay (`sleep 5`), then a single `capture-pane`/`grep` check. Never a poll loop here; that can hang. The reply-settling poll belongs to Phase 4, not the delivery check.
 
 ### The two outcomes (neither is a reply timeout)
 

@@ -4,8 +4,8 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.3.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.3.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Brand Name Checker
@@ -32,7 +32,7 @@ This skill uses parallel subagents to handle 13+ sequential web fetches across i
 
 ### Parallelization Strategy
 
-- **Early Exit Logic**: If social-checker finds exact handle taken on main platform, skip steps 2-4 and jump to synthesizer with "Abandon" verdict
+- **Early-Exit Rule**: If social-checker finds an exact handle taken on the primary platform, skip steps 2-4 (Registry, Domain, Trademark) and jump straight to the synthesizer with an "Abandon" verdict. This is referenced elsewhere in this file simply as the Early-Exit Rule.
 - **Independent Workers**: Registry, domain, trademark checkers run in parallel without dependencies
 - **Sequential Flow**: Social → (if clear) → Parallel {Registry, Domain, Trademark} → Synthesizer
 
@@ -57,7 +57,7 @@ Optionally check for `prd.md` in project to understand product context.
 
 ## Analysis Protocol
 
-**If an exact social handle is taken, skip Steps 2-4 and jump directly to Step 6 (Recommendation) with an "Abandon" verdict.**
+**Early-Exit Rule applies** (see Subagent Architecture above): an exact social handle taken skips Steps 2-4 straight to Step 6 (Recommendation) with an "Abandon" verdict.
 
 ### Step 1: Social Media Check (First Priority)
 
@@ -69,7 +69,7 @@ Use WebSearch to check handles on:
 - YouTube: `"[NAME]" site:youtube.com`
 - TikTok: `"@[NAME]" site:tiktok.com`
 
-**If exact handle taken:** Return `NEGATIVE: Exact social handle taken (@platform)` and STOP. Suggest different name.
+**If exact handle taken (Early-Exit Rule):** Return `NEGATIVE: Exact social handle taken (@platform)` and STOP. Suggest different name.
 
 ### Step 2: Package Registry Check (if Step 1 clear)
 
@@ -185,7 +185,7 @@ RECOMMEND: Modify — use "acme-cli" (npm/PyPI clear, .com available, no TM conf
 
 ## Edge Cases
 
-- **Exact social handle taken on primary platform**: Skip all remaining checks and immediately return an Abandon recommendation with alternative name suggestions.
+- **Exact social handle taken on primary platform**: Early-Exit Rule (see Subagent Architecture) — skip all remaining checks and return an Abandon recommendation with alternative name suggestions.
 - **Rate-limited registry API**: Retry once after 5 seconds; if still blocked, mark the registry as "unchecked" and note it in the report — do not skip silently.
 - **Trademark database unavailable**: Note the outage per database; downgrade risk only if all three TM sources are inaccessible (warn user).
 - **Name contains special characters or spaces**: Normalize to slug form (e.g., `my tool` → `my-tool`) before all checks; report both the original and normalized forms.

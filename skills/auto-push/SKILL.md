@@ -4,7 +4,7 @@ description: "Generate a commit message, stage all changes, and push to remote a
 license: MIT
 effort: low
 metadata:
-  version: 1.0.2
+  version: 1.0.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -180,4 +180,4 @@ The skill run is successful when all of the following hold:
 
 For the edge-case table, per-phase step-completion report format, error-handling guidance, and alternative workflows (selective staging, interactive `git add -p`, PR flow), see [`references/edge-cases-and-reports.md`](./references/edge-cases-and-reports.md).
 
-**Remember**: Always review changes before pushing. When in doubt, use individual git commands for more control.
+**Remember**: This skill already scans for secrets, large files, and branch risk in Step 2 and proceeds automatically once those checks pass — no extra manual review step is inserted. Use individual git commands instead if you want more control over what gets committed.

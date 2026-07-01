@@ -4,7 +4,7 @@ description: "Generate Product Requirements Documents from `idea.md` and `valida
 license: MIT
 effort: max
 metadata:
-  version: 1.3.1
+  version: 1.3.2
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -47,6 +47,8 @@ If path is not provided (auto-pick mode):
 6. If multiple candidates are plausible, ask user to choose.
 
 ## Workflow
+
+**Mode selection (decide before Phase 1):** If `PROJECT_DIR/prd.md` already exists and the user wants changes to it, this is a **modify** run — do Phase 1's steps 1-4 (including the mandatory backup), then skip to `## Modification Mode` below instead of Phases 2-5. Otherwise this is a **create** run — proceed through Phases 1-5 in order. Both modes share Phase 1's backup step; see `## Modification Mode` for modify-run detail.
 
 ### Phase 1: Validate Input
 
@@ -125,7 +127,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 1 — Validate Input**
 ```
-◆ Validate Input (step 1 of 5 — input resolution)
+◆ Validate Input (step 1 of 7 — input resolution)
 ··································································
   Input files found:        √ pass
   Dependencies resolved:    √ pass (PROJECT_DIR confirmed)
@@ -136,7 +138,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 2 — Extract Context**
 ```
-◆ Extract Context (step 2 of 5 — context extraction)
+◆ Extract Context (step 2 of 7 — context extraction)
 ··································································
   idea.md parsed:           √ pass (concept + technical context read)
   validate.md parsed:       √ pass (verdict + ratings extracted)
@@ -147,7 +149,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 3 — Clarify Requirements**
 ```
-◆ Clarify Requirements (step 3 of 5 — requirements gathering)
+◆ Clarify Requirements (step 3 of 7 — requirements gathering)
 ··································································
   Questions answered:       √ pass
   Scope defined:            √ pass (MVP timeframe confirmed)
@@ -158,7 +160,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 4 — Generate PRD**
 ```
-◆ Generate PRD (step 4 of 5 — document generation)
+◆ Generate PRD (step 4 of 7 — document generation)
 ··································································
   10 sections written:      √ pass
   prd.md created:           √ pass
@@ -169,7 +171,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase 5 — Output**
 ```
-◆ Output (step 5 of 5 — delivery)
+◆ Output (step 5 of 7 — delivery)
 ··································································
   File written:             √ pass
   Summary presented:        √ pass
@@ -206,11 +208,10 @@ Link format (derive `<owner>/<repo>` from `git remote get-url origin`):
 
 ## Modification Mode
 
-If user wants to modify existing PRD:
-1. Create timestamped backup
-2. Ask what to modify (features, priorities, timeline, specs, personas)
-3. Apply changes preserving structure
-4. Update revision history
+Entered per the Mode selection note above, once Phase 1's backup (`prd.backup.YYYYMMDD_HHMMSS.md`) already exists:
+1. Ask what to modify (features, priorities, timeline, specs, personas)
+2. Apply changes preserving structure
+3. Update revision history
 
 ## Guidelines
 
@@ -250,4 +251,4 @@ Handle missing inputs, verdict=REJECT, conflicting requirements, existing PRDs (
 
 ## Verification Steps
 
-After generation, verify file exists, has >=10 `^## ` headings, >=1 mermaid block, >=1 `Given/When/Then` line, >=4 MoSCoW labels, cites `idea.md`, and (if applicable) a `prd.backup.*.md` sibling exists. See `references/verification-steps.md` for the exact shell checks.
+Run the grep-backed thresholds listed under `## Acceptance Criteria` above (heading count, mermaid block, Given/When/Then, MoSCoW count, idea.md citation, backup sibling). See `references/verification-steps.md` for the exact shell commands to run each check.

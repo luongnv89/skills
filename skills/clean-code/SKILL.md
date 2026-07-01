@@ -4,9 +4,9 @@ description: "Audit code against the bbv Clean Code Cheat Sheet and write CLEAN_
 license: MIT
 effort: high
 metadata:
-  version: 1.2.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
-  architecture: inline (single-agent orchestration)
+  version: 1.2.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
+  architecture: "inline (single-agent orchestration)"
 ---
 
 # Clean Code
@@ -95,11 +95,7 @@ Use the **Severity Levels** table below to classify each finding as you go.
 
 ### Phase 3 — Build the Phased Plan
 
-Convert findings into actionable tasks, grouped into priority phases. **Phasing is by severity:**
-
-- **Phase 1 — Critical**: bugs, security risks, broken core principles (e.g. God class, SRP violation that blocks change), missing tests around risky logic.
-- **Phase 2 — Major**: maintainability blockers — significant smells, high coupling, long methods, missing abstractions, test smells.
-- **Phase 3 — Minor**: naming, small conditionals, dead code, comment cleanup, style-level polish.
+Convert findings into actionable tasks, grouped into priority phases. **Phasing is by severity** — see the **Severity Levels** table below for the Critical/Major/Minor definitions and their phase mapping.
 
 Each task MUST have: a stable **ID** (`1.1`, `1.2`, `2.1`…), a short **title**, the **target `file:line`(s)**, the **principle/smell** it addresses, an **effort estimate** (e.g. `~15m`, `~2h`, `~1d`), **dependencies** (other task IDs that must come first, or `none`), and an **acceptance check** (how to confirm the task is done).
 

@@ -4,8 +4,8 @@ description: "Build a production-quality CLI tool for any module or application.
 license: MIT
 effort: high
 metadata:
-  version: 1.0.3
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.0.4
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # CLI Builder

@@ -4,8 +4,8 @@ description: "Create or update CLAUDE.md and AGENTS.md files following official 
 license: MIT
 effort: medium
 metadata:
-  version: 1.3.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.3.1
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 ## When to Use

@@ -1,10 +1,10 @@
 ---
 name: drawio-generator
-description: "Generate professional diagrams as valid draw.io XML files — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, and swimlanes. Don't use for Excalidraw or Mermaid output, hand-drawn sketch styles, or slide decks/presentations."
+description: "Generate professional diagrams as valid draw.io XML — flowcharts, architecture, C4 models, ER diagrams, sequence diagrams, mind maps, and swimlanes. Don't use for Excalidraw or Mermaid output, hand-drawn sketch styles, or slide decks/presentations."
 license: MIT
 effort: high
 metadata:
-  version: 1.2.0
+  version: 1.2.2
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -188,12 +188,7 @@ When iterating on an existing diagram, read the file, modify the XML in place, a
 
 ## Subagent Architecture
 
-When a diagram exceeds 30 elements, spawn a review loop to avoid single-context degradation.
-
-**Complexity threshold (set at end of Phase 2):**
-- Small (<10): proceed inline
-- Medium (10–30): proceed inline with careful validation
-- Large (>30): spawn the subagent review loop
+When a diagram exceeds 30 elements, spawn a review loop to avoid single-context degradation. Use the complexity estimate from Phase 2 step 6: large (30+) spawns the subagent review loop below; small/medium proceed inline.
 
 **Phase 3 — `agents/xml-generator.md`**
 - Receives: diagram type, elements, edges, style, complexity
