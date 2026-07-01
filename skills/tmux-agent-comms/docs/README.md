@@ -15,6 +15,7 @@
 - **Message any agent** — send a prompt to a target session with proper escaping, including the separate-`Enter` gotcha for stubborn TUIs.
 - **Read replies reliably** — a bundled `wait_for_idle.py` polls the pane until output settles instead of guessing with a fixed `sleep`, then returns the answer.
 - **Broadcast & collect** — fan one instruction out to several agents and gather each reply.
+- **Show an agent's terminal on demand** — attach to (or switch to) a spawned agent's session to see its live CLI and type into it directly, for trust prompts, debugging, or hands-on steering, without giving up the default detached workflow.
 - **Safe teardown** — kill individual sessions (or the whole server) behind explicit user confirmation, so no agent's work is lost by accident.
 
 ## When to Use
