@@ -4,7 +4,7 @@ description: "Manage AI agents in tmux: spawn or kill sessions and message any C
 license: MIT
 effort: medium
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -70,12 +70,14 @@ To launch a **fleet**, repeat with distinct job-named sessions (`reviewer`, `tes
 
 ### Show the agent's terminal (optional)
 
-The default workflow stays detached — you drive the agent with `send-keys`/`capture-pane` and never open its terminal. If the user wants to *see* the live CLI (a trust/auth prompt, debugging, or hands-on steering), attach to the same session name instead of reading it from outside:
+The default workflow stays detached — you drive the agent with `send-keys`/`capture-pane` and never open its terminal. If the user wants to *see* the live CLI (a trust/auth prompt, debugging, or hands-on steering), there are two commands, and **who runs which matters**:
 
 ```bash
-tmux attach-session -t "$name"     # from a plain (non-tmux) shell
-tmux switch-client -t "$name"      # from inside tmux already (your own terminal is a tmux client)
+tmux attach-session -t "$name"     # HUMAN runs this in their own interactive terminal
+tmux switch-client -t "$name"      # agent can run this itself, if it is already a tmux client ($TMUX set)
 ```
+
+`attach-session` needs a controlling TTY. If you (the agent) invoke it through a non-interactive Bash tool, it fails with `open terminal failed: not a terminal` — it does not open anything. Never run `attach-session` yourself; instead tell the human the exact command to type in their own terminal. `switch-client` is different: it's a control-mode command that reuses your *own* existing tmux client, so it's safe for you to run it yourself when you're already inside a tmux client (`$TMUX` is set) and want to hand your own view over.
 
 Detach with `Ctrl-b d` (default prefix + `d`) to return control to the orchestrator without killing the session. This is opt-in and does not replace the default detached flow — see `references/tmux-recipes.md` ("Showing an agent's live terminal") for the when-to-use guidance, the correct command for each starting context, and a worked example that names the exact session attached to.
 
