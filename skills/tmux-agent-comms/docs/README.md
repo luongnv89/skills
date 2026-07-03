@@ -41,8 +41,8 @@ graph TD
     C --> D["Wait until pane settles (wait_for_idle.py)"]
     D --> E["Capture & relay reply"]
     E --> F["Continue, report fleet status, or tear down (confirmed)"]
-    style A fill:#4CAF50,color:#fff
-    style F fill:#2196F3,color:#fff
+    style A fill:#2E7D32,color:#fff
+    style F fill:#1565C0,color:#fff
 ```
 
 ## Usage
@@ -85,7 +85,7 @@ Send the same message to every agent and collect all the replies together — th
 /tmux-agent-comms tell all my running agents to pull the latest main and report status
 ```
 
-You get one labeled block per agent with its reply and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), so you can see at a glance which agents are done and which need attention. For long runs, the orchestrator also reports fleet status about every 5 minutes without interrupting working panes.
+You get one labeled block per agent with its reply and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), so you can see at a glance which agents are done and which need attention. Status uses the same meaning in scan-friendly words: `idle` maps to `done`, `BLOCKED` maps to `blocked`, and `TIMEOUT` maps to `unknown` unless a fresh capture is still changing (`in-progress`). For long runs, the orchestrator also reports fleet status about every 5 minutes without interrupting working panes.
 
 ### 3b. Check or inspect running agents
 

@@ -4,7 +4,7 @@ description: "Manage AI agents in tmux: spawn, status/inspect, message, read rep
 license: MIT
 effort: medium
 metadata:
-  version: 1.8.0
+  version: 1.8.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -144,7 +144,7 @@ tmux list-panes -a -F '#{session_name}|#{pane_current_path}|#{pane_current_comma
 tmux capture-pane -t "$session" -p -S -40
 ```
 
-Classify `in-progress` when the tail changes or shows a spinner / `esc to interrupt`; `blocked` when `wait_for_idle.py --no-print` exits 3 or a prompt is visible; `done` when the pane is quiet and a completed reply/prompt is visible; otherwise `unknown`. Keep progress summaries short — the current task or last meaningful line, not full scrollback.
+Keep status checks fast and read-only: prefer two short bounded captures (`sleep 1-3`) to detect changing output, or call `wait_for_idle.py --timeout 3 --quiet-cycles 1 --no-print` rather than the full reply-wait cycle. Classify `in-progress` when the tail changes or shows a spinner / `esc to interrupt`; `blocked` when the short waiter exits 3 or a prompt is visible; `done` when the pane is quiet and a completed reply/prompt is visible; otherwise `unknown`. Keep progress summaries short — the current task or last meaningful line, not full scrollback.
 
 Use **inspect `<agent-id>`** for one agent. Resolve the ID to the exact session, show the same fields as status plus a bounded tail and pane details, and print the human-only attach command:
 

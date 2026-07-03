@@ -39,7 +39,7 @@ tmux list-panes -a -F '#{session_name}|#{pane_current_path}|#{pane_current_comma
 tmux capture-pane -t myrepo-reviewer -p -S -40
 ```
 
-Classify conservatively: spinner / `esc to interrupt` or changing captures means `in-progress`; known dialog text or `wait_for_idle.py --no-print` exit 3 means `blocked`; quiet pane with completed answer/prompt means `done`; otherwise `unknown`. Preserve the existing wait budget from SKILL.md Phase 4 — the status cadence is for user visibility, not an infinite poll loop.
+Classify conservatively and quickly: spinner / `esc to interrupt` or two short captures that differ means `in-progress`; known dialog text or `wait_for_idle.py --timeout 3 --quiet-cycles 1 --no-print` exit 3 means `blocked`; quiet pane with completed answer/prompt means `done`; otherwise `unknown`. Preserve the existing wait budget from SKILL.md Phase 4 — the status cadence is for user visibility, not an infinite poll loop, and status must not spend a full waiter timeout on every active agent.
 
 ## Status and inspect commands
 
