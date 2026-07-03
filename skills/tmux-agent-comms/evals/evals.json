@@ -10,13 +10,31 @@
     {
       "id": 2,
       "prompt": "Spin up two tmux agents for me — one named 'tests' and one named 'docs' — and launch claude in each, in the current project directory.",
-      "expected_output": "Creates two detached named sessions (tmux new-session -d -s tests / -s docs), uses -c for the project directory, launches the agent in each, and waits for each to finish booting before considering them ready. No destructive commands.",
+      "expected_output": "Creates two detached sessions using the <folder>-<short-task-name> convention (e.g. <folder>-tests and <folder>-docs), uses -c for the project directory, launches the agent in non-blocking/autonomous mode by default, and waits for each to finish booting before considering them ready. No destructive commands.",
       "files": []
     },
     {
       "id": 3,
       "prompt": "I'm done with all my tmux agents, just kill everything.",
       "expected_output": "Treats teardown as destructive: confirms with the user before killing, prefers killing the named sessions individually over kill-server unless a full reset is explicitly wanted, and warns that unsaved agent state is lost.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Launch three tmux agents for this repo (reviewer, tests, docs) and keep me updated while they work for a while.",
+      "expected_output": "Creates detached sessions using the <folder>-<short-task-name> naming convention, honors TAC_STARTUP_MODE/per-launch interactive overrides while defaulting to non-blocking/autonomous startup, waits without serializing the fleet, and emits read-only fleet status reports about every 5 minutes showing each agent's state, task/progress, start time, and working directory without sending extra keys to working agents.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Show status for all my managed tmux agents.",
+      "expected_output": "Runs read-only tmux inspection commands, identifies managed sessions (especially <folder>-<short-task-name> sessions), and returns a table with agent ID, exact session name, state, progress summary, started time, and working directory. It does not send keys or interrupt agents.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Inspect the reviewer tmux agent and tell me how to attach to it.",
+      "expected_output": "Resolves reviewer to exactly one tmux session, shows detailed fields and a bounded tail/pane summary, and prints the exact human-run tmux attach-session command. The orchestrator does not execute attach-session itself.",
       "files": []
     }
   ]

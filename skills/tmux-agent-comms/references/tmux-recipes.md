@@ -7,7 +7,7 @@ Patterns the SKILL.md points to when a task goes beyond the basic send → wait 
 Send one instruction to a fleet and collect each reply. Use the bundled script — it sends to every session first, then waits on all of them **concurrently** (each reply settles in its own background process), so wall-clock is the slowest single agent, not the sum:
 
 ```bash
-TAC_TIMEOUT=180 bash scripts/broadcast.sh "pull latest main and report status" reviewer tests docs
+TAC_TIMEOUT=180 bash scripts/broadcast.sh "pull latest main and report status" myrepo-reviewer myrepo-tests myrepo-docs
 ```
 
 It prints one labeled block per agent with the reply delta and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), and exits non-zero if any agent timed out or is blocked. `TAC_WAIT_ARGS` passes extra flags to the waiter (e.g. `TAC_WAIT_ARGS=--full`).
@@ -15,10 +15,52 @@ It prints one labeled block per agent with the reply delta and a state tag (`idl
 **Wait for boot before the first broadcast.** Freshly spawned agents may still be on a splash or trust prompt. Confirm each is ready first (exit 0, not 3):
 
 ```bash
-for s in reviewer tests docs; do python3 scripts/wait_for_idle.py "$s" --timeout 30 --no-print; echo "$s ready=$?"; done
+for s in myrepo-reviewer myrepo-tests myrepo-docs; do python3 scripts/wait_for_idle.py "$s" --timeout 30 --no-print; echo "$s ready=$?"; done
 ```
 
 If `broadcast.sh` is unavailable, fan the message out in one loop, then wait in a **second** loop (never one combined loop — that serializes the waits behind each send).
+
+## Periodic fleet status during long runs
+
+When orchestrating multiple agents for more than a few minutes, keep the user informed on a guidance cadence of about **every 5 minutes**. The cadence is read-only: inspect panes, summarize, and continue waiting. Do **not** send keystrokes, attach, or otherwise interrupt agents that are still working.
+
+A useful status report is a compact table:
+
+| Agent | Session | State | Task / progress | Started | Workdir |
+| --- | --- | --- | --- | --- | --- |
+| reviewer | myrepo-reviewer | in-progress | reviewing auth tests | 14:02 | `/repo` |
+| docs | myrepo-docs | blocked | trust prompt visible | 14:03 | `/repo` |
+
+Collect raw fields with tmux formats, then fill the progress column from a bounded tail capture:
+
+```bash
+tmux list-sessions -F '#{session_name}|#{t:session_created}'
+tmux list-panes -a -F '#{session_name}|#{pane_current_path}|#{pane_current_command}'
+tmux capture-pane -t myrepo-reviewer -p -S -40
+```
+
+Classify conservatively: spinner / `esc to interrupt` or changing captures means `in-progress`; known dialog text or `wait_for_idle.py --no-print` exit 3 means `blocked`; quiet pane with completed answer/prompt means `done`; otherwise `unknown`. Preserve the existing wait budget from SKILL.md Phase 4 — the status cadence is for user visibility, not an infinite poll loop.
+
+## Status and inspect commands
+
+Use **status** to summarize every managed agent. Treat managed agents as sessions launched during this run plus sessions following the `<folder>-<short-task-name>` naming convention for the current workspace. If unrelated tmux sessions exist, omit them or list them separately as `unmanaged` rather than mixing them into the fleet.
+
+Minimum status columns:
+
+- Agent ID: usually the short task slug (for `myrepo-reviewer`, agent ID is `reviewer`).
+- Session: exact tmux session name.
+- State: `in-progress`, `done`, `blocked`, or `unknown`.
+- Progress: one short phrase from the current task or last meaningful line.
+- Started: `#{t:session_created}` from `tmux list-sessions`.
+- Workdir: `#{pane_current_path}` from the active pane.
+
+Use **inspect `<agent-id>`** to drill into one session. Resolve the agent ID to one exact session first; on ambiguity, show candidates and ask the user to choose before printing an attach target. Include the status fields, pane command, pane index if useful, a bounded tail (`-S -40`, widened only if truncated), and this copy-paste command for the human:
+
+```bash
+tmux attach-session -t <exact-session-name>
+```
+
+Never execute the attach command from the orchestrator; it requires the user's real terminal.
 
 ## Sending multi-line or code-heavy messages
 

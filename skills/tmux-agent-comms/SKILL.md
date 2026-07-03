@@ -1,22 +1,22 @@
 ---
 name: tmux-agent-comms
-description: "Manage AI agents in tmux: spawn or kill sessions and message any CLI agent (Claude Code, Gemini, etc.) via send-keys/capture-pane, then read its reply. Use to launch a fleet or talk to a running agent. Don't use for SSH, GNU screen, or GUI apps."
+description: "Manage AI agents in tmux: spawn, status/inspect, message, read replies, or kill sessions via send-keys/capture-pane. Use to launch fleets or talk to running agents. Don't use for SSH, GNU screen, or GUI apps."
 license: MIT
 effort: medium
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Tmux Agent Comms
 
-Manage and talk to AI agents (another Claude Code, Gemini CLI, or any CLI) running in separate tmux sessions: **create** sessions, **send** messages, **wait** for the agent to finish, **capture** replies, and **tear down** when done.
+Manage and talk to AI agents (another Claude Code, Gemini CLI, Codex, pi-agent, or any CLI) running in separate tmux sessions: **create** sessions, **send** messages, **wait** for the agent to finish, **capture** replies, **check status**, **inspect** sessions, and **tear down** when done.
 
 Mental model: each tmux session is one agent. You orchestrate from outside by writing to its input and reading its pane — what a human does by switching windows, but scripted. Your context budget is finite, so relay each agent's answer, not its whole screen (the bundled helper extracts just the reply delta).
 
 ## When to Use
 
-Launching agents in tmux, messaging an agent in another session, broadcasting to a fleet, or reading what an agent replied. Don't use for SSH/remote shells, GNU `screen`, or driving a GUI app.
+Launching agents in tmux, messaging an agent in another session, broadcasting to a fleet, checking fleet status, inspecting a managed session, or reading what an agent replied. Don't use for SSH/remote shells, GNU `screen`, or driving a GUI app.
 
 ## Workflow
 
@@ -29,6 +29,8 @@ Six phases, in order: discover/spawn a session, resolve the exact target, send t
 | Spawn a new agent session | Phase 1 |
 | Message an agent that's already running | Phase 2 |
 | Just read a running agent's pane (no send) | Phase 5 |
+| Show fleet status | Phase 5 ("Status and Inspect") |
+| Inspect one agent and get an attach command | Phase 5 ("Status and Inspect") |
 | Broadcast the same message to a fleet | Phase 6 ("Broadcast to a fleet") |
 | Shut an agent down | Phase 6 ("Tear down") |
 
@@ -44,6 +46,7 @@ Six phases, in order: discover/spawn a session, resolve the exact target, send t
 3. **Wait for the agent, don't race it.** Sending a follow-up while it's still working corrupts input. Wait until the pane settles (Phase 4) before reading or sending again.
 4. **Escape what you send.** `send-keys` and the shell both interpret special characters. Follow the escaping rules in Phase 3 or messages get mangled — or worse, execute.
 5. **Attaching is opt-in, not a replacement.** Showing an agent's terminal (Phase 1) is for a human to drive by hand; it never replaces the default detached, scripted workflow.
+6. **Default startup is autonomous and non-blocking.** Spawn detached sessions and continue with readiness checks; don't wait at startup for a human unless the user explicitly asks for interactive mode.
 
 ## Phase 1: Create or Discover Sessions
 
@@ -51,22 +54,29 @@ Six phases, in order: discover/spawn a session, resolve the exact target, send t
 tmux list-sessions 2>/dev/null || echo "no tmux server running yet"
 ```
 
-Match the target against this list (Phase 2). To spawn: `tmux new-session` **fails if the name is taken** (exit 1), so check first, create **detached** (`-d -s <name>`), then launch the agent in a second step:
+Match the target against this list (Phase 2). New sessions use the predictable pattern **`<folder>-<short-task-name>`**: folder is the current project/workspace folder, and short task is a concise slug like `reviewer`, `tests`, or `docs`. This keeps `status`, `inspect`, and attach commands grep-friendly.
+
+To spawn: `tmux new-session` **fails if the name is taken** (exit 1), so check first, create **detached** (`-d -s <name>`), then launch the agent in a second step:
 
 ```bash
-name=agent1
+slug() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g'; }
+folder="$(slug "$(basename "$PWD")")"
+task="$(slug "${short_task_name:-reviewer}")"
+name="${folder}-${task}"
 tmux has-session -t "$name" 2>/dev/null && name="${name}-$(date +%s)"   # avoid collision
-tmux new-session -d -s "$name" -c /path/to/project
-tmux send-keys -t "$name" "claude" Enter
+tmux new-session -d -s "$name" -c "$PWD"
+tmux send-keys -t "$name" "${TAC_AGENT_CMD:-claude}" Enter
 ```
 
-Replace `claude` with whatever launches the target agent. **"Spawned" ≠ "ready"** — a fresh agent often boots through a trust/auth prompt. Don't send blind; run the wait helper (Phase 4): exit `0` means ready, exit `3` means it's parked on a prompt to surface to the user rather than type into.
+**Startup mode:** autonomous/non-blocking is the default for pi-agent, Claude, Codex, Gemini, and other CLIs. Use `TAC_STARTUP_MODE=autonomous|interactive` as the global default when present; a per-launch user request like `--interactive` or "show me the setup first" overrides it. In autonomous mode, use a detached launch command (`TAC_AGENT_CMD`, or the user's requested command) and immediately continue to readiness checks; never park the orchestrator on an interactive startup question. In interactive mode, print the attach command and stop before scripted sends.
+
+**"Spawned" ≠ "ready"** — a fresh agent often boots through a trust/auth prompt. Don't send blind; run the wait helper (Phase 4): exit `0` means ready, exit `3` means it's parked on a prompt to surface to the user rather than type into.
 
 ```bash
 python3 scripts/wait_for_idle.py "$name" --timeout 30 --no-print; echo "ready=$?"
 ```
 
-For a **fleet**, repeat with distinct job-named sessions (`reviewer`, `tests`, `docs`).
+For a **fleet**, repeat with distinct task slugs under the same folder prefix (`myrepo-reviewer`, `myrepo-tests`, `myrepo-docs`).
 
 **Showing the agent's terminal** (optional, human-only): `tmux attach-session -t "$name"` or `tmux switch-client -t "$name"`, run by the human in their own interactive terminal — the agent invoking either itself will fail (no TTY / no attached client). Detach with `Ctrl-b d` to return control without killing the session. See `references/tmux-recipes.md` ("Showing an agent's live terminal") for the when-to-use table and worked example.
 
@@ -122,11 +132,35 @@ tmux capture-pane -t agent1 -p -S -40       # ~40 scrollback lines + visible pan
 
 If the capture starts mid-sentence, the reply exceeded the window — widen stepwise (`-S -80`, ...). Only fall back to unbounded `-S -` when even a wide tail truncates — see `references/tmux-recipes.md` ("Reading scrollback robustly").
 
+### Status and Inspect (read-only)
+
+Use **status** when the user asks what every managed tmux agent is doing. Read only — do not send keys. Prefer sessions following the `<folder>-<short-task-name>` convention, plus any sessions launched earlier in this run. Output a table with at least: agent ID, session name, state (`in-progress` / `done` / `blocked` / `unknown`), task/progress summary, started time, and working directory.
+
+Useful raw data:
+
+```bash
+tmux list-sessions -F '#{session_name}|#{t:session_created}'
+tmux list-panes -a -F '#{session_name}|#{pane_current_path}|#{pane_current_command}'
+tmux capture-pane -t "$session" -p -S -40
+```
+
+Classify `in-progress` when the tail changes or shows a spinner / `esc to interrupt`; `blocked` when `wait_for_idle.py --no-print` exits 3 or a prompt is visible; `done` when the pane is quiet and a completed reply/prompt is visible; otherwise `unknown`. Keep progress summaries short — the current task or last meaningful line, not full scrollback.
+
+Use **inspect `<agent-id>`** for one agent. Resolve the ID to the exact session, show the same fields as status plus a bounded tail and pane details, and print the human-only attach command:
+
+```bash
+tmux attach-session -t "$session"
+```
+
+The orchestrator must not run that attach command itself (no TTY); it only gives the user a copy-paste command for their own terminal.
+
 ## Phase 6: Continue or Tear Down
 
 **Continue:** repeat send → verify-delivered (Phase 3) → wait + manual-verify (Phase 4) → capped-tail capture (Phase 5). Wait for idle before sending again, and keep the overall budget across rounds — if the loop keeps re-waiting without progress, escalate rather than poll forever.
 
 **Broadcast to a fleet:** send to every session first, then wait on each concurrently — never serialize a full send→wait→read per agent. `scripts/broadcast.sh` does this; see `references/tmux-recipes.md` ("Broadcast to multiple agents").
+
+**Long-running fleet status:** during multi-agent work that runs for several minutes, emit a fleet status report about every 5 minutes until all agents are done or blocked. Use the read-only Status table from Phase 5: per-agent state, current task/progress, started time, and working directory. This is a monitor/wake cadence only — never interrupt a working pane, never send keys as part of the report, and keep the same wait/budget rules from Phase 4.
 
 **Tear down (confirmation required):**
 
@@ -168,6 +202,8 @@ Relay that answer to the user. If the read starts mid-sentence, widen to `-S -80
 - **Trust/auth dialog** — `wait_for_idle.py` returns exit 3, not 0. Never send a message (would be read as menu input); surface the dialog.
 - **Reply ends in a numbered list** ("1. yes 2. no") — not mistaken for a prompt; block detection uses only verified dialog strings.
 - **Duplicate session name** — `tmux new-session` exits 1; resolve a free name first (Phase 1).
+- **Interactive startup would hang the run** — default to autonomous detached startup; only enter interactive mode when the user explicitly opts in, then print an attach command instead of blocking the orchestrator.
+- **Status cannot identify an agent** — list it as `unknown` rather than guessing; `inspect` must resolve the exact session before printing an attach command.
 - **Reply text contains "running"/"loading"** — busy detection scans only spinner chrome, never reply prose.
 - **Message never landed** — Phase 3's post-send-activity check catches this before waiting and reports `NOT-DELIVERED`; send a lone `Enter`, re-check, re-type if still nothing.
 - **Agent stalled** (unchanged pane, no spinner, no completion) — distinct from "still working" or a dropped delivery; surface it, don't silently re-wait.
@@ -178,7 +214,7 @@ Relay that answer to the user. If the read starts mid-sentence, widen to `-S -80
 ## Reference
 
 - `references/delivery-and-waiting.md` — full rationale behind delivery verification (Phase 3) and waiting (Phase 4).
-- `references/tmux-recipes.md` — broadcasting to a fleet, sending multi-line/code messages, splitting panes, showing an agent's live terminal, reading scrollback, troubleshooting.
+- `references/tmux-recipes.md` — broadcasting to a fleet, periodic fleet status, status/inspect details, sending multi-line/code messages, splitting panes, showing an agent's live terminal, reading scrollback, troubleshooting.
 
 ## Step Completion Report
 
@@ -193,6 +229,7 @@ After a messaging or lifecycle operation, emit:
   Reply settled:       √ pass (3 quiet cycles · verdict advisory)
   Reply verified:      √ pass (manual capped-tail read)
   Reply captured:      √ pass (-S -40, not truncated)
+  Fleet status:        √ pass (if long-running fleet work: ~5 min cadence; otherwise — n/a)
   Destructive action:  — none (or: confirmed by user)
   ____________________________
   Result:              PASS

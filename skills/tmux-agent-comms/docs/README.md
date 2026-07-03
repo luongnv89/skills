@@ -11,10 +11,12 @@
 
 ## Highlights
 
-- **Launch a fleet** — create named, detached tmux sessions and boot an agent (Claude Code, Gemini CLI, any CLI) inside each.
+- **Launch a fleet** — create predictable, detached tmux sessions (`<folder>-<short-task-name>`) and boot an agent (Claude Code, Gemini CLI, Codex, pi-agent, any CLI) inside each.
+- **Start non-blocking by default** — use autonomous detached startup, with `TAC_STARTUP_MODE` or a per-launch request to opt into interactive startup only when needed.
 - **Message any agent** — send a prompt to a target session with proper escaping, including the separate-`Enter` gotcha for stubborn TUIs.
 - **Read replies reliably** — a bundled `wait_for_idle.py` polls the pane until output settles instead of guessing with a fixed `sleep`, then returns the answer.
-- **Broadcast & collect** — fan one instruction out to several agents and gather each reply.
+- **Broadcast & collect** — fan one instruction out to several agents and gather each reply, with periodic fleet status during long-running work.
+- **Status & inspect** — list every managed agent in a table, inspect one agent, and get the exact attach command for a human terminal.
 - **Show an agent's terminal on demand** — attach to (or switch to) a spawned agent's session to see its live CLI and type into it directly, for trust prompts, debugging, or hands-on steering, without giving up the default detached workflow.
 - **Safe teardown** — kill individual sessions (or the whole server) behind explicit user confirmation, so no agent's work is lost by accident.
 
@@ -25,17 +27,20 @@
 | "Launch three Claude agents in tmux for reviewer, tests, and docs" | Create three named detached sessions and start an agent in each |
 | "Send 'summarize src/' to the reviewer agent and show me its reply" | Send the message, wait for the pane to settle, capture and relay the answer |
 | "Ask all my agents to pull the latest main" | Broadcast the message to every session and collect each response |
+| "Show status for my tmux agents" | Print a table with state, progress, start time, and working directory |
+| "Inspect the reviewer agent" | Show details for that agent and the exact `tmux attach-session` command |
 | "Shut down the tests agent" | Confirm, then `kill-session` that target |
 
 ## How It Works
 
 ```mermaid
 graph TD
-    A["Create or discover sessions"] --> B["Resolve exact target (has-session)"]
+    A["Create/discover named sessions"] --> B["Resolve exact target (has-session)"]
     B --> C["Send message (escaped + Enter)"]
+    B --> S["Status / inspect (read-only)"]
     C --> D["Wait until pane settles (wait_for_idle.py)"]
     D --> E["Capture & relay reply"]
-    E --> F["Continue or tear down (confirmed)"]
+    E --> F["Continue, report fleet status, or tear down (confirmed)"]
     style A fill:#4CAF50,color:#fff
     style F fill:#2196F3,color:#fff
 ```
@@ -70,7 +75,7 @@ Spin up several agents, each scoped to a job, and kick them all off at once.
 /tmux-agent-comms launch three Claude agents in tmux named reviewer, tests, and docs in this repo, then ask each to report what it would work on first
 ```
 
-The skill creates three named detached sessions, boots an agent in each, waits for each to clear its boot/trust prompt, then messages them. Naming sessions by job (`reviewer`, `tests`, `docs`) keeps later messages self-documenting.
+The skill creates three predictably named detached sessions (for example, `myrepo-reviewer`, `myrepo-tests`, `myrepo-docs`), boots an agent in each, waits for each to clear its boot/trust prompt, then messages them. The `<folder>-<short-task-name>` convention keeps later status, inspect, and attach commands self-documenting.
 
 ### 3. Broadcast one instruction to the whole fleet
 
@@ -80,7 +85,18 @@ Send the same message to every agent and collect all the replies together — th
 /tmux-agent-comms tell all my running agents to pull the latest main and report status
 ```
 
-You get one labeled block per agent with its reply and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), so you can see at a glance which agents are done and which need attention.
+You get one labeled block per agent with its reply and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), so you can see at a glance which agents are done and which need attention. For long runs, the orchestrator also reports fleet status about every 5 minutes without interrupting working panes.
+
+### 3b. Check or inspect running agents
+
+Use status when you want the whole fleet at a glance, or inspect when you need one agent's details and attach command.
+
+```
+/tmux-agent-comms show status for all managed agents
+/tmux-agent-comms inspect the reviewer agent and show me how to attach
+```
+
+Status returns a table with session, state, progress, start time, and working directory. Inspect resolves one exact session and prints a human-run command such as `tmux attach-session -t myrepo-reviewer`.
 
 ### 4. Hand a long prompt or a code block to an agent
 
@@ -117,7 +133,7 @@ The skill confirms the target with you, then `kill-session`. (A full reset of ev
 
 | Path | Description |
 |---|---|
-| `references/tmux-recipes.md` | Broadcast patterns, multi-line/code message sending, pane splitting, scrollback, chrome-stripping, and a troubleshooting table |
+| `references/tmux-recipes.md` | Broadcast patterns, periodic fleet status, status/inspect behavior, multi-line/code message sending, pane splitting, scrollback, chrome-stripping, and a troubleshooting table |
 | `scripts/wait_for_idle.py` | Polls a pane until idle; prints just the reply delta (token-lean) and reports idle / blocked-on-prompt / timeout via exit codes 0/3/2 |
 | `scripts/broadcast.sh` | Sends one message to a fleet and collects every reply concurrently, one labeled block per agent |
 
