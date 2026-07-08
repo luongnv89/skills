@@ -14,13 +14,17 @@
 |-------|----------------|
 | tmux-agent-comms | 1.3.0 → 1.8.1 (observability + terminal option) |
 | landing-page-generator | 1.1.4 → 1.2.0 (absorbs README-to-landing as Mode B) |
-| code-review | 1.2.0 → 1.2.1 (sharpen description + code-quality routing) |
-| code-optimizer | 1.4.0 → 1.4.1 (sharpen description + code-quality routing) |
-| clean-code | 1.2.2 → 1.2.3 (sharpen description + code-quality routing) |
-| slop-cleanup | 1.1.2 → 1.1.3 (sharpen description + code-quality routing) |
+| code-review | 1.2.0 → 2.0.0 (merge code-optimizer + clean-code + slop-cleanup as modes) |
 | drawio-generator | 1.2.2 → 1.2.3 (nested under diagram-generator umbrella) |
 | excalidraw-generator | 1.3.2 → 1.3.3 (nested under diagram-generator umbrella) |
 | viral-product-evaluator | 1.2.3 → 1.2.4 (update merged-skill cross-reference) |
+
+### Removed Skills (merged into code-review modes)
+| Skill | Merged into |
+|-------|-------------|
+| code-optimizer | `code-review` → `perf` mode |
+| clean-code | `code-review` → `clean` mode |
+| slop-cleanup | `code-review` → `cleanup` mode |
 
 ### Skill Consolidation (#72)
 Fewer, clearer entry points — one primary skill per intent.
@@ -35,10 +39,12 @@ Fewer, clearer entry points — one primary skill per intent.
   Skill names and the `/drawio-generator` · `/excalidraw-generator` invocations are unchanged; only
   the install path is nested (installers discover both levels). Use `/diagram-generator` to pick the
   engine by output format.
-- **Code-quality cluster disambiguated, not merged.** `code-review` / `code-optimizer` /
-  `clean-code` / `slop-cleanup` are genuinely distinct (report vs refactor; bugs vs perf vs
-  standards), so descriptions now cross-link and the README carries a "Which code-quality skill?"
-  decision guide. No skill removed.
+- **Code-quality cluster merged into `code-review` (four modes).** `code-optimizer`, `clean-code`,
+  and `slop-cleanup` are **removed** as separate skills; their full workflows become the `perf`,
+  `clean`, and `cleanup` modes of `code-review` (default = `review`). One entry point selects the
+  mode by intent or an explicit `mode:` parameter. Safety: only `cleanup` writes code, and it never
+  fires by inference. **Migration:** `/code-optimizer` → `code-review mode:perf`; `/clean-code` →
+  `code-review mode:clean`; `/slop-cleanup` → `code-review mode:cleanup`.
 
 ### Other
 - **chore(skills)**: trim SKILL.md files under 500-line limit (#67)

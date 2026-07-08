@@ -12,7 +12,7 @@ A clear and concise description of what the bug is.
 
 ## Skill Affected
 
-Which skill is affected? (e.g., smart-commit, code-optimizer)
+Which skill is affected? (e.g., code-review, auto-push)
 
 ## Steps to Reproduce
 

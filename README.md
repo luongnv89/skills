@@ -150,23 +150,20 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 1.2.1 | medium | Review diffs for bugs, vulns, and quality with prioritized fixes |
-| [**code-optimizer**](skills/code-optimizer/) | 1.4.1 | medium | Find perf bottlenecks, leaks, and inefficiency |
+| [**code-review**](skills/code-review/) | 2.0.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**test-coverage**](skills/test-coverage/) | 1.3.0 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.3.0 | medium | Usability review using Krug's principles |
-| [**slop-cleanup**](skills/slop-cleanup/) | 1.1.3 | high | Remove AI slop, duplication, weak types, and legacy cruft |
-| [**clean-code**](skills/clean-code/) | 1.2.3 | high | Audit against Clean Code + ATDD/TDD checklists |
 
-**Which code-quality skill?** One primary per intent — the descriptions cross-link, and this guide is the map:
+**`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
-| I want to... | Use | It... |
+| I want to... | Mode | It... |
 |---|---|---|
-| Find bugs, security, or quality issues in a diff | **code-review** | reads + reports prioritized findings |
-| Make code faster / fix perf bottlenecks | **code-optimizer** | reads + reports performance fixes |
-| Audit readability/standards vs the Clean Code cheat sheet | **clean-code** | writes an audit report (`CLEAN_CODE_AUDIT.md`) |
-| Actually apply cleanup / refactor out AI slop & cruft | **slop-cleanup** | writes code (8-subagent refactor) |
-| Fill test gaps | **test-coverage** | generates tests for untested branches |
-| Usability / UX review of a UI | **dont-make-me-think** | reviews UI vs Krug's principles |
+| Find bugs, security, or quality issues in a diff | `review` (default) | reads + reports prioritized findings |
+| Make code faster / fix perf bottlenecks | `perf` | reads + reports performance fixes |
+| Audit readability/standards vs the Clean Code cheat sheet | `clean` | writes an audit report (`CLEAN_CODE_AUDIT.md`) |
+| Actually apply cleanup / refactor out AI slop & cruft | `cleanup` | **writes code** (8-subagent refactor) |
+
+Adjacent skills: **test-coverage** (generate tests for untested branches) · **dont-make-me-think** (usability/UX review).
 
 ### Shipping
 

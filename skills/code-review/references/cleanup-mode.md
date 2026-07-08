@@ -1,13 +1,3 @@
----
-name: slop-cleanup
-description: "Refactor a codebase to remove AI slop, dead code, weak types, duplication, and cruft via 8 parallel subagents — the primary skill for applying cleanup (it writes code); pairs after a clean-code audit. Not for new features, perf, or read-only review."
-license: MIT
-effort: high
-metadata:
-  version: 1.1.3
-  author: "Luong NGUYEN <luongnv89@gmail.com>"
-  architecture: "subagent (Pattern B: Parallel Workers, 8 specialized cleaners)"
----
 
 # Slop Code Cleanup
 
@@ -41,7 +31,7 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 This skill **deletes and rewrites code aggressively**. That is the point. But because deletions are harder to reverse than additions, enforce these gates:
 
 1. **Never run on uncommitted changes.** If `git status` is not clean, stop and ask the user to commit or stash.
-2. **Create a dedicated cleanup branch** before any edits (e.g., `chore/slop-cleanup-YYYYMMDD`). Never work directly on `main`/`master`.
+2. **Create a dedicated cleanup branch** before any edits (e.g., `chore/code-review-cleanup-YYYYMMDD`). Never work directly on `main`/`master`.
 3. **One category per commit.** Each subagent's changes land in their own commit with a clear message. This makes individual categories revertible without losing the rest.
 4. **Test gate between phases.** After each subagent completes, run the test suite and typecheck (if available). If tests fail, stop the pipeline and surface the failure — do not continue to the next subagent on a broken tree.
 5. **Report before destructive deletion.** For subagents that delete code (unused code, legacy, duplicates), surface the deletion list to the user for approval when the deletion count exceeds 50 items or crosses module boundaries.
@@ -125,7 +115,7 @@ git diff-index --quiet HEAD -- || { echo "Commit or stash changes first"; exit 1
 
 # Create cleanup branch
 date_tag=$(date +%Y%m%d)
-git checkout -b "chore/slop-cleanup-${date_tag}"
+git checkout -b "chore/code-review-cleanup-${date_tag}"
 ```
 
 Detect the stack (language, package manager, test command, typecheck command) and write a one-line summary the user sees before dispatch begins.
@@ -154,7 +144,7 @@ Read each subagent's category report and produce `SLOP_CLEANUP.md` at the repo r
 ```markdown
 # Slop Cleanup Report
 
-**Branch:** chore/slop-cleanup-YYYYMMDD
+**Branch:** chore/code-review-cleanup-YYYYMMDD
 **Commits:** N  (list with category and one-line summary)
 **Tests:** ✓ passing  |  **Typecheck:** ✓ clean
 
@@ -259,7 +249,7 @@ After a full run on a TypeScript monorepo, the final `SLOP_CLEANUP.md` summary l
 ```markdown
 # Slop Cleanup Report
 
-**Branch:** chore/slop-cleanup-20260419
+**Branch:** chore/code-review-cleanup-20260419
 **Commits:** 8  (one per category)
 **Tests:** passing  |  **Typecheck:** clean
 
@@ -275,13 +265,13 @@ After a full run on a TypeScript monorepo, the final `SLOP_CLEANUP.md` summary l
 - Slop comments removed: 198
 ```
 
-And the terminal handoff message: "Cleaned up 8 categories across 43 files, removed 847 lines, tests passing on branch chore/slop-cleanup-20260419. Review `SLOP_CLEANUP.md` and merge when ready."
+And the terminal handoff message: "Cleaned up 8 categories across 43 files, removed 847 lines, tests passing on branch chore/code-review-cleanup-20260419. Review `SLOP_CLEANUP.md` and merge when ready."
 
 ## Acceptance Criteria
 
 A run passes when **all** of the following are true:
 
-- [ ] Working tree is clean at start; the run is on a dedicated cleanup branch (e.g., `chore/slop-cleanup-YYYYMMDD`), not on `main`/`master`.
+- [ ] Working tree is clean at start; the run is on a dedicated cleanup branch (e.g., `chore/code-review-cleanup-YYYYMMDD`), not on `main`/`master`.
 - [ ] Each of the 8 cleanup categories produces its own commit with a descriptive message — never one monolithic commit.
 - [ ] Test suite and typecheck pass between Wave 1 and Wave 2; the pipeline stops if either fails.
 - [ ] Final `SLOP_CLEANUP.md` report exists and lists per-category counts (files touched, lines removed, deletions skipped).

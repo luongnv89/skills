@@ -1,12 +1,3 @@
----
-name: code-optimizer
-description: "Find performance bottlenecks, memory leaks, and algorithmic inefficiency — the primary skill for making code faster. Don't use for bugs/security (use code-review), readability audits (use clean-code), or slop refactors (use slop-cleanup)."
-license: MIT
-effort: medium
-metadata:
-  version: 1.4.1
-  author: "Luong NGUYEN <luongnv89@gmail.com>"
----
 
 # Code Optimization
 
