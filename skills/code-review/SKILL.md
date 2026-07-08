@@ -1,10 +1,10 @@
 ---
 name: code-review
-description: "Review code changes for bugs, security vulnerabilities, and code quality issues — producing prioritized findings with specific fix suggestions. Don't use for performance tuning, writing new features from scratch, or generating test cases."
+description: "Review a diff for bugs, security, and code-quality issues with prioritized fixes — the primary skill for correctness/security review. Don't use for performance (use code-optimizer), refactors (use slop-cleanup), or tests (use test-coverage)."
 license: MIT
 effort: medium
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: Luong NGUYEN <luongnv89@gmail.com>
   architecture: "subagent (Pattern B+C: Parallel Workers + Review Loop)"
 ---

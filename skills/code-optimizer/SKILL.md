@@ -1,10 +1,10 @@
 ---
 name: code-optimizer
-description: "Analyze code for performance bottlenecks, memory leaks, and algorithmic inefficiencies. Use when asked to optimize, find bottlenecks, or improve efficiency. Don't use for bug-hunting code review, security audits, or refactoring without a perf goal."
+description: "Find performance bottlenecks, memory leaks, and algorithmic inefficiency — the primary skill for making code faster. Don't use for bugs/security (use code-review), readability audits (use clean-code), or slop refactors (use slop-cleanup)."
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

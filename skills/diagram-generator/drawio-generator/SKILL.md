@@ -4,13 +4,15 @@ description: "Generate professional diagrams as valid draw.io XML — flowcharts
 license: MIT
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Draw.io Diagram Generator
 
 Generate professional diagrams as valid draw.io XML. Every request flows through four phases — **Understand**, **Propose**, **Generate**, **Validate** — before the file is written. Body content is intentionally lean to respect the agent's context budget; depth lives in `references/`.
+
+> Part of the **diagram-generator** suite. For a hand-drawn / sketch look, use `excalidraw-generator` instead; the `diagram-generator` umbrella routes between the two.
 
 ## Environment Check
 

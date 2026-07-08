@@ -45,6 +45,13 @@ You produce skill content. Scope is limited to one skill directory at a time (`s
 5. Keep SKILL.md under 500 lines; spill to `references/`.
 6. After editing, run `quick_validate.py` against the skill and include the result in your final message.
 
+**Suite / umbrella folders.** Some products ship as a suite: an umbrella skill at `skills/<umbrella>/`
+plus child skills at `skills/<umbrella>/<child>/` (e.g. `website-cloner`, `diagram-generator`). Each
+SKILL.md — umbrella and every child — is validated independently: its `name` must equal its **own**
+directory name, and it bumps its own `metadata.version`. Keep the umbrella lean (route or orchestrate
+only) and push depth into each child. Installers discover both levels, so nesting a skill needs no
+installer change.
+
 **Do not** edit files outside the target skill directory. **Do not** commit, push, or modify `dist/`. Stop and ask if the change touches more than the one skill.
 
 ## Token Efficiency

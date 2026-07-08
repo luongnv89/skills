@@ -1,10 +1,10 @@
 ---
 name: clean-code
-description: "Audit code against the bbv Clean Code Cheat Sheet and write CLEAN_CODE_AUDIT.md with findings plus a priority-phased plan. User-invoked: use when the user runs /clean-code or requests a clean-code audit. Don't use for general coding, bug-fixing, or PR review."
+description: "Audit code against the bbv Clean Code Cheat Sheet, writing CLEAN_CODE_AUDIT.md — the primary skill for a readability/standards audit. Don't use for bugs (use code-review), speed (use code-optimizer), or applying fixes (use slop-cleanup)."
 license: MIT
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "inline (single-agent orchestration)"
 ---

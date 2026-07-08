@@ -1,16 +1,11 @@
----
-name: readme-to-landing-page
-description: "Transform a project README.md into a conversion-optimized landing page using PAS, AIDA, or StoryBrand — hero, value prop, how it works, quick start, CTA in pure markdown. Skip for full HTML sites or general blog copy."
-license: MIT
-effort: high
-metadata:
-  version: 2.1.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
----
+# Mode B — README Landing Page
 
-# README to Landing Page
+Transform a project's existing `README.md` into a concise, visual, developer-friendly
+landing page. Use this mode when the source material is a repository README (not an open
+product brief) and the deliverable is a rewritten `README.md` file in the repo.
 
-Transform a project's README.md into a concise, visual, developer-friendly landing page.
+> Merged from the former `readme-to-landing-page` skill. For marketing landing-page **copy**
+> from a product brief, use Mode A in `SKILL.md` instead.
 
 ## Core Principle: Show, Don't Tell
 
@@ -22,15 +17,21 @@ Developers skim — they don't read walls of text. The output README must:
 - **Be direct** — lead with what matters, skip the preamble
 - **No emoji** — never use emoji in headings, body text, badges, or section labels
 
-If something can be a diagram, make it a diagram. If something can be a table, make it a table. If something can be a one-liner, don't write three sentences.
+If something can be a diagram, make it a diagram. If something can be a table, make it a table.
+If something can be a one-liner, don't write three sentences.
 
 ## Anti-Slop Rules
 
-AI-generated READMEs have predictable tells. Slop signals "nobody reviewed this" and kills credibility. See `references/anti-slop-rules.md` for the full banned-phrase list and structural patterns to avoid.
+AI-generated READMEs have predictable tells. Slop signals "nobody reviewed this" and kills
+credibility. See `references/anti-slop-rules.md` for the full banned-phrase list and structural
+patterns to avoid.
 
-**Quick test:** read each sentence and ask "does this give the reader information they didn't already have?" If not, cut it.
+**Quick test:** read each sentence and ask "does this give the reader information they didn't
+already have?" If not, cut it.
 
 ## Repo Sync Before Edits (mandatory)
+
+This mode rewrites a tracked file, so sync with remote first:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -43,7 +44,8 @@ If `origin` is missing or conflicts occur, stop and ask the user.
 
 ## Workflow
 
-If no `README.md` exists, or the existing one is already marketing-style, see **Edge Cases** below before starting Step 1 — a different mode applies.
+If no `README.md` exists, or the existing one is already marketing-style, see **Edge Cases**
+below before starting Step 1 — a different mode applies.
 
 ### Step 1: Gather Context
 
@@ -85,7 +87,9 @@ cp README.md README.backup.md
 
 ### Step 5: Rewrite README.md
 
-Follow the section flow in `references/section-templates.md` (hero, how it works, features, quick start, examples, comparison, social proof, FAQ, CTA, collapsed technical details). Each template includes good vs. bad patterns and exact length budgets.
+Follow the section flow in `references/readme-section-templates.md` (hero, how it works, features,
+quick start, examples, comparison, social proof, FAQ, CTA, collapsed technical details). Each
+template includes good vs. bad patterns and exact length budgets.
 
 Key rules across all sections:
 - H1 = value proposition (<=10 words), not the project name
@@ -127,9 +131,10 @@ Ask for feedback. Do NOT commit unless asked.
 
 ## Expected Output
 
-For a CLI tool called "fastbuild", the rewritten README.md opens with:
+For a CLI tool called "fastbuild", the rewritten README.md opens with (outer fence shown as
+`~~~` so the inner mermaid block is literal):
 
-```markdown
+~~~markdown
 ![stars](https://img.shields.io/github/stars/acme/fastbuild)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 
@@ -142,21 +147,21 @@ no config files, no daemon, no warm-up time.
 
 ## How It Works
 
-` ` `mermaid
+```mermaid
 graph LR
     A[Source files] --> B[fastbuild watcher]
     B --> C{Changed?}
     C -->|Yes| D[Compile changed modules]
     C -->|No| E[Skip]
     D --> F[Output bundle]
-` ` `
+```
 
 | Feature | What you get |
 |---|---|
 | Zero config | Works out of the box — no setup files |
 | Incremental | Recompiles only changed modules |
 | Fast | < 1s on codebases with 10k+ files |
-```
+~~~
 
 Original content is preserved in `README.backup.md` and in `<details>` blocks at the end of the new README.
 
@@ -179,7 +184,8 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 
 ## Step Completion Reports
 
-After each major step, output a status report. See `references/step-reports.md` for the format and phase-specific checks.
+After each major step, output a status report. See `references/readme-step-reports.md` for the
+format and phase-specific checks.
 
 ## Guidelines
 

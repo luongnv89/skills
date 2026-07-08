@@ -1,6 +1,6 @@
 # Anti-Slop Rules
 
-AI-generated landing page copy has predictable tells that make visitors distrust the page. Avoid all of these patterns.
+AI-generated marketing copy and READMEs have predictable tells that make readers distrust the page — visitors on a landing page, developers skimming a repo. Avoid all of these patterns in both modes.
 
 ## Banned phrases — never write these or close variants
 
@@ -18,10 +18,16 @@ AI-generated landing page copy has predictable tells that make visitors distrust
 | "Say goodbye to X" | Cliche | State what the product does instead |
 | "Unlock/unleash/harness" | Filler verbs | Name the outcome |
 | "Best-in-class/world-class" | Unsubstantiated | Cite proof or cut |
+| "Dive deep/deep dive" | Padding | Cut or replace with "details" |
+| "It's worth noting that" | Throat-clearing | Cut — just state the thing |
+| "Streamline your workflow" | Generic promise | Describe the specific workflow change |
+| "Comprehensive solution" | Says nothing | State what it covers |
 
 ## Structural slop to avoid
 
 - Padding paragraphs that repeat the headline in different words
+- "Introduction" sections that delay the actual content
+- Multiple sentences saying the same thing for emphasis
 - Rhetorical questions ("Tired of X? Want to Y?")
 - Exclamation marks for artificial enthusiasm
 - Emoji in headings or body text

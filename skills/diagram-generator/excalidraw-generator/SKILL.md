@@ -4,13 +4,15 @@ description: "Generate diagrams as valid Excalidraw JSON — flowcharts, archite
 license: MIT
 effort: high
 metadata:
-  version: 1.3.2
+  version: 1.3.3
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
 # Excalidraw Diagram Generator
 
 Generate professional diagrams as valid Excalidraw JSON. Every diagram goes through four phases: **Understand** the request, **Propose** options, **Generate** the JSON, and **Validate** before writing the file.
+
+> Part of the **diagram-generator** suite. For precise, editable-in-draw.io output, use `drawio-generator` instead; the `diagram-generator` umbrella routes between the two.
 
 This SKILL.md is intentionally compact to fit the agent's context budget (token-efficient body). Long-form details live in `references/` — read the linked file when you need depth.
 

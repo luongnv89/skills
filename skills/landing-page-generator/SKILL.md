@@ -1,16 +1,31 @@
 ---
 name: landing-page-generator
-description: "Generate conversion-focused landing page copy with PAS, AIDA, or StoryBrand. Use when creating sales pages, hero sections, CTAs, or full marketing website copy. Don't use for README rewrites, blog posts, or UX audits."
+description: "Generate landing pages with PAS, AIDA, or StoryBrand — marketing copy from a product brief, or a scannable landing-page rewrite of an existing README. The one skill for landing-page work. Not for blog posts, UX audits, or HTML builds."
 license: MIT
 effort: high
 metadata:
-  version: 1.1.4
+  version: 1.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Landing Page Generator
 
-Generate conversion-focused landing page copy using proven copywriting frameworks.
+Generate landing pages using proven copywriting frameworks (PAS, AIDA, StoryBrand). One skill,
+two modes: write conversion-focused marketing copy from a product brief, or transform an existing
+project README into a scannable, visual landing page.
+
+## Two Modes
+
+Pick the mode that matches the input and deliverable:
+
+| Mode | Use when | Input | Output | Where |
+|---|---|---|---|---|
+| **A — Landing copy** | You need marketing copy for a sales/landing page | Product/service brief | Conversion-focused copy (hero → CTA) + A/B notes, in chat | This file, below |
+| **B — README landing page** | You have an existing project `README.md` to make persuasive and scannable | Repo `README.md` + project files | Rewritten `README.md` (mermaid, tables, collapsed details) + `README.backup.md` | `references/readme-mode.md` |
+
+If the user asks to "turn my README into a landing page", "make my GitHub page sell the project",
+or similar, follow **Mode B** in `references/readme-mode.md`. Otherwise use **Mode A** below. When
+unsure which applies, ask.
 
 ## Anti-Slop Rules
 
@@ -30,7 +45,9 @@ Before writing, confirm the user supplied enough detail to make specific claims:
 If proof is missing, write placeholders clearly labeled `[proof needed]`; never invent customers,
 metrics, guarantees, scarcity, or compliance claims.
 
-## Workflow
+## Workflow (Mode A — Landing copy)
+
+> Mode B (README landing page) has its own self-contained workflow in `references/readme-mode.md`.
 
 ### Step 1: Gather Product/Service Information
 

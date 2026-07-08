@@ -4,7 +4,7 @@ description: "Review a product codebase and landing page against 32 viral princi
 license: MIT
 effort: high
 metadata:
-  version: 1.2.3
+  version: 1.2.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -23,7 +23,7 @@ Trigger when the user wants to:
 - Check a product against "the 32 principles" (Marc Lou-style viral-product rules)
 
 Do **not** use for: technical SEO (`seo-ai-optimizer`), App Store ASO (`aso-marketing`),
-turning a README into a page (`readme-to-landing-page`), or bug-hunting code review
+turning a README into a page (`landing-page-generator`), or bug-hunting code review
 (`code-review`). This skill
 **evaluates and prioritizes**; it does not rewrite the product.
 

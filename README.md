@@ -111,7 +111,7 @@ A skill is a self-contained playbook: frontmatter metadata, instructions, option
 ## Quick Start
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill readme-to-landing-page
+npx skills add https://github.com/luongnv89/skills --skill landing-page-generator
 ```
 
 ```bash
@@ -150,12 +150,23 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 1.1.4 | medium | Review diffs for bugs, vulns, and quality with prioritized fixes |
-| [**code-optimizer**](skills/code-optimizer/) | 1.3.1 | medium | Find perf bottlenecks, leaks, and inefficiency |
-| [**test-coverage**](skills/test-coverage/) | 1.2.3 | low | Target untested branches and edge cases |
-| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.2.1 | medium | Usability review using Krug's principles |
-| [**slop-cleanup**](skills/slop-cleanup/) | 1.1.1 | high | Remove AI slop, duplication, weak types, and legacy cruft |
-| [**clean-code**](skills/clean-code/) | 1.2.0 | high | Audit against Clean Code + ATDD/TDD checklists |
+| [**code-review**](skills/code-review/) | 1.2.1 | medium | Review diffs for bugs, vulns, and quality with prioritized fixes |
+| [**code-optimizer**](skills/code-optimizer/) | 1.4.1 | medium | Find perf bottlenecks, leaks, and inefficiency |
+| [**test-coverage**](skills/test-coverage/) | 1.3.0 | low | Target untested branches and edge cases |
+| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.3.0 | medium | Usability review using Krug's principles |
+| [**slop-cleanup**](skills/slop-cleanup/) | 1.1.3 | high | Remove AI slop, duplication, weak types, and legacy cruft |
+| [**clean-code**](skills/clean-code/) | 1.2.3 | high | Audit against Clean Code + ATDD/TDD checklists |
+
+**Which code-quality skill?** One primary per intent — the descriptions cross-link, and this guide is the map:
+
+| I want to... | Use | It... |
+|---|---|---|
+| Find bugs, security, or quality issues in a diff | **code-review** | reads + reports prioritized findings |
+| Make code faster / fix perf bottlenecks | **code-optimizer** | reads + reports performance fixes |
+| Audit readability/standards vs the Clean Code cheat sheet | **clean-code** | writes an audit report (`CLEAN_CODE_AUDIT.md`) |
+| Actually apply cleanup / refactor out AI slop & cruft | **slop-cleanup** | writes code (8-subagent refactor) |
+| Fill test gaps | **test-coverage** | generates tests for untested branches |
+| Usability / UX review of a UI | **dont-make-me-think** | reviews UI vs Krug's principles |
 
 ### Shipping
 
@@ -171,7 +182,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**idea-validator**](skills/idea-validator/) | 1.4.0 | max | Market, feasibility, competitor checks for ideas |
-| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.1.0 | high | Score codebase + landing page vs 32 viral principles |
+| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.2.4 | high | Score codebase + landing page vs 32 viral principles |
 | [**brand-name-checker**](skills/brand-name-checker/) | 1.3.0 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.3.1 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.3.0 | max | Technical architecture document from PRD |
@@ -183,8 +194,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 |---|---|---|---|
 | [**frontend-design**](skills/frontend-design/) | 1.2.2 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.2.1 | medium | 7 SVG logo variants from project context |
-| [**excalidraw-generator**](skills/excalidraw-generator/) | 1.3.0 | high | Diagrams as Excalidraw JSON (flow, C4, ER, etc.) |
-| [**drawio-generator**](skills/drawio-generator/) | 1.2.0 | high | Diagrams as draw.io XML with C4 support |
+| [**diagram-generator**](skills/diagram-generator/) | 1.0.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 | [**website-cloner**](skills/website-cloner/) | 1.1.5 | high | 6-phase URL to improved Vite/React/Tailwind site |
 
 **Website cloner phases** (install individually or as suite):
@@ -198,13 +208,19 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | website-builder | 1.0.2 | Build improved site |
 | website-clone-final-report | 1.0.1 | Before/after summary |
 
+**Diagram generator engines** (install the umbrella or a single engine):
+
+| Engine | Version | What it does |
+|---|---|---|
+| drawio-generator | 1.2.3 | draw.io XML — precise, editable, C4, swimlanes |
+| excalidraw-generator | 1.3.3 | Excalidraw JSON — hand-drawn, sketch, wireframes |
+
 ### Documentation
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**docs-generator**](skills/docs-generator/) | 1.2.3 | low | Restructure docs into clear hierarchy |
-| [**readme-to-landing-page**](skills/readme-to-landing-page/) | 2.1.0 | high | Turn README into scannable landing page (PAS/AIDA/StoryBrand) |
-| [**landing-page-generator**](skills/landing-page-generator/) | 1.1.3 | high | Conversion-focused landing copy (PAS, AIDA, StoryBrand) |
+| [**landing-page-generator**](skills/landing-page-generator/) | 1.2.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.2.0 | high | Technical SEO + AI-bot directives |
 | [**oss-ready**](skills/oss-ready/) | 1.2.0 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 1.3.0 | medium | CLAUDE.md + AGENTS.md per best practices |
@@ -233,7 +249,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 
 Most skills are `skills/<name>/`. Multi-phase products live under a suite folder: umbrella at `skills/<umbrella>/` + phases at `skills/<umbrella>/<phase>/`.
 
-Current suite: [website-cloner](skills/website-cloner/). Install the umbrella or any phase. Installers discover both levels.
+Current suites: [website-cloner](skills/website-cloner/) (6 sequential phases) and [diagram-generator](skills/diagram-generator/) (draw.io + Excalidraw engines behind one router). Install an umbrella or any child. Installers discover both levels.
 
 Mirror the layout for your own multi-skill products.
 
