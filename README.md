@@ -216,7 +216,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**docs-generator**](skills/docs-generator/) | 1.2.3 | low | Restructure docs into clear hierarchy |
+| [**doc-manager**](skills/doc-manager/) | 2.0.0 | medium | Generate/update docs to match code, cited to path:line, never invented |
 | [**landing-page-generator**](skills/landing-page-generator/) | 1.2.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.2.0 | high | Technical SEO + AI-bot directives |
 | [**oss-ready**](skills/oss-ready/) | 1.2.0 | low | Add OSS files and templates |
