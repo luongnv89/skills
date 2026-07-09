@@ -4,7 +4,7 @@ description: "Review or improve code — one skill, four modes: bug/security rev
 license: MIT
 effort: high
 metadata:
-  version: 2.0.0
+  version: 2.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
 ---
@@ -44,6 +44,14 @@ source. `cleanup` **modifies files**. Therefore:
   refactor / clean up the codebase (or passes `mode:cleanup`). A plain "review my code" must never
   rewrite files — stay in a read-only mode.
 - **Confirm before the first write** in `cleanup`, and follow that mode's own gating.
+
+## Repo Sync Before Edits
+
+The router itself is read-only. The two modes that touch a git repo carry the mandatory
+sync-before-edits step in their own workflow: `cleanup` (writes source) in `references/cleanup-mode.md`
+and `clean` (writes `CLEAN_CODE_AUDIT.md`) in `references/clean-mode.md`. Before either mode edits,
+follow that reference's Repo Sync step — sync with remote (stash-first if the tree is dirty) so writes
+land on top of the latest base.
 
 ## Run the mode's workflow
 
