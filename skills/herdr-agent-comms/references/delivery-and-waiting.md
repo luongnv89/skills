@@ -106,15 +106,40 @@ The helper mirrors tmux-agent-comms' wait semantics (exit 0 idle / 2 timeout / 3
 
 ## Concurrent fleet waits
 
-Send all first, wait all second:
+Send all first, wait all second. Prefer the helper (handles `idle` **or** `done`, and post-send semantics):
 
 ```bash
 for p in "${panes[@]}"; do herdr pane run "$p" "$msg"; done
 for p in "${panes[@]}"; do
-  herdr wait agent-status "$p" --status done --timeout 180000 &
+  python3 scripts/wait_for_idle.py "$p" --timeout 180 &
 done
 wait
 ```
+
+Or with raw waits — **do not** wait only on `done` (focused fleet tabs usually finish as `idle`):
+
+```bash
+for p in "${panes[@]}"; do herdr pane run "$p" "$msg"; done
+for p in "${panes[@]}"; do
+  (
+    deadline=$((SECONDS + 180))
+    while (( SECONDS < deadline )); do
+      st=$(herdr pane get "$p" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["pane"].get("agent_status",""))')
+      case "$st" in
+        done|idle) exit 0 ;;
+        blocked) exit 3 ;;
+        working) herdr wait agent-status "$p" --status done --timeout 15000 \
+                   || herdr wait agent-status "$p" --status idle --timeout 15000 || true ;;
+        *) sleep 2 ;;
+      esac
+    done
+    exit 2
+  ) &
+done
+wait
+```
+
+Or simply: `scripts/broadcast.sh "$msg" reviewer tests docs`.
 
 Serializing full send→wait→read per agent makes total time the sum of agents; concurrent waits make it the max.
 

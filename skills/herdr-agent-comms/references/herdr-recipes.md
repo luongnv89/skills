@@ -150,27 +150,32 @@ If the answer clearly started above the window, increase `--lines` stepwise (80 
 
 ## Broadcast pattern (manual)
 
-Same idea as `scripts/broadcast.sh`:
+Same idea as `scripts/broadcast.sh` (preferred one-liner: `scripts/broadcast.sh "$msg" reviewer tests docs`):
 
 ```bash
 targets=(reviewer tests docs)
 msg="Pull latest main and report branch + dirty state."
 
+# Resolve names → pane ids once (agent send is text-only; pane run submits Enter)
+panes=()
 for t in "${targets[@]}"; do
-  # Prefer resolving to pane ids then pane run (text + Enter)
-  herdr agent send "$t" "$msg"
+  p=$(herdr agent get "$t" | python3 -c 'import sys,json; d=json.load(sys.stdin); a=d.get("result",{}).get("agent") or d.get("result",{}); print(a["pane_id"])')
+  panes+=("$p")
 done
 
+# Send once per pane (do NOT also agent-send the same message)
 for pane in "${panes[@]}"; do
-  herdr pane run "$pane" "$msg" &
+  herdr pane run "$pane" "$msg"
 done
-wait
 
+# Concurrent completion: idle OR done (focused fleet tabs finish as idle)
 for pane in "${panes[@]}"; do
-  herdr wait agent-status "$pane" --status done --timeout 180000 &
+  python3 scripts/wait_for_idle.py "$pane" --timeout 180 &
 done
 wait
 ```
+
+Never wait only on `done` for the full budget after `herdr tab focus` — the fleet view is focused, so agents settle as `idle`.
 
 ## Troubleshooting
 
