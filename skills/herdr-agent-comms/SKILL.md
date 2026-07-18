@@ -1,25 +1,25 @@
 ---
 name: herdr-agent-comms
-description: "Manage AI agent fleets in Herdr: one project workspace, one tab per agent, message/wait/read via herdr CLI, steer any pane. Use for Herdr multi-agent fleets. Don't use for tmux, screen, or non-Herdr terminals."
+description: "Manage AI agent fleets in Herdr: one project workspace, split panes in one view, message/wait/read via herdr CLI, steer any pane. Use for Herdr multi-agent fleets. Don't use for tmux, screen, or non-Herdr terminals."
 license: MIT
 effort: medium
 metadata:
-  version: 1.0.1
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 compatibility: "Requires `herdr` on PATH and a running Herdr server (`herdr status`)."
 ---
 
 # Herdr Agent Comms
 
-Manage and talk to AI agents (Claude Code, pi, Codex, OpenCode, or any CLI) running as **visible Herdr tabs**: **create** a project workspace, **spawn** one agent per tab, **send** tasks, **wait** on agent status, **capture** replies, and **tear down** when done.
+Manage and talk to AI agents (Claude Code, pi, Codex, OpenCode, or any CLI) as **split panes in one fleet view**: **create** a project workspace, **spawn** agents into a shared tab via splits, **send** tasks, **wait** on agent status, **capture** replies, and **tear down** when done.
 
 Mental model (Herdr concepts, not tmux):
 
 | Concept | Role in this skill |
 |---|---|
 | **Workspace** | One per project/repo — all agents for that project live here |
-| **Tab** | One per agent — each sub-agent is a dedicated tab you can jump into |
-| **Pane** | Real terminal inside the tab; primary control target (`wN:pM`) |
+| **Fleet tab** | One shared tab (label e.g. `fleet`) holding the whole multi-agent view |
+| **Pane** | One agent = one split pane; primary control target (`wN:pM`) |
 | **Agent name** | Stable handle for send/wait/read (`reviewer`, `tests`, …) |
 
 You orchestrate from outside (or from another Herdr pane) with the `herdr` CLI. Prefer Herdr's agent-status waits over polling scrollback. Relay each agent's answer, not its whole screen.
@@ -28,11 +28,11 @@ This skill is the **Herdr counterpart** of `tmux-agent-comms`. Use this when age
 
 ## When to Use
 
-Spinning up a multi-agent fleet in Herdr, putting every agent for a project in one workspace, messaging or steering an agent tab, broadcasting to a fleet, or reading what an agent replied. Don't use for tmux/screen sessions or GUI apps.
+Spinning up a multi-agent fleet in Herdr, putting every agent for a project in one workspace as **side-by-side / tiled panes**, messaging or steering any pane, broadcasting to a fleet, or reading what an agent replied. Don't use for tmux/screen sessions or GUI apps.
 
 ## Workflow
 
-Six phases, in order: ensure server + resolve workspace, spawn agent tabs, resolve targets, send, wait + read, continue or tear down.
+Six phases, in order: ensure server + resolve workspace, spawn split-pane fleet, resolve targets, send, wait + read, continue or tear down.
 
 **Jump straight to the phase for your task** — don't read the rest:
 
@@ -42,7 +42,7 @@ Six phases, in order: ensure server + resolve workspace, spawn agent tabs, resol
 | Message an agent that's already running | Phase 3 |
 | Just read a running agent's pane (no send) | Phase 5 |
 | Broadcast the same message to a fleet | Phase 6 ("Broadcast") |
-| Shut agents / tabs down | Phase 6 ("Tear down") |
+| Shut agents / fleet tab down | Phase 6 ("Tear down") |
 
 ## Prerequisites
 
@@ -55,8 +55,8 @@ Six phases, in order: ensure server + resolve workspace, spawn agent tabs, resol
 
 1. **Confirm before destructive actions.** Closing panes/tabs/workspaces or `herdr server stop` can lose agent work — never without explicit user go-ahead. Reading panes is always safe.
 2. **Parse IDs from JSON.** Workspace/tab/pane IDs are opaque (`w26`, `w26:t2`, `w26:p4`). Never invent them from sidebar order.
-3. **One workspace per project; one tab per agent.** Default spawn path creates a **new tab** per agent inside the project workspace (not a split in the orchestrator tab). Use splits only when the user asks for side-by-side panes.
-4. **Prefer `--no-focus` for background fleet work** so spawning doesn't yank the user's focus. Use `herdr agent focus <name>` / `herdr tab focus <tab_id>` when the user wants to jump in and steer.
+3. **One workspace per project; one fleet tab; split pane per agent.** Default spawn path puts **all fleet agents in a single tab** as tiled splits so the human sees everyone at once. Create a **new tab per agent only** when the user explicitly asks for full-viewport isolation.
+4. **Prefer `--no-focus` while spawning** so layout churn doesn't steal the keyboard from the human. After the fleet is up, `herdr tab focus <fleet_tab>` (or click the fleet tab) shows the whole board; `herdr agent focus <name>` zooms to one pane to type.
 5. **Wait on agent status, don't race.** After send, wait for `working` then `idle`/`done` (Phase 4). Don't send a follow-up while status is `working`.
 6. **`pane run` submits text + Enter.** Prefer it over separate `send-text`/`send-keys` for prompts. `agent send` is literal text only (no Enter) — use when you must type without submitting.
 7. **Blocked agents need humans.** Status `blocked` means a trust/auth/permission dialog — surface it; don't type the next task into the dialog.
@@ -88,38 +88,52 @@ Optional: install the integration for agents you resume often (`herdr integratio
 
 **Done when:** you have a concrete `workspace_id` for the project and the server is running.
 
-## Phase 2: Spawn Agent Tabs (fleet)
+## Phase 2: Spawn Split-Pane Fleet
 
-For each agent in the fleet, create a **new tab** in that workspace, launch the CLI in its root pane, name the agent, wait until ready, then submit the task.
+Put **all agents in one fleet tab** as tiled splits so the human sees every agent in a single view.
 
-### 2a — Create tab + launch
+### 2a — Create one fleet tab, then split per agent
 
 ```bash
-name=reviewer
 project_dir=/path/to/project
 ws="$workspace_id"          # from Phase 1
-agent_cmd='pi --model anthropic/claude-sonnet-4-6 --thinking medium'
-# optional skills for pi:  --skill /path/to/SKILL.md
+fleet_label=fleet           # or "${label}-fleet"
 
-# free name if taken
+# One shared tab for the whole fleet
+tab_json="$(herdr tab create --workspace "$ws" --cwd "$project_dir" --label "$fleet_label" --no-focus)"
+fleet_tab="$(printf '%s' "$tab_json" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["tab"]["tab_id"])')"
+root_pane="$(printf '%s' "$tab_json" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
+
+# --- agent 1: use the tab's root pane ---
+name=reviewer
+agent_cmd='pi --thinking medium'
 herdr agent list | grep -q "\"name\":\"$name\"" && name="${name}-$(date +%s)"
+herdr pane rename "$root_pane" "$name"
+herdr agent rename "$root_pane" "$name"
+herdr pane run "$root_pane" "$agent_cmd"
+# record: pane_id=$root_pane
 
-tab_json="$(herdr tab create --workspace "$ws" --cwd "$project_dir" --label "$name" --no-focus)"
-pane_id="$(printf '%s' "$tab_json" | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d["result"]["root_pane"]["pane_id"])')"
-tab_id="$(printf '%s' "$tab_json" | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d["result"]["tab"]["tab_id"])')"
+# --- agents 2..N: split inside the same fleet tab ---
+# Alternate right/down for a usable tile (2-up: right; 3+: right then down…).
+# Always --no-focus so the human keeps their keyboard.
+name=tests
+herdr agent list | grep -q "\"name\":\"$name\"" && name="${name}-$(date +%s)"
+start_json="$(herdr agent start "$name" \
+  --cwd "$project_dir" --workspace "$ws" --tab "$fleet_tab" \
+  --split right --no-focus -- pi --thinking low)"
+pane_id="$(printf '%s' "$start_json" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["agent"]["pane_id"])')"
+# if argv after -- is only the launcher, boot is done; else still wait idle before task
 
-herdr pane rename "$pane_id" "$name"
-herdr agent rename "$pane_id" "$name"
-herdr pane run "$pane_id" "$agent_cmd"
+name=docs
+herdr agent list | grep -q "\"name\":\"$name\"" && name="${name}-$(date +%s)"
+herdr agent start "$name" \
+  --cwd "$project_dir" --workspace "$ws" --tab "$fleet_tab" \
+  --split down --no-focus -- pi --thinking low
 ```
 
-Alternative one-liner when you already have a tab and only need a split (user asked for panes, not tabs):
+**Split direction rule:** prefer `right` when the target pane is wider than tall; prefer `down` when it is tall/narrow. If you cannot inspect layout, **alternate** `right`, `down`, `right`, … Avoid stacking every split in the same direction (creates unusable slivers).
 
-```bash
-herdr agent start "$name" --cwd "$project_dir" --workspace "$ws" --tab "$tab_id" --split right --no-focus -- pi --model ...
-```
-
-Default for this skill is **tab-per-agent**, not split-per-agent.
+**Optional (user asked for full-viewport isolation):** one tab per agent via `herdr tab create` per name — see `references/herdr-recipes.md` ("Tab-per-agent layout"). Not the default.
 
 ### 2b — Build `agent_cmd` (common CLIs)
 
@@ -132,10 +146,12 @@ Default for this skill is **tab-per-agent**, not split-per-agent.
 
 Launch the **interactive** TUI (no `-p`/`exec` non-interactive mode) unless the user asked for fire-and-exit. Do **not** pass the long task as argv on first launch by default — boot first, then `pane run` the task (matches Herdr's own agent guide).
 
+When using `herdr agent start … -- <argv>`, put only the launcher (+ model/thinking/skill flags) after `--`, not the long task prompt.
+
 ### 2c — Ready, then assign work
 
 ```bash
-# boot → idle (or blocked on trust)
+# boot → idle (or blocked on trust) — per pane
 herdr wait agent-status "$pane_id" --status idle --timeout 60000
 # if timeout: herdr pane get / herdr agent explain "$pane_id"
 # if blocked: surface to user (Rule 7)
@@ -144,11 +160,18 @@ herdr pane run "$pane_id" "Review the open PR diff and report only actionable fi
 herdr wait agent-status "$pane_id" --status working --timeout 30000 || true
 ```
 
-**Fleet spawn:** create every tab first (all `--no-focus`), launch every agent, then wait/read concurrently — don't fully serialize spawn→wait→read per agent when the user wants parallel work. `scripts/broadcast.sh` fans messages after spawn.
+**Fleet spawn:** create the fleet tab once, spawn every split (`--no-focus`), launch every agent, then wait/read concurrently — don't fully serialize spawn→wait→read per agent when the user wants parallel work. `scripts/broadcast.sh` fans messages after spawn.
 
-**Human visibility:** tabs appear in the project workspace sidebar immediately. Tell the user they can click the tab or run `herdr agent focus <name>` / `herdr tab focus <tab_id>` to steer live. Detach the Herdr client with `prefix+q` (`ctrl+b` then `q`); agents keep running.
+**Human visibility:** after spawn, focus the fleet tab so all panes are on screen:
 
-**Done when:** each requested agent has `pane_id` + `tab_id` + agent `name`, status is not stuck on `unknown` after boot wait, and initial tasks (if any) have been submitted.
+```bash
+herdr tab focus "$fleet_tab"
+# or zoom one agent: herdr agent focus reviewer
+```
+
+Detach the Herdr client with `prefix+q` (`ctrl+b` then `q`); agents keep running.
+
+**Done when:** each requested agent has `pane_id` + shared `fleet_tab` + agent `name`, all panes are in that tab, status is not stuck on `unknown` after boot wait, and initial tasks (if any) have been submitted.
 
 ## Phase 3: Resolve the Exact Target
 
@@ -256,8 +279,8 @@ herdr workspace list
 **Tear down (confirmation required):**
 
 ```bash
-herdr tab close "$tab_id"           # preferred — one agent tab
-herdr pane close "$pane_id"         # single pane
+herdr pane close "$pane_id"         # one agent pane
+herdr tab close "$fleet_tab"        # preferred — whole fleet view at once
 herdr workspace close "$ws"         # whole project workspace — confirm
 # herdr server stop                 # kills everything — last resort, confirm
 ```
@@ -266,11 +289,12 @@ Never `server stop` from inside an active session unless the user explicitly wan
 
 ## Example
 
-Spin two agents in the current project workspace and collect answers:
+Spin two agents side-by-side in one fleet tab and collect answers:
 
 ```bash
 project_dir="$(pwd)"
 label="$(basename "$project_dir")"
+export L="$label"
 ws="$(herdr workspace list | python3 -c "
 import sys,json,os
 d=json.load(sys.stdin); label=os.environ['L']
@@ -279,26 +303,28 @@ for w in d['result']['workspaces']:
 " )"
 # if empty: create with herdr workspace create --cwd "$project_dir" --label "$label" --no-focus
 
-spawn() {
-  local name="$1" cmd="$2" task="$3"
-  local tab_json pane
-  tab_json="$(herdr tab create --workspace "$ws" --cwd "$project_dir" --label "$name" --no-focus)"
-  pane="$(printf '%s' "$tab_json" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
-  herdr pane rename "$pane" "$name"
-  herdr agent rename "$pane" "$name"
-  herdr pane run "$pane" "$cmd"
-  herdr wait agent-status "$pane" --status idle --timeout 60000
-  herdr pane run "$pane" "$task"
-  printf '%s\n' "$pane"
-}
+tab_json="$(herdr tab create --workspace "$ws" --cwd "$project_dir" --label fleet --no-focus)"
+fleet_tab="$(printf '%s' "$tab_json" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["tab"]["tab_id"])')"
+p1="$(printf '%s' "$tab_json" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')"
 
-p1="$(spawn reviewer 'pi --thinking medium' 'Review recent commits for risk; bullet findings only.')"
-p2="$(spawn tests 'pi --thinking low' 'Outline a minimal test plan for the last change.')"
+herdr pane rename "$p1" reviewer
+herdr agent rename "$p1" reviewer
+herdr pane run "$p1" 'pi --thinking medium'
 
+j2="$(herdr agent start tests --cwd "$project_dir" --workspace "$ws" --tab "$fleet_tab" \
+  --split right --no-focus -- pi --thinking low)"
+p2="$(printf '%s' "$j2" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["agent"]["pane_id"])')"
+
+for p in "$p1" "$p2"; do
+  herdr wait agent-status "$p" --status idle --timeout 60000
+done
+herdr pane run "$p1" 'Review recent commits for risk; bullet findings only.'
+herdr pane run "$p2" 'Outline a minimal test plan for the last change.'
+
+herdr tab focus "$fleet_tab"   # show both panes in one view
 python3 scripts/wait_for_idle.py "$p1" --timeout 180
-# (or the Phase 5 idle|done poll loop)
 herdr pane read "$p1" --source recent-unwrapped --lines 80
-herdr agent focus reviewer   # human can jump in to steer
+herdr agent focus reviewer     # optional: zoom to type into one pane
 ```
 
 ## Edge Cases
@@ -310,8 +336,9 @@ herdr agent focus reviewer   # human can jump in to steer
 - **Name collision** — `agent rename` / `agent start` names must be unique; suffix with epoch if taken.
 - **Wrong workspace** — never spawn project B agents into project A's workspace; re-resolve Phase 1.
 - **Status `unknown`** — install integration or use `scripts/wait_for_idle.py` + `pane read`.
-- **User wants to steer** — `herdr agent focus <name>` or tell them to click the tab; keep sending CLI follow-ups only when not fighting their keyboard.
-- **Closing the wrong tab** — only close tabs/panes this skill created, unless the user names the target.
+- **Too many splits** — more than ~4 panes in one tab gets cramped; still default to splits unless the user asks for tab-per-agent, or create a second fleet tab for overflow.
+- **User wants to steer** — `herdr tab focus` for the whole board, `herdr agent focus <name>` for one pane; keep sending CLI follow-ups only when not fighting their keyboard.
+- **Closing the wrong pane/tab** — only close panes/tabs this skill created, unless the user names the target.
 
 ## Reference
 
@@ -328,7 +355,7 @@ After a messaging or lifecycle operation, emit:
 ··································································
   Server:              √ pass (herdr status)
   Workspace:           √ pass (w26 · project label)
-  Target resolved:     √ pass (name: reviewer · pane: w26:p4 · tab: w26:t2)
+  Target resolved:     √ pass (name: reviewer · pane: w26:p4 · fleet tab: w26:t2)
   Message sent:        √ pass (pane run)
   Message delivered:   √ pass (status → working)
   Reply settled:       √ pass (status done|idle)
@@ -338,4 +365,4 @@ After a messaging or lifecycle operation, emit:
   Result:              PASS
 ```
 
-Adapt rows to the operation — a spawn reports `Tabs created`; a teardown reports `Confirmed` and `Tabs closed`. Use `⚠` for dropped delivery or escalated stall.
+Adapt rows to the operation — a spawn reports `Fleet tab + splits created`; a teardown reports `Confirmed` and `Panes/tab closed`. Use `⚠` for dropped delivery or escalated stall.

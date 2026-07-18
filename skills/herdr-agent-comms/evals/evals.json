@@ -9,8 +9,8 @@
     },
     {
       "id": 2,
-      "prompt": "Spin up two Herdr agents for this project named 'tests' and 'docs'. Use pi with thinking low for both. Put them in the same project workspace, each in its own tab.",
-      "expected_output": "Checks herdr status, reuses or creates one workspace for the project, creates two tabs (not splits) with --no-focus, launches pi --thinking low in each, renames agents, waits until idle/ready. No server stop.",
+      "prompt": "Spin up two Herdr agents for this project named 'tests' and 'docs'. Use pi with thinking low for both. Put them in the same project workspace so I can see both panes at once.",
+      "expected_output": "Checks herdr status, reuses or creates one workspace for the project, creates one fleet tab and split panes (not one tab per agent) with --no-focus, launches pi --thinking low in each, renames agents, waits until idle/ready. No server stop.",
       "files": []
     },
     {
@@ -21,8 +21,8 @@
     },
     {
       "id": 4,
-      "prompt": "Launch three Herdr agents (reviewer, tests, docs) for this repo with different tasks in parallel and keep them visible so I can jump into any tab to steer.",
-      "expected_output": "One workspace, three tabs, parallel-friendly spawn (no-focus), submits distinct tasks, explains human can click tabs or herdr agent focus to steer, does not nest tmux.",
+      "prompt": "Launch three Herdr agents (reviewer, tests, docs) for this repo with different tasks in parallel and keep them visible in one view so I can jump into any pane to steer.",
+      "expected_output": "One workspace, one fleet tab with three split panes, parallel-friendly spawn (no-focus), submits distinct tasks, explains human can herdr tab focus the fleet or herdr agent focus a pane to steer, does not nest tmux.",
       "files": []
     },
     {
