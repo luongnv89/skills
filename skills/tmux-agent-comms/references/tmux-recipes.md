@@ -120,10 +120,13 @@ Newly spawned sessions default to a visible terminal tab inside the current app/
 **Opening the default app terminal tab:** use the terminal-tab facility of the app/environment invoking the skill, not an external OS terminal app unless the user asks. The new tab should run a command like:
 
 ```bash
-cd /path/to/project && exec tmux new-session -s myrepo-reviewer -c /path/to/project claude
+# Leave the agent command unquoted after `--` so multi-word TAC_AGENT_CMD expands to argv.
+cd /path/to/project && exec tmux new-session -s myrepo-reviewer -c /path/to/project -- claude
 ```
 
-If the agent cannot open an app-integrated terminal tab itself, create the tmux session detached and tell the human to open a new terminal tab in the same app and run `tmux attach-session -t myrepo-reviewer`.
+**Detached fallback splits by reason:**
+- **No app-tab facility** — create the session detached and tell the human to open a new terminal tab in the same app and run `tmux attach-session -t myrepo-reviewer`.
+- **Explicit background/detached request** — create the session detached only; do not print an open-tab/attach instruction.
 
 **Attaching an existing session — both commands here are things a human runs, not the agent:**
 

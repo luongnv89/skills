@@ -73,20 +73,28 @@ tmux has-session -t "$name" 2>/dev/null && name="${name}-$(date +%s)"   # avoid 
 **Default: open a new app terminal tab.** Use the terminal-tab facility of the current app/environment where the skill is running (IDE terminal tab, coding-agent terminal tab, or equivalent). The new tab's command should create/attach the tmux session and launch the agent there:
 
 ```bash
-cd "$project_dir" && exec tmux new-session -s "$name" -c "$project_dir" "$agent_cmd"
+# $agent_cmd is intentionally unquoted so multi-word TAC_AGENT_CMD values
+# (e.g. claude --permission-mode bypassPermissions) expand to separate argv.
+cd "$project_dir" && exec tmux new-session -s "$name" -c "$project_dir" -- $agent_cmd
 ```
 
 The tab itself is the live terminal for that session. Do **not** open an external OS terminal app unless the user explicitly requests it, and do not confuse this with creating a tmux window/tab inside an existing session.
 
-If the current environment does not expose a way for the agent to open an app-integrated terminal tab, or the user asked for a **detached/background** fleet, fall back to a detached spawn and immediately give the user the exact command to run in a new terminal tab inside the same app:
+**Detached fallback** — create the session detached, then branch on *why* you fell back:
 
 ```bash
 tmux new-session -d -s "$name" -c "$project_dir"
+# send-keys types the command line, so multi-word TAC_AGENT_CMD is fine as one string.
 tmux send-keys -t "$name" "$agent_cmd" Enter
-printf 'Open a new terminal tab in this app and run: cd %q && tmux attach-session -t %q\n' "$project_dir" "$name"
 ```
 
-**Startup mode:** autonomous/non-blocking is the default for pi-agent, Claude, Codex, Gemini, and other CLIs. Use `TAC_STARTUP_MODE=autonomous|interactive` as the global default when present; a per-launch user request like `--interactive` or "show me the setup first" overrides it. In autonomous mode, open the visible app tab when available (or detached fallback), then immediately continue to readiness checks — never park the orchestrator on an interactive startup question. In interactive mode, ensure the session is visible (app tab or printed attach command) and stop before scripted sends.
+- **No app-tab facility** (environment cannot open an integrated terminal tab): also print the exact command for the user to open a tab themselves:
+  ```bash
+  printf 'Open a new terminal tab in this app and run: cd %q && tmux attach-session -t %q\n' "$project_dir" "$name"
+  ```
+- **Explicit background/detached request** (user asked for a background fleet / no visible tabs): stop after the detached spawn — do **not** print an open-tab/attach instruction.
+
+**Startup mode:** autonomous/non-blocking is the default for pi-agent, Claude, Codex, Gemini, and other CLIs. Use `TAC_STARTUP_MODE=autonomous|interactive` as the global default when present; a per-launch user request like `--interactive` or "show me the setup first" overrides it. In autonomous mode, open the visible app tab when available (or the matching detached fallback above), then immediately continue to readiness checks — never park the orchestrator on an interactive startup question. In interactive mode, ensure the session is visible (app tab, or printed attach command when the tab facility is missing) and stop before scripted sends.
 
 **"Spawned" ≠ "ready"** — a fresh agent often boots through a trust/auth prompt. Don't send blind; run the wait helper (Phase 4): exit `0` means ready, exit `3` means it's parked on a prompt to surface to the user rather than type into.
 
