@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Wait until a Herdr agent pane is idle/done (or content-stable), then print what's new.
+"""Wait until a Herdr agent pane finishes work, then print what's new.
 
-Primary path: `herdr wait agent-status` for idle|done|blocked when Herdr detects the agent.
+Primary path: poll `herdr pane get` / status waits for working → idle|done|blocked.
 Fallback: poll `herdr pane read` until the transcript stops changing (unknown agents).
 
+By default this is a **post-send completion wait**: it will not treat a pre-existing
+idle/done pane as success until it has seen `working` (or a transcript change).
+Use --ready for boot/ready waits that may already be idle.
+
 Exit codes:
-    0  idle/done (settled, ready for the next message)
+    0  idle/done after work (or already ready with --ready)
     1  usage / environment error (herdr missing, bad target)
     2  timed out before the pane settled
     3  blocked: needs human input
@@ -22,8 +26,9 @@ Options:
     --lines N            pane read line window (default: 60)
     --full               print entire last capture, not just new lines
     --no-print           print nothing (exit code only)
-    --prefer-status      use herdr status waits first (default: on)
-    --no-status          skip status waits; content-stability only
+    --prefer-status      use herdr status first (default: on)
+    --no-prefer-status   content-stability only (alias: --no-status)
+    --ready              accept already-idle/done without requiring prior working
 """
 
 from __future__ import annotations
@@ -49,7 +54,6 @@ def run(cmd: list[str], timeout: float | None = None) -> subprocess.CompletedPro
 def resolve_pane(target: str) -> str:
     """Return a pane_id for a pane id or agent name."""
     if ":" in target and target.split(":", 1)[0].startswith("w"):
-        # likely pane id wN:pM or tab id wN:tM — prefer as-is if pane get works
         cp = run(["herdr", "pane", "get", target])
         if cp.returncode == 0:
             try:
@@ -69,7 +73,6 @@ def resolve_pane(target: str) -> str:
         except (json.JSONDecodeError, AttributeError, KeyError):
             pass
 
-    # scan list
     cp = run(["herdr", "agent", "list"])
     if cp.returncode != 0:
         raise SystemExit(f"herdr agent list failed: {cp.stderr or cp.stdout}")
@@ -119,11 +122,9 @@ def pane_read(pane_id: str, lines: int) -> str:
     )
     if cp.returncode != 0:
         return cp.stdout or cp.stderr or ""
-    # CLI may return plain text or JSON depending on version — prefer raw stdout text
     out = cp.stdout or ""
     try:
         d = json.loads(out)
-        # common shapes
         r = d.get("result", d)
         for key in ("text", "content", "output", "data"):
             if isinstance(r.get(key), str):
@@ -136,6 +137,8 @@ def pane_read(pane_id: str, lines: int) -> str:
 
 
 def wait_status(pane_id: str, status: str, timeout_ms: int) -> bool:
+    if timeout_ms <= 0:
+        return False
     cp = run(
         [
             "herdr",
@@ -151,8 +154,20 @@ def wait_status(pane_id: str, status: str, timeout_ms: int) -> bool:
     return cp.returncode == 0
 
 
+def print_delta(baseline: str, final: str, full: bool) -> None:
+    if full:
+        print(final)
+        return
+    if final.startswith(baseline):
+        print(final[len(baseline) :].lstrip("\n"))
+    else:
+        print(final)
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("target", help="pane id or agent name")
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--quiet-cycles", type=int, default=3)
@@ -160,8 +175,25 @@ def main() -> int:
     ap.add_argument("--lines", type=int, default=60)
     ap.add_argument("--full", action="store_true")
     ap.add_argument("--no-print", action="store_true")
-    ap.add_argument("--prefer-status", action=argparse.BooleanOptionalAction, default=True)
+    ap.add_argument(
+        "--prefer-status",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="use herdr agent-status first (default: true)",
+    )
+    ap.add_argument(
+        "--no-status",
+        action="store_true",
+        help="alias for --no-prefer-status",
+    )
+    ap.add_argument(
+        "--ready",
+        action="store_true",
+        help="accept already-idle/done without requiring a prior working transition",
+    )
     args = ap.parse_args()
+    if args.no_status:
+        args.prefer_status = False
 
     if not shutil.which("herdr"):
         print("Error: herdr not on PATH", file=sys.stderr)
@@ -175,47 +207,57 @@ def main() -> int:
 
     deadline = time.time() + args.timeout
     baseline = pane_read(pane_id, args.lines)
+    saw_work = False  # working status or transcript change
 
-    # Fast path: already terminal
     st = agent_status(pane_id)
     if st == "blocked":
         if not args.no_print:
             print(baseline if args.full else "")
         return 3
-    if st in ("idle", "done") and args.prefer_status:
-        # might still be pre-task idle; only treat as done if caller waited after send
-        # Content path still runs if we want delta — but status is authoritative for blocked
-        pass
+
+    if args.ready and st in ("idle", "done") and args.prefer_status:
+        if not args.no_print:
+            print_delta(baseline, baseline, args.full)
+        return 0
 
     if args.prefer_status and st not in (None, "unknown"):
-        remaining_ms = max(1, int((deadline - time.time()) * 1000))
-        # wait for blocked first with short timeout? better: loop statuses
-        # Wait until not working: race done and idle via polling get
         while time.time() < deadline:
             st = agent_status(pane_id)
             if st == "blocked":
                 if not args.no_print:
-                    print(pane_read(pane_id, args.lines) if args.full else "")
+                    print_delta(baseline, pane_read(pane_id, args.lines), args.full)
                 return 3
-            if st in ("idle", "done"):
-                final = pane_read(pane_id, args.lines)
-                if not args.no_print:
-                    if args.full:
-                        print(final)
-                    else:
-                        # print suffix not in baseline
-                        if final.startswith(baseline):
-                            print(final[len(baseline) :].lstrip("\n"))
-                        else:
-                            print(final)
-                return 0
+
             if st == "working":
-                # block until done or idle
+                saw_work = True
                 slice_ms = min(30_000, max(1, int((deadline - time.time()) * 1000)))
-                if wait_status(pane_id, "done", slice_ms) or wait_status(pane_id, "idle", 1_000):
-                    continue
+                # Prefer short waits so we can notice idle or done either way
+                half = max(1, slice_ms // 2)
+                if not wait_status(pane_id, "done", half):
+                    wait_status(pane_id, "idle", max(1, int((deadline - time.time()) * 1000)))
                 continue
-            # unknown — fall through to content stability after loop break
+
+            if st in ("idle", "done"):
+                cur = pane_read(pane_id, args.lines)
+                if cur != baseline:
+                    saw_work = True
+                if saw_work or args.ready:
+                    if not args.no_print:
+                        print_delta(baseline, cur, args.full)
+                    return 0
+                # Pre-task idle: wait for working (or transcript change via status loop)
+                slice_ms = min(5_000, max(1, int((deadline - time.time()) * 1000)))
+                if wait_status(pane_id, "working", slice_ms):
+                    saw_work = True
+                    continue
+                # Also check blocked while waiting to start
+                if agent_status(pane_id) == "blocked":
+                    if not args.no_print:
+                        print_delta(baseline, pane_read(pane_id, args.lines), args.full)
+                    return 3
+                continue
+
+            # unknown mid-flight — fall through to content stability
             break
         else:
             return 2
@@ -228,27 +270,29 @@ def main() -> int:
         st = agent_status(pane_id)
         if st == "blocked":
             if not args.no_print:
-                print(last if args.full else "")
+                print_delta(baseline, last, args.full)
             return 3
+        if st == "working":
+            saw_work = True
         cur = pane_read(pane_id, args.lines)
-        if cur == last:
-            quiet += 1
-            if quiet >= args.quiet_cycles:
-                if st == "working":
-                    quiet = 0  # still working chrome-stable briefly
-                    continue
-                if not args.no_print:
-                    if args.full:
-                        print(cur)
-                    else:
-                        if cur.startswith(baseline):
-                            print(cur[len(baseline) :].lstrip("\n"))
-                        else:
-                            print(cur)
-                return 0
-        else:
+        if cur != last:
+            if cur != baseline:
+                saw_work = True
             quiet = 0
             last = cur
+            continue
+        quiet += 1
+        if quiet >= args.quiet_cycles:
+            if st == "working":
+                quiet = 0
+                continue
+            if not saw_work and not args.ready:
+                # still pre-task idle with no transcript change — keep waiting
+                quiet = 0
+                continue
+            if not args.no_print:
+                print_delta(baseline, cur, args.full)
+            return 0
     return 2
 
 

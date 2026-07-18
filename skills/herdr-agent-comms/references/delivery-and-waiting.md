@@ -44,15 +44,27 @@ Both mean "not working anymore." After a task:
 - Active tab with focused client → often **`idle`**
 - Focusing the pane turns `done` → `idle`
 
-Orchestrator pattern:
+Orchestrator pattern — **accept either terminal state**; do not spend the whole budget on `done` alone (focused tabs finish as `idle`):
 
 ```bash
-# Prefer done for background fleets; fall back to idle
-herdr wait agent-status "$pane" --status done --timeout 180000 \
-  || herdr wait agent-status "$pane" --status idle --timeout 5000
+# Preferred helper (requires saw working / transcript change before success):
+python3 scripts/wait_for_idle.py "$pane" --timeout 180
+
+# Manual: poll pane get for idle|done|blocked while re-waiting in short slices
+deadline=$((SECONDS + 180))
+while (( SECONDS < deadline )); do
+  st=$(herdr pane get "$pane" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["pane"].get("agent_status",""))')
+  case "$st" in
+    done|idle) break ;;
+    blocked) echo blocked; break ;;
+    working) herdr wait agent-status "$pane" --status done --timeout 15000 \
+               || herdr wait agent-status "$pane" --status idle --timeout 15000 || true ;;
+    *) sleep 2 ;;
+  esac
+done
 ```
 
-Or poll `herdr pane get` / `herdr agent get` and accept either terminal status when `agent_status` ∈ {`idle`,`done`} after you observed `working`.
+`scripts/wait_for_idle.py` defaults to **post-send** semantics: already-idle panes are not success until `working` (or a transcript change) is observed. Use `--ready` only for boot waits.
 
 ## Blocked
 

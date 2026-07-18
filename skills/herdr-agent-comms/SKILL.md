@@ -4,7 +4,7 @@ description: "Manage AI agent fleets in Herdr: one project workspace, one tab pe
 license: MIT
 effort: medium
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 compatibility: "Requires `herdr` on PATH and a running Herdr server (`herdr status`)."
 ---
@@ -187,16 +187,25 @@ herdr wait agent-status "$pane_id" --status working --timeout 15000 \
 
 ## Phase 5: Wait for the Reply, Then Read It
 
-Use Herdr status waits (not fixed `sleep`):
+Use Herdr status waits (not fixed `sleep`). Completion may be **`done`** (unseen, usually background) **or `idle`** (seen / focused tab) — wait for either:
 
 ```bash
-# background tab/workspace → completion is often "done"
-herdr wait agent-status "$pane_id" --status done --timeout 180000
-# if the user is watching that tab, completion may be "idle" instead:
-# herdr wait agent-status "$pane_id" --status idle --timeout 180000
+# After delivery verified (Phase 4). Poll until idle|done|blocked or budget spent.
+deadline=$((SECONDS + 180))
+while (( SECONDS < deadline )); do
+  st=$(herdr pane get "$pane_id" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["pane"].get("agent_status",""))')
+  case "$st" in
+    done|idle) echo "settled:$st"; break ;;
+    blocked) echo "blocked"; break ;;
+    working) herdr wait agent-status "$pane_id" --status done --timeout 15000 \
+               || herdr wait agent-status "$pane_id" --status idle --timeout 15000 || true ;;
+    *) sleep 2 ;;
+  esac
+done
+# Or: python3 scripts/wait_for_idle.py "$pane_id" --timeout 180
 ```
 
-Treat **either `idle` or `done` as completed** when inspecting `herdr pane get` / `herdr agent get` — difference is only whether the result was seen.
+Treat **either `idle` or `done` as completed** — difference is only whether the result was seen. Never wait only on `done` for the full budget: a focused-tab finish stays `idle` and will time out.
 
 Then read a capped recent transcript:
 
@@ -286,7 +295,8 @@ spawn() {
 p1="$(spawn reviewer 'pi --thinking medium' 'Review recent commits for risk; bullet findings only.')"
 p2="$(spawn tests 'pi --thinking low' 'Outline a minimal test plan for the last change.')"
 
-herdr wait agent-status "$p1" --status done --timeout 180000 || herdr wait agent-status "$p1" --status idle --timeout 1000
+python3 scripts/wait_for_idle.py "$p1" --timeout 180
+# (or the Phase 5 idle|done poll loop)
 herdr pane read "$p1" --source recent-unwrapped --lines 80
 herdr agent focus reviewer   # human can jump in to steer
 ```
