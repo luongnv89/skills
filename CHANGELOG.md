@@ -12,7 +12,7 @@
 ### Skills Updated
 | Skill | Version Change |
 |-------|----------------|
-| docs-generator → doc-manager | 1.2.5 → 2.0.0 |
+| docs-generator → doc-manager | 1.2.5 → 2.0.1 |
 | tmux-agent-comms | 1.3.0 → 1.8.1 (observability + terminal option) |
 | landing-page-generator | 1.1.4 → 1.2.0 (absorbs README-to-landing as Mode B) |
 | code-review | 1.2.0 → 2.0.0 (merge code-optimizer + clean-code + slop-cleanup as modes) |
@@ -20,7 +20,7 @@
 | excalidraw-generator | 1.3.2 → 1.3.3 (nested under diagram-generator umbrella) |
 | viral-product-evaluator | 1.2.3 → 1.2.4 (update merged-skill cross-reference) |
 
-**Breaking (doc-manager):** `docs-generator` renamed to `doc-manager`; the `/docs-generator` invocation and `--skill docs-generator` install path are removed — use `/doc-manager`. Reoriented from "restructure docs into a hierarchy" to "generate missing or update existing docs so every page matches the code." New behavior: every non-obvious claim is cited to `path:line`, ambiguities are resolved by asking and logged to `docs/DECISIONS.md`, nothing is invented. Runbook (deploy/setup/process) docs additionally get a check-only `validate.sh` and a maintained `docs/troubleshooting.md`.
+**Breaking (doc-manager):** `docs-generator` renamed to `doc-manager`; the `/docs-generator` invocation and `--skill docs-generator` install path are removed — use `/doc-manager`. Reoriented from "restructure docs into a hierarchy" to "generate missing or update existing docs so every page matches the code." New behavior: every non-obvious claim is cited to `path:line`, ambiguities are resolved by asking and logged to `docs/DECISIONS.md`, nothing is invented. Runbook (deploy/setup/process) docs additionally get a check-only `validate.sh` and a maintained `docs/troubleshooting.md`. **2.0.1:** runbook acceptance no longer hard-requires live `--check` exit 0 for operator env/network prereqs; validate script template parses all flags (`--check` + `--run-destructive`).
 
 ### Removed Skills (merged into code-review modes)
 | Skill | Merged into |

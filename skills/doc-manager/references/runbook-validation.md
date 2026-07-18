@@ -13,13 +13,13 @@ Rules:
    - `--run-destructive` flag — the step only executes when the operator explicitly opts in.
    - `MANUAL:` marker — the step is printed as a manual instruction and skipped by the script entirely (use when the action can't be safely automated at all, e.g. `terraform apply`, a prod cutover).
 3. **Idempotent + read-only in check mode.** Checks may read files, test connectivity (`curl -sf`, `nc -z`), confirm a tool is installed (`command -v`), confirm an env var is set (`[ -n "$X" ]`), confirm a port/endpoint responds. They may **not** write, deploy, migrate, delete, or push.
-4. **One check per documented step.** The script mirrors the runbook: each numbered step in the doc maps to a `[CHECK]` (or `[MANUAL]`) line, so a passing script proves the doc's preconditions hold.
-5. **Exit non-zero on any failed check.** So the run's acceptance criterion (`exits 0 on --check`) is meaningful.
+4. **One check per documented step.** The script mirrors the runbook: each numbered step in the doc maps to a `[CHECK]` (or `[MANUAL]`) line, so a passing script proves the doc's agent-satisfiable preconditions hold.
+5. **Exit non-zero on any failed check.** Keep real checks — do not delete or weaken them to force green. Skill acceptance requires the script to be check-only, linked, and well-formed; live `--check` may be non-zero when remaining failures are documented operator prerequisites (env, tools, remote health outside this environment).
 
 ## Placement
 
 - Writable repo: `scripts/validate-<runbook-name>.sh`, `chmod +x`. The runbook section links to it near the top: `> Validate this runbook: \`./scripts/validate-deploy.sh --check\``.
-- Read-only repo: emit the script inline in the change summary instead of writing it, **and run it once** so you can report its `--check` exit code — the acceptance criterion requires a known exit status, which you can't have for a script you never executed.
+- Read-only repo: emit the script inline in the change summary instead of writing it, **and run it once** so you can report its `--check` outcome — acceptance needs a known result (pass, or non-zero with documented operator prereqs), which you can't have for a script you never executed.
 
 ## Template
 
@@ -30,7 +30,21 @@ Rules:
 set -uo pipefail
 
 MODE="check"
-[ "${1:-}" = "--run-destructive" ] && MODE="destructive"
+for arg in "$@"; do
+  case "$arg" in
+    --check) ;;
+    --run-destructive) MODE="destructive" ;;
+    -h|--help)
+      printf 'Usage: %s [--check] [--run-destructive]\n' "${0##*/}"
+      exit 0
+      ;;
+    *)
+      printf 'Unknown option: %s\n' "$arg" >&2
+      printf 'Usage: %s [--check] [--run-destructive]\n' "${0##*/}" >&2
+      exit 2
+      ;;
+  esac
+done
 
 fail=0
 ok()   { printf '[CHECK] %-32s OK\n' "$1"; }
@@ -65,8 +79,11 @@ Adapt each `[CHECK]` to a real step in the doc, and cite the doc line the check 
 Run the script in check mode. For each failure:
 
 1. Diagnose the real cause (missing tool, wrong path in the doc, stale env name, unreachable endpoint).
-2. Fix the **doc** if the doc was wrong; fix the **check** if the check was wrong. If the failure is an environment gap the operator must close, note it as a prerequisite in the runbook.
-3. Append the entry to `docs/troubleshooting.md`:
+2. Classify and act:
+   - **Doc wrong** → fix the doc (and re-cite).
+   - **Check wrong** → fix the check.
+   - **Operator prerequisite** the agent cannot satisfy here (env var unset, tool not installed on this machine, remote/network health outside the target environment) → document it as a runbook prerequisite or convert the step to `MANUAL:` / keep it as a failing `[CHECK]` with the prereq called out. **Do not** drop or soften the check solely to force exit 0.
+3. Append an entry to `docs/troubleshooting.md` only when you actually diagnosed and resolved something (doc fix, check fix, or a newly documented prereq that unblocked understanding):
 
 ```markdown
 ## {symptom, one line}
@@ -75,6 +92,6 @@ Run the script in check mode. For each failure:
 - **Seen during:** validate-deploy.sh --check
 ```
 
-4. Re-run until `--check` exits 0.
+4. Re-run. Require exit 0 for agent-satisfiable local/static checks. Remaining non-zero exits are acceptable only when every failure is a documented operator prerequisite — report those clearly in the change summary.
 
 Only entries for problems **actually encountered** go in `troubleshooting.md` — do not pre-populate it with hypothetical issues (that would be inventing). If validation surfaced no failures, leave the file untouched and say so in the summary.
