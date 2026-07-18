@@ -13,7 +13,7 @@
 | Skill | Version Change |
 |-------|----------------|
 | docs-generator → doc-manager | 1.2.5 → 2.0.1 |
-| tmux-agent-comms | 1.3.0 → 1.8.1 (observability + terminal option) |
+| tmux-agent-comms | 1.3.0 → 1.9.0 (observability + app terminal tabs by default) |
 | landing-page-generator | 1.1.4 → 1.2.0 (absorbs README-to-landing as Mode B) |
 | code-review | 1.2.0 → 2.0.0 (merge code-optimizer + clean-code + slop-cleanup as modes) |
 | drawio-generator | 1.2.2 → 1.2.3 (nested under diagram-generator umbrella) |

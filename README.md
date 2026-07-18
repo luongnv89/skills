@@ -238,7 +238,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.0.4 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.1.0 | high | Cross-platform install.sh with env detection |
 | [**opencode-runner**](skills/opencode-runner/) | 1.4.0 | medium | Delegate work to opencode free cloud models |
-| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 1.3.0 | medium | Spawn, message, read CLI agents in tmux |
+| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 1.9.0 | medium | Spawn, message, read CLI agents in tmux |
 
 ---
 

@@ -7,24 +7,24 @@
 
 # Tmux Agent Comms
 
-> Spawn, manage, and talk to AI agents running in separate tmux sessions — agent-to-agent communication over `send-keys` and `capture-pane`.
+> Spawn, manage, and talk to AI agents running in separate tmux sessions — new sessions open in an app terminal tab by default, with agent-to-agent communication over `send-keys` and `capture-pane`.
 
 ## Highlights
 
-- **Launch a fleet** — create predictable, detached tmux sessions (`<folder>-<short-task-name>`) and boot an agent (Claude Code, Gemini CLI, Codex, pi-agent, any CLI) inside each.
-- **Start non-blocking by default** — use autonomous detached startup, with `TAC_STARTUP_MODE` or a per-launch request to opt into interactive startup only when needed.
+- **Launch sessions** — create predictable tmux sessions (`<folder>-<short-task-name>`) and boot an agent (Claude Code, Gemini CLI, Codex, pi-agent, any CLI) inside each, opening new sessions in a terminal tab inside the current app by default.
+- **Start non-blocking by default** — open a visible app tab when available, then continue readiness checks; use `TAC_STARTUP_MODE` or a per-launch request to opt into interactive-only startup when needed.
 - **Message any agent** — send a prompt to a target session with proper escaping, including the separate-`Enter` gotcha for stubborn TUIs.
 - **Read replies reliably** — a bundled `wait_for_idle.py` polls the pane until output settles instead of guessing with a fixed `sleep`, then returns the answer.
 - **Broadcast & collect** — fan one instruction out to several agents and gather each reply, with periodic fleet status during long-running work.
 - **Status & inspect** — list every managed agent in a table, inspect one agent, and get the exact attach command for a human terminal.
-- **Show an agent's terminal on demand** — attach to (or switch to) a spawned agent's session to see its live CLI and type into it directly, for trust prompts, debugging, or hands-on steering, without giving up the default detached workflow.
+- **Keep agents visible** — new sessions attach to a fresh terminal tab in the current app by default; detached mode remains available for background fleets or environments without a terminal-tab facility.
 - **Safe teardown** — kill individual sessions (or the whole server) behind explicit user confirmation, so no agent's work is lost by accident.
 
 ## When to Use
 
 | Say this... | Skill will... |
 |---|---|
-| "Launch three Claude agents in tmux for reviewer, tests, and docs" | Create three named detached sessions and start an agent in each |
+| "Launch three Claude agents in tmux for reviewer, tests, and docs" | Create three named sessions (app terminal tabs by default) and start an agent in each |
 | "Send 'summarize src/' to the reviewer agent and show me its reply" | Send the message, wait for the pane to settle, capture and relay the answer |
 | "Ask all my agents to pull the latest main" | Broadcast the message to every session and collect each response |
 | "Show status for my tmux agents" | Print a table with state, progress, start time, and working directory |
@@ -75,7 +75,7 @@ Spin up several agents, each scoped to a job, and kick them all off at once.
 /tmux-agent-comms launch three Claude agents in tmux named reviewer, tests, and docs in this repo, then ask each to report what it would work on first
 ```
 
-The skill creates three predictably named detached sessions (for example, `myrepo-reviewer`, `myrepo-tests`, `myrepo-docs`), boots an agent in each, waits for each to clear its boot/trust prompt, then messages them. The `<folder>-<short-task-name>` convention keeps later status, inspect, and attach commands self-documenting.
+The skill creates three predictably named sessions (for example, `myrepo-reviewer`, `myrepo-tests`, `myrepo-docs`) in app terminal tabs by default, boots an agent in each, waits for each to clear its boot/trust prompt, then messages them. The `<folder>-<short-task-name>` convention keeps later status, inspect, and attach commands self-documenting.
 
 ### 3. Broadcast one instruction to the whole fleet
 

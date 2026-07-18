@@ -104,19 +104,28 @@ List panes and their indices with `tmux list-panes -t agent1`.
 
 ## Showing an agent's live terminal
 
-The default orchestrator flow stays detached — `send-keys` writes to a session's pane and `capture-pane` reads it, without ever opening a terminal on the session. Sometimes a human needs to see or drive the live CLI directly instead: a trust/auth dialog that needs a keypress the orchestrator won't fire (SKILL.md Phase 1, Phase 4 exit 3), debugging a stuck agent, or mid-run steering a scripted loop can't express.
+Newly spawned sessions default to a visible terminal tab inside the current app/environment (SKILL.md Phase 1). `send-keys` and `capture-pane` still work against that tmux session from the orchestrator, but the human can also see the live CLI in the app's terminal tab. Sometimes an existing detached session needs to be shown too: a trust/auth dialog that needs a keypress the orchestrator won't fire (SKILL.md Phase 4 exit 3), debugging a stuck agent, or mid-run steering a scripted loop can't express.
 
-**When to use show vs. detached:**
+**When to use a visible app tab vs. detached:**
 
 | Situation | Use |
 | --- | --- |
-| Routine messaging, waiting, capturing replies | Detached (default) — `send-keys` / `wait_for_idle.py` / `capture-pane`, no terminal needed |
-| Agent parked on a trust/auth prompt (`wait_for_idle.py` exit 3) | Show — a human must see the exact dialog text and pick the right key |
-| Debugging why an agent looks stalled or is behaving oddly | Show — watch it live rather than repeatedly capturing snapshots |
-| Mid-run correction or manual input only a human should give | Show — type directly into that agent's input |
-| Everything else — scripted send/wait/capture loop, broadcasts | Detached (default) |
+| Spawning a new single agent | Visible app terminal tab (default) — attach the new tab to the tmux session |
+| Routine messaging, waiting, capturing replies on an existing session | Either visible or detached — `send-keys` / `wait_for_idle.py` / `capture-pane` work the same |
+| Agent parked on a trust/auth prompt (`wait_for_idle.py` exit 3) | Visible app tab — a human must see the exact dialog text and pick the right key |
+| Debugging why an agent looks stalled or is behaving oddly | Visible app tab — watch it live rather than repeatedly capturing snapshots |
+| Mid-run correction or manual input only a human should give | Visible app tab — type directly into that agent's input |
+| Background fleets where the user asked for no visible tabs | Detached — keep sessions backgrounded and capture replies programmatically |
 
-**Attaching — both commands here are things a human runs, not the agent:**
+**Opening the default app terminal tab:** use the terminal-tab facility of the app/environment invoking the skill, not an external OS terminal app unless the user asks. The new tab should run a command like:
+
+```bash
+cd /path/to/project && exec tmux new-session -s myrepo-reviewer -c /path/to/project claude
+```
+
+If the agent cannot open an app-integrated terminal tab itself, create the tmux session detached and tell the human to open a new terminal tab in the same app and run `tmux attach-session -t myrepo-reviewer`.
+
+**Attaching an existing session — both commands here are things a human runs, not the agent:**
 
 ```bash
 tmux attach-session -t agent1     # HUMAN, in their own real interactive terminal
@@ -134,7 +143,7 @@ tmux has-session -t agent1 2>/dev/null && echo "OK: agent1 exists" || tmux list-
 tmux attach-session -t agent1     # human runs this, attaching to the confirmed name from the line above
 ```
 
-**Safety notes (consistent with Critical Rule 1):** for a human running it in their own terminal, attaching and scrolling to read is always safe; *typing* into the session is a write, the same hazard as `send-keys` — confirm with the user before typing into another agent's session on their behalf. For the agent, neither command is a safety question so much as a hard failure — `attach-session` needs a TTY the agent's Bash tool doesn't have, and `switch-client` needs an attached client the agent's own detached execution context never is; both require a human to run them from their own terminal. If the orchestrator's scripted send-keys loop is still running while a human is attached and typing, both are writing to the same input and will fight each other — pause the scripted loop during hands-on takeover. Detach with `Ctrl-b d` (default tmux prefix `Ctrl-b`, then `d`) when done; this returns control to the orchestrator **without** killing the session, so the scripted loop can resume.
+**Safety notes (consistent with Critical Rule 1):** for a human using the visible app tab, attaching and scrolling to read is always safe; *typing* into the session is a write, the same hazard as `send-keys` — confirm with the user before typing into another agent's session on their behalf. For the agent, `attach-session`/`switch-client` are still not safe automation primitives — `attach-session` needs a TTY the agent's Bash tool doesn't have, and `switch-client` needs an attached client the agent's own detached execution context may not be; both require a human or an app terminal-tab facility. If the orchestrator's scripted send-keys loop is still running while a human is attached and typing, both are writing to the same input and will fight each other — pause the scripted loop during hands-on takeover. Detach with `Ctrl-b d` (default tmux prefix `Ctrl-b`, then `d`) when done; this returns control to the orchestrator **without** killing the session, so the scripted loop can resume.
 
 ## Reading scrollback robustly
 
@@ -170,7 +179,7 @@ This is best-effort — always sanity-check the result rather than trusting it b
 | Reply cut off | Bounded-tail window too small for this reply | Widen the tail stepwise — `-S -80`, then larger; unbounded `-S -` only as last resort (SKILL.md Phase 5; "Reading scrollback robustly" above) |
 | `;` or `$...` came out wrong / executed | Shell/tmux interpreted special chars | Quote the message; use `send-keys -l` or paste-buffer (see above) |
 | Agent stuck on a yes/no or trust prompt | It's waiting for a keypress, not a typed line | `wait_for_idle.py` flags this as exit 3 (BLOCKED) for known dialogs. Send the exact key it expects (e.g. `tmux send-keys -t agent1 "1" Enter`), but confirm with the user first for any permission/trust prompt |
-| Attached to the wrong session / can't find my agent's window | Guessed a name instead of resolving it, or the spawn renamed on collision (`agent1-<timestamp>`) | Run `tmux has-session -t <name>` or `tmux list-sessions` first, then attach to the confirmed name (see "Showing an agent's live terminal" above) |
+| Attached to the wrong session / can't find my agent's tab | Guessed a name instead of resolving it, or the spawn renamed on collision (`agent1-<timestamp>`) | Run `tmux has-session -t <name>` or `tmux list-sessions` first, then attach/open a tab to the confirmed name (see "Showing an agent's live terminal" above) |
 | `attach-session` errors with "sessions should be nested with care, unset $TMUX to force" | Ran `attach-session` from a shell that's already inside a tmux client | Use `tmux switch-client -t <name>` instead, or `unset TMUX` first if a nested attach is intentional |
 | Can't tell if the agent is stuck or still working | Trusting the helper's exit code without a look | Verdict is advisory — read the pane yourself (`-S -40`). Spinner / changing tail = working (wait); unchanged + no spinner + no completion = stalled (surface to user). SKILL.md Phase 4 |
 | `wait_for_idle.py` times out repeatedly | Agent genuinely slow, or a persistent spinner | Raise `--timeout` for a single wait; if a static UI element matches a busy marker, fall back to the manual capture-compare loop. Bound the **overall** re-wait/re-send loop and escalate when the budget is spent — never poll forever (SKILL.md Phase 4) |

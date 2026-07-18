@@ -1,16 +1,18 @@
 ---
 name: tmux-agent-comms
-description: "Manage AI agents in tmux: spawn, status/inspect, message, read replies, or kill sessions via send-keys/capture-pane. Use to launch fleets or talk to running agents. Don't use for SSH, GNU screen, or GUI apps."
+description: "Manage AI agents in tmux: spawn sessions in current app terminal tabs by default; message CLI agents via send-keys/capture-pane; read replies; kill sessions. Use to launch fleets or talk to running agents. Don't use for SSH, screen, or GUI apps."
 license: MIT
 effort: medium
 metadata:
-  version: 1.8.1
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Tmux Agent Comms
 
 Manage and talk to AI agents (another Claude Code, Gemini CLI, Codex, pi-agent, or any CLI) running in separate tmux sessions: **create** sessions, **send** messages, **wait** for the agent to finish, **capture** replies, **check status**, **inspect** sessions, and **tear down** when done.
+
+Default spawn behavior: each new tmux session opens in a **new terminal tab inside the current app/environment** where this skill is invoked. The tab is a visible terminal attached to that tmux session; it is not an external Terminal.app/iTerm/xterm window unless the user explicitly asks.
 
 Mental model: each tmux session is one agent. You orchestrate from outside by writing to its input and reading its pane — what a human does by switching windows, but scripted. Your context budget is finite, so relay each agent's answer, not its whole screen (the bundled helper extracts just the reply delta).
 
@@ -45,8 +47,8 @@ Six phases, in order: discover/spawn a session, resolve the exact target, send t
 2. **Verify the target before sending.** Resolve the exact session with `has-session` first (Phase 2) — a typo sends keystrokes nowhere or to the wrong agent.
 3. **Wait for the agent, don't race it.** Sending a follow-up while it's still working corrupts input. Wait until the pane settles (Phase 4) before reading or sending again.
 4. **Escape what you send.** `send-keys` and the shell both interpret special characters. Follow the escaping rules in Phase 3 or messages get mangled — or worse, execute.
-5. **Attaching is opt-in, not a replacement.** Showing an agent's terminal (Phase 1) is for a human to drive by hand; it never replaces the default detached, scripted workflow.
-6. **Default startup is autonomous and non-blocking.** Spawn detached sessions and continue with readiness checks; don't wait at startup for a human unless the user explicitly asks for interactive mode.
+5. **New sessions open visibly by default.** Spawn new agent sessions in a fresh terminal tab provided by the current app/environment, attached to the tmux session. If the environment cannot open an app terminal tab, create the session detached and print the exact attach command for the user; never run `attach-session` yourself from a non-TTY shell.
+6. **Default startup is autonomous and non-blocking.** Opening a visible app tab is for human observation; the orchestrator still continues with readiness checks and scripted messaging. Don't wait at startup for a human unless the user explicitly asks for interactive mode.
 
 ## Phase 1: Create or Discover Sessions
 
@@ -56,19 +58,35 @@ tmux list-sessions 2>/dev/null || echo "no tmux server running yet"
 
 Match the target against this list (Phase 2). New sessions use the predictable pattern **`<folder>-<short-task-name>`**: folder is the current project/workspace folder, and short task is a concise slug like `reviewer`, `tests`, or `docs`. This keeps `status`, `inspect`, and attach commands grep-friendly.
 
-To spawn: `tmux new-session` **fails if the name is taken** (exit 1), so check first, create **detached** (`-d -s <name>`), then launch the agent in a second step:
+To spawn, resolve a free name first because `tmux new-session` **fails if the name is taken** (exit 1):
 
 ```bash
 slug() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g'; }
 folder="$(slug "$(basename "$PWD")")"
 task="$(slug "${short_task_name:-reviewer}")"
 name="${folder}-${task}"
+project_dir="$PWD"
+agent_cmd="${TAC_AGENT_CMD:-claude}"
 tmux has-session -t "$name" 2>/dev/null && name="${name}-$(date +%s)"   # avoid collision
-tmux new-session -d -s "$name" -c "$PWD"
-tmux send-keys -t "$name" "${TAC_AGENT_CMD:-claude}" Enter
 ```
 
-**Startup mode:** autonomous/non-blocking is the default for pi-agent, Claude, Codex, Gemini, and other CLIs. Use `TAC_STARTUP_MODE=autonomous|interactive` as the global default when present; a per-launch user request like `--interactive` or "show me the setup first" overrides it. In autonomous mode, use a detached launch command (`TAC_AGENT_CMD`, or the user's requested command) and immediately continue to readiness checks; never park the orchestrator on an interactive startup question. In interactive mode, print the attach command and stop before scripted sends.
+**Default: open a new app terminal tab.** Use the terminal-tab facility of the current app/environment where the skill is running (IDE terminal tab, coding-agent terminal tab, or equivalent). The new tab's command should create/attach the tmux session and launch the agent there:
+
+```bash
+cd "$project_dir" && exec tmux new-session -s "$name" -c "$project_dir" "$agent_cmd"
+```
+
+The tab itself is the live terminal for that session. Do **not** open an external OS terminal app unless the user explicitly requests it, and do not confuse this with creating a tmux window/tab inside an existing session.
+
+If the current environment does not expose a way for the agent to open an app-integrated terminal tab, or the user asked for a **detached/background** fleet, fall back to a detached spawn and immediately give the user the exact command to run in a new terminal tab inside the same app:
+
+```bash
+tmux new-session -d -s "$name" -c "$project_dir"
+tmux send-keys -t "$name" "$agent_cmd" Enter
+printf 'Open a new terminal tab in this app and run: cd %q && tmux attach-session -t %q\n' "$project_dir" "$name"
+```
+
+**Startup mode:** autonomous/non-blocking is the default for pi-agent, Claude, Codex, Gemini, and other CLIs. Use `TAC_STARTUP_MODE=autonomous|interactive` as the global default when present; a per-launch user request like `--interactive` or "show me the setup first" overrides it. In autonomous mode, open the visible app tab when available (or detached fallback), then immediately continue to readiness checks — never park the orchestrator on an interactive startup question. In interactive mode, ensure the session is visible (app tab or printed attach command) and stop before scripted sends.
 
 **"Spawned" ≠ "ready"** — a fresh agent often boots through a trust/auth prompt. Don't send blind; run the wait helper (Phase 4): exit `0` means ready, exit `3` means it's parked on a prompt to surface to the user rather than type into.
 
@@ -76,9 +94,9 @@ tmux send-keys -t "$name" "${TAC_AGENT_CMD:-claude}" Enter
 python3 scripts/wait_for_idle.py "$name" --timeout 30 --no-print; echo "ready=$?"
 ```
 
-For a **fleet**, repeat with distinct task slugs under the same folder prefix (`myrepo-reviewer`, `myrepo-tests`, `myrepo-docs`).
+For a **fleet**, repeat with distinct task slugs under the same folder prefix (`myrepo-reviewer`, `myrepo-tests`, `myrepo-docs`). The visible-tab default applies to each newly spawned session unless the user asks for a detached/background fleet.
 
-**Showing the agent's terminal** (optional, human-only): `tmux attach-session -t "$name"` or `tmux switch-client -t "$name"`, run by the human in their own interactive terminal — the agent invoking either itself will fail (no TTY / no attached client). Detach with `Ctrl-b d` to return control without killing the session. See `references/tmux-recipes.md` ("Showing an agent's live terminal") for the when-to-use table and worked example.
+**Showing an existing agent's terminal** (human-only): if a session already exists without a visible tab, the human can run `tmux attach-session -t "$name"` or `tmux switch-client -t "$name"` from an interactive terminal. The agent invoking either itself will fail (no TTY / no attached client). Detach with `Ctrl-b d` to return control without killing the session. See `references/tmux-recipes.md` ("Showing an agent's live terminal") for the when-to-use table and worked example.
 
 ## Phase 2: Resolve the Exact Target
 
@@ -202,14 +220,14 @@ Relay that answer to the user. If the read starts mid-sentence, widen to `-S -80
 - **Trust/auth dialog** — `wait_for_idle.py` returns exit 3, not 0. Never send a message (would be read as menu input); surface the dialog.
 - **Reply ends in a numbered list** ("1. yes 2. no") — not mistaken for a prompt; block detection uses only verified dialog strings.
 - **Duplicate session name** — `tmux new-session` exits 1; resolve a free name first (Phase 1).
-- **Interactive startup would hang the run** — default to autonomous detached startup; only enter interactive mode when the user explicitly opts in, then print an attach command instead of blocking the orchestrator.
+- **Interactive startup would hang the run** — default to autonomous startup (visible app tab when available, otherwise detached fallback) and continue readiness checks; only enter interactive mode when the user explicitly opts in, then ensure the session is visible and stop before scripted sends.
 - **Status cannot identify an agent** — list it as `unknown` rather than guessing; `inspect` must resolve the exact session before printing an attach command.
 - **Reply text contains "running"/"loading"** — busy detection scans only spinner chrome, never reply prose.
 - **Message never landed** — Phase 3's post-send-activity check catches this before waiting and reports `NOT-DELIVERED`; send a lone `Enter`, re-check, re-type if still nothing.
 - **Agent stalled** (unchanged pane, no spinner, no completion) — distinct from "still working" or a dropped delivery; surface it, don't silently re-wait.
 - **Re-wait/re-send loop won't terminate** — enforce the overall budget (Phase 4); escalate rather than poll indefinitely.
 - **Capped-tail capture starts mid-sentence** — reply is longer than ~40 lines; widen stepwise, only reach for unbounded `-S -` if a wide tail still truncates.
-- **Returning to orchestrator control after attaching** — detach with `Ctrl-b d`; never `kill-session` just to "get back."
+- **Returning to orchestrator control after attaching** — if the human attached manually, detach with `Ctrl-b d`; never `kill-session` just to "get back." A visible app tab can stay open while the orchestrator continues scripted send/wait/capture.
 
 ## Reference
 
