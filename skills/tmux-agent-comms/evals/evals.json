@@ -10,7 +10,7 @@
     {
       "id": 2,
       "prompt": "Spin up two tmux agents for me — one named 'tests' and one named 'docs' — and launch claude in each, in the current project directory.",
-      "expected_output": "Creates two detached sessions using the <folder>-<short-task-name> convention (e.g. <folder>-tests and <folder>-docs), uses -c for the project directory, launches the agent in non-blocking/autonomous mode by default, and waits for each to finish booting before considering them ready. No destructive commands.",
+      "expected_output": "Creates two sessions using the <folder>-<short-task-name> convention (e.g. <folder>-tests and <folder>-docs), opens each by default in a visible app/IDE terminal tab attached to the tmux session (detached only if no app-tab facility exists or the user asks for background), uses the project directory, launches the agent in non-blocking/autonomous mode by default, and waits for each to finish booting before considering them ready. No destructive commands.",
       "files": []
     },
     {
@@ -22,7 +22,7 @@
     {
       "id": 4,
       "prompt": "Launch three tmux agents for this repo (reviewer, tests, docs) and keep me updated while they work for a while.",
-      "expected_output": "Creates detached sessions using the <folder>-<short-task-name> naming convention, honors TAC_STARTUP_MODE/per-launch interactive overrides while defaulting to non-blocking/autonomous startup, waits without serializing the fleet, and emits read-only fleet status reports about every 5 minutes showing each agent's state, task/progress, start time, and working directory without sending extra keys to working agents.",
+      "expected_output": "Creates sessions using the <folder>-<short-task-name> naming convention and opens each by default in a visible app/IDE terminal tab attached to the tmux session (detached only if no app-tab facility exists or the user asks for a background fleet), honors TAC_STARTUP_MODE/per-launch interactive overrides while defaulting to non-blocking/autonomous startup, waits without serializing the fleet, and emits read-only fleet status reports about every 5 minutes showing each agent's state, task/progress, start time, and working directory without sending extra keys to working agents.",
       "files": []
     },
     {
