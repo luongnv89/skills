@@ -1,0 +1,41 @@
+{
+  "skill_name": "herdr-agent-comms",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a Herdr agent named 'reviewer' already running. Ask it to summarize the open PRs and show me what it says back.",
+      "expected_output": "Resolves the reviewer target via herdr agent get/list, sends with pane run (or agent send + enter), waits on agent-status (working then done/idle) rather than a blind sleep, reads recent-unwrapped, and relays the reply.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Spin up two Herdr agents for this project named 'tests' and 'docs'. Use pi with thinking low for both. Put them in the same project workspace, each in its own tab.",
+      "expected_output": "Checks herdr status, reuses or creates one workspace for the project, creates two tabs (not splits) with --no-focus, launches pi --thinking low in each, renames agents, waits until idle/ready. No server stop.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I'm done with all my Herdr fleet agents for this project — shut them down.",
+      "expected_output": "Treats teardown as destructive: confirms first, prefers closing the skill-created tabs/panes (or workspace if user wants) over herdr server stop unless explicitly requested, warns about lost state.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Launch three Herdr agents (reviewer, tests, docs) for this repo with different tasks in parallel and keep them visible so I can jump into any tab to steer.",
+      "expected_output": "One workspace, three tabs, parallel-friendly spawn (no-focus), submits distinct tasks, explains human can click tabs or herdr agent focus to steer, does not nest tmux.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Broadcast 'pull latest main and report status' to all my Herdr fleet agents and collect replies.",
+      "expected_output": "Uses broadcast.sh or equivalent send-all-then-wait-concurrent pattern, reports per-agent idle/timeout/blocked, does not serialize full send-wait-read per agent.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "My SSH session died — can you reattach my tmux coding agents?",
+      "expected_output": "Should NOT trigger herdr-agent-comms as the primary skill (tmux domain). Negative trigger: redirect to tmux-agent-comms or plain tmux help.",
+      "files": []
+    }
+  ]
+}
