@@ -1,6 +1,6 @@
 # Context Gate — /issue-work-loop
 
-Best-effort gate: if a worker is already ≥ **50%** context (configurable via `work_loop.context_threshold`) at the **start of a new ROUND**, **FRESHEN** it before assigning work.
+Best-effort gate: if a worker is already ≥ **50%** context (configurable via `work_loop.context_threshold`), **FRESHEN** it before assigning work — **reviewer** gated at ROUND start, **implementer** gated immediately before each fix dispatch (not at ROUND start).
 
 This is not a perfect token meter. Herdr does not expose a normalized context percentage for every CLI. Prefer an explicit agent report; fall back to conservative heuristics when the report is `UNKNOWN`.
 
