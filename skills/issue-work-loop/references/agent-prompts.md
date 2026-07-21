@@ -45,6 +45,7 @@ branch_name: <branch or null>
 pr_number: <number or null>
 pr_url: <url or null>
 head_sha: <full sha or null>
+worktree_path: <absolute path if you used a git worktree, else null>
 files_changed: <count or null>
 tests_passed: true | false | null
 failure_step: <step or null>

@@ -11,7 +11,8 @@
         "Spawns Herdr panes for implementer and reviewer (herdr-agent-comms), not Agent-tool subagents for those roles",
         "Implementer is instructed to use issue-resolver on issue #42",
         "Reviewer is instructed to use issue-pr-review --review-only",
-        "Final handoff leaves merge to the user (no gh pr merge)"
+        "Final handoff leaves merge to the user (no gh pr merge)",
+        "Runs SWEEP cleanup: closes worker panes and removes loop worktrees before handoff"
       ]
     },
     {
@@ -103,6 +104,19 @@
       "files": [],
       "expectations": [
         "Does not start the Herdr implementer/reviewer pair when independent review is not requested"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "happy-path",
+      "prompt": "After the issue work loop finishes on #42, leave my workspace clean so I only need to merge the PR.",
+      "expected_output": "SWEEP closes panes, removes worktrees, checks out default branch with clean tree; does not merge.",
+      "files": [],
+      "expectations": [
+        "Closes implementer and reviewer Herdr panes without closing the root pane",
+        "Removes non-primary git worktrees for the PR branch when present",
+        "Returns the main repo to the default branch with a clean working tree",
+        "Does not delete the remote PR branch or run gh pr merge"
       ]
     }
   ]

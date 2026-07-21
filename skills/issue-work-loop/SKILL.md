@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, and skills issue-resolver, issue-pr-review, herdr-agent-comms."
 effort: max
 metadata:
-  version: 1.0.1
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -23,6 +23,7 @@ Resolve one GitHub issue through a Herdr-pane **implementer → reviewer → fix
 | Notes count | Every FINDING (fix **and** note) must be fixed |
 | No merge | USER-MERGE only — leave PR open for the human |
 | Fresh when fat | FRESHEN a role when context ≥ 50% at ROUND start |
+| Clean workspace | SWEEP worker panes + worktrees before handoff |
 
 ## Leading Words
 
@@ -30,7 +31,8 @@ Resolve one GitHub issue through a Herdr-pane **implementer → reviewer → fix
 - **FINDING** — any reviewer item, including notes and partials
 - **CLEAN** — zero FINDINGS; tests/CI acceptable per reviewer report
 - **FRESHEN** — clear session and restart that role with a compact handoff
-- **USER-MERGE** — final state: PR ready, human merges
+- **SWEEP** — tear down worker panes, remove loop worktrees, return main repo to default branch
+- **USER-MERGE** — final state: PR ready, workspace clean, human merges
 
 ## Invocation
 
@@ -53,6 +55,7 @@ On failure, print the matching error from `references/error-messages.md` and sto
    - `references/agent-prompts.md`
    - `references/context-gate.md`
    - `references/loop-protocol.md`
+   - `references/cleanup.md`
    - `references/error-messages.md`
    - `references/output-format.md`
 
@@ -90,8 +93,9 @@ Optional keys under `.gitissue.yml` (defaults if missing):
 | `work_loop.context_threshold` | `50` | FRESHEN when reported context % ≥ this |
 | `work_loop.implementer_name` | `"impl-{N}"` | Herdr agent name for implementer |
 | `work_loop.reviewer_name` | `"rev-{N}"` | Herdr agent name for reviewer |
+| `work_loop.auto_cleanup` | `true` | Run SWEEP at end (panes + worktrees + default branch) |
 
-CLI flags override config. Print `○ First run — using default config` when `.gitissue.yml` is absent (do not invent keys into the file).
+CLI flags override config. `--no-cleanup` sets `auto_cleanup: false` (debug only — leaves panes/worktrees). Print `○ First run — using default config` when `.gitissue.yml` is absent (do not invent keys into the file).
 
 ---
 
@@ -105,10 +109,11 @@ CLI flags override config. Print `○ First run — using default config` when `
   [3] Resolve       ✓ PR #{M} created
   [4] Spawn rev     ✓ rev-{N}
   [5] Loop          ● ROUND 1..K until CLEAN or max
-  [6] Handoff       ✓ USER-MERGE — PR ready
+  [6] SWEEP         ✓ panes closed, worktrees gone, on default branch
+  [7] Handoff       ✓ USER-MERGE — clean workspace, PR ready
 ```
 
-Full send/wait mechanics: load `herdr-agent-comms` and follow its phases. Full ROUND state machine: `references/loop-protocol.md`. Prompts: `references/agent-prompts.md`. Context gate: `references/context-gate.md`.
+Full send/wait mechanics: load `herdr-agent-comms` and follow its phases. Full ROUND state machine: `references/loop-protocol.md`. Prompts: `references/agent-prompts.md`. Context gate: `references/context-gate.md`. Cleanup: `references/cleanup.md`.
 
 ---
 
@@ -196,27 +201,49 @@ For implementer (rounds > 1) and reviewer (every ROUND): run the context probe i
 
 | Reviewer verdict | Action |
 |------------------|--------|
-| CLEAN | Exit loop → Phase 6 |
+| CLEAN | Exit loop → Phase 6 SWEEP |
 | FINDINGS and `round < max_rounds` | Send **Implementer — fix** prompt with the FINDINGS list; wait for push + new `head_sha`; then `round += 1` and go to 5a for the next review |
-| FINDINGS and `round == max_rounds` | Stop with max-rounds report; leave PR open; USER-MERGE still applies (user may merge incomplete work) |
+| FINDINGS and `round == max_rounds` | Exit loop → Phase 6 SWEEP; PR stays open for human decision |
 
 Implementer fix rounds **must not** re-run full `/issue-resolver` or open a second PR — only fix on the existing branch and push.
 
 Blocked agent (trust dialog) → surface to user; do not type into the dialog.
 
-**Done when:** CLEAN, or max rounds exhausted, or unrecoverable failure.
+**Done when:** CLEAN, or max rounds exhausted, or unrecoverable failure — then always Phase 6 (unless `--no-cleanup`).
 
-## Phase 6 — Handoff (USER-MERGE)
+## Phase 6 — SWEEP (clean workspace)
 
-Never run `gh pr merge`. Print the final summary from `references/output-format.md`.
+Mandatory when `work_loop.auto_cleanup` is true (default). Full procedure: `references/cleanup.md`.
 
-Offer optional teardown of worker panes (confirm first — herdr-agent-comms Phase 6). Never close the root pane.
+1. **Snapshot handoff facts** first: `pr_number`, `pr_url`, `branch_name`, `head_sha`, verdict, FINDINGS, spawned pane ids.
+2. **Close worker panes** this run spawned (`impl-*`, `rev-*` for `{N}`). Never close the root pane / `$HERDR_PANE_ID`. No confirmation prompt — SWEEP is automatic.
+3. **Remove loop worktrees** for the PR branch (sibling `*-worktrees/*`, `wt-{N}`, or any non-primary worktree on `{branch_name}`). Never `git worktree remove` the primary repo root. Never delete `origin/{branch}` while the PR is open.
+4. **Reset main repo:** checkout default branch, `fetch` + `pull --rebase`, leave working tree clean (stash residual worker dirt; never `reset --hard` user work without stashing).
+5. Emit the SWEEP Step Completion Report from `references/cleanup.md` / `references/output-format.md`.
+
+**Done when (checkable):**
+
+```bash
+test -z "$(git status --porcelain)"
+test "$(git rev-parse --abbrev-ref HEAD)" = "$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's#^origin/##')"
+# worker pane ids from this run no longer appear in: herdr agent list
+# no non-primary worktree still checks out {pr_branch}
+```
+
+If any sub-step fails, mark SWEEP `PARTIAL`, print recovery from `references/error-messages.md`, and continue to Phase 7 so the user still gets the PR URL.
+
+## Phase 7 — Handoff (USER-MERGE)
+
+Never run `gh pr merge`. Print the final summary from `references/output-format.md` (includes cleanup status).
+
+The human should only need to open the PR and merge — local workspace is already clean.
 
 ```
   ✓ Issue #{N} ready for human merge
     PR: {pr_url}
     Rounds: {r}
     Verdict: CLEAN | MAX_ROUNDS | FAILED
+    Workspace: clean on {default_branch}
 ```
 
 ---
@@ -241,6 +268,8 @@ Offer optional teardown of worker panes (confirm first — herdr-agent-comms Pha
 - Soft-pass notes as CLEAN
 - Re-run full issue-resolver on fix rounds
 - Close the root orchestrator pane when tearing down workers
+- Force-push or delete the remote PR branch during SWEEP
+- Leave worker panes or loop worktrees behind when `auto_cleanup` is true
 
 ## Step Completion Reports
 
@@ -259,6 +288,7 @@ After each phase and each ROUND, emit a report in this shape:
 - `references/loop-protocol.md` — ROUND state machine, PR detection, parse rules
 - `references/agent-prompts.md` — implementer/reviewer/context prompts
 - `references/context-gate.md` — 50% gate, FRESHEN, UNKNOWN fallback
+- `references/cleanup.md` — SWEEP: panes, worktrees, default-branch reset
 - `references/output-format.md` — preview, per-round, final summary templates
 - `references/error-messages.md` — exact error blocks
 - Sibling skills: `herdr-agent-comms`, `issue-resolver`, `issue-pr-review`

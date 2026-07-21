@@ -43,6 +43,19 @@ Terminal style follows shared conventions: symbols `● ✓ ✗ ◆ ⚡ ⚠ ○`
   Result:             PASS | CONTINUE | FAIL
 ```
 
+## SWEEP report
+
+```
+◆ SWEEP (cleanup)
+··································································
+  Worker panes:       √ closed impl-{N}, rev-{N}
+  Worktrees removed:  √ {path} | ○ none
+  On default branch:  √ {default_branch}
+  Working tree:       √ clean
+  Criteria:           √ 4/4 met
+  Result:             PASS | PARTIAL | FAIL
+```
+
 ## Final summary — CLEAN
 
 ```
@@ -51,13 +64,14 @@ Terminal style follows shared conventions: symbols `● ✓ ✗ ◆ ⚡ ⚠ ○`
   Issue:         #{N} — {title}
   PR:            #{M}
   {pr_url}
-  Branch:        {branch}
+  Branch:        {branch} (remote only — local workspace cleaned)
   Head:          {sha}
   Rounds:        {r}/{K}
   Freshen:       impl={ni}, rev={nr}
+  Cleanup:       √ panes closed, worktrees removed, on {default_branch}
   Verdict:       CLEAN
 
-  Next:          merge when ready (human only)
+  Next:          open the PR and merge when ready (human only)
                  gh pr merge {M}
 ```
 
@@ -70,13 +84,14 @@ Terminal style follows shared conventions: symbols `● ✓ ✗ ◆ ⚡ ⚠ ○`
   PR:            #{M}
   {pr_url}
   Rounds:        {K}/{K}
+  Cleanup:       √ workspace cleaned (PR left open)
   Verdict:       MAX_ROUNDS
 
   Remaining FINDINGS:
   1. ...
   2. ...
 
-  Next:          fix manually, re-run /issue-work-loop {N},
+  Next:          fix on GitHub / re-run /issue-work-loop {N},
                  or merge with known gaps (human decision)
 ```
 
@@ -90,11 +105,12 @@ Terminal style follows shared conventions: symbols `● ✓ ✗ ◆ ⚡ ⚠ ○`
   Phase:         {phase}
   Reason:        {short}
   PR:            {url or none}
+  Cleanup:       √ | ⚠ partial | ○ skipped
 ```
 
 ## Compact success line (after full report)
 
 ```
-  ✓ Issue #{N} ready for human merge
+  ✓ Issue #{N} ready for human merge (workspace clean)
     https://github.com/owner/repo/pull/{M}
 ```

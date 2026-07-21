@@ -172,3 +172,46 @@ Rich format: `✗ what failed`, then `To fix:`, optional docs line.
   To fix:  git stash list && git stash show -p stash@{0}
            resolve conflicts, then re-run /issue-work-loop
 ```
+
+## Cleanup (SWEEP)
+
+### Worktree remove failed
+```
+⚠ Could not remove worktree {wt_dir}
+
+  To fix:  git worktree list
+           git worktree remove {wt_dir} --force
+           git worktree prune
+
+  SWEEP continues; remote PR branch was not deleted.
+```
+
+### Pane close failed
+```
+⚠ Could not close worker pane {pane_id} ({name})
+
+  To fix:  herdr agent list
+           herdr pane close {pane_id}
+
+  Root pane was not touched. SWEEP continues.
+```
+
+### Could not return to default branch
+```
+⚠ Could not checkout {default_branch} during SWEEP
+
+  Current: {branch}
+  To fix:  git status
+           git checkout {default_branch}
+           git pull --rebase origin {default_branch}
+
+  PR is still open for human merge: {pr_url}
+```
+
+### Residual dirty tree stashed
+```
+⚠ Working tree was dirty after SWEEP — stashed residual changes
+
+  Stash:   git stash list   # look for issue-work-loop: residual
+  To fix:  inspect and drop/apply as needed
+```

@@ -15,7 +15,8 @@
 - Spins up a **reviewer** pane that runs `/issue-pr-review --review-only`
 - Loops fix → re-review until zero findings (**notes count**)
 - **Freshen** workers when context is ≥ 50% at the start of a round
-- **Never merges** — leaves the PR for you
+- **SWEEP** at the end: close worker panes, remove loop worktrees, return to default branch
+- **Never merges** — leaves a clean workspace and an open PR for you
 
 ## When to Use
 
@@ -35,11 +36,13 @@ graph TD
     B --> C["Resolve → PR"]
     C --> D["Spawn reviewer"]
     D --> E["Review ROUND"]
-    E -->|CLEAN| F["USER-MERGE handoff"]
+    E -->|CLEAN| S["SWEEP cleanup"]
     E -->|FINDINGS| G["Implementer fix"]
     G --> H["Context gate"]
     H --> E
+    S --> F["USER-MERGE handoff"]
     style A fill:#4CAF50,color:#fff
+    style S fill:#FF9800,color:#fff
     style F fill:#2196F3,color:#fff
 ```
 
@@ -59,6 +62,7 @@ graph TD
 | `references/loop-protocol.md` | ROUND state machine |
 | `references/agent-prompts.md` | Worker prompts |
 | `references/context-gate.md` | 50% freshen rules |
+| `references/cleanup.md` | End-of-loop SWEEP (panes, worktrees, branch) |
 | `references/output-format.md` | Terminal reports |
 | `references/error-messages.md` | Error catalog |
 
@@ -66,4 +70,5 @@ graph TD
 
 - Open PR linked to the issue
 - Round-by-round review/fix log
+- Clean local workspace (panes closed, worktrees removed, on default branch)
 - Final `CLEAN` / `MAX_ROUNDS` / `FAILED` handoff (no merge)

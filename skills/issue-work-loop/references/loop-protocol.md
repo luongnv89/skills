@@ -12,13 +12,16 @@ PREFLIGHT
   → LOOP:
        CONTEXT_GATE (impl if fix; rev always)
        REVIEW
-       if CLEAN → HANDOFF
+       if CLEAN → SWEEP
        if FINDINGS and rounds left → FIX → LOOP
-       if FINDINGS and no rounds left → HANDOFF (MAX_ROUNDS)
+       if FINDINGS and no rounds left → SWEEP (MAX_ROUNDS)
+  → SWEEP            (panes + worktrees + default branch; default on)
   → HANDOFF (USER-MERGE)
 ```
 
 Terminal outcomes: `CLEAN` | `MAX_ROUNDS` | `FAILED` | `ALREADY_RESOLVED`
+
+SWEEP is mandatory before HANDOFF when `work_loop.auto_cleanup` is true (default). Full steps in `references/cleanup.md`.
 
 ## ROUND counter
 
@@ -115,7 +118,7 @@ Workers run autonomously. The orchestrator only:
 
 - asks the human on multiple-PR ambiguity
 - surfaces blocked dialogs
-- confirms worker teardown
+- runs SWEEP automatically (no teardown confirmation)
 - hands off merge
 
 No mid-loop "approve this fix plan" prompts.
@@ -127,7 +130,12 @@ When FINDINGS remain after `max_rounds`:
 - Outcome: `MAX_ROUNDS`
 - PR stays open
 - Print remaining FINDINGS verbatim
+- Still run SWEEP (clean local workspace)
 - Still USER-MERGE (human may merge, continue manually, or close)
+
+## SWEEP (end of every successful path to handoff)
+
+Order: snapshot facts → close worker panes → remove loop worktrees → checkout default branch + clean tree → report. Never delete the remote PR branch. Never close root. See `references/cleanup.md`.
 
 ## Already resolved
 
