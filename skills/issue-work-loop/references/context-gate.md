@@ -8,7 +8,7 @@ This is not a perfect token meter. Herdr does not expose a normalized context pe
 
 | Role | When |
 |------|------|
-| Implementer | Start of every fix ROUND (Phase 5a). Skip on first initial resolve if the pane just booted. |
+| Implementer | Before every fix dispatch (Phase 5c), first fix included. Skip on the initial resolve if the pane just booted. |
 | Reviewer | Start of every review ROUND (including ROUND 1 after spawn — usually pass; still probe if the pane is reused). |
 
 Never skip the gate after a long prior ROUND on the same pane.
