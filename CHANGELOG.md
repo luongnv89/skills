@@ -16,10 +16,10 @@
 |-------|---------|
 | fork-upstream-sync | 1.0.3 |
 | herdr-agent-comms | 1.21.0 |
-| issue-work-loop | 1.1.3 |
+| issue-work-loop | 1.1.4 |
 | diagram-generator | 1.0.0 (umbrella routing draw.io + Excalidraw) |
 
-**issue-work-loop (1.1.3):** resolves a single GitHub issue through a Herdr-pane implementer→reviewer loop until the PR review is CLEAN. Implementer runs `/issue-resolver`, reviewer runs `/issue-pr-review --review-only` in a separate pane; every FINDING counts, including notes (no soft-pass). Roles are FRESHENed when pane context crosses 50% (implementer gated immediately before each fix), `--no-cleanup` skips SWEEP for debug, worker panes and loop worktrees are swept at the end by default, and merging is always left to the human.
+**issue-work-loop (1.1.4):** resolves a single GitHub issue through a Herdr-pane implementer→reviewer loop until the PR review is CLEAN. Implementer runs `/issue-resolver`, reviewer runs `/issue-pr-review --review-only` in a separate pane; every FINDING counts, including notes (no soft-pass). Reviewer is FRESHENed at ROUND start and implementer before each fix when context crosses 50%; `--no-cleanup` skips SWEEP for debug; worker panes and loop worktrees are swept at the end by default; merging is always left to the human.
 
 ### Skills Updated
 | Skill | Version Change |

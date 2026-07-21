@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, plus separately installed skills issue-resolver and issue-pr-review, and herdr-agent-comms (in this catalog)."
 effort: max
 metadata:
-  version: 1.1.3
+  version: 1.1.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -22,7 +22,7 @@ Resolve one GitHub issue through a Herdr-pane **implementer → reviewer → fix
 | Role split | Implementer writes; reviewer only reviews (`--review-only`) |
 | Notes count | Every FINDING (fix **and** note) must be fixed |
 | No merge | USER-MERGE only — leave PR open for the human |
-| Fresh when fat | FRESHEN a role when context ≥ 50% at ROUND start |
+| Fresh when fat | FRESHEN reviewer at ROUND start; implementer before each fix (≥ 50%) |
 | Clean workspace | SWEEP worker panes + worktrees before handoff |
 
 ## Leading Words

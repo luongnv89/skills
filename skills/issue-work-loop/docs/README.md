@@ -14,7 +14,7 @@
 - Spins up an **implementer** pane that runs `/issue-resolver` and opens a PR
 - Spins up a **reviewer** pane that runs `/issue-pr-review --review-only`
 - Loops fix → re-review until zero findings (**notes count**)
-- **Freshen** workers when context is ≥ 50% at the start of a round
+- **Freshen** the reviewer at ROUND start and the implementer before each fix when context is ≥ 50%
 - **SWEEP** at the end: close worker panes, remove loop worktrees, return to default branch
 - **Never merges** — leaves a clean workspace and an open PR for you
 
@@ -52,6 +52,7 @@ graph TD
 /issue-work-loop 42
 /issue-work-loop 42 --max-rounds 3
 /issue-work-loop 42 --agent-cli "pi --thinking high"
+/issue-work-loop 42 --no-cleanup
 ```
 
 ## Resources
