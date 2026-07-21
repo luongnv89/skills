@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, plus separately installed skills issue-resolver and issue-pr-review, and herdr-agent-comms (in this catalog)."
 effort: max
 metadata:
-  version: 1.1.1
+  version: 1.1.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -127,7 +127,7 @@ Full send/wait mechanics: load `herdr-agent-comms` and follow its phases. Full R
 ## Phase 1 — Preflight
 
 1. Run Prerequisites above.
-2. Parse `{issue_number}` (required positive integer). Parse optional `--max-rounds` and `--agent-cli`.
+2. Parse `{issue_number}` (required positive integer). Parse optional `--max-rounds`, `--agent-cli`, and `--no-cleanup`. Presence of `--no-cleanup` sets `work_loop.auto_cleanup = false` for this run (skips Phase 6 SWEEP).
 3. Confirm issue exists and is open:
 
    ```bash
@@ -170,7 +170,7 @@ Do **not** put the long task on the launch argv — boot first, then Phase 3 sen
 
 **Gates:**
 - `status: success` + open PR → continue
-- `status: already_resolved` → hand off with no loop
+- `status: already_resolved` → branch on open PRs linking `#{N}` per `references/loop-protocol.md` → *Already resolved* (authoritative): **zero** → outcome `ALREADY_RESOLVED`, hand off, no reviewer; **exactly one** → run **one** review ROUND only (report the verdict; no multi-round fix loop); **multiple** → stop with the ambiguous-PR error
 - failure / no PR / multiple ambiguous PRs → stop with error (do not invent a PR)
 
 **Done when:** one open PR number is known and recorded as `{pr_number}`.

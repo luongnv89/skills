@@ -10,14 +10,19 @@ PREFLIGHT
   → RESOLVE          (implementer initial; ROUND 0 conceptually)
   → SPAWN_REV
   → LOOP:
-       CONTEXT_GATE (impl if fix; rev always)
+       CONTEXT_GATE (reviewer)          ← start of every ROUND, ROUND 1 included
        REVIEW
        if CLEAN → SWEEP
-       if FINDINGS and rounds left → FIX → LOOP
+       if FINDINGS and rounds left → CONTEXT_GATE (implementer) → FIX → LOOP
        if FINDINGS and no rounds left → SWEEP (MAX_ROUNDS)
   → SWEEP            (panes + worktrees + default branch; default on)
   → HANDOFF (USER-MERGE)
 ```
+
+The two context gates sit at different points and are **not** interchangeable (see `references/context-gate.md`):
+
+- **Reviewer** — gated at ROUND start, before every REVIEW, ROUND 1 included.
+- **Implementer** — gated immediately before **each** fix dispatch, after the FINDINGS verdict — not at ROUND start. The first fix is included (the pane still carries the whole Phase 3 resolve). Gating on the fix edge also avoids freshening the implementer right before a CLEAN exit.
 
 Terminal outcomes: `CLEAN` | `MAX_ROUNDS` | `FAILED` | `ALREADY_RESOLVED`
 

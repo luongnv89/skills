@@ -115,26 +115,28 @@ cd "$repo_root"
 default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')"
 [ -n "$default_branch" ] || default_branch=main
 
+# Clear the tree BEFORE any checkout or rebase — a dirty tree fails
+# `pull --rebase` even when already on the default branch, which would
+# otherwise skip the sync silently and get masked by the residual stash below.
+if [ -n "$(git status --porcelain)" ]; then
+  git stash push -u -m "issue-work-loop: pre-cleanup stash before sync of ${default_branch}"
+fi
+
 # Leave the PR branch if checked out here
 if [ "$(git rev-parse --abbrev-ref HEAD)" != "$default_branch" ]; then
-  dirty=0
-  if [ -n "$(git status --porcelain)" ]; then
-    git stash push -u -m "issue-work-loop: pre-cleanup stash before return to ${default_branch}"
-    dirty=1
-  fi
   git checkout "$default_branch"
 fi
 
 git fetch origin
 git pull --rebase origin "$default_branch" || {
   git rebase --abort 2>/dev/null || true
-  echo "⚠ could not rebase ${default_branch} — left on branch, user should sync"
+  echo "⚠ could not rebase ${default_branch} — sync skipped, user should sync manually"
+  echo "  Stashed work (if any): git stash list"
 }
 
-# Drop loop-only uncommitted junk on default branch only when status is dirty
-# from worker residue (never discard the pre-cleanup stash of user work)
+# Anything dirty at this point is post-sync worker residue — stash it too
+# (never discard; prefer stash over hard reset when unsure).
 if [ -n "$(git status --porcelain)" ]; then
-  # Prefer stash over hard reset when unsure — preserve user data
   git stash push -u -m "issue-work-loop: residual dirty tree after cleanup"
 fi
 ```
