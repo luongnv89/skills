@@ -16,7 +16,10 @@
 |-------|---------|
 | fork-upstream-sync | 1.0.3 |
 | herdr-agent-comms | 1.21.0 |
+| issue-work-loop | 1.1.1 |
 | diagram-generator | 1.0.0 (umbrella routing draw.io + Excalidraw) |
+
+**issue-work-loop (1.1.1):** resolves a single GitHub issue through a Herdr-pane implementer→reviewer loop until the PR review is CLEAN. Implementer runs `/issue-resolver`, reviewer runs `/issue-pr-review --review-only` in a separate pane; every FINDING counts, including notes (no soft-pass). Roles are FRESHENed when pane context crosses 50%, worker panes and loop worktrees are swept at the end, and merging is always left to the human.
 
 ### Skills Updated
 | Skill | Version Change |

@@ -58,8 +58,10 @@ Rich format: `✗ what failed`, then `To fix:`, optional docs line.
 ```
 ✗ Missing required skill(s): {names}
 
-  To fix:  install issue-resolver, issue-pr-review, and herdr-agent-comms
-           from the same distribution as this skill, then restart the session
+  To fix:  install the missing skill(s), then restart the session
+           herdr-agent-comms — ships in this skills catalog
+           issue-resolver, issue-pr-review — installed separately
+             (may come from another distribution / your IDD setup)
 
   This skill needs all three to spawn workers and run resolve/review.
 ```

@@ -72,7 +72,7 @@ Terminal style follows shared conventions: symbols `● ✓ ✗ ◆ ⚡ ⚠ ○`
   Verdict:       CLEAN
 
   Next:          open the PR and merge when ready (human only)
-                 gh pr merge {M}
+                 {pr_url}
 ```
 
 ## Final summary — MAX_ROUNDS

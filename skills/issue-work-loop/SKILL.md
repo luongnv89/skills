@@ -2,10 +2,10 @@
 name: issue-work-loop
 description: "Resolve one open GitHub issue with a Herdr implementer→reviewer fix loop until CLEAN (notes count). Use when independent review is required. Don't use for plain resolve without review, backlog automation, review-only of an existing PR, or merging."
 license: MIT
-compatibility: "Requires herdr, git, gh auth, and skills issue-resolver, issue-pr-review, herdr-agent-comms."
+compatibility: "Requires herdr, git, gh auth, plus separately installed skills issue-resolver and issue-pr-review, and herdr-agent-comms (in this catalog)."
 effort: max
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -41,6 +41,7 @@ Resolve one GitHub issue through a Herdr-pane **implementer → reviewer → fix
 | `/issue-work-loop <N>` | Resolve issue #N through the loop (max 5 ROUNDs) |
 | `/issue-work-loop <N> --max-rounds K` | Cap ROUNDs at K (default 5, min 1) |
 | `/issue-work-loop <N> --agent-cli <cmd>` | Override worker CLI (default: `claude`) |
+| `/issue-work-loop <N> --no-cleanup` | Skip Phase 6 SWEEP (debug only — leaves panes/worktrees) |
 
 ## Prerequisites
 
@@ -50,7 +51,7 @@ On failure, print the matching error from `references/error-messages.md` and sto
 2. `gh` installed and authenticated: `which gh && gh auth status`
 3. GitHub remote: `git remote -v`
 4. Herdr: `command -v herdr && herdr status` (server running; never bare `herdr` from a non-TTY shell)
-5. Skills available: `issue-resolver`, `issue-pr-review`, `herdr-agent-comms` — confirm each skill's `SKILL.md` is loadable in this session (same install roots as this skill / the agent skill list). If any missing → `Missing required skill(s)` error.
+5. Skills available: `issue-resolver`, `issue-pr-review`, `herdr-agent-comms` — confirm each skill's `SKILL.md` is loadable in this session (any install root on the agent skill list). `herdr-agent-comms` ships in this catalog; `issue-resolver` and `issue-pr-review` are installed separately and may come from another distribution. If any missing → `Missing required skill(s)` error.
 6. Bundled files present (relative to this skill's directory):
    - `references/agent-prompts.md`
    - `references/context-gate.md`
@@ -71,16 +72,22 @@ if [ -n "$(git status --porcelain)" ]; then
   dirty=1
 fi
 git fetch origin
-git pull --rebase origin "$branch"
-if [ "$dirty" -eq 1 ]; then
-  git stash pop || {
-    echo "✗ Stash pop failed — recover with: git stash list && git stash show -p stash@{0}"
-    exit 1
-  }
+if git pull --rebase origin "$branch"; then
+  if [ "$dirty" -eq 1 ]; then
+    git stash pop || {
+      echo "✗ Stash pop failed — recover with: git stash list && git stash show -p stash@{0}"
+      exit 1
+    }
+  fi
+else
+  # Never pop onto a half-finished rebase — leave the stash intact and stop.
+  echo "✗ Rebase failed — your changes are safe in: git stash list"
+  echo "  Resolve or 'git rebase --abort', then 'git stash pop' manually."
+  exit 1
 fi
 ```
 
-If `origin` is missing or rebase conflicts, stop and ask the user.
+If `origin` is missing or rebase conflicts, stop and ask the user — do not pop the stash.
 
 ## Configuration
 
@@ -178,9 +185,11 @@ Same grid pattern as Phase 2 with name `{reviewer_name}` (default `rev-{N}`).
 
 Initialize `round = 1`. While `round ≤ max_rounds`:
 
-### 5a — Context gate (both roles, start of ROUND)
+### 5a — Context gate (reviewer, start of every ROUND)
 
-For implementer (rounds > 1) and reviewer (every ROUND): run the context probe in `references/context-gate.md`. If ≥ threshold or fallback says restart → **FRESHEN** that role (close worker pane, re-spawn, compact handoff only — issue #, PR #, branch, head SHA, current FINDINGS). Never paste full prior transcript.
+Run the context probe in `references/context-gate.md` on the **reviewer** at the start of every ROUND, including ROUND 1. If ≥ threshold or fallback says restart → **FRESHEN** that role (close worker pane, re-spawn, compact handoff only — issue #, PR #, branch, head SHA, current FINDINGS). Never paste full prior transcript.
+
+The implementer is gated separately in 5c, immediately before **every** fix dispatch — including the first fix after the Phase 3 resolve, when the pane is still fat with resolve context.
 
 ### 5b — Review
 
@@ -202,8 +211,10 @@ For implementer (rounds > 1) and reviewer (every ROUND): run the context probe i
 | Reviewer verdict | Action |
 |------------------|--------|
 | CLEAN | Exit loop → Phase 6 SWEEP |
-| FINDINGS and `round < max_rounds` | Send **Implementer — fix** prompt with the FINDINGS list; wait for push + new `head_sha`; then `round += 1` and go to 5a for the next review |
+| FINDINGS and `round < max_rounds` | **Context-gate the implementer first** (every fix, first one included — see below), then send **Implementer — fix** prompt with the FINDINGS list; wait for push + new `head_sha`; then `round += 1` and go to 5a for the next review |
 | FINDINGS and `round == max_rounds` | Exit loop → Phase 6 SWEEP; PR stays open for human decision |
+
+**Implementer gate before every fix:** run the `references/context-gate.md` probe on the implementer pane before each fix dispatch. On the **first** fix the pane still carries the whole Phase 3 resolve, so the UNKNOWN fallback is *FRESHEN before the first fix* — never reuse it unheard. Gating here (not at ROUND start) also avoids freshening the implementer right before a CLEAN exit.
 
 Implementer fix rounds **must not** re-run full `/issue-resolver` or open a second PR — only fix on the existing branch and push.
 
@@ -224,8 +235,13 @@ Mandatory when `work_loop.auto_cleanup` is true (default). Full procedure: `refe
 **Done when (checkable):**
 
 ```bash
+# Fallback must sit outside the pipeline — sed exits 0 on empty input,
+# so `... | sed ... || echo main` would never yield main.
+default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')"
+[ -n "$default_branch" ] || default_branch=main
+
 test -z "$(git status --porcelain)"
-test "$(git rev-parse --abbrev-ref HEAD)" = "$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's#^origin/##')"
+test "$(git rev-parse --abbrev-ref HEAD)" = "$default_branch"
 # worker pane ids from this run no longer appear in: herdr agent list
 # no non-primary worktree still checks out {pr_branch}
 ```

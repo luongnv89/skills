@@ -66,7 +66,10 @@ Discover worktrees linked to the PR branch (and common issue-resolver sibling la
 
 ```bash
 repo_root="$(git rev-parse --show-toplevel)"
-default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##' || echo main)"
+# Resolve default branch — the fallback must live outside the pipeline
+# (`... | sed ... || echo main` never fires: sed exits 0 on empty input).
+default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')"
+[ -n "$default_branch" ] || default_branch=main
 pr_branch="{branch_name}"   # from loop state; empty if unknown
 
 git worktree list --porcelain
@@ -109,7 +112,8 @@ Run in `$repo_root` (orchestrator project dir):
 
 ```bash
 cd "$repo_root"
-default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##' || echo main)"
+default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')"
+[ -n "$default_branch" ] || default_branch=main
 
 # Leave the PR branch if checked out here
 if [ "$(git rev-parse --abbrev-ref HEAD)" != "$default_branch" ]; then
