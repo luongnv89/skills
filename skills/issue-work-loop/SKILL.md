@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, plus separately installed skills issue-resolver and issue-pr-review, and herdr-agent-comms (in this catalog)."
 effort: max
 metadata:
-  version: 1.1.2
+  version: 1.1.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

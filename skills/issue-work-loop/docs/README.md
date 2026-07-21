@@ -37,8 +37,8 @@ graph TD
     C --> D["Spawn reviewer"]
     D --> E["Review ROUND"]
     E -->|CLEAN| S["SWEEP cleanup"]
-    E -->|FINDINGS| G["Implementer fix"]
-    G --> H["Context gate"]
+    E -->|FINDINGS| G["Context gate implementer"]
+    G --> H["Implementer fix"]
     H --> E
     S --> F["USER-MERGE handoff"]
     style A fill:#4CAF50,color:#fff
