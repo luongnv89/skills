@@ -1,0 +1,109 @@
+{
+  "skill_name": "issue-work-loop",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Work on issue #42 end to end with an implementer and reviewer until the PR is clean. I'll merge myself.",
+      "expected_output": "Runs /issue-work-loop style flow: Herdr implementer with issue-resolver, then reviewer with issue-pr-review --review-only, loops until CLEAN, does not merge.",
+      "files": [],
+      "expectations": [
+        "Spawns Herdr panes for implementer and reviewer (herdr-agent-comms), not Agent-tool subagents for those roles",
+        "Implementer is instructed to use issue-resolver on issue #42",
+        "Reviewer is instructed to use issue-pr-review --review-only",
+        "Final handoff leaves merge to the user (no gh pr merge)"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "/issue-work-loop 17",
+      "expected_output": "Preflight then resolve/review loop for issue 17 with default max rounds 5.",
+      "files": [],
+      "expectations": [
+        "Parses issue number 17",
+        "Uses default max_rounds of 5 unless overridden",
+        "Emits structured phase/round reports"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Run the issue work loop on #99 with max 3 rounds using claude workers in Herdr.",
+      "expected_output": "Loop with max_rounds=3; notes treated as findings; fix rounds do not re-run full issue-resolver.",
+      "files": [],
+      "expectations": [
+        "Respects max rounds of 3",
+        "Treats note-level review items as FINDINGS requiring a fix round",
+        "Fix prompts forbid opening a second PR and forbid re-running full issue-resolver"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "/issue-work-loop 55 — if context is over half full at the start of a new round, restart that agent fresh.",
+      "expected_output": "Applies context gate: probe CONTEXT %, FRESHEN at >=50%, UNKNOWN fallback documented.",
+      "files": [],
+      "expectations": [
+        "Probes context usage before assigning a new round of work",
+        "Restarts (FRESHEN) a worker when context is reported at or above 50%",
+        "Uses a compact handoff (issue/PR/sha/findings) after freshen, not full transcript paste"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Keep reviewing and fixing issue #12 until clean, but stop after max rounds with findings still open.",
+      "expected_output": "On max rounds, report remaining FINDINGS, leave PR open, do not merge.",
+      "files": [],
+      "expectations": [
+        "Stops when max rounds exhausted with remaining findings",
+        "Lists remaining FINDINGS in the final summary",
+        "Does not call gh pr merge"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Review PR #88 and auto-merge if green.",
+      "expected_output": "Should use issue-pr-review / merge flow, not issue-work-loop.",
+      "files": [],
+      "expectations": [
+        "Does not invoke the issue-work-loop implementer/reviewer Herdr pair as the primary path",
+        "Does not claim ownership of merge via issue-work-loop USER-MERGE contract"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "edge",
+      "prompt": "/issue-work-loop 42 but issue 42 already has two open PRs mentioning it.",
+      "expected_output": "Stops at preflight with ambiguous PR error; does not spawn implementer resolve.",
+      "files": [],
+      "expectations": [
+        "Detects multiple linked open PRs before spawn",
+        "Does not start /issue-resolver when PR graph is ambiguous"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "prompt": "Reviewer says VERDICT CLEAN but lists three note-level findings for issue #7.",
+      "expected_output": "Orchestrator treats as FINDINGS and continues fix loop.",
+      "files": [],
+      "expectations": [
+        "Overrides CLEAN when note/fix list items are present",
+        "Does not soft-pass notes"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "negative-trigger",
+      "prompt": "Just resolve issue #9 and open a PR, no review needed.",
+      "expected_output": "Should use issue-resolver, not issue-work-loop.",
+      "files": [],
+      "expectations": [
+        "Does not start the Herdr implementer/reviewer pair when independent review is not requested"
+      ]
+    }
+  ]
+}
