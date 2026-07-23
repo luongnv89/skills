@@ -244,7 +244,7 @@
       "files": [],
       "expectations": [
         "Launches each worker CLI bare with no invented auto-mode startup parameters (pi needs none — it is autonomous by default)",
-        "Switches Claude Code with the Shift+Tab keystroke after boot and verifies the auto-accept-edits mode indicator before the reviewer task",
+        "Switches Claude Code with the Shift+Tab keystroke after boot and verifies the auto-accept-edits mode indicator before its role task",
         "Switches opencode to the full-permission Build agent via Tab or the switch_agent keybind (or settings) and verifies it",
         "Never sends an auto-mode slash command to any worker",
         "Applies the same autonomous-mode gate before a lazily spawned FIXER receives FINDINGS",
