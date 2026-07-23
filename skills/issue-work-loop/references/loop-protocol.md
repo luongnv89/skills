@@ -226,7 +226,7 @@ Never gate/spawn a writer before a CLEAN exit or before PR push-safety PASS.
 
 Every newly launched or FRESHENed reviewer, ISSUE implementer, and PR FIXER must pass this gate before receiving role work:
 
-1. Launch the configured interactive CLI **bare** — only its own verified flags (e.g. `pi` or `pi --thinking high`) — and complete the readiness wait. Never invent auto-mode startup parameters; no supported CLI takes one.
+1. Launch the configured interactive CLI **bare** — only its own verified flags (e.g. `pi` or `pi --thinking high`) — and complete the readiness wait. Do not pass auto-mode startup parameters: even where a harness exposes a mode flag, the post-boot switch below is the verified mechanism this skill relies on.
 2. Apply the per-harness switch:
 
    | Launcher | Startup | Switch after boot | Verify and record |
@@ -235,7 +235,7 @@ Every newly launched or FRESHENed reviewer, ISSUE implementer, and PR FIXER must
    | `claude` | Plain `claude` | Send the Shift+Tab keystroke (`herdr pane send-keys`, not a text message) until the auto-accept-edits mode is selected | Bounded pane read shows the auto-accept-edits mode indicator; record `autonomous_mode: verified` |
    | `opencode` | Plain `opencode` | Press Tab (or the configured `switch_agent` keybind) to select the full-permission Build agent; settings are the documented alternative | Bounded pane read shows the Build agent selected; record `autonomous_mode: verified` |
 
-3. Never send an auto-mode slash command — no supported CLI has one. Never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the mode switch above is the working mechanism.
+3. Never send an auto-mode slash command. Never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the mode switch above is the working mechanism.
 4. For any other CLI, autonomy is unknown — fail closed with the autonomous-mode error rather than improvising startup flags.
 5. FRESHEN clears the recorded mode state, so the replacement session must pass the gate again.
 

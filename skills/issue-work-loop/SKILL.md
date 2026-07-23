@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent-comms in both modes; issue-resolver is required only in ISSUE mode."
 effort: max
 metadata:
-  version: 1.3.0
+  version: 1.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -133,7 +133,7 @@ Apply this gate to every reviewer, ISSUE implementer, and PR FIXER after its int
 2. For **pi** (`pi`), there is nothing to activate: it is autonomous by default. Launch the bare configured command and record that fact.
 3. For **Claude Code** (`claude`), launch plain `claude`, then send the Shift+Tab keystroke until the auto-accept-edits mode is selected, and confirm its mode indicator with a bounded pane read before dispatching work.
 4. For **opencode** (`opencode`), launch plain `opencode`, then press Tab (or the configured `switch_agent` keybind) to select the full-permission Build agent and verify it; settings are the documented alternative.
-5. Never send an auto-mode slash command (no CLI has one) and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the per-harness switch above is the required mechanism. Any other CLI fails closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
+5. Never send an auto-mode slash command, never pass auto-mode startup flags (even where a harness exposes one), and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the post-boot per-harness switch above is the required mechanism. Any other CLI fails closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
 6. Repeat the gate after every FRESHEN because a restarted CLI is a new session.
 
 The full per-harness matrix is in `references/loop-protocol.md`. A task prompt saying “work autonomously” does not satisfy this gate.

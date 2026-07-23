@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires `herdr` on PATH and a running Herdr server (`herdr status`)."
 effort: medium
 metadata:
-  version: 1.22.1
+  version: 1.22.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -73,7 +73,7 @@ Resolve the scripts directory by checking repo-local installs before global ones
 5. Rename the pane and agent, then launch the CLI with `herdr pane run`.
 6. After all workers launch, run concurrent `wait_for_idle.py --ready` checks. Assign no work unless every worker returns 0.
 
-Use `pi` with only its verified flags (`--model`, `--thinking`), and launch `claude` or `opencode` bare — those CLIs take no auto-mode startup flags; any mode switching happens after startup and is owned by the caller's own protocol. For any other agent CLI, launch it bare rather than inventing flags. Do not attach the long task to the initial launcher argv.
+Use `pi` with only its verified flags (`--model`, `--thinking`), and launch `claude` or `opencode` bare — do not pass mode flags at startup; any mode switching happens after startup and is owned by the caller's own protocol. For any other agent CLI, launch it bare rather than inventing flags. Do not attach the long task to the initial launcher argv.
 
 **Done when:** every worker has a unique name and pane ID in `root_tab`, the layout widths differ by at most one cell, root remains active, and all readiness checks pass.
 

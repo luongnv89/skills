@@ -239,7 +239,7 @@
     {
       "id": 19,
       "kind": "edge",
-      "prompt": "/issue-work-loop --pr 88 using Claude Code workers; make the reviewer and fixer autonomous without skipping permissions.",
+      "prompt": "/issue-work-loop --pr 88 with workers on mixed harnesses (agent_cli is pi for the reviewer and may be claude or opencode for the fixer); make every worker autonomous without skipping permissions.",
       "expected_output": "Boots each worker bare per the per-harness matrix (pi autonomous by default with zero auto-mode parameters; Claude Code switched via Shift+Tab and verified by its mode indicator; opencode switched to the Build agent), never sends an auto-mode slash command, and repeats the gate after FRESHEN.",
       "files": [],
       "expectations": [
