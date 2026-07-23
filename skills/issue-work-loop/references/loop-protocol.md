@@ -226,17 +226,24 @@ Never gate/spawn a writer before a CLEAN exit or before PR push-safety PASS.
 
 Every newly launched or FRESHENed reviewer, ISSUE implementer, and PR FIXER must pass this gate before receiving role work:
 
-1. Launch the configured interactive CLI and complete the readiness wait.
-2. If the launcher executable is `claude`, send `/auto-mode on` as a standalone message using the Herdr send/wait contract. Require an acknowledgement that auto-mode is active.
-3. Never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions` as a substitute.
-4. For another CLI, activate and verify its documented safe autonomous mode, or record that the CLI is autonomous by default. Unknown/unverifiable autonomy fails closed.
-5. Store `autonomous_mode: verified` in tracked pane state. FRESHEN clears that state, so the replacement session must pass the gate again.
+1. Launch the configured interactive CLI **bare** — only its own verified flags (e.g. `pi` or `pi --thinking high`) — and complete the readiness wait. Never invent auto-mode startup parameters; no supported CLI takes one.
+2. Apply the per-harness switch:
 
-Do not count mode activation as a ROUND. Do not send the worker task in the same message as `/auto-mode on`; a prompt-level request to act autonomously is not verification.
+   | Launcher | Startup | Switch after boot | Verify and record |
+   |---|---|---|---|
+   | `pi` | Bare command; pass no auto-mode parameters | Nothing to activate — autonomous by default | Readiness wait passed; record `autonomous_mode: autonomous_by_default` |
+   | `claude` | Plain `claude` | Send the Shift+Tab keystroke (`herdr pane send-keys`, not a text message) until the auto-accept-edits mode is selected | Bounded pane read shows the auto-accept-edits mode indicator; record `autonomous_mode: verified` |
+   | `opencode` | Plain `opencode` | Press Tab (or the configured `switch_agent` keybind) to select the full-permission Build agent; settings are the documented alternative | Bounded pane read shows the Build agent selected; record `autonomous_mode: verified` |
+
+3. Never send an auto-mode slash command — no supported CLI has one. Never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the mode switch above is the working mechanism.
+4. For any other CLI, autonomy is unknown — fail closed with the autonomous-mode error rather than improvising startup flags.
+5. FRESHEN clears the recorded mode state, so the replacement session must pass the gate again.
+
+Do not count mode activation as a ROUND. Do not send the worker task in the same input as the mode switch; a prompt-level request to act autonomously is not verification.
 
 ## Herdr send/wait contract
 
-For every autonomy activation, probe, resolve, review, fix, or parse re-prompt:
+For every probe, resolve, review, fix, or parse re-prompt (autonomous-mode switches are keystrokes verified by bounded pane reads, not message sends):
 
 1. Capture recent-unwrapped baseline.
 2. Mint a fresh completion marker.

@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent-comms in both modes; issue-resolver is required only in ISSUE mode."
 effort: max
 metadata:
-  version: 1.2.1
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -116,7 +116,7 @@ Optional `.gitissue.yml` keys (defaults when absent):
 | Key | Default | Role |
 |---|---|---|
 | `work_loop.max_rounds` | `5` | Maximum completed review ROUNDs |
-| `work_loop.agent_cli` | `"claude"` | Interactive worker launcher; autonomy is activated after boot |
+| `work_loop.agent_cli` | `"claude"` | Interactive worker launcher; autonomy follows the per-harness boot-gate matrix |
 | `work_loop.context_threshold` | `50` | FRESHEN at or above this percentage |
 | `work_loop.implementer_name` | `"impl-{N}"` | ISSUE implementer pane |
 | `work_loop.reviewer_name` | `"rev-{N}"` in ISSUE; `"rev-pr-{M}"` in PR | Reviewer pane |
@@ -129,13 +129,14 @@ CLI flags override config. `--no-cleanup` sets `auto_cleanup: false` for debuggi
 
 Apply this gate to every reviewer, ISSUE implementer, and PR FIXER after its interactive CLI is ready and before sending any task:
 
-1. Identify the launcher executable from `agent_cli`.
-2. For **Claude Code** (`claude`), launch normally, then send `/auto-mode on` as its own Herdr message and wait for acknowledgement. Verify autonomous mode is active before dispatching work.
-3. Never launch Claude Code with `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; auto-mode is the required mechanism.
-4. For another CLI, use its documented safe autonomous mode. If it is autonomous by default, record that fact. If autonomy cannot be enabled or verified, stop with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
-5. Repeat the gate after every FRESHEN because a restarted CLI is a new session.
+1. Identify the launcher executable from `agent_cli` and launch it bare — only its own verified flags, never invented auto-mode startup parameters.
+2. For **pi** (`pi`), there is nothing to activate: it is autonomous by default. Launch the bare configured command and record that fact.
+3. For **Claude Code** (`claude`), launch plain `claude`, then send the Shift+Tab keystroke until the auto-accept-edits mode is selected, and confirm its mode indicator with a bounded pane read before dispatching work.
+4. For **opencode** (`opencode`), launch plain `opencode`, then press Tab (or the configured `switch_agent` keybind) to select the full-permission Build agent and verify it; settings are the documented alternative.
+5. Never send an auto-mode slash command (no CLI has one) and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the per-harness switch above is the required mechanism. Any other CLI fails closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
+6. Repeat the gate after every FRESHEN because a restarted CLI is a new session.
 
-Use the baseline/send/wait contract for the activation message itself. A task prompt saying “work autonomously” does not satisfy this gate.
+The full per-harness matrix is in `references/loop-protocol.md`. A task prompt saying “work autonomously” does not satisfy this gate.
 
 ## Workflow Overview
 
@@ -231,7 +232,7 @@ Never run `gh pr merge` or enable auto-merge. Print the mode-specific final repo
 | Missing/contradictory reviewer verdict | One parse-only re-prompt, then fail ROUND |
 | PR head changes during review/fix | Refresh; discard stale review/fix plan and review the current SHA |
 | Fork/cross-repo push permission unavailable or uncertain | Review is allowed; stop before FIXER/push with handoff |
-| Autonomous mode cannot be enabled or verified | Stop before dispatch; never substitute skip-permissions flags |
+| Autonomous mode cannot be enabled or verified | Stop before dispatch with the per-harness recovery from `error-messages.md`; never substitute skip-permissions flags |
 | Worker blocked | Surface trust/auth dialog; never type into it |
 | Max rounds | Report all remaining FINDINGS; leave PR open |
 
@@ -240,7 +241,7 @@ Never run `gh pr merge` or enable auto-merge. Print the mode-specific final repo
 - Merge, auto-merge, close the PR, force-push, or delete its remote branch
 - Open a second PR
 - Use Agent-tool subagents instead of Herdr panes
-- Launch Claude Code workers with either skip-permissions flag instead of `/auto-mode on`
+- Launch Claude Code workers with either skip-permissions flag instead of the Shift+Tab mode switch
 - Dispatch work before autonomous mode is verified, including after FRESHEN
 - Let the reviewer edit, commit, or push
 - Spawn PR-mode implementer/FIXER before FINDINGS and push-safety PASS
