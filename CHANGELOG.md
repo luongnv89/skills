@@ -82,6 +82,10 @@ Fewer, clearer entry points — one primary skill per intent.
   fires by inference. **Migration:** `/code-optimizer` → `code-review mode:perf`; `/clean-code` →
   `code-review mode:clean`; `/slop-cleanup` → `code-review mode:cleanup`.
 
+### Bug Fixes
+- **issue-work-loop (1.2.1 → 1.3.0)**: Replace the autonomous worker boot gate with a per-harness matrix — pi launches bare and is autonomous by default (zero auto-mode parameters); Claude Code starts plain and is switched via the Shift+Tab keystroke, verified by its auto-accept-edits mode indicator; opencode starts plain and is switched to the full-permission Build agent via Tab or settings. Removes the nonexistent auto-mode slash command and invented startup flags that broke fresh-machine startup; skip-permissions flags remain refused, now with a working shortcut alternative documented at every refusal. (#83)
+- **herdr-agent-comms (1.22.0 → 1.22.1)**: Launcher guidance drops the unverified pi `--skill` flag and replaces vague "verified flags for Claude Code, Codex, or OpenCode" with concrete direction to launch `claude`/`opencode` bare (mode switching is post-start and owned by the caller), keeping pi's verified `--model`/`--thinking`. (#83)
+
 ### Other
 - **chore(skills)**: trim SKILL.md files under 500-line limit (#67)
 
