@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires `tmux` on PATH. Optional Python 3 for wait/preflight/broadcast helpers."
 effort: medium
 metadata:
-  version: 2.1.0
+  version: 2.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -28,6 +28,7 @@ Route directly to the required mode; do not read unrelated references.
 | Read a pane, show status, or inspect | Phase 5 |
 | Broadcast to a fleet | Phase 6 |
 | Shut down an agent | Phase 6 |
+| Main agent's own context is filling up | Phase 7 HANDOFF |
 
 ## Prerequisites
 
@@ -44,10 +45,12 @@ Route directly to the required mode; do not read unrelated references.
 5. **Bound waiting.** Use a wall-clock cap or at most 2–3 re-waits. Surface a stall instead of polling forever.
 6. **Keep reads bounded.** Start with `capture-pane -S -40` and widen only when the reply is truncated.
 7. **Escalate blocked panes.** A trust/auth/permission dialog requires a human; do not type task text into it.
+8. **Run exactly one orchestrator.** Only the current main agent writes to fleet sessions. Orchestrator is a role, not a session: after a Phase 7 HANDOFF ack, the outgoing agent goes read-only and issues no further `send-keys`, spawns, or kills.
+9. **Gate your own context.** Self-check at every Phase 7 gate point; at or above the threshold, HANDOFF instead of continuing to fill this window.
 
 ## Workflow
 
-Run the six phases in order for a send. A read-only status/inspect operation may jump to Phase 5.
+Run Phases 1–6 in order for a send. A read-only status/inspect operation may jump to Phase 5. Phase 7 is the orchestrator's own context gate, evaluated at its named gate points rather than in sequence.
 
 ### Phase 1 — Create or Discover
 
@@ -134,12 +137,29 @@ Read `references/tmux-recipes.md` for classification commands, periodic fleet st
 
 **Complete when:** every follow-up has an independent proof cycle, broadcast failures are reported per target, or confirmed teardown affects only named sessions.
 
+### Phase 7 — Hand Off the Orchestrator Role
+
+Long fleet runs outlive one context window. Self-check your own usage at three gate points — before a spawn wave, before a broadcast, and after each relayed capture — never mid-cycle between a send and its wait.
+
+| Self-reported usage | Action |
+|---|---|
+| `P >= threshold` (default 50, overridable in conversation) | HANDOFF |
+| `P < threshold` | Continue as main |
+| UNKNOWN or unavailable | Count relayed reads and spawn waves; HANDOFF at 20 reads or 4 spawn waves |
+
+HANDOFF spawns a successor with the same Phase 1 machinery — `<folder>-main-g<N>`, app terminal tab by default, ready-gated — then delivers a compact handoff brief through the Phase 3 cycle (paste-buffer, since it is multi-line) and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that session is the orchestrator; this agent goes read-only and prints the successor's `tmux attach-session` command for the human. A successor that fails readiness or never acks means the HANDOFF failed: stay main, report the unused session, and ask before killing it.
+
+Read `references/context-succession.md` for the gate-point table, UNKNOWN fallback logging, full procedure, and the brief template. Never paste transcripts or diffs into a brief.
+
+**Complete when:** the gate decision is recorded with a percentage or an explicit UNKNOWN fallback, and any HANDOFF has a ready successor session, a delivered brief, a received ack, and no write from the outgoing agent afterward.
+
 ## Acceptance Criteria
 
 - Every write targets a confirmed session and immediately follows a successful preflight.
 - Every message has a fresh baseline, split marker, delivery check, bounded wait, and independent capped-tail verification.
 - No blocked dialog receives task text; no destructive command runs without confirmation.
 - Fleet sends and readiness checks run concurrently, with partial failures identified by session.
+- The context gate is evaluated at each gate point, and any HANDOFF ends with exactly one acked orchestrator.
 - The expected output is the requested reply/status plus the adapted Step Completion Report below—not raw unbounded scrollback.
 
 ## Example
@@ -162,10 +182,12 @@ Expected result: the agent's new reply is relayed, the joined marker proves this
 - Follow-up: never reuse a deleted baseline or marker already present in transcript.
 - Truncated capture: widen `-S` stepwise.
 - Human attached manually: detach with `Ctrl-b d`; never kill merely to return control.
+- Successor never acks: HANDOFF failed—stay main, keep the fleet, and report the unused session before asking to kill it.
 
 ## References
 
 - `references/delivery-and-waiting.md` — read for any send/wait cycle, recovery, marker contract, or timeout.
+- `references/context-succession.md` — read at the context gate for the HANDOFF procedure and brief template.
 - `references/tmux-recipes.md` — read only for script resolution, spawn modes, fleets, status/inspect, multiline sends, attach, scrollback, or troubleshooting.
 - `scripts/preflight_send.py` — fail-closed check before every send or recovery Enter.
 - `scripts/wait_for_idle.py` — readiness and settled-reply waiter.
@@ -184,6 +206,7 @@ After each operation, emit only applicable rows:
   Message delivered:   √ pass (activity vs baseline)
   Completion marker:   √ pass (fresh and joined)
   Reply verified:      √ pass (bounded independent read)
+  Context gate:        √ pass (P% or UNKNOWN · continue | HANDOFF → <folder>-main-gN)
   Destructive action:  — none (or: √ confirmed)
   Result:              PASS | FAIL | PARTIAL
 ```

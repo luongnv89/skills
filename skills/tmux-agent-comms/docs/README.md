@@ -18,6 +18,7 @@
 - **Broadcast & collect** — preflight + baselines + split markers + concurrent waits; periodic fleet status during long-running work.
 - **Status & inspect** — list every managed agent in a table, inspect one agent, and get the exact attach command for a human terminal.
 - **Keep agents visible** — new sessions attach to a fresh terminal tab in the current app by default; detached mode remains available for background fleets or environments without a terminal-tab facility.
+- **Context handoff** — when the main agent's own window passes 50%, it spawns a successor orchestrator session (`<folder>-main-g2`), hands over a compact fleet brief, and goes read-only so a long run never dies of a full context.
 - **Safe teardown** — kill individual sessions (or the whole server) behind explicit user confirmation, so no agent's work is lost by accident.
 
 ## When to Use
@@ -30,6 +31,7 @@
 | "Show status for my tmux agents" | Print a table with state, progress, start time, and working directory |
 | "Inspect the reviewer agent" | Show details for that agent and the exact `tmux attach-session` command |
 | "Shut down the tests agent" | Confirm, then `kill-session` that target |
+| "Keep this fleet running even when you run out of context" | Hand the orchestrator role to a fresh `<folder>-main-g2` session with a compact brief |
 
 ## How It Works
 
@@ -133,6 +135,7 @@ The skill confirms the target with you, then `kill-session`. (A full reset of ev
 
 | Path | Description |
 |---|---|
+| `references/context-succession.md` | The main agent's own context gate (default 50%), HANDOFF procedure, successor naming, and the compact handoff brief template |
 | `references/tmux-recipes.md` | Broadcast patterns, periodic fleet status, status/inspect behavior, multi-line/code message sending, pane splitting, scrollback, chrome-stripping, and a troubleshooting table |
 | `scripts/wait_for_idle.py` | Polls a pane until idle; prints just the reply delta (token-lean) and reports idle / blocked-on-prompt / timeout via exit codes 0/3/2 |
 | `scripts/broadcast.sh` | Sends one message to a fleet and collects every reply concurrently, one labeled block per agent |

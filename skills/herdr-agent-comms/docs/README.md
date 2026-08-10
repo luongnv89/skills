@@ -12,7 +12,8 @@
 ## Highlights
 
 - **Root + sub-agents grid** — every column, including root, is resized to equal width as sub-agents are added.
-- **Root never replaced** — orchestrator pane stays; only close worker panes on teardown.
+- **Root never replaced by accident** — the orchestrator pane stays put; only worker panes are closed on teardown.
+- **Context handoff** — when the main agent's own window passes 50%, it spawns a successor orchestrator pane, hands over a compact fleet brief, and goes read-only so a long run never dies of a full context.
 - **Fleet spawn** — agent CLI + model + thinking + optional skills, then assign tasks in parallel.
 - **Message & steer** — `pane run` / `agent send`, wait on `working` → `done`/`idle`, read transcripts.
 - **Broadcast** — fan one instruction to many agents; concurrent waits.
@@ -26,6 +27,7 @@
 | "Ask the reviewer agent what it found" | Resolve target, send, wait on status, relay reply |
 | "Broadcast 'pull main' to all fleet agents" | Fan-out send + concurrent collect |
 | "Focus the tests pane so I can steer" | `herdr agent focus tests` |
+| "Keep this fleet running even when you run out of context" | Hand the orchestrator role to a fresh `main-g2` pane with a compact brief |
 
 ## How It Works
 

@@ -36,6 +36,12 @@
       "prompt": "My SSH session died — can you reattach my tmux coding agents?",
       "expected_output": "Should NOT trigger herdr-agent-comms as the primary skill (tmux domain). Negative trigger: redirect to tmux-agent-comms or plain tmux help.",
       "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Keep driving this Herdr fleet through the whole refactor — I don't want the run to fall over when you fill up your own context.",
+      "expected_output": "Treats the main agent's context as a gated resource: self-checks usage at the named gate points (before a spawn wave, before a broadcast, after each relayed reply) rather than continuously, and continues as main below the 50% threshold. At or above it — or on the UNKNOWN fallback counters (20 relayed reads / 4 spawn waves) — performs a HANDOFF: spawns a successor pane named main-g2 through the same guarded split + equalize + readiness path, sends a compact handoff brief (objective, fleet roster with pane ids and statuses, delivered vs outstanding, constraints) through the normal baseline/marker/preflight cycle, waits for the exact ack 'HANDOFF ACCEPTED gen=2 fleet=<k>', then goes read-only, announces the new orchestrator with herdr agent focus main-g2, and never closes the outgoing root pane without confirmation. Does not paste transcripts or diffs into the brief, and never leaves two orchestrators writing to the fleet.",
+      "files": []
     }
   ]
 }

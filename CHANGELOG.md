@@ -15,7 +15,7 @@
 | Skill | Version |
 |-------|---------|
 | fork-upstream-sync | 1.0.3 |
-| herdr-agent-comms | 1.21.0 |
+| herdr-agent-comms | 1.23.0 |
 | issue-work-loop | 1.1.5 |
 | diagram-generator | 1.0.0 (umbrella routing draw.io + Excalidraw) |
 
@@ -25,7 +25,7 @@
 | Skill | Version Change |
 |-------|----------------|
 | docs-generator → doc-manager | 1.2.5 → 2.0.1 |
-| tmux-agent-comms | 1.3.0 → 1.9.0 (observability + app terminal tabs by default) |
+| tmux-agent-comms | 1.3.0 → 2.2.0 (observability, app terminal tabs by default, orchestrator context handoff) |
 | landing-page-generator | 1.1.4 → 1.2.0 (absorbs README-to-landing as Mode B) |
 | code-review | 1.2.0 → 2.0.1 (merge code-optimizer + clean-code + slop-cleanup as modes) |
 | drawio-generator | 1.2.2 → 1.2.3 (nested under diagram-generator umbrella) |
@@ -52,6 +52,8 @@
 | tad-generator | → 1.4.0 |
 | tasks-generator | → 1.3.0 |
 | website-cloner | → 1.1.6 |
+
+**Orchestrator context handoff (herdr-agent-comms 1.23.0, tmux-agent-comms 2.2.0):** the main agent now gates its own context window instead of only its workers'. It self-checks usage at three named points — before a spawn wave, before a broadcast, and after each relayed reply — and at or above a 50% threshold (overridable in conversation) performs a **HANDOFF**: it spawns a successor orchestrator with the skill's own guarded spawn path (`main-g<N>` pane in Herdr, `<folder>-main-g<N>` session in tmux), delivers a compact fleet brief through the normal baseline/marker/preflight cycle, waits for an explicit `HANDOFF ACCEPTED` ack, then goes read-only and announces the successor. Orchestrator is now a **role, not a pane** — the outgoing pane/session is retired, never closed without confirmation — and exactly one orchestrator holds write access at a time. When usage is unreportable, a countable fallback (20 relayed reads or 4 spawn waves) drives the same decision. See `references/context-succession.md` in either skill.
 
 **Breaking (doc-manager):** `docs-generator` renamed to `doc-manager`; the `/docs-generator` invocation and `--skill docs-generator` install path are removed — use `/doc-manager`. Reoriented from "restructure docs into a hierarchy" to "generate missing or update existing docs so every page matches the code." New behavior: every non-obvious claim is cited to `path:line`, ambiguities are resolved by asking and logged to `docs/DECISIONS.md`, nothing is invented. Runbook (deploy/setup/process) docs additionally get a check-only `validate.sh` and a maintained `docs/troubleshooting.md`. **2.0.1:** runbook acceptance no longer hard-requires live `--check` exit 0 for operator env/network prereqs; validate script template parses all flags (`--check` + `--run-destructive`).
 

@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires `herdr` on PATH and a running Herdr server (`herdr status`)."
 effort: medium
 metadata:
-  version: 1.22.2
+  version: 1.23.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -25,11 +25,13 @@ Use Herdr concepts, not tmux assumptions. Prefer status-aware helpers and relay 
 | Broadcast to a fleet | Phases 3 and 6 |
 | Focus/steer a pane | Phase 3, then Phase 6 |
 | Close workers | Phase 6 teardown |
+| Main agent's own context is filling up | Phase 7 HANDOFF |
 
 Read only the reference needed by that branch:
 
 - See `references/herdr-recipes.md` for guarded grid spawning, equalization semantics, multi-line sends, focus, and troubleshooting.
 - See `references/delivery-and-waiting.md` for preflight, completion markers, delivery verification, wait outcomes, and concurrent waits.
+- See `references/context-succession.md` for the main agent's context gate, HANDOFF procedure, and handoff brief template.
 
 ## Check Prerequisites
 
@@ -40,13 +42,15 @@ Read only the reference needed by that branch:
 
 ## Follow Non-Negotiable Rules
 
-1. **Keep root.** Never replace or close the root pane during fleet work.
-2. **Parse IDs.** Read opaque workspace/tab/pane IDs from JSON; never infer them from display order.
-3. **Use one equal-width row.** Split the current rightmost pane `right`, keep every worker in the root tab, then run the equalizer. Create separate tabs only when the user explicitly requests isolation.
-4. **Fail closed before writes.** Reject missing, ambiguous, `working`, `blocked`, malformed, or off-enum targets. Only a verified safe status may receive input.
-5. **Wait before follow-ups.** Never send while an agent is working. Every follow-up gets a fresh baseline and completion marker.
-6. **Surface blockers.** A trust, auth, or permission prompt needs a human; do not type a task or recovery Enter into it.
-7. **Confirm destruction.** Closing panes, tabs, workspaces, or the server can lose work. Obtain explicit approval and preserve root unless the user says otherwise.
+1. **Keep root as a role.** Never replace or close the root pane during fleet work. The one exception is a Phase 7 HANDOFF, where the orchestrator role migrates to a ready successor pane; even then the outgoing pane is retired to read-only, never closed without Rule 8 confirmation.
+2. **Run exactly one orchestrator.** Only the current main agent writes to fleet panes. After a HANDOFF ack, the outgoing agent issues no further sends, splits, or closes — two orchestrators writing the same panes corrupt each other's baselines.
+3. **Parse IDs.** Read opaque workspace/tab/pane IDs from JSON; never infer them from display order.
+4. **Use one equal-width row.** Split the current rightmost pane `right`, keep every worker in the root tab, then run the equalizer. Create separate tabs only when the user explicitly requests isolation.
+5. **Fail closed before writes.** Reject missing, ambiguous, `working`, `blocked`, malformed, or off-enum targets. Only a verified safe status may receive input.
+6. **Wait before follow-ups.** Never send while an agent is working. Every follow-up gets a fresh baseline and completion marker.
+7. **Surface blockers.** A trust, auth, or permission prompt needs a human; do not type a task or recovery Enter into it.
+8. **Confirm destruction.** Closing panes, tabs, workspaces, or the server can lose work. Obtain explicit approval and preserve the orchestrator pane unless the user says otherwise.
+9. **Gate your own context.** Self-check at every Phase 7 gate point; at or above the threshold, HANDOFF instead of continuing to fill this window.
 
 ## Phase 1 — Resolve Root Context
 
@@ -113,6 +117,22 @@ Accept `idle` or `done` after observed work. Read a capped `recent-unwrapped` tr
 
 **Done when:** every requested target has a recorded outcome and destructive actions match the user's confirmed scope.
 
+## Phase 7 — Hand Off the Orchestrator Role
+
+Long fleet runs outlive one context window. Self-check your own usage at three gate points — before a spawn wave, before a broadcast, and after each relayed reply — never mid-cycle between a dispatch and its wait.
+
+| Self-reported usage | Action |
+|---|---|
+| `P >= threshold` (default 50, overridable in conversation) | HANDOFF |
+| `P < threshold` | Continue as main |
+| UNKNOWN or unavailable | Count relayed reads and spawn waves; HANDOFF at 20 reads or 4 spawn waves |
+
+HANDOFF spawns a successor with the same Phase 2 machinery — `main-g<N>` in the root tab, equalized, readiness-gated — then delivers a compact handoff brief through the Phase 4 cycle and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that pane is the orchestrator; this pane goes read-only and announces the new one with `herdr agent focus main-g<N>`. A successor that fails readiness or never acks means the HANDOFF failed: stay main, report the orphan pane, and ask before closing it.
+
+Read `references/context-succession.md` for the gate-point table, UNKNOWN fallback logging, full procedure, and the brief template. Never paste transcripts or diffs into a brief.
+
+**Done when:** the gate decision is recorded with a percentage or an explicit UNKNOWN fallback, and any HANDOFF has a ready successor pane, a delivered brief, a received ack, and no write from the outgoing pane afterward.
+
 ## Verify Expected Output
 
 Expected output for a successful fleet operation:
@@ -133,6 +153,7 @@ Acceptance criteria:
 - Every send passes preflight and every completed reply has delivery evidence.
 - Every agent ends as completed, blocked, timed out, or failed—none disappear from the report.
 - Errors and destructive confirmations are surfaced explicitly.
+- The context gate is evaluated at each gate point, and any HANDOFF ends with exactly one acked orchestrator.
 
 ## Handle Edge Cases
 
@@ -142,6 +163,7 @@ Acceptance criteria:
 - More than four panes: warn that columns become cramped; change layout only with user approval.
 - Unequal grid: rerun the equalizer and abort worker launch if it still fails.
 - Wrong workspace or accidental tab: stop, preserve work, and ask before moving or closing panes.
+- Successor never acks: HANDOFF failed—stay main, keep the fleet, and report the orphan pane before asking to close it.
 
 ## Emit the Step Completion Report
 
@@ -154,6 +176,7 @@ Acceptance criteria:
   Layout/readiness:    √ pass (if spawning; otherwise — n/a)
   Delivery:            √ pass (if sending; otherwise — n/a)
   Replies:             √ pass (done|idle · blocked/timeouts reported)
+  Context gate:        √ pass (P% or UNKNOWN · continue | HANDOFF → main-gN)
   Destructive action:  — none (or confirmed scope)
   Result:              PASS | FAIL | PARTIAL
 ```
