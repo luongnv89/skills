@@ -147,9 +147,26 @@ The plan derived from this report: [`MODERNIZATION_PLAN.md`](./MODERNIZATION_PLA
 - **No finding without evidence.** `path:line`, or `path` + symbol, or `repo-wide` for
   absence-of-thing findings only.
 - **Counts must reconcile.** The Summary table equals the sum of rows in the Findings tables.
-- **Deduplicate across dimensions.** Same file+line from two delegates is one row listing both
-  dimensions, at the higher severity.
+- **Deduplicate across dimensions.** See the rule below — it is the one that keeps the Summary
+  counts reconciling.
 - **No remediation prose in the report.** `Fix direction` is one line; the actual sequencing,
   ownership, and verification belong in the plan.
 - **Never write "no issues found"** for a dimension that produced nothing — either name the checks
   that were run and came back clean, or mark it **Not Assessed**.
+
+## Deduplication rule
+
+When two dimensions report the same `path:line`:
+
+- The dimension appearing **earlier in the delegate table in `SKILL.md`** keeps the finding and its
+  ID; the other ID is discarded and never referenced again.
+- The finding is listed **once**, in the keeping dimension's table, with an `Also:` column naming the
+  other dimension.
+- The other dimension's table gets a one-line cross-reference (`See F-BUG-04 — also a SEC issue`)
+  that is **excluded from all counts**.
+
+Severity is the **higher** of the two dimensions' assessments — deduplicating must never downgrade a
+finding.
+
+This is what keeps the Summary counts equal to the number of counted rows, which Phase 3's
+completion criteria check.

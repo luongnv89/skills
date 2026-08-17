@@ -4,7 +4,7 @@ description: "Audit a stale, inherited, or messy codebase — deps, bugs, securi
 license: MIT
 effort: max
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -57,31 +57,21 @@ Used throughout this skill and its references with these exact meanings:
 ## Repo Sync Before Edits (mandatory)
 
 **Default: do not sync.** This skill merges nothing and commits nothing — it writes two untracked
-report files. Rebasing an audited tree is a mutation the user did not ask for, and on a long-neglected
-branch it can pull in a year of upstream commits mid-audit, invalidating every `path:line` citation
-and the SHA recorded in the report. Audit the tree as you found it.
+report files. Rebasing mid-audit can pull in a year of upstream commits, invalidating every
+`path:line` citation and the recorded SHA. Audit the tree as you found it.
 
 **Sync only when the user asks for the reports committed or pushed.** Then sync at the *start* of
-Phase 3, before the first write and after the audit has been recorded — and because HEAD may move,
-re-record the commit SHA and re-verify the cited lines still resolve. If a citation no longer
-resolves, the audit is stale: say so and re-run rather than publishing a report that points at the
-wrong lines.
+Phase 3, after the audit is recorded — and because HEAD moves, re-record the commit SHA and
+re-verify every citation still resolves. A citation that no longer resolves means the audit is
+stale: say so and re-run rather than publishing a report pointing at the wrong lines.
 
-When syncing, sync the current branch with remote:
-
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
-
-If the working tree is not clean, stash first, sync, then restore:
+When syncing, sync the current branch with remote — stash first if the tree is not clean:
 
 ```bash
-git stash push -u -m "pre-sync"
+git stash push -u -m "pre-sync"   # only when `git status --porcelain` is non-empty
 branch="$(git rev-parse --abbrev-ref HEAD)"
 git fetch origin && git pull --rebase origin "$branch"
-git stash pop
+git stash pop                     # only if you stashed
 ```
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user
@@ -89,19 +79,18 @@ before continuing. A dirty tree is common on a neglected repo — never discard 
 
 ## Scope and branch selection
 
-Resolve these before Phase 0. Each is a real branch in the workflow, not a preference.
+Resolve all nine branches in `references/scope-detection.md` **before Phase 0** — target path, repo
+size, Agent-tool availability, Bash availability, Skill-tool availability, UI presence, app
+runnability, ecosystems, and any user dimension filter. Each is a real branch in the workflow, not a
+preference. Two of them change what is obtainable at all, so check them early:
 
-| Branch | Detect | Effect |
-|---|---|---|
-| **Target** | `$ARGUMENTS` path, else current working directory | Repo root for all probes and both output files |
-| **Repo size** | count *source* files only — `git ls-files` filtered to source extensions, or `find` with the standard excludes (`node_modules`, `dist`, `build`, `vendor`, `target`, `.git`) when the target is not a git repo | < 50 source files → run dimensions inline; ≥ 50 → parallel `dimension-auditor` subagents |
-| **Agent tool** | availability in this session | Unavailable → run every dimension inline, sequentially, and disclose reduced depth in the report |
-| **Bash / shell** | can you run commands at all? | Unavailable (e.g. Claude.ai) → **no baseline is obtainable**: every Phase 0 probe and `dep_scan.sh` is a shell command. Record the whole baseline **Not Assessed — no shell**, audit only what static reading supports (`CLEAN`, `DEAD`, `UX`, `DOCS`, and manifest-declared versions read from the file), and state prominently that dependency *currency* and all runtime verification were impossible. Do not fabricate a verdict. |
-| **Skill tool** | does the delegate appear by name in this session's skill list? | Present → invocable. Absent, or the list cannot be enumerated → inline, recorded as `Path: inline (availability unknown)`. Never guess availability |
-| **UI present** | frontend deps in manifests, or `*.tsx/*.jsx/*.vue/*.svelte/*.html` outside build output, or template dirs | Absent → UI/UX dimensions are **Not Assessed — no UI detected**; never invent UX findings |
-| **App runnable** | a start/dev script that a probe confirms exists | Not runnable → UX review is static-only; state that limitation in the report |
-| **Ecosystems** | manifest files present (see `references/dependency-audit.md`) | Drives which dependency probes run; each **fail-soft** |
-| **Dimension filter** | user names specific areas ("just deps and tests") | Audit only those; mark the rest **Not Assessed — out of requested scope** |
+- **No Bash** → no baseline is obtainable; every Phase 0 probe is a shell command. Record the whole
+  baseline **Not Assessed — no shell**, audit only what static reading supports, and never fabricate
+  a verdict.
+- **No UI detected** → UI/UX dimensions are **Not Assessed — no UI detected**. Never invent UX
+  findings.
+
+Never assume the permissive side of a branch you did not check.
 
 ## What this skill owns, and what it delegates
 
@@ -123,22 +112,19 @@ currency**, the **baseline gate**, and the **audit → plan bridge**. Everything
 
 **Delegation policy — one rule: a delegate is invoked only if it changes no tracked file.**
 
-- **Invoked** (`BUG`, `PERF`, `UX`) — these never touch source. Call them with the Skill tool:
-  `skill: "code-review"` with `args: "mode:review <scope>"` and `args: "mode:perf <scope>"`, and
-  `skill: "dont-make-me-think"` **in review mode only**. Normalize each one's output into finding
-  records; record `Path: delegated`. Two cautions:
-  - `code-review` mode `review` writes its own `CODE_REVIEW.md`. That is a **declared artifact** —
-    list it in the report's Artifacts section. Mode `perf` writes no file.
-  - `dont-make-me-think` has a **Redesign Mode that edits UI source files**. Never let it enter that
-    mode: ask for the usability review only, and decline any offer to apply fixes.
-- **Inline** (`CLEAN`, `DEAD`, `TEST`, `CI`, `SEC`, `DOCS`) — these delegates **write**: they install
-  hooks, configure CI, generate test files, rewrite docs, or refactor source. Invoking one during an
-  audit would break the read-only contract, so never do it. Audit the dimension with its checklist in
-  `references/dimension-map.md`, record `Path: inline`, and name that skill as the invocation in the
-  plan task that does the work. Here `inline` is the expected path, not a degradation — do not report
-  it as a limitation.
-- **Skill tool unavailable** → the three invoked dimensions fall back to inline as well. That *is*
-  reduced depth: record `Path: inline (Skill tool unavailable)` and say so in Limitations.
+- **Invoked** (`BUG`, `PERF`, `UX`) — these never touch source. Normalize their output into finding
+  records and record `Path: delegated`. `code-review` mode `review` writes its own `CODE_REVIEW.md`,
+  a **declared artifact** that must be listed in the report's Artifacts section. Never let
+  `dont-make-me-think` enter its **Redesign Mode, which edits UI source files** — ask for the
+  usability review only and decline any offer to apply fixes.
+- **Inline** (`CLEAN`, `DEAD`, `TEST`, `CI`, `SEC`, `DOCS`) — these delegates **write**, so invoking
+  one during an audit would break the read-only contract. Never do it. Audit the dimension with its
+  checklist in `references/dimension-map.md`, record `Path: inline`, and name that skill as the
+  invocation in the plan task that does the work. Here `inline` is the expected path, not a
+  degradation — do not report it as a limitation.
+
+Read `references/delegation-policy.md` before Phase 2 for exact invocation args, artifact handling,
+and the Skill-tool-unavailable fallback (which *is* reduced depth).
 
 ## Workflow
 
@@ -177,6 +163,9 @@ listed; repo-size branch and Agent-tool branch are both resolved and stated.
 
 ### Phase 2 — Dimension audits
 
+**Read `references/delegation-policy.md` before invoking any delegated dimension** — it holds the
+exact call for each, and the artifact handling that keeps the read-only contract intact.
+
 Run `DEP` first — its output feeds the plan's upgrade waves and often explains findings in other
 dimensions. Then run the remaining audited dimensions, in parallel via `agents/dimension-auditor.md`
 when the size branch calls for subagents, otherwise inline.
@@ -201,15 +190,10 @@ evidence; finding IDs are unique and follow `F-<DIM>-<NNN>`.
 Merge all finding records into `MODERNIZATION_REPORT.md` using `references/report-template.md`.
 Rank by severity: `Critical` → `High` → `Medium` → `Low`.
 
-**Deduplication rule.** When two dimensions report the same `path:line`:
-- The dimension appearing **earlier in the delegate table above** keeps the finding and its ID; the
-  other ID is discarded and never referenced.
-- The finding is listed **once**, in the keeping dimension's table, with an `Also:` column naming the
-  other dimension.
-- The other dimension's table gets a one-line cross-reference (`See F-BUG-04 — also a SEC issue`)
-  that is **excluded from all counts**.
-
-This keeps the Summary counts equal to the number of counted rows, which Phase 3's criteria check.
+**Deduplicate before writing.** Two dimensions reporting the same `path:line` produce one counted
+row, kept by whichever dimension appears earlier in the delegate table above. Follow the
+deduplication rule in `references/report-template.md` — it is what keeps the Summary counts equal to
+the number of rows.
 
 **Completion criteria:** the file exists at the repo root; it contains the baseline table, a
 dimension coverage table showing all 10 dispositions, and the full finding table; every finding has
@@ -319,11 +303,10 @@ Source files changed: 0
 ## Edge Cases
 
 - **Not a git repo** — skip Repo Sync, state it in the report, still write both files.
-- **Monorepo** — `scripts/dep_scan.sh` probes the repo root only. When it reports manifests in
-  subdirectories, **re-run it once per package directory** (it prints the exact commands) and merge
-  the results; each workspace package is its own ecosystem row in `DEP` with its own `id_start` block.
-  Never accept "Ecosystems detected: none" while nested manifests exist. Scope other dimensions to the
-  packages the user names, or all of them if unspecified.
+- **Monorepo** — `scripts/dep_scan.sh` probes the repo root only; **re-run it once per package
+  directory** and merge the results, one ecosystem row and `id_start` block per package. Never accept
+  "Ecosystems detected: none" while nested manifests exist. Scope other dimensions to the packages
+  the user names, or all of them if unspecified.
 - **No manifest at all** (shell scripts, plain HTML) — `DEP` is **Not Assessed — no manifest**; the
   plan drops P2 to a single "no dependency surface" note rather than inventing upgrade tasks.
 - **No network** — dependency *latest* versions are unobtainable; record installed versions only and
@@ -334,17 +317,18 @@ Source files changed: 0
   before overwriting.
 - **Huge repo (> 2000 source files)** — audit by subsystem in priority order, cap the file set per
   dimension, and state in Limitations exactly what was not scanned. Never silently truncate.
-- **User asks to apply fixes** — this skill is read-only; finish both files, then point at the
-  delegate skill named in the relevant task.
+- **User asks to apply fixes** — handled by the Read-only contract above: finish both files first,
+  then hand off.
 
 ## Reference files
 
-- `references/baseline.md` — Phase 0 probe protocol per stack and the baseline evidence table.
-- `references/dependency-audit.md` — per-ecosystem detection, **fail-soft** probes, classification
-  schema, **upgrade wave** rules, and migration-guide lookup for majors.
-- `references/dimension-map.md` — the 10 dimensions: delegate invocation, inline fallback checklist,
-  severity rubric, and skip rules.
-- `references/report-template.md` — `MODERNIZATION_REPORT.md` structure.
+- `references/scope-detection.md` — the nine scope branches, detection, and resolution order.
+- `references/delegation-policy.md` — invocation args, artifact handling, and fallbacks per path.
+- `references/baseline.md` — Phase 0 probe protocol per stack, and the baseline evidence table.
+- `references/dependency-audit.md` — per-ecosystem **fail-soft** probes, classification schema,
+  **upgrade wave** rules, and migration-guide lookup for majors.
+- `references/dimension-map.md` — the 10 dimensions: inline checklist, severity rubric, skip rules.
+- `references/report-template.md` — `MODERNIZATION_REPORT.md` structure and the deduplication rule.
 - `references/plan-template.md` — `MODERNIZATION_PLAN.md` structure and task format.
 - `scripts/dep_scan.sh` — read-only ecosystem and dependency probe; prints a markdown summary.
 
