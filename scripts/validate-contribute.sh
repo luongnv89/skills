@@ -51,6 +51,35 @@ if [ -f "$SC/quick_validate.py" ] && [ -f skills/doc-manager/SKILL.md ]; then
   fi
 fi
 
+# --- Skill count parity: docs/index.html vs the catalog on disk ---
+# Counting rule (stated in full in the docs/index.html <head> comment): every
+# tracked SKILL.md anywhere under skills/, nested suite sub-skills included,
+# because install.sh installs those children independently. Directories with no
+# SKILL.md (e.g. *-workspace/) never count.
+if [ -f docs/index.html ]; then
+  on_disk="$(git ls-files skills | grep -c '/SKILL\.md$' | tr -d '[:space:]')"
+  # Every site that advertises the count matches "<n> skills" or "<n> installable".
+  # The <head> comment enumerates them; a site reworded out of that shape would
+  # otherwise go unchecked, so the number of matches is asserted as well.
+  expected_sites=6
+  sites="$(grep -oE '[0-9]+ (skills|installable)' docs/index.html | grep -oE '^[0-9]+')"
+  n_sites="$(printf '%s\n' "$sites" | grep -c '[0-9]' | tr -d '[:space:]')"
+  bad_sites="$(printf '%s\n' "$sites" | grep '[0-9]' | grep -vx "$on_disk" | sort -u | tr '\n' ' ')"
+  if [ -z "$on_disk" ] || [ "$on_disk" = "0" ]; then
+    bad "docs/index.html skill count" "could not derive the count from git ls-files"
+  elif [ "$n_sites" -eq 0 ]; then
+    bad "docs/index.html skill count" "no '<n> skills'/'<n> installable' literal found — update this check if the copy was reworded"
+  elif [ "$n_sites" -lt "$expected_sites" ]; then
+    bad "docs/index.html skill count" "only $n_sites of the $expected_sites documented sites still match '<n> skills'/'<n> installable' — a reworded site would go unchecked"
+  elif [ -n "$bad_sites" ]; then
+    bad "docs/index.html skill count" "advertises ${bad_sites}but ${on_disk} SKILL.md files are tracked under skills/"
+  else
+    ok "docs/index.html skill count ($on_disk in $n_sites places)"
+  fi
+else
+  bad "docs/index.html present" "missing"
+fi
+
 # --- Destructive scaffold — gated ---
 if [ "$MODE" = "destructive" ]; then
   man "init_skill.py my-skill --path skills/ (creates files)"

@@ -4,7 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agent Skills — Ready-made skills for AI coding agents</title>
-  <meta name="description" content="Agent Skills v1.15.0 — 40 installable workflows for AI coding agents. Browse the GitHub Pages catalog, install with one command. Claude Code, Cursor, Copilot, Codex, OpenCode, and Google Antigravity. MIT licensed.">
+  <!--
+    SKILL COUNT — counting rule (do not guess it; it is asserted mechanically).
+
+      Rule:    every installable SKILL.md anywhere under skills/, including the
+               nested sub-skills of umbrella suites (diagram-generator/,
+               website-cloner/). install.sh and remote-install.sh install those
+               children independently, so each one is a separately installable
+               skill. Directories without a SKILL.md (e.g. *-workspace/) never
+               count.
+      Command: git ls-files skills | grep -c '/SKILL\.md$'
+               (equivalently, on a clean tree: find skills -name SKILL.md | wc -l)
+      Value:   42 skills
+
+    The number appears in five page-visible places: this meta description, the
+    hero badge, the "Current catalog docs" card, the "N skills" social-proof
+    card, and the footer line under it — plus the Value line above, which is
+    written in the same "<n> skills" form on purpose so that it is checked too.
+    Change all six together.
+
+    scripts/validate-contribute.sh re-derives the count and fails when any of
+    the six disagrees with it, and also when fewer than six still match the
+    "<n> skills" / "<n> installable" shape it looks for — so a site reworded out
+    of that shape cannot quietly stop being checked. If you deliberately add or
+    remove a site, update expected_sites in that script. Run it after adding or
+    removing a skill.
+  -->
+  <meta name="description" content="Agent Skills v1.15.0 — 42 installable workflows for AI coding agents. Browse the GitHub Pages catalog, install with one command. Claude Code, Cursor, Copilot, Codex, OpenCode, and Google Antigravity. MIT licensed.">
   <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -553,7 +579,7 @@
   <!-- HERO (PAS opener) -->
   <header class="hero">
     <div class="container">
-      <div class="badge"><strong>v1.15.0</strong> · <strong>40 skills</strong> · <a href="https://luongnv89.github.io/skills/" style="color: inherit; text-decoration: underline;">Live on GitHub Pages</a> · MIT</div>
+      <div class="badge"><strong>v1.15.0</strong> · <strong>42 skills</strong> · <a href="https://luongnv89.github.io/skills/" style="color: inherit; text-decoration: underline;">Live on GitHub Pages</a> · MIT</div>
       <h1>Stop Rebuilding Agent Skills</h1>
       <p class="hero-sub">
         Your AI coding agent restarts from zero every session. Agent Skills gives you a browsable catalog of standalone, versioned workflows — including this site from <code class="mono">docs/</code>. Install only what you need with one command. Your agent follows the same process every time.
@@ -693,7 +719,7 @@
       <div class="grid-3">
         <div class="card">
           <h3>Current catalog docs</h3>
-          <p>README and this GitHub Pages home now reflect the 40 installable <code class="mono">SKILL.md</code> entries in <code class="mono">skills/</code>.</p>
+          <p>README and this GitHub Pages home now reflect the 42 installable <code class="mono">SKILL.md</code> entries in <code class="mono">skills/</code>.</p>
         </div>
         <div class="card">
           <h3>New &amp; expanded skills</h3>
@@ -718,7 +744,7 @@
       </p>
       <div class="grid-3">
         <div class="card">
-          <h3>40 skills</h3>
+          <h3>42 skills</h3>
           <p>Code review, security-setup, release automation, website-cloner suite, PRDs, Herdr/tmux agent comms — each installs on its own.</p>
         </div>
         <div class="card">
@@ -731,7 +757,7 @@
         </div>
       </div>
       <p style="margin-top: 2rem; color: var(--muted); font-size: 0.9rem;">
-        Catalog <strong>v1.15.0</strong> plus Unreleased docs — 40 installable workflows, suite-aware installers, and current README parity.
+        Catalog <strong>v1.15.0</strong> plus Unreleased docs — 42 installable workflows, suite-aware installers, and current README parity.
       </p>
     </div>
   </section>
