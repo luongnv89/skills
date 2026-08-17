@@ -46,7 +46,8 @@ case "$TIMEOUT" in ''|*[!0-9]*) die "--timeout must be a whole number of seconds
 case "$DEPTH"   in ''|*[!0-9]*) die "--depth must be a whole number, got '$DEPTH'" ;; esac
 ROOT="$(cd "$ROOT" && pwd)"
 
-EXCLUDES='-not -path */node_modules/* -not -path */.git/* -not -path */vendor/* -not -path */dist/* -not -path */build/* -not -path */.venv/* -not -path */venv/* -not -path */target/*'
+EXCLUDES=(-not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/vendor/*' -not -path '*/dist/*'
+          -not -path '*/build/*' -not -path '*/.venv/*' -not -path '*/venv/*' -not -path '*/target/*')
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
@@ -80,8 +81,7 @@ run_probe() {
 skip_tool() { printf '\n**%s** — Not Assessed: `%s` not installed.\n' "$1" "$2"; }
 skip_net()  { printf '\n**%s** — Not Assessed: offline mode, network probe skipped.\n' "$1"; }
 
-# shellcheck disable=SC2086
-found() { find "$ROOT" -maxdepth "$DEPTH" -name "$1" $EXCLUDES -print 2>/dev/null | head -20; }
+found() { find "$ROOT" -maxdepth "$DEPTH" -name "$1" "${EXCLUDES[@]}" -print 2>/dev/null | head -20; }
 
 ECOSYSTEMS=""
 note_eco() { ECOSYSTEMS="$ECOSYSTEMS $1"; }
@@ -99,9 +99,7 @@ for m in package.json pyproject.toml requirements.txt setup.py Pipfile go.mod Ca
   hits="$(found "$m")"
   if [ -n "$hits" ]; then
     MANIFESTS="$MANIFESTS $m"
-    total="$(find "$ROOT" -maxdepth "$DEPTH" -name "$m" -not -path '*/node_modules/*' -not -path '*/.git/*' \
-             -not -path '*/vendor/*' -not -path '*/dist/*' -not -path '*/build/*' -not -path '*/.venv/*' \
-             -not -path '*/venv/*' -not -path '*/target/*' 2>/dev/null | wc -l | tr -d ' ')"
+    total="$(find "$ROOT" -maxdepth "$DEPTH" -name "$m" "${EXCLUDES[@]}" 2>/dev/null | wc -l | tr -d ' ')"
     printf -- '- `%s`\n' "$m"
     printf '%s\n' "$hits" | sed "s|^$ROOT/\{0,1\}|    - |"
     [ "$total" -gt 20 ] && printf -- '    - _… %s more not shown (raise `--depth` or re-run per package)_\n' "$((total - 20))"
@@ -110,13 +108,14 @@ for m in package.json pyproject.toml requirements.txt setup.py Pipfile go.mod Ca
       [ -z "$hit" ] && continue
       d="$(dirname "$hit")"
       [ "$d" = "$ROOT" ] && continue
-      case " $NESTED_DIRS " in *" $d "*) ;; *) NESTED_DIRS="$NESTED_DIRS $d" ;; esac
+      # Newline-delimited so directory names containing spaces survive intact.
+      case $'\n'"$NESTED_DIRS" in *$'\n'"$d"$'\n'*) ;; *) NESTED_DIRS="$NESTED_DIRS$d"$'\n' ;; esac
     done <<EOF
 $hits
 EOF
   fi
 done
-NESTED_DIRS="$(printf '%s' "$NESTED_DIRS" | tr ' ' '\n' | sed '/^$/d')"
+NESTED_DIRS="$(printf '%s' "$NESTED_DIRS" | sed '/^$/d')"
 [ -n "$(found '*.csproj')" ] && { MANIFESTS="$MANIFESTS csproj"; printf -- '- `*.csproj`\n'; }
 [ -d "$ROOT/.github/workflows" ] && { MANIFESTS="$MANIFESTS actions"; printf -- '- `.github/workflows/`\n'; }
 
@@ -154,9 +153,9 @@ if [ -f "$ROOT/pyproject.toml" ] || [ -f "$ROOT/requirements.txt" ] || [ -f "$RO
   note_eco python
   printf '\n## Python\n'
   if have uv && [ -f "$ROOT/uv.lock" ]; then
-    run_probe "uv outdated" uv pip list --outdated
+    [ $OFFLINE -eq 1 ] && skip_net "uv outdated" || run_probe "uv outdated" uv pip list --outdated
   elif have poetry && [ -f "$ROOT/poetry.lock" ]; then
-    run_probe "poetry outdated" poetry show --outdated
+    [ $OFFLINE -eq 1 ] && skip_net "poetry outdated" || run_probe "poetry outdated" poetry show --outdated
   elif have pip; then
     [ $OFFLINE -eq 1 ] && skip_net "pip outdated" || run_probe "pip outdated" pip list --outdated --format=json
   else
@@ -316,7 +315,7 @@ fi
 
 # ---------- Summary ----------
 printf '\n## Scan summary\n\n'
-if [ -z "$ECOSYSTEMS" ] && [ -n "$MANIFESTS" ]; then
+if [ -z "$ECOSYSTEMS" ] && [ -n "$NESTED_DIRS" ]; then
   # Manifests exist but none at the repo root: this is a monorepo / nested layout.
   printf -- '- Ecosystems probed at repo root: **none**\n'
   printf -- '\n> **Not Assessed — manifests found only in subdirectories.** This scan probes the repo\n'
