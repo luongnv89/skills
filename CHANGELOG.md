@@ -5,7 +5,7 @@
 
 ### Docs
 - Reconcile root README skill catalog to on-disk `metadata.version` for all installable skills; add `fork-upstream-sync`, `herdr-agent-comms`, Google Antigravity install path, Project docs index, install validation link
-- Reconcile `docs/index.html` GitHub Pages copy to current catalog state: v1.15.0 baseline, 40 installable skills, Google Antigravity support, and no removed `clean-code` catalog card
+- Reconcile `docs/index.html` GitHub Pages copy to current catalog state: v1.15.0 baseline, Google Antigravity support, and no removed `clean-code` catalog card
 - Correct the `docs/index.html` skill count to 42 at every site, state the counting rule (every tracked `SKILL.md` under `skills/`, nested suite sub-skills included) beside the literal, and assert it from `scripts/validate-contribute.sh` so the next skill added cannot silently re-break it
 - Fix CONTRIBUTING setup commands to external skill-creator paths (`~/.claude/skills/skill-creator/scripts/`); align frontmatter example with `metadata.version`
 - Add `scripts/validate-install.sh`, `scripts/validate-contribute.sh` (check-only), `docs/DECISIONS.md`, `docs/troubleshooting.md`, `docs/archive/README.md`
