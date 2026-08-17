@@ -1,0 +1,149 @@
+{
+  "skill_name": "codebase-modernizer",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "I haven't touched this project in about a year. Can you do a full review of the codebase — dependencies, logic, UI, UX — and give me a step-by-step plan with sprints and milestones to bring it up to date?",
+      "expected_output": "MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md written at the repo root; baseline recorded with a GREEN/AMBER/RED verdict; all 10 dimensions dispositioned; a 5-phase plan with sprints, tasks, and milestones.",
+      "files": [],
+      "expectations": [
+        "The run establishes the Phase 0 baseline (build, tests, pass rate) BEFORE auditing any dimension",
+        "Both MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md exist at the target repo root",
+        "The report's dimension coverage table lists all 10 dimensions with Audited or Not Assessed + reason",
+        "Every finding cites path:line, or is marked repo-wide only for absence-of-thing findings",
+        "The plan contains phases P0 through P4, each with at least one sprint and a measurable milestone",
+        "Every task has at least 2 acceptance criteria, one asserting the test suite is still green",
+        "Every task carries a Closes: line naming finding IDs, or names the milestone it enables",
+        "No repo-writing delegate is invoked during the audit — test-coverage, devops-pipeline, security-setup, doc-manager, code-review mode clean, and code-review mode cleanup are each named in a plan task instead",
+        "git diff --stat is empty — no tracked file's content was modified",
+        "Any new file is one of the two reports, the declared CODE_REVIEW.md artifact, or a probe byproduct, and all of them are enumerated in the report's Artifacts section",
+        "dont-make-me-think is invoked in review mode only — its Redesign Mode never runs and no UI source file is edited"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "This repo has become a mess after dozens of tasks with no cleanup. Audit the whole thing and tell me how to get it to a better, up-to-date version — I want something testable, not a wish list.",
+      "expected_output": "Full audit plus a plan whose every task has command-checkable acceptance criteria, a dependency table with no cycles, and an explicitly stated critical path.",
+      "files": [],
+      "expectations": [
+        "Findings are severity-ranked Critical/High/Medium/Low and the summary counts equal the finding table rows",
+        "Every acceptance criterion in the plan is checkable by a command, file state, or count — no 'code is cleaner' style criteria",
+        "The dependency table references only task IDs that exist and contains no cycles",
+        "The critical path is stated explicitly with its task chain",
+        "Dead-code and duplication work is scheduled as a task invoking code-review mode cleanup, and cleanup is never run during the audit"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Update all the dependencies in this project to the latest versions and plan the rest of the modernization work.",
+      "expected_output": "No dependency is actually upgraded. A classified DEP table plus upgrade waves; majors become one task each with a named migration source.",
+      "files": [],
+      "expectations": [
+        "No upgrade command is executed — no npm update, ncu -u, pip install -U, cargo update, poetry update, or equivalent",
+        "The skill states up front that upgrades are planned rather than applied, and why",
+        "Each dependency is classified with gap type, risk, blast radius, and an upgrade wave",
+        "Security patches, the patch/minor batch, and each major are separated into distinct waves",
+        "Each major-version task appears alone and names its migration source, or is flagged as a spike when no guide was retrievable"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Review this codebase and plan the modernization. (Target: a headless Go CLI with no frontend files, no test suite, and a build that currently fails to compile.)",
+      "expected_output": "Baseline RED recorded; audit continues; UX marked Not Assessed — no UI detected; missing test suite reported as Critical; Sprint 0 restores baseline-green and everything else depends on it.",
+      "files": [],
+      "expectations": [
+        "The baseline verdict is RED and the audit continues rather than aborting",
+        "The UX dimension is marked 'Not Assessed — no UI detected' and no UX findings are invented",
+        "The absent test suite is reported as a Critical finding and lands in phase P0",
+        "The plan's Sprint 0 restores baseline-green and later phases depend on milestone M0",
+        "The Limitations section names every Not Assessed dimension and every missing tool"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Audit this repo — but I only care about dependencies and test coverage right now.",
+      "expected_output": "Only DEP and TEST are audited; the other 8 dimensions appear in the coverage table as 'Not Assessed — out of requested scope'; the plan covers only findings from the two audited dimensions.",
+      "files": [],
+      "expectations": [
+        "Exactly the DEP and TEST dimensions are audited",
+        "The other eight dimensions appear in the coverage table marked Not Assessed with the out-of-scope reason",
+        "No findings are produced for dimensions that were not audited",
+        "The plan still uses the fixed P0-P4 skeleton, with empty phases collapsed to a one-line note rather than renumbered"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Review this PR for bugs and security issues before I merge it.",
+      "expected_output": "Handled by code-review mode review — a prioritized findings report on the diff. No baseline probe, no MODERNIZATION_REPORT.md, no sprint plan.",
+      "files": [],
+      "expectations": [
+        "codebase-modernizer does not trigger; the request routes to code-review",
+        "No MODERNIZATION_REPORT.md or MODERNIZATION_PLAN.md is written",
+        "No 5-phase sprint plan is produced for a single-diff review"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Here's the PRD for our new product. Break it into sprint tasks with dependencies.",
+      "expected_output": "Handled by tasks-generator — tasks.md from the PRD. No codebase audit, no baseline probe, no dependency scan.",
+      "files": [],
+      "expectations": [
+        "codebase-modernizer does not trigger; the request routes to tasks-generator",
+        "No baseline probe or dependency scan runs against the repo",
+        "The output is PRD-derived tasks, not an audit report"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "prompt": "Audit this codebase and give me the modernization plan. (Environment: every delegate skill is installed and available — code-review, dont-make-me-think, test-coverage, devops-pipeline, security-setup, doc-manager.)",
+      "expected_output": "The audit invokes only the three non-mutating delegates. No hook, workflow, test, or docs file is created; the six writing skills appear only as named invocations inside plan tasks.",
+      "files": [],
+      "expectations": [
+        "No pre-commit hook or .pre-commit-config.yaml is created (security-setup and devops-pipeline are not invoked)",
+        "No file under .github/workflows/ is created or modified",
+        "No test file is generated (test-coverage is not invoked)",
+        "No documentation file is rewritten (doc-manager is not invoked)",
+        "No CLEAN_CODE_AUDIT.md is produced (code-review mode clean is not invoked)",
+        "dont-make-me-think runs in review mode only — no UI source file is edited",
+        "Each of the six writing skills is named as the invocation in at least one plan task",
+        "git diff --stat is empty at the end of the run"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "Audit this monorepo and plan the modernization. (Target: packages/web/package.json and services/api/go.mod, with no manifest at the repo root.)",
+      "expected_output": "Nested manifests are detected and probed per package; DEP is never reported as 'no ecosystems' while manifests exist.",
+      "files": [],
+      "expectations": [
+        "Both the nested npm package and the nested Go module appear as separate DEP ecosystem rows",
+        "The run does not report 'Ecosystems detected: none' while nested manifests exist",
+        "dep_scan.sh is re-run per package directory, or the unprobed packages are explicitly marked Not Assessed with the reason",
+        "The go.mod declared Go version is assessed for EOL rather than reported as 'no runtime declared'"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "happy-path",
+      "prompt": "I inherited this Rails app from a contractor who left 8 months ago. Give me a refactoring and upgrade plan I can actually work through sprint by sprint.",
+      "expected_output": "Full audit plus a P0-P4 plan sized into sprints, with the Ruby/Rails dependency and runtime currency assessed and majors split one per task.",
+      "files": [],
+      "expectations": [
+        "The skill triggers on the inherited/neglected-codebase framing without the user saying 'modernize' or 'stale'",
+        "Phase 0 records a baseline verdict before any dimension is audited",
+        "The Ruby ecosystem is detected and its runtime version checked against current stable for EOL",
+        "Any Rails major-version bump is its own task naming a migration source, never batched with other upgrades",
+        "Sprints are sized to 5-10 tasks each and every task carries an effort estimate",
+        "Both MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md are written; git diff --stat is empty"
+      ]
+    }
+  ]
+}
