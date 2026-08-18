@@ -35,6 +35,7 @@ Pre tasks are milestone-enabling and serve `ME`.
 | Never invoke | Do **not** run `/agent-config` (or write `CLAUDE.md` / `AGENTS.md`) during the audit. Name the exact invocation on the task's `Verify:` line. |
 | IDs | Sprint **Pre**, tasks `Task Pre.<index>` so P0 keeps Sprint 0 / `Task 0.<index>`. |
 | Order | `ME` precedes every P0–P4 task. On a RED baseline, Pre is the only work allowed before `M0`. |
+| RED baseline | Pre does **not** assert a green build or suite. Restore-green stays on P0 / Sprint 0. Pre ACs only require documented install/run notes and create-or-update of `CLAUDE.md` / `AGENTS.md`. |
 
 ### Binding M3 and M4 — required, not optional
 
@@ -62,8 +63,10 @@ multiple sprints when it exceeds that; a phase always has at least one sprint.
 Derived from [`MODERNIZATION_REPORT.md`](./MODERNIZATION_REPORT.md) · **Baseline at audit:** <verdict>
 **Test command of record:** `<command>` · **Pass rate at audit:** `<41/58>`
 
-Every task's acceptance criteria include *"`<test command>` passes at ≥ the recorded rate"*. That is
-what makes this plan testable rather than aspirational.
+Every P0–P4 task's acceptance criteria include *"`<test command>` passes at ≥ the recorded rate"*.
+On a RED baseline, Pre omits that assertion — restoring green is P0 / Sprint 0, and Pre must
+finish first. Pre ACs only require documented install/run notes and create-or-update of
+`CLAUDE.md` / `AGENTS.md`.
 
 ## At a glance
 
@@ -91,8 +94,8 @@ what makes this plan testable rather than aspirational.
 **Closes**: — (milestone-enabling: ME)
 
 **Acceptance Criteria**:
-- [ ] A later agent can install deps and run the recorded build/test commands from written project files alone
-- [ ] `<test command>` passes at ≥ 41/58 (baseline-green holds)
+- [ ] Written notes cover toolchain install, required env vars / `.env.example`, and the recorded build/test commands
+- [ ] A later agent can follow those notes from project files alone (commands may still be RED; restoring green is P0)
 
 **Dependencies**: None
 
@@ -107,8 +110,8 @@ what makes this plan testable rather than aspirational.
 **Closes**: — (milestone-enabling: ME)
 
 **Acceptance Criteria**:
-- [ ] `CLAUDE.md` exists at the repo root and names the recorded build/test commands
-- [ ] `<test command>` passes at ≥ 41/58 (baseline-green holds)
+- [ ] `CLAUDE.md` exists at the repo root (create via `/agent-config` if absent)
+- [ ] `CLAUDE.md` names the recorded build/test commands (improve via `/agent-config update` if already present)
 
 **Dependencies**: Pre.1
 
@@ -124,7 +127,7 @@ what makes this plan testable rather than aspirational.
 
 **Acceptance Criteria**:
 - [ ] `AGENTS.md` exists at the repo root (create) or is improved against agent-config checklists (update)
-- [ ] `<test command>` passes at ≥ 41/58 (baseline-green holds)
+- [ ] `AGENTS.md` names the recorded build/test commands
 
 **Dependencies**: Pre.1
 
@@ -148,7 +151,7 @@ what makes this plan testable rather than aspirational.
 - [ ] <specific, checkable condition — a command, a file state, or a count>
 - [ ] `<test command>` passes at ≥ 41/58 (baseline-green holds)
 
-**Dependencies**: None
+**Dependencies**: Pre.2, Pre.3
 
 **Effort**: S | M | L (1–3 days)
 
@@ -166,7 +169,7 @@ what makes this plan testable rather than aspirational.
 | Task | Depends on | Blocks | Wave |
 |---|---|---|---|
 | Pre.1 | — | Pre.2, Pre.3, 0.1 | W0 |
-| 0.1 | Pre.1 | 0.3, 1.1 | W1 |
+| 0.1 | Pre.2, Pre.3 | 0.3, 1.1 | W1 |
 | 1.1 | 0.1 | 2.1 | W2 |
 
 ## Execution waves
@@ -177,8 +180,9 @@ run in parallel.
 | Wave | Tasks |
 |---|---|
 | 1 | Pre.1 |
-| 2 | Pre.2, Pre.3, 0.1, 0.2, 0.4 |
-| 3 | 0.3, 0.5 |
+| 2 | Pre.2, Pre.3 |
+| 3 | 0.1, 0.2, 0.4 |
+| 4 | 0.3, 0.5 |
 
 ## Milestones
 
@@ -212,11 +216,15 @@ oversight — this section is what makes the plan reviewable.
 - No task invents work absent from the report.
 
 **Testability**
-- ≥ 2 acceptance criteria per task; at least one asserts baseline-green still holds.
+- ≥ 2 acceptance criteria per task. P0–P4 tasks include one that asserts baseline-green still holds.
+  **Pre is exempt from the green-build/suite AC when the baseline is RED** — restoring that is P0 /
+  Sprint 0, and no P0 work may start before `ME`. Pre ACs only require documented install/run notes
+  and create-or-update of `CLAUDE.md` / `AGENTS.md`.
 - **When there is no test command at audit time** (RED baseline, no suite — a supported case), the
-  baseline assertion falls back to the build: tasks scheduled *before* the P0 suite-creation task
-  assert "`<build command>` succeeds"; every task *after* it asserts the suite that task established.
-  State this substitution once at the top of the plan so the criteria are not silently weaker.
+  baseline assertion falls back to the build: **P0–P4** tasks scheduled *before* the P0 suite-creation
+  task assert "`<build command>` succeeds"; every task *after* it asserts the suite that task
+  established. Do not apply this fallback to Pre. State the substitution once at the top of the
+  plan so the criteria are not silently weaker.
 - Each criterion is checkable by a command, a file state, or a count — never "code is cleaner".
 - The `Verify:` line gives the exact command a reviewer runs.
 
