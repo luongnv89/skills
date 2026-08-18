@@ -4,7 +4,7 @@ description: "Audit a stale, inherited, or messy codebase — deps, bugs, securi
 license: MIT
 effort: max
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -36,6 +36,8 @@ such as `obj/`, `.dart_tool/`, `target/`, `.gradle/`). Nothing else.
   broken build and an unreviewable diff, which is exactly what the plan exists to prevent.
 - Refactors, dead-code removal, and test generation are **planned**, not applied. Applying them is
   the delegate skills' job, run later against the plan.
+- Agent environment files (`CLAUDE.md`, `AGENTS.md`) are **planned** via `/agent-config create` or
+  `/agent-config update` in the plan's Pre step — never created or rewritten during the audit.
 - If the user asks mid-run to start fixing, finish the report and plan first, then hand off to the
   delegate skill named in that task.
 
@@ -121,7 +123,8 @@ currency**, the **baseline gate**, and the **audit → plan bridge**. Everything
   one during an audit would break the read-only contract. Never do it. Audit the dimension with its
   checklist in `references/dimension-map.md`, record `Path: inline`, and name that skill as the
   invocation in the plan task that does the work. Here `inline` is the expected path, not a
-  degradation — do not report it as a limitation.
+  degradation — do not report it as a limitation. The plan's Pre step likewise names
+  `/agent-config create|update` and never runs it.
 
 Read `references/delegation-policy.md` before Phase 2 for exact invocation args, artifact handling,
 and the Skill-tool-unavailable fallback (which *is* reduced depth).
@@ -204,10 +207,11 @@ table.
 
 Spawn `agents/plan-architect.md` with the report path (or run it inline when the Agent tool is
 unavailable). It writes `MODERNIZATION_PLAN.md` from `references/plan-template.md`, using the fixed
-five-phase skeleton:
+skeleton (unconditional **Pre**, then **P0–P4** — do not rename or renumber P0–P4):
 
 | Phase | Goal | Milestone |
 |---|---|---|
+| **Pre Agent environment** | env an AI agent can use autonomously; `CLAUDE.md` / `AGENTS.md` created or improved | `ME` — both files exist (create or update via planned `/agent-config`); recorded commands documented |
 | **P0 Stabilize** | build green, tests runnable, lockfile committed, CI running | `M0` — baseline-green reproducible in CI |
 | **P1 Secure & Patch** | vulnerabilities closed, security patch + patch/minor **upgrade waves** | `M1` — zero known High/Critical vulns; patch/minor current |
 | **P2 Modernize** | each major dependency bump and runtime/toolchain upgrade, one task each | `M2` — every major current or deferred with written rationale |
@@ -217,10 +221,12 @@ five-phase skeleton:
 Phases split into sprints. Every task uses the `tasks-generator` task format so the plan interoperates
 with that skill, plus a `Closes:` line naming finding IDs.
 
-**Completion criteria:** every `Critical` and `High` finding is closed by ≥ 1 task; every task has
-≥ 2 testable acceptance criteria, one of which asserts baseline-green still holds; task IDs follow
+**Completion criteria:** Pre — Agent environment is present and ordered before P0, with create vs
+update of `CLAUDE.md` and `AGENTS.md` matching file presence and `/agent-config` named not run;
+every `Critical` and `High` finding is closed by ≥ 1 task; every task has ≥ 2 testable acceptance
+criteria, one of which asserts baseline-green still holds; task IDs follow `Task Pre.<index>` then
 `Task <sprint>.<index>`; the dependency table references only task IDs that exist; no circular
-dependencies; the critical path is stated explicitly; each of P0–P4 has a milestone with a
+dependencies; the critical path is stated explicitly; Pre and each of P0–P4 have a milestone with a
 measurable exit condition.
 
 ### Phase 5 — Validation pass
@@ -277,7 +283,9 @@ The run is successful only if **all** hold:
 - [ ] Every finding record has a unique `F-<DIM>-<NNN>` ID, a severity, and `path:line` evidence
       (or manifest+version for `DEP`).
 - [ ] Every `Critical` and `High` finding is closed by at least one task in the plan.
-- [ ] The plan contains phases P0–P4, each with ≥ 1 sprint and a measurable milestone.
+- [ ] The plan starts with the Agent-environment pre-step, then P0–P4, each with ≥ 1 sprint and a
+      measurable milestone. Pre is present whether `CLAUDE.md` / `AGENTS.md` already exist (update)
+      or not (create). `/agent-config` is named, never invoked.
 - [ ] Every task has ≥ 2 testable acceptance criteria including a baseline-green assertion, explicit
       `Dependencies`, an effort estimate, and a `Closes:` line.
 - [ ] The dependency table has no broken task IDs and no cycles; the critical path is stated.
@@ -295,7 +303,7 @@ Baseline: AMBER — builds; 41/58 tests pass; no coverage tool; CI absent
 Dimensions: 8 audited, 2 Not Assessed (UX — no UI detected; PERF — out of requested scope)
 Findings: 3 critical, 11 high, 24 medium, 9 low
 Outputs: MODERNIZATION_REPORT.md, MODERNIZATION_PLAN.md
-Plan: 5 phases, 9 sprints, 47 tasks — critical path P0→P1→P2 (Sprint 0.1 → 2.4)
+Plan: Pre + P0–P4, 10 sprints, 50 tasks — critical path Pre.1 → 0.1 → 2.4
 Validation: plan-validator PASS, 0 must-fix
 Source files changed: 0
 ```

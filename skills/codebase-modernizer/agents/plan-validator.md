@@ -1,8 +1,8 @@
 ---
 name: plan-validator
-description: Fresh-context validation of MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md — verify every citation resolves, severities are defensible, and no finding is orphaned
+description: Fresh-context validation of MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md — verify every citation resolves, the agent-environment pre-step precedes P0, severities are defensible, and no finding is orphaned
 role: Modernization Validator
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Plan Validator Agent
@@ -39,8 +39,13 @@ The failure modes of an audit-and-plan run, in the order they cost the most:
 6. **Unverifiable criteria** — "code is cleaner", "improve performance", "refactor the module". A
    criterion that no command, file state, or count can settle is a failed criterion.
 7. **Sequencing errors** — a refactor scheduled before the tests covering it; a framework major before
-   the runtime upgrade it requires; anything outside P0 starting before `M0` on a RED baseline;
-   batched majors in one task.
+   the runtime upgrade it requires; anything other than Pre starting outside P0 before `M0` on a RED
+   baseline; Pre missing, placed after P0, or used as a reason to rename/renumber P0–P4; batched
+   majors in one task.
+7b. **Applied `/agent-config`** — `CLAUDE.md` or `AGENTS.md` written or rewritten during the audit,
+    or a Pre task that treats those files as already done because they exist. Pre must name
+    `/agent-config create` (file absent) or `/agent-config update` (file present). Those tasks are
+    planned, not applied.
 8. **Graph defects** — dependency table referencing a task ID that does not exist; a cycle; a stated
    critical path that is not actually the longest chain. **Recompute it yourself from the dependency
    table** — a plan that merely *states* a critical path passes every other check while being wrong.
@@ -58,7 +63,9 @@ The failure modes of an audit-and-plan run, in the order they cost the most:
    `resolves` / `wrong-line` / `missing`.
 3. Cross-check report ↔ plan: every Critical/High ID appears in a `Closes:` or in Deferred; every
    `Closes:` ID exists in the report.
-4. Walk the dependency graph for cycles and dangling IDs; recompute the critical path.
+4. Confirm Pre — Agent environment exists, is ordered before P0 / `M0`, covers both `CLAUDE.md` and
+   `AGENTS.md` with create-vs-update matching file presence, and did not run `/agent-config`. Then
+   walk the dependency graph for cycles and dangling IDs; recompute the critical path.
 5. Re-add the severity counts.
 6. Read the Limitations section last, then re-examine every claim it undercuts.
 

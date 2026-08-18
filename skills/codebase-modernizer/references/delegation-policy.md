@@ -59,3 +59,18 @@ dimensions fall back to inline as well. That *is* reduced depth, unlike the six 
 
 Never guess whether a delegate exists. An unverified assumption that a skill is present produces a
 `Path: delegated` row backed by nothing.
+
+## Planned later — `/agent-config` (not a dimension)
+
+`/agent-config` **writes** `CLAUDE.md` and `AGENTS.md`. It is not an audit dimension and it is never
+invoked during the audit — not `create`, not `update`, not `audit`.
+
+Name it only in the plan's **Pre — Agent environment** tasks, which the user runs later:
+
+| File state at audit time | Planned invocation |
+|---|---|
+| `CLAUDE.md` or `AGENTS.md` absent | `/agent-config create` targeting that file |
+| file already present | `/agent-config update` targeting that file |
+
+Presence of either file is not a reason to skip Pre. Do not treat "the file exists" as the
+milestone. The audit records which variant to schedule; it does not draft or patch the files.
