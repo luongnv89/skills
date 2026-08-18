@@ -10,6 +10,10 @@
 #      "evals": [{"id": int, "kind": str, "prompt": str,
 #                 "expected_output": str, "files": list, "expectations": list}]}
 #
+# Those types are checked, not just presence: `expectations` is a list of STRINGS
+# (~/.claude/skills/skill-creator/agents/grader.md:15), so an entry parked in an
+# object is silently never rendered into the grader prompt.
+#
 # `kind` defaults to "happy-path" when omitted (schemas.md:39), so a missing `kind`
 # is a WARN, never a FAIL — writing `"kind": "happy-path"` into a file that never
 # declared one would be a semantic guess, not a translation.
@@ -17,6 +21,7 @@
 # This repo has no npm/pnpm/make/pytest (CLAUDE.md:12). Stdlib only.
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -24,7 +29,8 @@ from pathlib import Path
 # uses to preserve the original descriptive id of a file whose ids were strings.
 TOP_KEYS = {"skill_name", "evals"}
 CASE_KEYS = {"id", "kind", "prompt", "expected_output", "files", "expectations", "name"}
-REQUIRED_CASE_KEYS = ("prompt", "expected_output")
+REQUIRED_CASE_KEYS = ("prompt", "expected_output")  # non-empty strings
+LIST_CASE_KEYS = ("files", "expectations")           # lists
 
 # Assertion lists seen parked under non-canonical keys in this catalog's history.
 # The runner reads `expectations` and nothing else, so these are silently dead.
@@ -93,9 +99,36 @@ def check_file(path: Path):
             seen_ids[case_id] = pos
 
         label = "id %r" % case_id if case_id is not None else where
+        # Presence, then type, then emptiness — in that order, so a list-valued
+        # 'prompt' is reported as the wrong type rather than as merely present.
         for key in REQUIRED_CASE_KEYS:
-            if not case.get(key):
+            if key not in case:
                 fails.append("%s is missing '%s'" % (label, key))
+            elif not isinstance(case[key], str):
+                fails.append(
+                    "%s has a non-string '%s' (%s) — schemas.md:9-45 types it as a string"
+                    % (label, key, type(case[key]).__name__)
+                )
+            elif not case[key]:
+                fails.append("%s has an empty '%s'" % (label, key))
+
+        for key in LIST_CASE_KEYS:
+            if key in case and not isinstance(case[key], list):
+                fails.append(
+                    "%s has a non-list '%s' (%s) — schemas.md:9-45 types it as a list"
+                    % (label, key, type(case[key]).__name__)
+                )
+
+        # grader.md:15 — "List of expectations to evaluate (strings)". An object
+        # entry is never rendered into the grader prompt as its author intended.
+        if isinstance(case.get("expectations"), list):
+            for idx, item in enumerate(case["expectations"]):
+                if not isinstance(item, str):
+                    fails.append(
+                        "%s has a non-string expectations[%d] (%s) — grader.md:15 "
+                        "reads expectations as a list of strings"
+                        % (label, idx, type(item).__name__)
+                    )
 
         for key in DRIFTED_ASSERTION_KEYS:
             if key in case:
@@ -142,7 +175,11 @@ def main(argv):
     fail_count = 0
     warn_count = 0
     for path in files:
-        rel = path.relative_to(root)
+        # --path may be absolute and outside `root`; relative_to() would raise,
+        # and a relpath full of `../` reads worse than the absolute path.
+        rel = os.path.relpath(str(path), str(root))
+        if rel.startswith(os.pardir + os.sep):
+            rel = str(path)
         fails, warns = check_file(path)
         if fails:
             fail_count += 1

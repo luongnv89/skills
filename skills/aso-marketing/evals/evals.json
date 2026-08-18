@@ -7,14 +7,14 @@
       "expected_output": "Full ASO analysis report and prioritized plan with iOS-specific metadata optimization including cross-field keyword combination strategy and approval gate.",
       "files": [],
       "expectations": [
-        {"text": "Produces a structured analysis report with app overview, metadata status table, and competitive findings", "type": "boolean"},
-        {"text": "Includes categorized keyword tables (primary/secondary/long-tail) with volume estimates and rationale", "type": "boolean"},
-        {"text": "Covers all iOS-specific metadata fields with character counts", "type": "boolean"},
-        {"text": "Includes competitive analysis referencing Nike Training Club but does NOT use 'Nike Training Club' as a proposed keyword or in proposed metadata", "type": "boolean"},
-        {"text": "Explains cross-field keyword combination strategy", "type": "boolean"},
-        {"text": "Includes a store policy compliance check that scans for prohibited keywords, trademark violations, and listing policy issues", "type": "boolean"},
-        {"text": "No proposed metadata contains prohibited terms (free, best, #1, top-rated) or competitor trademarks", "type": "boolean"},
-        {"text": "Includes an explicit approval gate before execution", "type": "boolean"}
+        "Produces a structured analysis report with app overview, metadata status table, and competitive findings",
+        "Includes categorized keyword tables (primary/secondary/long-tail) with volume estimates and rationale",
+        "Covers all iOS-specific metadata fields with character counts",
+        "Includes competitive analysis referencing Nike Training Club but does NOT use 'Nike Training Club' as a proposed keyword or in proposed metadata",
+        "Explains cross-field keyword combination strategy",
+        "Includes a store policy compliance check that scans for prohibited keywords, trademark violations, and listing policy issues",
+        "No proposed metadata contains prohibited terms (free, best, #1, top-rated) or competitor trademarks",
+        "Includes an explicit approval gate before execution"
       ]
     },
     {
@@ -23,14 +23,14 @@
       "expected_output": "Comprehensive dual-platform ASO plan with platform-specific metadata, launch timeline, localization strategy, and visual asset guidance.",
       "files": [],
       "expectations": [
-        {"text": "Has distinct sections for both Apple App Store AND Google Play with platform-specific metadata", "type": "boolean"},
-        {"text": "iOS uses keywords field while Android emphasizes full description indexing", "type": "boolean"},
-        {"text": "Addresses fresh-launch context with timeline and pre-launch steps", "type": "boolean"},
-        {"text": "Includes localization strategy with priority markets", "type": "boolean"},
-        {"text": "Targets meditation/sleep/stress relief with categorized keywords", "type": "boolean"},
-        {"text": "Provides visual asset guidance (screenshots, icon, video)", "type": "boolean"},
-        {"text": "Includes a policy compliance check validating proposed metadata against both Apple and Google Play store policies", "type": "boolean"},
-        {"text": "No proposed metadata uses prohibited terms like 'best', 'free', '#1', or competitor trademarks like 'Headspace', 'Calm'", "type": "boolean"}
+        "Has distinct sections for both Apple App Store AND Google Play with platform-specific metadata",
+        "iOS uses keywords field while Android emphasizes full description indexing",
+        "Addresses fresh-launch context with timeline and pre-launch steps",
+        "Includes localization strategy with priority markets",
+        "Targets meditation/sleep/stress relief with categorized keywords",
+        "Provides visual asset guidance (screenshots, icon, video)",
+        "Includes a policy compliance check validating proposed metadata against both Apple and Google Play store policies",
+        "No proposed metadata uses prohibited terms like 'best', 'free', '#1', or competitor trademarks like 'Headspace', 'Calm'"
       ]
     },
     {
@@ -39,13 +39,13 @@
       "expected_output": "Conversion-focused ASO plan for Google Play with before/after metadata, above-the-fold optimization, and A/B testing recommendations.",
       "files": [],
       "expectations": [
-        {"text": "Prioritizes conversion rate optimization as primary objective", "type": "boolean"},
-        {"text": "Covers Google Play fields with correct character limits and indexing rules", "type": "boolean"},
-        {"text": "Addresses above-the-fold optimization (first 1-3 lines)", "type": "boolean"},
-        {"text": "Recommends A/B testing with Store Listing Experiments", "type": "boolean"},
-        {"text": "Shows before/after metadata comparison with character counts", "type": "boolean"},
-        {"text": "Includes visual asset recommendations for conversion", "type": "boolean"},
-        {"text": "Validates proposed metadata against Google Play prohibited keywords (no 'top', 'best', '#1', 'free', 'download now', etc.) and trademark rules", "type": "boolean"}
+        "Prioritizes conversion rate optimization as primary objective",
+        "Covers Google Play fields with correct character limits and indexing rules",
+        "Addresses above-the-fold optimization (first 1-3 lines)",
+        "Recommends A/B testing with Store Listing Experiments",
+        "Shows before/after metadata comparison with character counts",
+        "Includes visual asset recommendations for conversion",
+        "Validates proposed metadata against Google Play prohibited keywords (no 'top', 'best', '#1', 'free', 'download now', etc.) and trademark rules"
       ]
     }
   ]
