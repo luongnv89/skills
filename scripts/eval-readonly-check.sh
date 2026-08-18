@@ -45,17 +45,17 @@ USAGE
 # TRANSCRIBED, not invented. Every entry below is quoted from the skill's own
 # contract text; the citation is the file:line it came from.
 #
-#   MODERNIZATION_REPORT.md  skills/codebase-modernizer/SKILL.md:269
+#   MODERNIZATION_REPORT.md  skills/codebase-modernizer/SKILL.md:279
 #                            ("MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md
 #                             both exist at the target repo root")
 #                            also references/report-template.md:122
-#   MODERNIZATION_PLAN.md    skills/codebase-modernizer/SKILL.md:269
+#   MODERNIZATION_PLAN.md    skills/codebase-modernizer/SKILL.md:279
 #                            also references/report-template.md:123
-#   CODE_REVIEW.md           skills/codebase-modernizer/SKILL.md:273
+#   CODE_REVIEW.md           skills/codebase-modernizer/SKILL.md:285-286
 #                            ("a **declared delegate artifact** (`CODE_REVIEW.md`)")
-#                            also SKILL.md:30, references/delegation-policy.md:26,
+#                            also SKILL.md:32, references/delegation-policy.md:26,
 #                            references/report-template.md:124
-#   obj/ .dart_tool/         skills/codebase-modernizer/SKILL.md:32
+#   obj/ .dart_tool/         skills/codebase-modernizer/SKILL.md:33-34
 #   target/ .gradle/         ("**probe byproducts** (build dirs some dependency probes
 #                             create, such as `obj/`, `.dart_tool/`, `target/`,
 #                             `.gradle/`)")
@@ -65,7 +65,7 @@ USAGE
 #                             `target/`) is acceptable")
 #
 # Nothing else. A path outside this list appearing after the run is a contract breach
-# (SKILL.md:32 "Nothing else.", SKILL.md:274 "Anything else is a contract breach").
+# (SKILL.md:34 "Nothing else.", SKILL.md:287 "Anything else is a contract breach").
 DEFAULT_ALLOW=(
   "MODERNIZATION_REPORT.md"
   "MODERNIZATION_PLAN.md"
@@ -174,7 +174,7 @@ fi
 #               *directories*), so the bare name must NOT match.
 #
 # A plain entry matches that path at the repo root only, which is where the contract
-# places the two reports and CODE_REVIEW.md (SKILL.md:269-273).
+# places the two reports and CODE_REVIEW.md (SKILL.md:279-286).
 is_allowed() {
   local mode="$1" p="${2#./}" a d
   [ -z "$p" ] && return 1

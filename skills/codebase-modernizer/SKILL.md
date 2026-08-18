@@ -4,7 +4,7 @@ description: "Audit a stale, inherited, or messy codebase — deps, bugs, securi
 license: MIT
 effort: max
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -25,11 +25,13 @@ Produces exactly two files in the target repo root:
 ## Read-only contract
 
 This skill **never modifies source code, dependencies, lockfiles, or configuration** — no tracked
-file's content changes, verifiable with an empty `git diff --stat`. It runs read-only probes and
-writes the two report files above. Two kinds of *new* file may also appear, and both must be
-enumerated in the report's Artifacts section: a **declared delegate artifact** (`CODE_REVIEW.md`,
-from `code-review` mode `review`) and **probe byproducts** (build dirs some dependency probes create,
-such as `obj/`, `.dart_tool/`, `target/`, `.gradle/`). Nothing else.
+file's content changes. On a clean tree that is `git diff --stat` empty. On a stale, already-dirty
+tree, `git status --porcelain` and `git diff` after the run must match a snapshot taken before it
+(declared artifacts set aside). It runs read-only probes and writes the two report files above. Two
+kinds of *new* file may also appear, and both must be enumerated in the report's Artifacts section:
+a **declared delegate artifact** (`CODE_REVIEW.md`, from `code-review` mode `review`) and **probe
+byproducts** (build dirs some dependency probes create, such as `obj/`, `.dart_tool/`, `target/`,
+`.gradle/`). Nothing else.
 
 - Dependency upgrades become **planned tasks with migration steps** — never `npm update`, `ncu -u`,
   `cargo update`, `poetry update`, or any equivalent. A blind bulk upgrade on a stale tree produces a
@@ -275,8 +277,11 @@ unresolved.
 The run is successful only if **all** hold:
 
 - [ ] `MODERNIZATION_REPORT.md` and `MODERNIZATION_PLAN.md` both exist at the target repo root.
-- [ ] **No tracked file's content changed** — `git diff --stat` is empty. This is the promise that
-      matters: no source, manifest, lockfile, hook, workflow, test, or docs file was modified.
+- [ ] **No tracked file's content changed** relative to the pre-run snapshot. On a clean tree,
+      `git diff --stat` is empty. On a stale already-dirty tree, `git status --porcelain` and
+      `git diff` match the snapshot taken before the run (declared artifacts set aside). This is
+      the promise that matters: no source, manifest, lockfile, hook, workflow, test, or docs
+      file was modified by the audit.
 - [ ] Every new file in `git status --short` is either one of the two reports, a **declared delegate
       artifact** (`CODE_REVIEW.md`), or a probe byproduct listed in the report's Artifacts section.
       Anything else is a contract breach.

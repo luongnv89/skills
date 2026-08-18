@@ -124,7 +124,7 @@ complete.
 | `CODE_REVIEW.md` | declared artifact — written by `code-review` mode `review` |
 | `obj/`, `.dart_tool/` | probe byproducts — created by `dotnet list package` / `flutter pub outdated` |
 
-**Tracked files modified: 0** — `git diff --stat` empty.
+**Tracked files modified: 0** — `git status --porcelain` and `git diff` match the pre-run snapshot once declared artifacts are set aside. On a clean tree that is also `git diff --stat` empty.
 
 ## Limitations
 

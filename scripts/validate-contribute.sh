@@ -80,6 +80,17 @@ else
   bad "docs/index.html present" "missing"
 fi
 
+# --- Eval suite schema (CONTRIBUTING.md Eval Suites) ---
+if [ -f scripts/validate-evals.py ]; then
+  if python3 scripts/validate-evals.py >/dev/null; then
+    ok "validate-evals.py (structural FAIL tier)"
+  else
+    bad "validate-evals.py (structural FAIL tier)" "non-zero exit — run python3 scripts/validate-evals.py"
+  fi
+else
+  bad "scripts/validate-evals.py present" "missing"
+fi
+
 # --- Destructive scaffold — gated ---
 if [ "$MODE" = "destructive" ]; then
   man "init_skill.py my-skill --path skills/ (creates files)"

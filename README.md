@@ -153,7 +153,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**code-review**](skills/code-review/) | 2.1.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
-| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.2.1 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
+| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.2.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.3.0 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.3.2 | medium | Usability review using Krug's principles |
 

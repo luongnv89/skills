@@ -161,7 +161,7 @@
         "If either file had been missing the matching task would have named /agent-config create instead",
         "agent-config is not invoked during the audit; CLAUDE.md and AGENTS.md content is unchanged",
         "P0 through P4 remain present and are not renamed or renumbered",
-        "git diff --stat is empty — no tracked file's content was modified"
+        "The run leaves no delta: `git status --porcelain`, the full `git diff`, and a SHA-256 manifest of every git-visible path (tracked plus untracked, honouring the target's `.gitignore`) are byte-identical to the pre-run snapshot once the declared artifacts are set aside (`scripts/eval-readonly-check.sh snapshot` / `verify` / `restore`). Whatever dirtiness the target already carried is part of the baseline, not a failure"
       ]
     }
   ]
