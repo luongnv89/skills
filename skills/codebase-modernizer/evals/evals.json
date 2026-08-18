@@ -13,7 +13,7 @@
         "The report's dimension coverage table lists all 10 dimensions with Audited or Not Assessed + reason",
         "Every finding cites path:line, or is marked repo-wide only for absence-of-thing findings",
         "The plan starts with Pre / Agent environment, then phases P0 through P4 unrenumbered, each with at least one sprint and a measurable milestone",
-        "Every task has at least 2 acceptance criteria, one asserting the test suite is still green",
+        "Every P0-P4 task has at least 2 acceptance criteria, one asserting the test suite is still green; Pre is exempt from the green assertion when the baseline is RED",
         "Every task carries a Closes: line naming finding IDs, or names the milestone it enables",
         "No repo-writing delegate is invoked during the audit — agent-config, test-coverage, devops-pipeline, security-setup, doc-manager, code-review mode clean, and code-review mode cleanup are each named in a plan task instead",
         "git diff --stat is empty — no tracked file's content was modified",
@@ -60,6 +60,7 @@
         "The UX dimension is marked 'Not Assessed — no UI detected' and no UX findings are invented",
         "The absent test suite is reported as a Critical finding and lands in phase P0",
         "The plan starts with Pre / Agent environment before P0; missing CLAUDE.md and AGENTS.md are scheduled as /agent-config create, not written during the audit",
+        "Pre has no green-build/suite acceptance criterion; restore-green stays on Sprint 0",
         "The plan's Sprint 0 restores baseline-green and later phases depend on milestone M0",
         "The Limitations section names every Not Assessed dimension and every missing tool"
       ]

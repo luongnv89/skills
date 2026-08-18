@@ -4,7 +4,7 @@ description: "Audit a stale, inherited, or messy codebase — deps, bugs, securi
 license: MIT
 effort: max
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -46,7 +46,8 @@ such as `obj/`, `.dart_tool/`, `target/`, `.gradle/`). Nothing else.
 Used throughout this skill and its references with these exact meanings:
 
 - **baseline-green** — the recorded state where the project builds and its test suite runs to a known
-  pass rate. Established in Phase 0; every planned task's acceptance criteria require it to hold.
+  pass rate. Established in Phase 0; every P0–P4 task's acceptance criteria require it to hold. Pre
+  is exempt when the baseline is RED — restore-green stays on P0 / Sprint 0.
 - **finding record** — one normalized issue row with a stable **finding ID** (`F-<DIM>-<NNN>`, e.g.
   `F-DEP-003`). The report lists them; the plan's tasks close them by ID.
 - **Not Assessed** — an explicit report verdict for a dimension that could not be checked (no tool,
@@ -147,9 +148,9 @@ Build and test commands can legitimately create build output, but any *tracked* 
 report it and note that the probe was not reproducible. `references/baseline.md` gives the
 non-mutating form of each command.
 
-**When there is no test command**, the baseline-green assertion every plan task carries falls back to
-the build: tasks before the P0 suite-creation task assert `<build command>` succeeds; every later
-task asserts the suite that task established.
+**When there is no test command**, the baseline-green assertion every **P0–P4** task carries falls
+back to the build: P0–P4 tasks before the P0 suite-creation task assert `<build command>` succeeds;
+every later P0–P4 task asserts the suite that task established. Do not apply this fallback to Pre.
 
 **Completion criteria:** every row of the baseline table in `references/baseline.md` holds a recorded
 value or an explicit **Not Assessed** with a reason; the overall verdict is `GREEN`, `AMBER`, or
@@ -224,7 +225,8 @@ with that skill, plus a `Closes:` line naming finding IDs.
 **Completion criteria:** Pre — Agent environment is present and ordered before P0, with create vs
 update of `CLAUDE.md` and `AGENTS.md` matching file presence and `/agent-config` named not run;
 every `Critical` and `High` finding is closed by ≥ 1 task; every task has ≥ 2 testable acceptance
-criteria, one of which asserts baseline-green still holds; task IDs follow `Task Pre.<index>` then
+criteria; every P0–P4 task asserts baseline-green still holds (Pre is exempt when the baseline is
+RED — Pre ACs are install/run notes plus create-or-update of `CLAUDE.md`/`AGENTS.md`); task IDs follow `Task Pre.<index>` then
 `Task <sprint>.<index>`; the dependency table references only task IDs that exist; no circular
 dependencies; the critical path is stated explicitly; Pre and each of P0–P4 have a milestone with a
 measurable exit condition.
@@ -286,8 +288,9 @@ The run is successful only if **all** hold:
 - [ ] The plan starts with the Agent-environment pre-step, then P0–P4, each with ≥ 1 sprint and a
       measurable milestone. Pre is present whether `CLAUDE.md` / `AGENTS.md` already exist (update)
       or not (create). `/agent-config` is named, never invoked.
-- [ ] Every task has ≥ 2 testable acceptance criteria including a baseline-green assertion, explicit
-      `Dependencies`, an effort estimate, and a `Closes:` line.
+- [ ] Every task has ≥ 2 testable acceptance criteria, explicit `Dependencies`, an effort estimate,
+      and a `Closes:` line. P0–P4 tasks include a baseline-green assertion. Pre is exempt when the
+      baseline is RED (install/run notes plus create-or-update of `CLAUDE.md`/`AGENTS.md`).
 - [ ] The dependency table has no broken task IDs and no cycles; the critical path is stated.
 - [ ] Major dependency bumps are one task each, never batched, each naming its migration source.
 - [ ] Limitations section lists every **Not Assessed** dimension, missing tool, and degraded pass.
@@ -303,7 +306,7 @@ Baseline: AMBER — builds; 41/58 tests pass; no coverage tool; CI absent
 Dimensions: 8 audited, 2 Not Assessed (UX — no UI detected; PERF — out of requested scope)
 Findings: 3 critical, 11 high, 24 medium, 9 low
 Outputs: MODERNIZATION_REPORT.md, MODERNIZATION_PLAN.md
-Plan: Pre + P0–P4, 10 sprints, 50 tasks — critical path Pre.1 → 0.1 → 2.4
+Plan: Pre + P0–P4, 10 sprints, 50 tasks — critical path Pre.1 → Pre.2 → 0.1 → 2.4
 Validation: plan-validator PASS, 0 must-fix
 Source files changed: 0
 ```

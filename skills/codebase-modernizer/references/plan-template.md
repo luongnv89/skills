@@ -79,7 +79,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 | P3 Clean & Harden | 2 | 12 | 18 Medium | M3 |
 | P4 Polish | 1 | 8 | 9 Low | M4 |
 
-**Critical path:** Task Pre.1 → 0.1 → 0.3 → 1.2 → 2.1 → 2.4 (<N> days). Nothing in P0 starts before ME. Nothing in P2 starts before M0.
+**Critical path:** Task Pre.1 → Pre.2 → 0.1 → 0.3 → 1.2 → 2.1 → 2.4 (<N> days). Nothing in P0 starts before ME. Nothing in P2 starts before M0.
 
 ## Phase Pre — Agent environment
 

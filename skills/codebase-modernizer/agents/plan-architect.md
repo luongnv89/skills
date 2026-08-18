@@ -53,9 +53,10 @@ Convert an evidence report into an executable plan. You read the report, you wri
    A P0–P4 phase with no findings gets a one-line note; it is never renumbered or dropped. Pre is
    never omitted.
 3. **Split by effort.** Every `L` finding becomes ≥ 2 tasks. Every task is 1–3 days.
-4. **Write tasks** in the template's format: Description, `Closes:`, ≥ 2 acceptance criteria (one
-   asserting baseline-green holds against the recorded pass rate), `Dependencies`, `Effort`,
-   `Verify:` with the exact command a reviewer runs.
+4. **Write tasks** in the template's format: Description, `Closes:`, ≥ 2 acceptance criteria,
+   `Dependencies`, `Effort`, `Verify:` with the exact command a reviewer runs. P0–P4 tasks include
+   one AC asserting baseline-green holds against the recorded pass rate. Pre ACs are install/run
+   notes plus create-or-update of `CLAUDE.md`/`AGENTS.md` — not a green/pass-rate assertion.
 5. **Sequence.**
    - Pre is first; no P0–P4 task starts before `ME`.
    - Nothing outside P0 starts before `M0` when the baseline is RED, except Pre.
@@ -76,7 +77,9 @@ Return `FAIL` with the specific gap rather than a plan that misses any of these:
 
 - [ ] Every `Critical` and `High` finding appears in a task's `Closes:` or in Deferred.
 - [ ] No task exists without `Closes:` or a named milestone it enables.
-- [ ] Every task has ≥ 2 acceptance criteria; ≥ 1 asserts baseline-green.
+- [ ] Every task has ≥ 2 acceptance criteria. P0–P4 include ≥ 1 that asserts baseline-green; Pre
+      ACs are install/run notes plus create-or-update of `CLAUDE.md`/`AGENTS.md` (no green/pass-rate
+      AC).
 - [ ] Every acceptance criterion is checkable by a command, file state, or count.
 - [ ] Task IDs follow `Task <sprint>.<index>`, unique across the plan.
 - [ ] Dependency table references only existing task IDs; no cycles.
@@ -99,7 +102,7 @@ Write the file, then return JSON:
   "tasks": 50,
   "closed": {"critical": 3, "high": 11, "medium": 24, "low": 9},
   "deferred": ["F-PERF-02"],
-  "critical_path": {"tasks": ["Pre.1","0.1","0.3","1.2","2.1","2.4"], "days": 36},
+  "critical_path": {"tasks": ["Pre.1","Pre.2","0.1","0.3","1.2","2.1","2.4"], "days": 36},
   "self_check": "PASS",
   "gaps": []
 }
