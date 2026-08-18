@@ -36,8 +36,8 @@ Convert an evidence report into an executable plan. You read the report, you wri
 ## Process
 
 1. **Read the report end to end.** Build the finding inventory: ID, dimension, severity, effort,
-   evidence. Note the baseline verdict, the test command of record, and the pass rate — every task's
-   acceptance criteria reference them.
+   evidence. Note the baseline verdict, the test command of record, and the pass rate — every P0–P4
+   task's acceptance criteria reference them. Pre ACs do not.
 2. **Emit Pre, then bucket findings into the fixed P0–P4 skeleton** from
    `references/plan-template.md`. Do not rename or renumber P0–P4.
    - **Pre — Agent environment** is unconditional and comes first, even when `CLAUDE.md` and

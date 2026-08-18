@@ -110,7 +110,7 @@ Do not launch servers, open browsers, or run migrations. This skill is read-only
 A completed baseline table plus the verdict, written into the report's Baseline section by Phase 3.
 Carry forward to later phases:
 
-- the exact **test command** (every planned task's acceptance criteria reference it),
-- the **pass rate** at audit time (the "still green" bar tasks must not regress below),
+- the exact **test command** (every P0–P4 task's acceptance criteria reference it; Pre does not),
+- the **pass rate** at audit time (the "still green" bar P0–P4 tasks must not regress below),
 - the list of rows marked **Not Assessed** (they become P0 tasks: add coverage tooling, add CI, and
   so on).

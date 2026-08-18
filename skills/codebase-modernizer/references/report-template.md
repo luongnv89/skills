@@ -39,7 +39,7 @@ the plan does about them. No hedging, no filler.>
 | Last commit | <date>, N commits in 12 months | `git log -1` |
 
 **Verdict:** GREEN | AMBER | RED
-**Test command of record:** `<command>` — every plan task's acceptance criteria reference this.
+**Test command of record:** `<command>` — every P0–P4 plan task's acceptance criteria reference this. Pre ACs do not.
 
 ## Dimension coverage
 
