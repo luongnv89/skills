@@ -79,9 +79,9 @@ the same pattern for the plan's Pre step: named, never run during the audit.
 ## The three ideas that make the output useful
 
 **Baseline first.** Before anything else it records whether the project builds and what fraction of
-tests pass. Every task in the plan then carries "and the suite is still green" as an acceptance
-criterion. That's what makes the plan *testable* instead of aspirational — and if the baseline is
-RED, restoring it becomes Sprint 0 and everything else waits.
+tests pass. Every P0–P4 task in the plan then carries "and the suite is still green" as an
+acceptance criterion. Pre is exempt when the baseline is RED — restoring green is P0 / Sprint 0.
+That's what makes the plan *testable* instead of aspirational.
 
 **No bulk upgrades.** Running `npm update` across a stale tree gives you a broken build and a diff
 nobody can review. Instead every dependency is classified (patch / minor / major / vulnerable /
@@ -97,7 +97,7 @@ filled in with a plausible guess. The Limitations section lists every one of the
 
 | Phase | Goal | Milestone |
 |---|---|---|
-| **Pre Agent environment** | env an agent can use autonomously; create or improve `CLAUDE.md` / `AGENTS.md` | both files exist and document how to run the project |
+| **Pre Agent environment** | env an agent can use autonomously; create or improve `CLAUDE.md` / `AGENTS.md` | both files exist (create or update); commands documented in `CLAUDE.md` and Pre.1 notes |
 | **P0 Stabilize** | build green, tests runnable, CI running | baseline reproducible in CI |
 | **P1 Secure & Patch** | vulnerabilities closed, waves W1–W2 shipped | zero High/Critical advisories |
 | **P2 Modernize** | runtime upgrade, then majors one at a time | every major current or deferred with a reason |

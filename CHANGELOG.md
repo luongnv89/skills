@@ -25,12 +25,14 @@
 
 **codebase-modernizer (1.2.0):** every emitted plan now opens with an unconditional **Pre — Agent environment** step before P0 Stabilize (P0–P4 keep their numbers). Pre schedules a runnable agent environment and create-or-improve of `CLAUDE.md` / `AGENTS.md` via `/agent-config create|update` — planned only; the audit still never writes those files.
 
+**codebase-modernizer (1.2.1):** Pre is exempt from the still-green suite AC when the baseline is RED. Pre.3 / `AGENTS.md` is create-or-update against agent-config checklists only; recorded build/test commands live on Pre.1 notes and Pre.2 / `CLAUDE.md`.
+
 **issue-work-loop (1.1.5):** resolves a single GitHub issue through a Herdr-pane implementer→reviewer loop until the PR review is CLEAN. Implementer runs `/issue-resolver`, reviewer runs `/issue-pr-review --review-only` in a separate pane; every FINDING counts, including notes (no soft-pass). Reviewer is FRESHENed at ROUND start and implementer before each fix when context crosses 50%; `--no-cleanup` skips SWEEP for debug; worker panes and loop worktrees are swept at the end by default; merging is always left to the human.
 
 ### Skills Updated
 | Skill | Version Change |
 |-------|----------------|
-| codebase-modernizer | 1.1.0 → 1.2.0 |
+| codebase-modernizer | 1.1.0 → 1.2.1 |
 | docs-generator → doc-manager | 1.2.5 → 2.0.1 |
 | tmux-agent-comms | 1.3.0 → 2.2.0 (observability, app terminal tabs by default, orchestrator context handoff) |
 | landing-page-generator | 1.1.4 → 1.2.0 (absorbs README-to-landing as Mode B) |

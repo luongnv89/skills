@@ -14,7 +14,7 @@ you should not modernize on top of a known vulnerability. Pre is never collapsed
 
 | Phase | Goal | Exit milestone |
 |---|---|---|
-| **Pre Agent environment** | project env an AI agent can use autonomously; `CLAUDE.md` and `AGENTS.md` created or improved | `ME` — both files exist at the repo root, document the recorded build/test commands, and are scheduled via `/agent-config` (not written during the audit) |
+| **Pre Agent environment** | project env an AI agent can use autonomously; `CLAUDE.md` and `AGENTS.md` created or improved | `ME` — both files exist (create or update via planned `/agent-config`); recorded build/test commands documented in `CLAUDE.md` and Pre.1 notes |
 | **P0 Stabilize** | build green, tests runnable, lockfile committed, CI running the suite | `M0` — baseline-green reproducible in CI from a clean checkout |
 | **P1 Secure & Patch** | close vulnerabilities, ship waves W1–W2 | `M1` — zero known High/Critical advisories; patch/minor current |
 | **P2 Modernize** | runtime/toolchain upgrade (W3), then one major per task (W4+) | `M2` — every major current or deferred with written rationale |
@@ -83,7 +83,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 
 ## Phase Pre — Agent environment
 
-**Goal:** <one line> · **Milestone ME:** <CLAUDE.md and AGENTS.md created or improved; recorded build/test commands documented>
+**Goal:** <one line> · **Milestone ME:** <CLAUDE.md and AGENTS.md created or improved; recorded build/test commands documented in CLAUDE.md and Pre.1 notes>
 
 ### Sprint Pre — Agent-runnable environment
 
@@ -126,8 +126,8 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 **Closes**: — (milestone-enabling: ME)
 
 **Acceptance Criteria**:
-- [ ] `AGENTS.md` exists at the repo root (create) or is improved against agent-config checklists (update)
-- [ ] `AGENTS.md` names the recorded build/test commands
+- [ ] `AGENTS.md` exists at the repo root (create via `/agent-config` if absent)
+- [ ] `AGENTS.md` is improved against agent-config checklists only (subagent definitions; update if already present). Recorded build/test commands stay on Pre.1 notes and `CLAUDE.md`
 
 **Dependencies**: Pre.1
 
@@ -188,7 +188,7 @@ run in parallel.
 
 | ID | Phase | Exit condition (measurable) | Verify with |
 |---|---|---|---|
-| ME | Pre | `CLAUDE.md` and `AGENTS.md` exist (created or improved); recorded build/test commands documented | `test -f CLAUDE.md && test -f AGENTS.md` |
+| ME | Pre | `CLAUDE.md` and `AGENTS.md` exist (create or update); recorded build/test commands documented in `CLAUDE.md` and Pre.1 notes | `test -f CLAUDE.md && test -f AGENTS.md` |
 | M0 | P0 | clean checkout → build + suite green in CI | CI run link / `<command>` |
 | M1 | P1 | `npm audit --json` reports 0 high+ advisories | `<command>` |
 
