@@ -3,7 +3,18 @@
 
 ## Unreleased
 
+### Fixed
+- **codebase-modernizer evals 1, 8, 10 asserted something no run could satisfy** (#88): each demanded `git diff --stat` be empty at the end of the run, which is false on any genuinely stale repo — the intended audit target is already dirty (44 modified tracked files plus untracked entries) before the skill starts. Rewritten as a **delta** assertion: `git status --porcelain`, the full `git diff`, and a SHA-256 manifest of every non-`.git` path must be byte-identical to a pre-run snapshot, modulo the declared artifact allowlist. Eval 1's gloss ("no tracked file's content was modified") was likewise an absolute claim and is now stated as delta-against-baseline
+
+### Tooling
+- Add `scripts/validate-evals.py` (stdlib only): walks `skills/*/evals/evals.json` and suite sub-skills, enforcing the canonical `{skill_name, evals:[{id, kind, prompt, expected_output, files, expectations}]}` shape. **FAIL** tier (non-zero exit) covers a wrong top-level shape, a `skill_name` that does not match its directory, missing/duplicate/non-integer ids, missing `prompt` or `expected_output`, assertion lists parked under the dead `assertions`/`expected_behavior` keys, and unknown keys; **WARN** tier (exit 0) surfaces `expectations: []`, a file where no case declares `kind`, and a missing `files`
+- Add `scripts/eval-readonly-check.sh` (`snapshot` / `verify` / `restore`): zero-dependency harness that checks a read-only skill's contract as a delta against a pre-run snapshot. The SHA-256 path manifest is what makes it work — `git diff` cannot see untracked files, so a delegate writing a new `.github/workflows/ci.yml` or test file passes an empty `git diff --stat` unnoticed. The declared-artifact allowlist is transcribed from the skill's own contract text with `file:line` citations, and transcript-level assertions are reported as `[MANUAL] ... SKIPPED` rather than dropped
+
+### Changed
+- Converge seven drifted `evals.json` files onto the canonical schema, content-preserving: `aso-marketing` (`assertions` → `expectations`); `fork-upstream-sync` (`skill` → `skill_name`, `expected_behavior` → `expectations`, `files: []` added, string ids replaced by integers 1-3 in file order with each original slug preserved under an optional `name` key, and `expected_output` rendered from that case's own expectation list); `herdr-agent-comms`, `landing-page-generator`, `opencode-runner`, `tmux-agent-comms`, `viral-product-evaluator` (explicit `expectations: []`). No `kind` was written into a file that never declared one — it defaults to `happy-path`, so filling it in would guess at cases that may really be negative-trigger. No expectation content was invented; the empty lists are the honest state and the WARN tier keeps them visible
+
 ### Docs
+- Document the canonical `evals.json` shape, `python3 scripts/validate-evals.py`, its FAIL/WARN tiers, the optional `name` key, and the read-only delta harness in CONTRIBUTING.md
 - Reconcile root README skill catalog to on-disk `metadata.version` for all installable skills; add `fork-upstream-sync`, `herdr-agent-comms`, Google Antigravity install path, Project docs index, install validation link
 - Reconcile `docs/index.html` GitHub Pages copy to current catalog state: v1.15.0 baseline, Google Antigravity support, and no removed `clean-code` catalog card
 - Correct the `docs/index.html` skill count to 42 at every site, state the counting rule (every tracked `SKILL.md` under `skills/`, nested suite sub-skills included) beside the literal, and assert it from `scripts/validate-contribute.sh` so the next skill added cannot silently re-break it

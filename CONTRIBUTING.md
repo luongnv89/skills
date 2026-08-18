@@ -101,6 +101,58 @@ Hard rules for this catalog (`CLAUDE.md:28-42`):
 7. Do not commit `*-workspace/` contents or secrets.
 8. Run `quick_validate.py` on any skill you touched before opening a PR.
 
+### Eval Suites (`evals/evals.json`)
+
+A skill may ship a test set at `skills/<name>/evals/evals.json`. The canonical shape is defined by **skill-creator**, which is external to this repo (`CONTRIBUTING.md:18`, `:24-27`) — see `~/.claude/skills/skill-creator/references/schemas.md:9-45`:
+
+```json
+{
+  "skill_name": "my-skill",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "What the user types",
+      "expected_output": "Human-readable description of success",
+      "files": [],
+      "expectations": ["A verifiable statement about the run"]
+    }
+  ]
+}
+```
+
+- `skill_name` must equal the skill's directory name.
+- `id` is a **unique integer**. If a suite historically used descriptive string ids, keep the slug under an optional `name` key (`"id": 1, "name": "sync-fork-keep-feature"`) so nothing is lost when the id becomes an integer.
+- `kind` is `happy-path` (the default when omitted), `edge`, or `negative-trigger`. **Do not add `kind: happy-path` to a case that never declared one** — because it is the default, writing it in is a guess about cases that may really be negative-trigger.
+- `expectations` is the only assertion key the runner reads. `assertions` and `expected_behavior` are dead keys; a list parked there is silently never checked.
+- An empty `expectations: []` is the honest state for a suite whose assertions were never written. Leave it empty rather than inventing them.
+
+Validate every suite in the catalog:
+
+```bash
+python3 scripts/validate-evals.py
+```
+
+It walks `skills/*/evals/evals.json` and `skills/*/*/evals/evals.json` (suite sub-skills) and reports two tiers:
+
+| Tier | Exit | What it catches |
+|---|---|---|
+| **FAIL** | non-zero | top level is not `{skill_name, evals[]}`; `skill_name` ≠ the skill directory name; a missing, duplicate, or non-integer `id`; a missing `prompt` or `expected_output`; an assertion list under `assertions` or `expected_behavior`; unknown keys |
+| **WARN** | 0 | `expectations: []`; no case in the file declares `kind`; `files` absent |
+
+FAIL means the file is structurally broken and the runner cannot read it as intended. WARN means the file is valid but thin — it is printed so the gap stays visible instead of passing as coverage.
+
+**Read-only skills.** A skill that promises it modifies nothing cannot assert `git diff --stat` is empty, because the stale repos such a skill targets are usually dirty before the run starts. Assert a **delta** instead, with `scripts/eval-readonly-check.sh`:
+
+```bash
+scripts/eval-readonly-check.sh snapshot --target /path/to/repo --manifest /tmp/snap
+# ... run the skill against the target ...
+scripts/eval-readonly-check.sh verify   --target /path/to/repo --manifest /tmp/snap
+scripts/eval-readonly-check.sh restore  --target /path/to/repo --manifest /tmp/snap --dest /tmp/artifacts
+```
+
+It compares `git status --porcelain`, the full `git diff`, and a **SHA-256 manifest of every non-`.git` path** against the pre-run snapshot, exempting a declared-artifact allowlist (`--allow` adds to it). The manifest is the load-bearing check: `git diff` cannot see an untracked file, so a newly written `.github/workflows/ci.yml` or test file would otherwise go unnoticed. Assertions that only a transcript can settle are reported as `[MANUAL] ... SKIPPED (run by operator)` rather than silently dropped.
+
 ## Commit Message Convention
 
 We use [Conventional Commits](https://www.conventionalcommits.org/):
@@ -131,10 +183,11 @@ Always update `metadata.version` in `SKILL.md` when modifying a skill (`CLAUDE.m
 ## Pull Request Process
 
 1. Ensure your skill passes validation (`quick_validate.py`)
-2. Update [README.md](README.md) if adding a new skill (catalog row + version)
-3. Add an entry under `## Unreleased` in [CHANGELOG.md](CHANGELOG.md)
-4. Fill out the PR template completely (`.github/PULL_REQUEST_TEMPLATE.md`)
-5. Wait for review and address any feedback
+2. If the skill ships evals, run `python3 scripts/validate-evals.py` and clear every FAIL
+3. Update [README.md](README.md) if adding a new skill (catalog row + version)
+4. Add an entry under `## Unreleased` in [CHANGELOG.md](CHANGELOG.md)
+5. Fill out the PR template completely (`.github/PULL_REQUEST_TEMPLATE.md`)
+6. Wait for review and address any feedback
 
 ## Code of Conduct
 
