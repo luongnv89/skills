@@ -5,43 +5,50 @@
       "id": 1,
       "prompt": "I have a Herdr agent named 'reviewer' already running. Ask it to summarize the open PRs and show me what it says back.",
       "expected_output": "Resolves the reviewer target via herdr agent get/list, captures a pre-send transcript baseline, sends with pane run (or agent send + enter), waits on agent-status (working then done/idle) rather than a blind sleep, uses a split completion marker that cannot be satisfied by prompt echo to recognize a fast reply, reads recent-unwrapped, and relays the reply.",
-      "files": []
+      "files": [],
+      "expectations": []
     },
     {
       "id": 2,
       "prompt": "Spin up two Herdr agents for this project named 'tests' and 'docs'. Use pi with thinking low for both. Split them from my current pane so I can see root + both agents in one tab.",
       "expected_output": "Checks herdr status, resolves root pane (HERDR_PANE_ID or equivalent), builds a same-tab grid including root by splitting the rightmost column twice with --no-focus and resizing every column to equal width each time (not new tabs, not a separate fleet tab, not unequal-width columns), launches pi --thinking low in each sub-pane, renames agents, waits until idle/ready, keeps root agent pane. No server stop.",
-      "files": []
+      "files": [],
+      "expectations": []
     },
     {
       "id": 3,
       "prompt": "I'm done with all my Herdr fleet agents for this project — shut them down.",
       "expected_output": "Treats teardown as destructive: confirms first, prefers closing skill-created sub-agent panes while keeping the root pane, avoids herdr server stop unless explicitly requested, warns about lost state.",
-      "files": []
+      "files": [],
+      "expectations": []
     },
     {
       "id": 4,
       "prompt": "Launch three Herdr agents (reviewer, tests, docs) for this repo with different tasks in parallel and keep them visible in one view so I can jump into any pane to steer.",
       "expected_output": "Resolves root pane/tab, builds a same-tab grid including root by rightmost-column splits + equal-width resize for three sub-agents (no-focus), submits distinct tasks, explains human can herdr agent focus a pane to steer, does not create per-agent tabs, does not nest tmux.",
-      "files": []
+      "files": [],
+      "expectations": []
     },
     {
       "id": 5,
       "prompt": "Broadcast 'pull latest main and report status' to all my Herdr fleet agents and collect replies.",
       "expected_output": "Uses broadcast.sh or equivalent capture-all-baselines, split-completion-markers, send-all, then wait-concurrent pattern so fast replies and prompt echoes are distinguished; reports per-agent idle/timeout/blocked and does not serialize full send-wait-read per agent.",
-      "files": []
+      "files": [],
+      "expectations": []
     },
     {
       "id": 6,
       "prompt": "My SSH session died — can you reattach my tmux coding agents?",
       "expected_output": "Should NOT trigger herdr-agent-comms as the primary skill (tmux domain). Negative trigger: redirect to tmux-agent-comms or plain tmux help.",
-      "files": []
+      "files": [],
+      "expectations": []
     },
     {
       "id": 7,
       "prompt": "Keep driving this Herdr fleet through the whole refactor — I don't want the run to fall over when you fill up your own context.",
       "expected_output": "Treats the main agent's context as a gated resource: self-checks usage at the named gate points (before a spawn wave, before a broadcast, after each relayed reply) rather than continuously, and continues as main below the 50% threshold. At or above it — or on the UNKNOWN fallback counters (20 relayed reads / 4 spawn waves) — performs a HANDOFF: spawns a successor pane named main-g2 through the same guarded split + equalize + readiness path, sends a compact handoff brief (objective, fleet roster with pane ids and statuses, delivered vs outstanding, constraints) through the normal baseline/marker/preflight cycle, waits for the exact ack 'HANDOFF ACCEPTED gen=2 fleet=<k>', then goes read-only, announces the new orchestrator with herdr agent focus main-g2, and never closes the outgoing root pane without confirmation. Does not paste transcripts or diffs into the brief, and never leaves two orchestrators writing to the fleet.",
-      "files": []
+      "files": [],
+      "expectations": []
     }
   ]
 }

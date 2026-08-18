@@ -1,10 +1,13 @@
 {
-  "skill": "fork-upstream-sync",
+  "skill_name": "fork-upstream-sync",
   "evals": [
     {
-      "id": "sync-fork-keep-feature",
+      "id": 1,
+      "name": "sync-fork-keep-feature",
       "prompt": "This repo is a fork of stablyai/orca. Sync with upstream so my main is current, but keep my markdown preview feature that is still in PR #7121 on branch feat/1-markdown-light-preview.",
-      "expected_behavior": [
+      "expected_output": "Adds or uses upstream remote and fetches upstream/main; Rebases feature branch onto upstream/main and resolves conflicts with union where needed; Rebuilds fork main as upstream/main fast-forwarded with feature branch tip; Uses force-with-lease when pushing; Reports mergeable PR status or equivalent verification.",
+      "files": [],
+      "expectations": [
         "Adds or uses upstream remote and fetches upstream/main",
         "Rebases feature branch onto upstream/main and resolves conflicts with union where needed",
         "Rebuilds fork main as upstream/main fast-forwarded with feature branch tip",
@@ -13,9 +16,12 @@
       ]
     },
     {
-      "id": "pr-conflicts-only",
+      "id": 2,
+      "name": "pr-conflicts-only",
       "prompt": "My open PR branch conflicts with upstream main. Fix the branch so the PR can merge; do not change unrelated files.",
-      "expected_behavior": [
+      "expected_output": "Rebases from upstream/main onto PR head branch only; Resolves conflicts and continues rebase until complete; Force-pushes PR branch with lease; Does not reset fork main unless user asked for integration main.",
+      "files": [],
+      "expectations": [
         "Rebases from upstream/main onto PR head branch only",
         "Resolves conflicts and continues rebase until complete",
         "Force-pushes PR branch with lease",
@@ -23,9 +29,12 @@
       ]
     },
     {
-      "id": "post-merge-cleanup",
+      "id": 3,
+      "name": "post-merge-cleanup",
       "prompt": "Upstream merged my PR. Make my fork main identical to upstream main.",
-      "expected_behavior": [
+      "expected_output": "Fetches upstream; Resets local main to upstream/main; Force-pushes origin main with lease; Confirms main SHA matches upstream/main.",
+      "files": [],
+      "expectations": [
         "Fetches upstream",
         "Resets local main to upstream/main",
         "Force-pushes origin main with lease",
