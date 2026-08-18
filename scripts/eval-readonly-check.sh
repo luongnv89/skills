@@ -34,7 +34,8 @@ Usage:
   --manifest  snapshot directory (default: $TMPDIR/eval-readonly-<name>-<hash>)
   --dest      where `restore` moves the run's artifacts
   --allow     extra declared-artifact path; repeatable. A trailing slash means a
-              directory AT THE REPO ROOT and everything under it.
+              directory AT THE REPO ROOT and everything under it, and exempts
+              UNTRACKED paths only — a tracked file under it is never exempt.
 
 Exit: 0 contract held · 1 contract breach · 2 harness misuse or environment error
 USAGE
@@ -66,6 +67,11 @@ USAGE
 #
 # Nothing else. A path outside this list appearing after the run is a contract breach
 # (SKILL.md:34 "Nothing else.", SKILL.md:287 "Anything else is a contract breach").
+#
+# The directory entries exempt UNTRACKED output only. baseline.md:30-32 blesses exactly
+# that and no more: "New *untracked* build output (`coverage/`, `dist/`, `target/`) is
+# acceptable ... A changed **tracked** file is not: report it as a finding". A repo that
+# commits its `dist/` therefore still gets the full read-only contract over those files.
 DEFAULT_ALLOW=(
   "MODERNIZATION_REPORT.md"
   "MODERNIZATION_PLAN.md"
@@ -175,7 +181,30 @@ fi
 #
 # A plain entry matches that path at the repo root only, which is where the contract
 # places the two reports and CODE_REVIEW.md (SKILL.md:279-286).
-is_allowed() {
+#
+# The two forms are matched by separate functions because they carry different
+# authority. A plain entry names a file the skill DECLARES it writes, so it is exempt
+# whether or not that file is tracked (re-auditing a repo whose MODERNIZATION_REPORT.md
+# was committed by a previous audit must not read as a breach). A directory entry only
+# carries baseline.md:30-32, which blesses *untracked* build output and explicitly
+# refuses the tracked case — so callers that look at tracked state must never let a
+# directory entry exempt anything.
+
+# Plain (no trailing slash) allowlist entries only.
+is_allowed_plain() {
+  local p="${1#./}" a
+  [ -z "$p" ] && return 1
+  for a in "${ALLOW[@]}"; do
+    case "$a" in
+      */) ;;
+      *)  [ "$p" = "$a" ] && return 0 ;;
+    esac
+  done
+  return 1
+}
+
+# Trailing-slash (directory) allowlist entries only. MODE is as documented above.
+is_allowed_dir() {
   local mode="$1" p="${2#./}" a d
   [ -z "$p" ] && return 1
   [ "$p" = "." ] && return 1
@@ -190,12 +219,14 @@ is_allowed() {
           return 0
         fi
         ;;
-      *)
-        [ "$p" = "$a" ] && return 0
-        ;;
     esac
   done
   return 1
+}
+
+is_allowed() {
+  is_allowed_plain "$2" && return 0
+  is_allowed_dir "$1" "$2"
 }
 
 # Reads a stream on stdin, drops every line whose path field is allowlisted.
@@ -213,6 +244,29 @@ filter_allowed() {
     is_allowed "$mode" "$path" || printf '%s\n' "$line"
   done
 }
+
+# Manifest filter that honours baseline.md:30-32. Same input/output shape as
+# `filter_allowed manifest`, with one difference: a directory-allowlisted path that is
+# TRACKED in $TARGET stays in the comparison, so rewriting a committed dist/bundle.js
+# is a breach instead of an exemption. $1 is a newline-separated list of tracked paths.
+filter_allowed_manifest() {
+  local tracked="$1" line path
+  while IFS= read -r line; do
+    path="$(printf '%s' "$line" | cut -f3-)"
+    case "$path" in *' -> '*) path="${path##* -> }" ;; esac
+    path="${path%/}"; path="${path#./}"
+    is_allowed_plain "$path" && continue
+    if is_allowed_dir manifest "$path" && ! grep -Fxq "$path" "$tracked"; then
+      continue
+    fi
+    printf '%s\n' "$line"
+  done
+}
+
+# Tracked paths of $TARGET, one per line, for filter_allowed_manifest. A path holding a
+# newline cannot be represented here — derive_manifest refuses those outright, so such a
+# target never reaches a comparison in the first place.
+derive_tracked() { git -C "$TARGET" ls-files -z | tr '\0' '\n'; }
 
 # --- the three derivations -------------------------------------------------------
 derive_status() { git -C "$TARGET" status --porcelain; }
@@ -309,6 +363,11 @@ split_diff() {
 
 # Writes to $2 the concatenation of every section of diff file $1 whose path is NOT
 # allowlisted, preserving git's own section order.
+#
+# Only PLAIN allowlist entries exempt a section here. Everything `git diff` reports is
+# tracked by definition, and a directory entry carries no authority over a tracked file
+# (baseline.md:30-32: "A changed **tracked** file is not [acceptable]"), so a section
+# under `dist/` or `target/` is always a breach.
 filter_diff() {
   local src="$1" out="$2" dir idx n p
   dir="$(mktemp -d)" || { printf 'mktemp failed\n' >&2; exit 2; }
@@ -317,7 +376,7 @@ filter_diff() {
   : > "$out"
   while IFS="$TAB" read -r n p; do
     [ -n "${n:-}" ] || continue
-    is_allowed manifest "$p" && continue
+    is_allowed_plain "$p" && continue
     cat "$dir/$n.part" >> "$out"
   done < "$idx"
   rm -rf "$dir"
@@ -348,28 +407,35 @@ do_snapshot() {
     "$paths"
 }
 
-# $1 = "allow" (exempt the declared artifacts) | "strict" (exempt nothing)
-do_verify() {
-  local mode="${1:-allow}"
+# Refuses a snapshot that is missing or was taken against another repo. target.txt is
+# written by `snapshot` precisely so a snapshot cannot be used against a different repo;
+# comparing canonical forms keeps /tmp vs /private/tmp from reading as a mismatch.
+#
+# `restore` MOVES files, so this must run before its first `mv`: a mismatched --manifest
+# would otherwise relocate the target's own pre-existing artifacts and only then error.
+# Missing snapshot → a reported breach (return 1); wrong provenance → harness misuse (2).
+require_snapshot() {
   if [ ! -f "$SNAP/manifest.txt" ]; then
     bad "snapshot present" "no snapshot at $SNAP — run 'snapshot' before the run"
-    return
+    return 1
   fi
-
-  # target.txt is written by `snapshot` precisely so a snapshot cannot be verified
-  # against a different repo. Comparing canonical forms keeps /tmp vs /private/tmp
-  # from reading as a mismatch.
-  if [ -f "$SNAP/target.txt" ]; then
-    local recorded
-    recorded="$(head -n 1 "$SNAP/target.txt")"
-    if [ "$(canon_dir "$recorded")" != "$TARGET" ]; then
-      printf 'snapshot %s was taken against %s, not %s\n' "$SNAP" "$recorded" "$TARGET" >&2
-      exit 2
-    fi
-  else
+  if [ ! -f "$SNAP/target.txt" ]; then
     printf 'snapshot %s has no target.txt — refusing to verify a snapshot of unknown provenance\n' "$SNAP" >&2
     exit 2
   fi
+  local recorded
+  recorded="$(head -n 1 "$SNAP/target.txt")"
+  if [ "$(canon_dir "$recorded")" != "$TARGET" ]; then
+    printf 'snapshot %s was taken against %s, not %s\n' "$SNAP" "$recorded" "$TARGET" >&2
+    exit 2
+  fi
+  return 0
+}
+
+# $1 = "allow" (exempt the declared artifacts) | "strict" (exempt nothing)
+do_verify() {
+  local mode="${1:-allow}"
+  require_snapshot || return
 
   local work
   work="$(mktemp -d)" || { printf 'mktemp failed\n' >&2; exit 2; }
@@ -381,8 +447,13 @@ do_verify() {
     derive_status | filter_allowed porcelain > "$work/status.now" \
       || { printf 'git status failed on %s\n' "$TARGET" >&2; exit 2; }
     filter_allowed porcelain < "$SNAP/status.txt" > "$work/status.pre"
-    derive_manifest_or_die | filter_allowed manifest > "$work/manifest.now"
-    filter_allowed manifest < "$SNAP/manifest.txt" > "$work/manifest.pre"
+    # Both sides are filtered against the SAME tracked set (the current one), so a
+    # tracked path under an allowlisted directory is compared on both sides or on
+    # neither — never retained on one side only, which would fake a delta.
+    derive_tracked > "$work/tracked.txt" \
+      || { printf 'git ls-files failed on %s\n' "$TARGET" >&2; exit 2; }
+    derive_manifest_or_die | filter_allowed_manifest "$work/tracked.txt" > "$work/manifest.now"
+    filter_allowed_manifest "$work/tracked.txt" < "$SNAP/manifest.txt" > "$work/manifest.pre"
     # A declared artifact that is already TRACKED (a MODERNIZATION_REPORT.md
     # committed by a previous audit) shows up in `git diff`, not in the untracked
     # sets. Comparing raw diffs would FAIL on a write the contract permits.
@@ -435,13 +506,11 @@ do_verify() {
 
 do_restore() {
   [ -n "$DEST" ] || { printf -- '--dest is required for restore\n' >&2; usage; }
+  # BEFORE anything is created or moved: a snapshot of another repo must not get as far
+  # as relocating this target's own files.
+  require_snapshot || exit $fail
   mkdir -p "$DEST" || { printf 'cannot create %s\n' "$DEST" >&2; exit 2; }
   DEST="$(cd "$DEST" && pwd -P)"
-
-  if [ ! -f "$SNAP/manifest.txt" ]; then
-    bad "snapshot present" "no snapshot at $SNAP — run 'snapshot' before the run"
-    exit $fail
-  fi
 
   # Allowlisted paths that were ALREADY there before the run belong to the target,
   # not to the run. Moving them out would leave `restore`'s strict re-verify staring
