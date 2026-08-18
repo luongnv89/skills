@@ -12,7 +12,7 @@ set -uo pipefail
 # catalog (CLAUDE.md rule 7). Capture the invocation cwd before the cd.
 INVOCATION_PWD="$PWD"
 ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
-cd "$ROOT"
+cd "$ROOT" || exit 2
 
 NL='
 '
@@ -35,7 +35,8 @@ Usage:
   --dest      where `restore` moves the run's artifacts
   --allow     extra declared-artifact path; repeatable. A trailing slash means a
               directory AT THE REPO ROOT and everything under it, and exempts
-              UNTRACKED paths only — a tracked file under it is never exempt.
+              UNTRACKED paths only — a path tracked either at snapshot time or
+              after the run is never exempt.
 
 Exit: 0 contract held · 1 contract breach · 2 harness misuse or environment error
 USAGE
@@ -187,8 +188,9 @@ fi
 # whether or not that file is tracked (re-auditing a repo whose MODERNIZATION_REPORT.md
 # was committed by a previous audit must not read as a breach). A directory entry only
 # carries baseline.md:30-32, which blesses *untracked* build output and explicitly
-# refuses the tracked case — so callers that look at tracked state must never let a
-# directory entry exempt anything.
+# refuses the tracked case — so neither comparison filter lets a directory entry exempt
+# a tracked path. (`is_allowed` below keeps the ungated union; its only caller is
+# `restore`, which decides what to MOVE OUT, not what to compare.)
 
 # Plain (no trailing slash) allowlist entries only.
 is_allowed_plain() {
@@ -229,10 +231,14 @@ is_allowed() {
   is_allowed_dir "$1" "$2"
 }
 
-# Reads a stream on stdin, drops every line whose path field is allowlisted.
-# mode=manifest → tab-separated manifest (kind, hash, path). mode=porcelain → git status.
+# Reads a stream on stdin, drops every line whose path field is allowlisted, honouring
+# baseline.md:30-32 — a directory-allowlisted path that is TRACKED stays in the
+# comparison, so rewriting a committed dist/bundle.js is a breach, not an exemption.
+#
+# $1 = mode. manifest → tab-separated manifest (kind, hash, path). porcelain → git status.
+# $2 = file holding the tracked path set, one path per line (see derive_tracked).
 filter_allowed() {
-  local mode="$1" line path
+  local mode="$1" tracked="$2" line path
   while IFS= read -r line; do
     case "$mode" in
       manifest)  path="$(printf '%s' "$line" | cut -f3-)" ;;
@@ -240,30 +246,16 @@ filter_allowed() {
     esac
     # `git status` renders renames as "old -> new"; judge on the destination.
     case "$path" in *' -> '*) path="${path##* -> }" ;; esac
-    path="${path%/}"
-    is_allowed "$mode" "$path" || printf '%s\n' "$line"
-  done
-}
-
-# Manifest filter that honours baseline.md:30-32. Same input/output shape as
-# `filter_allowed manifest`, with one difference: a directory-allowlisted path that is
-# TRACKED in $TARGET stays in the comparison, so rewriting a committed dist/bundle.js
-# is a breach instead of an exemption. $1 is a newline-separated list of tracked paths.
-filter_allowed_manifest() {
-  local tracked="$1" line path
-  while IFS= read -r line; do
-    path="$(printf '%s' "$line" | cut -f3-)"
-    case "$path" in *' -> '*) path="${path##* -> }" ;; esac
     path="${path%/}"; path="${path#./}"
     is_allowed_plain "$path" && continue
-    if is_allowed_dir manifest "$path" && ! grep -Fxq "$path" "$tracked"; then
+    if is_allowed_dir "$mode" "$path" && ! grep -Fxq "$path" "$tracked"; then
       continue
     fi
     printf '%s\n' "$line"
   done
 }
 
-# Tracked paths of $TARGET, one per line, for filter_allowed_manifest. A path holding a
+# Tracked paths of $TARGET, one per line, for filter_allowed. A path holding a
 # newline cannot be represented here — derive_manifest refuses those outright, so such a
 # target never reaches a comparison in the first place.
 derive_tracked() { git -C "$TARGET" ls-files -z | tr '\0' '\n'; }
@@ -387,6 +379,9 @@ do_snapshot() {
   derive_status > "$SNAP/status.txt" || { printf 'git status failed on %s\n' "$TARGET" >&2; exit 2; }
   derive_diff   > "$SNAP/diff.txt"   || { printf 'git diff failed on %s\n' "$TARGET" >&2; exit 2; }
   derive_manifest > "$SNAP/manifest.txt" || { printf 'manifest derivation failed on %s\n' "$TARGET" >&2; exit 2; }
+  # Recorded so `verify` can tell what was tracked BEFORE the run. Without it a run that
+  # SHRINKS the index would be judged only on the post-run tracked set — see do_verify.
+  derive_tracked > "$SNAP/tracked.txt" || { printf 'git ls-files failed on %s\n' "$TARGET" >&2; exit 2; }
   printf '%s\n' "$TARGET" > "$SNAP/target.txt"
 
   local paths
@@ -444,16 +439,39 @@ do_verify() {
 
   local diff_name diff_pre diff_now
   if [ "$mode" = "allow" ]; then
-    derive_status | filter_allowed porcelain > "$work/status.now" \
-      || { printf 'git status failed on %s\n' "$TARGET" >&2; exit 2; }
-    filter_allowed porcelain < "$SNAP/status.txt" > "$work/status.pre"
-    # Both sides are filtered against the SAME tracked set (the current one), so a
-    # tracked path under an allowlisted directory is compared on both sides or on
-    # neither — never retained on one side only, which would fake a delta.
-    derive_tracked > "$work/tracked.txt" \
+    # Both sides are filtered against the SAME tracked set, so a tracked path under an
+    # allowlisted directory is compared on both sides or on neither — never retained on
+    # one side only, which would fake a delta.
+    #
+    # That set is the UNION of the snapshot-time and post-run tracked sets. The post-run
+    # set alone reinstates the exemption baseline.md:30-32 denies: a run that SHRINKS the
+    # index (`git rm --cached dist/bundle.js`, or a full `git rm`) leaves the path
+    # untracked NOW, so both sides would drop it as "untracked build output" and the
+    # destruction of committed content would read as a pass. A path tracked at EITHER end
+    # is a tracked file for the contract's purposes. A snapshot taken before tracked.txt
+    # existed falls back to the post-run set alone rather than hard-failing.
+    derive_tracked > "$work/tracked.now" \
       || { printf 'git ls-files failed on %s\n' "$TARGET" >&2; exit 2; }
-    derive_manifest_or_die | filter_allowed_manifest "$work/tracked.txt" > "$work/manifest.now"
-    filter_allowed_manifest "$work/tracked.txt" < "$SNAP/manifest.txt" > "$work/manifest.pre"
+    #
+    # Guarded like every other derivation that feeds a comparison: a truncated tracked
+    # set fails OPEN — an empty one exempts everything under every directory entry on
+    # both sides, blinding the manifest AND porcelain checks into a spurious exit 0.
+    if [ -f "$SNAP/tracked.txt" ]; then
+      cat "$SNAP/tracked.txt" "$work/tracked.now" | LC_ALL=C sort -u > "$work/tracked.txt" \
+        || { printf 'cannot build the tracked-path union for %s\n' "$TARGET" >&2; exit 2; }
+    else
+      LC_ALL=C sort -u "$work/tracked.now" > "$work/tracked.txt" \
+        || { printf 'cannot read the tracked-path set for %s\n' "$TARGET" >&2; exit 2; }
+    fi
+    derive_status | filter_allowed porcelain "$work/tracked.txt" > "$work/status.now" \
+      || { printf 'git status failed on %s\n' "$TARGET" >&2; exit 2; }
+    filter_allowed porcelain "$work/tracked.txt" < "$SNAP/status.txt" > "$work/status.pre"
+    # Derived to a file first, NOT piped: derive_manifest_or_die's `exit 2` on the left of
+    # a pipeline runs in a subshell and would leave verify reporting exit 1 (contract
+    # breach) for what is really exit 2 (environment error).
+    derive_manifest_or_die > "$work/manifest.raw"
+    filter_allowed manifest "$work/tracked.txt" < "$work/manifest.raw" > "$work/manifest.now"
+    filter_allowed manifest "$work/tracked.txt" < "$SNAP/manifest.txt" > "$work/manifest.pre"
     # A declared artifact that is already TRACKED (a MODERNIZATION_REPORT.md
     # committed by a previous audit) shows up in `git diff`, not in the untracked
     # sets. Comparing raw diffs would FAIL on a write the contract permits.
