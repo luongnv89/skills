@@ -15,9 +15,8 @@
         "The plan starts with Pre / Agent environment, then phases P0 through P4 unrenumbered, each with at least one sprint and a measurable milestone",
         "Every P0-P4 task has at least 2 acceptance criteria, one asserting the test suite is still green; Pre is exempt from the green assertion when the baseline is RED",
         "Every task carries a Closes: line naming finding IDs, or names the milestone it enables",
-<<<<<<< HEAD
         "No repo-writing delegate is invoked during the audit — agent-config, test-coverage, devops-pipeline, security-setup, doc-manager, code-review mode clean, and code-review mode cleanup are each named in a plan task instead",
-        "The run modifies no tracked file: the target repo's `git status --porcelain`, its full `git diff`, and a SHA-256 manifest of every non-`.git` path are byte-identical before and after the run, once the declared artifacts below are set aside. The target is a genuinely stale repo and is normally already dirty before the run starts, so the assertion is delta-against-a-pre-run-snapshot, not `git diff --stat` being empty (`scripts/eval-readonly-check.sh snapshot` then `verify`)",
+        "The run modifies no tracked file: the target repo's `git status --porcelain`, its full `git diff`, and a SHA-256 manifest of every git-visible path (tracked plus untracked, honouring the target's `.gitignore`) are byte-identical before and after the run, once the declared artifacts below are set aside. The target is a genuinely stale repo and is normally already dirty before the run starts, so the assertion is delta-against-a-pre-run-snapshot, not `git diff --stat` being empty (`scripts/eval-readonly-check.sh snapshot` then `verify`)",
         "Any new file is one of the two reports, the declared CODE_REVIEW.md artifact, or a probe byproduct, and all of them are enumerated in the report's Artifacts section",
         "dont-make-me-think is invoked in review mode only — its Redesign Mode never runs and no UI source file is edited"
       ]
@@ -118,7 +117,7 @@
         "dont-make-me-think runs in review mode only — no UI source file is edited",
         "Each of the six writing skills is named as the invocation in at least one plan task",
         "The plan's Pre step names /agent-config create or /agent-config update and agent-config is not invoked during the audit",
-        "The run leaves no delta: `git status --porcelain`, the full `git diff`, and a SHA-256 manifest of every non-`.git` path are byte-identical to the pre-run snapshot once the declared artifacts are set aside (`scripts/eval-readonly-check.sh snapshot` / `verify` / `restore`). Whatever dirtiness the target already carried is part of the baseline, not a failure"
+        "The run leaves no delta: `git status --porcelain`, the full `git diff`, and a SHA-256 manifest of every git-visible path (tracked plus untracked, honouring the target's `.gitignore`) are byte-identical to the pre-run snapshot once the declared artifacts are set aside (`scripts/eval-readonly-check.sh snapshot` / `verify` / `restore`). Whatever dirtiness the target already carried is part of the baseline, not a failure"
       ]
     },
     {
@@ -147,7 +146,7 @@
         "Any Rails major-version bump is its own task naming a migration source, never batched with other upgrades",
         "Sprints are sized to 5-10 tasks each and every task carries an effort estimate",
         "The plan starts with Pre / Agent environment before unrenumbered P0-P4",
-        "Both MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md are written, and the run leaves no delta — `git status --porcelain`, the full `git diff`, and a SHA-256 manifest of every non-`.git` path all match the pre-run snapshot once the two reports and any other declared artifact are set aside (`scripts/eval-readonly-check.sh`)"
+        "Both MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md are written, and the run leaves no delta — `git status --porcelain`, the full `git diff`, and a SHA-256 manifest of every git-visible path (tracked plus untracked, honouring the target's `.gitignore`) all match the pre-run snapshot once the two reports and any other declared artifact are set aside (`scripts/eval-readonly-check.sh`)"
       ]
     },
     {

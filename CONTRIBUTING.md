@@ -151,7 +151,7 @@ scripts/eval-readonly-check.sh verify   --target /path/to/repo --manifest /tmp/s
 scripts/eval-readonly-check.sh restore  --target /path/to/repo --manifest /tmp/snap --dest /tmp/artifacts
 ```
 
-It compares `git status --porcelain`, the full `git diff`, and a **SHA-256 manifest of every non-`.git` path** against the pre-run snapshot, exempting a declared-artifact allowlist (`--allow` adds to it). The manifest is the load-bearing check: `git diff` cannot see an untracked file, so a newly written `.github/workflows/ci.yml` or test file would otherwise go unnoticed. Assertions that only a transcript can settle are reported as `[MANUAL] ... SKIPPED (run by operator)` rather than silently dropped.
+It compares `git status --porcelain`, the full `git diff`, and a **SHA-256 manifest of every git-visible path (tracked plus untracked, honouring the target's `.gitignore`)** against the pre-run snapshot, exempting a declared-artifact allowlist (`--allow` adds to it). The manifest is the load-bearing check: `git diff` cannot see an untracked file, so a newly written `.github/workflows/ci.yml` or test file would otherwise go unnoticed. Assertions that only a transcript can settle are reported as `[MANUAL] ... SKIPPED (run by operator)` rather than silently dropped.
 
 ## Commit Message Convention
 
