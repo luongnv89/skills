@@ -23,11 +23,14 @@
 
 **codebase-modernizer (1.1.0):** read-only whole-repo audit that produces `MODERNIZATION_REPORT.md` and `MODERNIZATION_PLAN.md` for a codebase gone stale or messy. Phase 0 records a **baseline-green** verdict (build, test pass rate, coverage, CI) that every planned task's acceptance criteria then reference — which is what makes the plan testable rather than aspirational. Ten dimensions: dependency and runtime currency is the skill's own (`scripts/dep_scan.sh` probes 14 ecosystems fail-soft). A delegate is invoked during the audit **only if it writes nothing** — `code-review` modes `review`/`perf` and `dont-make-me-think` run; the six that write (`code-review` modes `clean`/`cleanup`, `test-coverage`, `devops-pipeline`, `security-setup`, `doc-manager`) are scanned inline and instead named as the invocation in the plan task that does the work. Findings cite `path:line` or are marked **Not Assessed** — never guessed. Dependencies are never upgraded in place: they are classified into **upgrade waves** (security patches → patch/minor batch → one major per task with a named migration source, via Context7 when available). The plan uses a fixed P0–P4 skeleton with sprints, milestones, a dependency DAG, and a stated critical path, in `tasks-generator`'s task format. A future gated apply-upgrades mode is the intended v2 extension.
 
+**codebase-modernizer (1.2.0):** every emitted plan now opens with an unconditional **Pre — Agent environment** step before P0 Stabilize (P0–P4 keep their numbers). Pre schedules a runnable agent environment and create-or-improve of `CLAUDE.md` / `AGENTS.md` via `/agent-config create|update` — planned only; the audit still never writes those files.
+
 **issue-work-loop (1.1.5):** resolves a single GitHub issue through a Herdr-pane implementer→reviewer loop until the PR review is CLEAN. Implementer runs `/issue-resolver`, reviewer runs `/issue-pr-review --review-only` in a separate pane; every FINDING counts, including notes (no soft-pass). Reviewer is FRESHENed at ROUND start and implementer before each fix when context crosses 50%; `--no-cleanup` skips SWEEP for debug; worker panes and loop worktrees are swept at the end by default; merging is always left to the human.
 
 ### Skills Updated
 | Skill | Version Change |
 |-------|----------------|
+| codebase-modernizer | 1.1.0 → 1.2.0 |
 | docs-generator → doc-manager | 1.2.5 → 2.0.1 |
 | tmux-agent-comms | 1.3.0 → 2.2.0 (observability, app terminal tabs by default, orchestrator context handoff) |
 | landing-page-generator | 1.1.4 → 1.2.0 (absorbs README-to-landing as Mode B) |

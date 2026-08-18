@@ -20,7 +20,7 @@ review, that skill's own `CODE_REVIEW.md` — and every file it created is liste
 | File | Contents |
 |---|---|
 | `MODERNIZATION_REPORT.md` | Baseline health + every finding, severity-ranked, each citing `file:line` |
-| `MODERNIZATION_PLAN.md` | 5 phases → sprints → tasks → milestones, every task closing named findings |
+| `MODERNIZATION_PLAN.md` | Pre + P0–P4 → sprints → tasks → milestones, every task closing named findings |
 
 ## When to Use
 
@@ -67,12 +67,14 @@ but only three of them actually run during the audit.
 | CI / pipelines | checklist scan | `devops-pipeline` |
 | Secrets / vulnerabilities | checklist scan | `security-setup` |
 | Docs drift | checklist scan | `doc-manager` |
+| Agent environment (`CLAUDE.md`, `AGENTS.md`) | not written | `/agent-config create` or `update` (plan Pre step) |
 
-**Why the split:** six of those skills *write* — they install pre-commit hooks, generate workflow
-files, create test files, rewrite docs, or refactor source. Running one during an audit would break
-the read-only promise. So the audit scans those dimensions itself, and the plan names the exact skill
-to run for each task — which is more useful anyway: "Task 3.2: run `/test-coverage` on
-`src/payments`" beats a finding that says coverage is low.
+**Why the split:** those skills *write* — they install pre-commit hooks, generate workflow files,
+create test files, rewrite docs, refactor source, or write `CLAUDE.md` / `AGENTS.md`. Running one
+during an audit would break the read-only promise. So the audit scans those dimensions itself, and
+the plan names the exact skill to run for each task — which is more useful anyway: "Task 3.2: run
+`/test-coverage` on `src/payments`" beats a finding that says coverage is low. `/agent-config` is
+the same pattern for the plan's Pre step: named, never run during the audit.
 
 ## The three ideas that make the output useful
 
@@ -95,6 +97,7 @@ filled in with a plausible guess. The Limitations section lists every one of the
 
 | Phase | Goal | Milestone |
 |---|---|---|
+| **Pre Agent environment** | env an agent can use autonomously; create or improve `CLAUDE.md` / `AGENTS.md` | both files exist and document how to run the project |
 | **P0 Stabilize** | build green, tests runnable, CI running | baseline reproducible in CI |
 | **P1 Secure & Patch** | vulnerabilities closed, waves W1–W2 shipped | zero High/Critical advisories |
 | **P2 Modernize** | runtime upgrade, then majors one at a time | every major current or deferred with a reason |
