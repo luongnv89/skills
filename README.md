@@ -13,7 +13,7 @@
 
 One command drops a tested, versioned skill into your agent. No more ad-hoc prompts. The same rigorous steps run every time.
 
-Skills are independent files. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode.
+Skills are independent files. Works with Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, Google Antigravity (`install.sh:23`).
 
 [**Browse catalog**](#skill-catalog) | [**Install**](#install)
 
@@ -305,7 +305,7 @@ npx skills add https://github.com/luongnv89/skills --skill code-review
 ---
 
 <details>
-<summary><b>Supported Tool Paths</b></summary>
+<summary><b>Supported Tool Paths</b> (`install.sh:218-321`)</summary>
 
 | Tool | Global | Project |
 |---|---|---|

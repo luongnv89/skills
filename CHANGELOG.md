@@ -32,11 +32,11 @@
 ### New Skills
 | Skill | Version |
 |-------|---------|
-| fork-upstream-sync | 1.0.3 |
+| fork-upstream-sync | 1.3.2 |
 | herdr-agent-comms | 1.23.0 |
-| issue-work-loop | 1.1.5 |
-| diagram-generator | 1.0.0 (umbrella routing draw.io + Excalidraw) |
-| codebase-modernizer | 1.1.0 |
+| issue-work-loop | 1.3.1 |
+| diagram-generator | 1.1.2 (umbrella routing draw.io + Excalidraw) |
+| codebase-modernizer | 1.2.2 |
 
 **codebase-modernizer (1.1.0):** read-only whole-repo audit that produces `MODERNIZATION_REPORT.md` and `MODERNIZATION_PLAN.md` for a codebase gone stale or messy. Phase 0 records a **baseline-green** verdict (build, test pass rate, coverage, CI) that every planned task's acceptance criteria then reference — which is what makes the plan testable rather than aspirational. Ten dimensions: dependency and runtime currency is the skill's own (`scripts/dep_scan.sh` probes 14 ecosystems fail-soft). A delegate is invoked during the audit **only if it writes nothing** — `code-review` modes `review`/`perf` and `dont-make-me-think` run; the six that write (`code-review` modes `clean`/`cleanup`, `test-coverage`, `devops-pipeline`, `security-setup`, `doc-manager`) are scanned inline and instead named as the invocation in the plan task that does the work. Findings cite `path:line` or are marked **Not Assessed** — never guessed. Dependencies are never upgraded in place: they are classified into **upgrade waves** (security patches → patch/minor batch → one major per task with a named migration source, via Context7 when available). The plan uses a fixed P0–P4 skeleton with sprints, milestones, a dependency DAG, and a stated critical path, in `tasks-generator`'s task format. A future gated apply-upgrades mode is the intended v2 extension.
 
@@ -52,10 +52,10 @@
 | Skill | Version Change |
 |-------|----------------|
 | codebase-modernizer | 1.1.0 → 1.2.2 |
-| docs-generator → doc-manager | 1.2.5 → 2.0.1 |
+| docs-generator → doc-manager | 1.2.5 → 2.0.2 |
 | tmux-agent-comms | 1.3.0 → 2.2.0 (observability, app terminal tabs by default, orchestrator context handoff) |
-| landing-page-generator | 1.1.4 → 1.2.0 (absorbs README-to-landing as Mode B) |
-| code-review | 1.2.0 → 2.0.1 (merge code-optimizer + clean-code + slop-cleanup as modes) |
+| landing-page-generator | 1.1.4 → 1.2.1 (absorbs README-to-landing as Mode B) |
+| code-review | 1.2.0 → 2.1.0 (merge code-optimizer + clean-code + slop-cleanup as modes) |
 | drawio-generator | 1.2.2 → 1.2.3 (nested under diagram-generator umbrella) |
 | excalidraw-generator | 1.3.2 → 1.3.3 (nested under diagram-generator umbrella) |
 | viral-product-evaluator | 1.2.3 → 1.2.4 (update merged-skill cross-reference) |
@@ -63,23 +63,23 @@
 | aso-marketing | → 1.2.1 |
 | auto-push | → 1.0.3 |
 | brand-name-checker | → 1.3.2 |
-| cli-builder | → 1.0.4 |
+| cli-builder | → 1.0.5 |
 | devops-pipeline | → 2.0.3 |
-| frontend-design | → 1.2.3 |
+| frontend-design | → 1.2.4 |
 | idea-validator | → 1.5.0 |
-| install-script-generator | → 2.2.0 |
-| logo-designer | → 1.2.2 |
-| ollama-optimizer | → 1.1.0 |
+| install-script-generator | → 2.2.1 |
+| logo-designer | → 1.2.3 |
+| ollama-optimizer | → 1.1.1 |
 | opencode-runner | → 1.4.1 |
 | oss-ready | → 1.2.1 |
 | prd-generator | → 1.3.2 |
 | release-manager | → 2.6.0 |
 | security-setup | → 1.4.0 |
-| seo-ai-optimizer | → 1.2.1 |
+| seo-ai-optimizer | → 1.2.3 |
 | subagent-creator | → 1.1.2 |
 | tad-generator | → 1.4.0 |
-| tasks-generator | → 1.3.0 |
-| website-cloner | → 1.1.6 |
+| tasks-generator | → 1.3.1 |
+| website-cloner | → 1.2.1 |
 
 **Orchestrator context handoff (herdr-agent-comms 1.23.0, tmux-agent-comms 2.2.0):** the main agent now gates its own context window instead of only its workers'. It self-checks usage at three named points — before a spawn wave, before a broadcast, and after each relayed reply — and at or above a 50% threshold (overridable in conversation) performs a **HANDOFF**: it spawns a successor orchestrator with the skill's own guarded spawn path (`main-g<N>` pane in Herdr, `<folder>-main-g<N>` session in tmux), delivers a compact fleet brief through the normal baseline/marker/preflight cycle, waits for an explicit `HANDOFF ACCEPTED` ack, then goes read-only and announces the successor. Orchestrator is now a **role, not a pane** — the outgoing pane/session is retired, never closed without confirmation — and exactly one orchestrator holds write access at a time. When usage is unreportable, a countable fallback (20 relayed reads or 4 spawn waves) drives the same decision. See `references/context-succession.md` in either skill.
 
