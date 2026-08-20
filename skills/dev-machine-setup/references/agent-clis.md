@@ -64,12 +64,8 @@ Verify: `opencode --version`.
 
 ## PATH
 
-If a global npm bin is "installed" but not found:
-
-```bash
-npm prefix -g
-# add <prefix>/bin (Unix) or <prefix> (Windows) to PATH, then open a new shell
-```
+"Installed but `command not found`" is almost always the npm global bin missing from PATH — fix per
+`optimize.md#npm-global-bin-not-on-path`.
 
 ## Auth
 

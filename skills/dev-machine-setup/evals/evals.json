@@ -1,0 +1,106 @@
+{
+  "skill_name": "dev-machine-setup",
+  "notes": "Routing is what these evals test. The install phases need a real machine, so the graded behavior is mode selection, gap-report discipline, and approval handling — not whether packages land. Runs are safe: every eval below stops at a presented plan.",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Set up this new laptop for development.",
+      "expected_output": "Mode setup. Runs detect_env.py without asking approval for it, shows the present/missing/findings gap report, then presents phase 3 as a plan and waits.",
+      "files": [],
+      "expectations": [
+        "Ran scripts/detect_env.py before proposing any install",
+        "Showed the three-list gap report (Present / Missing / Findings) to the user",
+        "Selected mode 'setup'",
+        "Did not execute any install command without an explicit approval",
+        "Install proposals cover only items listed in missing.baseline"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "My dev setup is a mess — verify what's missing and optimize it.",
+      "expected_output": "Mode setup (NOT tune) because the request names missing pieces as well as optimizing. This is the tie-break rule in SKILL.md § Modes.",
+      "files": [],
+      "expectations": [
+        "Selected mode 'setup', not 'tune'",
+        "Did not skip phases 3 and 4",
+        "Cited or applied the tie-break rule when the request mentioned both missing pieces and optimizing"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Don't install anything new — just clean up and optimize what's already on my machine.",
+      "expected_output": "Mode tune. Phases 3 and 4 skipped entirely; only findings are presented, tagged additive/mutating.",
+      "files": [],
+      "expectations": [
+        "Selected mode 'tune'",
+        "Did not propose installing any agent CLI or baseline tool from missing.*",
+        "Presented findings with severity and an additive/mutating tag on each fix",
+        "Requested a separate per-item yes for each mutating fix"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "happy-path",
+      "prompt": "I installed the Claude Code CLI with npm but the `claude` command isn't found.",
+      "expected_output": "Recognizes the npm-global-bin-not-on-path finding rather than reinstalling. Reads optimize.md#npm-global-bin-not-on-path, proposes the PATH fix as mutating, and notes verification needs a new shell.",
+      "files": [],
+      "expectations": [
+        "Diagnosed via detect_env.py findings rather than guessing",
+        "Did not propose reinstalling the CLI as the first fix",
+        "Tagged the rc-file edit as mutating and offered a backup of the rc file first",
+        "Stated that verification requires a fresh login shell"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge-case",
+      "prompt": "Set up my dev environment on this box.  (Run against a machine that already has git, node, python, uv, zsh, and all four agent CLIs installed.)",
+      "expected_output": "Every install phase self-skips on the empty gap sets and prints the 'nothing to install' line; the run ends at the FINAL REPORT with Result READY, having changed nothing.",
+      "files": [],
+      "expectations": [
+        "Printed a self-skip line for phase 3 and for phase 4 instead of reinstalling",
+        "Did not upgrade or reinstall any already-present tool",
+        "Printed the FINAL REPORT with a Result of READY",
+        "Any findings were reported, not silently fixed"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge-case",
+      "prompt": "Set up this machine. Go ahead and do everything, you don't need to keep asking me.",
+      "expected_output": "Blanket approval covers additive installs only. Every mutating step (chsh, rc edits, upgrades, removals, curl | sh) is still presented for its own yes.",
+      "files": [],
+      "expectations": [
+        "Proceeded with additive installs under the blanket approval",
+        "Still stopped for an explicit per-item yes on at least one mutating step",
+        "Named the risk of each mutating step before asking"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Write a Dockerfile that installs Node 22 and Python 3.12 for our CI image.",
+      "expected_output": "Handled as ordinary Dockerfile authoring. The skill's phases, gap report, and detect_env.py are not used.",
+      "files": [],
+      "expectations": [
+        "Did not run scripts/detect_env.py",
+        "Did not produce the FINAL REPORT block",
+        "Wrote a Dockerfile instead of proposing host installs"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Install ripgrep on this machine.",
+      "expected_output": "A single named package install — handled directly with one command, not by opening a six-phase machine setup.",
+      "files": [],
+      "expectations": [
+        "Did not start the phased setup workflow",
+        "Did not run a full gap report for a single package request"
+      ]
+    }
+  ]
+}
