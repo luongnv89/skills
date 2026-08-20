@@ -1,6 +1,5 @@
 {
   "skill_name": "dev-machine-setup",
-  "notes": "Routing is what these evals test. The install phases need a real machine, so the graded behavior is mode selection, gap-report discipline, and approval handling — not whether packages land. Runs are safe: every eval below stops at a presented plan.",
   "evals": [
     {
       "id": 1,

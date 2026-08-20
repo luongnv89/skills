@@ -211,8 +211,12 @@ def findings(os_name: str, arch: str, tools: dict[str, str | None], mgrs: list[s
     out: list[dict[str, str]] = []
 
     if not mgrs:
-        out.append(find("no-package-manager", "high", "packaging",
-                        "No package manager found; nothing can be installed until one exists."))
+        brew_prefix = "/opt/homebrew/bin" if os_name == "macos" and arch == "arm64" else (
+            "/usr/local/bin" if os_name == "macos" else None)
+        brew_installed = brew_prefix is not None and os.path.isfile(os.path.join(brew_prefix, "brew"))
+        if not brew_installed and not tools.get("npm"):
+            out.append(find("no-package-manager", "high", "packaging",
+                            "No package manager found; nothing can be installed until one exists."))
 
     if tools.get("npm"):
         bindir = npm_global_bin()
