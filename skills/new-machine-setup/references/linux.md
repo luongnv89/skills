@@ -15,7 +15,7 @@ cd inbash
 |--------|---------|
 | Debian/Ubuntu | `sudo apt-get update && sudo apt-get install -y git curl wget vim build-essential` or `./unix/basic.sh --yes` |
 | Fedora | `sudo dnf install -y git curl wget vim gcc gcc-c++ make` |
-| Arch | `sudo pacman -Sy --needed git curl wget vim base-devel` |
+| Arch | `sudo pacman -Syu --needed git curl wget vim base-devel` |
 
 ## Node.js LTS
 

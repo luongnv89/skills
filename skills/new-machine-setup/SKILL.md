@@ -1,10 +1,10 @@
 ---
 name: new-machine-setup
-description: "Set up a clean, ready-to-develop machine across macOS, Linux, and Windows with OS/arch detection and a human-in-the-loop per phase. Use when the user wants a fresh dev box, to bootstrap Node/Python, install Claude Code, Codex, Pi, OpenCode, or Oh My Zsh, or to debloat OEM apps. Don't use for Dockerfiles, CI images, or one-off package installs."
+description: "Set up a clean, ready-to-develop machine on macOS, Linux, or Windows: OS/arch detection, Node/Python bootstrap, Claude Code, Codex, Pi, or OpenCode installs with per-phase approval. Don't use for Dockerfiles, CI images, or one-off package installs."
 license: MIT
 compatibility: "macOS, Linux (Debian/Ubuntu/Fedora/Arch), Windows (winget/PowerShell). Needs network and a package manager or permission to install one. Never run destructive uninstalls without an explicit yes."
 metadata:
-  version: 0.3.0
+  version: 0.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: high
 ---
