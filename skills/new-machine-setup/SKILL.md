@@ -4,7 +4,7 @@ description: "Set up a clean, ready-to-develop machine across macOS, Linux, and 
 license: MIT
 compatibility: "macOS, Linux (Debian/Ubuntu/Fedora/Arch), Windows (winget/PowerShell). Needs network and a package manager or permission to install one. Never run destructive uninstalls without an explicit yes."
 metadata:
-  version: 0.1.0
+  version: 0.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: high
 ---
@@ -16,6 +16,17 @@ Turn a factory laptop into a **clean, ready-to-develop** machine. Detect OS + CP
 This skill is an orchestrator. Long per-OS command tables live in `references/` so only the current platform is loaded.
 
 **Do not** pipe remote scripts to a shell until the user has approved that step. Prefer official installers and the user's own [inbash](https://github.com/luongnv89/inbash) scripts when they match the OS.
+
+## Human-in-the-loop (mandatory)
+
+Every phase runs as a strict four-step loop. Do not skip any step, and do not batch multiple phases into one approval.
+
+1. **Present** — show exactly what will be executed for this phase: each command, what it installs/changes, and any risk (especially removals or `curl | sh`).
+2. **Approve** — wait for the user's explicit go-ahead (a clear "yes" or "run it"). For removals and remote-script installs, require an explicit per-item yes; a blanket "do everything" only covers non-destructive steps.
+3. **Execute** — run only what was approved. If something fails, stop and re-present before retrying; never silently widen scope.
+4. **Verify** — after execution, confirm the phase actually succeeded (version checks, file pres:ence, exit-code reads). Record pass/fail in the running log.
+
+Keep a running list of every step's outcome (✓ / ✗ + evidence). The final report is built from this log, never from memory.
 
 ## When to Use
 
@@ -46,64 +57,68 @@ Don't use for: Dockerfiles, CI runners, or installing a single package.
 
 ## Procedure
 
+Each phase follows the **Human-in-the-loop** loop (present → approve → execute → verify). Begin every phase by presenting the concrete plan for that phase; do not move to the next phase until the current one verifies green (or is explicitly deferred by the user).
+
 ### 1. Detect the machine
 
-Run:
+- **Present:** "I'll run `python3 scripts/detect_env.py` to read OS, arch, package managers, and which dev tools already exist. Read-only, no changes."
+- **Approve:** wait.
+- **Execute:** run `python3 scripts/detect_env.py` (or the fallback one-liners from `references/detect.md` if `python3` is missing).
+- **Verify:** confirm JSON contains `os`, `arch`, a package manager, and the tool map. Read **only** the OS reference that matches (`windows.md` / `macos.md` / `linux.md`).
 
-```bash
-python3 scripts/detect_env.py
-```
-
-If `python3` is missing, use the one-liners in `references/detect.md`.
-
-**Done when:** you have `os` (`macos` | `linux` | `windows`), `arch` (`x86_64` | `arm64` | other), package manager, and which of `{git,node,npm,python3,zsh,brew,winget}` already exist.
-
-Then read **only** the matching OS reference (`windows.md` / `macos.md` / `linux.md`).
+**Phase 1 done when:** inventory JSON is captured and the correct OS reference is selected.
 
 ### 2. Inventory (Windows first; useful everywhere)
 
 Inspired by [XFreeze](https://x.com/xfreeze/status/2090189407659999603): factory Windows boxes ship trial AV, OEM utilities, and partner games. **List before delete.**
 
-On Windows, follow `references/windows.md` § Inventory. On macOS/Linux, list unexpected GUI apps and leftover vendor agents, but do not uninstall by default.
+- **Present:** the inventory commands (e.g. `winget list`, `Get-AppxPackage`). State this is read-only.
+- **Approve:** wait.
+- **Execute:** follow `references/windows.md` § Inventory (or list GUI apps / vendor agents on macOS/Linux).
+- **Verify:** you have a complete list; build a `keep / review / remove-candidate` table.
 
-Present a short table: keep / review / remove-candidate. Wait for an explicit yes on every removal.
+Then, **per removal**:
+- **Present** each removal candidate with its exact command and the risk (e.g. losing a vendor utility).
+- **Approve:** explicit per-item yes. No removal without it.
+- **Execute** only confirmed rows.
+- **Verify** the package is gone (`winget list` / `Get-AppxPackage` no longer shows it).
 
-**Done when:** the user has seen the inventory. Removals are either skipped or confirmed one-by-one.
+**Phase 2 done when:** inventory shown; removals are either skipped or confirmed one-by-one and verified.
 
 ### 3. Baseline toolchain
 
-Install missing pieces only (idempotent):
+- **Present:** the full list of what will be installed for this machine, drawn from the table below, with the exact commands (Homebrew/inbash/winget). Flag anything that overwrites an existing Node/Python.
+- **Approve:** wait.
+- **Execute:** install **missing** pieces only (idempotent):
+  - Package manager — Homebrew (mac), winget (Windows), distro pkg (Linux)
+  - CLI baseline — git, curl, wget, vim/editor (inbash `unix/basic.sh` on Debian)
+  - Shell — zsh + Oh My Zsh + inbash `setup-ohMyZsh.sh` (mac/linux); Windows keeps PowerShell, optional WSL2
+  - Node.js LTS — inbash `unix/nodejs.sh` / `mac/nodejs.sh`; Windows `winget install OpenJS.NodeJS.LTS`
+  - Python — mac: inbash `mac/python-pip-uv.sh`; Linux: `unix/python3-pip.sh` + **uv**; Windows: `winget install Python.Python.3.12` + **uv**
+- **Verify:** `git --version`, `node -v`, `npm -v`, `python3 --version` (and `uv --version`) succeed for the target OS. Prefer LTS Node and a venv/uv workflow.
 
-| Layer | Purpose |
-|-------|---------|
-| Package manager | Homebrew (mac), winget (Windows), distro pkg (Linux) |
-| CLI baseline | git, curl, wget, vim/editor — inbash `unix/basic.sh` on Debian |
-| Shell | zsh + Oh My Zsh + inbash `setup-ohMyZsh.sh` (mac/linux). Windows: keep PowerShell; optional WSL2 + same Unix path |
-| Node.js LTS | inbash `unix/nodejs.sh` / `mac/nodejs.sh`; Windows: `winget install OpenJS.NodeJS.LTS` |
-| Python | mac: inbash `mac/python-pip-uv.sh` (Homebrew python + **uv**). Linux: `unix/python3-pip.sh` then install **uv**. Windows: `winget install Python.Python.3.12` + uv |
-
-Prefer **LTS Node** and a **venv/uv** workflow. Do not overwrite a working Node/Python without asking.
-
-**Done when:** `git --version`, `node -v`, `npm -v`, `python3 --version` succeed for the target OS.
+**Phase 3 done when:** baseline verification commands all pass (or deferred items are recorded).
 
 ### 4. Coding-agent CLIs
 
-Read `references/agent-clis.md` and install, in this order (Node is already on PATH):
+- **Present:** the install order and exact commands from `references/agent-clis.md` (Claude Code, Codex, Pi, OpenCode), noting any `curl | sh` URL that needs explicit approval.
+- **Approve:** wait. Per-tool yes is fine; a blanket yes covers all non-destructive installs.
+- **Execute:** install in order, skipping any already present:
+  1. Claude Code
+  2. Codex
+  3. Pi (`@mariozechner/pi-coding-agent`)
+  4. OpenCode
+- **Verify:** each requested CLI prints a version (`claude --version`, `codex --version`, `pi --version`, `opencode --version`). Never store API keys in the skill or shell history.
 
-1. Claude Code
-2. Codex
-3. Pi (`@mariozechner/pi-coding-agent`)
-4. OpenCode
+**Phase 4 done when:** each requested CLI verifies green (or explicitly skipped by the user).
 
-Skip any the user already has. Do not store API keys in the skill or in shell history snippets.
+### 5. Final report
 
-**Done when:** each requested CLI prints a version (`claude --version`, `codex --version`, `pi --version`, `opencode --version`).
+- **Present:** nothing to execute here — this is the consolidated deliverable.
+- **Execute/Verify:** assemble the report from the running step log (built across phases 1–4), not from memory.
+- Print the report (template below). Offer optional extras from inbash (Docker, C/C++, SSH, MongoDB) only if the user asks.
 
-### 5. Ready-to-develop check
-
-Print a verification report (see below). Offer optional extras from inbash only if asked: Docker, C/C++, SSH server, MongoDB.
-
-**Done when:** the report is shown and gaps are either fixed or explicitly deferred.
+**Phase 5 done when:** the report is shown and any gaps are either fixed or explicitly deferred by the user.
 
 ## Safety
 
@@ -111,28 +126,34 @@ Print a verification report (see below). Offer optional extras from inbash only 
 - Never `curl | bash` without naming the URL and getting a yes.
 - Never commit secrets. Auth for Claude/Codex is interactive login after install.
 - Windows ARM64 (Snapdragon / Copilot+): prefer arm64 winget packages; say so when a tool is x64-only.
+- **Approval is per-phase and, for removals/remote scripts, per-item.** A prior yes does not carry forward.
 
 ## Verification report
 
-Always print:
+Always print a consolidated report built from the running log:
 
 ```
-◆ New machine setup
-  OS / arch:          …
-  Package manager:    …
-  Inventory:          √ listed (N removal candidates, K removed)
-  git / curl:         √ / ×
-  Node LTS + npm:     √ version …
-  Python + uv:        √ version …
-  zsh + Oh My Zsh:    √ / skipped (Windows host)
-  Claude Code:        √ / skipped
-  Codex:              √ / skipped
-  Pi:                 √ / skipped
-  OpenCode:           √ / skipped
-  Result:             READY | PARTIAL | BLOCKED
+◆ New machine setup — FINAL REPORT
+  Machine:   <os> / <arch> / <distro or build>
+  Manager:   <package manager>
+
+  Phase 1 · Detect
+    ✓ inventory captured (os/arch/tools)
+  Phase 2 · Inventory
+    ✓ listed N packages; removed K (names: …) / skipped
+  Phase 3 · Baseline
+    ✓ git <v>   ✓ node <v>   ✓ npm <v>
+    ✓ python <v>   ✓ uv <v>
+    ✓ zsh + Oh My Zsh  / skipped (Windows host)
+  Phase 4 · Agent CLIs
+    ✓ Claude Code <v>   ✓ Codex <v>   ✓ Pi <v>   ✓ OpenCode <v>
+    (skipped: …)
+
+  Result:    READY | PARTIAL | BLOCKED
+  Deferred:  <optional extras the user declined>
 ```
 
-`READY` = baseline + Node + Python work. Agents may be skipped and still READY if the user declined them.
+`READY` = baseline + Node + Python verify green. Agents may be skipped and still READY if the user declined them. `PARTIAL` = some verification failed but non-fatal; `BLOCKED` = a required phase could not be approved or executed.
 
 ## Pitfalls
 
