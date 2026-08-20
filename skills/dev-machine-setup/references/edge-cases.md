@@ -31,5 +31,14 @@ On Fedora/Arch, use `linux.md` package-manager switches instead of running the `
 
 ## Partial or interrupted runs
 
-The skill is safe to re-run: phase 1 rebuilds the gap report from the machine's real state, so anything
-that already succeeded drops out of `missing` and is skipped. Never resume from an old report.
+Trigger the skill again — phase 0 picks the run back up from `~/.dev-machine-setup/session.json`
+(`references/session.md`). Two rules keep that honest:
+
+- The session file carries **decisions** (mode, what was approved, what was declined, backup paths). It never
+  carries machine state.
+- Machine state always comes from a fresh `detect_env.py` on resume. Anything that already succeeded drops
+  out of `missing` and is skipped; anything that regressed comes back. **Never resume from an old gap
+  report.**
+
+With no session file — a different machine, or the user discarded it — a plain re-run is still safe, just
+chattier: phase 1 rebuilds everything from scratch and re-asks the questions.

@@ -5,15 +5,16 @@ inbash Unix scripts target **Debian/Ubuntu** (`apt`). On Fedora/RHEL/Arch, use t
 Clone when apt-based:
 
 ```bash
-git clone https://github.com/luongnv89/inbash.git
-cd inbash
+git clone https://github.com/luongnv89/inbash.git ~/.inbash 2>/dev/null || git -C ~/.inbash pull --ff-only
 ```
+
+Every inbash command below then runs from any directory via its `~/.inbash/` path.
 
 ## Package manager
 
 | Distro | Install |
 |--------|---------|
-| Debian/Ubuntu | `sudo apt-get update && sudo apt-get install -y git curl wget vim build-essential` or `./unix/basic.sh --yes` |
+| Debian/Ubuntu | `sudo apt-get update && sudo apt-get install -y git curl wget vim build-essential` or `~/.inbash/unix/basic.sh --yes` |
 | Fedora | `sudo dnf install -y git curl wget vim gcc gcc-c++ make` |
 | Arch | `sudo pacman -Syu --needed git curl wget vim base-devel` |
 
@@ -22,7 +23,7 @@ cd inbash
 **Debian/Ubuntu (inbash):**
 
 ```bash
-./unix/nodejs.sh --yes
+~/.inbash/unix/nodejs.sh --yes
 ```
 
 Uses NodeSource `setup_lts.x`. Review the downloaded setup script if the user is cautious.
@@ -38,7 +39,7 @@ Prefer one Node. If `nvm`/`fnm` already exists, use it instead of adding a secon
 **Debian/Ubuntu (inbash):**
 
 ```bash
-./unix/python3-pip.sh --yes
+~/.inbash/unix/python3-pip.sh --yes
 ```
 
 Then **uv** (do not `pip install` into the system interpreter — PEP 668):
@@ -55,8 +56,8 @@ Confirm the URL first. Verify: `python3 --version`, `uv --version`.
 ## Zsh + Oh My Zsh
 
 ```bash
-./install-zsh.sh --yes --set-default
-./setup-ohMyZsh.sh --yes
+~/.inbash/install-zsh.sh --yes --set-default
+~/.inbash/setup-ohMyZsh.sh --yes
 ```
 
 `install-zsh.sh` already switches on apt/dnf/yum/pacman/apk/zypper. Works on WSL.

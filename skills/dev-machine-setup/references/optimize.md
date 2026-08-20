@@ -14,23 +14,52 @@ cp ~/.zshrc ~/.zshrc.bak.$(date +%Y%m%d%H%M%S)   # or ~/.zprofile, ~/.bashrc
 
 Windows equivalent: `Copy-Item $PROFILE "$PROFILE.bak"`.
 
+Every command here reaches the user as a **run-block** — SKILL.md § Presenting commands. Inspect blocks stay
+separate from fix blocks, nothing assumes a working directory, and any value that has to come from the user
+is collected *before* the block is shown, never left as a `<placeholder>`.
+
 ---
 
 ## no-package-manager
 
-**additive.** Nothing installs until a manager exists. Install the one for the OS — macOS: Homebrew
-(`macos.md` § Homebrew), Linux: the distro's manager is already present unless the image is minimal
-(`linux.md`), Windows: App Installer from the Microsoft Store, then re-run `winget --version`.
+**additive.** Nothing installs until a manager exists.
+
+macOS — Homebrew (*you run this*: the installer prompts for your password):
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Linux: the distro's manager is already present unless the image is minimal (`linux.md`).
+
+Windows — install **App Installer** from the Microsoft Store (*you run this*: Store GUI), then verify:
+
+```powershell
+winget --version
+```
 
 ## npm-global-bin-not-on-path
 
 **mutating** (edits a shell rc). This is the single most common cause of "installed it, command not
 found" — the CLI is on disk but the shim directory is invisible.
 
+Inspect — where npm actually puts global binaries:
+
 ```bash
-npm prefix -g                       # e.g. /Users/me/.npm-global
-export PATH="$(npm prefix -g)/bin:$PATH"          # verify in this shell first
-echo 'export PATH="$(npm prefix -g)/bin:$PATH"' >> ~/.zshrc   # then persist
+npm prefix -g
+```
+
+Persist (mutating; backs the rc file up first):
+
+```bash
+cp ~/.zshrc ~/.zshrc.bak.$(date +%Y%m%d%H%M%S)
+echo 'export PATH="$(npm prefix -g)/bin:$PATH"' >> ~/.zshrc
+```
+
+Verify — in a *fresh* login shell, since the current one never re-reads `~/.zshrc`:
+
+```bash
+zsh -l -c 'command -v claude && claude --version'
 ```
 
 Windows: add the `npm prefix -g` directory itself (no `/bin`) via
@@ -43,8 +72,17 @@ If the prefix is a root-owned directory the user cannot write, re-point it inste
 
 **mutating.** Homebrew is installed but its shellenv line never landed:
 
+Persist (mutating — Intel Macs use `/usr/local/bin/brew`; confirm which with `ls /opt/homebrew/bin/brew`
+before presenting the block):
+
 ```bash
-echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile   # Intel: /usr/local/bin/brew
+cp ~/.zprofile ~/.zprofile.bak.$(date +%Y%m%d%H%M%S) 2>/dev/null || true
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+```
+
+Reload (*you run this* — it replaces your running shell):
+
+```bash
 exec zsh -l
 ```
 
@@ -57,17 +95,31 @@ uninstall the x86 prefix — some formulae are x86-only.
 
 ## xcode-clt-missing
 
-**additive.** `xcode-select --install` (opens a GUI dialog; tell the user to accept it). Native builds,
-many Homebrew formulae, and `node-gyp` fail without it.
+**additive.** Native builds, many Homebrew formulae, and `node-gyp` fail without it.
+
+*You run this* — it opens a GUI dialog that has to be accepted:
+
+```bash
+xcode-select --install
+```
+
+Verify:
+
+```bash
+xcode-select -p
+```
 
 ## multiple-node-managers
 
 **mutating.** Two or more Node sources compete for PATH, so `node -v` depends on which rc file won.
 Do not uninstall anything automatically. Show the user which one is winning and let them pick:
 
+Inspect — which Node is winning and where it comes from:
+
 ```bash
-which -a node && node -v
-type -a node          # zsh/bash: shows function/alias shims too
+which -a node
+type -a node
+node -v
 ```
 
 Keep the version manager if one is in active use (a `.nvmrc`/`.node-version` in their projects is the
@@ -78,28 +130,71 @@ step — `brew uninstall node` or removing the manager's rc lines, never both bl
 
 **mutating.** The floor lives in `NODE_MIN_MAJOR` in `scripts/detect_env.py`. Upgrading a runtime can
 break projects pinned to the old major — say so before running anything. Upgrade through whatever
-already owns Node (`brew upgrade node`, `nvm install --lts`, `winget upgrade OpenJS.NodeJS.LTS`,
-distro path in `linux.md`), never by adding a second source.
+already owns Node, never by adding a second source. Pick the one block matching the owner found by
+`multiple-node-managers`'s inspect:
+
+```bash
+brew upgrade node
+```
+
+```bash
+nvm install --lts && nvm alias default 'lts/*'
+```
+
+```powershell
+winget upgrade --id OpenJS.NodeJS.LTS
+```
+
+Distro path in `linux.md`. Verify: `node -v` and `npm -v`.
 
 ## python-below-min
 
 **mutating.** Same rule: upgrade through the owner. Never replace the OS's own `/usr/bin/python3` on
-Linux or macOS — install a newer interpreter alongside (`brew install python@3.13`, `uv python install
-3.13`) and leave the system one alone.
+Linux or macOS — install a newer interpreter alongside and leave the system one alone:
+
+```bash
+brew install python@3.13
+```
+
+```bash
+uv python install 3.13
+```
+
+Verify: `python3 -V`, or `uv python list` for the uv-managed ones.
 
 ## python-externally-managed
 
-**additive.** The system interpreter is PEP 668 marked, so `pip install` into it fails by design.
-Install `uv` and use `uv venv` / `uv pip` per-project. Commands per OS in `macos.md`, `linux.md`,
-`windows.md`. Never suggest `--break-system-packages`.
+**additive.** The system interpreter is PEP 668 marked, so `pip install` into it fails by design. Install
+`uv` and work per-project. Never suggest `--break-system-packages`.
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Homebrew alternative — `brew install uv`. Windows — `winget install --id astral-sh.uv`. Fuller per-OS
+context in `macos.md`, `linux.md`, `windows.md`.
+
+Then, in any project directory (this is the habit to hand the user, not a one-off fix):
+
+```bash
+uv venv && source .venv/bin/activate
+```
 
 ## git-identity-missing
 
-**mutating** (writes `~/.gitconfig`) — and the values must come from the user, never invented:
+**mutating** (writes `~/.gitconfig`). The values must come from the user and never be invented — **ask for
+both first, then present the block with them already filled in.** A block still containing a placeholder is
+not a run-block; it makes the user edit before pasting, which is exactly what the format exists to avoid.
 
 ```bash
-git config --global user.name "<ask the user>"
-git config --global user.email "<ask the user>"
+git config --global user.name "Ada Lovelace"
+git config --global user.email "ada@example.com"
+```
+
+Verify:
+
+```bash
+git config --global --get-regexp '^user\.'
 ```
 
 ## path-duplicates
@@ -107,24 +202,62 @@ git config --global user.email "<ask the user>"
 **mutating.** Duplicate entries mean a profile is sourced twice (commonly `.zprofile` *and* `.zshrc`
 both adding the same line, or a re-entrant `exec zsh`). Show the offenders first:
 
+Inspect — which entries repeat, and which rc file adds them twice:
+
 ```bash
 echo "$PATH" | tr ':' '\n' | sort | uniq -d
 grep -n 'PATH=' ~/.zshrc ~/.zprofile ~/.zshenv 2>/dev/null
-time zsh -i -c exit          # startup cost, before and after
+time zsh -i -c exit
 ```
 
-Fix the duplicated export in the rc file (after the backup above). Do not rewrite PATH wholesale — one
-bad edit locks the user out of their own tools.
+There is no generic fix command: the fix is deleting one specific line. That also makes it the one finding
+whose fix is never stored for later replay — line numbers move. If the run pauses here, record the *inspect*
+block and re-derive the edit on resume (`session.md` § Reconciling). Read the `grep -n` output, then
+present a fix block naming that exact file and line number, after the backup above. Do not rewrite PATH
+wholesale — one bad edit locks the user out of their own tools. Re-run the `time zsh -i -c exit` block
+afterwards to show the startup win.
 
 ## login-shell-not-zsh
 
-**mutating.** `chsh -s "$(command -v zsh)"` needs a password and may be denied by policy or by an LDAP
-directory. A denial is not a failure of the phase — record it and move on (`edge-cases.md` § chsh).
+**mutating.** *You run this* — `chsh` asks for your password at a TTY, and a corporate policy or LDAP
+directory may refuse it. A denial is not a failure of the phase: record it and move on
+(`edge-cases.md` § chsh).
+
+```bash
+chsh -s "$(command -v zsh)"
+```
+
+Verify in a **newly opened terminal window** (the current one keeps its old shell):
+
+```bash
+echo "$SHELL"
+```
 
 ## oh-my-zsh-missing
 
-**additive.** `setup-ohMyZsh.sh` from inbash (`macos.md` / `linux.md`). If the user already has a
-hand-written `~/.zshrc`, install the framework and plugins but skip the config copy.
+**additive.** Downloads and runs a remote installer, and creates `~/.zshrc` — say both before asking.
+
+inbash (preferred for this user; clones to a fixed path so the block works from any directory):
+
+```bash
+git clone https://github.com/luongnv89/inbash.git ~/.inbash 2>/dev/null || git -C ~/.inbash pull --ff-only
+~/.inbash/setup-ohMyZsh.sh --yes
+```
+
+Upstream installer, if inbash is unavailable:
+
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+If the user already has a hand-written `~/.zshrc`, install the framework and plugins but skip the config
+copy — and back the file up first either way.
+
+Verify:
+
+```bash
+ls -d ~/.oh-my-zsh
+```
 
 ## no-sudo
 

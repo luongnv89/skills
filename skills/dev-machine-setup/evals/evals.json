@@ -37,7 +37,8 @@
         "Selected mode 'tune'",
         "Did not propose installing any agent CLI or baseline tool from missing.*",
         "Presented findings with severity and an additive/mutating tag on each fix",
-        "Requested a separate per-item yes for each mutating fix"
+        "Requested a separate per-item yes for each mutating fix",
+        "Presented each fix as its own fenced run-block, not as a command squeezed into a table cell"
       ]
     },
     {
@@ -50,7 +51,8 @@
         "Diagnosed via detect_env.py findings rather than guessing",
         "Did not propose reinstalling the CLI as the first fix",
         "Tagged the rc-file edit as mutating and offered a backup of the rc file first",
-        "Stated that verification requires a fresh login shell"
+        "Stated that verification requires a fresh login shell",
+        "Gave a complete, copy-pasteable command block with no <placeholders> and no assumed working directory"
       ]
     },
     {
@@ -99,6 +101,34 @@
       "expectations": [
         "Did not start the phased setup workflow",
         "Did not run a full gap report for a single package request"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge-case",
+      "prompt": "Just optimize what's already here.  (Run against a macOS machine whose findings are exactly login-shell-not-zsh and oh-my-zsh-missing.)",
+      "expected_output": "Phase 5 presented as a table of id/severity/impact/tag plus one fenced run-block per finding, each labelled you-run-this or I-can-run-this, then a numbered approval prompt.",
+      "files": [],
+      "expectations": [
+        "No command appears inside a table cell",
+        "Each finding has its own fenced code block the user can copy and run unedited",
+        "chsh is labelled 'you run this' and its password prompt / policy-denial risk is named",
+        "The Oh My Zsh installer URL is visible inside the block, tagged mutating-or-additive per the skill",
+        "Approval was requested as a numbered list rather than as prose per-finding questions"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "edge-case",
+      "prompt": "Stop here, I need to head out — I'll finish this later.",
+      "expected_output": "The run pauses cleanly: session file written and its path given, remaining work summarized, and a single paste-once block of the already-approved commands so the user can finish by hand. Triggering the skill again resumes without re-asking.",
+      "files": [],
+      "expectations": [
+        "Wrote ~/.dev-machine-setup/session.json and told the user the path",
+        "Summarized what is done, approved-but-not-run, and declined",
+        "Emitted one paste-once block containing only already-approved commands, in approval order",
+        "Did not leave a partially applied rc-file edit behind",
+        "Said that re-triggering the skill resumes, with no arguments needed"
       ]
     }
   ]

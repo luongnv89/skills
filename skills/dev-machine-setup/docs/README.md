@@ -33,6 +33,24 @@ OEM bloat and remove it one confirmed package at a time.
 | `setup` | "set up this machine", "install my dev environment" | Fills every gap, then optimizes |
 | `tune` | "optimize my dev setup", "why is `claude` not found" | Optimizes only — installs nothing you didn't ask for |
 
+## Copy-paste, not narration
+
+Every command it proposes arrives as its own fenced block you can copy whole and run — never a command
+wedged into a table cell, never a `<placeholder>` you have to fill in, never a snippet that only works if
+you happen to be in the right directory. Blocks that need *your* terminal (a `chsh` password prompt, a GUI
+dialog, a browser login) are labelled as such, so it's always clear who runs what.
+
+## Pause anywhere, resume by asking again
+
+Long setups get interrupted. Progress — mode, what you approved, what you declined, which rc files were
+backed up and where — is written to `~/.dev-machine-setup/session.json` after every step. Say "stop here"
+and you get the file path, what's left, and one paste-once block of the remaining approved commands in case
+you'd rather finish by hand.
+
+To resume, just trigger the skill again. It re-probes the machine first and reconciles against what you
+already did — including anything you ran yourself while it wasn't watching — so nothing is re-asked and
+nothing is run twice.
+
 ## Usage
 
 Ask an agent that has this skill:

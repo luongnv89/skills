@@ -7,13 +7,18 @@ Run this first. Do not install anything until the JSON is in hand.
 From the skill directory (or any clone of this skill):
 
 ```bash
-python3 scripts/detect_env.py
+python3 "$HOME/.claude/skills/dev-machine-setup/scripts/detect_env.py"
 ```
+
+`~/.claude/skills/dev-machine-setup/` is the default install path. If this skill lives somewhere else
+(plugin bundle, repo checkout), resolve that directory **once** and present the block with the real absolute
+path already substituted — never a relative path and never a `<placeholder>`, per SKILL.md § Presenting
+commands.
 
 On Windows PowerShell, if `python3` is missing:
 
 ```powershell
-py -3 scripts/detect_env.py
+py -3 "$HOME\.claude\skills\dev-machine-setup\scripts\detect_env.py"
 ```
 
 ## Fallback one-liners

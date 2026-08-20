@@ -3,9 +3,10 @@
 Prefer [inbash](https://github.com/luongnv89/inbash) mac scripts. Clone once:
 
 ```bash
-git clone https://github.com/luongnv89/inbash.git
-cd inbash
+git clone https://github.com/luongnv89/inbash.git ~/.inbash 2>/dev/null || git -C ~/.inbash pull --ff-only
 ```
+
+Every inbash command below then runs from any directory via its `~/.inbash/` path.
 
 ## Homebrew
 
@@ -35,13 +36,13 @@ brew install git curl wget
 inbash:
 
 ```bash
-./mac/nodejs.sh --yes --formula node
+~/.inbash/mac/nodejs.sh --yes --formula node
 ```
 
 Or pin LTS:
 
 ```bash
-./mac/nodejs.sh --yes --formula node@22 --force-link
+~/.inbash/mac/nodejs.sh --yes --formula node@22 --force-link
 ```
 
 Verify: `node -v`, `npm -v`. Optionally `corepack enable`.
@@ -51,7 +52,7 @@ Verify: `node -v`, `npm -v`. Optionally `corepack enable`.
 inbash (Homebrew `python@3.12`, pip, **uv**):
 
 ```bash
-./mac/python-pip-uv.sh --yes --python-formula python@3.12
+~/.inbash/mac/python-pip-uv.sh --yes --python-formula python@3.12
 ```
 
 Verify: `python3 -V`, `uv --version`. Use `uv venv` for projects; do not `sudo pip3 install`.
@@ -59,8 +60,8 @@ Verify: `python3 -V`, `uv --version`. Use `uv venv` for projects; do not `sudo p
 ## Zsh + Oh My Zsh
 
 ```bash
-./install-zsh.sh --yes --set-default
-./setup-ohMyZsh.sh --yes
+~/.inbash/install-zsh.sh --yes --set-default
+~/.inbash/setup-ohMyZsh.sh --yes
 ```
 
 `setup-ohMyZsh.sh` installs `zsh-syntax-highlighting`, `zsh-autosuggestions`, `zsh-completions` and deploys inbash `zshrc-config`. If the user already has a custom `~/.zshrc`, skip the config copy and only add plugins.
@@ -69,7 +70,7 @@ Verify: `python3 -V`, `uv --version`. Use `uv venv` for projects; do not `sudo p
 
 ## Optional (only if asked)
 
-- Docker Desktop: `./mac/docker.sh --yes`
+- Docker Desktop: `~/.inbash/mac/docker.sh --yes`
 - Xcode CLT: `xcode-select --install` if compile tools are missing
 
 ## Agent CLIs
