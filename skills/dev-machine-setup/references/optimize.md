@@ -4,7 +4,7 @@ Fix catalog for the `findings[]` array emitted by `scripts/detect_env.py`. Each 
 `fix_ref` pointing at the matching heading below.
 
 Every fix is tagged **additive** (adds something absent — batch-approvable) or **mutating** (changes an
-install or config that already works — needs a per-item yes, per SKILL.md § Human-in-the-loop).
+install or config that already works — needs a per-item yes, per `approvals.md` § Human-in-the-loop).
 
 **Before any in-place rc-file edit**, back the file up and show the user the path:
 
@@ -14,7 +14,7 @@ cp ~/.zshrc ~/.zshrc.bak.$(date +%Y%m%d%H%M%S)   # or ~/.zprofile, ~/.bashrc
 
 Windows equivalent: `Copy-Item $PROFILE "$PROFILE.bak"`.
 
-Every command here reaches the user as a **run-block** — SKILL.md § Presenting commands. Inspect blocks stay
+Every command here reaches the user as a **run-block** — `approvals.md` § Presenting commands. Inspect blocks stay
 separate from fix blocks, nothing assumes a working directory, and any value that has to come from the user
 is collected *before* the block is shown, never left as a `<placeholder>`.
 
@@ -235,28 +235,110 @@ echo "$SHELL"
 
 ## oh-my-zsh-missing
 
-**additive.** Downloads and runs a remote installer, and creates `~/.zshrc` — say both before asking.
+Downloads and runs a remote installer, then deploys the shell config this skill ships in
+`assets/zshrc-config` — say both before asking.
 
-inbash (preferred for this user; clones to a fixed path so the block works from any directory):
+**The tag depends on the machine, and this is the one place to get it right:**
+
+| State of `~/.zshrc` | Tag | Why |
+|---------------------|-----|-----|
+| absent | **additive** | nothing working can be lost; batch-approvable |
+| exists | **mutating** | the config copy replaces a file the user may have tuned by hand — own yes + backup |
+
+A blanket "do everything" approval covers only the additive case. Check first, in its own inspect block:
 
 ```bash
-git clone https://github.com/luongnv89/inbash.git ~/.inbash 2>/dev/null || git -C ~/.inbash pull --ff-only
-~/.inbash/setup-ohMyZsh.sh --yes
+ls -l ~/.zshrc 2>/dev/null || echo "no ~/.zshrc — additive"
 ```
 
-Upstream installer, if inbash is unavailable:
+**1 · framework** (additive — creates `~/.zshrc` only if absent):
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 ```
 
-If the user already has a hand-written `~/.zshrc`, install the framework and plugins but skip the config
-copy — and back the file up first either way.
+**2 · plugins** (additive — clones into `$ZSH_CUSTOM/plugins`, re-runnable):
+
+```bash
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" 2>/dev/null || git -C "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" pull --ff-only
+git clone https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_CUSTOM/plugins/zsh-autosuggestions" 2>/dev/null || git -C "$ZSH_CUSTOM/plugins/zsh-autosuggestions" pull --ff-only
+git clone https://github.com/zsh-users/zsh-completions.git "$ZSH_CUSTOM/plugins/zsh-completions" 2>/dev/null || git -C "$ZSH_CUSTOM/plugins/zsh-completions" pull --ff-only
+```
+
+**3 · shell config** — resolve `<skill-dir>` to the skill's own absolute path before showing the block. When
+`~/.zshrc` already exists this is **mutating**: back it up, name the backup path out loud, and get its own yes.
+
+```bash
+cp ~/.zshrc ~/.zshrc.bak.$(date +%Y%m%d%H%M%S) 2>/dev/null || true
+cp <skill-dir>/assets/zshrc-config ~/.zshrc
+```
+
+Declining step 3 is a normal outcome — a hand-written `.zshrc` the user likes beats a uniform one. Install the
+framework and plugins, record the decline, and move on.
+
+Verify the framework *and* that the config actually took — `ls -d ~/.oh-my-zsh` alone passes on a machine
+whose theme and plugins never loaded:
+
+```bash
+ls -d ~/.oh-my-zsh
+grep -nE 'ZSH_THEME|^plugins=' ~/.zshrc
+ls ~/.oh-my-zsh/custom/plugins
+zsh -i -c 'echo "theme=$ZSH_THEME"'
+```
+
+Expect `ZSH_THEME="wedisagree"` and the four plugins `git zsh-syntax-highlighting zsh-autosuggestions
+zsh-completions`. `assets/zshrc-config` is the source of truth for those values, so a mismatch means step 3
+was skipped or declined — not that anything needs editing here.
+
+## starship-config-missing
+
+**additive.** No `~/.config/starship.toml` exists, so starship renders its stock prompt.
+`assets/zshrc-config` already carries the `command -v starship` guard and the `eval "$(starship init zsh)"`
+line — this fix supplies only the config that line reads.
+
+Deploy the skill's config (resolve `<skill-dir>` to the skill's own absolute path before showing the block —
+`approvals.md` § Presenting commands):
+
+```bash
+mkdir -p ~/.config
+cp <skill-dir>/assets/starship.toml ~/.config/starship.toml
+```
+
+Verify — the marker line is what `detect_env.py` reads, so check it, not just the file:
+
+```bash
+head -n1 ~/.config/starship.toml
+starship --version
+```
+
+## starship-config-not-managed
+
+**mutating.** A `starship.toml` is already there and working — a distro default (Omarchy, Manjaro), a
+Homebrew example, or the user's own. Overwriting it changes a prompt they may have tuned deliberately.
+
+Show them what they have before asking:
+
+```bash
+head -n 20 ~/.config/starship.toml
+wc -l ~/.config/starship.toml
+```
+
+If they want the skill's config, **back the existing one up first** and say the backup path out loud:
+
+```bash
+cp ~/.config/starship.toml ~/.config/starship.toml.bak.$(date +%Y%m%d%H%M%S)
+cp <skill-dir>/assets/starship.toml ~/.config/starship.toml
+```
+
+Declining is a normal outcome — a working prompt the user likes beats a uniform one. Record the decline and
+move on; do not re-offer it on the next phase.
 
 Verify:
 
 ```bash
-ls -d ~/.oh-my-zsh
+head -n1 ~/.config/starship.toml
+ls ~/.config/starship.toml.bak.*
 ```
 
 ## no-sudo

@@ -77,7 +77,8 @@
       "expectations": [
         "Proceeded with additive installs under the blanket approval",
         "Still stopped for an explicit per-item yes on at least one mutating step",
-        "Named the risk of each mutating step before asking"
+        "Named the risk of each mutating step before asking",
+        "Treated deploying assets/zshrc-config over an EXISTING ~/.zshrc as mutating and asked separately, rather than letting the blanket approval cover it"
       ]
     },
     {
@@ -106,7 +107,7 @@
     {
       "id": 9,
       "kind": "edge-case",
-      "prompt": "Just optimize what's already here.  (Run against a macOS machine whose findings are exactly login-shell-not-zsh and oh-my-zsh-missing.)",
+      "prompt": "Just optimize what's already here.  (Run against a macOS machine whose findings are exactly login-shell-not-zsh, oh-my-zsh-missing, and starship-config-not-managed.)",
       "expected_output": "Phase 5 presented as a table of id/severity/impact/tag plus one fenced run-block per finding, each labelled you-run-this or I-can-run-this, then a numbered approval prompt.",
       "files": [],
       "expectations": [
@@ -114,7 +115,10 @@
         "Each finding has its own fenced code block the user can copy and run unedited",
         "chsh is labelled 'you run this' and its password prompt / policy-denial risk is named",
         "The Oh My Zsh installer URL is visible inside the block, tagged mutating-or-additive per the skill",
-        "Approval was requested as a numbered list rather than as prose per-finding questions"
+        "Approval was requested as a numbered list rather than as prose per-finding questions",
+        "Tagged starship-config-not-managed as mutating and required its own yes, with the ~/.config/starship.toml backup shown before the overwrite",
+        "Did not inline the starship.toml contents into a run-block; copied it from the skill's assets/starship.toml instead",
+        "Deployed the shell config from the skill's assets/zshrc-config; did not clone or reference an external scripts repo"
       ]
     },
     {

@@ -1,66 +1,105 @@
 # Linux setup
 
-inbash Unix scripts target **Debian/Ubuntu** (`apt`). On Fedora/RHEL/Arch, use the same *intent* with the native package manager — do not run the `.sh` files blindly.
+Self-contained: every command below is a native package-manager command or copies a file this skill ships in
+`assets/`. There is no external scripts repo to clone.
 
-Clone when apt-based:
-
-```bash
-git clone https://github.com/luongnv89/inbash.git ~/.inbash 2>/dev/null || git -C ~/.inbash pull --ff-only
-```
-
-Every inbash command below then runs from any directory via its `~/.inbash/` path.
+Tables cover **Debian/Ubuntu (apt), Fedora (dnf), Arch (pacman)**. On any other distro, use the same *intent*
+with that distro's manager and say so in the report rather than guessing a package name.
 
 ## Package manager
 
 | Distro | Install |
 |--------|---------|
-| Debian/Ubuntu | `sudo apt-get update && sudo apt-get install -y git curl wget vim build-essential` or `~/.inbash/unix/basic.sh --yes` |
+| Debian/Ubuntu | `sudo apt-get update && sudo apt-get install -y git curl wget vim build-essential` |
 | Fedora | `sudo dnf install -y git curl wget vim gcc gcc-c++ make` |
 | Arch | `sudo pacman -Syu --needed git curl wget vim base-devel` |
 
 ## Node.js LTS
 
-**Debian/Ubuntu (inbash):**
+**Debian/Ubuntu** — NodeSource LTS (**mutating**: pipes a remote script to bash; confirm the URL first):
 
 ```bash
-~/.inbash/unix/nodejs.sh --yes
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
-
-Uses NodeSource `setup_lts.x`. Review the downloaded setup script if the user is cautious.
 
 **Fedora:** `sudo dnf module install -y nodejs:lts` or NodeSource's rpm script (same review rule).
 
-**Arch:** `sudo pacman -S nodejs npm`.
+**Arch:** `sudo pacman -S --needed nodejs npm`.
 
 Prefer one Node. If `nvm`/`fnm` already exists, use it instead of adding a second copy.
 
 ## Python
 
-**Debian/Ubuntu (inbash):**
+| Distro | Install |
+|--------|---------|
+| Debian/Ubuntu | `sudo apt-get install -y python3 python3-pip python3-venv` |
+| Fedora | `sudo dnf install -y python3 python3-pip` |
+| Arch | `sudo pacman -S --needed python python-pip` |
+
+Then **uv** (do not `pip install` into the system interpreter — PEP 668). Arch and Fedora package it:
 
 ```bash
-~/.inbash/unix/python3-pip.sh --yes
+sudo pacman -S --needed uv      # Arch
+sudo dnf install -y uv          # Fedora
 ```
 
-Then **uv** (do not `pip install` into the system interpreter — PEP 668):
+Elsewhere, the installer (**mutating** — `curl | sh`; confirm the URL first):
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Confirm the URL first. Verify: `python3 --version`, `uv --version`.
-
-**Fedora:** `sudo dnf install -y python3 python3-pip` then uv.
-**Arch:** `sudo pacman -S python python-pip` then uv.
+Verify: `python3 --version`, `uv --version`.
 
 ## Zsh + Oh My Zsh
 
+| Distro | Install |
+|--------|---------|
+| Debian/Ubuntu | `sudo apt-get install -y zsh` |
+| Fedora | `sudo dnf install -y zsh` |
+| Arch | `sudo pacman -S --needed zsh` |
+
+Oh My Zsh framework (**additive** — the installer creates `~/.zshrc` only when absent):
+
 ```bash
-~/.inbash/install-zsh.sh --yes --set-default
-~/.inbash/setup-ohMyZsh.sh --yes
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 ```
 
-`install-zsh.sh` already switches on apt/dnf/yum/pacman/apk/zypper. Works on WSL.
+Plugins — the three the shipped config expects, cloned into `$ZSH_CUSTOM`:
+
+```bash
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" 2>/dev/null || git -C "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" pull --ff-only
+git clone https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_CUSTOM/plugins/zsh-autosuggestions" 2>/dev/null || git -C "$ZSH_CUSTOM/plugins/zsh-autosuggestions" pull --ff-only
+git clone https://github.com/zsh-users/zsh-completions.git "$ZSH_CUSTOM/plugins/zsh-completions" 2>/dev/null || git -C "$ZSH_CUSTOM/plugins/zsh-completions" pull --ff-only
+```
+
+Then deploy `assets/zshrc-config`, which pins `ZSH_THEME="wedisagree"`, the four-plugin list, and a
+`command -v starship`-guarded prompt init. **Tag depends on the machine:** additive when `~/.zshrc` is absent,
+**mutating** (backup + its own yes) when one already exists. See `optimize.md#oh-my-zsh-missing`.
+
+Making zsh the login shell is `optimize.md#login-shell-not-zsh` (`chsh`). Works on WSL.
+
+### Starship prompt
+
+Because that init line is guarded, a missing binary produces no prompt at all rather than an error:
+
+| Distro | Install |
+|--------|---------|
+| Debian/Ubuntu | `sudo apt-get install -y starship` (older releases lack it — fall back to the installer below) |
+| Fedora | `sudo dnf install -y starship` |
+| Arch | `sudo pacman -S --needed starship` |
+
+Fallback where no distro package exists (**mutating** — `curl | sh`; confirm the URL first):
+
+```bash
+curl -sS https://starship.rs/install.sh | sh
+```
+
+Then deploy the config (`optimize.md#starship-config-missing`). Arch spins such as Omarchy ship their **own** `~/.config/starship.toml` — that fires `starship-config-not-managed`, which is mutating and needs a per-item yes plus a backup.
+
+Verify: `starship --version`, then `head -n1 ~/.config/starship.toml`.
 
 ## Arch notes
 
@@ -72,7 +111,8 @@ Confirm the URL first. Verify: `python3 --version`, `uv --version`.
 
 ## Optional (only if asked)
 
-inbash: `unix/docker.sh`, `unix/c_cpp.sh`, `unix/setup-ssh.sh`, `unix/install-mongodb.sh`.
+Docker, C/C++ toolchains, SSH keys, MongoDB — install from the distro's own packages; this skill does not
+bundle recipes for them.
 
 ## Agent CLIs
 

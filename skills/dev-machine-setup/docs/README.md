@@ -11,7 +11,8 @@ Set up **or tune** any machine (macOS, Linux, Windows) — a factory laptop, a h
 daily driver that has drifted.
 
 Inspired by [XFreeze on new Windows boxes](https://x.com/xfreeze/status/2090189407659999603) (inventory OEM
-junk before installing anything) and this user's [inbash](https://github.com/luongnv89/inbash) scripts.
+junk before installing anything). Self-contained: no external scripts repo is cloned — the shell config it
+deploys ships in the skill's own `assets/`.
 
 ## How it works
 

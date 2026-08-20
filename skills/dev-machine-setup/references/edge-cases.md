@@ -25,9 +25,13 @@ and WSL Node paths — a gap report from one side says nothing about the other.
 debloat phase entirely, and skip `chsh` (containers usually have no login shell and the change dies with
 the container). Prefer user-level installs so the setup survives an image rebuild.
 
-## inbash scripts are Debian/mac-oriented
+## Distros outside the shipped tables
 
-On Fedora/Arch, use `linux.md` package-manager switches instead of running the `.sh` files blindly.
+`linux.md` carries explicit commands for **apt, dnf, and pacman** only. On anything else (Alpine, openSUSE,
+Void, NixOS) do not guess a package name: translate the *intent* using that distro's own manager, verify the
+binary afterwards, and say in the report which distro the commands were adapted for. NixOS in particular
+rejects imperative installs — declare the packages in the user's configuration instead, and record the finding
+as deferred rather than failed.
 
 ## Partial or interrupted runs
 

@@ -1,0 +1,172 @@
+# =================================================================
+# dev-machine-setup :: Generic .zshrc
+# -----------------------------------------------------------------
+# Vendored fork of luongnv89/inbash `zshrc-config` so this skill has no
+# external repo dependency. It is a FORK, not a mirror: upstream fixes do not
+# flow in. Edit this file directly; do not re-point it at inbash.
+# -----------------------------------------------------------------
+# A portable Zsh configuration for Linux & macOS machines.
+# Works with Oh My Zsh and common developer toolchains.
+# =================================================================
+
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+# Path to your oh-my-zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
+
+# Set name of the theme to load.
+ZSH_THEME="wedisagree"
+
+# Uncomment the following line to enable command auto-correction.
+ENABLE_CORRECTION="true"
+
+# Which plugins would you like to load?
+# Standard plugins can be found in ~/.oh-my-zsh/plugins/*
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+plugins=(
+  git
+  zsh-syntax-highlighting
+  zsh-autosuggestions
+  zsh-completions
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# =================================================================
+# Starship prompt (cross-platform, installed via brew / curl / etc.)
+# =================================================================
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+# =================================================================
+# User configuration
+# =================================================================
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+
+# =================================================================
+# Homebrew (macOS / Linuxbrew)
+# =================================================================
+if command -v brew >/dev/null 2>&1; then
+  _BREW_BIN="$(command -v brew)"
+  eval "$("$_BREW_BIN" shellenv 2>/dev/null)"
+  unset _BREW_BIN
+fi
+
+# =================================================================
+# Python (homebrew / system)
+# =================================================================
+# Homebrew Python on macOS (Apple Silicon)
+if [ -d "/opt/homebrew/Frameworks/Python.framework/Versions" ]; then
+  for ver in /opt/homebrew/Frameworks/Python.framework/Versions/*/bin; do
+    case ":$PATH:" in
+      *":$ver:"*) ;; *) export PATH="$ver:$PATH";;
+    esac
+  done
+fi
+
+# Homebrew Python on macOS (Intel)
+if [ -d "/usr/local/Frameworks/Python.framework/Versions" ]; then
+  for ver in /usr/local/Frameworks/Python.framework/Versions/*/bin; do
+    case ":$PATH:" in
+      *":$ver:"*) ;; *) export PATH="$ver:$PATH";;
+    esac
+  done
+fi
+
+# Python 3.10 system path (macOS legacy)
+if [ -d "/Library/Frameworks/Python.framework/Versions/3.10/bin" ]; then
+  PATH="/Library/Frameworks/Python.framework/Versions/3.10/bin:${PATH}"
+  export PATH
+fi
+
+# =================================================================
+# pipx / user-local binaries
+# =================================================================
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# =================================================================
+# Developer CLI tools (optional — only adds to PATH if present)
+# =================================================================
+
+# =================================================================
+# AI Coding Assistants (optional — only adds to PATH if present)
+# =================================================================
+
+_COMPLETION_CACHE_DIR="$HOME/.local/share"
+
+# Claude Code (Anthropic)
+# Installed via: npm i -g @anthropic-ai/claude-code  OR  pipx install claude-code
+if command -v claude >/dev/null 2>&1; then
+  # Generate and source shell completion (one-time, cached)
+  _CLAUDE_COMP="$_COMPLETION_CACHE_DIR/claude-shell-completion.zsh"
+  if [ ! -f "$_CLAUDE_COMP" ]; then
+    mkdir -p "$_COMPLETION_CACHE_DIR"
+    claude completion zsh > "$_CLAUDE_COMP" 2>/dev/null || true
+  fi
+  [ -s "$_CLAUDE_COMP" ] && source "$_CLAUDE_COMP"
+fi
+
+# Codex CLI (OpenAI)
+# Installed via: npm i -g @openai/codex
+if command -v codex >/dev/null 2>&1; then
+  export PATH="$HOME/.codex/bin:$PATH"
+  # Generate and source shell completion (one-time, cached)
+  _CODEX_COMP="$_COMPLETION_CACHE_DIR/codex-shell-completion.zsh"
+  if [ ! -f "$_CODEX_COMP" ]; then
+    mkdir -p "$_COMPLETION_CACHE_DIR"
+    codex completion zsh > "$_CODEX_COMP" 2>/dev/null || true
+  fi
+  [ -s "$_CODEX_COMP" ] && source "$_CODEX_COMP"
+fi
+
+# Pi (Pi.dev — Pi Coding Agent)
+# Installed via: npm i -g @earendil-works/pi-coding-agent
+if command -v pi >/dev/null 2>&1; then
+  # Generate and source shell completion (one-time, cached)
+  _PI_COMP="$_COMPLETION_CACHE_DIR/pi-shell-completion.zsh"
+  if [ ! -f "$_PI_COMP" ]; then
+    mkdir -p "$_COMPLETION_CACHE_DIR"
+    pi completion zsh > "$_PI_COMP" 2>/dev/null || true
+  fi
+  [ -s "$_PI_COMP" ] && source "$_PI_COMP"
+fi
+
+unset _COMPLETION_CACHE_DIR _CLAUDE_COMP _CODEX_COMP _PI_COMP
+
+# =================================================================
+# NVM (Node Version Manager) — optional
+# =================================================================
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  export NVM_DIR="$HOME/.nvm"
+  . "$NVM_DIR/nvm.sh"
+elif [ -s "/usr/local/share/nvm/nvm.sh" ]; then
+  export NVM_DIR="/usr/local/share/nvm"
+  . "$NVM_DIR/nvm.sh"
+fi
+
+# =================================================================
+# Pyenv — optional
+# =================================================================
+if command -v pyenv >/dev/null 2>&1; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  if command -v pyenv >/dev/null 2>&1; then
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+  fi
+fi
+
+# =================================================================
+# Direnv — optional
+# =================================================================
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook zsh)"
+fi

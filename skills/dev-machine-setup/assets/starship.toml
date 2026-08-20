@@ -1,0 +1,132 @@
+# dev-machine-setup:starship-config v1
+# ===============================================
+# STARSHIP - Clean Dev Prompt (Node, Python, Docker, LLM, CTF)
+# ===============================================
+
+# --- Global ---
+add_newline = true
+command_timeout = 1200
+
+format = """
+$hostname\
+$directory\
+$git_branch$git_status\
+$nodejs$python\
+$docker_context\
+$custom_llm$custom_ctf\
+$cmd_duration\
+$line_break\
+$character
+"""
+
+# -----------------------------------------------
+# CORE SECTIONS
+# -----------------------------------------------
+
+[directory]
+style = "bold blue"
+truncation_length = 3              # show up to 3 folders
+truncate_to_repo = true           # collapse everything above git root
+fish_style_pwd_dir_length = 1     # shows /u/p/proj instead of full names
+read_only = " "                  # shows lock icon if not writable
+format = "[$path]($style) "
+disabled = false
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold yellow)"
+format = "$symbol "
+
+[cmd_duration]
+min_time = 2000
+show_milliseconds = false
+format = "⏱ [$duration]($style) "
+style = "yellow"
+
+[git_branch]
+symbol = " "
+format = "[$symbol$branch]($style) "
+style = "bold purple"
+
+[git_status]
+format = '([$all_status$ahead_behind]($style)) '
+style = "cyan"
+conflicted = "⚔ "
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇕ "
+untracked = "? "
+modified = "✎ "
+staged = "+ "
+renamed = "» "
+deleted = "✘ "
+
+# -----------------------------------------------
+# LANGUAGES - Node + Python
+# -----------------------------------------------
+
+[nodejs]
+symbol = " "
+format = "[$symbol($version)](bold green) "
+detect_extensions = ["js", "jsx", "ts", "tsx", "mjs", "cjs"]
+detect_files = ["package.json", "vite.config.ts", "next.config.js"]
+detect_folders = ["node_modules"]
+
+[python]
+symbol = " "
+format = '[$symbol(${version} )(\($virtualenv\))]($style) '
+style = "bold yellow"
+python_binary = "python3"
+
+# -----------------------------------------------
+# DOCKER
+# -----------------------------------------------
+
+[docker_context]
+symbol = " "
+format = "[$symbol$context]($style) "
+style = "bold blue"
+only_with_files = true
+detect_files = ["Dockerfile", "docker-compose.yml", "compose.yaml"]
+disabled = false
+
+# -----------------------------------------------
+# CUSTOM MODULES: LLM / CTF
+# -----------------------------------------------
+# Convention: drop a file `.llm` or `.ctf` in your repo root to enable
+
+[custom.llm]
+command = "echo 'LLM'"
+when = "test -f .llm"
+format = "[ $output]($style) "
+style = "bold magenta"
+shell = ["bash", "-c"]
+
+[custom.ctf]
+command = "echo 'CTF'"
+when = "test -f .ctf"
+format = "[ $output]($style) "
+style = "bold red"
+shell = ["bash", "-c"]
+
+# -----------------------------------------------
+# QUALITY OF LIFE
+# -----------------------------------------------
+
+[time]
+disabled = true
+
+[hostname]
+format = "[$hostname]($style) "
+style = "dimmed"
+ssh_only = false
+
+[env_var.GIT_AUTHOR_EMAIL]
+# Useful if you switch identities work/personal
+format = " [$env_value]($style) "
+style = "blue"
+disabled = true  # set to false if you want it
+
+[battery]
+disabled = true

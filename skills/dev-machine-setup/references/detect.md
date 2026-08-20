@@ -12,7 +12,7 @@ python3 "$HOME/.claude/skills/dev-machine-setup/scripts/detect_env.py"
 
 `~/.claude/skills/dev-machine-setup/` is the default install path. If this skill lives somewhere else
 (plugin bundle, repo checkout), resolve that directory **once** and present the block with the real absolute
-path already substituted — never a relative path and never a `<placeholder>`, per SKILL.md § Presenting
+path already substituted — never a relative path and never a `<placeholder>`, per `references/approvals.md` § Presenting
 commands.
 
 On Windows PowerShell, if `python3` is missing:
@@ -46,8 +46,8 @@ Get-Command winget, git, node, python, py -ErrorAction SilentlyContinue
 | `arch` | `x86_64` / `arm64` / raw uname |
 | `distro` | Linux ID from `/etc/os-release` (ubuntu, fedora, arch, …) |
 | `package_managers` | present managers (`apt`, `dnf`, `pacman`, `brew`, `winget`, `choco`, `scoop`) |
-| `tools` | `{name: version_or_null}` for git, node, npm, python3, pip, uv, zsh, claude, codex, pi, opencode |
-| `shell` | login shell + whether Oh My Zsh is installed |
+| `tools` | `{name: version_or_null}` for git, node, npm, python3, pip, uv, zsh, starship, claude, codex, pi, opencode |
+| `shell` | login shell, whether Oh My Zsh is installed, and `starship_config`: `managed` (the skill's `assets/starship.toml`, identified by its first-line marker) · `foreign` (a distro or hand-rolled toml) · `absent` |
 | `node_managers` | nvm / volta / asdf / fnm / n, found by directory (nvm is a shell function, not a binary) |
 | `missing.baseline` | baseline tools with no version — **the install list for phase 3** |
 | `missing.agents` | agent CLIs with no version — **the install list for phase 4** |

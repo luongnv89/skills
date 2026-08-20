@@ -30,7 +30,7 @@ import sys
 NODE_MIN_MAJOR = 20  # oldest Node LTS still receiving security fixes
 PYTHON_MIN_MINOR = 10  # oldest CPython 3.x still receiving security fixes
 
-BASELINE_UNIX = ("git", "node", "npm", "python3", "uv", "zsh")
+BASELINE_UNIX = ("git", "node", "npm", "python3", "uv", "zsh", "starship")
 BASELINE_WINDOWS = ("git", "node", "npm", "python3", "uv")
 AGENTS = ("claude", "codex", "pi", "opencode")
 
@@ -174,11 +174,32 @@ def node_managers() -> list[str]:
     return found
 
 
+STARSHIP_CONFIG = (".config", "starship.toml")
+# First line of assets/starship.toml. Presence of this marker is how phase 5
+# tells "our config is deployed" from "some other starship.toml is here" —
+# without it the fix would be unverifiable and the finding would report forever.
+STARSHIP_MARKER = "# dev-machine-setup:starship-config"
+
+
+def starship_config_state() -> str:
+    """One of: 'managed' (ours), 'foreign' (someone else's), 'absent'."""
+    path = _home(*STARSHIP_CONFIG)
+    if not os.path.isfile(path):
+        return "absent"
+    try:
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            head = fh.readline()
+    except OSError:
+        return "foreign"
+    return "managed" if head.startswith(STARSHIP_MARKER) else "foreign"
+
+
 def shell_info(os_name: str) -> dict[str, object]:
     login = os.environ.get("SHELL") if os_name != "windows" else os.environ.get("ComSpec")
     return {
         "login_shell": login,
         "oh_my_zsh": os.path.isdir(_home(".oh-my-zsh")),
+        "starship_config": starship_config_state(),
     }
 
 
@@ -276,6 +297,18 @@ def findings(os_name: str, arch: str, tools: dict[str, str | None], mgrs: list[s
         if not os.path.isdir(_home(".oh-my-zsh")):
             out.append(find("oh-my-zsh-missing", "low", "shell",
                             "zsh is installed without Oh My Zsh; no plugin/completion baseline."))
+        # The shipped assets/zshrc-config guards its prompt on `command -v starship`, so a
+        # missing binary or a foreign config degrades silently to no prompt at all.
+        if tools.get("starship"):
+            state = starship_config_state()
+            if state == "absent":
+                out.append(find("starship-config-missing", "low", "shell",
+                                "starship is installed but ~/.config/starship.toml is absent; "
+                                "the prompt falls back to starship defaults."))
+            elif state == "foreign":
+                out.append(find("starship-config-not-managed", "low", "shell",
+                                "~/.config/starship.toml exists but is not the dev-machine-setup config "
+                                "(distro or hand-rolled default)."))
 
     if os_name != "windows" and getattr(os, "geteuid", lambda: 0)() != 0 and not shutil.which("sudo"):
         out.append(find("no-sudo", "medium", "packaging",
@@ -318,6 +351,7 @@ def main() -> int:
         "pip": tool_version(["pip3", "pip"], ["--version"]),
         "uv": tool_version(["uv"], ["--version"]),
         "zsh": tool_version(["zsh"], ["--version"]),
+        "starship": tool_version(["starship"], ["--version"]),
         "claude": tool_version(["claude"], ["--version"]),
         "codex": tool_version(["codex"], ["--version"]),
         "pi": tool_version(["pi"], ["--version"]),

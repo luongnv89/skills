@@ -27,7 +27,6 @@ winget uninstall --id <Id> --silent
 Get-AppxPackage <Name> | Remove-AppxPackage
 ```
 
-Optional: inbash `windows/system_check.ps1` for a hardware snapshot (`-AsJson`).
 
 ## Package manager
 
@@ -61,7 +60,7 @@ Confirm the URL with the user before running. Alternative: `winget install astra
 
 ## Shell
 
-Keep PowerShell 7 if available (`winget install Microsoft.PowerShell`). Oh My Zsh is a Unix skill — if the user wants the full inbash zsh setup, install **WSL2 Ubuntu** and re-run this skill *inside* WSL (then follow `linux.md`).
+Keep PowerShell 7 if available (`winget install Microsoft.PowerShell`). Oh My Zsh is a Unix skill — if the user wants the full zsh setup, install **WSL2 Ubuntu** and re-run this skill *inside* WSL (then follow `linux.md`).
 
 ```powershell
 wsl --install -d Ubuntu

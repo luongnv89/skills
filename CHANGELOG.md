@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **`dev-machine-setup` 0.6.0 → 0.9.0:** now **self-contained** — no `luongnv89/inbash` clone. The shell config ships as `assets/zshrc-config` (a vendored fork; upstream fixes no longer flow in) and the `.sh` wrappers are replaced by the plain brew / apt / dnf / pacman commands and `git clone`s they wrapped.
+- **Zsh parity:** `detect_env.py` now reports `starship` as a baseline tool and emits `starship-config-missing` / `starship-config-not-managed`, deploying `assets/starship.toml`. Detection reads a first-line marker so phase 5's re-run can actually observe the fix.
+- **`oh-my-zsh-missing` is no longer flatly additive:** deploying the shipped `~/.zshrc` is additive when none exists and **mutating** (backup + its own yes) when one does, so a blanket approval can't silently overwrite a working config.
+- **SKILL.md split** for progressive disclosure — approval protocol → `references/approvals.md`, phase bodies → `references/procedure.md`. 354 → 176 lines; `asm eval` 90 → 94, min category 6 → 8.
 
 ## v2.0.0 — 2026-08-18
 
