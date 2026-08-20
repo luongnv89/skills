@@ -1,10 +1,10 @@
 ---
 name: new-machine-setup
-description: "Set up a clean, ready-to-develop machine across macOS, Linux, and Windows with OS/arch detection. Use when the user bought a new laptop, wants a fresh dev box, asks to bootstrap Node/Python, install Claude Code, Codex, Pi, OpenCode, or Oh My Zsh, or mentions OEM bloat / Grok Build-style cleanup. Don't use for Dockerfiles, CI images, or one-off package installs."
+description: "Set up a clean, ready-to-develop machine across macOS, Linux, and Windows with OS/arch detection and a human-in-the-loop per phase. Use when the user wants a fresh dev box, to bootstrap Node/Python, install Claude Code, Codex, Pi, OpenCode, or Oh My Zsh, or to debloat OEM apps. Don't use for Dockerfiles, CI images, or one-off package installs."
 license: MIT
 compatibility: "macOS, Linux (Debian/Ubuntu/Fedora/Arch), Windows (winget/PowerShell). Needs network and a package manager or permission to install one. Never run destructive uninstalls without an explicit yes."
 metadata:
-  version: 0.2.0
+  version: 0.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: high
 ---
@@ -13,7 +13,7 @@ metadata:
 
 Turn a factory laptop into a **clean, ready-to-develop** machine. Detect OS + CPU arch first, optionally inventory/remove OEM junk (the XFreeze / Grok Build idea), then install a consistent baseline: git, shell, Node.js, Python, and the coding-agent CLIs this user actually uses.
 
-This skill is an orchestrator. Long per-OS command tables live in `references/` so only the current platform is loaded.
+This skill is an orchestrator. Long per-OS command tables live in `references/` so only the current platform is loaded, keeping the agent's context budget small while the full detail stays one link away.
 
 **Do not** pipe remote scripts to a shell until the user has approved that step. Prefer official installers and the user's own [inbash](https://github.com/luongnv89/inbash) scripts when they match the OS.
 
@@ -53,6 +53,7 @@ Don't use for: Dockerfiles, CI runners, or installing a single package.
 | `references/macos.md` | macOS: Homebrew, Node, Python+uv, zsh |
 | `references/linux.md` | Linux: apt/dnf/pacman, NodeSource LTS, python3-pip |
 | `references/agent-clis.md` | Claude Code, Codex, Pi, OpenCode install + verify |
+| `references/edge-cases.md` | ARM64, nvm conflicts, PEP 668, WSL, chsh, inbash distro limits |
 | `scripts/detect_env.py` | Print a JSON inventory (OS, arch, package managers, tools) |
 
 ## Procedure
@@ -154,6 +155,24 @@ Always print a consolidated report built from the running log:
 ```
 
 `READY` = baseline + Node + Python verify green. Agents may be skipped and still READY if the user declined them. `PARTIAL` = some verification failed but non-fatal; `BLOCKED` = a required phase could not be approved or executed.
+
+## Acceptance Criteria
+
+The skill is done when all of these hold:
+
+- `python3 scripts/detect_env.py` prints valid JSON with `os`, `arch`, a package manager, and a tool map.
+- Every phase ran the present → approve → execute → verify loop, and each approval is recorded in the running log.
+- No removal or `curl | sh` ran without an explicit, per-item yes.
+- Phase 3 verifies green: `git --version`, `node -v`, `npm -v`, `python3 --version`, `uv --version` succeed (or deferred items are logged).
+- Each requested agent CLI (Claude Code, Codex, Pi, OpenCode) verifies via its `--version` (or is explicitly skipped).
+- The FINAL REPORT (template above) is printed, built from the running log — not from memory — with a `Result` of READY / PARTIAL / BLOCKED.
+- `quick_validate.py` exits 0 on the shipped SKILL.md.
+
+**Expected output:** the consolidated FINAL REPORT block shown under "Verification report" above.
+
+## Edge Cases
+
+Environment-specific gotchas (ARM64, nvm conflicts, PEP 668, WSL, `chsh` denial, inbash distro limits) live in `references/edge-cases.md` — read it when a phase hits an unusual machine.
 
 ## Pitfalls
 
