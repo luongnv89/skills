@@ -230,6 +230,68 @@ install line **and** the line that installs `asm` itself — assume the user has
 Name the second half only when `codebase-modernizer` is also missing. When it is installed, the
 message is the first half plus `run /codebase-modernizer first`.
 
+**The input check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
+holds *and* that `references/epic-identity.md` step 0 will accept the path.**
+A `tasks/` directory hit is resolved here — `tasks/tasks.md`, else the single `*.md` inside it, else
+list them and ask which (SKILL.md → *Mode selection* → *Plan discovery*). Resolve it in Phase 0, not
+later: `references/epic-identity.md` step 0 refuses anything that is not one file, and by Phase 3
+this run has already created labels. A directory that resolves to nothing, or to several files the
+user will not choose between, is a `×` on the **input** group — the same failure as no plan at all:
+
+```text
+✗ Plan directory does not resolve to a single file
+
+  tasks/ contains 4 *.md files and no tasks.md:
+    tasks/01-setup.md · tasks/02-api.md · tasks/03-ui.md · tasks/04-ship.md
+
+  To fix:  pass the one that holds the Sprint Overview table:
+
+       /plan-to-issues tasks/01-setup.md
+```
+
+An **explicit** path needs the same treatment: `/plan-to-issues ../outside_PLAN.md` passes
+`[ -f "$plan" ]` and would then die in Phase 3, after Phase 2 created labels. Run step 0's
+normalization here — it is read-only — and treat any path it would reject (outside the repo, or
+holding a newline, `"` or `\`) as a `×` on the **input** group:
+
+```text
+✗ Plan is outside the repository
+
+  ../outside_PLAN.md resolves to /home/me/outside_PLAN.md, which is not under
+  /home/me/project. The epic's plan-binding marker would be a machine-specific
+  absolute path, so another clone would miss it and file a second epic.
+
+  To fix:  put the plan inside the repo, then re-run:
+
+       cp ../outside_PLAN.md ./MODERNIZATION_PLAN.md
+       /plan-to-issues MODERNIZATION_PLAN.md
+```
+
+### Sub-issues unavailable (degrade, never block)
+
+Phase 4 registers every child as a native sub-issue so the epic shows live status. Probe the
+endpoint once during the `gh` group — it is a read, and it costs one call:
+
+```bash
+repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+gh api "repos/$repo/issues/1/sub_issues" >/dev/null 2>&1 && echo ok
+```
+
+A failure is a **degrade, not a stop** — the backlog is still worth filing:
+
+```text
+⚠ Sub-issues unavailable on this host
+
+  The epic will list its children, but GitHub will not show their
+  open/closed status or a progress bar. Open a child to see its state.
+
+  This is expected on older GitHub Enterprise Server.
+```
+
+Report it in the degraded-checks line of the final report. Never respond by writing checkboxes into
+the plan map instead: the map asserts no status by design, and a checkbox would go stale on the next
+close (`references/epic-dashboard.md` -> *Rules the layout must hold*).
+
 ### Missing bundled file
 
 ```text
@@ -243,8 +305,9 @@ message is the first half plus `run /codebase-modernizer first`.
 
 Check all of these relative to this SKILL.md's directory before running anything:
 `references/preflight.md`, `references/plan-parsing.md`, `references/labels.md`,
-`references/issue-creator-bridge.md`, `references/epic-dashboard.md`, `references/sync-mode.md`,
-`references/edge-cases.md`, `agents/plan-parser.md`, `scripts/render_dashboard.py`.
+`references/issue-creator-bridge.md`, `references/epic-identity.md`, `references/epic-dashboard.md`,
+`references/sync-mode.md`, `references/edge-cases.md`, `agents/plan-parser.md`,
+`scripts/render_dashboard.py`.
 
 This list is the authoritative guard — it must name **every** bundled file the skill loads at
 runtime, including the ones only one mode reaches (`sync-mode.md` for `sync`, `edge-cases.md` for
@@ -297,7 +360,7 @@ On success, one line per check, then continue:
   Repo writable:      √ pass (luongnv89/skills · issues on · ADMIN)
   API budget:         √ pass (4905 remaining, ~220 needed)
   Skills installed:   √ pass (issue-creator 0.8.0)
-  Bundled files:      √ pass (9/9)
+  Bundled files:      √ pass (10/10)
   Plan located:       √ pass (MODERNIZATION_PLAN.md — 50 tasks, 6 phases)
   ____________________________
   Result:             PASS

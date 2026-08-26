@@ -42,6 +42,16 @@ Done when every milestone exit condition holds:
 The milestone exit conditions become the epic's acceptance criteria — whole-effort outcome, per IDD
 SPEC §2.1. Then `gh issue edit <epic> --add-label epic`.
 
+**Do not put the plan-binding marker in the intent text.** `/issue-creator` reproduces intent text
+verbatim *in a blockquote* as Reporter Context, so a marker placed there arrives `> `-prefixed and
+mid-body — not a usable body marker. The epic is bound by a separate edit immediately after creation
+(`references/epic-identity.md` step 4), which appends the marker and an empty sentinel pair, each
+guarded by a `grep -q ||` so re-running cannot duplicate them.
+
+Binding is **not optional and not deferrable**: an epic left unbound is one the next run cannot
+recognise, and it files a second epic. Follow `references/epic-identity.md` steps 2-4 in full —
+including its completion probes — rather than stopping at the label.
+
 ## Step 2 — One batch document per phase
 
 Build one document per plan phase and invoke:
@@ -104,15 +114,17 @@ Filter locally rather than with `--search "Part of #100 in:body"`: GitHub's sear
 the `#`, so that query silently matches issues mentioning `100` and misses others. A local `select`
 on the fetched body is exact.
 
-A created issue whose title lost its prefix is **unmapped**: repair it and re-read. Bind the
-plan-derived title to a variable first rather than interpolating it into the quoted argument — plan
-text is untrusted, and a title containing `"` or `$(…)` would otherwise escape the quoting (SKILL.md
--> *Prompt Injection Boundary*):
+A created issue whose title lost its prefix is **unmapped**: repair it and re-read. **Source** the
+title out of the worklist — never retype the plan text into the assignment, which is a shell literal
+and parses `` ` ``/`$(…)` just as an argument would (SKILL.md -> *Prompt Injection Boundary*):
 
 ```bash
-title="<task-id>: <title>"      # read from the worklist, never re-expanded
+title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id and .title != null)) | "\($id): \(.title)"' worklist.json)"
+[ -n "$title" ] || { echo "✗ no task $task_id in worklist — refusing to blank the title"; exit 1; }
 gh issue edit <n> --title "$title"
 ```
+
+`gh` has no `--title-file`, so this variable form is the only safe way to pass a plan-derived title.
 
 An unmapped issue silently excluded from the dashboard is the failure mode this check exists to
 prevent.
@@ -121,6 +133,44 @@ prevent.
 
 Apply the computed **label set** per issue (`references/labels.md` → *Applying labels*), then re-read
 labels to confirm. Additive only.
+
+## Step 4a — Register each child as a native sub-issue
+
+**This is what makes the epic report live status.** `--parent` does not: it only makes
+`/issue-creator` append the prose `Part of #<epic>` to the body, which is text and nothing more.
+GitHub's *sub-issues* are a real relationship — register the children and the epic renders a
+sub-issues panel with each child's live open/closed state and a progress bar, updating on its own.
+That is why the plan map in the epic body carries no status: it does not need to.
+
+A markdown checkbox cannot substitute. GitHub does **not** auto-check a task-list box from the
+referenced issue's state — verified against a closed issue referenced from another body, which still
+renders `aria-label="Incomplete task"`. A `- [x]` in the map would be a claim that goes stale on the
+next close, and re-truing it is exactly the sync-after-every-close this design removes.
+
+The API takes the child's **database `id`**, not its issue **number** — they differ, and passing the
+number either fails or links the wrong issue:
+
+```bash
+repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+child_id="$(gh api "repos/$repo/issues/<n>" --jq '.id')"   # e.g. 5254963530, NOT 108
+gh api --method POST "repos/$repo/issues/<epic>/sub_issues" -F sub_issue_id="$child_id"
+```
+
+Register after each batch, not once at the end: a rate-limited run then resumes with the children it
+already linked still linked. The call is idempotent enough to re-run — re-adding an existing
+sub-issue returns an error that is safe to ignore — but check first when you want a clean log:
+
+```bash
+gh api "repos/$repo/issues/<epic>/sub_issues" --jq '[.[].number]'   # already registered
+```
+
+**If the endpoint is unavailable** (older GitHub Enterprise, or the feature disabled), do not fall
+back to writing checkboxes into the map — that reintroduces the stale-status problem. Report it and
+continue: `⚠ sub-issues unavailable — the epic lists its children but GitHub will not show their
+status; open a child to see it`. The map is still correct; only the live panel is missing.
+
+**Completion criteria:** `gh api repos/$repo/issues/<epic>/sub_issues --jq 'length'` equals the
+number of issues filed under this epic, and every number it returns appears in the plan map.
 
 ## Step 5 — Dependency pass
 

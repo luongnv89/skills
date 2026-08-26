@@ -20,14 +20,16 @@
       "id": 2,
       "kind": "happy-path",
       "prompt": "/plan-to-issues sync 100",
-      "expected_output": "Epic #100's dashboard is re-rendered from live issue states: checkboxes, per-phase counts, milestone status, and the Last synced date all update. No issues are created.",
+      "expected_output": "Epic #100's plan map is re-rendered from the epic's registered sub-issues and the plan: newly filed issues appear under their phase, plan tasks with no issue render `(not filed)`, and the rendered date updates. No issue status is written. No issues are created.",
       "files": [],
       "expectations": [
         "The epic body is fetched and the run stops if the plan-dashboard sentinels are absent",
-        "Live states come from a single `gh issue list --state all --json number,state,title` call, not one call per child",
+        "The epic's children come from a single `gh api repos/{owner}/{repo}/issues/100/sub_issues` call, not one call per child",
+        "Issue open/closed state is NOT fetched or rendered — the map carries no status",
         "Only the region between the sentinels is rewritten; the rest of the epic body is unchanged",
         "No `gh issue create` is invoked in sync mode",
-        "Plan tasks with no dashboard entry are reported as unmapped rather than filed"
+        "Plan tasks with no map entry are reported as unmapped rather than filed",
+        "Re-running sync when nothing has been filed since rewrites the body to identical bytes"
       ]
     },
     {
@@ -122,13 +124,41 @@
       "id": 10,
       "kind": "edge",
       "prompt": "File only the first two phases of MODERNIZATION_PLAN.md as issues — I'm not ready to commit to the rest yet.",
-      "expected_output": "Only tasks in the named phases are filed, but the dashboard still lists every phase in the plan, with the unfiled ones marked `— not filed` rather than omitted or shown as complete.",
+      "expected_output": "Only the named phases are filed. The epic's plan map lists every phase; excluded ones render `— not filed`. Live status comes from the sub-issues panel, not the body.",
       "files": [],
       "expectations": [
         "Only the named phases are filed; no issue is created for any task in an excluded phase",
-        "The dashboard's phase table lists every phase in the plan, not just the filed ones",
-        "Excluded phases render `— not filed` in the Progress column and `○ not started` as Status, never `✅ met` or a 0% bar that reads as filed-but-unstarted",
+        "The map's phase table lists every phase in the plan, not just the filed ones",
+        "Excluded phases render `— not filed` in the Tasks column and list no issue numbers",
+        "The map asserts no issue status: no checkbox, progress bar, percentage, milestone verdict, or next-actionable list",
+        "Every filed child is registered as a native sub-issue of the epic, so GitHub shows its open/closed state without the body being rewritten",
         "The epic is created once and carries the plan-binding marker, so a later run filing the remaining phases reuses it instead of creating a second epic"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "prompt": "File MODERNIZATION_PLAN.md as issues. (Run in a repo where a previous run already created the epic but was interrupted before it filed every task.)",
+      "expected_output": "The existing epic is found by its plan-binding marker and reused; only the tasks it does not already list are filed. No second epic is created.",
+      "files": [],
+      "expectations": [
+        "The existing epic is matched on the `<!-- plan-to-issues:plan=... -->` marker, not on the dashboard sentinels",
+        "No second epic is created for the same plan path",
+        "Tasks already filed under the epic are skipped rather than duplicated",
+        "An epic carrying the `epic` label but no binding marker is offered for adoption with an explicit confirm, never adopted silently"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "edge",
+      "prompt": "File MODERNIZATION_PLAN.md as issues, then close two of the created issues and look at the epic.",
+      "expected_output": "The epic's sub-issues panel shows the two as closed and its progress advances. The plan map in the body is byte-identical to what was rendered at filing time — no sync was needed.",
+      "files": [],
+      "expectations": [
+        "No `/plan-to-issues sync` run is required or suggested after an issue merely closes",
+        "Re-rendering the map after the closes produces identical bytes",
+        "The epic body contains no `- [x]`, `- [ ]`, progress bar, or percentage that could contradict the closed issues",
+        "Open/closed status is readable from the epic's sub-issues panel"
       ]
     }
   ]
