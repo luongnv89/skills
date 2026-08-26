@@ -1,0 +1,122 @@
+{
+  "skill_name": "plan-to-issues",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "I just ran /codebase-modernizer on this repo. Turn MODERNIZATION_PLAN.md into GitHub issues with an epic on top that tracks the whole thing.",
+      "expected_output": "One epic issue plus one issue per plan task, each labelled, each carrying `Part of #<epic>`; the epic body holds a phase-grouped dashboard between the plan-dashboard sentinels.",
+      "files": [],
+      "expectations": [
+        "The run parses the plan and reconciles the task count against `grep -cE '^#{3,4} Task ' <plan>` before filing anything",
+        "Missing labels are listed with their colours and confirmed once before `gh label create` runs",
+        "The epic is created first, then issues are filed with /issue-creator batch mode using --parent <epic>, one batch per plan phase",
+        "Every filed issue title starts with its plan task id prefix (`0.1: …`)",
+        "The epic body is rendered through scripts/render_dashboard.py and written between <!-- plan-dashboard:start --> and <!-- plan-dashboard:end -->",
+        "The run emits Step Completion Reports for all six phases and re-reads the epic and children to verify"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "/plan-to-issues sync 100",
+      "expected_output": "Epic #100's dashboard is re-rendered from live issue states: checkboxes, per-phase counts, milestone status, and the Last synced date all update. No issues are created.",
+      "files": [],
+      "expectations": [
+        "The epic body is fetched and the run stops if the plan-dashboard sentinels are absent",
+        "Live states come from a single `gh issue list --state all --json number,state,title` call, not one call per child",
+        "Only the region between the sentinels is rewritten; the rest of the epic body is unchanged",
+        "No `gh issue create` is invoked in sync mode",
+        "Plan tasks with no dashboard entry are reported as unmapped rather than filed"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Show me what issues you'd file for docs/MODERNIZATION_PLAN.md before you actually create anything.",
+      "expected_output": "A dry-run preview: the task-to-issue table with computed label sets, the labels that would be created, and a rendered dashboard preview. Nothing is created or edited.",
+      "files": [],
+      "expectations": [
+        "No `gh issue create`, `gh issue edit`, or `gh label create` is executed",
+        "Each previewed issue shows its full label set (phase, type, dim, priority)",
+        "The preview names the plan path it parsed and the number of tasks found"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "File the plan as issues — but I already ran this last week and half the issues exist.",
+      "expected_output": "The existing epic is reused, already-filed tasks are skipped, and only the missing tasks are filed. Zero duplicate issues and zero new epics; the dashboard is re-rendered over the full set.",
+      "files": [],
+      "expectations": [
+        "An existing epic is found by filtering fetched issue bodies for the plan-dashboard sentinel, not by a GitHub `--search` query",
+        "Tasks already filed are matched on the `Plan task: <id>` marker and skipped, and the skip count is reported",
+        "No second epic is created",
+        "The final report names every skipped task"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Turn tasks.md into issues with an epic dashboard.",
+      "expected_output": "The /tasks-generator plan shape parses correctly — H3 task headings, phases resolved from the Sprint Overview table's Phase column (or synthesized per sprint) — and issues are filed with no invented dimensions or milestones.",
+      "files": [],
+      "expectations": [
+        "Task headings are matched at H3 as well as H4, so the task count is non-zero",
+        "Phases come from the Sprint Overview table or are synthesized per sprint, with the source recorded",
+        "Tasks with no `Closes:` line get no `dim:` label and take priority from the phase default",
+        "Phases with no milestone render `—` rather than a fabricated exit condition"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Write a modernization plan for this repo — audit the dependencies and tell me what to upgrade first.",
+      "expected_output": "The request is handled by /codebase-modernizer (audit and plan authoring). plan-to-issues does not run: there is no plan to file yet.",
+      "files": [],
+      "expectations": [
+        "No epic or issue is created",
+        "The run does not attempt to parse a plan file or compute label sets"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Resolve issue #104 and open a PR for it.",
+      "expected_output": "Handled by /issue-resolver. plan-to-issues does not run — it files backlogs, it does not implement them.",
+      "files": [],
+      "expectations": [
+        "No dashboard is rendered and no epic body is edited",
+        "The plan file is not parsed"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "prompt": "File MODERNIZATION_PLAN.md as issues. (Run in a repo where the issue-creator skill is not installed and gh is not authenticated.)",
+      "expected_output": "Preflight stops the run before any mutation and reports both failures together: the gh auth fix and an issue-creator install block naming `asm install`, plus `npm install -g agent-skill-manager` for asm itself. Nothing is created.",
+      "files": [],
+      "expectations": [
+        "All preflight checks run and both failures are reported in one pass, not one stop per failure",
+        "The missing-skill block includes the asm install command AND the command to install asm itself",
+        "A no-asm alternative (`npx skills add …`) and a verification command are given",
+        "No `gh issue create`, `gh issue edit`, or `gh label create` is executed",
+        "The Preflight Step Completion Report shows `×` rows and does not print Result: PASS"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "File MODERNIZATION_PLAN.md as issues. (Run in a repo where gh is installed and authenticated, two accounts are logged in, and the caller's permission on the repo is TRIAGE.)",
+      "expected_output": "Preflight probes gh readiness rather than presence: it names the active account and asks for confirmation before filing, and degrades on TRIAGE — issues are filed and labelled with existing labels only, label creation disabled — with the degradation repeated in the final report.",
+      "files": [],
+      "expectations": [
+        "`gh repo view --json nameWithOwner,hasIssuesEnabled,isArchived,viewerPermission` is run and its verdict drives the decision",
+        "The multi-account case names the `Active account: true` account and asks before filing",
+        "TRIAGE degrades rather than stopping: no `gh label create` is attempted, existing labels still apply",
+        "The Preflight report shows a `⚠` row for the degraded check, and the final report repeats it",
+        "API budget is checked against the task count before any issue is created"
+      ]
+    }
+  ]
+}
