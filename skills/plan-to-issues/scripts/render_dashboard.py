@@ -9,6 +9,7 @@ Usage:  python3 render_dashboard.py < dashboard-input.json > dashboard.md
 """
 
 import json
+import re
 import sys
 
 START = "<!-- plan-dashboard:start -->"
@@ -44,10 +45,43 @@ def require(cond, msg, hint=None):
         die(msg, hint)
 
 
+SCALAR = (str, int, float)
+
+
 def require_list(value, path):
+    """Require a list-or-absent whose entries are all scalars.
+
+    Entry types matter as much as the container's: an unhashable entry (a list or dict) reaching a
+    dict lookup raises TypeError, which would exit 1 with a traceback instead of exit 2 with a hint.
+    """
     require(value is None or isinstance(value, list),
             "%s must be a list, got %s" % (path, type(value).__name__),
             "see references/epic-dashboard.md -> Render input schema")
+    for n, entry in enumerate(value or []):
+        require(isinstance(entry, SCALAR),
+                "%s[%d] must be a string, got %s" % (path, n, type(entry).__name__))
+
+
+def require_scalar(value, path, allow_none=False):
+    require((value is None and allow_none) or isinstance(value, SCALAR),
+            "%s must be a string, got %s" % (path, type(value).__name__),
+            "see references/epic-dashboard.md -> Render input schema")
+
+
+def require_issue_number(value, path, allow_none=False):
+    """Require a real issue number.
+
+    `epic` and `issue` are caller-supplied, not plan-derived, and they are interpolated into
+    `#N` refs and the sync hint. A string here is not merely wrong-typed: `"1 --> <!--
+    plan-dashboard:end -->"` forges a premature end sentinel, and a newline in `issue` forges
+    dashboard checklist lines that sync then reads back as real children. Collapsing whitespace is
+    not enough — the value must be a number.
+    """
+    if value is None and allow_none:
+        return
+    require(isinstance(value, int) and not isinstance(value, bool) and value > 0,
+            "%s must be a positive integer issue number, got %r" % (path, value),
+            "issue numbers come from `gh issue create`; do not pass them as strings")
 
 
 def die(msg, hint=None):
@@ -80,6 +114,13 @@ def load():
             die("missing required key: %s" % key, "see references/epic-dashboard.md -> Render input schema")
     if not isinstance(data["phases"], list) or not data["phases"]:
         die("`phases` must be a non-empty list — a plan always has at least one phase")
+    require_scalar(data["plan_path"], "plan_path")
+    require_scalar(data["synced"], "synced")
+    require(re.match(r"^\d{4}-\d{2}-\d{2}$", str(data["synced"])),
+            "synced must be an ISO date (YYYY-MM-DD), got %r" % (data["synced"],),
+            "supply it as `date -u +%Y-%m-%d` — the renderer never reads the clock")
+    require_issue_number(data["epic"], "epic")
+    require_scalar(data.get("baseline"), "baseline", allow_none=True)
     require_list(data.get("critical_path"), "critical_path")
     require_list(data.get("deferred"), "deferred")
     for k, row in enumerate(data.get("deferred") or []):
@@ -106,6 +147,11 @@ def load():
             for key in ("task_id", "title", "state"):
                 if key not in task:
                     die("phases[%d].tasks[%d] missing required key: %s" % (i, j, key))
+            require_scalar(task["task_id"], "phases[%d].tasks[%d].task_id" % (i, j))
+            require_scalar(task["title"], "phases[%d].tasks[%d].title" % (i, j))
+            require_scalar(task["state"], "phases[%d].tasks[%d].state" % (i, j))
+            require_issue_number(task.get("issue"), "phases[%d].tasks[%d].issue" % (i, j),
+                                 allow_none=True)
             require_list(task.get("depends_on"), "phases[%d].tasks[%d].depends_on" % (i, j))
             require_list(task.get("unknown_deps"), "phases[%d].tasks[%d].unknown_deps" % (i, j))
             if task["state"] not in STATE_ICON:
@@ -139,7 +185,7 @@ def milestone_status(phase):
 
 def task_line(task):
     box = "x" if task["state"] == "closed" else " "
-    num = "#%s" % task["issue"] if task.get("issue") else "(not filed)"
+    num = "#%s" % flat(task["issue"]) if task.get("issue") else "(not filed)"
     line = "- [%s] %s — %s %s" % (box, num, flat(task["task_id"]), flat(task["title"]))
     notes = []
     if task["state"] == "missing":
@@ -166,7 +212,7 @@ def resolve_deps(data):
             for dep in task.get("depends_on") or []:
                 target = index.get(dep)
                 if target and target.get("issue"):
-                    refs.append("#%s" % target["issue"])
+                    refs.append("#%s" % flat(target["issue"]))
                 elif target:
                     refs.append(dep)
                 else:
@@ -189,7 +235,7 @@ def render(data):
     all_tasks = [t for p in data["phases"] for t in p["tasks"]]
     done = sum(1 for t in all_tasks if t["state"] == "closed")
     out.append("**Progress:** %d/%d closed %s · **Last synced:** %s"
-               % (done, len(all_tasks), bar(done, len(all_tasks)), data["synced"]))
+               % (done, len(all_tasks), bar(done, len(all_tasks)), flat(data["synced"])))
     out.append("")
 
     out.append("| Phase | Progress | Milestone | Status |")
@@ -236,7 +282,7 @@ def render(data):
         for task_id in cp:
             target = index.get(task_id)
             if target and target.get("issue"):
-                chain.append("#%s %s" % (target["issue"], STATE_ICON[target["state"]]))
+                chain.append("#%s %s" % (flat(target["issue"]), STATE_ICON[target["state"]]))
             elif target:
                 chain.append("%s %s" % (flat(task_id), STATE_ICON[target["state"]]))
             else:
@@ -253,7 +299,7 @@ def render(data):
                 continue  # an unresolvable dep cannot be shown closed — never call it actionable
             blockers = [index[d] for d in task.get("_dep_ids", []) if d in index]
             if all(b["state"] == "closed" for b in blockers):
-                actionable.append("#%s" % task["issue"])
+                actionable.append("#%s" % flat(task["issue"]))
     if actionable:
         out.append("**Next actionable** — open, every dependency closed: %s" % ", ".join(actionable))
         out.append("")
@@ -270,7 +316,7 @@ def render(data):
         out.append("")
 
     out.append("<sub>Rendered by `/plan-to-issues` — refresh with `/plan-to-issues sync %s`</sub>"
-               % data["epic"])
+               % flat(data["epic"]))
     out.append(END)
     return "\n".join(out) + "\n"
 

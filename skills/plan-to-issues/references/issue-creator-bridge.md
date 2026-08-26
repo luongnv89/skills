@@ -42,19 +42,15 @@ Done when every milestone exit condition holds:
 The milestone exit conditions become the epic's acceptance criteria — whole-effort outcome, per IDD
 SPEC §2.1. Then `gh issue edit <epic> --add-label epic`.
 
-**The intent text must end with the plan-binding marker block** — this is not optional, and it is
-what makes the epic findable on a re-run:
+**Do not put the plan-binding marker in the intent text.** `/issue-creator` reproduces intent text
+verbatim *in a blockquote* as Reporter Context, so a marker placed there arrives `> `-prefixed and
+mid-body — not a usable body marker. The epic is bound by a separate edit immediately after
+creation (SKILL.md Phase 3 step 4), which appends the marker and an empty sentinel pair, each guarded
+by a `grep -q ||` so re-running cannot duplicate them.
 
-```text
-<!-- plan-to-issues:plan=<plan_path> -->
-<!-- plan-dashboard:start -->
-<!-- plan-dashboard:end -->
-```
-
-Creating the epic without it reintroduces the duplicate-epic bug: an interruption during Step 3
-leaves an epic that the next run cannot recognise, and it files a second one. Follow SKILL.md
-Phase 3 steps 2-4 in full — including the post-create verification — rather than stopping at the
-label.
+Binding is **not optional and not deferrable**: an epic left unbound is one the next run cannot
+recognise, and it files a second epic. Follow SKILL.md Phase 3 steps 2-4 in full — including the
+post-create verification — rather than stopping at the label.
 
 ## Step 2 — One batch document per phase
 
@@ -123,7 +119,7 @@ title out of the worklist — never retype the plan text into the assignment, wh
 and parses `` ` ``/`$(…)` just as an argument would (SKILL.md -> *Prompt Injection Boundary*):
 
 ```bash
-title="$(jq -r --arg id "$task_id" '.tasks[] | select(.id == $id) | "\($id): \(.title)"' worklist.json)"
+title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id)) | "\($id): \(.title)"' worklist.json)"
 gh issue edit <n> --title "$title"
 ```
 

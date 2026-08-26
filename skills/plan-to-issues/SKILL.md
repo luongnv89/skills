@@ -72,7 +72,7 @@ an already-bound variable *sourced from parsed data*, never retyped:
 
 ```bash
 # read the value out of the worklist — the shell never sees the plan text as syntax
-title="$(jq -r --arg id "$task_id" '.tasks[] | select(.id == $id) | "\($id): \(.title)"' worklist.json)"
+title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id)) | "\($id): \(.title)"' worklist.json)"
 gh issue edit <n> --title "$title"          # "$title" is not re-expanded
 ```
 
@@ -209,79 +209,81 @@ dropped list.
 
 An epic is an ordinary issue that parents the others (IDD SPEC §2.1) — not a new artifact type.
 
+**Why this phase is recovery-based, not window-free.** Creating the epic and marking it are two API
+calls, and `/issue-creator` owns the body it writes — it places supplied intent text *verbatim, in a
+blockquote* inside its own template, so a marker embedded there arrives `> `-prefixed and mid-body,
+where it is not a usable body marker. The marker therefore cannot ride in on the create call, and
+there is no atomic create-with-marker. Between step 2 and step 4 the epic exists unmarked. That
+window cannot be closed, so it is made **recoverable**: step 1's fallback finds the unmarked epic and
+adopts it after a confirm. Design for the interruption; do not claim it is impossible.
+
 1. **Check for an existing epic first** — fetch and filter locally, since the `epic` label may
    post-date an earlier run and GitHub's search tokenizer is unreliable on markers:
    `gh issue list --state all --limit 200 --json number,title,body` filtered on the **plan-binding
-   marker** `<!-- plan-to-issues:plan=<plan_path> -->`. An epic whose body carries that marker is
-   *this plan's* epic: switch to **idempotent re-run** — reuse it, skip Phase 3's creation, and file only
-   the tasks it does not already list. Never create a second epic for the same plan.
+   marker** for this exact plan path — `<!-- plan-to-issues:plan=<plan_path> -->`, matched as a fixed
+   string on its own line. An epic carrying it is *this plan's* epic: switch to **idempotent
+   re-run** — reuse it, skip creation, and file only the tasks it does not already list. Never create
+   a second epic for the same plan.
 
    Match on the binding marker, **not** on the `plan-dashboard:start` sentinel: the sentinel pair is
-   not written until Phase 5, so a run interrupted during Phase 4 — the documented rate-limit
-   case — would leave a sentinel-less epic and the re-run would create a second one. The marker is
-   part of the epic's **initial body** (step 2), so it exists the instant the issue does; there is no
-   window in which a created epic lacks it.
+   not written until Phase 5, so a run interrupted during Phase 4 would leave a sentinel-less epic
+   and the re-run would create a second one.
 
-   **Fallback for a markerless epic.** An epic created by a pre-1.5.0 run, or by a `/issue-creator`
-   invocation that dropped the marker, will not match. Before concluding that no epic exists, scan
-   the same fetched list for an open issue carrying the `epic` label whose title matches
-   `^Epic: .* — ` and whose body names this plan path. Do not adopt it silently: print the candidate
-   and **ask once**.
+   **Fallback — an unmarked epic.** A run interrupted between step 2 and step 4, or a pre-1.5.0 run,
+   leaves an epic with no marker. Before concluding that none exists, scan the same fetched list for
+   an **open issue with the `epic` label that carries no `plan-to-issues:plan=` marker at all**. Do
+   not require it to name the plan path — an epic interrupted before Phase 5 has an empty dashboard
+   and may never mention the path. Do not adopt silently; show what is known and **ask once**:
 
    ```text
-   ⚠ Found #142 "Epic: Modernize acme — Pre + P0–P4" (epic label, names MODERNIZATION_PLAN.md)
-     but it carries no plan-binding marker.
+   ⚠ #142 "Epic: Modernize acme — Pre + P0–P4"  (epic label, no plan binding)
+       created 2026-08-26 14:02 · 0 child issues · no dashboard
 
-     Adopt it as this plan's epic? [Y/n]   (declining creates a new epic)
+     This looks like an interrupted run of this plan. Adopt it? [Y/n]
+     (declining creates a new epic; #142 is left untouched)
    ```
 
-   On adoption, write the marker to it immediately (step 4's command), then continue as an
-   idempotent re-run.
+   On adoption, run step 4 to bind it, then continue as an idempotent re-run. If several unmarked
+   epics match, list them all and ask which — never guess.
 2. Otherwise invoke `/issue-creator` in Create mode with the epic intent text built from the plan
    header: project name, baseline verdict, test command of record, the phase table, and the
    milestone exit conditions as the epic's acceptance criteria (they describe the whole-effort
-   outcome). Title: `Epic: Modernize <project> — Pre + P0–P4`.
-
-   **The intent text ends with the marker block**, so the epic is born discoverable:
-
-   ```text
-   <!-- plan-to-issues:plan=MODERNIZATION_PLAN.md -->
-   <!-- plan-dashboard:start -->
-   <!-- plan-dashboard:end -->
-   ```
-
-   These are HTML comments — `/issue-creator` preserves them in the body it writes and they render
-   as nothing. Creating the epic *with* the marker is what closes the duplicate-epic window: there is
-   no moment at which the issue exists but the marker does not.
+   outcome). Title: `Epic: Modernize <project> — Pre + P0–P4`. Do **not** put the marker in the
+   intent text; it would be blockquoted into Reporter Context.
 3. Apply the `epic` label and record the number as `<epic>`.
-4. **Verify the marker survived** — `/issue-creator` owns the body template and may reorder it. If
-   the re-read in the completion criteria shows the marker absent, append it now, before filing a
-   single child issue:
+4. **Bind the epic — before filing a single child issue.** Append the plan-binding marker and an
+   empty sentinel pair. Each piece is appended only if absent, so re-running this step (or reaching
+   it via the adoption path on an epic that already has a sentinel pair) cannot produce a duplicate:
 
    ```bash
    gh issue view <epic> --json body --jq '.body' > epic-body.md
-   printf '\n<!-- plan-to-issues:plan=%s -->\n<!-- plan-dashboard:start -->\n<!-- plan-dashboard:end -->\n' "$plan_path" >> epic-body.md
+   grep -qF "<!-- plan-to-issues:plan=$plan_path -->" epic-body.md \
+     || printf '\n<!-- plan-to-issues:plan=%s -->\n' "$plan_path" >> epic-body.md
+   grep -q '^<!-- plan-dashboard:start -->$' epic-body.md \
+     || printf '<!-- plan-dashboard:start -->\n<!-- plan-dashboard:end -->\n' >> epic-body.md
    gh issue edit <epic> --body-file epic-body.md
    ```
 
-   This step is a **top-up, not the primary write** — it is idempotent and does nothing when step 2
-   did its job.
+   The guards are what make this idempotent — the prose does not make it so, the `grep -q ||` does.
 
 **Completion criteria:** `gh issue view <epic> --json number,labels` returns an open issue carrying
-the `epic` label; its number is recorded for `--parent` binding; and its body contains the
-plan-binding marker for this plan path and exactly one `plan-dashboard` sentinel pair. Both
-properties are probed, each by the command that actually tests it:
+the `epic` label; its number is recorded for `--parent` binding; and its body carries the binding
+marker **for this plan path** plus exactly one sentinel pair. Each asserted property gets the probe
+that actually tests it — anchored to line start, so a blockquoted or indented copy fails rather than
+passing silently:
 
 ```bash
 body="$(gh issue view <epic> --json body --jq '.body')"
-printf '%s\n' "$body" | grep -c 'plan-to-issues:plan='      # must be 1 — the binding marker
-printf '%s\n' "$body" | grep -c 'plan-dashboard:start'      # must be 1 — pair opened once
-printf '%s\n' "$body" | grep -c 'plan-dashboard:end'        # must be 1 — pair closed once
+printf '%s\n' "$body" | grep -cFx "<!-- plan-to-issues:plan=$plan_path -->"  # must be 1 — this plan
+printf '%s\n' "$body" | grep -c  '^<!-- plan-to-issues:plan='                # must be 1 — no foreign binding
+printf '%s\n' "$body" | grep -cFx '<!-- plan-dashboard:start -->'             # must be 1 — pair opened once
+printf '%s\n' "$body" | grep -cFx '<!-- plan-dashboard:end -->'               # must be 1 — pair closed once
 ```
 
-A count of 0 on the first means step 2's marker was stripped — run step 4's top-up and re-verify. Any
-other count means the body was hand-edited; **stop** rather than filing children into an ambiguous
-epic.
+Probe 1 at 0 means the marker is absent or wrapped (`/issue-creator` reordered the body, or it landed
+in a blockquote) — re-run step 4 and re-verify. Probe 2 above 1, or probe 1 at 0 while probe 2 is 1,
+means the epic is bound to a **different plan**: **stop**, rather than filing this plan's children
+into another plan's epic. Any sentinel count other than 1 means the body was hand-edited; **stop**.
 
 ### Phase 4 — File the issues, one batch per phase
 

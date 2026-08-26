@@ -13,8 +13,9 @@ The dashboard lives between two markers, and **only the region between them is e
 <!-- plan-dashboard:end -->
 ```
 
-Immediately above the sentinels sits the **plan-binding marker**, written when the epic is created
-(SKILL.md Phase 3, step 4) — before the first child issue is filed:
+Immediately above the sentinels sits the **plan-binding marker**, written by the bind step that runs
+immediately after the epic is created (SKILL.md Phase 3, step 4) — before the first child issue is
+filed:
 
 ```text
 <!-- plan-to-issues:plan=MODERNIZATION_PLAN.md -->
@@ -22,15 +23,16 @@ Immediately above the sentinels sits the **plan-binding marker**, written when t
 
 It is what makes an epic discoverable on a re-run. The sentinels alone cannot do that job: they carry
 no plan path, and a run interrupted during Phase 4 would have written neither if they were deferred
-to Phase 5. Both are therefore part of the epic's **initial body**, written by the same
-`/issue-creator` call that creates the issue — the sentinel pair starts out empty and Phase 5 fills
-it. Writing them at creation rather than in a follow-up edit is deliberate: a separate edit leaves a
-window in which the epic exists without its marker, and an interruption there produces a duplicate
-epic on the next run.
+to Phase 5. Both are therefore written by the bind step, before any child is filed — the sentinel
+pair starts out empty and Phase 5 fills it.
 
-An epic whose sentinel region is **empty** is therefore a normal, expected state — a create run that
-has not reached Phase 5 yet. It is not a corrupt epic, and sync handles it (see
-`references/sync-mode.md`).
+The marker cannot be embedded in the create call: `/issue-creator` places supplied intent text
+verbatim *in a blockquote*, so a marker sent that way arrives `> `-prefixed and mid-body. Binding is
+consequently a second edit, and the short window between create and bind is handled by recovery
+(Phase 3 step 1's adoption fallback) rather than pretended away.
+
+An epic whose sentinel region is **empty** is a normal, expected state — a create run that has not
+reached Phase 5 yet. It is not a corrupt epic, and sync handles it (see `references/sync-mode.md`).
 
 Everything outside the sentinels — the binding marker, `/issue-creator`'s
 `<!-- gitissue:normalized v1 -->` marker, the epic's Description, Reporter Context, Acceptance
