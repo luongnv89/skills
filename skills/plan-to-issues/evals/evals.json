@@ -130,6 +130,19 @@
         "Excluded phases render `— not filed` in the Progress column and `○ not started` as Status, never `✅ met` or a 0% bar that reads as filed-but-unstarted",
         "The epic is created once and carries the plan-binding marker, so a later run filing the remaining phases reuses it instead of creating a second epic"
       ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "prompt": "File MODERNIZATION_PLAN.md as issues. (Run in a repo where a previous run already created the epic but was interrupted before it filed every task.)",
+      "expected_output": "The existing epic is found by its plan-binding marker and reused; only the tasks it does not already list are filed. No second epic is created.",
+      "files": [],
+      "expectations": [
+        "The existing epic is matched on the `<!-- plan-to-issues:plan=... -->` marker, not on the dashboard sentinels",
+        "No second epic is created for the same plan path",
+        "Tasks already filed under the epic are skipped rather than duplicated",
+        "An epic carrying the `epic` label but no binding marker is offered for adoption with an explicit confirm, never adopted silently"
+      ]
     }
   ]
 }

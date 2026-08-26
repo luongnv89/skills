@@ -18,14 +18,36 @@ CELLS = 10
 STATE_ICON = {"closed": "✅", "open": "○", "missing": "⚠"}
 
 
-def cell(value):
-    """Escape a value for use inside a markdown table cell.
+def flat(value):
+    """Collapse a plan-derived string to a single line.
 
-    Plan text is untrusted markdown: a phase or task title containing `|` would otherwise emit an
-    extra column and break the whole table. Newlines collapse for the same reason.
+    Plan text is untrusted markdown. A newline anywhere in it breaks the line-oriented grammar the
+    dashboard is built on — it splits an `### P0 — Title` heading in two, and it breaks the
+    `- [x] #N — <id> <title>` form that sync's child-parsing grep depends on. Applied to every
+    plan-derived string, table cell or not.
     """
     text = "—" if value is None else str(value)
-    return text.replace("\\", "\\\\").replace("|", "\\|").replace("\n", " ").strip() or "—"
+    return " ".join(text.split()) or "—"
+
+
+def cell(value):
+    """Escape a plan-derived string for use inside a markdown table cell.
+
+    Collapses newlines (see flat()) and escapes `|`, which would otherwise open an extra column and
+    break the whole table out of alignment.
+    """
+    return flat(value).replace("\\", "\\\\").replace("|", "\\|") or "—"
+
+
+def require(cond, msg, hint=None):
+    if not cond:
+        die(msg, hint)
+
+
+def require_list(value, path):
+    require(value is None or isinstance(value, list),
+            "%s must be a list, got %s" % (path, type(value).__name__),
+            "see references/epic-dashboard.md -> Render input schema")
 
 
 def die(msg, hint=None):
@@ -58,10 +80,22 @@ def load():
             die("missing required key: %s" % key, "see references/epic-dashboard.md -> Render input schema")
     if not isinstance(data["phases"], list) or not data["phases"]:
         die("`phases` must be a non-empty list — a plan always has at least one phase")
+    require_list(data.get("critical_path"), "critical_path")
+    require_list(data.get("deferred"), "deferred")
+    for k, row in enumerate(data.get("deferred") or []):
+        require(isinstance(row, dict),
+                "deferred[%d] must be a JSON object, got %s" % (k, type(row).__name__))
     for i, phase in enumerate(data["phases"]):
+        if not isinstance(phase, dict):
+            die("phases[%d] must be a JSON object, got %s" % (i, type(phase).__name__),
+                "see references/epic-dashboard.md -> Render input schema")
         for key in ("id", "title", "tasks"):
             if key not in phase:
                 die("phases[%d] missing required key: %s" % (i, key))
+        milestone = phase.get("milestone")
+        require(milestone is None or isinstance(milestone, dict),
+                "phases[%d].milestone must be a JSON object, got %s"
+                % (i, type(milestone).__name__))
         if not isinstance(phase["tasks"], list):
             die("phases[%d].tasks must be a list, got %s" % (i, type(phase["tasks"]).__name__),
                 "use [] for a phase with no tasks — see references/epic-dashboard.md -> Render input schema")
@@ -72,6 +106,8 @@ def load():
             for key in ("task_id", "title", "state"):
                 if key not in task:
                     die("phases[%d].tasks[%d] missing required key: %s" % (i, j, key))
+            require_list(task.get("depends_on"), "phases[%d].tasks[%d].depends_on" % (i, j))
+            require_list(task.get("unknown_deps"), "phases[%d].tasks[%d].unknown_deps" % (i, j))
             if task["state"] not in STATE_ICON:
                 die("phases[%d].tasks[%d] has state %r — expected open, closed, or missing"
                     % (i, j, task["state"]))
@@ -79,7 +115,7 @@ def load():
 
 
 def phase_label(phase):
-    return "%s %s" % (phase["id"], phase["title"])
+    return "%s %s" % (flat(phase["id"]), flat(phase["title"]))
 
 
 def phase_note(phase):
@@ -104,15 +140,15 @@ def milestone_status(phase):
 def task_line(task):
     box = "x" if task["state"] == "closed" else " "
     num = "#%s" % task["issue"] if task.get("issue") else "(not filed)"
-    line = "- [%s] %s — %s %s" % (box, num, task["task_id"], task["title"])
+    line = "- [%s] %s — %s %s" % (box, num, flat(task["task_id"]), flat(task["title"]))
     notes = []
     if task["state"] == "missing":
         notes.append("⚠ missing")
     deps = [d for d in task.get("depends_on", []) if d]
     if deps:
-        notes.append("depends on %s" % ", ".join(deps))
+        notes.append("depends on %s" % ", ".join(flat(d) for d in deps))
     for unknown in task.get("unknown_deps", []) or []:
-        notes.append("⚠ unknown dep %s" % unknown)
+        notes.append("⚠ unknown dep %s" % flat(unknown))
     if notes:
         line += "  ·  " + "  ·  ".join(notes)
     return line
@@ -145,9 +181,9 @@ def render(data):
     index = resolve_deps(data)
     out = [START, "", "## Implementation Dashboard", ""]
 
-    head = "**Plan:** `%s`" % data["plan_path"]
+    head = "**Plan:** `%s`" % flat(data["plan_path"])
     if data.get("baseline"):
-        head += " · **Baseline at audit:** %s" % data["baseline"]
+        head += " · **Baseline at audit:** %s" % flat(data["baseline"])
     out.append(head)
 
     all_tasks = [t for p in data["phases"] for t in p["tasks"]]
@@ -173,17 +209,18 @@ def render(data):
         tasks = phase["tasks"]
         pdone = sum(1 for t in tasks if t["state"] == "closed")
         note = phase_note(phase)
-        heading = "### %s — %s" % (phase["id"], phase["title"])
+        heading = "### %s — %s" % (flat(phase["id"]), flat(phase["title"]))
         heading += " · %s" % (note if note else "%d/%d %s" % (pdone, len(tasks), bar(pdone, len(tasks))))
         out.append(heading)
         out.append("")
         ms = phase.get("milestone") or {}
         meta = []
         if phase.get("goal"):
-            meta.append("**Goal:** %s" % phase["goal"])
+            meta.append("**Goal:** %s" % flat(phase["goal"]))
         if ms:
             meta.append("**Milestone %s:** %s — %s"
-                        % (ms.get("id", "—"), ms.get("exit", "—"), milestone_status(phase)))
+                        % (flat(ms.get("id", "—")), flat(ms.get("exit", "—")),
+                           milestone_status(phase)))
         if meta:
             out.append(" · ".join(meta))
             out.append("")
@@ -201,9 +238,9 @@ def render(data):
             if target and target.get("issue"):
                 chain.append("#%s %s" % (target["issue"], STATE_ICON[target["state"]]))
             elif target:
-                chain.append("%s %s" % (task_id, STATE_ICON[target["state"]]))
+                chain.append("%s %s" % (flat(task_id), STATE_ICON[target["state"]]))
             else:
-                chain.append("%s ⚠" % task_id)
+                chain.append("%s ⚠" % flat(task_id))
         out.append("**Critical path:** %s" % " → ".join(chain))
         out.append("")
 

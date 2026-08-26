@@ -22,8 +22,15 @@ Immediately above the sentinels sits the **plan-binding marker**, written when t
 
 It is what makes an epic discoverable on a re-run. The sentinels alone cannot do that job: they carry
 no plan path, and a run interrupted during Phase 4 would have written neither if they were deferred
-to Phase 5. Both are therefore written up front — the sentinel pair starts out empty and Phase 5
-fills it.
+to Phase 5. Both are therefore part of the epic's **initial body**, written by the same
+`/issue-creator` call that creates the issue — the sentinel pair starts out empty and Phase 5 fills
+it. Writing them at creation rather than in a follow-up edit is deliberate: a separate edit leaves a
+window in which the epic exists without its marker, and an interruption there produces a duplicate
+epic on the next run.
+
+An epic whose sentinel region is **empty** is therefore a normal, expected state — a create run that
+has not reached Phase 5 yet. It is not a corrupt epic, and sync handles it (see
+`references/sync-mode.md`).
 
 Everything outside the sentinels — the binding marker, `/issue-creator`'s
 `<!-- gitissue:normalized v1 -->` marker, the epic's Description, Reporter Context, Acceptance

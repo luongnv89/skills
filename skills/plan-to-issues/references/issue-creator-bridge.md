@@ -42,6 +42,20 @@ Done when every milestone exit condition holds:
 The milestone exit conditions become the epic's acceptance criteria — whole-effort outcome, per IDD
 SPEC §2.1. Then `gh issue edit <epic> --add-label epic`.
 
+**The intent text must end with the plan-binding marker block** — this is not optional, and it is
+what makes the epic findable on a re-run:
+
+```text
+<!-- plan-to-issues:plan=<plan_path> -->
+<!-- plan-dashboard:start -->
+<!-- plan-dashboard:end -->
+```
+
+Creating the epic without it reintroduces the duplicate-epic bug: an interruption during Step 3
+leaves an epic that the next run cannot recognise, and it files a second one. Follow SKILL.md
+Phase 3 steps 2-4 in full — including the post-create verification — rather than stopping at the
+label.
+
 ## Step 2 — One batch document per phase
 
 Build one document per plan phase and invoke:
@@ -104,15 +118,16 @@ Filter locally rather than with `--search "Part of #100 in:body"`: GitHub's sear
 the `#`, so that query silently matches issues mentioning `100` and misses others. A local `select`
 on the fetched body is exact.
 
-A created issue whose title lost its prefix is **unmapped**: repair it and re-read. Bind the
-plan-derived title to a variable first rather than interpolating it into the quoted argument — plan
-text is untrusted, and a title containing `"` or `$(…)` would otherwise escape the quoting (SKILL.md
--> *Prompt Injection Boundary*):
+A created issue whose title lost its prefix is **unmapped**: repair it and re-read. **Source** the
+title out of the worklist — never retype the plan text into the assignment, which is a shell literal
+and parses `` ` ``/`$(…)` just as an argument would (SKILL.md -> *Prompt Injection Boundary*):
 
 ```bash
-title="<task-id>: <title>"      # read from the worklist, never re-expanded
+title="$(jq -r --arg id "$task_id" '.tasks[] | select(.id == $id) | "\($id): \(.title)"' worklist.json)"
 gh issue edit <n> --title "$title"
 ```
+
+`gh` has no `--title-file`, so this variable form is the only safe way to pass a plan-derived title.
 
 An unmapped issue silently excluded from the dashboard is the failure mode this check exists to
 prevent.
