@@ -8,6 +8,12 @@ nothing and edits exactly one body. Run the reduced preflight first (Phase 0 —
 
 1. Fetch the epic. **No dashboard sentinels → stop**: `✗ Issue #N has no plan dashboard — is this
    the right epic?` Never overwrite a body this skill did not write.
+
+   An epic created but never filled (Phase 3 wrote the sentinel pair; Phase 4 was interrupted) has
+   an **empty** pair. That is a valid epic, not a foreign issue, so sync proceeds: step 2 finds no
+   children, step 4 lists every plan task under `Not filed`, and the render shows a 0% dashboard
+   with the create-mode hint. Report it as `⚠ epic has no filed children — run /plan-to-issues to
+   file them` rather than presenting an empty dashboard as finished work.
 2. Parse the child issue numbers and their task ids out of the dashboard checklist lines.
 3. Fetch live states in one call: `gh issue list --state all --limit 500 --json number,state,title`.
    Filter to the dashboard's numbers; a number missing from the result is rendered `⚠ missing`, not

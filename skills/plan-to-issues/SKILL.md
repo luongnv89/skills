@@ -211,7 +211,7 @@ An epic is an ordinary issue that parents the others (IDD SPEC §2.1) — not a 
    Match on the binding marker, **not** on the `plan-dashboard:start` sentinel: the sentinel pair is
    not written until Phase 5, so a run interrupted during Phase 4 — the documented rate-limit
    case — would leave a sentinel-less epic and the re-run would create a second one. The binding
-   marker is written at creation time (step 2 below), before any child issue is filed, so it is
+   marker is written at creation time (step 4 below), before any child issue is filed, so it is
    present for every interruption point from Phase 3 onward.
 2. Otherwise invoke `/issue-creator` in Create mode with the epic intent text built from the plan
    header: project name, baseline verdict, test command of record, the phase table, and the
