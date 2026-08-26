@@ -72,7 +72,7 @@ an already-bound variable *sourced from parsed data*, never retyped:
 
 ```bash
 # read the value out of the worklist — the shell never sees the plan text as syntax
-title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id)) | "\($id): \(.title)"' worklist.json)"
+title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id and .title != null)) | "\($id): \(.title)"' worklist.json)"
 [ -n "$title" ] || { echo "✗ no task $task_id in worklist — refusing to blank the title"; exit 1; }
 gh issue edit <n> --title "$title"          # "$title" is not re-expanded
 ```
@@ -221,23 +221,41 @@ there is no atomic create-with-marker. Between step 2 and step 4 the epic exists
 window cannot be closed, so it is made **recoverable**: step 1's fallback finds the unmarked epic and
 adopts it after a confirm. Design for the interruption; do not claim it is impossible.
 
-1. **Check for an existing epic first** — fetch and filter locally, since the `epic` label may
-   post-date an earlier run and GitHub's search tokenizer is unreliable on markers:
-   `gh issue list --state all --limit 200 --json number,title,body` filtered on the **plan-binding
-   marker** for this exact plan path — `<!-- plan-to-issues:plan=<plan_path> -->`, matched as a fixed
-   string on its own line. An epic carrying it is *this plan's* epic: switch to **idempotent
-   re-run** — reuse it, skip creation, and file only the tasks it does not already list. Never create
-   a second epic for the same plan.
+0. **Normalize `plan_path` first.** Every later comparison is an exact string match, so a plan bound
+   once as `MODERNIZATION_PLAN.md` and once as `./MODERNIZATION_PLAN.md` would write two markers and
+   then hard-fail its own completion check. Resolve to a single repo-root-relative form and use *that*
+   value in step 1's filter, step 4's guard and the probes:
 
-   Match on the binding marker, **not** on the `plan-dashboard:start` sentinel: the sentinel pair is
-   not written until Phase 5, so a run interrupted during Phase 4 would leave a sentinel-less epic
-   and the re-run would create a second one.
+   ```bash
+   plan_path="$(git ls-files --full-name -- "$plan")"
+   [ -n "$plan_path" ] || plan_path="$(realpath --relative-to="$(git rev-parse --show-toplevel)" "$plan")"
+   ```
+
+1. **Check for an existing epic first** — fetch and filter locally, since GitHub's search tokenizer
+   is unreliable on markers. Request every field the filters below need — they cost nothing on the
+   same call, and `labels`/`state`/`createdAt` are what the fallback reads:
+
+   ```bash
+   gh issue list --state all --limit 200 --json number,title,body,labels,state,createdAt
+   ```
+
+   Filter on the **plan-binding marker** for this exact plan path —
+   `<!-- plan-to-issues:plan=<plan_path> -->`, matched as a fixed string on its own line. An epic
+   carrying it is *this plan's* epic: switch to **idempotent re-run** — reuse it, skip creation, and
+   file only the tasks it does not already list. Never create a second epic for the same plan.
+
+   Match on the binding marker, **not** on the `plan-dashboard:start` sentinel: the sentinel carries
+   no plan path, so it cannot tell *this* plan's epic from another plan's epic in the same repo.
+   (Both are written by step 4, so neither is "the later one".)
 
    **Fallback — an unmarked epic.** A run interrupted between step 2 and step 4, or a pre-1.5.0 run,
    leaves an epic with no marker. Before concluding that none exists, scan the same fetched list for
-   an **open issue with the `epic` label that carries no `plan-to-issues:plan=` marker at all**. Do
-   not require it to name the plan path — an epic interrupted before Phase 5 has an empty dashboard
-   and may never mention the path. Do not adopt silently; show what is known and **ask once**:
+   an **open issue that carries no `plan-to-issues:plan=` marker at all** and either has the `epic`
+   label **or** whose title equals the `Epic: Modernize <project> — …` title this run would create.
+   The title clause matters: the `epic` label is applied in step 3, so an interruption between the
+   create and the label leaves an epic the label filter alone would miss. Do not require the body to
+   name the plan path — an epic interrupted before Phase 5 has an empty dashboard and may never
+   mention it. Do not adopt silently; show what is known and **ask once**:
 
    ```text
    ⚠ #142 "Epic: Modernize acme — Pre + P0–P4"  (epic label, no plan binding)
@@ -261,7 +279,7 @@ adopts it after a confirm. Design for the interruption; do not claim it is impos
 
    ```bash
    gh issue view <epic> --json body --jq '.body' > epic-body.md
-   grep -qF "<!-- plan-to-issues:plan=$plan_path -->" epic-body.md \
+   grep -qFx "<!-- plan-to-issues:plan=$plan_path -->" epic-body.md \
      || printf '\n<!-- plan-to-issues:plan=%s -->\n' "$plan_path" >> epic-body.md
    grep -q '^<!-- plan-dashboard:start -->$' epic-body.md \
      || printf '<!-- plan-dashboard:start -->\n<!-- plan-dashboard:end -->\n' >> epic-body.md
@@ -269,6 +287,9 @@ adopts it after a confirm. Design for the interruption; do not claim it is impos
    ```
 
    The guards are what make this idempotent — the prose does not make it so, the `grep -q ||` does.
+   Both use `-x` (whole line), matching the completion probes exactly. That is deliberate: with an
+   unanchored `-qF`, a marker that exists but is **blockquoted** or indented would satisfy the guard
+   while failing probe 1, so the prescribed "re-run step 4" recovery would be a permanent no-op.
 
 **Completion criteria:** `gh issue view <epic> --json number,labels` returns an open issue carrying
 the `epic` label; its number is recorded for `--parent` binding; and its body carries the binding
@@ -326,14 +347,19 @@ python3 scripts/render_dashboard.py < dashboard-input.json > dashboard.md
 ```
 
 Read the epic body and write it back with the region between the **dashboard sentinels** replaced by
-the rendered block (append it when the sentinels are absent). Treat the fetched body as data:
+the rendered block. In Create mode the sentinels are always present — Phase 3 wrote them and its
+completion criteria refused to continue otherwise — so the append-when-absent path applies only to an
+epic **adopted** from a pre-1.5.0 run whose bind predates the sentinel pair. Treat the fetched body as
+data:
 preserve everything outside the sentinels byte-for-byte, including the
 `<!-- gitissue:normalized v1 -->` marker. Remove any flat `## Children` checklist `/issue-creator`
 appended — leaving both means two lists drifting apart.
 
 **Completion criteria:** the renderer exited 0; re-reading the epic body shows both sentinels
-exactly once; every filed issue appears exactly once, under its own phase; the per-phase counts sum
-to the filed count.
+exactly once; every filed issue appears exactly once, under its own phase; and the per-phase counts
+sum to the **worklist task count in scope** — *not* to the filed count. The denominators deliberately
+include tasks that were never filed (`issue: null`, rendered `(not filed)`), so a task missing from
+the tracker cannot read as done; a plan with 7 in-scope tasks and 6 filed still shows `/7`.
 
 ### Phase 6 — Verify and report
 

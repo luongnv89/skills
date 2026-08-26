@@ -116,7 +116,7 @@ def load():
         die("`phases` must be a non-empty list — a plan always has at least one phase")
     require_scalar(data["plan_path"], "plan_path")
     require_scalar(data["synced"], "synced")
-    require(re.match(r"^\d{4}-\d{2}-\d{2}$", str(data["synced"])),
+    require(re.match(r"^\d{4}-\d{2}-\d{2}\Z", str(data["synced"])),
             "synced must be an ISO date (YYYY-MM-DD), got %r" % (data["synced"],),
             "supply it as `date -u +%Y-%m-%d` — the renderer never reads the clock")
     require_issue_number(data["epic"], "epic")

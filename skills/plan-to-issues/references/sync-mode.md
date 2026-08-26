@@ -14,7 +14,10 @@ nothing and edits exactly one body. Run the reduced preflight first (Phase 0 —
    children, step 4 lists every plan task under `Not filed`, and the render shows a 0% dashboard
    with the create-mode hint. Report it as `⚠ epic has no filed children — run /plan-to-issues to
    file them` rather than presenting an empty dashboard as finished work.
-2. Parse the child issue numbers and their task ids out of the dashboard checklist lines.
+2. Parse the child issue numbers and their task ids out of the dashboard checklist lines, matching
+   the full checklist grammar (`^- \[[ x]\] #N — <task-id>`) rather than a bare `#N — id`. A plan
+   title that cites an issue number would otherwise inject a phantom child — see
+   `references/epic-dashboard.md` -> *Sync algorithm*.
 3. Fetch live states in one call: `gh issue list --state all --limit 500 --json number,state,title`.
    Filter to the dashboard's numbers; a number missing from the result is rendered `⚠ missing`, not
    silently dropped.

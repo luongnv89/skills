@@ -62,7 +62,7 @@ dashboard supersedes it; two checklists of the same children drift within a week
 
 ### Pre — Agent environment · 3/3 ██████████ 100%
 
-**Goal:** project env an AI agent can use autonomously · **Milestone ME:** ✅ met
+**Goal:** project env an AI agent can use autonomously · **Milestone ME:** CLAUDE.md and AGENTS.md exist — ✅ met
 
 - [x] #101 — Pre.1 Make the project environment agent-runnable
 - [x] #102 — Pre.2 Create or improve CLAUDE.md
@@ -70,7 +70,7 @@ dashboard supersedes it; two checklists of the same children drift within a week
 
 ### P0 — Stabilize · 4/6 ███████░░░ 67%
 
-**Goal:** build green, tests runnable, CI running · **Milestone M0:** ◐ in progress
+**Goal:** build green, tests runnable, CI running · **Milestone M0:** build green; test suite runs — ◐ in progress
 
 - [x] #104 — 0.1 Commit the lockfile and restore the build
 - [ ] #108 — 0.5 Add the CI workflow  ·  depends on #104, #107
@@ -144,12 +144,17 @@ output stays reproducible.
 ```bash
 gh issue view <epic> --json body --jq '.body' > epic-body.md          # 1. fetch
 grep -c 'plan-dashboard:start' epic-body.md                           # 2. gate: must be 1
-grep -oE '#[0-9]+ — [A-Za-z0-9.]+' epic-body.md                       # 3. children + task ids
+grep -oE '^- \[[ x]\] #[0-9]+ — [A-Za-z0-9.]+' epic-body.md          # 3. children + task ids
 gh issue list --state all --limit 500 --json number,state,title       # 4. live states, one call
 python3 scripts/render_dashboard.py < dashboard-input.json            # 5. re-render
 gh issue edit <epic> --body-file epic-body-updated.md                 # 6. write back
 gh issue view <epic> --json body --jq '.body' | grep -c 'plan-dashboard'  # 7. verify: must be 2
 ```
+
+Anchor step 3 to the checklist grammar — an unanchored `#[0-9]+ — [A-Za-z0-9.]+` matches mid-line, so
+a plan task whose *title* cites an issue (`Harmless title #999 — 9.9 phantom child`) would inject a
+phantom child that sync then reports as `⚠ missing`, or silently adopts an unrelated issue #999 into
+the dashboard. Plan titles are untrusted text; only a line that *is* a checklist row counts.
 
 Between 4 and 5: a dashboard number absent from the live list becomes `state: "missing"`; a plan
 task with no dashboard entry becomes an **unmapped** task, listed under `Not filed` and reported with

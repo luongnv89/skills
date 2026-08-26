@@ -119,7 +119,7 @@ title out of the worklist — never retype the plan text into the assignment, wh
 and parses `` ` ``/`$(…)` just as an argument would (SKILL.md -> *Prompt Injection Boundary*):
 
 ```bash
-title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id)) | "\($id): \(.title)"' worklist.json)"
+title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id and .title != null)) | "\($id): \(.title)"' worklist.json)"
 [ -n "$title" ] || { echo "✗ no task $task_id in worklist — refusing to blank the title"; exit 1; }
 gh issue edit <n> --title "$title"
 ```
