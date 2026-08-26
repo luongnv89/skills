@@ -22,8 +22,9 @@ Effort stays in the issue body's Metadata section — it is not a label. Four ax
 already 4–6 labels per issue; a fifth buys filtering nobody uses and doubles the labels to create.
 
 **No `blocked` label.** Dependencies live in the issue body (`Depends on #N`, written by the bridge)
-and in the dashboard's *Next actionable* list. A `blocked` label would need re-synchronising on every
-child close — churn for information the dashboard already renders.
+and in the plan map's `depends on #N` note. A `blocked` label would need re-synchronising on every
+child close — exactly the churn this skill removed from the epic body, and it would put derived
+status back into the tracker by another route.
 
 ## Dimension → type mapping
 

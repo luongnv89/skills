@@ -134,6 +134,44 @@ prevent.
 Apply the computed **label set** per issue (`references/labels.md` → *Applying labels*), then re-read
 labels to confirm. Additive only.
 
+## Step 4a — Register each child as a native sub-issue
+
+**This is what makes the epic report live status.** `--parent` does not: it only makes
+`/issue-creator` append the prose `Part of #<epic>` to the body, which is text and nothing more.
+GitHub's *sub-issues* are a real relationship — register the children and the epic renders a
+sub-issues panel with each child's live open/closed state and a progress bar, updating on its own.
+That is why the plan map in the epic body carries no status: it does not need to.
+
+A markdown checkbox cannot substitute. GitHub does **not** auto-check a task-list box from the
+referenced issue's state — verified against a closed issue referenced from another body, which still
+renders `aria-label="Incomplete task"`. A `- [x]` in the map would be a claim that goes stale on the
+next close, and re-truing it is exactly the sync-after-every-close this design removes.
+
+The API takes the child's **database `id`**, not its issue **number** — they differ, and passing the
+number either fails or links the wrong issue:
+
+```bash
+repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+child_id="$(gh api "repos/$repo/issues/<n>" --jq '.id')"   # e.g. 5254963530, NOT 108
+gh api --method POST "repos/$repo/issues/<epic>/sub_issues" -F sub_issue_id="$child_id"
+```
+
+Register after each batch, not once at the end: a rate-limited run then resumes with the children it
+already linked still linked. The call is idempotent enough to re-run — re-adding an existing
+sub-issue returns an error that is safe to ignore — but check first when you want a clean log:
+
+```bash
+gh api "repos/$repo/issues/<epic>/sub_issues" --jq '[.[].number]'   # already registered
+```
+
+**If the endpoint is unavailable** (older GitHub Enterprise, or the feature disabled), do not fall
+back to writing checkboxes into the map — that reintroduces the stale-status problem. Report it and
+continue: `⚠ sub-issues unavailable — the epic lists its children but GitHub will not show their
+status; open a child to see it`. The map is still correct; only the live panel is missing.
+
+**Completion criteria:** `gh api repos/$repo/issues/<epic>/sub_issues --jq 'length'` equals the
+number of issues filed under this epic, and every number it returns appears in the plan map.
+
 ## Step 5 — Dependency pass
 
 Run once, after every phase is filed, so cross-phase dependencies resolve to real numbers.

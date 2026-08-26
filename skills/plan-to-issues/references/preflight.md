@@ -267,6 +267,31 @@ holding a newline, `"` or `\`) as a `×` on the **input** group:
        /plan-to-issues MODERNIZATION_PLAN.md
 ```
 
+### Sub-issues unavailable (degrade, never block)
+
+Phase 4 registers every child as a native sub-issue so the epic shows live status. Probe the
+endpoint once during the `gh` group — it is a read, and it costs one call:
+
+```bash
+repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+gh api "repos/$repo/issues/1/sub_issues" >/dev/null 2>&1 && echo ok
+```
+
+A failure is a **degrade, not a stop** — the backlog is still worth filing:
+
+```text
+⚠ Sub-issues unavailable on this host
+
+  The epic will list its children, but GitHub will not show their
+  open/closed status or a progress bar. Open a child to see its state.
+
+  This is expected on older GitHub Enterprise Server.
+```
+
+Report it in the degraded-checks line of the final report. Never respond by writing checkboxes into
+the plan map instead: the map asserts no status by design, and a checkbox would go stale on the next
+close (`references/epic-dashboard.md` -> *Rules the layout must hold*).
+
 ### Missing bundled file
 
 ```text

@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Render the plan-to-issues epic dashboard.
+"""Render the plan-to-issues epic plan map.
 
 Reads the render input JSON on stdin (schema: references/epic-dashboard.md) and writes the
-dashboard block — sentinels included — to stdout. Deterministic: same input, same bytes.
+plan-map block — sentinels included — to stdout. Deterministic: same input, same bytes.
 The clock is never read; `synced` is supplied by the caller.
+
+The map is **static**: it encodes which issue implements which plan task, and nothing that
+changes as work proceeds. Live status is GitHub's job — children are registered as native
+sub-issues of the epic, so the sub-issues panel shows open/closed and progress without this
+block ever being rewritten. Nothing here may depend on `state`.
 
 Usage:  python3 render_dashboard.py < dashboard-input.json > dashboard.md
 """
@@ -14,9 +19,6 @@ import sys
 
 START = "<!-- plan-dashboard:start -->"
 END = "<!-- plan-dashboard:end -->"
-CELLS = 10
-
-STATE_ICON = {"closed": "✅", "open": "○", "missing": "⚠"}
 
 
 def flat(value):
@@ -24,7 +26,7 @@ def flat(value):
 
     Plan text is untrusted markdown. A newline anywhere in it breaks the line-oriented grammar the
     dashboard is built on — it splits an `### P0 — Title` heading in two, and it breaks the
-    `- [x] #N — <id> <title>` form that sync's child-parsing grep depends on. Applied to every
+    `- #N — <id> <title>` form that sync's child-parsing grep depends on. Applied to every
     plan-derived string, table cell or not.
     """
     text = "—" if value is None else str(value)
@@ -84,7 +86,7 @@ def require_issue_number(value, path, allow_none=False):
     `epic` and `issue` are caller-supplied, not plan-derived, and they are interpolated into
     `#N` refs and the sync hint. A string here is not merely wrong-typed: `"1 --> <!--
     plan-dashboard:end -->"` forges a premature end sentinel, and a newline in `issue` forges
-    dashboard checklist lines that sync then reads back as real children. Collapsing whitespace is
+    plan-map task lines that sync then reads back as real children. Collapsing whitespace is
     not enough — the value must be a number.
     """
     if value is None and allow_none:
@@ -99,14 +101,6 @@ def die(msg, hint=None):
     if hint:
         sys.stderr.write("\n  To fix:  %s\n" % hint)
     sys.exit(2)
-
-
-def bar(done, total):
-    if total <= 0:
-        return "░" * CELLS + " 0%"
-    pct = int(done * 100 / total)
-    filled = int(done * CELLS / total)  # floor: 99% never shows a full bar
-    return "%s%s %d%%" % ("█" * filled, "░" * (CELLS - filled), pct)
 
 
 def load():
@@ -179,19 +173,20 @@ def load():
             if not isinstance(task, dict):
                 die("phases[%d].tasks[%d] must be a JSON object, got %s"
                     % (i, j, type(task).__name__))
-            for key in ("task_id", "title", "state"):
+            for key in ("task_id", "title"):
                 if key not in task:
                     die("phases[%d].tasks[%d] missing required key: %s" % (i, j, key))
             require_scalar(task["task_id"], "phases[%d].tasks[%d].task_id" % (i, j))
             require_scalar(task["title"], "phases[%d].tasks[%d].title" % (i, j))
-            require_scalar(task["state"], "phases[%d].tasks[%d].state" % (i, j))
+            # `state` is accepted for backward compatibility and deliberately IGNORED: the map is
+            # static, and live status comes from GitHub's sub-issues panel. Rendering it here is what
+            # forced a re-sync on every issue close.
+            require_scalar(task.get("state"), "phases[%d].tasks[%d].state" % (i, j),
+                           allow_none=True)
             require_issue_number(task.get("issue"), "phases[%d].tasks[%d].issue" % (i, j),
                                  allow_none=True)
             require_list(task.get("depends_on"), "phases[%d].tasks[%d].depends_on" % (i, j))
             require_list(task.get("unknown_deps"), "phases[%d].tasks[%d].unknown_deps" % (i, j))
-            if task["state"] not in STATE_ICON:
-                die("phases[%d].tasks[%d] has state %r — expected open, closed, or missing"
-                    % (i, j, task["state"]))
     return data
 
 
@@ -208,23 +203,18 @@ def phase_note(phase):
     return None
 
 
-def milestone_status(phase):
-    tasks = phase["tasks"]
-    if not tasks:
-        return "○ not started"
-    done = sum(1 for t in tasks if t["state"] == "closed")
-    if done == len(tasks):
-        return "✅ met"
-    return "◐ in progress" if done else "○ not started"
-
-
 def task_line(task):
-    box = "x" if task["state"] == "closed" else " "
+    """One static row: which issue implements which plan task.
+
+    No checkbox. GitHub does not auto-check a task-list box from the referenced issue's state
+    (verified: a closed issue referenced from another body still renders `aria-label="Incomplete
+    task"`), so a checkbox here is a claim that goes stale the moment the issue closes — and it is
+    what made a `sync` necessary after every close. The issue number is the live link; the
+    sub-issues panel is the live status.
+    """
     num = "#%s" % flat(task["issue"]) if task.get("issue") else "(not filed)"
-    line = "- [%s] %s — %s %s" % (box, num, flat(task["task_id"]), flat(task["title"]))
+    line = "- %s — %s %s" % (num, flat(task["task_id"]), flat(task["title"]))
     notes = []
-    if task["state"] == "missing":
-        notes.append("⚠ missing")
     deps = [d for d in task.get("depends_on", []) if d]
     if deps:
         notes.append("depends on %s" % ", ".join(flat(d) for d in deps))
@@ -260,38 +250,35 @@ def resolve_deps(data):
 
 def render(data):
     index = resolve_deps(data)
-    out = [START, "", "## Implementation Dashboard", ""]
+    out = [START, "", "## Plan", ""]
 
     head = "**Plan:** `%s`" % flat(data["plan_path"])
     if data.get("baseline"):
         head += " · **Baseline at audit:** %s" % flat(data["baseline"])
     out.append(head)
-
-    all_tasks = [t for p in data["phases"] for t in p["tasks"]]
-    done = sum(1 for t in all_tasks if t["state"] == "closed")
-    out.append("**Progress:** %d/%d closed %s · **Last synced:** %s"
-               % (done, len(all_tasks), bar(done, len(all_tasks)), flat(data["synced"])))
+    out.append("")
+    out.append("Open/closed status is live in the **Sub-issues** panel above — this map is static "
+               "and is rewritten only when issues are filed.")
     out.append("")
 
-    out.append("| Phase | Progress | Milestone | Status |")
-    out.append("|---|---|---|---|")
+    out.append("| Phase | Milestone | Tasks |")
+    out.append("|---|---|---|")
     for phase in data["phases"]:
-        tasks = phase["tasks"]
-        pdone = sum(1 for t in tasks if t["state"] == "closed")
         ms = phase.get("milestone") or {}
         ms_cell = "%s — %s" % (cell(ms.get("id", "—")), cell(ms.get("exit", "—"))) if ms else "—"
         note = phase_note(phase)
-        progress = ("— %s" % note) if note else "%d/%d %s" % (pdone, len(tasks), bar(pdone, len(tasks)))
-        out.append("| %s | %s | %s | %s |"
-                   % (cell(phase_label(phase)), progress, ms_cell, milestone_status(phase)))
+        # A count of plan tasks is static — it changes only when the plan or the filing scope does,
+        # never when an issue closes. That is the line between what may live here and what may not.
+        tasks_cell = ("— %s" % note) if note else "%d" % len(phase["tasks"])
+        out.append("| %s | %s | %s |" % (cell(phase_label(phase)), ms_cell, tasks_cell))
     out.append("")
 
     for phase in data["phases"]:
         tasks = phase["tasks"]
-        pdone = sum(1 for t in tasks if t["state"] == "closed")
         note = phase_note(phase)
         heading = "### %s — %s" % (flat(phase["id"]), flat(phase["title"]))
-        heading += " · %s" % (note if note else "%d/%d %s" % (pdone, len(tasks), bar(pdone, len(tasks))))
+        if note:
+            heading += " · %s" % note
         out.append(heading)
         out.append("")
         ms = phase.get("milestone") or {}
@@ -299,9 +286,8 @@ def render(data):
         if phase.get("goal"):
             meta.append("**Goal:** %s" % flat(phase["goal"]))
         if ms:
-            meta.append("**Milestone %s:** %s — %s"
-                        % (flat(ms.get("id", "—")), flat(ms.get("exit", "—")),
-                           milestone_status(phase)))
+            meta.append("**Milestone %s:** %s"
+                        % (flat(ms.get("id", "—")), flat(ms.get("exit", "—"))))
         if meta:
             out.append(" · ".join(meta))
             out.append("")
@@ -311,32 +297,21 @@ def render(data):
         if tasks:
             out.append("")
 
+    # The critical path is an ordering the plan asserts — static. The per-node ✅/○ icons it used to
+    # carry were not, and a "Next actionable" list is state-derived by definition: both are gone, and
+    # both are answerable from the sub-issues panel.
     cp = data.get("critical_path") or []
     if cp:
         chain = []
         for task_id in cp:
             target = index.get(task_id)
             if target and target.get("issue"):
-                chain.append("#%s %s" % (flat(target["issue"]), STATE_ICON[target["state"]]))
+                chain.append("#%s" % flat(target["issue"]))
             elif target:
-                chain.append("%s %s" % (flat(task_id), STATE_ICON[target["state"]]))
+                chain.append(flat(task_id))
             else:
                 chain.append("%s ⚠" % flat(task_id))
         out.append("**Critical path:** %s" % " → ".join(chain))
-        out.append("")
-
-    actionable = []
-    for phase in data["phases"]:
-        for task in phase["tasks"]:
-            if task["state"] != "open" or not task.get("issue"):
-                continue
-            if task.get("unknown_deps"):
-                continue  # an unresolvable dep cannot be shown closed — never call it actionable
-            blockers = [index[d] for d in task.get("_dep_ids", []) if d in index]
-            if all(b["state"] == "closed" for b in blockers):
-                actionable.append("#%s" % flat(task["issue"]))
-    if actionable:
-        out.append("**Next actionable** — open, every dependency closed: %s" % ", ".join(actionable))
         out.append("")
 
     deferred = data.get("deferred") or []
@@ -350,8 +325,8 @@ def render(data):
                                                   cell(row.get("why", "—")), cell(row.get("revisit", "—"))))
         out.append("")
 
-    out.append("<sub>Rendered by `/plan-to-issues` — refresh with `/plan-to-issues sync %s`</sub>"
-               % flat(data["epic"]))
+    out.append("<sub>Plan map rendered %s by `/plan-to-issues` — re-render after filing more issues "
+               "with `/plan-to-issues sync %s`</sub>" % (flat(data["synced"]), flat(data["epic"])))
     out.append(END)
     return "\n".join(out) + "\n"
 
