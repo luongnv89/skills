@@ -9,11 +9,14 @@ improved, summarised, or filled in from the codebase.
 | Shape | Produced by | Task heading | Phases come from |
 |---|---|---|---|
 | `MODERNIZATION_PLAN.md` | `/codebase-modernizer` | `#### Task <id>:` (H4) | `## Phase <id> — <title>` headings |
-| `tasks.md` / `tasks/*.md` | `/tasks-generator` | `### Task <id>:` (H3) | the `Phase` column of the Sprint Overview table |
+| `tasks.md` / one `tasks/*.md` | `/tasks-generator` | `### Task <id>:` (H3) | the `Phase` column of the Sprint Overview table |
 
 Both carry the same task block — id, title, Description, Acceptance Criteria, Dependencies, Effort —
 which is why one skill covers them. Match the task heading as `^#{3,4} Task <id>:`; matching only H4
 silently parses a `/tasks-generator` plan as empty.
+
+One run parses one file. A `tasks/` directory is resolved to a single `*.md` by Plan discovery
+(SKILL.md → *Mode selection*) before parsing starts, so every command here takes one `"$PLAN"`.
 
 A file with no task heading is not a plan — stop with the "No plan file found" error rather than
 parsing prose.

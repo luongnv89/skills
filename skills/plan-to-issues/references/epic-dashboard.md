@@ -14,8 +14,8 @@ The dashboard lives between two markers, and **only the region between them is e
 ```
 
 Immediately above the sentinels sits the **plan-binding marker**, written by the bind step that runs
-immediately after the epic is created (SKILL.md Phase 3, step 4) — before the first child issue is
-filed:
+immediately after the epic is created (`references/epic-identity.md` step 4) — before the first child
+issue is filed:
 
 ```text
 <!-- plan-to-issues:plan=MODERNIZATION_PLAN.md -->
@@ -29,7 +29,7 @@ pair starts out empty and Phase 5 fills it.
 The marker cannot be embedded in the create call: `/issue-creator` places supplied intent text
 verbatim *in a blockquote*, so a marker sent that way arrives `> `-prefixed and mid-body. Binding is
 consequently a second edit, and the short window between create and bind is handled by recovery
-(Phase 3 step 1's adoption fallback) rather than pretended away.
+(`references/epic-identity.md` step 1's adoption fallback) rather than pretended away.
 
 An epic whose sentinel region is **empty** is a normal, expected state — a create run that has not
 reached Phase 5 yet. It is not a corrupt epic, and sync handles it (see `references/sync-mode.md`).
@@ -152,8 +152,9 @@ gh issue view <epic> --json body --jq '.body' \
   | grep -cFx -e '<!-- plan-dashboard:start -->' -e '<!-- plan-dashboard:end -->'  # 7. verify: must be 2
 ```
 
-Steps 2 and 7 use `-Fx` (whole-line, fixed-string) for the same reason SKILL.md Phase 3 does: a plan
-task titled `Document the plan-dashboard:start sentinel` is copied verbatim into the dashboard, and
+Steps 2 and 7 use `-Fx` (whole-line, fixed-string) for the same reason the completion probes in
+`references/epic-identity.md` do: a plan task titled `Document the plan-dashboard:start sentinel` is
+copied verbatim into the dashboard, and
 `flat()` collapses whitespace without stripping sentinel text. Under an unanchored `grep -c` that
 title pushes the step-2 gate to 2, which `references/sync-mode.md` turns into a hard stop — one plan
 title would permanently disable `sync` for that epic. Region replacement must likewise locate both

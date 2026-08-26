@@ -6,8 +6,6 @@ An epic is an ordinary issue that parents the others (IDD SPEC §2.1) — not a 
 identity rests on one thing: the **plan-binding marker** `<!-- plan-to-issues:plan=<plan_path> -->`.
 Everything here exists to make that marker exact, present, and singular.
 
-An epic is an ordinary issue that parents the others (IDD SPEC §2.1) — not a new artifact type.
-
 **Why this phase is recovery-based, not window-free.** Creating the epic and marking it are two API
 calls, and `/issue-creator` owns the body it writes — it places supplied intent text *verbatim, in a
 blockquote* inside its own template, so a marker embedded there arrives `> `-prefixed and mid-body,
@@ -22,29 +20,51 @@ adopts it after a confirm. Design for the interruption; do not claim it is impos
    value in step 1's filter, step 4's guard and the probes:
 
    ```bash
-   # A plan is exactly one file. `git ls-files -- <path>` is a PATHSPEC, so without this guard a
-   # directory plan (tasks/) expands to one line per file and writes a multi-line, broken marker.
-   [ -f "$plan" ] || { echo "✗ not a plan file: $plan (pass the file, e.g. tasks/tasks.md)"; exit 1; }
-   plan_path="$(git ls-files --full-name --error-unmatch -- "$plan" 2>/dev/null | head -1)"
-   if [ -z "$plan_path" ]; then                       # not tracked yet — the usual case for a
-     root="$(git rev-parse --show-toplevel)"          # freshly generated MODERNIZATION_PLAN.md
+   # A plan is exactly one file — Phase 0's discovery resolves a `tasks/` directory to one before
+   # this runs. `git ls-files -- <path>` is a PATHSPEC, so without this guard a directory would
+   # expand to one line per file and write a multi-line, broken marker.
+   [ -f "$plan" ] || { echo "✗ not a plan file: $plan"; exit 1; }   # discovery resolves tasks/ to one file
+   # -c core.quotePath=false: ls-files octal-escapes a non-ASCII name (`"PL\303\204N.md"`) and the
+   # shell fallback below does not, so without it the same plan binds two different markers
+   # depending on whether it is tracked yet — committing the plan between runs would then miss the
+   # marker and file a second epic.
+   plan_path="$(git -c core.quotePath=false ls-files --full-name --error-unmatch -- "$plan" 2>/dev/null | head -1)"
+   if [ -z "$plan_path" ]; then     # not tracked yet — the usual case for a freshly
      plan_path="$(cd "$(dirname "$plan")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$plan")")"
-     plan_path="${plan_path#"$root"/}"                # POSIX; no GNU realpath --relative-to
-   fi
+   fi                               # generated MODERNIZATION_PLAN.md
+   root="$(git rev-parse --show-toplevel)"
+   plan_path="${plan_path#"$root"/}"  # relative already on the tracked branch; POSIX, no realpath
    # `$(printf '\n')` strips the newline and would make the pattern match everything — build the
    # newline with a sacrificial character instead.
    nl="$(printf '\nx')"; nl="${nl%x}"
+   # `"` and `\` too: quotePath=false still C-quotes a name holding a control character, so those
+   # are the two branches' only remaining disagreement — reject them on both rather than let one
+   # bind `"bad\nname.md"` and the other `bad<LF>name.md`.
    case "$plan_path" in
-     ''|*/|*"$nl"*)
-       echo "✗ could not normalize the plan path to a single repo-relative file: $plan"; exit 1;;
+     ''|/*|*/|*"$nl"*|*'"'*|*'\'*)
+       echo "✗ the plan must resolve to a single file inside the repo, got: $plan"; exit 1;;
    esac
    ```
 
-   The validation is not decoration. An **empty** `plan_path` would bind every plan in the repo to
-   the same `<!-- plan-to-issues:plan= -->` marker — the exact collision this step exists to
-   prevent — and a **multi-line** one writes a two-line marker that then fails probe 1 with a count
-   of 2, hard-failing the run on a correctly-created epic. The `-f` test rejects a directory plan
-   (`tasks/`) and a path that does not exist, before either can reach the pathspec.
+   The validation is not decoration. Every rejected shape is a *different* marker for the same plan,
+   and a marker that differs by one byte files a second epic:
+
+   | Shape | What it would bind | Consequence |
+   |---|---|---|
+   | empty | `<!-- plan-to-issues:plan= -->` | every plan in the repo shares one marker — the exact collision this step exists to prevent |
+   | multi-line (`tasks/` pathspec) | a two-line marker | probe 1 counts 2, hard-failing the run on a correctly-created epic |
+   | absolute (a plan outside the repo) | `/home/<user>/checkout/plan.md` | machine-specific: another clone computes a different path, misses the marker, files a second epic — and the local layout leaks into a public issue body |
+   | octal-escaped (non-ASCII, tracked) | `"PL\303\204N.md"` | differs from the untracked form, so committing the plan between runs files a second epic |
+
+   The `-f` test rejects a directory and a path that does not exist before either reaches the
+   pathspec; `core.quotePath=false` makes the tracked and untracked branches agree byte-for-byte on
+   every ordinary name, spaces and non-ASCII included; the `/*` arm keeps `plan_path` inside the
+   repo, matching what the error message promises.
+
+   The contract the guard enforces is *not* "every path resolves" — it is **the two branches never
+   disagree silently**. A name they could still render differently (one holding a control character,
+   a `"`, or a `\`) is rejected on both, so the worst case is a loud stop, never two markers for one
+   plan. Such a name is unusable in the line-oriented marker anyway.
 
    The fallback is shell-only on purpose — BSD/macOS `realpath` has no `--relative-to`, and neither
    `realpath` nor that flag is probed in Phase 0.
@@ -110,12 +130,16 @@ adopts it after a confirm. Design for the interruption; do not claim it is impos
    while failing probe 1, so the prescribed "re-run step 4" recovery would be a permanent no-op.
 
 **Completion criteria:** `gh issue view <epic> --json number,state,labels` returns an issue whose
-`state` is `OPEN` and whose labels contain `epic` — request `state`, or the criterion asserts a
-property the probe cannot see and a **closed** epic (edge-cases.md: "user closed the old one to force
-a fresh epic") passes, sending the whole backlog into it. `state != "OPEN"` stops the run; its number is recorded for `--parent` binding; and its body carries the binding
-marker **for this plan path** plus exactly one sentinel pair. Each asserted property gets the probe
-that actually tests it — anchored to line start, so a blockquoted or indented copy fails rather than
-passing silently:
+`state` is `OPEN` and whose labels contain `epic`; that number is recorded for `--parent` binding;
+and the body carries the binding marker **for this plan path** plus exactly one sentinel pair.
+
+`state` has to be *requested*, not assumed: without it the criterion asserts a property the probe
+cannot see, and a **closed** epic — the case `references/edge-cases.md` describes as closing the old
+epic to force a fresh one — would pass and take the whole backlog with it. `state != "OPEN"` stops
+the run.
+
+Each asserted property gets the probe that actually tests it, anchored to line start so a
+blockquoted or indented copy fails rather than passing silently:
 
 ```bash
 body="$(gh issue view <epic> --json body --jq '.body')"

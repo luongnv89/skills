@@ -230,6 +230,24 @@ install line **and** the line that installs `asm` itself — assume the user has
 Name the second half only when `codebase-modernizer` is also missing. When it is installed, the
 message is the first half plus `run /codebase-modernizer first`.
 
+**The input check resolves the plan to a single file, and passing it means `[ -f "$plan" ]` holds.**
+A `tasks/` directory hit is resolved here — `tasks/tasks.md`, else the single `*.md` inside it, else
+list them and ask which (SKILL.md → *Mode selection* → *Plan discovery*). Resolve it in Phase 0, not
+later: `references/epic-identity.md` step 0 refuses anything that is not one file, and by Phase 3
+this run has already created labels. A directory that resolves to nothing, or to several files the
+user will not choose between, is a `×` on the **input** group — the same failure as no plan at all:
+
+```text
+✗ Plan directory does not resolve to a single file
+
+  tasks/ contains 4 *.md files and no tasks.md:
+    tasks/01-setup.md · tasks/02-api.md · tasks/03-ui.md · tasks/04-ship.md
+
+  To fix:  pass the one that holds the Sprint Overview table:
+
+       /plan-to-issues tasks/01-setup.md
+```
+
 ### Missing bundled file
 
 ```text

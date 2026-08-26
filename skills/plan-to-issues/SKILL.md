@@ -139,8 +139,13 @@ Resolve the mode first — each is a distinct branch.
 | `/plan-to-issues sync <epic#>` | Sync | Re-render the dashboard of epic `#N` from live issue states. Creates no issues |
 
 **Plan discovery** (Create mode, no path given), first hit wins: `MODERNIZATION_PLAN.md` at repo
-root → `docs/MODERNIZATION_PLAN.md` → a single `*PLAN*.md` at root → `tasks.md` or a `tasks/`
+root → `docs/MODERNIZATION_PLAN.md` → a single `*PLAN*.md` at root → `tasks.md` → a `tasks/`
 directory. Two or more candidates → list them and ask which. Never guess between candidates.
+
+**Discovery always resolves to one file** — including when the hit is a directory: `tasks/` means
+`tasks/tasks.md` when it exists, otherwise the single `*.md` inside it, otherwise list them and ask
+which. Phase 3 binds the epic to that path, so a directory is never the bound value, and the choice
+is made here — in Phase 0, before Phase 2 creates a label — not after the first mutation.
 
 The two plan shapes differ in heading depth and phase source; `references/plan-parsing.md` holds the
 mapping. A file with no task heading at either level is not a plan — stop.
@@ -211,22 +216,23 @@ dropped list.
 
 ### Phase 3 — Create the epic
 
-Read `references/epic-identity.md` and apply it. The contract it implements:
+Read `references/epic-identity.md` and apply it. Its steps are numbered as they are numbered there,
+so a cross-reference to "step N" means the same step in both files. The contract it implements:
 
-1. **Normalize `plan_path`** to a single repo-root-relative *file* before anything else — every later
-   comparison is an exact string match, so `X.md` and `./X.md` must not bind twice, an empty value
-   must not collapse every plan onto one marker, and a directory plan must be rejected rather than
-   pathspec-expanded into a multi-line marker.
-2. **Look for this plan's epic first**, matching the binding marker for that exact path on its own
-   line. Found → **idempotent re-run**: reuse it, file only what it does not already list.
-3. **Fall back to adoption** when an unmarked epic looks like an interrupted run of this plan — the
-   create/bind window cannot be closed (`/issue-creator` blockquotes intent text, so the marker
-   cannot ride in on the create call), so it is *recovered* instead. Adoption always **asks once**;
-   it is never silent.
-4. **Create, label, then bind** — the bind edit appends the marker and an empty sentinel pair, each
-   behind a `grep -q ||` guard so re-running it cannot duplicate either.
-5. **Verify with probes that test the stated property** — anchored and plan-path-specific, so a
-   blockquoted marker fails and an epic bound to a *different* plan is caught rather than filed into.
+0. **Normalize `plan_path`** to a single repo-root-relative *file* before anything else — every later
+   comparison is an exact string match, so `X.md` and `./X.md` must not bind twice, and an empty,
+   multi-line, absolute, or octal-escaped value must not become a second marker for the same plan.
+1. **Look for this plan's epic first**, matching the binding marker for that exact path on its own
+   line. Found → **idempotent re-run**: reuse it, file only what it does not already list. Falls back
+   to **adoption** when an unmarked epic looks like an interrupted run of this plan — the create/bind
+   window cannot be closed (`/issue-creator` blockquotes intent text, so the marker cannot ride in on
+   the create call), so it is *recovered* instead. Adoption always **asks once**; it is never silent.
+2. **Create the epic** through `/issue-creator`, with no marker in the intent text.
+3. **Apply the `epic` label** and record the number.
+4. **Bind** — the bind edit appends the marker and an empty sentinel pair, each behind a `grep -q ||`
+   guard so re-running it cannot duplicate either. Then **verify with probes that test the stated
+   property** — anchored and plan-path-specific, so a blockquoted marker fails and an epic bound to a
+   *different* plan is caught rather than filed into.
 
 **Completion criteria:** the epic is `OPEN`, carries the `epic` label, its number is recorded for
 `--parent` binding, and its body holds exactly one binding marker for this plan path and exactly one
@@ -380,8 +386,8 @@ Three change the main path; the rest are catalogued in `references/edge-cases.md
 `--phase` filtering, rate limits, deferred findings, unknown dependency ids, foreign epics,
 non-GitHub remotes, archived repos, multi-account `gh`, read-only permission).
 
-- **Epic already exists** — reuse it (Phase 3, step 1). Never create a second epic for a plan, and
-  never re-parent existing children.
+- **Epic already exists** — reuse it (`references/epic-identity.md` step 1). Never create a second
+  epic for a plan, and never re-parent existing children.
 - **Rate limited mid-batch** — re-run Create mode. **Idempotent re-run** skips what landed and files
   the rest; nothing is duplicated.
 - **> 100 tasks** — print the count and confirm before filing. GitHub's secondary content-creation

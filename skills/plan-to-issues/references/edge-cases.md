@@ -11,8 +11,9 @@ else lives here. Read this when a run hits something unusual.
   unattended 100+ batch unreliable.
 - **Rate limited mid-batch** — `/issue-creator` retries with backoff and reports per item. Re-run
   Create mode: **idempotent re-run** skips what landed and files the rest.
-- **Epic already exists** — reuse it (Phase 3, step 1). If the user wants a fresh epic, they close
-  the old one first; this skill never orphans children by silently re-parenting.
+- **Epic already exists** — reuse it (`references/epic-identity.md` step 1). If the user wants a
+  fresh epic, they close the old one first; this skill never orphans children by silently
+  re-parenting.
 - **Deferred findings** — the plan's Deferred table is rendered in the dashboard as a table. Deferred
   work is a decision, not a backlog item: no issues are filed for it.
 - **Plan file deleted before a sync** — sync still refreshes states from the tracker and notes

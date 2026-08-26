@@ -44,13 +44,13 @@ SPEC §2.1. Then `gh issue edit <epic> --add-label epic`.
 
 **Do not put the plan-binding marker in the intent text.** `/issue-creator` reproduces intent text
 verbatim *in a blockquote* as Reporter Context, so a marker placed there arrives `> `-prefixed and
-mid-body — not a usable body marker. The epic is bound by a separate edit immediately after
-creation (SKILL.md Phase 3 step 4), which appends the marker and an empty sentinel pair, each guarded
-by a `grep -q ||` so re-running cannot duplicate them.
+mid-body — not a usable body marker. The epic is bound by a separate edit immediately after creation
+(`references/epic-identity.md` step 4), which appends the marker and an empty sentinel pair, each
+guarded by a `grep -q ||` so re-running cannot duplicate them.
 
 Binding is **not optional and not deferrable**: an epic left unbound is one the next run cannot
-recognise, and it files a second epic. Follow SKILL.md Phase 3 steps 2-4 in full — including the
-post-create verification — rather than stopping at the label.
+recognise, and it files a second epic. Follow `references/epic-identity.md` steps 2-4 in full —
+including its completion probes — rather than stopping at the label.
 
 ## Step 2 — One batch document per phase
 
