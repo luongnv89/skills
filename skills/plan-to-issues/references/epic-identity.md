@@ -28,7 +28,10 @@ adopts it after a confirm. Design for the interruption; do not claim it is impos
    # shell fallback below does not, so without it the same plan binds two different markers
    # depending on whether it is tracked yet — committing the plan between runs would then miss the
    # marker and file a second epic.
-   plan_path="$(git -c core.quotePath=false ls-files --full-name --error-unmatch -- "$plan" 2>/dev/null | head -1)"
+   # `:(literal)` turns pathspec magic off: a plan name holding `*`, `?` or `[` is otherwise a glob,
+   # so `p?.md` would bind whatever tracked file it happens to match (`p0.md`) while the untracked
+   # branch below binds `p?.md` — the silent disagreement this step exists to prevent.
+   plan_path="$(git -c core.quotePath=false ls-files --full-name --error-unmatch -- ":(literal)$plan" 2>/dev/null | head -1)"
    if [ -z "$plan_path" ]; then     # not tracked yet — the usual case for a freshly
      plan_path="$(cd "$(dirname "$plan")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$plan")")"
    fi                               # generated MODERNIZATION_PLAN.md

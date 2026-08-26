@@ -48,6 +48,16 @@ def require(cond, msg, hint=None):
 SCALAR = (str, int, float)
 
 
+def is_scalar(value):
+    """A JSON scalar that renders as text.
+
+    `bool` subclasses `int`, so a bare `isinstance(value, SCALAR)` admits JSON `true`/`false` and the
+    renderer writes a Python repr — `True` — straight into the epic body. Both scalar checks route
+    through here so neither can drift.
+    """
+    return isinstance(value, SCALAR) and not isinstance(value, bool)
+
+
 def require_list(value, path):
     """Require a list-or-absent whose entries are all scalars.
 
@@ -58,12 +68,12 @@ def require_list(value, path):
             "%s must be a list, got %s" % (path, type(value).__name__),
             "see references/epic-dashboard.md -> Render input schema")
     for n, entry in enumerate(value or []):
-        require(isinstance(entry, SCALAR),
+        require(is_scalar(entry),
                 "%s[%d] must be a string, got %s" % (path, n, type(entry).__name__))
 
 
 def require_scalar(value, path, allow_none=False):
-    require((value is None and allow_none) or isinstance(value, SCALAR),
+    require((value is None and allow_none) or is_scalar(value),
             "%s must be a string, got %s" % (path, type(value).__name__),
             "see references/epic-dashboard.md -> Render input schema")
 

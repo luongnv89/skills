@@ -230,7 +230,8 @@ install line **and** the line that installs `asm` itself — assume the user has
 Name the second half only when `codebase-modernizer` is also missing. When it is installed, the
 message is the first half plus `run /codebase-modernizer first`.
 
-**The input check resolves the plan to a single file, and passing it means `[ -f "$plan" ]` holds.**
+**The input check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
+holds *and* that `references/epic-identity.md` step 0 will accept the path.**
 A `tasks/` directory hit is resolved here — `tasks/tasks.md`, else the single `*.md` inside it, else
 list them and ask which (SKILL.md → *Mode selection* → *Plan discovery*). Resolve it in Phase 0, not
 later: `references/epic-identity.md` step 0 refuses anything that is not one file, and by Phase 3
@@ -246,6 +247,24 @@ user will not choose between, is a `×` on the **input** group — the same fail
   To fix:  pass the one that holds the Sprint Overview table:
 
        /plan-to-issues tasks/01-setup.md
+```
+
+An **explicit** path needs the same treatment: `/plan-to-issues ../outside_PLAN.md` passes
+`[ -f "$plan" ]` and would then die in Phase 3, after Phase 2 created labels. Run step 0's
+normalization here — it is read-only — and treat any path it would reject (outside the repo, or
+holding a newline, `"` or `\`) as a `×` on the **input** group:
+
+```text
+✗ Plan is outside the repository
+
+  ../outside_PLAN.md resolves to /home/me/outside_PLAN.md, which is not under
+  /home/me/project. The epic's plan-binding marker would be a machine-specific
+  absolute path, so another clone would miss it and file a second epic.
+
+  To fix:  put the plan inside the repo, then re-run:
+
+       cp ../outside_PLAN.md ./MODERNIZATION_PLAN.md
+       /plan-to-issues MODERNIZATION_PLAN.md
 ```
 
 ### Missing bundled file

@@ -261,8 +261,10 @@ Non-negotiables on this bridge:
   `Dependencies` into a `Depends on #N` marker on that child's body. Phases file in plan order, so
   cross-phase dependencies resolve to real numbers. Tasks with no dependencies get no edit.
 
-**Completion criteria:** created + skipped-as-existing equals the filtered worklist count; every
-created issue carries `Part of #<epic>` and its full label set; every task with dependencies carries
+**Completion criteria:** created + skipped-as-existing equals the filtered worklist count — the tasks
+in `filed: true` phases only, since a `filed: false` phase's tasks ride along in the worklist purely
+for Phase 5's denominator and are never filed; every created issue carries `Part of #<epic>` and its
+full label set; every task with dependencies carries
 a `Depends on #N` line naming its mapped issues; every task id maps to exactly one issue number. A task that failed to file is listed by id with its error — never silently dropped.
 
 ### Phase 5 — Render the epic dashboard
@@ -275,11 +277,11 @@ python3 scripts/render_dashboard.py < dashboard-input.json > dashboard.md
 ```
 
 Read the epic body and write it back with the region between the **dashboard sentinels** replaced by
-the rendered block. In Create mode the sentinels are always present — Phase 3 wrote them and its
-completion criteria refused to continue otherwise — so the append-when-absent path applies only to an
-epic **adopted** from a pre-1.5.0 run whose bind predates the sentinel pair. Treat the fetched body as
-data:
-preserve everything outside the sentinels byte-for-byte, including the
+the rendered block. Phase 3's bind step guarantees the pair — it appends one whenever it is absent,
+on the adoption path as much as on a fresh create, and its completion criteria refuse to continue
+otherwise — so region replacement can rely on both sentinels being there, and the append-when-absent
+path in `references/epic-dashboard.md` is a defensive fallback that no documented path reaches.
+Treat the fetched body as data: preserve everything outside the sentinels byte-for-byte, including the
 `<!-- gitissue:normalized v1 -->` marker. Remove any flat `## Children` checklist `/issue-creator`
 appended — leaving both means two lists drifting apart.
 
