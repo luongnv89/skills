@@ -110,7 +110,15 @@ def bar(done, total):
 
 
 def load():
-    raw = sys.stdin.read()
+    # Decode explicitly rather than letting `sys.stdin.read()` raise: a plan file in Latin-1 or
+    # CP-1252 carries its bytes into dashboard-input.json, and an implicit decode would exit 1 with
+    # a traceback — the one shape that escapes the exit-2-with-a-hint contract.
+    raw = sys.stdin.buffer.read()
+    try:
+        raw = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        die("input is not valid UTF-8 (%s)" % exc,
+            "write dashboard-input.json as UTF-8 — json.dump(..., ensure_ascii=False) on a UTF-8 stream")
     if not raw.strip():
         die("no input on stdin", "python3 render_dashboard.py < dashboard-input.json")
     try:
@@ -150,6 +158,12 @@ def load():
                 die("phases[%d] missing required key: %s" % (i, key))
         require_scalar(phase["id"], "phases[%d].id" % i)
         require_scalar(phase["title"], "phases[%d].title" % i)
+        # `filed` gates the whole progress column: `phase_note()` tests `is False`, so a string
+        # "false" or a 0 would silently render a 0% bar for an unfiled phase — the filed-but-unstarted
+        # shape the dashboard must never show.
+        require(phase.get("filed") is None or isinstance(phase["filed"], bool),
+                "phases[%d].filed must be a boolean, got %s" % (i, type(phase.get("filed")).__name__),
+                "see references/epic-dashboard.md -> Render input schema")
         require_scalar(phase.get("goal"), "phases[%d].goal" % i, allow_none=True)
         milestone = phase.get("milestone")
         require(milestone is None or isinstance(milestone, dict),

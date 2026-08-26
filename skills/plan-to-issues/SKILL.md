@@ -261,10 +261,8 @@ Non-negotiables on this bridge:
   `Dependencies` into a `Depends on #N` marker on that child's body. Phases file in plan order, so
   cross-phase dependencies resolve to real numbers. Tasks with no dependencies get no edit.
 
-**Completion criteria:** created + skipped-as-existing equals the filtered worklist count — the tasks
-in `filed: true` phases only, since a `filed: false` phase's tasks ride along in the worklist purely
-for Phase 5's denominator and are never filed; every created issue carries `Part of #<epic>` and its
-full label set; every task with dependencies carries
+**Completion criteria:** created + skipped-as-existing equals the filtered worklist count; every
+created issue carries `Part of #<epic>` and its full label set; every task with dependencies carries
 a `Depends on #N` line naming its mapped issues; every task id maps to exactly one issue number. A task that failed to file is listed by id with its error — never silently dropped.
 
 ### Phase 5 — Render the epic dashboard
@@ -288,13 +286,13 @@ appended — leaving both means two lists drifting apart.
 **Completion criteria:** the renderer exited 0; re-reading the epic body shows both sentinels
 exactly once; and every filed issue appears exactly once, under its own phase.
 
-On counts, assert what the renderer actually emits. The **overall** denominator is the full worklist
-task count — filtered-out phases included — because unfiled tasks (`issue: null`, rendered
-`(not filed)`) still count, so a task missing from the tracker cannot read as done. The **per-phase**
-denominators do *not* sum to it: a `filed: false` phase renders `— not filed` with no `n/m` at all,
-so they sum to the total minus the tasks in unfiled phases. Both readings are correct; do not
-reconcile them arithmetically. A `--phase P0` run over a 5-task plan with 2 tasks in P0 shows
-per-phase `1/2` and overall `1/5`.
+On counts, assert what the renderer actually emits. A phase excluded by `--phase` is emitted with an
+empty `tasks` array (`agents/plan-parser.md`), so it contributes nothing to either denominator: it
+renders `— not filed` in the phase table with no `n/m`, and the **overall** denominator covers the
+filed phases only. The per-phase counts therefore *do* sum to the overall one. A `--phase P0` run
+over a 5-task plan with 2 tasks in P0 shows per-phase `1/2` and overall `1/2` — the excluded phases
+are visible in the table as `— not filed`, which is what keeps the dashboard honest about them, not
+a denominator they are absent from.
 
 ### Phase 6 — Verify and report
 

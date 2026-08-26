@@ -22,11 +22,8 @@ it for severities) and nothing else.
 ```
 
 `report_path` may be absent or point at a missing file. `phase_filter` may be absent, meaning all
-phases. Filtered-out phases are still emitted **with their full `tasks` array**, marked
-`"filed": false`, every task in them carrying `"issue": null` — a phase missing from the output reads
-downstream as "no work here", and an empty `tasks` array understates the whole-plan denominator the
-same way. `"filed": false` is the only thing that keeps Phase 4 from filing those tasks; they are
-carried so the dashboard's overall count covers the whole plan.
+phases. Filtered-out phases are still emitted, with `"filed": false` and an empty `tasks` array — a
+phase missing from the output reads downstream as "no work here".
 
 ## Procedure
 
@@ -69,8 +66,7 @@ prose, no fences. `labels` is filled by the caller; omit it.
 Run these and include the results in `parse_check`. Report a mismatch; do not round it off.
 
 ```bash
-grep -cE '^#{3,4} Task '      "$PLAN"                        # equals your task count — a
-                                                             # `phase_filter` never reduces it
+grep -cE '^#{3,4} Task '      "$PLAN"                        # equals your task count
 grep -oE '^#{3,4} Task [^:]*' "$PLAN" | sort | uniq -d       # empty: no duplicate task ids
 grep -cE '^## Phase '         "$PLAN"                        # equals your phase count when phase_source is "headings"
 ```
