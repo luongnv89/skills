@@ -73,11 +73,15 @@ an already-bound variable *sourced from parsed data*, never retyped:
 ```bash
 # read the value out of the worklist — the shell never sees the plan text as syntax
 title="$(jq -r --arg id "$task_id" 'first(.phases[].tasks[] | select(.task_id == $id)) | "\($id): \(.title)"' worklist.json)"
+[ -n "$title" ] || { echo "✗ no task $task_id in worklist — refusing to blank the title"; exit 1; }
 gh issue edit <n> --title "$title"          # "$title" is not re-expanded
 ```
 
 The distinction that matters: `$(jq …)` **reads** the value at runtime; a literal is **parsed** by
 the shell. Only the first is safe for untrusted text.
+
+The emptiness check is not optional: `first(…)` over a non-matching id yields nothing at exit 0, and
+`gh issue edit --title ""` would **blank** the issue title rather than fail.
 
 The same rule governs markdown: `scripts/render_dashboard.py` escapes `|` and collapses newlines in
 every plan-derived string, so a plan title cannot break the dashboard table out of its column or
