@@ -243,8 +243,9 @@ message is the first half plus `run /codebase-modernizer first`.
 
 Check all of these relative to this SKILL.md's directory before running anything:
 `references/preflight.md`, `references/plan-parsing.md`, `references/labels.md`,
-`references/issue-creator-bridge.md`, `references/epic-dashboard.md`, `references/sync-mode.md`,
-`references/edge-cases.md`, `agents/plan-parser.md`, `scripts/render_dashboard.py`.
+`references/issue-creator-bridge.md`, `references/epic-identity.md`, `references/epic-dashboard.md`,
+`references/sync-mode.md`, `references/edge-cases.md`, `agents/plan-parser.md`,
+`scripts/render_dashboard.py`.
 
 This list is the authoritative guard — it must name **every** bundled file the skill loads at
 runtime, including the ones only one mode reaches (`sync-mode.md` for `sync`, `edge-cases.md` for
@@ -297,7 +298,7 @@ On success, one line per check, then continue:
   Repo writable:      √ pass (luongnv89/skills · issues on · ADMIN)
   API budget:         √ pass (4905 remaining, ~220 needed)
   Skills installed:   √ pass (issue-creator 0.8.0)
-  Bundled files:      √ pass (9/9)
+  Bundled files:      √ pass (10/10)
   Plan located:       √ pass (MODERNIZATION_PLAN.md — 50 tasks, 6 phases)
   ____________________________
   Result:             PASS

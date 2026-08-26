@@ -143,13 +143,22 @@ output stays reproducible.
 
 ```bash
 gh issue view <epic> --json body --jq '.body' > epic-body.md          # 1. fetch
-grep -c 'plan-dashboard:start' epic-body.md                           # 2. gate: must be 1
+grep -cFx '<!-- plan-dashboard:start -->' epic-body.md                # 2. gate: must be 1
 grep -oE '^- \[[ x]\] #[0-9]+ — [A-Za-z0-9.]+' epic-body.md          # 3. children + task ids
 gh issue list --state all --limit 500 --json number,state,title       # 4. live states, one call
 python3 scripts/render_dashboard.py < dashboard-input.json            # 5. re-render
 gh issue edit <epic> --body-file epic-body-updated.md                 # 6. write back
-gh issue view <epic> --json body --jq '.body' | grep -c 'plan-dashboard'  # 7. verify: must be 2
+gh issue view <epic> --json body --jq '.body' \
+  | grep -cFx -e '<!-- plan-dashboard:start -->' -e '<!-- plan-dashboard:end -->'  # 7. verify: must be 2
 ```
+
+Steps 2 and 7 use `-Fx` (whole-line, fixed-string) for the same reason SKILL.md Phase 3 does: a plan
+task titled `Document the plan-dashboard:start sentinel` is copied verbatim into the dashboard, and
+`flat()` collapses whitespace without stripping sentinel text. Under an unanchored `grep -c` that
+title pushes the step-2 gate to 2, which `references/sync-mode.md` turns into a hard stop — one plan
+title would permanently disable `sync` for that epic. Region replacement must likewise locate both
+sentinels as whole lines (first `start`, last `end`), or a title could place a forged `:end` before
+the real one and truncate the epic body.
 
 Anchor step 3 to the checklist grammar — an unanchored `#[0-9]+ — [A-Za-z0-9.]+` matches mid-line, so
 a plan task whose *title* cites an issue (`Harmless title #999 — 9.9 phantom child`) would inject a

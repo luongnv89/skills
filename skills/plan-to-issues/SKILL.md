@@ -211,104 +211,26 @@ dropped list.
 
 ### Phase 3 — Create the epic
 
-An epic is an ordinary issue that parents the others (IDD SPEC §2.1) — not a new artifact type.
+Read `references/epic-identity.md` and apply it. The contract it implements:
 
-**Why this phase is recovery-based, not window-free.** Creating the epic and marking it are two API
-calls, and `/issue-creator` owns the body it writes — it places supplied intent text *verbatim, in a
-blockquote* inside its own template, so a marker embedded there arrives `> `-prefixed and mid-body,
-where it is not a usable body marker. The marker therefore cannot ride in on the create call, and
-there is no atomic create-with-marker. Between step 2 and step 4 the epic exists unmarked. That
-window cannot be closed, so it is made **recoverable**: step 1's fallback finds the unmarked epic and
-adopts it after a confirm. Design for the interruption; do not claim it is impossible.
+1. **Normalize `plan_path`** to a single repo-root-relative *file* before anything else — every later
+   comparison is an exact string match, so `X.md` and `./X.md` must not bind twice, an empty value
+   must not collapse every plan onto one marker, and a directory plan must be rejected rather than
+   pathspec-expanded into a multi-line marker.
+2. **Look for this plan's epic first**, matching the binding marker for that exact path on its own
+   line. Found → **idempotent re-run**: reuse it, file only what it does not already list.
+3. **Fall back to adoption** when an unmarked epic looks like an interrupted run of this plan — the
+   create/bind window cannot be closed (`/issue-creator` blockquotes intent text, so the marker
+   cannot ride in on the create call), so it is *recovered* instead. Adoption always **asks once**;
+   it is never silent.
+4. **Create, label, then bind** — the bind edit appends the marker and an empty sentinel pair, each
+   behind a `grep -q ||` guard so re-running it cannot duplicate either.
+5. **Verify with probes that test the stated property** — anchored and plan-path-specific, so a
+   blockquoted marker fails and an epic bound to a *different* plan is caught rather than filed into.
 
-0. **Normalize `plan_path` first.** Every later comparison is an exact string match, so a plan bound
-   once as `MODERNIZATION_PLAN.md` and once as `./MODERNIZATION_PLAN.md` would write two markers and
-   then hard-fail its own completion check. Resolve to a single repo-root-relative form and use *that*
-   value in step 1's filter, step 4's guard and the probes:
-
-   ```bash
-   plan_path="$(git ls-files --full-name -- "$plan")"
-   [ -n "$plan_path" ] || plan_path="$(realpath --relative-to="$(git rev-parse --show-toplevel)" "$plan")"
-   ```
-
-1. **Check for an existing epic first** — fetch and filter locally, since GitHub's search tokenizer
-   is unreliable on markers. Request every field the filters below need — they cost nothing on the
-   same call, and `labels`/`state`/`createdAt` are what the fallback reads:
-
-   ```bash
-   gh issue list --state all --limit 200 --json number,title,body,labels,state,createdAt
-   ```
-
-   Filter on the **plan-binding marker** for this exact plan path —
-   `<!-- plan-to-issues:plan=<plan_path> -->`, matched as a fixed string on its own line. An epic
-   carrying it is *this plan's* epic: switch to **idempotent re-run** — reuse it, skip creation, and
-   file only the tasks it does not already list. Never create a second epic for the same plan.
-
-   Match on the binding marker, **not** on the `plan-dashboard:start` sentinel: the sentinel carries
-   no plan path, so it cannot tell *this* plan's epic from another plan's epic in the same repo.
-   (Both are written by step 4, so neither is "the later one".)
-
-   **Fallback — an unmarked epic.** A run interrupted between step 2 and step 4, or a pre-1.5.0 run,
-   leaves an epic with no marker. Before concluding that none exists, scan the same fetched list for
-   an **open issue that carries no `plan-to-issues:plan=` marker at all** and either has the `epic`
-   label **or** whose title equals the `Epic: Modernize <project> — …` title this run would create.
-   The title clause matters: the `epic` label is applied in step 3, so an interruption between the
-   create and the label leaves an epic the label filter alone would miss. Do not require the body to
-   name the plan path — an epic interrupted before Phase 5 has an empty dashboard and may never
-   mention it. Do not adopt silently; show what is known and **ask once**:
-
-   ```text
-   ⚠ #142 "Epic: Modernize acme — Pre + P0–P4"  (epic label, no plan binding)
-       created 2026-08-26 14:02 · 0 child issues · no dashboard
-
-     This looks like an interrupted run of this plan. Adopt it? [Y/n]
-     (declining creates a new epic; #142 is left untouched)
-   ```
-
-   On adoption, run step 4 to bind it, then continue as an idempotent re-run. If several unmarked
-   epics match, list them all and ask which — never guess.
-2. Otherwise invoke `/issue-creator` in Create mode with the epic intent text built from the plan
-   header: project name, baseline verdict, test command of record, the phase table, and the
-   milestone exit conditions as the epic's acceptance criteria (they describe the whole-effort
-   outcome). Title: `Epic: Modernize <project> — Pre + P0–P4`. Do **not** put the marker in the
-   intent text; it would be blockquoted into Reporter Context.
-3. Apply the `epic` label and record the number as `<epic>`.
-4. **Bind the epic — before filing a single child issue.** Append the plan-binding marker and an
-   empty sentinel pair. Each piece is appended only if absent, so re-running this step (or reaching
-   it via the adoption path on an epic that already has a sentinel pair) cannot produce a duplicate:
-
-   ```bash
-   gh issue view <epic> --json body --jq '.body' > epic-body.md
-   grep -qFx "<!-- plan-to-issues:plan=$plan_path -->" epic-body.md \
-     || printf '\n<!-- plan-to-issues:plan=%s -->\n' "$plan_path" >> epic-body.md
-   grep -q '^<!-- plan-dashboard:start -->$' epic-body.md \
-     || printf '<!-- plan-dashboard:start -->\n<!-- plan-dashboard:end -->\n' >> epic-body.md
-   gh issue edit <epic> --body-file epic-body.md
-   ```
-
-   The guards are what make this idempotent — the prose does not make it so, the `grep -q ||` does.
-   Both use `-x` (whole line), matching the completion probes exactly. That is deliberate: with an
-   unanchored `-qF`, a marker that exists but is **blockquoted** or indented would satisfy the guard
-   while failing probe 1, so the prescribed "re-run step 4" recovery would be a permanent no-op.
-
-**Completion criteria:** `gh issue view <epic> --json number,labels` returns an open issue carrying
-the `epic` label; its number is recorded for `--parent` binding; and its body carries the binding
-marker **for this plan path** plus exactly one sentinel pair. Each asserted property gets the probe
-that actually tests it — anchored to line start, so a blockquoted or indented copy fails rather than
-passing silently:
-
-```bash
-body="$(gh issue view <epic> --json body --jq '.body')"
-printf '%s\n' "$body" | grep -cFx "<!-- plan-to-issues:plan=$plan_path -->"  # must be 1 — this plan
-printf '%s\n' "$body" | grep -c  '^<!-- plan-to-issues:plan='                # must be 1 — no foreign binding
-printf '%s\n' "$body" | grep -cFx '<!-- plan-dashboard:start -->'             # must be 1 — pair opened once
-printf '%s\n' "$body" | grep -cFx '<!-- plan-dashboard:end -->'               # must be 1 — pair closed once
-```
-
-Probe 1 at 0 means the marker is absent or wrapped (`/issue-creator` reordered the body, or it landed
-in a blockquote) — re-run step 4 and re-verify. Probe 2 above 1, or probe 1 at 0 while probe 2 is 1,
-means the epic is bound to a **different plan**: **stop**, rather than filing this plan's children
-into another plan's epic. Any sentinel count other than 1 means the body was hand-edited; **stop**.
+**Completion criteria:** the epic is `OPEN`, carries the `epic` label, its number is recorded for
+`--parent` binding, and its body holds exactly one binding marker for this plan path and exactly one
+sentinel pair. `references/epic-identity.md` gives the four probes and the stop conditions.
 
 ### Phase 4 — File the issues, one batch per phase
 
@@ -356,10 +278,15 @@ preserve everything outside the sentinels byte-for-byte, including the
 appended — leaving both means two lists drifting apart.
 
 **Completion criteria:** the renderer exited 0; re-reading the epic body shows both sentinels
-exactly once; every filed issue appears exactly once, under its own phase; and the per-phase counts
-sum to the **worklist task count in scope** — *not* to the filed count. The denominators deliberately
-include tasks that were never filed (`issue: null`, rendered `(not filed)`), so a task missing from
-the tracker cannot read as done; a plan with 7 in-scope tasks and 6 filed still shows `/7`.
+exactly once; and every filed issue appears exactly once, under its own phase.
+
+On counts, assert what the renderer actually emits. The **overall** denominator is the full worklist
+task count — filtered-out phases included — because unfiled tasks (`issue: null`, rendered
+`(not filed)`) still count, so a task missing from the tracker cannot read as done. The **per-phase**
+denominators do *not* sum to it: a `filed: false` phase renders `— not filed` with no `n/m` at all,
+so they sum to the total minus the tasks in unfiled phases. Both readings are correct; do not
+reconcile them arithmetically. A `--phase P0` run over a 5-task plan with 2 tasks in P0 shows
+per-phase `1/2` and overall `1/5`.
 
 ### Phase 6 — Verify and report
 
@@ -470,6 +397,7 @@ non-GitHub remotes, archived repos, multi-account `gh`, read-only permission).
 - `references/labels.md` — label set derivation, the colour table, creation and degradation rules.
 - `references/issue-creator-bridge.md` — batch document format, per-phase invocation, Output
   Contract boundary, and the title→issue mapping and repair pass.
+- `references/epic-identity.md` — plan-path normalization, epic discovery, adoption, bind, probes.
 - `references/epic-dashboard.md` — dashboard layout, sentinels, render-input schema, sync algorithm.
 - `agents/plan-parser.md` — subagent that returns the worklist JSON for a large plan.
 - `scripts/render_dashboard.py` — deterministic dashboard renderer (stdin JSON → markdown stdout).

@@ -129,6 +129,8 @@ def load():
     for k, row in enumerate(data.get("deferred") or []):
         require(isinstance(row, dict),
                 "deferred[%d] must be a JSON object, got %s" % (k, type(row).__name__))
+        for dkey in ("id", "severity", "why", "revisit"):
+            require_scalar(row.get(dkey), "deferred[%d].%s" % (k, dkey), allow_none=True)
     for i, phase in enumerate(data["phases"]):
         if not isinstance(phase, dict):
             die("phases[%d] must be a JSON object, got %s" % (i, type(phase).__name__),
@@ -136,10 +138,16 @@ def load():
         for key in ("id", "title", "tasks"):
             if key not in phase:
                 die("phases[%d] missing required key: %s" % (i, key))
+        require_scalar(phase["id"], "phases[%d].id" % i)
+        require_scalar(phase["title"], "phases[%d].title" % i)
+        require_scalar(phase.get("goal"), "phases[%d].goal" % i, allow_none=True)
         milestone = phase.get("milestone")
         require(milestone is None or isinstance(milestone, dict),
                 "phases[%d].milestone must be a JSON object, got %s"
                 % (i, type(milestone).__name__))
+        for mkey in ("id", "exit"):
+            require_scalar((milestone or {}).get(mkey),
+                           "phases[%d].milestone.%s" % (i, mkey), allow_none=True)
         if not isinstance(phase["tasks"], list):
             die("phases[%d].tasks must be a list, got %s" % (i, type(phase["tasks"]).__name__),
                 "use [] for a phase with no tasks — see references/epic-dashboard.md -> Render input schema")
