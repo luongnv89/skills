@@ -122,7 +122,10 @@ def load():
     require_issue_number(data["epic"], "epic")
     require_scalar(data.get("baseline"), "baseline", allow_none=True)
     require_list(data.get("critical_path"), "critical_path")
-    require_list(data.get("deferred"), "deferred")
+    # `deferred` rows are objects, not scalars — check the container, then each row's shape.
+    require(data.get("deferred") is None or isinstance(data["deferred"], list),
+            "deferred must be a list, got %s" % type(data.get("deferred")).__name__,
+            "see references/epic-dashboard.md -> Render input schema")
     for k, row in enumerate(data.get("deferred") or []):
         require(isinstance(row, dict),
                 "deferred[%d] must be a JSON object, got %s" % (k, type(row).__name__))
