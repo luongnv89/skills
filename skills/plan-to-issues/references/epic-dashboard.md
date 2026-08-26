@@ -13,10 +13,22 @@ The dashboard lives between two markers, and **only the region between them is e
 <!-- plan-dashboard:end -->
 ```
 
-Everything outside them — `/issue-creator`'s `<!-- gitissue:normalized v1 -->` marker, the epic's
-Description, Reporter Context, Acceptance Criteria, Metadata — is preserved byte-for-byte. Absent
-sentinels mean: in Phase 5, append the block at the end of the body; in Sync mode, **stop** (the
-issue is not this skill's epic).
+Immediately above the sentinels sits the **plan-binding marker**, written when the epic is created
+(SKILL.md Phase 3, step 4) — before the first child issue is filed:
+
+```text
+<!-- plan-to-issues:plan=MODERNIZATION_PLAN.md -->
+```
+
+It is what makes an epic discoverable on a re-run. The sentinels alone cannot do that job: they carry
+no plan path, and a run interrupted during Phase 4 would have written neither if they were deferred
+to Phase 5. Both are therefore written up front — the sentinel pair starts out empty and Phase 5
+fills it.
+
+Everything outside the sentinels — the binding marker, `/issue-creator`'s
+`<!-- gitissue:normalized v1 -->` marker, the epic's Description, Reporter Context, Acceptance
+Criteria, Metadata — is preserved byte-for-byte. Absent sentinels mean: in Phase 5, append the block
+at the end of the body; in Sync mode, **stop** (the issue is not this skill's epic).
 
 Remove any flat `## Children` checklist `/issue-creator` appended when binding the batch. The
 dashboard supersedes it; two checklists of the same children drift within a week.

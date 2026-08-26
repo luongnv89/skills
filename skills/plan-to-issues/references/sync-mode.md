@@ -15,9 +15,10 @@ nothing and edits exactly one body. Run the reduced preflight first (Phase 0 —
 4. Re-parse the plan when it is still present, to detect **unmapped** plan tasks added since the
    last run. List them under `Not filed` in the dashboard and print the create-mode hint. Sync never
    files them itself.
-5. Re-render and write back between the sentinels, exactly as Phase 5.
+5. Re-render and write back between the sentinels, exactly as Phase 5. The plan-binding marker sits
+   outside the sentinels and is preserved byte-for-byte like the rest of the body.
 
 **Completion criteria:** every child number in the old dashboard appears in the new one with a state
 of open, closed, or `⚠ missing`; per-phase and overall counts recomputed; the `Last synced` date
-updated; the region outside the sentinels is unchanged.
+updated; the region outside the sentinels — the plan-binding marker included — is unchanged.
 

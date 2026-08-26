@@ -117,6 +117,19 @@
         "The Preflight report shows a `⚠` row for the degraded check, and the final report repeats it",
         "API budget is checked against the task count before any issue is created"
       ]
+    },
+    {
+      "id": 10,
+      "kind": "edge",
+      "prompt": "File only the first two phases of MODERNIZATION_PLAN.md as issues — I'm not ready to commit to the rest yet.",
+      "expected_output": "Only tasks in the named phases are filed, but the dashboard still lists every phase in the plan, with the unfiled ones marked `— not filed` rather than omitted or shown as complete.",
+      "files": [],
+      "expectations": [
+        "Only the named phases are filed; no issue is created for any task in an excluded phase",
+        "The dashboard's phase table lists every phase in the plan, not just the filed ones",
+        "Excluded phases render `— not filed` in the Progress column and `○ not started` as Status, never `✅ met` or a 0% bar that reads as filed-but-unstarted",
+        "The epic is created once and carries the plan-binding marker, so a later run filing the remaining phases reuses it instead of creating a second epic"
+      ]
     }
   ]
 }

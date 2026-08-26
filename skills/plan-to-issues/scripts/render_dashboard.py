@@ -18,6 +18,16 @@ CELLS = 10
 STATE_ICON = {"closed": "✅", "open": "○", "missing": "⚠"}
 
 
+def cell(value):
+    """Escape a value for use inside a markdown table cell.
+
+    Plan text is untrusted markdown: a phase or task title containing `|` would otherwise emit an
+    extra column and break the whole table. Newlines collapse for the same reason.
+    """
+    text = "—" if value is None else str(value)
+    return text.replace("\\", "\\\\").replace("|", "\\|").replace("\n", " ").strip() or "—"
+
+
 def die(msg, hint=None):
     sys.stderr.write("✗ render_dashboard: %s\n" % msg)
     if hint:
@@ -52,7 +62,13 @@ def load():
         for key in ("id", "title", "tasks"):
             if key not in phase:
                 die("phases[%d] missing required key: %s" % (i, key))
+        if not isinstance(phase["tasks"], list):
+            die("phases[%d].tasks must be a list, got %s" % (i, type(phase["tasks"]).__name__),
+                "use [] for a phase with no tasks — see references/epic-dashboard.md -> Render input schema")
         for j, task in enumerate(phase["tasks"]):
+            if not isinstance(task, dict):
+                die("phases[%d].tasks[%d] must be a JSON object, got %s"
+                    % (i, j, type(task).__name__))
             for key in ("task_id", "title", "state"):
                 if key not in task:
                     die("phases[%d].tasks[%d] missing required key: %s" % (i, j, key))
@@ -146,11 +162,11 @@ def render(data):
         tasks = phase["tasks"]
         pdone = sum(1 for t in tasks if t["state"] == "closed")
         ms = phase.get("milestone") or {}
-        ms_cell = "%s — %s" % (ms.get("id", "—"), ms.get("exit", "—")) if ms else "—"
+        ms_cell = "%s — %s" % (cell(ms.get("id", "—")), cell(ms.get("exit", "—"))) if ms else "—"
         note = phase_note(phase)
         progress = ("— %s" % note) if note else "%d/%d %s" % (pdone, len(tasks), bar(pdone, len(tasks)))
         out.append("| %s | %s | %s | %s |"
-                   % (phase_label(phase), progress, ms_cell, milestone_status(phase)))
+                   % (cell(phase_label(phase)), progress, ms_cell, milestone_status(phase)))
     out.append("")
 
     for phase in data["phases"]:
@@ -196,6 +212,8 @@ def render(data):
         for task in phase["tasks"]:
             if task["state"] != "open" or not task.get("issue"):
                 continue
+            if task.get("unknown_deps"):
+                continue  # an unresolvable dep cannot be shown closed — never call it actionable
             blockers = [index[d] for d in task.get("_dep_ids", []) if d in index]
             if all(b["state"] == "closed" for b in blockers):
                 actionable.append("#%s" % task["issue"])
@@ -210,8 +228,8 @@ def render(data):
         out.append("| Finding | Severity | Why deferred | Revisit when |")
         out.append("|---|---|---|---|")
         for row in deferred:
-            out.append("| %s | %s | %s | %s |" % (row.get("id", "—"), row.get("severity", "—"),
-                                                  row.get("why", "—"), row.get("revisit", "—")))
+            out.append("| %s | %s | %s | %s |" % (cell(row.get("id", "—")), cell(row.get("severity", "—")),
+                                                  cell(row.get("why", "—")), cell(row.get("revisit", "—"))))
         out.append("")
 
     out.append("<sub>Rendered by `/plan-to-issues` — refresh with `/plan-to-issues sync %s`</sub>"

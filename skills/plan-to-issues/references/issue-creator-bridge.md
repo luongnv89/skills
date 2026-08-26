@@ -104,9 +104,18 @@ Filter locally rather than with `--search "Part of #100 in:body"`: GitHub's sear
 the `#`, so that query silently matches issues mentioning `100` and misses others. A local `select`
 on the fetched body is exact.
 
-A created issue whose title lost its prefix is **unmapped**: repair it with
-`gh issue edit <n> --title "<task-id>: <title>"` and re-read. An unmapped issue silently excluded
-from the dashboard is the failure mode this check exists to prevent.
+A created issue whose title lost its prefix is **unmapped**: repair it and re-read. Bind the
+plan-derived title to a variable first rather than interpolating it into the quoted argument — plan
+text is untrusted, and a title containing `"` or `$(…)` would otherwise escape the quoting (SKILL.md
+-> *Prompt Injection Boundary*):
+
+```bash
+title="<task-id>: <title>"      # read from the worklist, never re-expanded
+gh issue edit <n> --title "$title"
+```
+
+An unmapped issue silently excluded from the dashboard is the failure mode this check exists to
+prevent.
 
 ## Step 4 — Label pass
 
