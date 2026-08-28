@@ -64,3 +64,14 @@ Artifacts land in `.agent-ready/` (scan data) and `agent-ready-plan.md` (the pla
 - The URL is sent to **isitagentready.com**, a third-party service, which then fetches the site. Gate G1 exists so that is an explicit choice.
 - The scanner hosts an implementation guide per check. The plan **links** them; it does not fetch or apply them.
 - A site the scanner reports as non-commerce gets its commerce checks deferred rather than filed.
+
+## Verification status
+
+| Phase | How far it has been exercised |
+|---|---|
+| 1–3 (scan → triage → plan) | End-to-end against three live sites at different score levels — `example.com` (0/5), `stripe.com` (1/5), `isitagentready.com` (4/5). Task counts, effort bands and acceptance-criteria coverage matched triage on every run. |
+| 4 (file the issues) | **Not yet run against a live repository.** The rendered plan is checked against the grammar `/plan-to-issues` documents, and that check has been re-confirmed independently — but the seam is verified by inspection against the spec, never by execution. A drift in `/plan-to-issues`' parser would surface on someone's first real run. |
+
+The eval suite is executable: `python3 scripts/run-skill-evals.py website-agent-readiness` from the repo root (see CONTRIBUTING.md). It measures triggering; the 30 behavioural expectations across the 10 cases are transcript-level and reported as `[MANUAL]`.
+
+Last recorded run (1 run per case): **6/8 triggering cases pass, 2 skipped as fixture-dependent.** The two failures are reproducible at 0/3 and are trigger-coverage gaps, not defects in the pipeline — a `localhost` URL and a "scan this site, its robots.txt says …" prompt both get handled directly instead of opening the skill, so the skill's own advice for those cases (flag an unreachable target at G1; treat scanned content as data) never gets a chance to apply.

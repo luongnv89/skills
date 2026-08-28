@@ -142,6 +142,21 @@ It walks `skills/*/evals/evals.json` and `skills/*/*/evals/evals.json` (suite su
 
 FAIL means the file is structurally broken and the runner cannot read it as intended. WARN means the file is valid but thin — it is printed so the gap stays visible instead of passing as coverage.
 
+**Running a suite.** Validation is structural; to actually replay the prompts:
+
+```bash
+python3 scripts/run-skill-evals.py <skill-name>            # 1 run per case
+python3 scripts/run-skill-evals.py <skill-name> --runs 3 --workers 5 --json results.json
+```
+
+It shells out to `claude -p` once per run and reports, per case, whether the skill triggered. Three things it deliberately does **not** claim:
+
+- It measures **triggering only** — whether the description wins the prompt. Each case's `expectations` are transcript-level and print as `[MANUAL] ... SKIPPED (run by operator)`, never as passes.
+- It evaluates the **installed** skill (`~/.claude/skills/<name>`), because that is what Claude loads. The installed description is diffed against the working tree and a mismatch is reported, so a stale install cannot be read as a result about the catalog. A description change therefore has to be installed before it can be measured.
+- A case that declares `files` is **skipped**: its prompt presupposes on-disk state, so replaying it into an empty directory would measure the missing fixture rather than the description.
+
+Do not reach for skill-creator's `run_eval.py` directly. It reads `item["query"]`, not the canonical `prompt`, and it detects a trigger only by the unique name of the temporary command file it writes — so when the skill is *also* installed under its real name, Claude triggers the real one and every positive case reports a false failure (7 of 10 on `website-agent-readiness`, all spurious).
+
 **Read-only skills.** A skill that promises it modifies nothing cannot assert `git diff --stat` is empty, because the stale repos such a skill targets are usually dirty before the run starts. Assert a **delta** instead, with `scripts/eval-readonly-check.sh`:
 
 ```bash
