@@ -8,6 +8,8 @@ set -euo pipefail
 API="https://isitagentready.com/api/scan"
 url="${1:-}"
 outdir="${2:-.agent-ready}"
+# A path starting with '-' would be read as an option flag by mkdir/curl/head.
+case "$outdir" in -*) outdir="./$outdir" ;; esac
 
 if [ -z "$url" ]; then
   echo "✗ usage: scan_site.sh <url> [outdir]" >&2
@@ -50,12 +52,14 @@ if [ "$code" != "200" ]; then
   exit 1
 fi
 
-python3 -c "
-import json,sys
-d=json.load(open('$outdir/scan.json'))
-if 'level' not in d or 'checks' not in d:
-    print('✗ unexpected response shape: missing level/checks', file=sys.stderr); sys.exit(1)
-" || exit 1
+# Single-quoted so no shell variable is interpolated into the Python source;
+# outdir reaches Python through the environment, like the URL above.
+OUTDIR="$outdir" python3 -c '
+import json,os,sys
+d=json.load(open(os.path.join(os.environ["OUTDIR"], "scan.json")))
+if "level" not in d or "checks" not in d:
+    print("\u2717 unexpected response shape: missing level/checks", file=sys.stderr); sys.exit(1)
+' || exit 1
 
 echo "→ scanning $url (remediation prose) ..." >&2
 code="$(curl -sS --max-time 120 -X POST "$API" \
