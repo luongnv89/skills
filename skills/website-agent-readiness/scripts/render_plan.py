@@ -165,8 +165,17 @@ def main() -> int:
 
     n_tasks = sum(len(p["tasks"]) for p in t["phases"])
     if n_tasks == 0:
-        print(f"✓ nothing to plan — {site} has no failing checks "
-              f"(level {t.get('level')}/5, {t.get('levelName')}).", file=sys.stderr)
+        if deferred:
+            n = len(deferred)
+            why = ("the scanner detected no commerce signals on this site"
+                   if all(r.get("category") == "commerce" for r in deferred)
+                   and not is_commerce else "they were deferred by phase mapping")
+            print(f"✓ nothing to plan — all {n} failing "
+                  f"{'check' if n == 1 else 'checks'} on {site} are deferred: {why} "
+                  f"(level {t.get('level')}/5, {t.get('levelName')}).", file=sys.stderr)
+        else:
+            print(f"✓ nothing to plan — {site} has no failing checks "
+                  f"(level {t.get('level')}/5, {t.get('levelName')}).", file=sys.stderr)
         print("  /plan-to-issues rejects a file with no task headings; skip Phase 4.",
               file=sys.stderr)
         return 3

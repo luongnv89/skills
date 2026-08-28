@@ -45,9 +45,17 @@ EFFORT = {
 }
 DEFAULT_EFFORT = "M"
 
+# Guide slugs the camelCase->kebab rule cannot derive. Everything else follows it.
+SLUG_OVERRIDES = {
+    "robotsTxtAiRules": "ai-rules",
+    "webMcp": "webmcp",
+}
+
 
 def slugify(check: str) -> str:
     """camelCase check key -> the scanner's kebab guide slug."""
+    if check in SLUG_OVERRIDES:
+        return SLUG_OVERRIDES[check]
     return re.sub(r"(?<!^)(?=[A-Z])", "-", check).lower()
 
 

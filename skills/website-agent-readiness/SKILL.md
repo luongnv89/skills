@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -249,10 +249,11 @@ structure. Refining a task's *prose* after the user reads it is fine; changing a
 level, an `**Effort**` value, or dropping an acceptance criterion silently breaks the
 parse. Read `references/plan-format.md` before touching the shape.
 
-**A site with no failing checks has no plan.** `render_plan.py` exits `3` and writes
-nothing — `/plan-to-issues` rejects a file with no task headings. Report the score, say
-there is nothing to file, and stop. Do not write an empty plan to give Phase 4 something
-to do.
+**A site with no fileable tasks has no plan.** `render_plan.py` exits `3` and writes
+nothing — `/plan-to-issues` rejects a file with no task headings. That happens when the
+scan reports no failing checks at all, and also when every failing check was deferred
+(commerce checks on a non-commerce site). Relay the reason the script prints, report the
+score, and stop. Do not write an empty plan to give Phase 4 something to do.
 
 **Completion criteria:** `agent-ready-plan.md` exists; both counts above match the triage
 task count; every task carries at least one `- [ ]` line. Or the renderer exited `3` and

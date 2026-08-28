@@ -80,9 +80,11 @@ band falls back to the `M` default.
 
 ## Check key → guide slug
 
-camelCase → kebab-case (`linkHeaders` → `link-headers`, `dnsAid` → `dns-aid`). The
-exceptions are why the join is positional rather than computed: `webMcp` → `webmcp`,
-`robotsTxtAiRules` → `ai-rules`. Use the `Implementation guide:` URL the response gives
+camelCase → kebab-case (`linkHeaders` → `link-headers`, `dnsAid` → `dns-aid`). Two slugs
+do not follow the rule — `webMcp` → `webmcp`, `robotsTxtAiRules` → `ai-rules` — and
+`triage_scan.py` carries them in a `SLUG_OVERRIDES` map so the slug fallback still finds
+their fix prose. The join is positional first for the same reason: a slug added upstream
+would not be derivable either. Use the `Implementation guide:` URL the response gives
 you; do not construct one.
 
 ## Category → phase

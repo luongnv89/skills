@@ -33,7 +33,14 @@ echo "→ scanning $url (structured) ..." >&2
 code="$(curl -sS --max-time 120 -X POST "$API" \
   -H 'Content-Type: application/json' \
   --data-binary "$body" \
-  -o "$outdir/scan.json" -w '%{http_code}')"
+  -o "$outdir/scan.json" -w '%{http_code}' || true)"
+
+if [ -z "$code" ] || [ "$code" = "000" ]; then
+  echo "✗ scan failed: no HTTP response from $API" >&2
+  echo "  curl could not complete the request (DNS failure, timeout, or connection refused)." >&2
+  echo "  Check this machine's network access to isitagentready.com, then retry." >&2
+  exit 1
+fi
 
 if [ "$code" != "200" ]; then
   echo "✗ scan failed: HTTP $code" >&2
@@ -54,9 +61,12 @@ echo "→ scanning $url (remediation prose) ..." >&2
 code="$(curl -sS --max-time 120 -X POST "$API" \
   -H 'Content-Type: application/json' \
   --data-binary "$body_agent" \
-  -o "$outdir/fixes.md" -w '%{http_code}')"
+  -o "$outdir/fixes.md" -w '%{http_code}' || true)"
 
-if [ "$code" != "200" ]; then
+if [ -z "$code" ] || [ "$code" = "000" ]; then
+  echo "⚠ agent-format request failed (no HTTP response) — falling back to nextLevel prompts only" >&2
+  : > "$outdir/fixes.md"
+elif [ "$code" != "200" ]; then
   echo "⚠ agent-format request failed (HTTP $code) — falling back to nextLevel prompts only" >&2
   : > "$outdir/fixes.md"
 fi
