@@ -65,6 +65,21 @@ def main() -> int:
     if t.get("redirectedFrom") and t["redirectedFrom"] != site:
         L.append(f"**Note:** the scanner followed a redirect from "
                  f"{clean(t['redirectedFrom'])} — fixes must land on {site}.")
+    # A degraded run -- the agent-format call failed, or its fix blocks did not
+    # line up with the failing checks -- leaves some tasks without the scanner's
+    # remediation prose. Say so here: the plan outlives the run, and the issues
+    # filed from it carry these descriptions.
+    degraded = [task["check"] for ph in t["phases"] for task in ph["tasks"]
+                if not clean(task.get("prompt"))]
+    if degraded:
+        n = len(degraded)
+        why = ("the fix blocks did not line up with the failing checks"
+               if t.get("joined_by") == "slug"
+               else "the scanner returned no remediation prose")
+        L.append(f"**Note:** the scanner's remediation prose was unavailable for "
+                 f"{n} {'check' if n == 1 else 'checks'} ({why}); their "
+                 f"descriptions fall back to the check message. Affected: "
+                 + ", ".join(f"`{c}`" for c in degraded) + ".")
     L.append("")
     L.append("Each task closes exactly one failing check. The scanner is the only "
              "source: descriptions are its own fix prompts, and every task is "

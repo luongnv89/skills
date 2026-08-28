@@ -111,5 +111,5 @@ priority — there is no separate severity to set.
 |---|---|---|
 | HTTP 404 on `/<url>` | the page-per-site URL does not exist | use `POST /api/scan` |
 | HTTP 4xx/5xx from the API | site unreachable *by the scanner* | the site must be publicly reachable — localhost and private IPs cannot be scanned |
-| `fixes.md` empty | agent-format call failed | run degrades to `nextLevel` prompts; the plan notes it |
+| `fixes.md` empty | agent-format call failed | run degrades to `nextLevel` prompts; the plan header notes every check left without prose |
 | `joined_by: "slug"` in triage.json | block count ≠ fail count | check the warning for checks with no fix prose |
