@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.0.1
+  version: 1.0.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
