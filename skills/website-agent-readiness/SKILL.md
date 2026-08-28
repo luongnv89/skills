@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.0.2
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -175,7 +175,8 @@ and only when the user asks.
 
 **Completion criteria:** `.agent-ready/scan.json` parses and contains `level` and
 `checks`; `.agent-ready/fixes.md` exists (it may be empty — the run degrades to the
-`nextLevel` prompts and the plan says so).
+`nextLevel` prompts, and the plan's header carries a `**Note:**` naming every check
+whose description fell back to the check message).
 
 ## Phase 2 — Triage
 
