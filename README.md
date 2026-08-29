@@ -251,6 +251,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.1.1 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.2.1 | high | Cross-platform install.sh with env detection |
 | [**opencode-runner**](skills/opencode-runner/) | 1.4.1 | medium | Delegate work to opencode free cloud models |
+| [**opencode-docker-dev**](skills/opencode-docker-dev/) | 1.3.0 | medium | Run OpenCode in a kept docker-dev container (no SSH/GH token) |
 | [**herdr-agent-comms**](skills/herdr-agent-comms/) | 1.23.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.3.1 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.2.0 | medium | Spawn, message, read CLI agents in tmux |
