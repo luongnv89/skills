@@ -5,7 +5,7 @@
   If you're an AI agent, read the SKILL.md file instead for skill instructions.
 -->
 
-# OpenCode Docker Dev
+# OpenCode Sandbox
 
 > Run OpenCode sandboxed inside a luongnv89/docker-dev container — isolated from host SSH keys and GitHub tokens by construction. The container is kept by default so you can attach a shell.
 

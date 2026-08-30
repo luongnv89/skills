@@ -81,7 +81,7 @@ on the host's native architecture instead.
 ## A broad `git add <dir>/` sweeps up backup or build artifacts
 
 Observed directly: a task committed inside the container ran `git add
-skills/opencode-docker-dev/` and picked up `SKILL.md.bak` — a backup file a
+skills/opencode-sandbox/` and picked up `SKILL.md.bak` — a backup file a
 prior tool run (`asm eval --fix`) had left on disk — into the commit. `git
 add <dir>/` stages *everything* under that path, tracked intent or not; task
 text asking for "the skill directory" doesn't distinguish source files from
@@ -97,7 +97,7 @@ rewrites a commit that may already be pushed or referenced elsewhere).
 ## A second run reuses a stale container `--name`
 
 Both modes now pass an explicit `--name`. One-shot defaults to
-`opencode-dev-<project>-<epoch>` (unique per invocation). Interactive must
+`opencode-sandbox-<project>-<epoch>` (unique per invocation). Interactive must
 do the same. If you reuse a name that is still in use — including a
 **kept** container the user declined to remove — Docker fails: `docker:
 Error response from daemon: Conflict. The container name "/..." is already
@@ -110,12 +110,12 @@ container.
 
 ## Leftover kept containers
 
-Keep-by-default means `docker ps` will accumulate `opencode-dev-*`
-containers (label `opencode-docker-dev=1`). That is intended, not a leak to
+Keep-by-default means `docker ps` will accumulate `opencode-sandbox-*`
+containers (label `opencode-sandbox=1`). That is intended, not a leak to
 silently fix. List them with:
 
 ```bash
-docker ps -a --filter label=opencode-docker-dev=1
+docker ps -a --filter label=opencode-sandbox=1
 ```
 
 Remove one only after the user confirms: `docker rm -f <name>`. `--rm` on

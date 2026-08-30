@@ -1,15 +1,15 @@
 ---
-name: opencode-docker-dev
+name: opencode-sandbox
 description: "Run OpenCode in a docker-dev container; prints docker exec attach; kept unless you confirm rm. Never mounts SSH/GH tokens. Isolate OpenCode or dodge rate limits. Don't use for opencode.ai (opencode-runner), Herdr, or the project's app."
 license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent-comms or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
-# OpenCode Docker Dev
+# OpenCode Sandbox
 
 Run OpenCode sandboxed inside a [luongnv89/docker-dev](https://github.com/luongnv89/docker-dev)
 container for a local project — isolating it from host SSH keys and GitHub
@@ -100,7 +100,7 @@ Additional options accepted by `run_opencode.sh`: `--image IMAGE` to override
 the default container image (`ghcr.io/luongnv89/u2604dev:latest`);
 `--format FORMAT` to set `opencode run`'s output format (`default` or `json`;
 default: `default`); `--name NAME` to set the container name (default:
-`opencode-dev-<project>-<epoch>`); `--start-only` to create the container and
+`opencode-sandbox-<project>-<epoch>`); `--start-only` to create the container and
 print the attach command without running OpenCode; `--exec-in NAME` to run
 OpenCode in an already-started container; `--rm` to auto-remove the
 container after OpenCode exits (opt-in — not the default).
@@ -117,7 +117,7 @@ line then sits in tool logs until OpenCode exits):
 
 ```bash
 # 2a — create the keep-alive container, print attach, return immediately
-bash /path/to/opencode-docker-dev/scripts/run_opencode.sh \
+bash /path/to/opencode-sandbox/scripts/run_opencode.sh \
   --project /path/to/project \
   --start-only \
   [--with-claude-skills] [--with-git-identity]
@@ -132,7 +132,7 @@ docker exec -it <CONTAINER_NAME> zsh
 
 ```bash
 # 2b — run OpenCode inside that container
-bash /path/to/opencode-docker-dev/scripts/run_opencode.sh \
+bash /path/to/opencode-sandbox/scripts/run_opencode.sh \
   --project /path/to/project \
   --message "<task text>" \
   --exec-in "<CONTAINER_NAME>" \
@@ -143,7 +143,7 @@ For task text too long or complex for a shell argument, write it to a file
 and attach it on **2b**:
 
 ```bash
-bash /path/to/opencode-docker-dev/scripts/run_opencode.sh \
+bash /path/to/opencode-sandbox/scripts/run_opencode.sh \
   --project /path/to/project \
   --message "Follow the attached file's instructions exactly." \
   --file /path/to/task.txt \
@@ -221,11 +221,11 @@ sentinel string instead).
 ## Example
 
 ```bash
-bash ~/.claude/skills/opencode-docker-dev/scripts/run_opencode.sh \
+bash ~/.claude/skills/opencode-sandbox/scripts/run_opencode.sh \
   --project ~/code/my-app \
   --start-only
 # → show the printed docker exec -it <name> zsh block to the user, then:
-bash ~/.claude/skills/opencode-docker-dev/scripts/run_opencode.sh \
+bash ~/.claude/skills/opencode-sandbox/scripts/run_opencode.sh \
   --project ~/code/my-app \
   --message "Add input validation to the signup form and run the test suite." \
   --exec-in "<CONTAINER_NAME>" \
@@ -266,7 +266,7 @@ the message or exits OpenCode entirely (see `references/interactive-mode.md`).
 ## Step Completion Report
 
 ```
-◆ OpenCode Docker Dev (one-shot run)
+◆ OpenCode Sandbox (one-shot run)
 ··································································
   Docker daemon:         √ pass (docker info)
   Image ready:           √ pass (ghcr.io/luongnv89/u2604dev:latest)

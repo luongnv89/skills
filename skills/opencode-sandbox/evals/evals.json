@@ -1,5 +1,5 @@
 {
-  "skill_name": "opencode-docker-dev",
+  "skill_name": "opencode-sandbox",
   "evals": [
     {
       "id": 1,
@@ -56,11 +56,11 @@
       "id": 5,
       "kind": "negative-trigger",
       "prompt": "Route this coding task to opencode.ai's free cloud models instead of using Claude directly.",
-      "expected_output": "Handled by opencode-runner (or a plain direct opencode.ai invocation), not opencode-docker-dev. No Docker container is set up, no docker-dev mounts are built, and no docker/cdev commands are run.",
+      "expected_output": "Handled by opencode-runner (or a plain direct opencode.ai invocation), not opencode-sandbox. No Docker container is set up, no docker-dev mounts are built, and no docker/cdev commands are run.",
       "files": [],
       "expectations": [
         "No docker run, cdev run, or docker-dev repo commands are invoked",
-        "The response does not apply opencode-docker-dev's mount-building or preflight workflow"
+        "The response does not apply opencode-sandbox's mount-building or preflight workflow"
       ]
     },
     {

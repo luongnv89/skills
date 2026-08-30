@@ -27,7 +27,7 @@
 #   --image IMAGE             docker image (default: ghcr.io/luongnv89/u2604dev:latest)
 #   --format FORMAT           opencode output format: default | json (default: default)
 #   --model MODEL             opencode model to use (e.g. opencode/muse-spark-1.2-contributor-free)
-#   --name NAME               container name (default: opencode-dev-<project>-<epoch>)
+#   --name NAME               container name (default: opencode-sandbox-<project>-<epoch>)
 #   --start-only              create the keep-alive container, print the attach
 #                             command, exit 0 (does not run OpenCode)
 #   --exec-in NAME            run OpenCode in an already-started container
@@ -134,7 +134,7 @@ if [ -z "$CONTAINER_NAME" ]; then
     [a-zA-Z0-9]*) ;;
     *) slug="p${slug}" ;;
   esac
-  CONTAINER_NAME="opencode-dev-${slug}-$(date +%s)"
+  CONTAINER_NAME="opencode-sandbox-${slug}-$(date +%s)"
 fi
 
 bash "$SCRIPT_DIR/preflight.sh" "$IMAGE"
@@ -155,7 +155,7 @@ ensure_running() {
   local state
   if ! docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
     echo "Error: container '$CONTAINER_NAME' does not exist." >&2
-    echo "Fix: start a new one with --start-only, or pass a name from 'docker ps -a --filter label=opencode-docker-dev=1'." >&2
+    echo "Fix: start a new one with --start-only, or pass a name from 'docker ps -a --filter label=opencode-sandbox=1'." >&2
     exit 1
   fi
   state="$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME")"
@@ -262,7 +262,7 @@ echo "Starting OpenCode container (image: $IMAGE, workspace: $PROJECT_DIR, name:
 
 if ! docker run -d \
   --name "$CONTAINER_NAME" \
-  --label opencode-docker-dev=1 \
+  --label opencode-sandbox=1 \
   "${MOUNTS[@]}" \
   -w /workspace \
   "$IMAGE" \

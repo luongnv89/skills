@@ -37,8 +37,8 @@ pane skill is active — this is the plain-docker equivalent `cdev run`
 performs):
 
 ```bash
-# Unique name, e.g. opencode-dev-<project>-$(date +%s)
-docker run -d --name <container-name> --label opencode-docker-dev=1 \
+# Unique name, e.g. opencode-sandbox-<project>-$(date +%s)
+docker run -d --name <container-name> --label opencode-sandbox=1 \
   -v "$PROJECT_DIR:/workspace" \
   -v "$HOME/.config/opencode:/root/.config/opencode" \
   [-v "$HOME/.claude:/root/.claude:ro" -v "$HOME/.agents:/root/.agents:ro"] \
