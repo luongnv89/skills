@@ -609,34 +609,42 @@ jobs:
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
+  # The per-language jobs carry CI-lane work only — a version matrix. They must not
+  # re-run the test suite at a single version: the pre-push hook already did that,
+  # and duplicating it here is exactly what the routing table forbids.
   frontend:
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.frontend == 'true' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
-      - name: Build
-        run: npm run build
+      - run: npm test
+      - run: npm run build
 
   backend:
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       - run: pip install -e "backend/[dev]"
-      - name: Matrix-only checks
-        run: pytest -q
+      - run: pytest -q
 ```
 
 ---
@@ -670,9 +678,13 @@ jobs:
 
 ### Deployment (on merge to main)
 
+`hooks` is deliberately **not** in `needs:`. It only runs on `pull_request`, and a `needs:`
+on a job that was skipped skips the dependent too — listing it here would mean main never
+deploys. The guard already gated the pull request that produced this merge.
+
 ```yaml
   deploy:
-    needs: [quality, matrix-test]
+    needs: [matrix-test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -682,7 +694,7 @@ jobs:
 
 ### Skipping specific pre-commit hooks in CI
 
-Some hooks (like interactive formatters) may not make sense in CI. Skip them with the `SKIP` env var:
+Some hooks (like interactive formatters) may not make sense in CI. Skip them with the `SKIP` env var, on the guard job's run step:
 
 ```yaml
       - name: Run both hook stages over the PR diff
