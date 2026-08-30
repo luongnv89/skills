@@ -1,6 +1,21 @@
 # GitHub Actions Workflow Templates
 
-Philosophy: **lean CI**. Since pre-commit already handles format, lint, type-check, unit tests, and E2E tests locally, GitHub Actions only needs to do what can't run locally: multi-version matrix testing, coverage uploads, and deployment.
+Philosophy: **lean CI**. pre-commit already handles format, lint, type-check, unit tests, and E2E tests locally, so GitHub Actions carries only the four responsibilities the SKILL's Check Routing Table assigns it: a diff-scoped bypass guard, multi-version matrix testing, secrets-dependent work, and deployment.
+
+## The one rule every template here follows
+
+`pre-commit run` executes **commit-stage hooks only**. Hooks on `stages: [pre-push]` — the full test suite, coverage threshold, and CLI E2E — are silently skipped unless you also pass `--hook-stage pre-push`. `pre-commit/action@v3.0.1` shares this blind spot, which is why these templates call the CLI directly instead:
+
+```yaml
+      - name: Verify hooks were not bypassed
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
+```
+
+Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. Running `--all-files` in CI re-checks the entire repository on every push and is the cost blow-up this skill exists to avoid.
 
 ## Table of Contents
 
@@ -17,7 +32,7 @@ Philosophy: **lean CI**. Since pre-commit already handles format, lint, type-che
 
 ## Minimal (pre-commit already covers everything)
 
-If your pre-commit setup runs format, lint, type-check, unit tests, and E2E tests — CI can be extremely thin:
+If your pre-commit setup runs format, lint, type-check, unit tests, and E2E tests, CI shrinks to a single bypass guard:
 
 ```yaml
 name: CI
@@ -39,14 +54,18 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
-        # Runs all pre-commit hooks (commit + push stages) on CI
-        env:
-          SKIP: ""  # add hook IDs here to skip on CI if needed
+      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
+      # seconds. Both invocations are required — `pre-commit run` alone executes
+      # commit-stage hooks only and silently skips the pre-push suite and E2E.
+      - name: Verify hooks were not bypassed
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```
 
-This single job re-runs everything pre-commit does locally, ensuring the same checks pass in a clean environment.
+This job proves the hooks actually ran on the incoming commits — the one thing local tooling cannot prove about itself, since `--no-verify` skips hooks entirely. It checks only the diff, so it stays in the seconds range no matter how large the repository grows.
 
 ---
 
@@ -78,9 +97,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Re-run pre-commit in CI (catches any env differences)
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
+      # seconds. Both invocations are required — `pre-commit run` alone executes
+      # commit-stage hooks only and silently skips the pre-push suite and E2E.
+      - name: Verify hooks were not bypassed
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
   matrix-test:
     runs-on: ubuntu-latest
@@ -162,9 +187,15 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev]"
 
-      # Pre-commit re-runs all hooks (format, lint, type-check, tests, E2E)
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
+      # seconds. Both invocations are required — `pre-commit run` alone executes
+      # commit-stage hooks only and silently skips the pre-push suite and E2E.
+      - name: Verify hooks were not bypassed
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
   matrix-test:
     runs-on: ubuntu-latest
@@ -241,8 +272,15 @@ jobs:
           go-version: '1.22'
           cache: true
 
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
+      # seconds. Both invocations are required — `pre-commit run` alone executes
+      # commit-stage hooks only and silently skips the pre-push suite and E2E.
+      - name: Verify hooks were not bypassed
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
   matrix-test:
     runs-on: ubuntu-latest
@@ -302,8 +340,15 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
 
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
+      # seconds. Both invocations are required — `pre-commit run` alone executes
+      # commit-stage hooks only and silently skips the pre-push suite and E2E.
+      - name: Verify hooks were not bypassed
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
   matrix-test:
     runs-on: ubuntu-latest
@@ -359,8 +404,15 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
+      # seconds. Both invocations are required — `pre-commit run` alone executes
+      # commit-stage hooks only and silently skips the pre-push suite and E2E.
+      - name: Verify hooks were not bypassed
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
   matrix-test:
     runs-on: ubuntu-latest
@@ -431,8 +483,12 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - name: Run pre-commit (frontend hooks)
-        uses: pre-commit/action@v3.0.1
+      - name: Verify hooks were not bypassed (frontend)
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
   backend:
     needs: changes
@@ -445,8 +501,12 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -e "backend/[dev]"
-      - name: Run pre-commit (backend hooks)
-        uses: pre-commit/action@v3.0.1
+      - name: Verify hooks were not bypassed (backend)
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```
 
 ---
@@ -495,8 +555,20 @@ jobs:
 Some hooks (like interactive formatters) may not make sense in CI. Skip them with the `SKIP` env var:
 
 ```yaml
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      - name: Verify hooks were not bypassed
         env:
           SKIP: "no-commit-to-branch"  # comma-separated hook IDs to skip
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```
+
+Skip sparingly. Every skipped hook is a check that now runs nowhere, since the guard is the only place CI re-verifies hook output.
+
+---
+
+### Keeping the matrix off the hot path
+
+Every template here gates `matrix-test` on `if: github.event_name == 'push'`. Keep that. A three-version matrix on every pull request commit triples the bill to re-confirm a signal the hooks already gave locally; running it on merges to the default branch catches version-specific breakage before release at a fraction of the cost. For a library where version skew is the main risk, widen it to `pull_request` only on the release branch, never on every push to a feature branch.

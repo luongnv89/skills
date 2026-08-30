@@ -44,7 +44,7 @@ python -m myapp unknown-command 2>&1 | grep -q "Error" && echo "unknown command 
 echo "=== E2E: All passed ==="
 ```
 
-## Pre-commit wiring (push stage)
+## Pre-commit wiring (`pre-push` stage)
 
 ```yaml
 - repo: local
@@ -54,5 +54,5 @@ echo "=== E2E: All passed ==="
       entry: bash scripts/e2e_test.sh
       language: system
       pass_filenames: false
-      stages: [push]
+      stages: [pre-push]
 ```
