@@ -65,7 +65,7 @@ asm install github:luongnv89/skills:skills/agent-config
 
 ## Token Efficiency
 
-Generated configs automatically include a **Token Efficiency** section with rules to reduce wasteful agent behavior:
+The source-of-truth file (`AGENTS.md` when both exist) includes a **Token Efficiency** section with rules to reduce wasteful agent behavior. The `CLAUDE.md` wrapper inherits it via `@AGENTS.md` and does not copy it:
 
 - No re-reading files just written or edited
 - No re-running commands to "verify" unless outcome was uncertain

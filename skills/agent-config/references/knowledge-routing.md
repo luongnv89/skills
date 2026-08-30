@@ -61,6 +61,8 @@ Commit the project files. Review them like code. Give the root file an owner.
 - Release → skill `release`
 ```
 
+These Constraints are constitution pins the agent reads. The matching `PreToolUse` hook is a routing recommendation on audit, not something `create` emits.
+
 ## The `CLAUDE.md` wrapper
 
 When a repo already has `AGENTS.md`, `CLAUDE.md` stays thin — never a second copy:

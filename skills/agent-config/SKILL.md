@@ -4,7 +4,7 @@ description: "Create or update CLAUDE.md and AGENTS.md files following official 
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -135,9 +135,9 @@ Every bullet must be a command, a pin, a constraint, or a pointer. One idea per 
 
 ## Token Efficiency Block (always inject)
 
-**Always** append the block from `references/token-efficiency-block.md` to every generated `CLAUDE.md` / `AGENTS.md`. This is non-negotiable — it protects the agent's context window and budget.
+**Always** append the block from `references/token-efficiency-block.md` once into the source-of-truth file — `AGENTS.md` when writing both (or when `AGENTS.md` already exists), otherwise the single target. Do **not** copy it into the `CLAUDE.md` wrapper; the wrapper opens with `@AGENTS.md` and inherits the block. This is non-negotiable — it protects the agent's context window and budget.
 
-It is the one deliberate exception to "no general advice": these are always-on rules about how the agent works, not about the code, so the root file is the layer that owns them.
+It is the one deliberate exception to "no general advice": these are always-on rules about how the agent works, not about the code, so the source-of-truth file is the layer that owns them.
 
 ## Optional Blocks (only when requested)
 
@@ -149,7 +149,7 @@ If the user asks for orchestration rigor or stricter coding rules, copy verbatim
 
 1. Ask which file type if unspecified.
 2. Analyze project: existing files, stack, README, package manifests.
-3. Draft following guidelines + inject token-efficiency block.
+3. Draft following guidelines + inject the token-efficiency block once into the source of truth.
 4. If user said "apply now", write directly; otherwise present draft.
 5. Finalize at the right path.
 
@@ -191,9 +191,9 @@ A run passes when **all** of the following are true:
 
 - [ ] Target file path confirmed (CLAUDE.md, AGENTS.md, or explicit path).
 - [ ] Repo synced clean OR user explicitly authorised proceeding without sync.
-- [ ] Token-efficiency block present in the generated/updated file (verify by grep `## Token Efficiency`).
-- [ ] No anti-pattern from `references/anti-patterns.md` appears in the new content.
-- [ ] For `create` / `update`: result passes every section of `references/claude-md-checklist.md` (length budget, content quality, routing, enforceability, 5 required sections, drift).
+- [ ] Token-efficiency block present in the source-of-truth file — `AGENTS.md` when both exist, otherwise the single target (verify by grep `## Token Efficiency`). Absent from the `CLAUDE.md` wrapper.
+- [ ] No anti-pattern from `references/anti-patterns.md` appears in the new content. **Prose standing in for a gate** is audit-time only — constitution Constraints pins do not fail create/update.
+- [ ] For `create` / `update`: result passes checklist sections 1–3 and 5–7 of `references/claude-md-checklist.md` (length budget, content quality, routing, 5 required sections, drift, final checks). Section 4 (enforceability) is reported on `audit` and does not fail a create/update run.
 - [ ] Generated/updated file is under 200 lines (verify with `wc -l`).
 - [ ] No rule appears in both `AGENTS.md` and `CLAUDE.md`; when both exist, `CLAUDE.md` opens with `@AGENTS.md`.
 - [ ] For `audit`: every checklist item is reported with pass / fail / N/A, each failing line carries a routing recommendation, and no file was modified (verify with `git diff --stat`).
@@ -201,7 +201,7 @@ A run passes when **all** of the following are true:
 
 ## Expected Output
 
-**For `create` / `update`:** writes one file at the chosen path. Example tail of the file:
+**For `create` / `update`:** writes the chosen target; when the user said "both", writes two files (`AGENTS.md` plus a thin `CLAUDE.md` wrapper that opens with `@AGENTS.md` and does not copy the token block). Example tail of the source-of-truth file:
 
 ```markdown
 ## Token Efficiency
@@ -220,7 +220,7 @@ Followed by a step-completion report ending in `Result: PASS`.
   Content quality:    × fail — 3 fluff lines ("be a senior engineer", motivational)
   Routing:            × fail — 12-line deploy runbook belongs in a skill
   Enforceability:     × fail — "never commit .env" has no PreToolUse hook
-  5 required sections: × fail — missing "Hard rules" and "Done when"
+  5 required sections: × fail — missing "Constraints" and "Done when"
   Drift:              × fail — 2 rules duplicated in AGENTS.md
   Anti-patterns:      × fail — found 2 (generic style rules)
   Token block:        × fail — missing

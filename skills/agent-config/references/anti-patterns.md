@@ -18,7 +18,7 @@ Structural failure modes, equally disqualifying:
 - **Cross-file duplication** — the same rule in both `AGENTS.md` and `CLAUDE.md`. One is the source of truth; the other points at it.
 - **Emphasis inflation** — `IMPORTANT` / `YOU MUST` on ordinary lines, which trains the model to ignore the markers on real hard rules.
 - **`@import` as a token-saving device** — imported files still load at launch, so imports organize but never shrink context.
-- **Prose standing in for a gate** — a must-never-happen rule written as a sentence instead of a `PreToolUse` hook, or "please test" instead of a test.
+- **Prose standing in for a gate** *(audit-time)* — a must-never-happen rule written as a sentence instead of a `PreToolUse` hook, or "please test" instead of a test. Constitution Constraints pins on create/update are expected; this finding is raised on `audit` as a routing recommendation, not as a create blocker.
 - **The 400-line constitution** — past 200 lines, adherence drops and rules get lost.
 
 For each line, ask: *"Would removing this cause the agent to make a specific mistake?"* If not, cut it.
