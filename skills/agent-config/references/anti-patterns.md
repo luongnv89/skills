@@ -3,7 +3,7 @@
 When drafting `CLAUDE.md` / `AGENTS.md`, **do not include**:
 
 - Code style guidelines that linters/formatters already enforce
-- Generic best practices the agent already knows ("write clean code", "be careful")
+- Generic best practices the agent already knows ("write clean code", "be careful") — the injected `## Token Efficiency` block is the one deliberate exception
 - Anything visible from the tree, README, or package manifest — directory listings, dependency lists, generic architecture recaps
 - Long explanations of obvious patterns, tutorials, or API encyclopedias (link instead)
 - Copy-pasted code examples

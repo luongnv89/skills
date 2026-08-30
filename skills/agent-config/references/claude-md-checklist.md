@@ -13,7 +13,7 @@ Audit standard for any agent config file. Walk it verbatim during the `audit` fl
 
 - [ ] **Every line** passes: "Would removing this cause a real, specific mistake?"
 - [ ] No personality fluff ("be a senior engineer", "think step by step", motivational language).
-- [ ] No general advice the agent can figure out on its own.
+- [ ] No general advice the agent can figure out on its own — the injected `## Token Efficiency` block is expected here and is not a violation.
 - [ ] Nothing inferable from the tree, README, or package manifest (directory listings, dependency lists, generic architecture recaps).
 - [ ] No duplication of facts already in auto-memory (`~/.claude/projects/<project>/memory/` — check with `/memory`).
 

@@ -69,7 +69,7 @@ If unspecified, ask which file:
 
 Subagent definition files (`.claude/agents/*.md`) are a different artifact and out of scope here — that is the `subagent-creator` skill's domain. Some repos, including this catalog, also keep subagent prompts inside their `AGENTS.md`; when the target file already uses that shape, preserve it and audit only the prose sections.
 
-## CLAUDE.md Guidelines
+## Content Guidelines (both files)
 
 These files give the agent persistent context **it cannot infer from code alone**.
 
