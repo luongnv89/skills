@@ -4,8 +4,8 @@ description: "Build production-grade frontend interfaces with distinctive aesthe
 license: MIT
 effort: high
 metadata:
-  version: 1.2.4
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.5
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Frontend Design
