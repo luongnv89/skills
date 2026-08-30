@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -18,14 +18,20 @@ Step 8 invokes `website-agent-readiness`. Verify it is installed **before** the 
 step that changes anything:
 
 ```bash
-asm list -p claude --json | grep -q '"website-agent-readiness"' || {
+test -d "$HOME/.claude/skills/website-agent-readiness" ||
+  asm list -p claude --json | grep -q '"website-agent-readiness"' || {
   echo "Missing required skill: website-agent-readiness" >&2
-  echo "Install it:      asm install website-agent-readiness -p claude --yes" >&2
+  echo "Install it:      asm install github:luongnv89/skills:skills/website-agent-readiness -p claude -s global --yes" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2
   echo "Verify:          asm list -p claude --json | grep 'website-agent-readiness'" >&2
   exit 1
 }
 ```
+
+The install path is tested **before** `asm list`: this skill ships in the same repo as its
+dependency, so a repo-installed `website-agent-readiness` is present without the curated
+registry knowing the bare name — an `asm list` check alone would nag on every run, and a
+bare-name `asm install` would not resolve.
 
 On a miss, print those commands and **skip Step 8** — Steps 1-7 audit the codebase and
 still run. Never invoke a half-installed skill. `website-agent-readiness` enforces its own

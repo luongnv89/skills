@@ -76,7 +76,7 @@ asm install github:luongnv89/skills:skills/seo-ai-optimizer
 
 ## Requires
 
-Step 8 invokes [`website-agent-readiness`](../../website-agent-readiness/). Install it with `asm install website-agent-readiness -p claude --yes`; without it, Steps 1-7 still run and Step 8 is skipped.
+Step 8 invokes [`website-agent-readiness`](../../website-agent-readiness/). Install it with `asm install github:luongnv89/skills:skills/website-agent-readiness`; without it, Steps 1-7 still run and Step 8 is skipped.
 
 ## Output
 

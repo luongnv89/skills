@@ -230,7 +230,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.0.2 | medium | Generate/update docs to match code, cited to path:line, never invented |
 | [**landing-page-generator**](skills/landing-page-generator/) | 1.2.1 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
-| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.0 | high | Technical SEO + AI-bot directives |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.1 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.1.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.2.1 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 1.3.1 | medium | CLAUDE.md + AGENTS.md per best practices |

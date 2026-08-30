@@ -87,3 +87,6 @@ SKILL.md.bak
 .vibe/
 .zencoder/
 .asm-improver/
+
+# gitissue run log (local)
+.gitissue/
