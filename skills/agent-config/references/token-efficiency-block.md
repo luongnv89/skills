@@ -1,6 +1,6 @@
 # Token Efficiency Block
 
-Insert this verbatim section into every generated `CLAUDE.md` and `AGENTS.md` file:
+Insert this verbatim section once into the source-of-truth file — `AGENTS.md` when writing both (or when `AGENTS.md` already exists), otherwise the single target. Do not copy it into the `CLAUDE.md` wrapper; that file opens with `@AGENTS.md` and inherits the block.
 
 ```markdown
 ## Token Efficiency
