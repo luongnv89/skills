@@ -1,0 +1,79 @@
+{
+  "skill_name": "opencode-sandbox",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Run OpenCode on ~/projects/widget-app to summarize what the src/ directory does. I don't want it touching my GitHub credentials.",
+      "expected_output": "The skill runs one-shot mode with --no-ssh --no-github (user asked not to touch GitHub credentials), checks Docker, starts a kept container, shows docker exec attach, runs the summary task, and reports the result plus a Step Completion Report.",
+      "files": [],
+      "expectations": [
+        "The run started the container with --start-only (or equivalent docker run -d ... sleep infinity), showed docker exec -it <name> zsh to the user, then ran OpenCode with --exec-in (or docker exec ... opencode run --auto) rather than driving an interactive TUI",
+        "The invocation includes --no-ssh and --no-github (or equivalent: no ~/.ssh mount and no GH_TOKEN) because the user asked not to touch GitHub credentials",
+        "The report/output states the exit code from the container run",
+        "A Step Completion Report is printed with the documented rows (Docker daemon, Image ready, Mounts, Credentials, Attach command, Task exit code, Container)"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "OpenCode on my host keeps hitting free-tier rate limits. Spin it up in the docker-dev container instead and have it add a CHANGELOG entry for the last 3 commits in this repo.",
+      "expected_output": "The skill preflights Docker, starts a kept container with default SSH/GitHub/gitconfig mounts, runs the task via --start-only then --exec-in, and afterward reviews git diff/status on the host before saying the task is done.",
+      "files": [],
+      "expectations": [
+        "Docker daemon readiness is checked/ensured before running (docker info or preflight.sh)",
+        "The task is delivered as a --message (or --file) argument to run_opencode.sh, not typed into an interactive TUI",
+        "After the container run, the assistant reviews git status/diff on the host before treating the change as final",
+        "Default credentials are left on (no --no-ssh/--no-github) unless the user asked to isolate"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Use the luongnv89/docker-dev repo to run opencode against this repo and follow my release-manager skill to prep a release, but stop before pushing anything.",
+      "expected_output": "The skill mounts the project plus ~/.claude (and ~/.agents) via --with-claude-skills. Because the user said stop before pushing, it passes --no-ssh --no-github (or equivalent) so --auto cannot push, or it keeps credentials but the task prompt forbids push/gh release.",
+      "files": [],
+      "expectations": [
+        "run_opencode.sh is invoked with --with-claude-skills so the release-manager skill is readable inside the container",
+        "The assistant is aware of (and ideally checks for) the ~/.claude -> ~/.agents symlink gotcha rather than assuming ~/.claude alone is enough",
+        "Push/gh release is not completed: either --no-ssh --no-github was passed, or the OpenCode task text forbids pushing",
+        "The response still reviews the host diff"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "happy-path",
+      "prompt": "Run OpenCode in the sandboxed container on this project, and also let it push the commit and open the PR itself so I don't have to do anything else.",
+      "expected_output": "The skill uses default credentials (SSH mount + GH_TOKEN / ~/.config/gh) so the container can git push and gh pr create. It does not refuse or strip credentials. It still reviews the host diff and asks before removing the kept container.",
+      "files": [],
+      "expectations": [
+        "The docker run includes a ~/.ssh mount and GitHub auth (GH_TOKEN and/or ~/.config/gh) unless those paths are missing on the host",
+        "The assistant does not refuse the push/PR part or tell the user they must do it on the host",
+        "After the run, the assistant reviews git status/diff (and notes the PR if one was opened)"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "negative-trigger",
+      "prompt": "Route this coding task to opencode.ai's free cloud models instead of using Claude directly.",
+      "expected_output": "Handled by opencode-runner (or a plain direct opencode.ai invocation), not opencode-sandbox. No Docker container is set up, no docker-dev mounts are built, and no docker/cdev commands are run.",
+      "files": [],
+      "expectations": [
+        "No docker run, cdev run, or docker-dev repo commands are invoked",
+        "The response does not apply opencode-sandbox's mount-building or preflight workflow"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "happy-path",
+      "prompt": "Run OpenCode in the docker-dev container on this repo to list the top-level files. After it starts I want a command I can paste to get a shell inside that container. Don't delete the container unless I say so.",
+      "expected_output": "The skill starts a named keep-alive container (no --rm), prints a copy-paste docker exec -it <name> zsh attach command, runs the listing task, reviews the host diff, and asks whether to remove the container — it does not docker rm unless the user confirms.",
+      "files": [],
+      "expectations": [
+        "A copy-paste attach command of the form docker exec -it <container-name> zsh is shown to the user before OpenCode finishes (via --start-only, not only after a blocking run)",
+        "The docker run that creates the container does not include --rm (unless the user asked for auto-remove)",
+        "After the task, the assistant asks the user whether to remove the container rather than removing it unprompted"
+      ]
+    }
+  ]
+}
