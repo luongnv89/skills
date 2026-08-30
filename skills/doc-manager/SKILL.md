@@ -4,8 +4,8 @@ description: "Generate or update docs to match the code, citing each claim to pa
 license: MIT
 effort: medium
 metadata:
-  version: 2.0.2
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 2.0.3
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Doc Manager
