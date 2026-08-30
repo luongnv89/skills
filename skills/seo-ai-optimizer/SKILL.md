@@ -24,7 +24,6 @@ test -d "$HOME/.claude/skills/website-agent-readiness" ||
   echo "Install it:      asm install github:luongnv89/skills:skills/website-agent-readiness -p claude -s global --yes" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2
   echo "Verify:          asm list -p claude --json | grep 'website-agent-readiness'" >&2
-  exit 1
 }
 ```
 
