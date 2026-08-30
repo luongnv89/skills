@@ -26,7 +26,7 @@
 |---|---|
 | "Review this PR", "find bugs", "any security issues?" | review |
 | "This is slow", "optimize this", "find the bottleneck" | perf |
-| "Clean-code audit", "check readability against standards" | clean |
+| "Clean-code audit", "clean code review", "check this against clean code" | clean |
 | "Clean up the codebase", "remove the AI slop and dead code" | cleanup |
 | "code-review mode:perf" (explicit override) | perf |
 
