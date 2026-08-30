@@ -339,15 +339,16 @@ repos:
 
   - repo: local
     hooks:
+      # `npx --prefix` resolves frontend/node_modules; it does not change cwd.
       - id: eslint
         name: eslint
         entry: npx --prefix frontend eslint --fix
         language: system
-        files: ^frontend/
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
 
       - id: typecheck
         name: typecheck
-        entry: npx --prefix frontend tsc --noEmit
+        entry: npx --prefix frontend tsc --noEmit -p frontend
         language: system
         files: ^frontend/
         pass_filenames: false
