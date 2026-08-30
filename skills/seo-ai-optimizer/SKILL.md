@@ -4,13 +4,33 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.2.3
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.3.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # SEO & AI Bot Optimizer
 
 Audit and optimize website codebases for search engines and AI systems.
+
+## Dependency Preflight (mandatory)
+
+Step 8 invokes `website-agent-readiness`. Verify it is installed **before** the first
+step that changes anything:
+
+```bash
+asm list -p claude --json | grep -q '"website-agent-readiness"' || {
+  echo "Missing required skill: website-agent-readiness" >&2
+  echo "Install it:      asm install website-agent-readiness -p claude --yes" >&2
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  echo "Verify:          asm list -p claude --json | grep 'website-agent-readiness'" >&2
+  exit 1
+}
+```
+
+On a miss, print those commands and **skip Step 8** — Steps 1-7 audit the codebase and
+still run. Never invoke a half-installed skill. `website-agent-readiness` enforces its own
+prerequisites (`curl`, `python3`, and for issue filing `git`, `gh`, `plan-to-issues`); this
+skill does not re-check them.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -74,6 +94,7 @@ If Agent is not available, the skill runs a complete audit in a single conversat
 5. **Plan** -- Propose prioritized improvements for user approval
 6. **Implement** -- Apply approved changes following the Safety Protocol
 7. **Validate** -- Re-check modified files
+8. **Agent-readiness handoff** -- Scan the deployed site via `/website-agent-readiness`
 
 ---
 
@@ -122,6 +143,30 @@ For detailed implementation instructions per category (Technical SEO, robots.txt
 
 After implementing changes, re-run the audit script on modified files to verify critical issues are resolved and check for regressions.
 
+## Step 8: Agent-Readiness Handoff
+
+Steps 1-7 fix the **codebase**. This step scores the **deployed site** as an AI agent sees
+it, catching what a static audit cannot: rendered output, live headers, and runtime
+robots/llms.txt delivery.
+
+Run it when both hold, else skip and say why:
+
+- The site is deployed at a reachable public URL, and the Step 6 changes are live there
+- The user supplies that URL and approves the handoff
+
+```
+/website-agent-readiness <live-url>
+```
+
+That skill owns its own gated pipeline (scan → triage → `agent-ready-plan.md` → issue
+filing) — do not re-run its phases here, and do not re-apply its recommended llms.txt or
+metadata fixes inline. Anything it returns that belongs in the codebase comes back through
+Steps 5-7 as a normal approved plan item.
+
+**Verify:** the step passes when `agent-ready-plan.md` exists in the working directory and
+its reported 0-5 agent-readiness score is recorded in the final summary; a skip passes when
+the summary names which of the two conditions above was unmet.
+
 ## Step Completion Reports
 
 After each step, emit a `◆` status block. For templates and per-step check lists, see `references/step-reports.md`.
@@ -136,6 +181,7 @@ After a full run, the agent should produce:
 1. **Audit Report:** A structured markdown report grouping findings by severity.
 2. **Implementation:** Modified or new files (robots.txt, llms.txt, sitemap.xml, JSON-LD) with confirmed changes.
 3. **Validation Report:** A post-fix verification showing critical issues reduced to 0.
+4. **Agent-Readiness Handoff:** The live-site score and `agent-ready-plan.md` from Step 8, or a one-line reason it was skipped.
 
 For a concrete example of the audit report output, see `references/workflow-detail.md`.
 
