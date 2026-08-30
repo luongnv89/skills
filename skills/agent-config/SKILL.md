@@ -4,13 +4,24 @@ description: "Create or update CLAUDE.md and AGENTS.md files following official 
 license: MIT
 effort: medium
 metadata:
-  version: 1.3.1
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 ## When to Use
 
 Use when the user asks to create, update, audit, or improve `CLAUDE.md` or `AGENTS.md`. Skip for generic README or contributor-doc work.
+
+## Core Principle
+
+These files are **context, not enforced configuration**. They are loaded every session and the agent may still deviate.
+
+- Short, specific, always-on facts go in the file.
+- Multi-step procedures go in a **skill**.
+- "Must never happen" goes in a `PreToolUse` **hook** plus permissions.
+- "Verify the work" goes in **tests or CI**, not a sentence.
+
+Write the constitution here; enforce the law somewhere else. Full rules and their sources: `references/official-standards.md`. Which layer owns a given instruction: `references/knowledge-routing.md`.
 
 ## Prerequisites
 
@@ -51,12 +62,18 @@ Recognised inputs: `create`, `update`, `audit`, or a path (e.g., `src/api/CLAUDE
 
 If unspecified, ask which file:
 
-- **CLAUDE.md** — project context loaded each conversation: bash commands Claude can't guess, code-style overrides, test runners, repo etiquette, env quirks, gotchas.
-- **AGENTS.md** — subagent definitions: tool permissions, model preferences, focused single-domain instructions.
+- **AGENTS.md** — the cross-agent source of truth, readable by any coding agent (Claude Code, Codex, others). A README *for agents*: setup, commands, layout, style deltas, tests, PR rules, security. Plain Markdown, no schema. Closest file wins, so nested copies override ancestors.
+- **CLAUDE.md** — Claude-specific context loaded each conversation. When `AGENTS.md` already exists, `CLAUDE.md` opens with `@AGENTS.md` and carries only Claude-only extras — never a second copy of the same rules.
+
+**Default when the user says "both":** write the content once into `AGENTS.md`, then a thin `CLAUDE.md` wrapper. Templates for both: `references/knowledge-routing.md`.
+
+Subagent definition files (`.claude/agents/*.md`) are a different artifact and out of scope here — that is the `subagent-creator` skill's domain. Some repos, including this catalog, also keep subagent prompts inside their `AGENTS.md`; when the target file already uses that shape, preserve it and audit only the prose sections.
 
 ## CLAUDE.md Guidelines
 
-CLAUDE.md gives Claude persistent context **it cannot infer from code alone**.
+These files give the agent persistent context **it cannot infer from code alone**.
+
+**Size budget:** under **200 lines** per file (sweet spot 40–150); Codex's combined budget is 32 KiB. Past 200 lines, adherence measurably drops. When a file outgrows it: path-scope folder rules into `.claude/rules/*.md`, extract procedures into a skill, replace pasted docs with a pointer. Never use `@import` to save tokens.
 
 ### Include vs Exclude
 
@@ -70,7 +87,9 @@ CLAUDE.md gives Claude persistent context **it cannot infer from code alone**.
 | Developer environment quirks (env vars) | File-by-file codebase descriptions |
 | Common gotchas or non-obvious behaviors | Self-evident practices like "write clean code" |
 
-See `references/anti-patterns.md` for the full quality test and failure modes, and `references/claude-md-checklist.md` for the structural audit checklist (length budget, hierarchy, 5 required sections).
+Also pin what the model would otherwise guess wrong: the package manager (`pnpm`, not `npm`), the language version, the single-test command.
+
+See `references/anti-patterns.md` for the full quality test and failure modes, and `references/claude-md-checklist.md` for the structural audit checklist (length budget, routing, enforceability, 5 required sections, drift).
 
 ### Example Format
 
@@ -86,49 +105,39 @@ See `references/anti-patterns.md` for the full quality test and failure modes, a
 
 ### File Locations
 
-- `~/.claude/CLAUDE.md` — applies to all sessions
-- `./CLAUDE.md` — checked into git, shared with team
-- `CLAUDE.local.md` — gitignored personal overrides
-- Parent dirs (monorepos) and child dirs (on-demand) both load
+- `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md` — personal defaults, all sessions. The user owns these; never rewrite one from a repo-scoped run.
+- `./CLAUDE.md`, `./AGENTS.md` — checked into git, shared with the team, reviewed like code.
+- `CLAUDE.local.md` / `AGENTS.override.md` — gitignored personal overrides.
+- `.claude/rules/*.md` with a `paths:` key — load only when matching files are touched.
+- Nested per-package files in monorepos; closest file wins.
 
-### Import Syntax
+### Imports and Emphasis
 
-```markdown
-See @README.md and @package.json.
-- Git workflow: @docs/git-instructions.md
-```
+`@README.md`-style imports organize files but **do not shrink context** — imported files still load at launch. Reach for a path-scoped rule when the goal is fewer tokens.
 
-### Emphasis
-
-Add **IMPORTANT** or **YOU MUST** for critical rules to improve adherence.
+Add **IMPORTANT** or **YOU MUST** only to true hard rules. Scattering them trains the model to ignore the markers.
 
 ## AGENTS.md Guidelines
 
-Subagents run in their own context with restricted tools.
-
-### Definition Format
+`AGENTS.md` is the shared, agent-agnostic contract. Use this section order:
 
 ```markdown
----
-name: security-reviewer
-description: Reviews code for security vulnerabilities
-tools: Read, Grep, Glob, Bash
-model: opus
----
-You are a senior security engineer. Review for:
-- Injection vulnerabilities (SQL, XSS, command injection)
-- Auth/authorization flaws
-- Secrets in code
-Provide line references and concrete fixes.
+## Project      — 2–4 sentences: what it is, invariants that must not break
+## Commands     — install, dev, test (all / one), lint, types, adding a dep
+## Layout       — package map, what may be edited, where tests live
+## Conventions  — deltas from defaults only, one short example if needed
+## Constraints  — never edit generated/, don't push to main unless asked
+## Done when    — the exact lint/type/test commands that define completion
+## Read when needed — pointers: billing → `docs/billing.md`
 ```
 
-**Required**: `name`, `description`, `tools`. **Optional**: `model`.
-
-Best practices: single-domain focus, specific scope, concrete output format, minimum tool surface.
+Every bullet must be a command, a pin, a constraint, or a pointer. One idea per bullet; no two bullets may contradict. Full templates, writing rules, and the maintenance feedback loop: `references/knowledge-routing.md`.
 
 ## Token Efficiency Block (always inject)
 
 **Always** append the block from `references/token-efficiency-block.md` to every generated `CLAUDE.md` / `AGENTS.md`. This is non-negotiable — it protects the agent's context window and budget.
+
+It is the one deliberate exception to "no general advice": these are always-on rules about how the agent works, not about the code, so the root file is the layer that owns them.
 
 ## Optional Blocks (only when requested)
 
@@ -153,11 +162,12 @@ If the user asks for orchestration rigor or stricter coding rules, copy verbatim
 
 ### `audit`
 
-1. Read existing file.
-2. Walk every item in `references/claude-md-checklist.md` (length budget, content quality, hierarchy, 5 required sections, final quality checks). Report each as pass / fail / N/A with a one-line reason.
+1. Read existing file. If both `AGENTS.md` and `CLAUDE.md` exist, read both — drift is only visible across the pair.
+2. Walk every item in `references/claude-md-checklist.md` (length budget, content quality, routing, enforceability, 5 required sections, drift, final checks). Report each as pass / fail / N/A with a one-line reason.
 3. Cross-check against `references/anti-patterns.md`.
-4. Report: checklist results, anti-patterns found, useful-vs-redundant ratio, top recommendations.
-5. **Do NOT modify the file** — report only.
+4. **Route and enforce.** For every failing line, name where it belongs: a skill (procedure), a `.claude/rules/*.md` path-scoped file (folder-only), a `PreToolUse` hook plus permissions (must-never-happen), a test or CI (verification), or the user-level file (personal taste). A machine-checkable rule gets the gate **and** loses its prose.
+5. Report: checklist results, anti-patterns found, routing recommendations, duplicated or contradicting rules, top recommendations.
+6. **Do NOT modify the file** — report only. Suggest `/context` to confirm the file loads and `/doctor` to prune what the agent can infer.
 
 ## Step Completion Reports
 
@@ -183,8 +193,10 @@ A run passes when **all** of the following are true:
 - [ ] Repo synced clean OR user explicitly authorised proceeding without sync.
 - [ ] Token-efficiency block present in the generated/updated file (verify by grep `## Token Efficiency`).
 - [ ] No anti-pattern from `references/anti-patterns.md` appears in the new content.
-- [ ] For `create` / `update`: result passes every section of `references/claude-md-checklist.md` (length budget, content quality, hierarchy, 5 required sections).
-- [ ] For `audit`: every checklist item is reported with pass / fail / N/A, and no file was modified (verify with `git diff --stat`).
+- [ ] For `create` / `update`: result passes every section of `references/claude-md-checklist.md` (length budget, content quality, routing, enforceability, 5 required sections, drift).
+- [ ] Generated/updated file is under 200 lines (verify with `wc -l`).
+- [ ] No rule appears in both `AGENTS.md` and `CLAUDE.md`; when both exist, `CLAUDE.md` opens with `@AGENTS.md`.
+- [ ] For `audit`: every checklist item is reported with pass / fail / N/A, each failing line carries a routing recommendation, and no file was modified (verify with `git diff --stat`).
 - [ ] Final step-completion report emitted with `Result: PASS`.
 
 ## Expected Output
@@ -206,8 +218,10 @@ Followed by a step-completion report ending in `Result: PASS`.
 ◆ Audit (step 1 of 1)
   Length budget:      √ pass — 64 lines
   Content quality:    × fail — 3 fluff lines ("be a senior engineer", motivational)
-  Hierarchy split:    √ pass — global / project / local in use
-  5 required sections: × fail — missing "Hard rules" and "Workflow preferences"
+  Routing:            × fail — 12-line deploy runbook belongs in a skill
+  Enforceability:     × fail — "never commit .env" has no PreToolUse hook
+  5 required sections: × fail — missing "Hard rules" and "Done when"
+  Drift:              × fail — 2 rules duplicated in AGENTS.md
   Anti-patterns:      × fail — found 2 (generic style rules)
   Token block:        × fail — missing
   Result:             PARTIAL
@@ -220,7 +234,11 @@ Followed by a step-completion report ending in `Result: PASS`.
 - **Dirty working tree** → stash backup before sync; if `stash pop` conflicts, stop and ask.
 - **Missing `origin`** → skip sync, warn user, require explicit confirmation to proceed.
 - **User pastes raw `$ARGUMENTS`** with no recognised verb → ask which mode (create/update/audit).
-- **Generated file would exceed 500 lines** → reject; CLAUDE.md must stay terse, link out instead.
+- **AGENTS.md already exists and user asks for CLAUDE.md** → write the wrapper (`@AGENTS.md` + Claude-only extras), never a duplicate of the shared rules.
+- **Target is a personal file (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`)** → audit and propose only; never rewrite a user's personal file from a repo-scoped run.
+- **Monorepo** → propose nested per-package files rather than growing the root file.
+- **Requested content is a multi-step procedure** → decline to inline it; propose a skill and leave a one-line pointer.
+- **Generated file would exceed 200 lines** → reject; path-scope, extract to a skill, or link out instead.
 
 ## Anti-Patterns to Avoid
 
