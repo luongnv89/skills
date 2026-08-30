@@ -7,13 +7,28 @@ Philosophy: **lean CI**. pre-commit already handles format, lint, type-check, un
 `pre-commit run` executes **commit-stage hooks only**. Hooks on `stages: [pre-push]` — the full test suite, coverage threshold, and CLI E2E — are silently skipped unless you also pass `--hook-stage pre-push`. `pre-commit/action@v3.0.1` shares this blind spot, which is why these templates call the CLI directly instead:
 
 ```yaml
-      - name: Verify hooks were not bypassed
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'   # avoids the all-zeros `github.event.before`
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0                      # `--from-ref` needs the base SHA locally
+      # ... set up the project toolchain and Python here ...
+      - name: Run both hook stages over the PR diff
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```
+
+Three details are load-bearing, and dropping any one of them makes the job fail on its first run:
+
+- **`fetch-depth: 0`.** `actions/checkout` clones at depth 1, so the base SHA is not in the object store and `--from-ref` dies on a bad object.
+- **`if: github.event_name == 'pull_request'`.** On a `push` event `github.event.before` is all zeros for a branch's first push, and stale after a force-push. Pull requests are where bypassed commits actually enter, so guard there.
+- **The project's toolchain in the same job.** Hooks declared `language: system` shell out to `npm`, `mypy`, `go`, or `cargo`; a bare Python job cannot run them.
 
 Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. Running `--all-files` in CI re-checks the entire repository on every push and is the cost blow-up this skill exists to avoid.
 
@@ -32,35 +47,42 @@ Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. 
 
 ## Minimal (pre-commit already covers everything)
 
-If your pre-commit setup runs format, lint, type-check, unit tests, and E2E tests, CI shrinks to a single bypass guard:
+If your pre-commit setup runs format, lint, type-check, unit tests, and E2E tests, CI shrinks to a single bypass guard. Note the trigger: with no matrix or deploy job, there is nothing for a `push` event to do, so this workflow listens for pull requests only rather than burning a no-op run on every push.
 
 ```yaml
 name: CI
 
 on:
-  push:
-    branches: [main, master]
   pull_request:
     branches: [main, master]
 
 jobs:
-  pre-commit:
+  # PRs are where bypassed commits enter. Gating the job on `pull_request` also
+  # avoids `github.event.before`, which is all zeros on a branch's first push.
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A diff-scoped run needs BOTH endpoints in the object store, and
+          # checkout defaults to fetch-depth 1 — without this the base SHA is
+          # missing and `--from-ref` dies on a bad object.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
-      # seconds. Both invocations are required — `pre-commit run` alone executes
-      # commit-stage hooks only and silently skips the pre-push suite and E2E.
-      - name: Verify hooks were not bypassed
+      # The ONLY overlap with pre-commit, and it costs seconds because the run is
+      # scoped to the diff. Both invocations are required — `pre-commit run` alone
+      # executes commit-stage hooks and silently skips the pre-push suite and E2E.
+      - name: Run both hook stages over the PR diff
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```
@@ -83,11 +105,21 @@ on:
     branches: [main, master]
 
 jobs:
-  quality:
+  # PRs are where bypassed commits enter. Gating the job on `pull_request` also
+  # avoids `github.event.before`, which is all zeros on a branch's first push.
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A diff-scoped run needs BOTH endpoints in the object store, and
+          # checkout defaults to fetch-depth 1 — without this the base SHA is
+          # missing and `--from-ref` dies on a bad object.
+          fetch-depth: 0
 
+      # The project toolchain: `language: system` hooks shell out to it.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -97,13 +129,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
-      # seconds. Both invocations are required — `pre-commit run` alone executes
-      # commit-stage hooks only and silently skips the pre-push suite and E2E.
-      - name: Verify hooks were not bypassed
+      # pre-commit is a Python tool; the runner's system Python can refuse
+      # `pip install` under PEP 668.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The ONLY overlap with pre-commit, and it costs seconds because the run is
+      # scoped to the diff. Both invocations are required — `pre-commit run` alone
+      # executes commit-stage hooks and silently skips the pre-push suite and E2E.
+      - name: Run both hook stages over the PR diff
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
@@ -173,10 +212,19 @@ on:
     branches: [main, master]
 
 jobs:
-  quality:
+  # PRs are where bypassed commits enter. Gating the job on `pull_request` also
+  # avoids `github.event.before`, which is all zeros on a branch's first push.
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A diff-scoped run needs BOTH endpoints in the object store, and
+          # checkout defaults to fetch-depth 1 — without this the base SHA is
+          # missing and `--from-ref` dies on a bad object.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -187,13 +235,13 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev]"
 
-      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
-      # seconds. Both invocations are required — `pre-commit run` alone executes
-      # commit-stage hooks only and silently skips the pre-push suite and E2E.
-      - name: Verify hooks were not bypassed
+      # The ONLY overlap with pre-commit, and it costs seconds because the run is
+      # scoped to the diff. Both invocations are required — `pre-commit run` alone
+      # executes commit-stage hooks and silently skips the pre-push suite and E2E.
+      - name: Run both hook stages over the PR diff
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
@@ -261,24 +309,41 @@ on:
     branches: [main, master]
 
 jobs:
-  quality:
+  # PRs are where bypassed commits enter. Gating the job on `pull_request` also
+  # avoids `github.event.before`, which is all zeros on a branch's first push.
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A diff-scoped run needs BOTH endpoints in the object store, and
+          # checkout defaults to fetch-depth 1 — without this the base SHA is
+          # missing and `--from-ref` dies on a bad object.
+          fetch-depth: 0
 
+      # The project toolchain: `language: system` hooks shell out to it.
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
           cache: true
 
-      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
-      # seconds. Both invocations are required — `pre-commit run` alone executes
-      # commit-stage hooks only and silently skips the pre-push suite and E2E.
-      - name: Verify hooks were not bypassed
+      # pre-commit is a Python tool; the runner's system Python can refuse
+      # `pip install` under PEP 668.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The ONLY overlap with pre-commit, and it costs seconds because the run is
+      # scoped to the diff. Both invocations are required — `pre-commit run` alone
+      # executes commit-stage hooks and silently skips the pre-push suite and E2E.
+      - name: Run both hook stages over the PR diff
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
@@ -327,11 +392,21 @@ on:
     branches: [main, master]
 
 jobs:
-  quality:
+  # PRs are where bypassed commits enter. Gating the job on `pull_request` also
+  # avoids `github.event.before`, which is all zeros on a branch's first push.
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A diff-scoped run needs BOTH endpoints in the object store, and
+          # checkout defaults to fetch-depth 1 — without this the base SHA is
+          # missing and `--from-ref` dies on a bad object.
+          fetch-depth: 0
 
+      # The project toolchain: `language: system` hooks shell out to it.
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -340,13 +415,20 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
 
-      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
-      # seconds. Both invocations are required — `pre-commit run` alone executes
-      # commit-stage hooks only and silently skips the pre-push suite and E2E.
-      - name: Verify hooks were not bypassed
+      # pre-commit is a Python tool; the runner's system Python can refuse
+      # `pip install` under PEP 668.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The ONLY overlap with pre-commit, and it costs seconds because the run is
+      # scoped to the diff. Both invocations are required — `pre-commit run` alone
+      # executes commit-stage hooks and silently skips the pre-push suite and E2E.
+      - name: Run both hook stages over the PR diff
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
@@ -392,11 +474,21 @@ on:
     branches: [main, master]
 
 jobs:
-  quality:
+  # PRs are where bypassed commits enter. Gating the job on `pull_request` also
+  # avoids `github.event.before`, which is all zeros on a branch's first push.
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A diff-scoped run needs BOTH endpoints in the object store, and
+          # checkout defaults to fetch-depth 1 — without this the base SHA is
+          # missing and `--from-ref` dies on a bad object.
+          fetch-depth: 0
 
+      # The project toolchain: `language: system` hooks shell out to it.
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -404,13 +496,20 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Bypass guard: the ONLY overlap with pre-commit. Diff-scoped, so it costs
-      # seconds. Both invocations are required — `pre-commit run` alone executes
-      # commit-stage hooks only and silently skips the pre-push suite and E2E.
-      - name: Verify hooks were not bypassed
+      # pre-commit is a Python tool; the runner's system Python can refuse
+      # `pip install` under PEP 668.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The ONLY overlap with pre-commit, and it costs seconds because the run is
+      # scoped to the diff. Both invocations are required — `pre-commit run` alone
+      # executes commit-stage hooks and silently skips the pre-push suite and E2E.
+      - name: Run both hook stages over the PR diff
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 
@@ -471,6 +570,45 @@ jobs:
             backend:
               - 'backend/**'
 
+  # ONE guard job, not one per language. A hook set is a single config: splitting
+  # the guard across per-language jobs makes each one run every hook, so the
+  # backend job would try to execute the eslint hook with no Node toolchain.
+  # Per-language `files:` filters in .pre-commit-config.yaml already do the
+  # scoping; the paths-filter below decides which BUILD jobs run, not which
+  # hooks do.
+  hooks:
+    needs: changes
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Every toolchain a `language: system` hook shells out to.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - if: needs.changes.outputs.frontend == 'true'
+        run: npm ci
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - if: needs.changes.outputs.backend == 'true'
+        run: pip install -e "backend/[dev]"
+
+      - name: Run both hook stages over the PR diff
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
+
   frontend:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
@@ -483,12 +621,8 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - name: Verify hooks were not bypassed (frontend)
-        run: |
-          pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
-          pre-commit run --from-ref "$base" --to-ref HEAD
-          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
+      - name: Build
+        run: npm run build
 
   backend:
     needs: changes
@@ -501,12 +635,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -e "backend/[dev]"
-      - name: Verify hooks were not bypassed (backend)
-        run: |
-          pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
-          pre-commit run --from-ref "$base" --to-ref HEAD
-          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
+      - name: Matrix-only checks
+        run: pytest -q
 ```
 
 ---
@@ -555,12 +685,12 @@ jobs:
 Some hooks (like interactive formatters) may not make sense in CI. Skip them with the `SKIP` env var:
 
 ```yaml
-      - name: Verify hooks were not bypassed
+      - name: Run both hook stages over the PR diff
         env:
           SKIP: "no-commit-to-branch"  # comma-separated hook IDs to skip
         run: |
           pip install pre-commit
-          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```

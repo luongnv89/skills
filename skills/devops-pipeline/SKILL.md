@@ -142,15 +142,29 @@ CI runs exactly four kinds of thing:
 The bypass guard, in full:
 
 ```yaml
-- name: Verify hooks were not bypassed
-  run: |
-    pip install pre-commit
-    base="${{ github.event.pull_request.base.sha || github.event.before }}"
-    pre-commit run --from-ref "$base" --to-ref HEAD
-    pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
+  hooks:
+    name: Verify hooks were not bypassed
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # ... set up the project toolchain and Python here ...
+      - name: Run both hook stages over the PR diff
+        run: |
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          pre-commit run --from-ref "$base" --to-ref HEAD
+          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```
 
-**Both lines are required.** `pre-commit run` executes commit-stage hooks *only* — the full suite and the CLI E2E tests live on `pre-push` and are silently skipped without the second invocation. `pre-commit/action@v3.0.1` has the same blind spot, so prefer this explicit two-line form over the action.
+Four details are load-bearing; drop any one and the job fails on its first run:
+
+- **Both `pre-commit run` lines.** The first executes commit-stage hooks *only* — the full suite and the CLI E2E tests live on `pre-push` and are silently skipped without the second. `pre-commit/action@v3.0.1` shares this blind spot, so call the CLI directly.
+- **`fetch-depth: 0`.** `actions/checkout` clones at depth 1, so the base SHA is absent and `--from-ref` dies on a bad object.
+- **`if: github.event_name == 'pull_request'`.** On a `push` event `github.event.before` is all zeros for a branch's first push and stale after a force-push.
+- **The project toolchain in the same job.** Hooks declared `language: system` shell out to `npm`, `mypy`, `go`, or `cargo`.
 
 Keep the matrix off the hot path: gate it on `push` to the default branch or on a release tag, not on every PR commit. A three-version matrix on every push is triple the bill for a signal the hooks already gave locally.
 
