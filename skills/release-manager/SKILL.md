@@ -4,8 +4,8 @@ description: "Manage software releases end-to-end: bump version, generate change
 license: MIT
 effort: max
 metadata:
-  version: 2.6.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 2.6.1
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Release Manager
@@ -18,7 +18,7 @@ Main agent orchestrates; heavy steps (scan files, generate changelog, update doc
 
 ## Overview
 
-A release typically involves these steps in order. Walk through each, confirming with the user before changes.
+A release typically involves these steps in order. Walk through each, confirming with the user before changes. **Step 1 can short-circuit the rest:** if the project already ships a release tool (`.changeset`, `.releaserc`, semantic-release, `lerna.json`), defer to it and skip steps 2-10.
 
 1. **Pre-flight checks** — clean working tree, synced with remote
 2. **Determine version** — analyze changes, suggest semver bump
