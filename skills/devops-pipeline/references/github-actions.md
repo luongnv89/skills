@@ -586,13 +586,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Every toolchain a `language: system` hook shells out to.
+      # Toolchains `language: system` hooks shell out to. Gate Node on the
+      # frontend filter: `cache: npm` requires a lockfile, and this template's
+      # lives at `frontend/package-lock.json`, not the repo root — a backend-only
+      # PR would otherwise fail the guard with "Dependencies lock file is not found".
       - name: Setup Node.js
+        if: needs.changes.outputs.frontend == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
       - if: needs.changes.outputs.frontend == 'true'
+        working-directory: frontend
         run: npm ci
 
       - name: Setup Python
@@ -626,9 +632,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+          cache-dependency-path: frontend/package-lock.json
+      - working-directory: frontend
+        run: npm ci
+      - working-directory: frontend
+        run: npm test
+      - working-directory: frontend
+        run: npm run build
 
   backend:
     needs: changes
