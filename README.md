@@ -201,7 +201,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**frontend-design**](skills/frontend-design/) | 1.2.4 | high | Production UIs with usability-first approach |
+| [**frontend-design**](skills/frontend-design/) | 1.2.5 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.2.3 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.1.2 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 | [**website-cloner**](skills/website-cloner/) | 1.2.1 | high | 6-phase URL to improved Vite/React/Tailwind site |
