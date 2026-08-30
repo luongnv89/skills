@@ -81,6 +81,57 @@ Use this template when presenting the prioritized improvement plan to the user:
 - Generate or install appropriate package for the framework.
 - See `references/framework-configs.md` for framework-specific packages.
 
+## Step 8: Agent-Readiness Handoff — Detail
+
+### Why it is a separate skill, not more audit logic
+
+Steps 1-7 read the **repository**. `website-agent-readiness` scans the **deployed site**
+through `isitagentready.com`, so it sees what a static audit cannot: server-rendered
+output, response headers, and whether `robots.txt` / `llms.txt` are actually served at
+their URLs rather than merely committed.
+
+The two skills point at each other deliberately and do not overlap:
+
+| Skill | Input | Fixes code? |
+|---|---|---|
+| `seo-ai-optimizer` (this skill) | a repo checkout | yes — Steps 5-7 |
+| `website-agent-readiness` | a live URL | no — it produces a plan and files issues |
+
+Its description names this skill as a non-trigger for applying llms.txt/SEO fixes; that
+boundary holds in this direction too. **Never** apply its recommendations inline from
+Step 8.
+
+### Preconditions
+
+Both must hold, or the step is skipped with the reason stated:
+
+1. The Step 6 changes are deployed and reachable at a public URL (a `localhost` URL cannot
+   be scanned by a hosted service).
+2. The user supplied that URL and approved the handoff.
+
+The dependency preflight in SKILL.md runs before any mutation; a missing
+`website-agent-readiness` skips Step 8 without failing Steps 1-7.
+
+### Handoff and return path
+
+```
+/website-agent-readiness <live-url>
+```
+
+That skill runs its own four gated phases and writes `agent-ready-plan.md`. Do not re-run
+its phases, re-implement its scan, or answer its approval gates on the user's behalf.
+
+Findings it returns that belong in the codebase re-enter **this** skill at Step 5 as new
+plan items, and go through the same Safety Protocol at Step 6. Findings that belong to
+hosting or infrastructure stay in its plan and are reported, not fixed here.
+
+### Verification
+
+- PASS: `agent-ready-plan.md` exists and the 0-5 score is recorded in the final summary.
+- SKIPPED: the summary names which precondition was unmet.
+- FAIL: the scan errored — report the error, do not retry silently, and leave Steps 1-7
+  results intact.
+
 ## Auxiliary Information
 
 ### Error Handling
@@ -88,6 +139,7 @@ Use this template when presenting the prioritized improvement plan to the user:
 - **Framework Config Not Found:** Warn and skip framework-specific optimizations. Proceed with generic HTML analysis.
 - **Web Search Fails:** Fall back to embedded best practices in `references/`. Note that latest guidelines could not be fetched.
 - **Large Codebase:** The audit script samples 50 representative files by default. Offer to increase with `--max-files N`.
+- **Agent-readiness scan fails or the site is unreachable:** Report the error and mark Step 8 `FAIL`. Steps 1-7 results stand; never retry silently or fabricate a score.
 
 ### Expected Output
 
@@ -125,8 +177,11 @@ After implementation, validation shows: `critical issues: 2 → 0`, `llms.txt cr
 - [ ] Safety Protocol (Diff & Confirm) was followed for all file modifications.
 - [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0.
 - [ ] `llms.txt`, `robots.txt`, and `sitemap.xml` are present (or explicitly justified).
+- [ ] Step 8 either records the live-site agent-readiness score and `agent-ready-plan.md`, or names the precondition that made it skip.
 
 ### Edge Cases
 - **robots.txt already exists with custom rules:** Merges AI bot directives without overwriting existing entries; shows diff before writing.
 - **Conflicting canonical URLs:** Flags each conflict individually; does not auto-fix without user approval.
 - **Large codebase (100+ pages):** Audits a representative 50-file sample; offers `--max-files N` flag to expand scope.
+- **Repo has no deployed site (library, template, pre-launch):** Step 8 is skipped, not failed — say so and finish at Step 7.
+- **`website-agent-readiness` returns fixes this skill already applied:** Report the duplicate rather than re-applying it; the live scan may predate the deploy.
