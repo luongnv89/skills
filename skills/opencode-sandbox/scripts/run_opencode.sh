@@ -23,7 +23,11 @@
 #                             For long/complex tasks: write them to a file, pass --file, and give
 #                             a short --message like "Follow the attached file's instructions exactly."
 #   --with-claude-skills      mount ~/.claude (and ~/.agents, for symlinked skills) read-only
-#   --with-git-identity       mount ~/.gitconfig read-only, for correct commit authorship
+#   --with-git-identity       mount ~/.gitconfig read-only (default: on)
+#   --no-git-identity         do not mount ~/.gitconfig
+#   --no-ssh                  do not mount ~/.ssh (default: mount it so git push works)
+#   --no-github               do not mount ~/.config/gh or inject GH_TOKEN
+#                             (default: both, so gh pr/push/merge work)
 #   --image IMAGE             docker image (default: ghcr.io/luongnv89/u2604dev:latest)
 #   --format FORMAT           opencode output format: default | json (default: default)
 #   --model MODEL             opencode model to use (e.g. opencode/muse-spark-1.2-contributor-free)
@@ -34,9 +38,9 @@
 #   --rm                      remove the container when this script exits (opt-in;
 #                             default is to keep it running so you can attach)
 #
-# Never mounts ~/.ssh or injects a GH token/GH_TOKEN — see
-# references/mounts-and-credentials.md for why, and what to do if a task
-# genuinely needs push/publish access.
+# SSH (~/.ssh) and GitHub (GH_TOKEN + ~/.config/gh) are ON by default. Pass
+# --no-ssh and/or --no-github for an untrusted task that must not reach
+# GitHub. See references/mounts-and-credentials.md.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -52,7 +56,9 @@ PROJECT_DIR=""
 MESSAGE=""
 TASK_FILE=""
 WITH_CLAUDE_SKILLS=0
-WITH_GIT_IDENTITY=0
+WITH_GIT_IDENTITY=1
+WITH_SSH=1
+WITH_GITHUB=1
 CONTAINER_NAME=""
 REMOVE_ON_EXIT=0
 RAN_OPENCODE=0
@@ -74,6 +80,9 @@ while [ $# -gt 0 ]; do
     --file) TASK_FILE="$2"; shift 2 ;;
     --with-claude-skills) WITH_CLAUDE_SKILLS=1; shift ;;
     --with-git-identity) WITH_GIT_IDENTITY=1; shift ;;
+    --no-git-identity) WITH_GIT_IDENTITY=0; shift ;;
+    --no-ssh) WITH_SSH=0; shift ;;
+    --no-github) WITH_GITHUB=0; shift ;;
     --image) IMAGE="$2"; shift 2 ;;
     --format) FORMAT="$2"; shift 2 ;;
     --model) MODEL="$2"; shift 2 ;;
@@ -254,21 +263,68 @@ if [ "$WITH_GIT_IDENTITY" = "1" ]; then
   if [ -f "$HOME/.gitconfig" ]; then
     MOUNTS+=(-v "$HOME/.gitconfig:/root/.gitconfig:ro")
   else
-    echo "Warning: --with-git-identity was requested but $HOME/.gitconfig does not exist; skipping." >&2
+    echo "Warning: git identity is on by default but $HOME/.gitconfig does not exist; skipping. Pass --no-git-identity to silence this." >&2
   fi
 fi
 
+if [ "$WITH_SSH" = "1" ]; then
+  if [ -d "$HOME/.ssh" ]; then
+    # rw so ssh can update known_hosts on first connect to a host.
+    MOUNTS+=(-v "$HOME/.ssh:/root/.ssh")
+  else
+    echo "Warning: SSH is on by default but $HOME/.ssh does not exist; skipping. Pass --no-ssh to silence this." >&2
+  fi
+fi
+
+DOCKER_ENV=()
+if [ "$WITH_GITHUB" = "1" ]; then
+  gh_ok=0
+  if [ -d "$HOME/.config/gh" ]; then
+    MOUNTS+=(-v "$HOME/.config/gh:/root/.config/gh")
+    gh_ok=1
+  fi
+  if command -v gh >/dev/null 2>&1; then
+    GH_TOKEN_VALUE=""
+    GH_TOKEN_VALUE="$(gh auth token 2>/dev/null || true)"
+    if [ -n "$GH_TOKEN_VALUE" ]; then
+      DOCKER_ENV+=(-e "GH_TOKEN=${GH_TOKEN_VALUE}" -e "GITHUB_TOKEN=${GH_TOKEN_VALUE}")
+      gh_ok=1
+    fi
+    unset GH_TOKEN_VALUE
+  fi
+  if [ "$gh_ok" != "1" ]; then
+    echo "Warning: GitHub is on by default but neither $HOME/.config/gh nor 'gh auth token' is available; skipping. Run 'gh auth login' on the host, or pass --no-github to silence this." >&2
+  fi
+fi
+
+echo "Credentials: ssh=$WITH_SSH github=$WITH_GITHUB gitconfig=$WITH_GIT_IDENTITY (1=on 0=off)" >&2
+
 echo "Starting OpenCode container (image: $IMAGE, workspace: $PROJECT_DIR, name: $CONTAINER_NAME)..." >&2
 
-if ! docker run -d \
-  --name "$CONTAINER_NAME" \
-  --label opencode-sandbox=1 \
-  "${MOUNTS[@]}" \
-  -w /workspace \
-  "$IMAGE" \
-  sleep infinity >/dev/null; then
-  echo "Error: 'docker run' failed to start container '$CONTAINER_NAME'. See the docker error above." >&2
-  exit 1
+# Bash 3.2 + set -u: empty "${DOCKER_ENV[@]}" is an error, so branch.
+if [ "${#DOCKER_ENV[@]}" -gt 0 ]; then
+  if ! docker run -d \
+    --name "$CONTAINER_NAME" \
+    --label opencode-sandbox=1 \
+    "${DOCKER_ENV[@]}" \
+    "${MOUNTS[@]}" \
+    -w /workspace \
+    "$IMAGE" \
+    sleep infinity >/dev/null; then
+    echo "Error: 'docker run' failed to start container '$CONTAINER_NAME'. See the docker error above." >&2
+    exit 1
+  fi
+else
+  if ! docker run -d \
+    --name "$CONTAINER_NAME" \
+    --label opencode-sandbox=1 \
+    "${MOUNTS[@]}" \
+    -w /workspace \
+    "$IMAGE" \
+    sleep infinity >/dev/null; then
+    echo "Error: 'docker run' failed to start container '$CONTAINER_NAME'. See the docker error above." >&2
+    exit 1
+  fi
 fi
 if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null || true)" != "true" ]; then
   echo "Error: container '$CONTAINER_NAME' was created but is not running. Inspect with: docker logs '$CONTAINER_NAME'" >&2

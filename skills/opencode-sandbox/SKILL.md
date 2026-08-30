@@ -1,23 +1,22 @@
 ---
 name: opencode-sandbox
-description: "Run OpenCode in a docker-dev container; prints docker exec attach; kept unless you confirm rm. Never mounts SSH/GH tokens. Isolate OpenCode or dodge rate limits. Don't use for opencode.ai (opencode-runner), Herdr, or the project's app."
+description: "Run OpenCode in a docker-dev sandbox (SSH/gh on by default; --no-ssh/--no-github to isolate). Prints docker exec attach; kept until you confirm rm. Don't use for opencode.ai (opencode-runner), Herdr, or the app."
 license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent-comms or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 1.4.0
+  version: 2.0.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # OpenCode Sandbox
 
-Run OpenCode sandboxed inside a [luongnv89/docker-dev](https://github.com/luongnv89/docker-dev)
-container for a local project — isolating it from host SSH keys and GitHub
-tokens by construction, not by discipline. **The redline: this skill never
-mounts `~/.ssh` and never injects a `GH_TOKEN` or `gh auth token`.** Design
-every task to stop before the step that would need push/publish credentials;
-see `references/mounts-and-credentials.md` for why and what to do if a task
-genuinely needs them anyway.
+Run OpenCode inside a [luongnv89/docker-dev](https://github.com/luongnv89/docker-dev)
+container for a local project. **SSH and GitHub auth are on by default**
+(`~/.ssh`, `~/.config/gh`, `GH_TOKEN` from `gh auth token`) so `git commit`,
+`git push`, `gh pr create`, and `gh pr merge` work in the container. Pass
+`--no-ssh --no-github` when the task must not reach GitHub. Details:
+`references/mounts-and-credentials.md`.
 
 **Keep-by-default:** the container stays running after the task so the user
 can attach a shell. Do not remove it unless they confirm (or they asked for
@@ -25,12 +24,12 @@ can attach a shell. Do not remove it unless they confirm (or they asked for
 
 ## When to Use
 
-- Run OpenCode against a project without exposing the host's `~/.ssh` or
-  `GH_TOKEN` to it
+- Run OpenCode against a project and let it commit, push, open, or merge a PR
+  (`gh` / SSH available inside the container)
 - OpenCode keeps hitting provider rate limits and the task needs a fresh
   container session
-- Confirm a task finished cleanly before letting anything ship — this skill's
-  workflow ends at "verify the host diff," never at "push"
+- The task must **not** touch GitHub — pass `--no-ssh --no-github` and review
+  the host diff; push stays a separate step
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -66,7 +65,7 @@ mid-run.
 so it stays running), prints an attach command, then runs `opencode run --auto`
 via `docker exec`. One exit code from OpenCode, output on stdout — no polling,
 no TUI, no permission dialogs to click through (`--auto` handles them; see
-`references/mounts-and-credentials.md` → _Why `--auto` is safe here_).
+`references/mounts-and-credentials.md` → _Why `--auto` is required_).
 
 **The container is kept by default.** Do not pass `--rm` unless the user
 already asked to throw the container away. After the run, ask them before
@@ -74,8 +73,16 @@ any `docker rm` (Step 4).
 
 ### Step 1 — Decide mounts
 
-Every run mounts the project directory (`/workspace`) and `~/.config/opencode`
-(OpenCode's own auth). Add flags only for what the task needs:
+Every run mounts the project directory (`/workspace`) and
+`~/.config/opencode` (OpenCode's own auth). **On by default:** `~/.ssh`,
+GitHub auth (`~/.config/gh` + `GH_TOKEN`), and `~/.gitconfig`. Opt out when
+the user asks to isolate, or the task must not reach GitHub:
+
+- `--no-ssh` — do not mount `~/.ssh`
+- `--no-github` — do not mount `~/.config/gh` or inject `GH_TOKEN`
+- `--no-git-identity` — do not mount `~/.gitconfig`
+
+Add flags only for extras the task needs:
 
 - `--with-claude-skills` — task must read/follow a **user-level** Claude Code
   skill living under `~/.claude/skills/` (mounts `~/.claude` **and**
@@ -85,16 +92,12 @@ Every run mounts the project directory (`/workspace`) and `~/.config/opencode`
   (e.g. `AGENTS.md`, `.claude/skills/` inside the repo itself, a
   CONTRIBUTING.md) — it's already inside `/workspace` via the project mount,
   no extra flag needed.
-- `--with-git-identity` — task will `git commit` and needs correct author
-  identity (mounts `~/.gitconfig`, read-only)
 
 OpenCode has no native "skill" concept — mounting a directory only makes a
 file *readable*, not *followed*. When using `--with-claude-skills`, the
 `--message` must explicitly point OpenCode at it, e.g.: `"Read
 /root/.claude/skills/<name>/SKILL.md and follow it as your playbook for this
 task."`
-
-Never add a flag or workaround for SSH/GH access — that's the redline above.
 
 Additional options accepted by `run_opencode.sh`: `--image IMAGE` to override
 the default container image (`ghcr.io/luongnv89/u2604dev:latest`);
@@ -120,7 +123,7 @@ line then sits in tool logs until OpenCode exits):
 bash /path/to/opencode-sandbox/scripts/run_opencode.sh \
   --project /path/to/project \
   --start-only \
-  [--with-claude-skills] [--with-git-identity]
+  [--with-claude-skills] [--no-ssh] [--no-github]
 ```
 
 Parse `CONTAINER_NAME=...` from stderr. Surface this to the user as a
@@ -136,7 +139,7 @@ bash /path/to/opencode-sandbox/scripts/run_opencode.sh \
   --project /path/to/project \
   --message "<task text>" \
   --exec-in "<CONTAINER_NAME>" \
-  [--with-claude-skills] [--with-git-identity]
+  [--with-claude-skills] [--no-ssh] [--no-github]
 ```
 
 For task text too long or complex for a shell argument, write it to a file
@@ -184,9 +187,10 @@ Before treating the run as done:
    diff them specifically for container-architecture leakage — a Linux
    binary promoted into a real (non-optional) dependency has shipped from
    this exact setup before. See `references/troubleshooting.md`.
-3. Anything beyond a local commit (push, release, publish) is a **separate,
-   human-reviewed step on the host** — never something the container did
-   itself, by construction (the redline above).
+3. Default credentials mean the container **can** `git push` / `gh pr`.
+   Review `git status`/`diff` (and the GitHub result) anyway. If the user
+   asked to isolate, you passed `--no-ssh --no-github` and push stays a
+   **separate host step**.
 
 ### Step 4 — Ask before removing the container
 
@@ -228,8 +232,7 @@ bash ~/.claude/skills/opencode-sandbox/scripts/run_opencode.sh \
 bash ~/.claude/skills/opencode-sandbox/scripts/run_opencode.sh \
   --project ~/code/my-app \
   --message "Add input validation to the signup form and run the test suite." \
-  --exec-in "<CONTAINER_NAME>" \
-  --with-git-identity
+  --exec-in "<CONTAINER_NAME>"
 ```
 
 Expected output: 2a reports Docker/image ready and prints `CONTAINER_NAME=`
@@ -251,8 +254,8 @@ unfinished (see `references/troubleshooting.md`), not as a pass.
       (or they requested `--rm` up front)
 - [ ] `git -C "$PROJECT_DIR" status --short` and `git -C "$PROJECT_DIR" diff` were reviewed on
       the host before anything is committed or pushed
-- [ ] No `~/.ssh` mount and no `GH_TOKEN`/`gh auth token` injection appear in
-      the `docker run` invocation, in either mode
+- [ ] SSH (`~/.ssh`) and GitHub auth (`GH_TOKEN` / `~/.config/gh`) were
+      mounted unless the user asked to isolate (`--no-ssh --no-github`)
 - [ ] Dependency-file diffs (`package.json`, lockfiles) were checked for
       container-only binaries before treating the run as safe to merge
 
@@ -270,8 +273,8 @@ the message or exits OpenCode entirely (see `references/interactive-mode.md`).
 ··································································
   Docker daemon:         √ pass (docker info)
   Image ready:           √ pass (ghcr.io/luongnv89/u2604dev:latest)
-  Mounts:                √ workspace, opencode config [+ claude skills] [+ git identity]
-  Credential redline:    √ no SSH key, no GH token mounted
+  Mounts:                √ workspace, opencode config, ssh, gh, gitconfig [+ claude skills]
+  Credentials:           √ ssh+gh on | √ --no-ssh --no-github (isolated)
   Attach command:        √ docker exec -it <name> zsh shown
   Task exit code:        √ 0 | × <N> — <error from output>
   Host diff reviewed:    √ pass (git status/diff checked) | — n/a (no changes)

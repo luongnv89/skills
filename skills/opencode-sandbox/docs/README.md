@@ -7,13 +7,13 @@
 
 # OpenCode Sandbox
 
-> Run OpenCode sandboxed inside a luongnv89/docker-dev container — isolated from host SSH keys and GitHub tokens by construction. The container is kept by default so you can attach a shell.
+> Run OpenCode inside a luongnv89/docker-dev container. SSH and GitHub auth are on by default so commit/push/PR work; pass `--no-ssh --no-github` to isolate. The container is kept by default so you can attach a shell.
 
 ## Highlights
 
 - One-shot mode uses **`--start-only` then `--exec-in`**: a named keep-alive container, a copy-paste `docker exec -it <name> zsh` attach command *before* OpenCode runs, then `opencode run --auto` via `docker exec` — a plain exit code, no TUI to drive or permission dialogs to click through
 - Container is **kept by default**; the agent asks before `docker rm`. Pass `--rm` only when you already want it gone
-- Never mounts `~/.ssh` or injects a GitHub token — by design, not by discipline. Tasks that need push/publish access stop before that step; a human does it on the host afterward
+- SSH (`~/.ssh`) and GitHub (`gh` config + token) are **on by default** so the container can commit, push, and open/merge PRs. Pass `--no-ssh --no-github` to isolate an untrusted task
 - Handles the `~/.claude` → `~/.agents` symlink gotcha automatically when mounting Claude Code skills into the container
 - Interactive mode (pairs with herdr-agent-comms or tmux-agent-comms) documents the OpenCode-specific TUI timing and permission-dialog quirks discovered while building this skill
 
@@ -21,15 +21,15 @@
 
 | Say this...                                                        | Skill will...                                                                 |
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| "Run OpenCode on this project without giving it my SSH key"        | Set up mounts, run `opencode run --auto` in a container, verify the diff      |
-| "OpenCode keeps hitting rate limits, try it in a fresh container"   | Launch a fresh container session against the same task (kept until you confirm cleanup) |
-| "Use the docker-dev repo to run OpenCode on this repo"              | Preflight Docker, build mounts, run the task, report exit code + diff         |
+| "Run OpenCode on this project and open the PR"                      | Default SSH/gh mounts, run OpenCode, container can `gh pr create`             |
+| "Run OpenCode without giving it my SSH key"                         | Same flow with `--no-ssh --no-github`, then review the host diff              |
+| "OpenCode keeps hitting rate limits, try it in a fresh container"   | Launch a fresh container session (kept until you confirm cleanup)             |
 
 ## How It Works
 
 ```mermaid
 graph TD
-    A["Decide mode: one-shot or interactive"] --> B["Decide mounts: workspace + opencode config, plus skills/git-identity if needed"]
+    A["Decide mode: one-shot or interactive"] --> B["Decide mounts: workspace + opencode + ssh/gh (or --no-ssh --no-github)"]
     B --> C["preflight.sh: Docker running, image pulled"]
     C --> D["--start-only: kept container + attach command"]
     D --> E["--exec-in: opencode run --auto"]
@@ -40,7 +40,7 @@ graph TD
 
 ## Usage
 
-Model-invoked — ask to run OpenCode sandboxed, isolated from credentials, or in a fresh container to dodge rate limits, and the skill applies itself.
+Model-invoked — ask to run OpenCode in a container (with git/gh by default), isolate it with `--no-ssh --no-github`, or dodge rate limits in a fresh container.
 
 ## Resources
 
@@ -48,7 +48,7 @@ Model-invoked — ask to run OpenCode sandboxed, isolated from credentials, or i
 | -------------------------------------------- | ----------------------------------------------------------------------------- |
 | `scripts/preflight.sh`                       | Ensures Docker is running and the image is pulled                            |
 | `scripts/run_opencode.sh`                    | `--start-only` then `--exec-in`: kept container, attach command, `opencode run --auto` |
-| `references/mounts-and-credentials.md`       | The credential redline, standard mounts, and the `~/.claude` symlink gotcha  |
+| `references/mounts-and-credentials.md`       | Default SSH/GitHub mounts, `--no-ssh`/`--no-github` opt-out, `~/.claude` symlink gotcha |
 | `references/interactive-mode.md`             | TUI readiness timing, permission dialogs, completion detection               |
 | `references/troubleshooting.md`              | Provider errors, rate limits, outdated `cdev`, dependency-file leakage       |
 

@@ -1,34 +1,21 @@
 # Mounts and credentials
 
-## The redline: never mount `~/.ssh`, never inject a GitHub token
+## Credentials on by default (opt out to isolate)
 
-`run_opencode.sh` has no flag for either, on purpose. OpenCode running inside
-the container is a fully autonomous agent with arbitrary code execution
-inside whatever it can reach. An SSH private key or a `GH_TOKEN` reaches
-**every repo and org that credential is scoped to** — far past the one
-project directory you mounted. Claude Code's own permission classifier blocks
-both of these when attempted directly, and that verdict is correct.
+`run_opencode.sh` mounts **`~/.ssh`** and GitHub auth (`~/.config/gh` plus
+`GH_TOKEN`/`GITHUB_TOKEN` from `gh auth token`) **by default**, so `git
+commit`, `git push`, `gh pr create`, and `gh pr merge` work inside the
+container. `~/.gitconfig` is also on by default for commit authorship.
 
-**Design tasks to stop before the step that needs them.** For a release-style
-task: version bump, changelog, local commit, local tag — then stop. Push and
-`gh release create` happen on the host afterward, after a human reviews the
-diff. This is not a limitation to work around; it's the point — a bad or
-compromised task run can, at worst, leave a mess in a sandboxed container
-and an unpushed local commit, never a pushed commit, a force-push, or a
-leaked credential.
+That is a real blast radius: an SSH key or `GH_TOKEN` reaches **every repo
+and org that credential is scoped to**, not just the mounted project.
+`--auto` will approve those actions without a prompt. Use this default when
+the task is supposed to ship (push/PR/merge). For an untrusted or
+read-only task, pass **`--no-ssh --no-github`** (and `--no-git-identity` if
+you also do not want commits attributed as you).
 
-If a task genuinely needs push/publish access inside the container, that is a
-**separate, explicit, user-performed action** — the user runs their own
-`docker run -v ~/.ssh:... -e GH_TOKEN=...` invocation outside this skill's
-scripts. Don't add a flag that automates it, and don't work around a
-classifier block by re-deriving the credential a different way (e.g. reading
-`gh auth token` into a file the container can reach) — that's the same
-exposure with extra steps.
-
-The container is **kept by default** (still running after the task) so the
-user can attach. That does not widen the mount list — leftover containers
-are still sandboxed; they are not extra credential exposure. Ask before
-`docker rm`.
+Do not print the token. The script logs only `Credentials: ssh=1 github=1
+gitconfig=1` (0 = off).
 
 ## Standard mounts
 
@@ -36,13 +23,18 @@ are still sandboxed; they are not extra credential exposure. Ask before
 |---|---|---|
 | project directory | `/workspace` | always — the task's target |
 | `~/.config/opencode` | `/root/.config/opencode` | always — OpenCode auth/config; omitted, the container has no provider and every task fails with "No provider available" |
+| `~/.ssh` | `/root/.ssh` | default on — `git push` over SSH. Skip with `--no-ssh` |
+| `~/.config/gh` | `/root/.config/gh` | default on — `gh` CLI host login. Skip with `--no-github` |
+| `GH_TOKEN` / `GITHUB_TOKEN` | env | default on — from `gh auth token` on the host. Skip with `--no-github` |
+| `~/.gitconfig` (ro) | `/root/.gitconfig` | default on — commit authorship. Skip with `--no-git-identity` |
 | `~/.claude` (ro) | `/root/.claude` | `--with-claude-skills` — task needs to read/follow a specific Claude Code skill |
 | `~/.agents` (ro) | `/root/.agents` | auto-added alongside `~/.claude` when it exists — see the symlink gotcha below |
-| `~/.gitconfig` (ro) | `/root/.gitconfig` | `--with-git-identity` — task will `git commit` and needs correct author identity |
-| task file (ro) | `/scratch/<name>` | `--file PATH` — see SKILL.md → One-shot mode |
+| task file | `/scratch/<name>` | `--file PATH` — copied in, not bind-mounted; see SKILL.md → One-shot mode |
 
 `run_opencode.sh` builds these automatically from its flags — read it before
-reimplementing the logic by hand.
+reimplementing the logic by hand. The container is **kept by default**
+(still running after the task) so the user can attach. Ask before
+`docker rm`.
 
 ## The `~/.claude` symlink gotcha
 
@@ -66,21 +58,19 @@ somewhere else entirely (a plugin directory, a project-local
 `.claude/skills/`) — check the real symlink target on the host with
 `readlink ~/.claude/skills/<name>` before assuming the mount is wrong.
 
-## Why `--auto` is safe here specifically
+## Why `--auto` is required (and what credentials change)
 
 `opencode run` requires `--auto` to run non-interactively — without it,
 OpenCode blocks on a permission dialog with nothing attached to answer it,
 and the container hangs until the process is killed. OpenCode's own `--help`
-labels `--auto` "dangerous," and outside this setup it would be: it
-auto-approves every action the agent wants to take, including ones you'd
-normally want to review.
+labels `--auto` "dangerous": it auto-approves every action the agent wants
+to take.
 
-Inside this skill's containers, `--auto` is safe **because the mounts already
-enforce the boundary** — auto-approving actions inside a sandbox that
-physically cannot reach `~/.ssh`, a GitHub token, or any directory besides
-`/workspace`, `/root/.config/opencode`, and (optionally) read-only config
-bounds the blast radius to "OpenCode did something wrong inside the mounted
-project directory," which `git status`/`git diff` on the host catches before
-anything ships. The safety property comes from the mount list, not from
-`--auto` itself — get the mount list wrong (e.g. add `~/.ssh` "just for this
-one task") and `--auto` stops being safe.
+With **default credentials** (`~/.ssh` + `GH_TOKEN`), that includes `git
+push` and `gh pr create/merge` against every org those credentials can
+reach. That is intended for ship-it tasks. It is **not** a sandbox against
+GitHub — only against host paths you did not mount. For a task that must
+not touch GitHub, pass `--no-ssh --no-github` so `--auto` cannot push.
+
+`--auto` is still required in both modes; the mount list decides how far a
+mistake can travel.
