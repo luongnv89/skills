@@ -62,6 +62,7 @@ asm install github:luongnv89/skills:skills/frontend-design
 | Path | Description |
 |---|---|
 | `references/usability-guide.md` | Full "Don't Make Me Think" step-by-step guideline with checklist |
+| `references/step-reports.md` | Step-completion report template, symbol legend, and per-phase checks |
 
 ## Output
 
