@@ -4,7 +4,7 @@ description: "Configure pre-commit hooks and lean GitHub Actions for shift-left 
 license: MIT
 effort: medium
 metadata:
-  version: 2.1.0
+  version: 2.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -47,6 +47,17 @@ git stash pop
 ```
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+
+## Safety Rails
+
+This skill writes config into someone else's repository and installs git hooks. Observe all of these:
+
+- **Never overwrite an existing `.pre-commit-config.yaml` or `.github/workflows/*.yml`.** Write a `<file>.bak` backup first, merge the new hooks into the existing file, show the user the diff, and ask them to confirm before writing. Preserve user-defined hooks and pinned `rev:` values, and leave the backup in place until the user confirms the merge.
+- **Do a dry run before you write.** Validate the proposed config with `pre-commit validate-config`, and run `pre-commit run --all-files` *before* installing the hooks — findings surface without any commit being blocked. Show the generated workflow as a diff; never land a file the user has not seen.
+- **Check for an existing git hook before installing.** `pre-commit install` preserves a foreign hook by moving it to `.git/hooks/pre-commit.legacy` and running in migration mode. Never pass `-f`/`--overwrite`, which removes that hook silently — if the user wants it gone, have them confirm the deletion explicitly.
+- **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf.** A failing hook is a finding to report, not an obstacle to route around.
+- **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, or lower a coverage threshold to turn a run green. Report the failure and let the user decide.
+- **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Edge Cases for each.
 
 ## Workflow
 
@@ -212,7 +223,7 @@ repos:
 A run passes when **all** of the following are true:
 
 - [ ] `.pre-commit-config.yaml` exists at the repo root and lists at least one hook for the detected primary language (formatter, linter, or type checker).
-- [ ] Every check sits in exactly one lane of the Check Routing Table, and everything runnable on a laptop is in a hook rather than in CI.
+- [ ] Every check sits in exactly one lane of the Check Routing Table: no hook `id` from `.pre-commit-config.yaml` appears in a workflow `run:` step other than the bypass guard, and no check runnable on a laptop is CI-only.
 - [ ] Hook `stages:` use the modern names (`pre-commit`, `pre-push`, `manual`); no generated config emits the deprecated `commit` or `push`.
 - [ ] Both hook types are installed: `pre-commit install` **and** `pre-commit install --hook-type pre-push`.
 - [ ] At least one `.github/workflows/*.yml` exists and carries only the four CI responsibilities from step 3.
@@ -262,5 +273,6 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ## Resources
 
-- [references/precommit-configs.md](references/precommit-configs.md) - Pre-commit configurations by language (with push-stage tests and E2E hooks)
-- [references/github-actions.md](references/github-actions.md) - GitHub Actions workflow templates (lean CI variants)
+- [references/precommit-configs.md](references/precommit-configs.md) — pre-commit configs by language, with `pre-push` tests and E2E hooks
+- [references/github-actions.md](references/github-actions.md) — GitHub Actions templates: bypass guard, matrix, deploy
+- [references/cli-e2e.md](references/cli-e2e.md) — CLI command discovery, the E2E script template, and its `pre-push` hook
