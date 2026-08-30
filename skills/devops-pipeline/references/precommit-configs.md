@@ -322,7 +322,7 @@ repos:
 
 ## Multi-language
 
-For monorepos or projects with multiple languages:
+For monorepos or projects with multiple languages. pre-commit always execs from the **repo root**; `files:` only filters which files trigger the hook, it does not change cwd. Copy remote hooks from the language sections above and scope them with `files:`. Rewrite local `language: system` entries so they target the package dir — a bare `npm test` will not see `frontend/package.json` or `frontend/node_modules`.
 
 ```yaml
 repos:
@@ -337,9 +337,50 @@ repos:
       - id: check-added-large-files
       - id: detect-private-key
 
-  # Add language-specific hooks from sections above
-  # Use `files:` patterns to scope hooks to specific directories
-  # Example: scope Go hooks to backend/, Node hooks to frontend/
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: npx --prefix frontend eslint --fix
+        language: system
+        files: ^frontend/
+
+      - id: typecheck
+        name: typecheck
+        entry: npx --prefix frontend tsc --noEmit
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+
+      - id: test-unit
+        name: frontend unit tests
+        entry: npm --prefix frontend run test:unit
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+
+      - id: test-full
+        name: frontend full test suite
+        entry: npm --prefix frontend test
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: pytest-unit
+        name: pytest unit tests
+        entry: pytest backend/tests/unit -x -q
+        language: system
+        files: ^backend/
+        pass_filenames: false
+
+      - id: pytest-full
+        name: pytest full suite
+        entry: pytest backend/tests --tb=short -q
+        language: system
+        files: ^backend/
+        pass_filenames: false
+        stages: [pre-push]
 ```
 
 ---

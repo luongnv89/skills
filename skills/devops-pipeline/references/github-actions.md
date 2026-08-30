@@ -575,7 +575,7 @@ jobs:
   # backend job would try to execute the eslint hook with no Node toolchain.
   # Per-language `files:` filters in .pre-commit-config.yaml already do the
   # scoping; the paths-filter below decides which BUILD jobs run, not which
-  # hooks do.
+  # hooks do. `files:` does not change cwd: Node entries must `--prefix frontend`.
   hooks:
     needs: changes
     name: Verify hooks were not bypassed
