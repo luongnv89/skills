@@ -55,6 +55,9 @@ Use `-o report.md` to write markdown to a file instead of stderr.
 ### Quality Score (0.0–1.0)
 - Penalizes: low resolution, excessive resolution, blur, compression artifacts
 
+### Warnings
+- Conditions that may distort the review: blur, heavy compression, very low or excessive resolution, unreadable text regions
+
 ## How to Use the Output in a Review
 
 1. **Parse the JSON** (stdout) to get factual data

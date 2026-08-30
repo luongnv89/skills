@@ -4,7 +4,7 @@ description: "Review UI usability using Steve Krug's principles and produce a sc
 license: MIT
 effort: medium
 metadata:
-  version: 1.3.2
+  version: 1.4.0
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -15,6 +15,47 @@ Evaluate and improve UIs through Steve Krug's "Don't Make Me Think" principles. 
 ## When to Use
 
 Trigger this skill when the user asks for a usability audit, UX review, or UI feedback on a screenshot, live URL, or HTML/CSS code. Do not use for visual/brand critique, WCAG accessibility audits, or backend/API review — route those elsewhere.
+
+## Dependency Preflight (mandatory)
+
+This skill invokes `/browse`, and only on the **live URL** path — screenshot, code, wireframe,
+and description inputs need nothing installed. Resolve it before navigating anything:
+
+```bash
+test -d "$HOME/.claude/skills/browse" || asm list -p claude --json | grep -q '"browse"' || {
+  echo "Missing required skill: browse" >&2
+  echo "Install it:      asm install github:garrytan/gstack:browse -p claude -s global --yes" >&2
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  echo "Verify:          asm list -p claude --json | grep 'browse'" >&2
+}
+```
+
+The install-path test runs first on purpose: `/browse` ships in gstack and may be present without
+`asm` knowing about it, so an `asm list` check alone would nag on every live-URL review.
+
+`-p claude` is not decoration: `asm install` refuses to guess a provider non-interactively and
+`--yes` does not cover that choice. Naming the same provider in the verification stops an install
+under a different tool from reporting success. `-s global` is what makes the install agree with the
+detection: scope otherwise defaults to a prompt, and a project-scoped install lands in
+`.claude/skills/`, where the `$HOME` test above will never find it.
+
+A missing `/browse` is **fail-soft**, not fatal — take the `/browse` row in Error Handling below.
+Never review a URL you could not load.
+
+## Repo Sync Before Edits (mandatory)
+
+Steps 1-4 below are read-only and need no sync. **Redesign Mode (step 5) writes to UI source files
+in a git repo** — sync the branch with the remote before its first edit, so fixes land on the
+latest base:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the tree is dirty, `git stash`, sync, `git stash pop`. If `origin` is missing or the pull
+conflicts, **stop and ask the user** — never skip or force the sync.
 
 ## Instructions
 
@@ -28,31 +69,26 @@ Follow this workflow to keep the agent's context budget tight:
 
 ## Prerequisites
 
-- **Browser access**: `/browse` skill available for live URL analysis
+- **Browser access** (live URL input only): `/browse`, per the Dependency Preflight above
 - **Input available**: one of — live URL, screenshot/image, HTML/CSS code, wireframe, or verbal description
 - **Code editor access** (Redesign Mode only): write permission to the UI source files being modified
 
 ## Screenshot Pre-processing
 
-When the input is a screenshot (image file), run the pre-processing script **before** visual analysis. This produces a structured report the agent can consume without generating image-processing code at runtime.
+When the input is a screenshot, run the pre-processing script **before** visual analysis, so the
+review rests on measured data instead of image-processing code written at runtime:
 
 ```bash
 python3 scripts/process_screenshots.py <image_path> [--recursive]
 ```
 
-Output: JSON to stdout (structured data), markdown to stderr (human-readable). Both are always produced.
+It always produces both outputs: JSON on stdout — metadata, color palette, layout regions, visual
+density, quality score, warnings — and a human-readable markdown report on stderr. Populate the
+review from the JSON; read the markdown for a quick sanity check. If the script fails or the image
+is invalid, fall back to visual analysis and note the failure in the review.
 
-The script extracts:
-- **Metadata**: dimensions, format, file size, aspect ratio
-- **Color palette**: dominant colors (primary, secondary, accent, background, text)
-- **Layout regions**: navigation bars, buttons, image placeholders, text blocks, footers
-- **Visual density**: low / medium / high (Laplacian variance)
-- **Quality score**: 0.0–1.0 (blur, compression artifacts, resolution)
-- **Warnings**: issues that may affect review accuracy
-
-Use the JSON output (stdout) to populate the review with factual data. Use the markdown output (stderr) for quick human verification.
-
-If the script fails or the image is invalid, fall back to visual analysis and note the failure.
+Read `references/screenshot-processing.md` for the full flag set, every extracted field, and how to
+map the output onto the scorecard.
 
 ### Input Handling
 
