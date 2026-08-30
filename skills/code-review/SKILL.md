@@ -30,7 +30,7 @@ mode you need — this protects the agent's context budget.
 2. **Otherwise infer** from the request:
    - "review", "find bugs", "security", "is this correct", "look for vulnerabilities" → **review**
    - "slow", "faster", "optimize", "bottleneck", "memory leak", "performance" → **perf**
-   - "clean code audit", "clean code review", "check this against clean code" → **clean**
+   - "clean code audit" (or "clean-code audit"), "clean code review", "check this against clean code" → **clean**
      (user-invoked only — a bare "readability" or "audit against standards" ask is ambiguous: use step 3)
    - "remove slop", "clean up the codebase", "refactor out cruft / dead code / duplication" → **cleanup**
 3. **Ambiguous?** Ask which mode, naming the options. Fall back to **review** only when the intent is
