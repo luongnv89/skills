@@ -4,7 +4,7 @@ description: "Review or improve code — one skill, four modes: bug/security rev
 license: MIT
 effort: high
 metadata:
-  version: 2.1.0
+  version: 2.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
 ---
@@ -30,7 +30,8 @@ mode you need — this protects the agent's context budget.
 2. **Otherwise infer** from the request:
    - "review", "find bugs", "security", "is this correct", "look for vulnerabilities" → **review**
    - "slow", "faster", "optimize", "bottleneck", "memory leak", "performance" → **perf**
-   - "clean code", "readability", "audit against standards", "clean-code audit" → **clean**
+   - "clean code audit", "clean code review", "check this against clean code" → **clean**
+     (user-invoked only — a bare "readability" or "audit against standards" ask is ambiguous: use step 3)
    - "remove slop", "clean up the codebase", "refactor out cruft / dead code / duplication" → **cleanup**
 3. **Ambiguous?** Ask which mode, naming the options. Fall back to **review** only when the intent is
    clearly "review this" with no other signal.
