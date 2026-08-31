@@ -14,21 +14,22 @@ the task is supposed to ship (push/PR/merge). For an untrusted or
 read-only task, pass **`--no-ssh --no-github`** (and `--no-git-identity` if
 you also do not want commits attributed as you).
 
-Do not print the token. The script logs only `Credentials: ssh=1 github=1
-gitconfig=1` (0 = off).
+Do not print the token. The script logs
+`Credentials: ssh=1 github=1 gitconfig=1 opencode-config=1 agents=0`
+(0 = off).
 
 ## Standard mounts
 
 | Mount | Container path | When |
 |---|---|---|
 | project directory | `/workspace` | always — the task's target |
-| `~/.config/opencode` | `/root/.config/opencode` | always — OpenCode auth/config; omitted, the container has no provider and every task fails with "No provider available" |
+| `~/.config/opencode` | `/root/.config/opencode` | default on — OpenCode auth/config. Skip with `--no-opencode-config` (OpenCode then starts unauthenticated; see below) |
 | `~/.ssh` | `/root/.ssh` | default on — `git push` over SSH. Skip with `--no-ssh` |
 | `~/.config/gh` | `/root/.config/gh` | default on — `gh` CLI host login. Skip with `--no-github` |
 | `GH_TOKEN` / `GITHUB_TOKEN` | env | default on — from `gh auth token` on the host. Skip with `--no-github` |
 | `~/.gitconfig` (ro) | `/root/.gitconfig` | default on — commit authorship. Skip with `--no-git-identity` |
 | `~/.claude` (ro) | `/root/.claude` | `--with-claude-skills` — task needs to read/follow a specific Claude Code skill |
-| `~/.agents` (ro) | `/root/.agents` | auto-added alongside `~/.claude` when it exists — see the symlink gotcha below |
+| `~/.agents` (ro) | `/root/.agents` | `--with-agents`, or auto-added alongside `~/.claude` — see the symlink gotcha below |
 | task file | `/scratch/<name>` | `--file PATH` — copied in, not bind-mounted; see SKILL.md → One-shot mode |
 
 `run_opencode.sh` builds these automatically from its flags — read it before
@@ -74,3 +75,39 @@ not touch GitHub, pass `--no-ssh --no-github` so `--auto` cannot push.
 
 `--auto` is still required in both modes; the mount list decides how far a
 mistake can travel.
+
+
+## Excluding OpenCode's own config (`--no-opencode-config`)
+
+Every default run mounts `~/.config/opencode` so the container inherits the
+host's OpenCode setup. That directory contains more than preferences:
+
+| File | Contents |
+|---|---|
+| `service.json` | a `password` |
+| `cli.json`, `tui.jsonc`, `opencode.jsonc` | preferences, plugin config |
+| `skills/` | relative symlinks into `~/.agents/skills/` |
+
+The account key itself lives elsewhere — `~/.local/share/opencode/auth.json`
+(`opencode.key`) — and is never mounted by this script.
+
+Pass `--no-opencode-config` for a container that must **not** inherit the host's
+OpenCode identity, e.g. one meant to run on a separate account with its own
+usage allowance. OpenCode inside then starts unauthenticated and needs its own
+`opencode auth login`.
+
+Because that also drops the `skills/` wiring, `--no-opencode-config`
+`--with-agents` together re-mount just that subdirectory read-only:
+
+```
+-v ~/.agents:/root/.agents:ro
+-v ~/.config/opencode/skills:/root/.config/opencode/skills:ro
+```
+
+The symlinks are relative (`../../../.agents/skills/<name>`), so at the mirrored
+depth they resolve against the `~/.agents` mount with no rewriting, and
+`/root/.config/opencode/` ends up containing only `skills`.
+
+`--with-agents` is the narrower sibling of `--with-claude-skills`: it mounts
+`~/.agents` alone, leaving `~/.claude` — and any Claude Code credentials under
+it — on the host.
