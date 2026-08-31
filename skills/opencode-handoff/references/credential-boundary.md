@@ -1,0 +1,103 @@
+# Credential Boundary — what crosses into the handoff container
+
+The reason this skill exists. Every mount decision below was verified against a
+real container; change one only with the same evidence.
+
+## The two credentials that must never mount
+
+| File | Key it holds | Default sandbox behavior |
+|---|---|---|
+| `~/.local/share/opencode/auth.json` | `opencode.type`, `opencode.key` | never mounted (outside `~/.config`) |
+| `~/.config/opencode/service.json` | `password` | **mounted** by the default `~/.config/opencode` mount |
+
+`opencode-sandbox`'s default run mounts all of `~/.config/opencode`, which
+carries `service.json` along with it. That is correct for its own use case —
+running a task on the host's account — and wrong for this one. `handoff.sh`
+therefore passes `--no-opencode-config`.
+
+Mounting neither is what produces the fresh usage allowance: OpenCode in the
+container has no credential, so `opencode auth login` inside the panel
+establishes a new one.
+
+## The wiring problem, and why the subdirectory mount solves it
+
+OpenCode discovers skills through `~/.config/opencode/skills/` — inside the
+directory just excluded. Its entries are symlinks, and crucially they are
+**relative**:
+
+```
+~/.config/opencode/skills/issue-creator -> ../../../.agents/skills/issue-creator
+```
+
+Three levels up from `.config/opencode/skills/` is `$HOME`, so the link resolves
+to `~/.agents/skills/issue-creator`. Mount that one subdirectory at the mirrored
+container depth, plus `~/.agents`, and the links resolve inside the container
+untouched:
+
+```bash
+-v "$HOME/.agents:/root/.agents:ro"
+-v "$HOME/.config/opencode/skills:/root/.config/opencode/skills:ro"
+```
+
+Verified in a real container:
+
+```console
+$ docker exec <name> readlink -f /root/.config/opencode/skills/issue-creator
+/root/.agents/skills/issue-creator
+$ docker exec <name> ls /root/.config/opencode/
+skills
+```
+
+`/root/.config/opencode/` contains **only** `skills` — Docker created the parent
+for the submount, so nothing else from the host's config directory exists there.
+
+### Why not rebuild the symlinks in-container
+
+`~/.config/opencode/skills` is a **curated subset** (9 entries) of
+`~/.agents/skills` (76). Symlinking all 76 would change the user's setup rather
+than reproduce it. Mounting the curated directory reproduces it exactly.
+
+### Why the mount is read-only
+
+The container must not be able to rewrite the host's skill wiring. This also
+means project-local skills cannot be symlinked into that directory — which is
+fine, see below.
+
+## Project-local `.agents/`
+
+Nothing extra is needed. `<project>/.agents/` arrives inside the `/workspace`
+mount at the same path relative to the project root that it occupies on the
+host, so whatever project-local discovery OpenCode performs on the host, it
+performs identically in the container.
+
+Deliberately **not** done: symlinking `/workspace/.agents/skills/*` into
+`/root/.config/opencode/skills/`. The host does not wire them there either, so
+doing it in the container would make the sandbox diverge from the session it is
+supposed to mirror.
+
+## What still mounts, and why
+
+SSH (`~/.ssh`), GitHub (`~/.config/gh` + `GH_TOKEN`), and git identity
+(`~/.gitconfig`) stay on by default, inherited from `opencode-sandbox`. The
+handoff is meant to continue real work, which means committing and pushing.
+These are *GitHub* credentials, not OpenCode ones — excluding them would not
+affect the usage allowance and would break the workflow.
+
+Pass `--no-ssh --no-github` when the handed-off task must not reach GitHub.
+
+## The runtime check
+
+Mount configuration is easy to get wrong and silent when it is. `handoff.sh`
+asserts the boundary against the running container before opening the panel:
+
+```bash
+for forbidden in /root/.config/opencode/auth.json \
+                 /root/.config/opencode/service.json \
+                 /root/.local/share/opencode/auth.json; do
+  docker exec "$CONTAINER_NAME" test -e "$forbidden" && leaked=1
+done
+```
+
+Any hit refuses the handoff and tells the user how to inspect and remove the
+container. A leak is a hard failure, never a warning: the user asked for a
+session that cannot spend their account.

@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent-comms or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 2.0.0
+  version: 2.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -92,6 +92,16 @@ Add flags only for extras the task needs:
   (e.g. `AGENTS.md`, `.claude/skills/` inside the repo itself, a
   CONTRIBUTING.md) — it's already inside `/workspace` via the project mount,
   no extra flag needed.
+- `--with-agents` — mount `~/.agents` read-only **without** `~/.claude`. Use
+  when the task needs the skill library but the container should not see
+  Claude Code's own directory.
+- `--no-opencode-config` — do **not** mount `~/.config/opencode`. OpenCode in
+  the container then starts unauthenticated, which is how you get a container
+  that cannot spend the host's OpenCode account (`opencode-handoff` builds on
+  this). Combined with `--with-agents`, the script also mounts
+  `~/.config/opencode/skills` read-only so its relative skill symlinks still
+  resolve — and nothing else from that directory, including
+  `service.json`. See `references/mounts-and-credentials.md`.
 
 OpenCode has no native "skill" concept — mounting a directory only makes a
 file *readable*, not *followed*. When using `--with-claude-skills`, the

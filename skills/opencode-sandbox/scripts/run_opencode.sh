@@ -23,6 +23,15 @@
 #                             For long/complex tasks: write them to a file, pass --file, and give
 #                             a short --message like "Follow the attached file's instructions exactly."
 #   --with-claude-skills      mount ~/.claude (and ~/.agents, for symlinked skills) read-only
+#   --with-agents             mount ~/.agents read-only (global agent/skill library)
+#                             WITHOUT ~/.claude. When combined with
+#                             --no-opencode-config, also mounts
+#                             ~/.config/opencode/skills read-only so the relative
+#                             skill symlinks still resolve inside the container.
+#   --no-opencode-config      do not mount ~/.config/opencode (default: mount it).
+#                             Use for a container that must NOT inherit the host's
+#                             OpenCode config/credentials — e.g. a fresh usage
+#                             allowance. OpenCode inside will need its own login.
 #   --with-git-identity       mount ~/.gitconfig read-only (default: on)
 #   --no-git-identity         do not mount ~/.gitconfig
 #   --no-ssh                  do not mount ~/.ssh (default: mount it so git push works)
@@ -56,6 +65,8 @@ PROJECT_DIR=""
 MESSAGE=""
 TASK_FILE=""
 WITH_CLAUDE_SKILLS=0
+WITH_AGENTS=0
+WITH_OPENCODE_CONFIG=1
 WITH_GIT_IDENTITY=1
 WITH_SSH=1
 WITH_GITHUB=1
@@ -79,6 +90,8 @@ while [ $# -gt 0 ]; do
     --message) MESSAGE="$2"; shift 2 ;;
     --file) TASK_FILE="$2"; shift 2 ;;
     --with-claude-skills) WITH_CLAUDE_SKILLS=1; shift ;;
+    --with-agents) WITH_AGENTS=1; shift ;;
+    --no-opencode-config) WITH_OPENCODE_CONFIG=0; shift ;;
     --with-git-identity) WITH_GIT_IDENTITY=1; shift ;;
     --no-git-identity) WITH_GIT_IDENTITY=0; shift ;;
     --no-ssh) WITH_SSH=0; shift ;;
@@ -238,10 +251,30 @@ fi
 
 MOUNTS=(-v "${PROJECT_DIR}:/workspace")
 
-if [ -d "$HOME/.config/opencode" ]; then
-  MOUNTS+=(-v "$HOME/.config/opencode:/root/.config/opencode")
+if [ "$WITH_OPENCODE_CONFIG" = "1" ]; then
+  if [ -d "$HOME/.config/opencode" ]; then
+    MOUNTS+=(-v "$HOME/.config/opencode:/root/.config/opencode")
+  else
+    echo "Warning: $HOME/.config/opencode not found — the container will have no OpenCode auth/config and may prompt to log in. Run 'opencode' once on the host first if this task needs a real provider." >&2
+  fi
 else
-  echo "Warning: $HOME/.config/opencode not found — the container will have no OpenCode auth/config and may prompt to log in. Run 'opencode' once on the host first if this task needs a real provider." >&2
+  echo "OpenCode config: not mounted (--no-opencode-config). OpenCode in this container starts unauthenticated and will need its own login." >&2
+fi
+
+if [ "$WITH_AGENTS" = "1" ]; then
+  if [ -d "$HOME/.agents" ]; then
+    MOUNTS+=(-v "$HOME/.agents:/root/.agents:ro")
+  else
+    echo "Warning: --with-agents was requested but $HOME/.agents does not exist; skipping." >&2
+  fi
+  # ~/.config/opencode/skills/<name> entries are relative symlinks
+  # (../../../.agents/skills/<name>). With the full ~/.config/opencode mount they
+  # come along already; with --no-opencode-config they do not, so mount just that
+  # subdirectory at the same depth — the relative links then resolve against the
+  # ~/.agents mount above, and nothing else from ~/.config/opencode is exposed.
+  if [ "$WITH_OPENCODE_CONFIG" != "1" ] && [ -d "$HOME/.config/opencode/skills" ]; then
+    MOUNTS+=(-v "$HOME/.config/opencode/skills:/root/.config/opencode/skills:ro")
+  fi
 fi
 
 if [ "$WITH_CLAUDE_SKILLS" = "1" ]; then
@@ -297,7 +330,7 @@ if [ "$WITH_GITHUB" = "1" ]; then
   fi
 fi
 
-echo "Credentials: ssh=$WITH_SSH github=$WITH_GITHUB gitconfig=$WITH_GIT_IDENTITY (1=on 0=off)" >&2
+echo "Credentials: ssh=$WITH_SSH github=$WITH_GITHUB gitconfig=$WITH_GIT_IDENTITY opencode-config=$WITH_OPENCODE_CONFIG agents=$WITH_AGENTS (1=on 0=off)" >&2
 
 echo "Starting OpenCode container (image: $IMAGE, workspace: $PROJECT_DIR, name: $CONTAINER_NAME)..." >&2
 
