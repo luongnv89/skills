@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent-comms or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 2.1.0
+  version: 2.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -73,14 +73,20 @@ any `docker rm` (Step 4).
 
 ### Step 1 — Decide mounts
 
-Every run mounts the project directory (`/workspace`) and
-`~/.config/opencode` (OpenCode's own auth). **On by default:** `~/.ssh`,
-GitHub auth (`~/.config/gh` + `GH_TOKEN`), and `~/.gitconfig`. Opt out when
-the user asks to isolate, or the task must not reach GitHub:
+Every run mounts the project directory (`/workspace`). **On by default:**
+`~/.config/opencode` (OpenCode's own auth — skip with `--no-opencode-config`),
+`~/.ssh`, GitHub auth (`~/.config/gh` + `GH_TOKEN`), and `~/.gitconfig`. Opt
+out when the user asks to isolate, or the task must not reach GitHub:
 
 - `--no-ssh` — do not mount `~/.ssh`
 - `--no-github` — do not mount `~/.config/gh` or inject `GH_TOKEN`
 - `--no-git-identity` — do not mount `~/.gitconfig`
+- `--no-opencode-config` — do not mount `~/.config/opencode`. OpenCode then
+  starts unauthenticated (`opencode-handoff` builds on this). Combined with
+  `--with-agents`, the script also mounts `~/.config/opencode/skills`
+  read-only so its relative skill symlinks still resolve — and nothing else
+  from that directory, including `service.json`. See
+  `references/mounts-and-credentials.md`.
 
 Add flags only for extras the task needs:
 
@@ -95,13 +101,6 @@ Add flags only for extras the task needs:
 - `--with-agents` — mount `~/.agents` read-only **without** `~/.claude`. Use
   when the task needs the skill library but the container should not see
   Claude Code's own directory.
-- `--no-opencode-config` — do **not** mount `~/.config/opencode`. OpenCode in
-  the container then starts unauthenticated, which is how you get a container
-  that cannot spend the host's OpenCode account (`opencode-handoff` builds on
-  this). Combined with `--with-agents`, the script also mounts
-  `~/.config/opencode/skills` read-only so its relative skill symlinks still
-  resolve — and nothing else from that directory, including
-  `service.json`. See `references/mounts-and-credentials.md`.
 
 OpenCode has no native "skill" concept — mounting a directory only makes a
 file *readable*, not *followed*. When using `--with-claude-skills`, the

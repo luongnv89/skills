@@ -14,21 +14,22 @@ the task is supposed to ship (push/PR/merge). For an untrusted or
 read-only task, pass **`--no-ssh --no-github`** (and `--no-git-identity` if
 you also do not want commits attributed as you).
 
-Do not print the token. The script logs only `Credentials: ssh=1 github=1
-gitconfig=1` (0 = off).
+Do not print the token. The script logs
+`Credentials: ssh=1 github=1 gitconfig=1 opencode-config=1 agents=0`
+(0 = off).
 
 ## Standard mounts
 
 | Mount | Container path | When |
 |---|---|---|
 | project directory | `/workspace` | always — the task's target |
-| `~/.config/opencode` | `/root/.config/opencode` | always — OpenCode auth/config; omitted, the container has no provider and every task fails with "No provider available" |
+| `~/.config/opencode` | `/root/.config/opencode` | default on — OpenCode auth/config. Skip with `--no-opencode-config` (OpenCode then starts unauthenticated; see below) |
 | `~/.ssh` | `/root/.ssh` | default on — `git push` over SSH. Skip with `--no-ssh` |
 | `~/.config/gh` | `/root/.config/gh` | default on — `gh` CLI host login. Skip with `--no-github` |
 | `GH_TOKEN` / `GITHUB_TOKEN` | env | default on — from `gh auth token` on the host. Skip with `--no-github` |
 | `~/.gitconfig` (ro) | `/root/.gitconfig` | default on — commit authorship. Skip with `--no-git-identity` |
 | `~/.claude` (ro) | `/root/.claude` | `--with-claude-skills` — task needs to read/follow a specific Claude Code skill |
-| `~/.agents` (ro) | `/root/.agents` | auto-added alongside `~/.claude` when it exists — see the symlink gotcha below |
+| `~/.agents` (ro) | `/root/.agents` | `--with-agents`, or auto-added alongside `~/.claude` — see the symlink gotcha below |
 | task file | `/scratch/<name>` | `--file PATH` — copied in, not bind-mounted; see SKILL.md → One-shot mode |
 
 `run_opencode.sh` builds these automatically from its flags — read it before

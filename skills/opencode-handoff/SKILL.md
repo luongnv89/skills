@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker on PATH and running, plus the opencode-sandbox skill at v2.1.0 or newer. The tmux panel additionally needs `tmux`; without it the skill prints the attach command instead."
 effort: medium
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -109,9 +109,10 @@ GitHub, `--no-tmux` to skip the panel and just print the attach command, and
 
 ### Step 3 — Verify the boundary held
 
-`handoff.sh` checks this itself and **refuses to hand over** if any of
-`/root/.config/opencode/auth.json`, `/root/.config/opencode/service.json`, or
-`/root/.local/share/opencode/auth.json` exists in the container. Confirm you saw:
+`handoff.sh` checks this itself and **refuses to hand over** if the host's
+OpenCode config or data directory is bind-mounted, or if `auth.json` /
+`service.json` exists under any OpenCode config/data path in the container
+(`/root`, `/home/*`, and `/workspace`). Confirm you saw:
 
 ```
 Credential boundary: OK (no OpenCode config, token, or key in the container).
@@ -168,8 +169,9 @@ fresh allowance. The host session stays untouched and still rate-limited.
 - [ ] A container was created for the requested project, mounted at `/workspace`
 - [ ] `/root/.agents/skills` is populated and
       `readlink -f /root/.config/opencode/skills/<any>` resolves under it
-- [ ] `Credential boundary: OK` printed — no `auth.json`, no `service.json`
-      anywhere in the container
+- [ ] `Credential boundary: OK` printed — no `auth.json` or `service.json`
+      under any OpenCode config/data path in the container, and the host
+      credential directories are not bind-mounted
 - [ ] A **detached** tmux session was created and its `attach-session` line was
       shown to the user; the skill never attached to it itself
 - [ ] The `opencode auth login` step was surfaced, not assumed

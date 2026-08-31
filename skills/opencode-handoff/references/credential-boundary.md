@@ -88,15 +88,19 @@ Pass `--no-ssh --no-github` when the handed-off task must not reach GitHub.
 ## The runtime check
 
 Mount configuration is easy to get wrong and silent when it is. `handoff.sh`
-asserts the boundary against the running container before opening the panel:
+asserts the boundary against the running container before opening the panel.
+A probe (`docker exec true`) runs first so a dead container cannot look like
+a clean boundary. Then two checks, both fail-closed:
 
-```bash
-for forbidden in /root/.config/opencode/auth.json \
-                 /root/.config/opencode/service.json \
-                 /root/.local/share/opencode/auth.json; do
-  docker exec "$CONTAINER_NAME" test -e "$forbidden" && leaked=1
-done
-```
+1. **Mount sources.** After resolving realpaths, no bind-mount source may
+   equal the host's `~/.config/opencode` or `~/.local/share/opencode`. The
+   `skills/` subdirectory is a different source path, so it is allowed; a
+   `skills/` directory that is actually a symlink to the parent is not.
+2. **Credential filenames.** `find` for `auth.json` and `service.json` under
+   every OpenCode config/data tree in the container (`/root`, `/home/*`,
+   `/workspace`). That catches image leftovers, a project that *is* `$HOME`,
+   and a leaked file inside the `skills/` submount, without flagging an
+   unrelated `auth.json` elsewhere in the project.
 
 Any hit refuses the handoff and tells the user how to inspect and remove the
 container. A leak is a hard failure, never a warning: the user asked for a

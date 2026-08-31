@@ -148,14 +148,73 @@ if ! docker exec "$CONTAINER_NAME" true 2>/dev/null; then
 fi
 
 leaked=0
-for forbidden in /root/.config/opencode/auth.json \
-                 /root/.config/opencode/service.json \
-                 /root/.local/share/opencode/auth.json; do
-  if docker exec "$CONTAINER_NAME" test -e "$forbidden" 2>/dev/null; then
-    echo "Error: '$forbidden' is present inside '$CONTAINER_NAME' — the host's OpenCode credentials leaked into the handoff container." >&2
+
+# Host credential directories must not be bind-mounted. The skills/ subdirectory
+# is a different source path, so it is allowed. Resolve realpaths so a skills/
+# directory that is actually a symlink to the parent still fails closed.
+host_opencode_config=""
+host_opencode_data=""
+if [ -d "$HOME/.config/opencode" ]; then
+  host_opencode_config="$(cd "$HOME/.config/opencode" && pwd -P)"
+fi
+if [ -d "$HOME/.local/share/opencode" ]; then
+  host_opencode_data="$(cd "$HOME/.local/share/opencode" && pwd -P)"
+fi
+mounts=""
+if ! mounts="$(docker inspect -f '{{range .Mounts}}{{.Source}}|{{.Destination}}{{println}}{{end}}' "$CONTAINER_NAME")"; then
+  echo "Error: cannot inspect mounts of '$CONTAINER_NAME' — the credential boundary could not be verified." >&2
+  echo "Remove it with: docker rm -f '$CONTAINER_NAME'" >&2
+  exit 1
+fi
+while IFS='|' read -r src dest; do
+  [ -n "${src:-}" ] || continue
+  resolved="$src"
+  if [ -d "$src" ]; then
+    resolved="$(cd "$src" && pwd -P)"
+  elif [ -e "$src" ]; then
+    resolved="$(cd "$(dirname -- "$src")" && pwd -P)/$(basename -- "$src")"
+  fi
+  if [ -n "$host_opencode_config" ] && [ "$resolved" = "$host_opencode_config" ]; then
+    echo "Error: host OpenCode config is mounted at '$dest' inside '$CONTAINER_NAME' (source: $src)." >&2
     leaked=1
   fi
-done
+  if [ -n "$host_opencode_data" ] && [ "$resolved" = "$host_opencode_data" ]; then
+    echo "Error: host OpenCode data dir is mounted at '$dest' inside '$CONTAINER_NAME' (source: $src)." >&2
+    leaked=1
+  fi
+done <<< "$mounts"
+
+# auth.json / service.json must not exist under any OpenCode config or data
+# path in the container (image leftovers, a project that is $HOME, a leaked
+# file inside the skills/ submount). Searching only those trees avoids
+# false positives on unrelated auth.json files in the project.
+found_files=""
+if ! found_files="$(docker exec "$CONTAINER_NAME" sh -c '
+  for dir in /root/.config/opencode /root/.local/share/opencode /root/.opencode \
+             /workspace/.config/opencode /workspace/.local/share/opencode /workspace/.opencode; do
+    if [ -d "$dir" ]; then
+      find "$dir" \( -name auth.json -o -name service.json \) -print
+    fi
+  done
+  if [ -d /home ]; then
+    find /home \( -name auth.json -o -name service.json \) \
+      \( -path "*/.config/opencode/*" -o -path "*/.local/share/opencode/*" -o -path "*/.opencode/*" \) \
+      -print
+  fi
+')"; then
+  echo "Error: credential search failed inside '$CONTAINER_NAME' — the boundary could not be verified." >&2
+  echo "Remove it with: docker rm -f '$CONTAINER_NAME'" >&2
+  exit 1
+fi
+if [ -n "$found_files" ]; then
+  echo "Error: OpenCode credential files are present inside '$CONTAINER_NAME':" >&2
+  printf '%s\n' "$found_files" | while IFS= read -r p; do
+    [ -n "$p" ] || continue
+    echo "  $p" >&2
+  done
+  leaked=1
+fi
+
 if [ "$leaked" = "1" ]; then
   echo "Refusing to hand over. Inspect the mounts with: docker inspect '$CONTAINER_NAME'" >&2
   echo "Remove the container with: docker rm -f '$CONTAINER_NAME'" >&2
