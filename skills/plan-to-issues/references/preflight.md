@@ -210,27 +210,83 @@ install line **and** the line that installs `asm` itself — assume the user has
 
 ### No plan file found
 
+Printed only when the user **passed an explicit path that does not exist**. A discovery miss is
+not this error: it continues to conversation fallback, or to *No input to convert* when the
+conversation also has no actionable intent.
+
 ```text
 ✗ No plan file found
 
-  Looked for: MODERNIZATION_PLAN.md · docs/MODERNIZATION_PLAN.md · *PLAN*.md · tasks.md · tasks/
+  /plan-to-issues was given {path}, which does not exist in this repo.
 
-  If you have a plan elsewhere:
+  To fix:  pass a path that exists, or omit the path to use discovery and
+           conversation fallback.
 
        /plan-to-issues path/to/plan.md
-
-  If you have no plan yet, generate one with /codebase-modernizer. Not installed?
-
-       npm install -g agent-skill-manager                                    # asm itself
-       asm install github:luongnv89/skills:skills/codebase-modernizer        # the skill
-
-     No asm, one-off:  npx skills add https://github.com/luongnv89/skills --skill codebase-modernizer
+       /plan-to-issues --from-conversation
 ```
 
-Name the second half only when `codebase-modernizer` is also missing. When it is installed, the
-message is the first half plus `run /codebase-modernizer first`.
+### Plan file is unparseable
 
-**The input check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
+A file that exists but has no `### Task` / `#### Task` heading is not a plan. **Stop** with this
+block — never fall through to the conversation, and never reuse the *No plan file found* block
+(that path does exist).
+
+```text
+✗ Plan file has no task headings
+
+  {path} exists but has no `### Task` or `#### Task` heading, so it is not a
+  plan this skill can convert.
+
+  To fix:  add task headings in the supported grammar (references/plan-parsing.md),
+           or pass a different file.
+
+       /plan-to-issues path/to/real-plan.md
+```
+
+**The input check resolves to exactly one of two kinds** — a plan **file**, or **conversational
+intent** (`references/input-resolution.md`). The rules below govern the file kind. The conversation
+kind passes when Phase 0 identified actionable intent in the user's own turns; it has no filesystem
+probe, so its `×` is only the *no input at all* case below. Never let a failing **explicit-path**
+file check fall through to the conversation kind: a missing or unparseable explicit path is a stop,
+not a downgrade. A **discovery** miss is not a failing file check — it is the next rule in the
+resolution order.
+
+**No input at all** — no plan file resolves *and* the conversation carries no actionable intent — is
+a `×` on the **input** group:
+
+```text
+✗ No input to convert
+
+  No plan file was found, and this conversation does not describe work to file.
+
+To fix:  give a plan file      /plan-to-issues path/to/plan.md
+         or describe the work, then re-run with --from-conversation
+         or generate a plan    /codebase-modernizer
+
+  docs: references/input-resolution.md
+```
+
+### Cannot restore worklist from epic Source
+
+Printed when `--from-conversation --epic <n>` cannot restore a worklist. This is a **stop** —
+not a degrade, not a fall-through to re-drafting, and not `sync`.
+
+```text
+✗ Cannot restore worklist from epic #<n>
+
+  --from-conversation --epic <n> resumes by parsing the fenced ## Source block.
+  That block is missing, empty, or has no parseable task rows.
+
+  To fix:  restore ## Source on the epic body and re-run the same command.
+           Starting without --epic is a new confirm, not a resume.
+
+  Do not run /plan-to-issues sync <n> — sync creates no issues.
+
+  docs: references/input-resolution.md
+```
+
+**The file-kind check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
 holds *and* that `references/epic-identity.md` step 0 will accept the path.**
 A `tasks/` directory hit is resolved here — `tasks/tasks.md`, else the single `*.md` inside it, else
 list them and ask which (SKILL.md → *Mode selection* → *Plan discovery*). Resolve it in Phase 0, not
@@ -306,7 +362,9 @@ close (`references/epic-dashboard.md` -> *Rules the layout must hold*).
 Check all of these relative to this SKILL.md's directory before running anything:
 `references/preflight.md`, `references/plan-parsing.md`, `references/labels.md`,
 `references/issue-creator-bridge.md`, `references/epic-identity.md`, `references/epic-dashboard.md`,
-`references/sync-mode.md`, `references/edge-cases.md`, `agents/plan-parser.md`,
+`references/sync-mode.md`, `references/edge-cases.md`, `references/input-resolution.md`,
+`references/phase-contracts.md`, `references/security-boundary.md`, `references/glossary.md`,
+`references/acceptance-criteria.md`, `references/reporting.md`, `agents/plan-parser.md`,
 `scripts/render_dashboard.py`.
 
 This list is the authoritative guard — it must name **every** bundled file the skill loads at
@@ -360,8 +418,8 @@ On success, one line per check, then continue:
   Repo writable:      √ pass (luongnv89/skills · issues on · ADMIN)
   API budget:         √ pass (4905 remaining, ~220 needed)
   Skills installed:   √ pass (issue-creator 0.8.0)
-  Bundled files:      √ pass (10/10)
-  Plan located:       √ pass (MODERNIZATION_PLAN.md — 50 tasks, 6 phases)
+  Bundled files:      √ pass (16/16)
+  Input resolved:     √ pass (file MODERNIZATION_PLAN.md — 50 tasks, 6 phases)
   ____________________________
   Result:             PASS
 ```

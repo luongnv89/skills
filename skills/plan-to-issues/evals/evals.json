@@ -51,7 +51,7 @@
       "expected_output": "The existing epic is reused, already-filed tasks are skipped, and only the missing tasks are filed. Zero duplicate issues and zero new epics; the dashboard is re-rendered over the full set.",
       "files": [],
       "expectations": [
-        "An existing epic is found by filtering fetched issue bodies for the plan-dashboard sentinel, not by a GitHub `--search` query",
+        "An existing epic is found by filtering fetched issue bodies for the `<!-- plan-to-issues:plan=... -->` marker, not the dashboard sentinels and not a GitHub `--search` query",
         "Tasks already filed are matched on the `Plan task: <id>` marker and skipped, and the skip count is reported",
         "No second epic is created",
         "The final report names every skipped task"
@@ -74,11 +74,12 @@
       "id": 6,
       "kind": "negative-trigger",
       "prompt": "Write a modernization plan for this repo — audit the dependencies and tell me what to upgrade first.",
-      "expected_output": "The request is handled by /codebase-modernizer (audit and plan authoring). plan-to-issues does not run: there is no plan to file yet.",
+      "expected_output": "The request is handled by /codebase-modernizer (audit and plan authoring). plan-to-issues does not run: the user is asking for the work to be *discovered* — audited out of the codebase — not for already-decided work to be filed. Accepting conversational intent does not make this a trigger: nothing here has been decided yet, and the skill never opens source files to invent tasks.",
       "files": [],
       "expectations": [
-        "No epic or issue is created",
-        "The run does not attempt to parse a plan file or compute label sets"
+        "The skill does not offer to draft a task list from this request",
+        "No audit, dependency scan, or source-file read is attempted",
+        "The user is pointed at /codebase-modernizer, with a note that its plan — or a later conversation about what to do — can then be filed with /plan-to-issues"
       ]
     },
     {
@@ -159,6 +160,73 @@
         "Re-rendering the map after the closes produces identical bytes",
         "The epic body contains no `- [x]`, `- [ ]`, progress bar, or percentage that could contradict the closed issues",
         "Open/closed status is readable from the epic's sub-issues panel"
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "happy-path",
+      "prompt": "We just talked through what needs doing to harden the ingest path. There's no plan file — turn this conversation into GitHub issues with an epic on top.",
+      "expected_output": "The skill resolves the conversation as its input, drafts a task list from the user's own turns, prints it and asks for confirmation before creating anything, then files one issue per confirmed task plus an epic bound with a `plan-to-issues:conversation=<slug>` marker and a `## Source` block holding the confirmed draft. The final report prints `/plan-to-issues --from-conversation --epic <n>` as the resume handle, which restores the worklist from `## Source` and files remaining tasks (no re-draft, not sync).",
+      "files": [],
+      "expectations": [
+        "No plan file is required, requested, or created — `git status --porcelain` is unchanged.",
+        "The drafted task list is printed and confirmed by the user before the first mutation; declining creates nothing.",
+        "The epic body carries `<!-- plan-to-issues:conversation=<slug> -->`, a `## Source` block whose fenced draft is plan-grammar markdown (`### Task <id>:` plus Description/Dependencies/Effort/Acceptance Criteria — not the compact confirm table), and one map sentinel pair.",
+        "Each child carries `Part of #<epic>`, a label set with at least `phase:` and a type label, and is registered as a native sub-issue.",
+        "The final report prints the re-run handle `/plan-to-issues --from-conversation --epic <n>`.",
+        "That handle resumes by restoring the worklist from `## Source` (no re-draft, no confirm) and filing remaining tasks; it is not `sync`."
+      ]
+    },
+    {
+      "id": 14,
+      "kind": "happy-path",
+      "prompt": "/plan-to-issues docs/ROADMAP.md",
+      "expected_output": "The arbitrary plan path is accepted with no filename special-casing: the same epic-plus-issues output as for MODERNIZATION_PLAN.md, with the epic bound to `plan-to-issues:plan=docs/ROADMAP.md`.",
+      "files": [
+        "docs/ROADMAP.md"
+      ],
+      "expectations": [
+        "The skill does not look for MODERNIZATION_PLAN.md or require /codebase-modernizer to have run.",
+        "The epic binding marker names the given path, normalized repo-root-relative.",
+        "No draft-and-confirm gate runs — that gate belongs to the conversation path only."
+      ]
+    },
+    {
+      "id": 15,
+      "kind": "edge",
+      "prompt": "/plan-to-issues   (a plan file exists at docs/PLAN.md, and the conversation above also describes work to do)",
+      "expected_output": "The skill detects both possible inputs and asks the user which to convert, rather than guessing or silently merging them.",
+      "files": [
+        "docs/PLAN.md"
+      ],
+      "expectations": [
+        "Both candidates are listed with a short summary each.",
+        "Nothing is created before the user chooses.",
+        "An explicit path argument or --from-conversation would have skipped this question."
+      ]
+    },
+    {
+      "id": 16,
+      "kind": "edge",
+      "prompt": "/plan-to-issues --from-conversation   (an epic already carries this conversation's slug)",
+      "expected_output": "The existing epic is printed and the user is asked whether to reuse it or create a new one; it is never silently reused, because a slug is not a stable identity.",
+      "files": [],
+      "expectations": [
+        "The prompt names the existing epic number, title, and child count.",
+        "Reuse files only the tasks the epic does not already list; no duplicates.",
+        "`--epic <n>` binds to that epic, restores the worklist from `## Source` (no re-draft, no confirm), and files only remaining tasks."
+      ]
+    },
+    {
+      "id": 17,
+      "kind": "edge",
+      "prompt": "/plan-to-issues   (no plan file anywhere, and the conversation is a question about how the build works)",
+      "expected_output": "A `✗ No input to convert` failure on the preflight input group, naming the three ways to supply one. Nothing is created.",
+      "files": [],
+      "expectations": [
+        "A question or explanation request is not treated as actionable intent.",
+        "The failure block offers a plan path, --from-conversation, and /codebase-modernizer.",
+        "Preflight reports FAIL and Phase 1 never runs."
       ]
     }
   ]
