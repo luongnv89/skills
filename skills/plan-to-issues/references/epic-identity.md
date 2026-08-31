@@ -201,7 +201,9 @@ issue already carrying `plan=`), and still asks once.
 
 `/plan-to-issues --from-conversation --epic <n>` **skips discovery entirely** and binds to that
 number after checking it is open and not already bound to a *different* slug or to a plan path.
-This is the supported way to resume a conversation-sourced run. The final report always prints
+This is the supported way to resume a conversation-sourced run. Phase 1 then restores the
+worklist from `## Source` (`references/input-resolution.md`) — it does not re-draft. The final
+report always prints
 `Re-run this backlog with: /plan-to-issues --from-conversation --epic <n>` — the issue number,
 not the slug, is the stable handle. `sync <epic#>` only re-renders the map; it creates no issues.
 

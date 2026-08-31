@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.0.1
+  version: 2.0.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -114,7 +114,7 @@ Resolve the mode first — each is a distinct branch.
 | `/plan-to-issues` | Create | Resolve the input, create the epic and one issue per task |
 | `/plan-to-issues <path.md>` | Create | Forced to that plan file — **any** path, no filename special-casing |
 | `/plan-to-issues --from-conversation` | Create | Forced to conversational intent; skips plan discovery |
-| `… --from-conversation --epic <n>` | Create | Resume a conversation-sourced epic by number |
+| `… --from-conversation --epic <n>` | Create | Resume: restore worklist from `## Source`, file remaining |
 | `/plan-to-issues --dry-run` | Preview | Resolve, parse or draft, compute labels, print the task table and map preview. **Creates nothing** |
 | `/plan-to-issues --phase P0,P1` | Create (filtered) | Only those phases; the map still lists every phase, unfiled ones `— not filed` |
 | `/plan-to-issues sync <epic#>` | Sync | Re-render epic `#N`'s map. Creates no issues |
@@ -158,14 +158,13 @@ appears with its goal and milestone; the dependency table references only ids in
 critical path is recorded. Any mismatch is a **FAIL** — report the missing ids rather than filing a
 partial backlog silently.
 
-**`conversation`** — draft from the user's own turns under the same no-enrichment contract, print
-every task row plus the epic title, and ask once: `[Y]es / [e]dit / [n]o`. **This gate is mandatory
-and has no auto-accept** — the file path has a reviewable artifact on disk, this path has only this
-gate. The confirmed draft goes verbatim into the epic body under `## Source`, its durable record.
+**`conversation`** — draft from the user's turns, print every task row plus the epic title, ask
+once: `[Y]es / [e]dit / [n]o`. **No auto-accept.** Confirmed draft goes under `## Source`.
+`--epic <n>` skips this gate: restore the worklist from that epic's `## Source`
+(`references/input-resolution.md`).
 
-*Completion criteria:* every drafted task has an id, title, ≥ 1 acceptance criterion, a
-`Dependencies` value, and an effort; the user confirmed the draft; it is recorded for Phase 3. No
-confirmation, no filing.
+*Completion criteria:* every task has an id, title, ≥ 1 criterion, `Dependencies`, and an effort;
+fresh: user confirmed. `--epic`: Source parsed, no confirm. Else do not file.
 
 ### Phase 2 — Resolve the label set
 
@@ -189,7 +188,8 @@ guard, then verify with anchored, source-value-specific probes.
 
 On the `file` path a marker hit is an **idempotent re-run** — reuse the epic, file only what it
 lacks. On the `conversation` path a hit is **never silently reused**: a slug is not a stable
-identity, so print the epic and ask (default reuse); `--epic <n>` skips the search. Both fall back
+identity, so print the epic and ask (default reuse); `--epic <n>` skips the search and Phase 1
+restores from `## Source`. Both fall back
 to **adoption** for an unmarked epic that looks like an interrupted run, and adoption always **asks
 once**.
 
@@ -327,7 +327,7 @@ Three change the main path; the rest are in `references/edge-cases.md`.
 - **Epic already exists** — file path reuses, never a second epic; conversation path prints the
   hit and asks (`n` permitted). Never re-parent existing children.
 - **Rate limited mid-batch** — re-run Create mode; **idempotent re-run** files only the rest. On the
-  conversation path use `--epic <n>` so it resumes rather than re-drafts.
+  conversation path `--epic <n>` restores the worklist from `## Source` and files remaining tasks.
 - **> 100 tasks** — print the count and confirm before filing; GitHub's secondary content-creation
   limit makes an unattended run that size unreliable. `--phase` splits it.
 

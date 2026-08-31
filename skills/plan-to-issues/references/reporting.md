@@ -17,7 +17,8 @@ Emitted after every phase.
 - **Preflight:** `Tools present`, `gh ready`, `Repo writable`, `API budget`, `Skills installed`,
   `Bundled files`, `Input resolved`
 - **Parse / draft:** `Input resolved`, `Task count matches` (file path) or `Draft confirmed`
-  (conversation path), `Fields complete`, `Deps resolvable`, `Critical path recorded`
+  (fresh conversation) or `Source restored` (`--epic` resume), `Fields complete`, `Deps
+  resolvable`, `Critical path recorded`
 - **Labels:** `Set computed`, `Existing checked`, `Missing created`, `Dropped recorded`
 - **Epic:** `Existing epic checked`, `Epic created`, `Epic labelled`, `Source marker bound`
 - **File issues:** `Batches run`, `Duplicates skipped`, `Labels applied`, `Parent markers present`,

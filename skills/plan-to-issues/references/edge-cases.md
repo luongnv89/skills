@@ -10,7 +10,8 @@ else lives here. Read this when a run hits something unusual.
 - **> 100 tasks** — print the count and confirm before filing; GitHub secondary rate limits make an
   unattended 100+ batch unreliable.
 - **Rate limited mid-batch** — `/issue-creator` retries with backoff and reports per item. Re-run
-  Create mode: **idempotent re-run** skips what landed and files the rest.
+  Create mode: **idempotent re-run** skips what landed and files the rest. On the conversation path
+  that re-run is `--epic <n>`: restore the worklist from `## Source`, do not re-draft.
 - **Epic already exists** — file path: reuse it (`references/epic-identity.md` step 1); never a
   second epic for the same plan. Conversation path: print the slug hit and ask; `n` may create a
   second epic with the same slug. If the user wants a fresh *file-path* epic, they close the old

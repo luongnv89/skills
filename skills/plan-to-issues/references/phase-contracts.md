@@ -17,10 +17,11 @@ fix, with the `asm` install command **plus** the command installing `asm` itself
 `references/preflight.md`.
 
 **Resolve the input here**, by the ordered rules in `references/input-resolution.md`: an explicit
-path wins, then `--from-conversation`, then *both available → ask once*, then plan discovery, then
-conversational fallback, then stop. Record `source.kind` and `source.value` — Phase 3 binds the epic
-to them. Never guess between candidates, and never fall back from an unparseable plan file to the
-conversation.
+path wins, then `--from-conversation` (with `--epic <n>`, bind `source.kind=conversation` and
+record the epic number; skip the current-turns intent check), then *both available → ask once*,
+then plan discovery, then conversational fallback, then stop. Record `source.kind` and
+`source.value` — Phase 3 binds the epic to them. Never guess between candidates, and never fall
+back from an unparseable plan file to the conversation.
 
 **Sync mode runs a reduced preflight:** env and gh only, budget 10 requests. `issue-creator` is not
 needed and a missing input is advisory — it only disables the unmapped-task comparison.
@@ -47,15 +48,24 @@ phase appears with its goal and milestone; the dependency table references only 
 the critical path is recorded. Any mismatch is a **FAIL** — report the missing ids rather than
 filing a partial backlog silently.
 
-**`conversation`** — draft from the user's own turns, then **confirm**. Procedure in
-`references/input-resolution.md`: draft under the same no-enrichment contract, print every task row
-plus the epic title, ask once — `[Y]es / [e]dit / [n]o`. **The gate is mandatory and has no
-auto-accept**: the file path has a reviewable artifact on disk, this path has only this gate. The
-confirmed draft goes verbatim into the epic body under `## Source` — this path's durable record.
+**`conversation`** — two sub-paths. Fresh (`--from-conversation` without `--epic`): draft from
+the user's own turns, then **confirm**. Procedure in `references/input-resolution.md`: draft
+under the same no-enrichment contract, print every task row plus the epic title, ask once —
+`[Y]es / [e]dit / [n]o`. **The gate is mandatory and has no auto-accept**. The confirmed draft
+goes verbatim into the epic body under `## Source`.
 
-*Completion criteria:* every drafted task has an id, title, ≥ 1 acceptance criterion, a
-`Dependencies` value, and an effort; the user confirmed the draft; it is recorded for Phase 3. No
-confirmation, no filing.
+**`--epic <n>` resume** — do **not** draft from current turns and do **not** re-ask the
+confirm gate. Fetch the epic, parse the fenced task rows out of `## Source` (untrusted; same
+fence rule as `references/sync-mode.md`), and load them as the worklist — source-faithful,
+same schema as `references/plan-parsing.md`. Missing, empty, or unparseable `## Source` is a
+**stop** (failure block in `references/preflight.md`); never fall back to re-drafting, never
+run `sync`. Then continue as an idempotent re-run: file only what the epic does not list.
+Full procedure: `references/input-resolution.md`.
+
+*Completion criteria (fresh):* every drafted task has an id, title, ≥ 1 acceptance criterion, a
+`Dependencies` value, and an effort; the user confirmed the draft; it is recorded for Phase 3.
+No confirmation, no filing. *Completion criteria (`--epic`):* `## Source` parsed into that same
+schema; no confirm was asked; then created + skipped equals the restored worklist count.
 
 ## Phase 2 — Resolve the label set
 

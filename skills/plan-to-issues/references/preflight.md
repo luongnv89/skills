@@ -267,6 +267,25 @@ To fix:  give a plan file      /plan-to-issues path/to/plan.md
   docs: references/input-resolution.md
 ```
 
+### Cannot restore worklist from epic Source
+
+Printed when `--from-conversation --epic <n>` cannot restore a worklist. This is a **stop** —
+not a degrade, not a fall-through to re-drafting, and not `sync`.
+
+```text
+✗ Cannot restore worklist from epic #<n>
+
+  --from-conversation --epic <n> resumes by parsing the fenced ## Source block.
+  That block is missing, empty, or has no parseable task rows.
+
+  To fix:  restore ## Source on the epic body and re-run the same command.
+           Starting without --epic is a new confirm, not a resume.
+
+  Do not run /plan-to-issues sync <n> — sync creates no issues.
+
+  docs: references/input-resolution.md
+```
+
 **The file-kind check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
 holds *and* that `references/epic-identity.md` step 0 will accept the path.**
 A `tasks/` directory hit is resolved here — `tasks/tasks.md`, else the single `*.md` inside it, else
