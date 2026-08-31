@@ -2,13 +2,11 @@
 
 The deep "why" behind SKILL.md Phases 3 and 4. The SKILL.md gives you the commands and the branch logic; read this when you need to understand *why* a step is shaped the way it is, or when a check behaves unexpectedly.
 
-## Fail-closed preflight
+## The exit-code table (canonical)
 
-Before every `send-keys` **and** before every recovery Enter, run:
+The single source for every helper exit code in this skill. SKILL.md's Critical Rules, Phase 1, and Phase 4 name *the exit-code table* and point here rather than restating it — the codes live in exactly one place so they cannot drift apart.
 
-```bash
-python3 "$here/preflight_send.py" "$target"
-```
+### `preflight_send.py` — is this pane sendable?
 
 | Exit | Meaning | Action |
 |---|---|---|
@@ -18,7 +16,26 @@ python3 "$here/preflight_send.py" "$target"
 | 4 | unverifiable | refuse; fix session / capture |
 | 1 | usage / tmux missing | fix environment |
 
-Typing into a trust dialog submits menu garbage and reports a false success. Typing into a working pane races the prior task's completion signal. Preflight is the single-target twin of `broadcast.sh` Phase 1b — keep them in lockstep.
+### `wait_for_idle.py` — readiness gate and settled-reply wait
+
+| Exit | Meaning | Action |
+|---|---|---|
+| 0 | settled — or ready, under `--ready` | proceed to read the reply / assign work |
+| 2 | timeout — the bounded wait elapsed | classify working vs stalled with an independent capped-tail read |
+| 3 | blocked (trust/auth/permission dialog) | escalate to a human; never type task text |
+| 1 | error — usage, tmux missing, bad target | fix environment |
+
+Both scripts share the same code *meanings* (0 good, 1 environment error, 2 not-yet, 3 blocked) so one mental model covers both. Only `preflight_send.py` exit 0 authorizes a send; `wait_for_idle.py` never does.
+
+## Fail-closed preflight
+
+Before every `send-keys` **and** before every recovery Enter, run:
+
+```bash
+python3 "$here/preflight_send.py" "$target"
+```
+
+Read the verdict off the exit-code table above. Typing into a trust dialog submits menu garbage and reports a false success. Typing into a working pane races the prior task's completion signal. Preflight is the single-target twin of `broadcast.sh` Phase 1b — keep them in lockstep.
 
 ## Why "text on screen" does not prove a message was submitted
 
@@ -75,7 +92,7 @@ rc=$?; rm -f "$baseline_file"
 | Boot / ready | `--ready` | Accepts already-idle; still returns 3 on blocked dialogs |
 | Marker-required | `--completion-marker` | Quiet prompt echo alone never completes |
 
-Exit codes: **0** settled, **1** error, **2** timeout, **3** blocked.
+Exit codes: see *the exit-code table* at the top of this file.
 
 ## Why the helper's verdict is advisory
 

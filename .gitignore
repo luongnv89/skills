@@ -86,10 +86,6 @@ SKILL.md.bak
 .trae/
 .vibe/
 .zencoder/
-.asm-improver/
 
 # gitissue run log (local)
 .gitissue/
-
-# skill-auto-improver run artifacts
-.asm-improver/
