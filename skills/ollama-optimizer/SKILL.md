@@ -4,8 +4,8 @@ description: "Optimize Ollama configuration for the current machine's hardware. 
 license: MIT
 effort: medium
 metadata:
-  version: 1.1.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.1.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Ollama Optimizer

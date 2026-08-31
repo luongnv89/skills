@@ -4,8 +4,8 @@ description: "Generate a commit message, stage all changes, and push to remote a
 license: MIT
 effort: low
 metadata:
-  version: 1.0.3
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.0.4
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Commit and Push Everything
