@@ -4,8 +4,8 @@ description: "Generate professional SVG logos from project context: 7 brand vari
 license: MIT
 effort: medium
 metadata:
-  version: 1.2.3
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.4
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Logo Designer
