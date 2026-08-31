@@ -7,10 +7,14 @@
 
 # Plan to Issues
 
-> You ran `/codebase-modernizer`. You have a 50-task plan with phases, sprints, milestones and a
-> critical path — and it is a markdown file nobody will open again. This skill moves it into the
-> tracker: one labelled issue per task, one epic on top, and the epic's body becomes the dashboard
-> you check to see how far along the plan is.
+> You have a plan — a 50-task modernization file with phases and milestones, a hand-written
+> `ROADMAP.md`, or just a conversation you finished five minutes ago. Either way it is not in the
+> tracker, and until it is, nobody works from it. This skill moves it in: one labelled issue per
+> task, one epic on top, and the epic's body maps every issue back to the task it came from.
+>
+> **No plan file required.** Talk through what needs doing, then run
+> `/plan-to-issues --from-conversation`; it drafts the task list, shows it to you, and files it
+> once you say yes.
 
 It writes to your issue tracker, not to your code. No source file is modified.
 
@@ -19,7 +23,7 @@ It writes to your issue tracker, not to your code. No source file is modified.
 | Artifact | Contents |
 |---|---|
 | **One epic issue** | Whole-effort acceptance criteria (the plan's milestones) plus a live dashboard: every child issue grouped by phase, per-phase progress bars, milestone status, critical path, and what's actionable right now |
-| **One issue per plan task** | Written by `/issue-creator` — normalized template, acceptance criteria, the plan text preserved verbatim as reporter context — bound to the epic with `Part of #N` |
+| **One issue per task** | Written by `/issue-creator` — normalized template, acceptance criteria, the plan text preserved verbatim as reporter context — bound to the epic with `Part of #N` |
 | **A label scheme** | `phase:p0`, `dim:dep`, `priority:high`, `bug`/`improvement`/`feature` — derived by rule from the plan, so you can filter the backlog by phase, dimension, or urgency |
 
 ## The dashboard

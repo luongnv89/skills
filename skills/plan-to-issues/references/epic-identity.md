@@ -156,3 +156,73 @@ Probe 1 at 0 means the marker is absent or wrapped (`/issue-creator` reordered t
 in a blockquote) — re-run step 4 and re-verify. Probe 2 above 1, or probe 1 at 0 while probe 2 is 1,
 means the epic is bound to a **different plan**: **stop**, rather than filing this plan's children
 into another plan's epic. Any sentinel count other than 1 means the body was hand-edited; **stop**.
+
+
+---
+
+## Conversation-sourced epics (source kind `conversation`)
+
+Everything above governs `source.kind == "file"` and is unchanged. When Phase 0 resolved
+conversational intent instead, the same five steps run with these deltas.
+
+**Step 0 — normalize.** There is no path to normalize. The identity value is the **slug of the epic
+title the user confirmed** in Phase 1: lowercased, every run of non-alphanumerics collapsed to `-`,
+leading and trailing `-` trimmed, truncated to 60 characters. An empty slug after normalization is a
+**stop**, exactly as an empty `plan_path` is — it would make one marker match every conversation.
+
+```bash
+slug="$(printf '%s' "$epic_title" | tr '[:upper:]' '[:lower:]' \
+  | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-60)"
+[ -n "$slug" ] || { echo "✗ empty conversation slug — refusing to bind"; exit 1; }
+```
+
+**Step 1 — discovery is advisory, not authoritative.** The marker is
+`<!-- plan-to-issues:conversation=<slug> -->`, matched as a fixed string on its own line, the same
+way step 1 matches the plan marker. **The difference that matters: a slug is not a stable identity.**
+Two unrelated discussions of one subject slug identically, and the same intent rephrased slugs
+differently. So a hit is **never silently reused**:
+
+```text
+An epic already carries this conversation slug:
+  #212  Epic: Harden the ingest path   (opened 3 days ago, 6 children)
+Reuse it and file only what it does not list, or create a new epic? [R/n]
+```
+
+Default is reuse. `n` creates a second epic with the same slug — permitted, because two backlogs may
+legitimately share a title; both then carry the marker and every later run asks. Adoption of an
+unmarked epic works exactly as it does on the file path, and still asks once.
+
+`/plan-to-issues --from-conversation --epic <n>` **skips discovery entirely** and binds to that
+number after checking it is open and not already bound to a *different* slug or to a plan path.
+This is the supported way to resume a conversation-sourced run, and the final report always prints
+it, because the issue number — not the slug — is the stable handle.
+
+**Step 4 — bind.** Append the conversation marker and, additionally, the `## Source` block holding
+the confirmed draft verbatim. Both are guarded the same way as the plan marker, so re-running cannot
+duplicate either:
+
+```bash
+grep -qFx "<!-- plan-to-issues:conversation=$slug -->" epic-body.md \
+  || printf '\n<!-- plan-to-issues:conversation=%s -->\n' "$slug" >> epic-body.md
+grep -qFx '## Source' epic-body.md \
+  || { printf '\n## Source\n\nConfirmed from conversation:\n\n' >> epic-body.md
+       printf '```text\n' >> epic-body.md
+       cat confirmed-draft.txt >> epic-body.md
+       printf '```\n' >> epic-body.md; }
+```
+
+The draft is fenced, so a drafted line cannot inject a heading or a sentinel into the epic body
+(`references/security-boundary.md`).
+
+**Step 4 probes.** Same shape, conversation values, plus the mutual-exclusion probe — an epic is
+bound to exactly one input kind, never both:
+
+```bash
+printf '%s\n' "$body" | grep -cFx "<!-- plan-to-issues:conversation=$slug -->"  # must be 1
+printf '%s\n' "$body" | grep -c  '^<!-- plan-to-issues:conversation='           # must be 1
+printf '%s\n' "$body" | grep -c  '^<!-- plan-to-issues:plan='                   # must be 0
+printf '%s\n' "$body" | grep -cFx '## Source'                                   # must be 1
+```
+
+**Never materialize a plan file to obtain a stable identity.** This skill writes to the tracker
+only; its acceptance criteria require `git status --porcelain` to match the pre-run snapshot.

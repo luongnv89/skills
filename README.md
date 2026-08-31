@@ -195,7 +195,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**prd-generator**](skills/prd-generator/) | 1.3.2 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.4.0 | max | Technical architecture document from PRD |
 | [**tasks-generator**](skills/tasks-generator/) | 1.3.1 | max | Sprint tasks and plan from PRD |
-| [**plan-to-issues**](skills/plan-to-issues/) | 1.6.0 | high | File a phased plan as labelled GitHub issues under one epic whose body maps each issue to its plan task |
+| [**plan-to-issues**](skills/plan-to-issues/) | 2.0.0 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
 
 ### Frontend & Design
 

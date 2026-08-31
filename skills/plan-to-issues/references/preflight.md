@@ -230,7 +230,28 @@ install line **and** the line that installs `asm` itself — assume the user has
 Name the second half only when `codebase-modernizer` is also missing. When it is installed, the
 message is the first half plus `run /codebase-modernizer first`.
 
-**The input check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
+**The input check resolves to exactly one of two kinds** — a plan **file**, or **conversational
+intent** (`references/input-resolution.md`). The rules below govern the file kind. The conversation
+kind passes when Phase 0 identified actionable intent in the user's own turns; it has no filesystem
+probe, so its `×` is only the *no input at all* case below. Never let a failing file check fall
+through to the conversation kind: an unresolvable explicit path is a stop, not a downgrade.
+
+**No input at all** — no plan file resolves *and* the conversation carries no actionable intent — is
+a `×` on the **input** group:
+
+```text
+✗ No input to convert
+
+  No plan file was found, and this conversation does not describe work to file.
+
+To fix:  give a plan file      /plan-to-issues path/to/plan.md
+         or describe the work, then re-run with --from-conversation
+         or generate a plan    /codebase-modernizer
+
+  docs: references/input-resolution.md
+```
+
+**The file-kind check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
 holds *and* that `references/epic-identity.md` step 0 will accept the path.**
 A `tasks/` directory hit is resolved here — `tasks/tasks.md`, else the single `*.md` inside it, else
 list them and ask which (SKILL.md → *Mode selection* → *Plan discovery*). Resolve it in Phase 0, not
@@ -361,7 +382,7 @@ On success, one line per check, then continue:
   API budget:         √ pass (4905 remaining, ~220 needed)
   Skills installed:   √ pass (issue-creator 0.8.0)
   Bundled files:      √ pass (10/10)
-  Plan located:       √ pass (MODERNIZATION_PLAN.md — 50 tasks, 6 phases)
+  Input resolved:     √ pass (file MODERNIZATION_PLAN.md — 50 tasks, 6 phases)
   ____________________________
   Result:             PASS
 ```
