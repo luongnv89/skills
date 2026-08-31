@@ -4,8 +4,8 @@ description: "Generate Product Requirements Documents from `idea.md` and `valida
 license: MIT
 effort: max
 metadata:
-  version: 1.3.2
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.4.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # PRD Generator
@@ -48,7 +48,7 @@ If path is not provided (auto-pick mode):
 
 ## Workflow
 
-**Mode selection (decide before Phase 1):** If `PROJECT_DIR/prd.md` already exists and the user wants changes to it, this is a **modify** run — do Phase 1's steps 1-4 (including the mandatory backup), then skip to `## Modification Mode` below instead of Phases 2-5. Otherwise this is a **create** run — proceed through Phases 1-5 in order. Both modes share Phase 1's backup step; see `## Modification Mode` for modify-run detail.
+**Mode selection (decide before Phase 1):** If `PROJECT_DIR/prd.md` already exists and the user wants changes to it, this is a **modify** run — do Phase 1's steps 1-4 (including the mandatory backup), then skip to `## Modification Mode` below instead of Phases 2-5, rejoining the workflow at Phase 6. Otherwise this is a **create** run — proceed through Phases 1-7 in order. Both modes share Phase 1's backup step; see `## Modification Mode` for modify-run detail.
 
 ### Phase 1: Validate Input
 
@@ -105,6 +105,23 @@ Read `references/prd-template.md` for the full template structure.
 3. Highlight areas needing user review
 4. Suggest next steps
 
+### Phase 6: README Maintenance (ideas repo)
+
+After writing `prd.md`, if the project folder is inside an `ideas` repo, update the repo README ideas table:
+- Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
+- Fallback: update `README.md` manually (ensure PRD status becomes ✅ for that idea)
+
+### Phase 7: Commit and push
+
+- Commit immediately after updates.
+- Confirm before pushing — this is a visible action:
+
+```bash
+git push origin <branch>
+```
+
+- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+
 ## Step Completion Reports
 
 After completing each major step, output a status report in this format:
@@ -123,79 +140,7 @@ After completing each major step, output a status report in this format:
 
 Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
 
-### Phase-specific checks
-
-**Phase 1 — Validate Input**
-```
-◆ Validate Input (step 1 of 7 — input resolution)
-··································································
-  Input files found:        √ pass
-  Dependencies resolved:    √ pass (PROJECT_DIR confirmed)
-  Backup created:           √ pass | — skipped (no existing prd.md)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 2 — Extract Context**
-```
-◆ Extract Context (step 2 of 7 — context extraction)
-··································································
-  idea.md parsed:           √ pass (concept + technical context read)
-  validate.md parsed:       √ pass (verdict + ratings extracted)
-  Context extracted:        √ pass (idea.md + validate.md read)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 3 — Clarify Requirements**
-```
-◆ Clarify Requirements (step 3 of 7 — requirements gathering)
-··································································
-  Questions answered:       √ pass
-  Scope defined:            √ pass (MVP timeframe confirmed)
-  Stakeholders identified:  √ pass (team size, compliance noted)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 4 — Generate PRD**
-```
-◆ Generate PRD (step 4 of 7 — document generation)
-··································································
-  10 sections written:      √ pass
-  prd.md created:           √ pass
-  Cross-references valid:   √ pass (mermaid diagrams render)
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-**Phase 5 — Output**
-```
-◆ Output (step 5 of 7 — delivery)
-··································································
-  File written:             √ pass
-  Summary presented:        √ pass
-  Next steps suggested:     √ pass
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-### Phase 6: README Maintenance (ideas repo)
-
-After writing `prd.md`, if the project folder is inside an `ideas` repo, update the repo README ideas table:
-- Preferred: `cd` to the repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
-- Fallback: update `README.md` manually (ensure PRD status becomes ✅ for that idea)
-
-### Phase 7: Commit and push
-
-- Commit immediately after updates.
-- Confirm before pushing — this is a visible action:
-
-```bash
-git push origin <branch>
-```
-
-- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+Per-phase check names and the full set of seven templates (one for each of Phases 1-7) live in `references/step-reports.md` — read it before emitting the first report.
 
 ## Reporting with GitHub links (mandatory)
 When reporting completion, include:
@@ -237,7 +182,7 @@ A run is considered successful only when every item below is verifiable in the p
 - [ ] Open Questions & Risks lists at least 3 risks, each with likelihood, impact, and mitigation.
 - [ ] Appendix.Revision History records this generation event with date and "v1.0 — initial PRD".
 - [ ] If a previous `prd.md` existed, a `prd.backup.YYYYMMDD_HHMMSS.md` sibling file was written before overwrite.
-- [ ] Step Completion Reports are emitted for phases 1-5 with `Result: PASS` (or explicit PARTIAL/FAIL with reason).
+- [ ] Step Completion Reports are emitted for phases 1-7 with `Result: PASS` (or explicit PARTIAL/FAIL with reason).
 
 Always verify the checklist explicitly in the final completion report (echo each item with √ or ×).
 
