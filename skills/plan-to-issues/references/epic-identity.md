@@ -171,15 +171,31 @@ the body was hand-edited; **stop**.
 Everything above governs `source.kind == "file"` and is unchanged. When Phase 0 resolved
 conversational intent instead, the same five steps run with these deltas.
 
-**Step 0 — normalize.** There is no path to normalize. The identity value is the **slug of the epic
-title the user confirmed** in Phase 1: lowercased, every run of non-alphanumerics collapsed to `-`,
-leading and trailing `-` trimmed, truncated to 60 characters. An empty slug after normalization is a
-**stop**, exactly as an empty `plan_path` is — it would make one marker match every conversation.
+**Step 0 — normalize.** There is no path to normalize.
+
+*Fresh conversation:* the identity value is the **slug of the epic title the user confirmed** in
+Phase 1: lowercased, every run of non-alphanumerics collapsed to `-`, leading and trailing `-`
+trimmed, truncated to 60 characters. An empty slug after normalization is a **stop**, exactly as
+an empty `plan_path` is — it would make one marker match every conversation.
 
 ```bash
 slug="$(printf '%s' "$epic_title" | tr '[:upper:]' '[:lower:]' \
   | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-60)"
 [ -n "$slug" ] || { echo "✗ empty conversation slug — refusing to bind"; exit 1; }
+```
+
+*`--epic <n>` resume:* do **not** re-slug from a Phase 1 title (there is none), from `<n>`, or
+from current turns. Fetch `#<n>` and set `source.value` / `$slug` from the existing
+`<!-- plan-to-issues:conversation=<slug> -->` marker, matched as a fixed string on its own line.
+**Stop** if that marker is missing or empty, or if the body carries `plan=`. Never append
+`conversation=<n>`.
+
+```bash
+body="$(gh issue view "$n" --json body --jq '.body')"
+slug="$(printf '%s\n' "$body" | sed -n 's/^<!-- plan-to-issues:conversation=\(.*\) -->$/\1/p' | head -1)"
+[ -n "$slug" ] || { echo "✗ epic #$n has no conversation= marker — cannot resume"; exit 1; }
+printf '%s\n' "$body" | grep -q '^<!-- plan-to-issues:plan=' \
+  && { echo "✗ epic #$n is bound to a plan — not a conversation resume"; exit 1; }
 ```
 
 **Step 1 — discovery is advisory, not authoritative.** The marker is
@@ -196,8 +212,9 @@ Reuse it and file only what it does not list, or create a new epic? [R/n]
 
 Default is reuse. `n` creates a second epic with the same slug — permitted, because two backlogs may
 legitimately share a title; both then carry the marker and every later run asks. Adoption of an
-unmarked epic works exactly as it does on the file path (neither source-marker kind; skip any
-issue already carrying `plan=`), and still asks once.
+unmarked epic works as on the file path (neither source-marker kind; skip any issue already
+carrying `plan=`), except the title clause matches `Epic: <confirmed title>`, **not**
+`Epic: Modernize <project> — …`, and still asks once.
 
 `/plan-to-issues --from-conversation --epic <n>` **skips discovery entirely** and binds to that
 number after checking it is open and not already bound to a *different* slug or to a plan path.
@@ -206,6 +223,11 @@ worklist from `## Source` (`references/input-resolution.md`) — it does not re-
 report always prints
 `Re-run this backlog with: /plan-to-issues --from-conversation --epic <n>` — the issue number,
 not the slug, is the stable handle. `sync <epic#>` only re-renders the map; it creates no issues.
+
+**Step 2 — create.** The file-path title and plan-header intent do **not** apply. Title:
+`Epic: <confirmed title>` — the title the user confirmed in Phase 1 (Expected Output:
+`Epic: Harden the ingest path`). Intent text is the confirmed draft only. Do **not** put the
+marker in the intent text. `--epic` skips this step: the epic already exists.
 
 **Step 4 — bind.** Append the conversation marker and, additionally, the `## Source` block holding
 the confirmed draft verbatim. Both are guarded the same way as the plan marker, so re-running cannot

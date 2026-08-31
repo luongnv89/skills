@@ -7,8 +7,9 @@ The run is successful only if **all** hold:
 
 - [ ] Preflight passed every applicable check before the first mutation, and resolved exactly one
       input. Degraded checks are named in the final report.
-- [ ] On the conversation path, the user confirmed the drafted task list verbatim before anything
-      was created, and the confirmed draft is recorded in the epic body under `## Source`.
+- [ ] On a fresh conversation, the user confirmed the drafted task list verbatim before anything
+      was created, and that draft is recorded under `## Source`. On `--epic <n>` resume, the
+      existing fenced `## Source` **is** that confirm — do not re-ask.
 - [ ] Every task in scope has exactly one issue, and every issue traces to a task id.
 - [ ] Every child issue carries `Part of #<epic>` and a label set with at least `phase:` and a type
       label; every child with dependencies also carries `Depends on #N`.

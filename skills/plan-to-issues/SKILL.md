@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.0.2
+  version: 2.0.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -180,9 +180,10 @@ mandatory); `gh label list` contains every label about to be applied, or it is o
 ### Phase 3 — Create the epic
 
 Apply `references/epic-identity.md`: **normalize** the source value (a `file` value to one
-repo-root-relative file, a `conversation` value to the confirmed-title slug — comparisons are exact
-string matches); **look for this source's epic first** by its source marker; **create** through
-`/issue-creator` with no marker in the intent text; **label** `epic`; **bind** the marker, the
+repo-root-relative file, a `conversation` value to the confirmed-title slug, or on `--epic` the
+slug already on the epic — never from `<n>`); **look for this source's epic first** by its source
+marker; **create** through `/issue-creator` with no marker in the intent text (conversation title
+`Epic: <confirmed title>`, intent from the draft); **label** `epic`; **bind** the marker, the
 `## Source` block on the conversation path, and an empty sentinel pair, each behind a `grep -q ||`
 guard, then verify with anchored, source-value-specific probes.
 
@@ -271,8 +272,8 @@ The run succeeded only if **all** hold; the full wording is in `references/accep
 
 - [ ] Preflight passed every applicable check before the first mutation and resolved exactly one
       input; degraded checks are named in the report.
-- [ ] On the conversation path, the user confirmed the draft verbatim before anything was created,
-      and it is recorded in the epic body under `## Source`.
+- [ ] Conversation: user confirmed the draft (or `--epic` treats existing `## Source` as that
+      confirm) before anything was created.
 - [ ] Every task in scope has exactly one issue and every issue traces to a task id.
 - [ ] Every child carries `Part of #<epic>`, a label set with at least `phase:` and a type label,
       and `Depends on #N` where it has dependencies.
@@ -284,7 +285,8 @@ The run succeeded only if **all** hold; the full wording is in `references/accep
       close reproduces identical bytes. Milestones appear with their measurable exit conditions.
 - [ ] No source file was modified — the conversation path **never materializes a plan file**.
       `git status --porcelain` matches the pre-run snapshot (the mandatory sync aside).
-- [ ] Re-running on the same input creates zero duplicate issues and zero new epics.
+- [ ] Re-running on the same input creates zero duplicate issues and zero new epics (file path
+      automatic; conversation via reuse or `--epic`).
 - [ ] Every dropped label, failed creation, and unmapped task is named in the final report.
 
 If any criterion fails, report it as a `FAIL` row and do not claim success.

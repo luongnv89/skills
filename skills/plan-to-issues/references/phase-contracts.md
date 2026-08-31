@@ -85,14 +85,17 @@ recorded dropped list.
 Apply `references/epic-identity.md`; its step numbering, condensed:
 
 0. **Normalize the source value** — a `file` value to one repo-root-relative *file*, a
-   `conversation` value to the confirmed-title slug. Comparisons are exact string matches, so
-   `X.md` and `./X.md` must not bind twice.
+   `conversation` value to the confirmed-title slug, or on `--epic <n>` the slug already on
+   that epic's `conversation=` marker (never re-slug from `<n>`). Comparisons are exact string
+   matches, so `X.md` and `./X.md` must not bind twice.
 1. **Look for this source's epic first**, matching the **source marker** for that exact value on its
    own line. On `file`, a hit is an **idempotent re-run**: reuse it, file only what it lacks. On
    `conversation`, a hit is **never silently reused** — a slug is not a stable identity, so print
    the epic and ask (default reuse); `--epic <n>` skips the search. Both fall back to **adoption**
    for an unmarked epic that looks like an interrupted run; adoption always **asks once**.
-2. **Create** through `/issue-creator`, with no marker in the intent text.
+   Conversation adoption title-matches `Epic: <confirmed title>`, not the Modernize pattern.
+2. **Create** through `/issue-creator`, with no marker in the intent text. Conversation path:
+   title `Epic: <confirmed title>`, intent from the confirmed draft only (`--epic` skips create).
 3. **Label** `epic` and record the number.
 4. **Bind** — append the source marker, the `## Source` block on the conversation path, and an empty
    sentinel pair, each behind a `grep -q ||` guard. Verify with **anchored, source-value-specific

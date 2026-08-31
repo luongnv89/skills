@@ -362,7 +362,9 @@ close (`references/epic-dashboard.md` -> *Rules the layout must hold*).
 Check all of these relative to this SKILL.md's directory before running anything:
 `references/preflight.md`, `references/plan-parsing.md`, `references/labels.md`,
 `references/issue-creator-bridge.md`, `references/epic-identity.md`, `references/epic-dashboard.md`,
-`references/sync-mode.md`, `references/edge-cases.md`, `agents/plan-parser.md`,
+`references/sync-mode.md`, `references/edge-cases.md`, `references/input-resolution.md`,
+`references/phase-contracts.md`, `references/security-boundary.md`, `references/glossary.md`,
+`references/acceptance-criteria.md`, `references/reporting.md`, `agents/plan-parser.md`,
 `scripts/render_dashboard.py`.
 
 This list is the authoritative guard — it must name **every** bundled file the skill loads at
@@ -416,7 +418,7 @@ On success, one line per check, then continue:
   Repo writable:      √ pass (luongnv89/skills · issues on · ADMIN)
   API budget:         √ pass (4905 remaining, ~220 needed)
   Skills installed:   √ pass (issue-creator 0.8.0)
-  Bundled files:      √ pass (10/10)
+  Bundled files:      √ pass (16/16)
   Input resolved:     √ pass (file MODERNIZATION_PLAN.md — 50 tasks, 6 phases)
   ____________________________
   Result:             PASS
