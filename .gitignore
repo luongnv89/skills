@@ -90,3 +90,6 @@ SKILL.md.bak
 
 # gitissue run log (local)
 .gitissue/
+
+# skill-auto-improver run artifacts
+.asm-improver/
