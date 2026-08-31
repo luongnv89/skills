@@ -51,7 +51,7 @@
       "expected_output": "The existing epic is reused, already-filed tasks are skipped, and only the missing tasks are filed. Zero duplicate issues and zero new epics; the dashboard is re-rendered over the full set.",
       "files": [],
       "expectations": [
-        "An existing epic is found by filtering fetched issue bodies for the plan-dashboard sentinel, not by a GitHub `--search` query",
+        "An existing epic is found by filtering fetched issue bodies for the `<!-- plan-to-issues:plan=... -->` marker, not the dashboard sentinels and not a GitHub `--search` query",
         "Tasks already filed are matched on the `Plan task: <id>` marker and skipped, and the skip count is reported",
         "No second epic is created",
         "The final report names every skipped task"
@@ -171,7 +171,7 @@
       "expectations": [
         "No plan file is required, requested, or created — `git status --porcelain` is unchanged.",
         "The drafted task list is printed and confirmed by the user before the first mutation; declining creates nothing.",
-        "The epic body carries `<!-- plan-to-issues:conversation=<slug> -->`, a `## Source` block with the confirmed draft, and one map sentinel pair.",
+        "The epic body carries `<!-- plan-to-issues:conversation=<slug> -->`, a `## Source` block whose fenced draft is plan-grammar markdown (`### Task <id>:` plus Description/Dependencies/Effort/Acceptance Criteria — not the compact confirm table), and one map sentinel pair.",
         "Each child carries `Part of #<epic>`, a label set with at least `phase:` and a type label, and is registered as a native sub-issue.",
         "The final report prints the re-run handle `/plan-to-issues --from-conversation --epic <n>`.",
         "That handle resumes by restoring the worklist from `## Source` (no re-draft, no confirm) and filing remaining tasks; it is not `sync`."

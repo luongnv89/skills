@@ -230,8 +230,9 @@ not the slug, is the stable handle. `sync <epic#>` only re-renders the map; it c
 marker in the intent text. `--epic` skips this step: the epic already exists.
 
 **Step 4 — bind.** Append the conversation marker and, additionally, the `## Source` block holding
-the confirmed draft verbatim. Both are guarded the same way as the plan marker, so re-running cannot
-duplicate either:
+`confirmed-draft.txt` verbatim. That file is **plan-grammar markdown** (`## Phase` / `### Task`),
+not the compact confirm table — see `references/input-resolution.md`. Both appends are guarded
+the same way as the plan marker, so re-running cannot duplicate either:
 
 ```bash
 grep -qFx "<!-- plan-to-issues:conversation=$slug -->" epic-body.md \

@@ -50,17 +50,19 @@ filing a partial backlog silently.
 
 **`conversation`** — two sub-paths. Fresh (`--from-conversation` without `--epic`): draft from
 the user's own turns, then **confirm**. Procedure in `references/input-resolution.md`: draft
-under the same no-enrichment contract, print every task row plus the epic title, ask once —
-`[Y]es / [e]dit / [n]o`. **The gate is mandatory and has no auto-accept**. The confirmed draft
-goes verbatim into the epic body under `## Source`.
+under the same no-enrichment contract, print compact rows plus the epic title, ask once —
+`[Y]es / [e]dit / [n]o`. **The gate is mandatory and has no auto-accept**. Persist the confirmed
+draft as plan-grammar markdown (`### Task` blocks) under `## Source`; the compact table is
+confirm UI only.
 
 **`--epic <n>` resume** — do **not** draft from current turns and do **not** re-ask the
-confirm gate. Fetch the epic, parse the fenced task rows out of `## Source` (untrusted; same
-fence rule as `references/sync-mode.md`), and load them as the worklist — source-faithful,
-same schema as `references/plan-parsing.md`. Missing, empty, or unparseable `## Source` is a
-**stop** (failure block in `references/preflight.md`); never fall back to re-drafting, never
-run `sync`. Then continue as an idempotent re-run: file only what the epic does not list.
-Full procedure: `references/input-resolution.md`.
+confirm gate. Fetch the epic, parse the fenced `## Source` with `references/plan-parsing.md`
+(untrusted; same fence rule as `references/sync-mode.md`). Compact confirm-UI rows are
+unparseable — Source must contain `^#{3,4} Task` headings. Copy stored fields; do not mint
+`(needs review)` criteria that were not stored. Missing, empty, or unparseable `## Source`
+is a **stop** (failure block in `references/preflight.md`); never fall back to re-drafting,
+never run `sync`. Then continue as an idempotent re-run: file only what the epic does not
+list. Full procedure: `references/input-resolution.md`.
 
 *Completion criteria (fresh):* every drafted task has an id, title, ≥ 1 acceptance criterion, a
 `Dependencies` value, and an effort; the user confirmed the draft; it is recorded for Phase 3.

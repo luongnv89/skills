@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.0.3
+  version: 2.0.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -158,10 +158,9 @@ appears with its goal and milestone; the dependency table references only ids in
 critical path is recorded. Any mismatch is a **FAIL** — report the missing ids rather than filing a
 partial backlog silently.
 
-**`conversation`** — draft from the user's turns, print every task row plus the epic title, ask
-once: `[Y]es / [e]dit / [n]o`. **No auto-accept.** Confirmed draft goes under `## Source`.
-`--epic <n>` skips this gate: restore the worklist from that epic's `## Source`
-(`references/input-resolution.md`).
+**`conversation`** — draft from the user's turns, print compact rows plus the epic title, ask
+once: `[Y]es / [e]dit / [n]o`. **No auto-accept.** Persist the draft as plan-grammar markdown
+under `## Source`. `--epic <n>` restores that block via `plan-parsing.md`.
 
 *Completion criteria:* every task has an id, title, ≥ 1 criterion, `Dependencies`, and an effort;
 fresh: user confirmed. `--epic`: Source parsed, no confirm. Else do not file.
