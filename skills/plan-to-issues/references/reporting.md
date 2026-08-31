@@ -50,7 +50,7 @@ Labels:    5 required, 2 created, 0 dropped
 Issues:    6 filed, 0 skipped, 0 failed
 Map:       1 phase, 0 milestones, critical path 1.1 → 1.2 → 1.5
 Verify:    epic re-read √ · 6/6 children re-read √ · 0 repairs
-Re-run this backlog with: /plan-to-issues sync 212
+Re-run this backlog with: /plan-to-issues --from-conversation --epic 212
 
 https://github.com/acme/acme-api/issues/212
 ```

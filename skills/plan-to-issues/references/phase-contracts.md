@@ -152,5 +152,5 @@ must be reverted.
 Repair what is repairable — missing label → `--add-label`; missing sub-issue link → re-register;
 missing map line → re-render. Report what is not. Never report `DONE` while a completion criterion
 is unmet. On the conversation path, always print
-`Re-run this backlog with: /plan-to-issues sync <epic#>`.
+`Re-run this backlog with: /plan-to-issues --from-conversation --epic <n>`.
 

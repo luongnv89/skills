@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.0.0
+  version: 2.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -245,8 +245,8 @@ marker, the sentinels, and one line per filed issue; then `gh issue list --state
 
 Repair what is repairable — missing label → `--add-label`; missing sub-issue link → re-register;
 missing map line → re-render. Report what is not. Never report `DONE` while a completion criterion
-is unmet. On the conversation path, always print
-`Re-run this backlog with: /plan-to-issues sync <epic#>`.
+is unmet. Conversation path prints `/plan-to-issues --from-conversation --epic <n>` as the resume
+handle (`sync` only re-renders the map).
 
 ## Sync mode
 
@@ -311,7 +311,7 @@ Source:    conversation "Harden the ingest path" (1 phase, 3 tasks, draft confir
 Epic:      #212 Epic: Harden the ingest path
 Issues:    3 filed, 0 skipped, 0 failed
 Verify:    epic re-read √ · 3/3 children re-read √ · 0 repairs
-Re-run this backlog with: /plan-to-issues sync 212
+Re-run this backlog with: /plan-to-issues --from-conversation --epic 212
 
 https://github.com/acme/acme-api/issues/212
 ```
@@ -324,8 +324,8 @@ A plan-file run is identical but for the source line — `/plan-to-issues docs/R
 
 Three change the main path; the rest are in `references/edge-cases.md`.
 
-- **Epic already exists** — reuse it. Never create a second epic for one input, never re-parent
-  existing children.
+- **Epic already exists** — file path reuses, never a second epic; conversation path prints the
+  hit and asks (`n` permitted). Never re-parent existing children.
 - **Rate limited mid-batch** — re-run Create mode; **idempotent re-run** files only the rest. On the
   conversation path use `--epic <n>` so it resumes rather than re-drafts.
 - **> 100 tasks** — print the count and confirm before filing; GitHub's secondary content-creation

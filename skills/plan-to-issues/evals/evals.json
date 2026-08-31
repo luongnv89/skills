@@ -166,14 +166,14 @@
       "id": 13,
       "kind": "happy-path",
       "prompt": "We just talked through what needs doing to harden the ingest path. There's no plan file — turn this conversation into GitHub issues with an epic on top.",
-      "expected_output": "The skill resolves the conversation as its input, drafts a task list from the user's own turns, prints it and asks for confirmation before creating anything, then files one issue per confirmed task plus an epic bound with a `plan-to-issues:conversation=<slug>` marker and a `## Source` block holding the confirmed draft.",
+      "expected_output": "The skill resolves the conversation as its input, drafts a task list from the user's own turns, prints it and asks for confirmation before creating anything, then files one issue per confirmed task plus an epic bound with a `plan-to-issues:conversation=<slug>` marker and a `## Source` block holding the confirmed draft. The final report prints `/plan-to-issues --from-conversation --epic <n>` as the resume handle.",
       "files": [],
       "expectations": [
         "No plan file is required, requested, or created — `git status --porcelain` is unchanged.",
         "The drafted task list is printed and confirmed by the user before the first mutation; declining creates nothing.",
         "The epic body carries `<!-- plan-to-issues:conversation=<slug> -->`, a `## Source` block with the confirmed draft, and one map sentinel pair.",
         "Each child carries `Part of #<epic>`, a label set with at least `phase:` and a type label, and is registered as a native sub-issue.",
-        "The final report prints the re-run handle `/plan-to-issues sync <epic#>`."
+        "The final report prints the re-run handle `/plan-to-issues --from-conversation --epic <n>`."
       ]
     },
     {

@@ -89,9 +89,12 @@ adopts it after a confirm. Design for the interruption; do not claim it is impos
    no plan path, so it cannot tell *this* plan's epic from another plan's epic in the same repo.
    (Both are written by step 4, so neither is "the later one".)
 
-   **Fallback — an unmarked epic.** A run interrupted between step 2 and step 4, or a pre-1.5.0 run,
-   leaves an epic with no marker. Before concluding that none exists, scan the same fetched list for
-   an **open issue that carries no `plan-to-issues:plan=` marker at all** and either has the `epic`
+   **Fallback — an unmarked epic.** Unmarked means **neither** source-marker kind: no
+   `plan-to-issues:plan=` **and** no `plan-to-issues:conversation=`. A run interrupted between
+   step 2 and step 4, or a pre-1.5.0 run, leaves an epic with no marker. Skip any issue that
+   already carries `conversation=` — adopting it would bind both markers and file this plan
+   into the wrong epic. Before concluding that none exists, scan the same fetched list for
+   an **open issue that carries neither source marker** and either has the `epic`
    label **or** whose title equals the `Epic: Modernize <project> — …` title this run would create.
    The title clause matters: the `epic` label is applied in step 3, so an interruption between the
    create and the label leaves an epic the label filter alone would miss. Do not require the body to
@@ -99,7 +102,7 @@ adopts it after a confirm. Design for the interruption; do not claim it is impos
    mention it. Do not adopt silently; show what is known and **ask once**:
 
    ```text
-   ⚠ #142 "Epic: Modernize acme — Pre + P0–P4"  (epic label, no plan binding)
+   ⚠ #142 "Epic: Modernize acme — Pre + P0–P4"  (epic label, neither source marker)
        created 2026-08-26 14:02 · 0 child issues · no dashboard
 
      This looks like an interrupted run of this plan. Adopt it? [Y/n]
@@ -148,6 +151,7 @@ blockquoted or indented copy fails rather than passing silently:
 body="$(gh issue view <epic> --json body --jq '.body')"
 printf '%s\n' "$body" | grep -cFx "<!-- plan-to-issues:plan=$plan_path -->"  # must be 1 — this plan
 printf '%s\n' "$body" | grep -c  '^<!-- plan-to-issues:plan='                # must be 1 — no foreign binding
+printf '%s\n' "$body" | grep -c  '^<!-- plan-to-issues:conversation='        # must be 0 — not a conversation epic
 printf '%s\n' "$body" | grep -cFx '<!-- plan-dashboard:start -->'             # must be 1 — pair opened once
 printf '%s\n' "$body" | grep -cFx '<!-- plan-dashboard:end -->'               # must be 1 — pair closed once
 ```
@@ -155,7 +159,9 @@ printf '%s\n' "$body" | grep -cFx '<!-- plan-dashboard:end -->'               # 
 Probe 1 at 0 means the marker is absent or wrapped (`/issue-creator` reordered the body, or it landed
 in a blockquote) — re-run step 4 and re-verify. Probe 2 above 1, or probe 1 at 0 while probe 2 is 1,
 means the epic is bound to a **different plan**: **stop**, rather than filing this plan's children
-into another plan's epic. Any sentinel count other than 1 means the body was hand-edited; **stop**.
+into another plan's epic. The conversation= probe above 0 means the epic is already conversation-
+sourced: **stop** — binding `plan=` onto it would mix kinds. Any sentinel count other than 1 means
+the body was hand-edited; **stop**.
 
 
 ---
@@ -190,12 +196,14 @@ Reuse it and file only what it does not list, or create a new epic? [R/n]
 
 Default is reuse. `n` creates a second epic with the same slug — permitted, because two backlogs may
 legitimately share a title; both then carry the marker and every later run asks. Adoption of an
-unmarked epic works exactly as it does on the file path, and still asks once.
+unmarked epic works exactly as it does on the file path (neither source-marker kind; skip any
+issue already carrying `plan=`), and still asks once.
 
 `/plan-to-issues --from-conversation --epic <n>` **skips discovery entirely** and binds to that
 number after checking it is open and not already bound to a *different* slug or to a plan path.
-This is the supported way to resume a conversation-sourced run, and the final report always prints
-it, because the issue number — not the slug — is the stable handle.
+This is the supported way to resume a conversation-sourced run. The final report always prints
+`Re-run this backlog with: /plan-to-issues --from-conversation --epic <n>` — the issue number,
+not the slug, is the stable handle. `sync <epic#>` only re-renders the map; it creates no issues.
 
 **Step 4 — bind.** Append the conversation marker and, additionally, the `## Source` block holding
 the confirmed draft verbatim. Both are guarded the same way as the plan marker, so re-running cannot

@@ -118,8 +118,8 @@ rephrased slugs differently. So on the conversation path, idempotent re-run is
   silently reused** — print the epic and ask: reuse it (idempotent re-run, file only what it does
   not list), or create a new epic. Default is reuse.
 - The final report always prints the epic number with the re-run invocation:
-  `Re-run this backlog with: /plan-to-issues sync <epic#>`. That number is the stable handle;
-  the slug is only a hint that finds it.
+  `Re-run this backlog with: /plan-to-issues --from-conversation --epic <n>`. That number is the
+  stable handle; the slug is only a hint that finds it. `sync <epic#>` only re-renders the map.
 - `/plan-to-issues --from-conversation --epic <n>` binds directly to a known epic and **skips the
   search entirely**. This is the supported way to resume a conversation-sourced run.
 
