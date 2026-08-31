@@ -74,11 +74,12 @@
       "id": 6,
       "kind": "negative-trigger",
       "prompt": "Write a modernization plan for this repo — audit the dependencies and tell me what to upgrade first.",
-      "expected_output": "The request is handled by /codebase-modernizer (audit and plan authoring). plan-to-issues does not run: there is no plan to file yet.",
+      "expected_output": "The request is handled by /codebase-modernizer (audit and plan authoring). plan-to-issues does not run: the user is asking for the work to be *discovered* — audited out of the codebase — not for already-decided work to be filed. Accepting conversational intent does not make this a trigger: nothing here has been decided yet, and the skill never opens source files to invent tasks.",
       "files": [],
       "expectations": [
-        "No epic or issue is created",
-        "The run does not attempt to parse a plan file or compute label sets"
+        "The skill does not offer to draft a task list from this request",
+        "No audit, dependency scan, or source-file read is attempted",
+        "The user is pointed at /codebase-modernizer, with a note that its plan — or a later conversation about what to do — can then be filed with /plan-to-issues"
       ]
     },
     {
