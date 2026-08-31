@@ -4,8 +4,8 @@ description: "Optimize App Store and Google Play listings via a 7-phase, plan-ap
 license: MIT
 effort: max
 metadata:
-  version: 1.2.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # ASO Marketing — Full-Lifecycle App Store Optimization

@@ -4,8 +4,8 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.2.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # App Store Review Checker

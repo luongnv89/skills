@@ -155,7 +155,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | [**code-review**](skills/code-review/) | 2.1.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**codebase-modernizer**](skills/codebase-modernizer/) | 1.2.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.3.1 | low | Target untested branches and edge cases |
-| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.3.2 | medium | Usability review using Krug's principles |
+| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.4.1 | medium | Usability review using Krug's principles |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
@@ -179,10 +179,10 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**auto-push**](skills/auto-push/) | 1.0.3 | low | Commit message + stage + push with secret and size checks |
+| [**auto-push**](skills/auto-push/) | 1.0.4 | low | Commit message + stage + push with secret and size checks |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.0.3 | medium | Pre-commit + GitHub Actions quality gates |
 | [**security-setup**](skills/security-setup/) | 1.4.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
-| [**fork-upstream-sync**](skills/fork-upstream-sync/) | 1.3.2 | medium | Sync a fork with upstream while keeping feature branches and open PRs mergeable |
+| [**fork-upstream-sync**](skills/fork-upstream-sync/) | 1.3.3 | medium | Sync a fork with upstream while keeping feature branches and open PRs mergeable |
 | [**release-manager**](skills/release-manager/) | 2.6.0 | max | Bump, changelog, tag, GitHub release, publish |
 
 ### Product Planning
@@ -232,7 +232,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**landing-page-generator**](skills/landing-page-generator/) | 1.2.1 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.1 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.1.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
-| [**oss-ready**](skills/oss-ready/) | 1.2.1 | low | Add OSS files and templates |
+| [**oss-ready**](skills/oss-ready/) | 1.2.2 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 1.4.1 | medium | CLAUDE.md + AGENTS.md per best practices |
 | [**subagent-creator**](skills/subagent-creator/) | 1.1.2 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
 
@@ -240,18 +240,18 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**aso-marketing**](skills/aso-marketing/) | 1.2.1 | max | App Store + Google Play keyword and metadata optimization |
-| [**appstore-review-checker**](skills/appstore-review-checker/) | 1.2.1 | high | Pre-submission audit vs Apple guidelines |
+| [**aso-marketing**](skills/aso-marketing/) | 1.2.2 | max | App Store + Google Play keyword and metadata optimization |
+| [**appstore-review-checker**](skills/appstore-review-checker/) | 1.2.2 | high | Pre-submission audit vs Apple guidelines |
 
 ### Tooling
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**cli-builder**](skills/cli-builder/) | 1.0.5 | high | 5-step CLI tool builder with approval gates |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.1.1 | medium | Hardware-aware Ollama tuning |
-| [**install-script-generator**](skills/install-script-generator/) | 2.2.1 | high | Cross-platform install.sh with env detection |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.1.2 | medium | Hardware-aware Ollama tuning |
+| [**install-script-generator**](skills/install-script-generator/) | 2.2.2 | high | Cross-platform install.sh with env detection |
 | [**opencode-handoff**](skills/opencode-handoff/) | 1.0.1 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
-| [**opencode-runner**](skills/opencode-runner/) | 1.4.1 | medium | Delegate work to opencode free cloud models |
+| [**opencode-runner**](skills/opencode-runner/) | 1.4.2 | medium | Delegate work to opencode free cloud models |
 | [**opencode-sandbox**](skills/opencode-sandbox/) | 2.1.1 | medium | Run OpenCode in a kept sandbox (SSH/gh on by default) |
 | [**herdr-agent-comms**](skills/herdr-agent-comms/) | 1.23.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.3.1 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |

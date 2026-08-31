@@ -4,8 +4,8 @@ description: "Review UI usability using Steve Krug's principles and produce a sc
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.0
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.4.1
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Don't Make Me Think — Usability Review & Redesign

@@ -4,8 +4,8 @@ description: "Run coding tasks via opencode using free cloud models. Use when as
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.4.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # OpenCode Runner

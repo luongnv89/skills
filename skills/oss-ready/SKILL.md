@@ -4,8 +4,8 @@ description: "Transform a project into a professional open-source repository by 
 license: MIT
 effort: low
 metadata:
-  version: 1.2.1
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.2.2
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # OSS Ready
