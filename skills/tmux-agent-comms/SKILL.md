@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires `tmux` on PATH. Optional Python 3 for wait/preflight/broadcast helpers."
 effort: medium
 metadata:
-  version: 2.2.0
+  version: 2.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -39,7 +39,7 @@ Route directly to the required mode; do not read unrelated references.
 ## Critical Rules
 
 1. **Confirm destructive actions.** Never send `exit`/`/quit`, kill a session, or kill the server without explicit approval.
-2. **Fail closed before every send.** Only preflight exit 0 is sendable. Exit 2 means working, 3 blocked, and 4 unverifiable.
+2. **Fail closed before every send.** Only preflight exit 0 is sendable; every other code means do not send. Codes are defined once, in *the exit-code table* (`references/delivery-and-waiting.md`).
 3. **Use a fresh proof cycle.** Every message needs a new baseline file and split completion marker. Never reuse either for a follow-up.
 4. **Send text and Enter separately.** For multiline/code-heavy text, use tmux paste-buffer; see `references/tmux-recipes.md`.
 5. **Bound waiting.** Use a wall-clock cap or at most 2–3 re-waits. Surface a stall instead of polling forever.
@@ -68,7 +68,7 @@ After spawn, require readiness before assigning work:
 python3 "$here/wait_for_idle.py" "$name" --ready --timeout 60 --no-print
 ```
 
-Exit 0 is ready, 3 is blocked, 2 is timeout, and 1 is error. Spawn fleets first, then check readiness concurrently. Read `references/tmux-recipes.md` for naming, tab/detached branches, script resolution, and fleet readiness.
+Read the result off *the exit-code table* in `references/delivery-and-waiting.md`; only exit 0 clears the session for work. Spawn fleets first, then check readiness concurrently. Read `references/tmux-recipes.md` for naming, tab/detached branches, script resolution, and fleet readiness.
 
 **Complete when:** every created session has an exact name and passes the ready gate, or the failure is surfaced without sending work.
 
@@ -106,7 +106,7 @@ rc=$?
 rm -f "$baseline_file"
 ```
 
-Handle exit 0 as settled, 1 as error, 2 as timeout, and 3 as blocked. Before relaying an actionable result, independently compare two short capped-tail captures. Changing output/spinner means working; unchanged output without completion means stalled.
+Handle `rc` per *the exit-code table* in `references/delivery-and-waiting.md`. Before relaying an actionable result, independently compare two short capped-tail captures. Changing output/spinner means working; unchanged output without completion means stalled.
 
 Read `references/delivery-and-waiting.md` for delivery recovery, wait modes, advisory verdicts, and the anti-deadloop budget.
 
@@ -175,40 +175,18 @@ Expected result: the agent's new reply is relayed, the joined marker proves this
 
 ## Edge Cases
 
-- Duplicate name: choose a collision-free name before spawn.
-- Trust/auth prompt: exit 3; show it to the human and stop.
-- Message unchanged after recovery Enter: report not delivered; do not start the reply wait.
-- Timeout or stable pane without completion: surface working vs stalled after a bounded independent read.
-- Follow-up: never reuse a deleted baseline or marker already present in transcript.
-- Truncated capture: widen `-S` stepwise.
-- Human attached manually: detach with `Ctrl-b d`; never kill merely to return control.
-- Successor never acks: HANDOFF failed—stay main, keep the fleet, and report the unused session before asking to kill it.
-
-## References
-
-- `references/delivery-and-waiting.md` — read for any send/wait cycle, recovery, marker contract, or timeout.
-- `references/context-succession.md` — read at the context gate for the HANDOFF procedure and brief template.
-- `references/tmux-recipes.md` — read only for script resolution, spawn modes, fleets, status/inspect, multiline sends, attach, scrollback, or troubleshooting.
-- `scripts/preflight_send.py` — fail-closed check before every send or recovery Enter.
-- `scripts/wait_for_idle.py` — readiness and settled-reply waiter.
-- `scripts/broadcast.sh` — safe concurrent fleet broadcast.
+Eight named conditions — duplicate session name, trust/auth prompt, an undelivered message after the recovery Enter, timeout or stalled pane, follow-up marker reuse, truncated capture, a manually attached human, and a successor that never acks. Read `references/reporting-and-edge-cases.md` when a phase hits one; do not read it preemptively.
 
 ## Step Completion Report
 
-After each operation, emit only applicable rows:
+Every operation closes with the Step Completion Report block — the requested reply or status **plus** that block, never raw unbounded scrollback. Emit only the rows the operation actually ran. The block layout, the `√ × — ⚠` legend, and the per-operation row table are in `references/reporting-and-edge-cases.md`.
 
-```text
-◆ Tmux Agent Comms ([operation])
-··································································
-  Target resolved:     √ pass ([exact session])
-  Preflight:           √ pass (idle)
-  Baseline captured:   √ pass
-  Message delivered:   √ pass (activity vs baseline)
-  Completion marker:   √ pass (fresh and joined)
-  Reply verified:      √ pass (bounded independent read)
-  Context gate:        √ pass (P% or UNKNOWN · continue | HANDOFF → <folder>-main-gN)
-  Destructive action:  — none (or: √ confirmed)
-  Result:              PASS | FAIL | PARTIAL
-```
+## References
 
-For spawn, report `Session created` and `Ready gate`; for status, report `Read-only`; for teardown, report `Confirmed` and `Session killed`. Use `⚠` for recovered delivery or an escalated stall.
+- `references/delivery-and-waiting.md` — read for any send/wait cycle, recovery, marker contract, or timeout. Holds *the exit-code table*, the one definition of every helper exit code.
+- `references/context-succession.md` — read at the context gate for the HANDOFF procedure and brief template.
+- `references/tmux-recipes.md` — read only for script resolution, spawn modes, fleets, status/inspect, multiline sends, attach, scrollback, or troubleshooting.
+- `references/reporting-and-edge-cases.md` — read for the Step Completion Report layout and when an edge case fires.
+- `scripts/preflight_send.py` — fail-closed check before every send or recovery Enter.
+- `scripts/wait_for_idle.py` — readiness and settled-reply waiter.
+- `scripts/broadcast.sh` — safe concurrent fleet broadcast.
