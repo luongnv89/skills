@@ -1,6 +1,12 @@
 # Pre-commit Configurations by Language
 
-Philosophy: **run as much as possible locally**. Commit-stage hooks catch issues immediately; push-stage hooks run the full test suite and E2E tests before code leaves the machine. GitHub Actions becomes a thin safety net.
+Philosophy: **run as much as possible locally**. `pre-commit`-stage hooks catch issues immediately (budget: under 10 seconds on changed files); `pre-push`-stage hooks run the full test suite and E2E tests before code leaves the machine (budget: under 60 seconds). GitHub Actions keeps only the version matrix, secrets-dependent work, deploys, and a diff-scoped bypass guard.
+
+**Stage names.** pre-commit 3.2 renamed `commit` to `pre-commit` and `push` to `pre-push`. The old names still work on 4.x but emit a deprecation warning and are scheduled for removal, so every config below uses the new names. To upgrade an existing file in place:
+
+```bash
+pre-commit migrate-config
+```
 
 ## Table of Contents
 
@@ -60,7 +66,7 @@ repos:
         entry: npm test
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
 
       # If this is a CLI tool, add E2E hook on push stage:
       # - id: e2e-cli
@@ -68,7 +74,7 @@ repos:
       #   entry: bash scripts/e2e_test.sh
       #   language: system
       #   pass_filenames: false
-      #   stages: [push]
+      #   stages: [pre-push]
 ```
 
 > **Note on unit vs full tests**: split your test script into `test:unit` (fast, no I/O) and `test` (all). If you can't split them, run all tests on commit — slow feedback is still better than no feedback.
@@ -122,7 +128,7 @@ repos:
         entry: pytest --tb=short -q
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
 
       # CLI E2E tests on push (if this is a CLI tool)
       # - id: e2e-cli
@@ -130,7 +136,7 @@ repos:
       #   entry: bash scripts/e2e_test.sh
       #   language: system
       #   pass_filenames: false
-      #   stages: [push]
+      #   stages: [pre-push]
 ```
 
 ### Alternative: Black instead of Ruff formatter
@@ -198,7 +204,7 @@ repos:
         entry: go test -race ./...
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
 
       # CLI E2E on push (if this is a CLI tool)
       # - id: e2e-cli
@@ -206,7 +212,7 @@ repos:
       #   entry: bash scripts/e2e_test.sh
       #   language: system
       #   pass_filenames: false
-      #   stages: [push]
+      #   stages: [pre-push]
 ```
 
 ## Rust
@@ -255,7 +261,7 @@ repos:
         entry: cargo test --all-features
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
 
       # CLI E2E on push (if this is a CLI tool)
       # - id: e2e-cli
@@ -263,7 +269,7 @@ repos:
       #   entry: bash scripts/e2e_test.sh
       #   language: system
       #   pass_filenames: false
-      #   stages: [push]
+      #   stages: [pre-push]
 ```
 
 ## Java
@@ -311,12 +317,12 @@ repos:
         entry: mvn test -q
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
 ```
 
 ## Multi-language
 
-For monorepos or projects with multiple languages:
+For monorepos or projects with multiple languages. pre-commit always execs from the **repo root**; `files:` only filters which files trigger the hook, it does not change cwd. Copy remote hooks from the language sections above and scope them with `files:`. Rewrite local `language: system` entries so they target the package dir — a bare `npm test` will not see `frontend/package.json` or `frontend/node_modules`.
 
 ```yaml
 repos:
@@ -331,9 +337,51 @@ repos:
       - id: check-added-large-files
       - id: detect-private-key
 
-  # Add language-specific hooks from sections above
-  # Use `files:` patterns to scope hooks to specific directories
-  # Example: scope Go hooks to backend/, Node hooks to frontend/
+  - repo: local
+    hooks:
+      # `npx --prefix` resolves frontend/node_modules; it does not change cwd.
+      - id: eslint
+        name: eslint
+        entry: npx --prefix frontend eslint --fix
+        language: system
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
+
+      - id: typecheck
+        name: typecheck
+        entry: npx --prefix frontend tsc --noEmit -p frontend
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+
+      - id: test-unit
+        name: frontend unit tests
+        entry: npm --prefix frontend run test:unit
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+
+      - id: test-full
+        name: frontend full test suite
+        entry: npm --prefix frontend test
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: pytest-unit
+        name: pytest unit tests
+        entry: pytest backend/tests/unit -x -q
+        language: system
+        files: ^backend/
+        pass_filenames: false
+
+      - id: pytest-full
+        name: pytest full suite
+        entry: pytest backend/tests --tb=short -q
+        language: system
+        files: ^backend/
+        pass_filenames: false
+        stages: [pre-push]
 ```
 
 ---
@@ -466,14 +514,14 @@ def test_unknown_command_exits_nonzero():
     assert r.returncode != 0
 ```
 
-Wire this into pre-commit on push stage:
+Wire this into pre-commit on the `pre-push` stage:
 ```yaml
 - id: e2e-cli
   name: CLI end-to-end tests
   entry: pytest tests/e2e/ -v
   language: system
   pass_filenames: false
-  stages: [push]
+  stages: [pre-push]
 ```
 
 ---
@@ -498,21 +546,31 @@ hooks:
 
 ### Run only on specific stages
 
+Valid stage names on pre-commit 3.2+ are the git hook names themselves — `pre-commit`, `pre-push`, `pre-merge-commit`, `commit-msg`, `post-checkout`, `manual`, and the rest. A hook with no `stages:` key defaults to `pre-commit`.
+
 ```yaml
 hooks:
   - id: pytest-full
-    stages: [push]  # Only on git push, not commit
+    stages: [pre-push]  # only on git push, not on every commit
 ```
 
 ### Install push-stage hooks
 
+`pre-commit install` wires up the `pre-commit` git hook only. Push-stage hooks need a second call, and forgetting it is the most common reason a carefully staged test suite never runs:
+
 ```bash
-pre-commit install                         # install commit-msg and pre-commit hooks
-pre-commit install --hook-type pre-push    # also install push hooks
+pre-commit install                         # installs the pre-commit git hook
+pre-commit install --hook-type pre-push    # installs the pre-push git hook
 ```
 
 ### Run push-stage hooks manually
 
+`pre-commit run` covers commit-stage hooks only. To exercise the push stage — locally or in the CI bypass guard — name it explicitly:
+
 ```bash
-pre-commit run --all-files --hook-stage push
+pre-commit run --all-files --hook-stage pre-push
 ```
+
+### Bypass
+
+`git commit --no-verify` and `git push --no-verify` skip every hook, and no configuration can prevent it. Treat local hooks as fast feedback, and keep the diff-scoped CI guard in [github-actions.md](github-actions.md) as the enforcement point.

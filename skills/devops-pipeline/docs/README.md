@@ -15,7 +15,7 @@
 - Configure language-specific linters, formatters, type checkers, and security scanners
 - Run unit tests on every commit, full test suite + E2E tests on push
 - Enumerate all CLI commands and generate end-to-end smoke tests (for CLI tools)
-- Keep GitHub Actions lean — matrix version testing and coverage upload only
+- Keep GitHub Actions lean — a diff-scoped bypass guard, matrix version testing, secrets-dependent work, and deploys only
 
 ## When to Use
 
@@ -64,7 +64,7 @@ graph TD
 
 ## Output
 
-- `.pre-commit-config.yaml` with commit-stage and push-stage hooks
+- `.pre-commit-config.yaml` with `pre-commit`-stage and `pre-push`-stage hooks
 - `scripts/e2e_test.sh` or `tests/e2e/test_cli.py` (for CLI tools)
 - `.github/workflows/ci.yml` — lean CI that focuses on matrix testing and coverage
 - Configured and verified local pre-commit environment (both commit and push hooks)
