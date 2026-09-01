@@ -1,7 +1,7 @@
 # Interactive mode
 
 Use this when the user wants to **watch OpenCode work live** or **steer it
-mid-task** — things one-shot mode (`opencode run --auto`) can't do, since it's
+mid-task** — things one-shot mode (`opencode2 run --auto`) can't do, since it's
 a single fire-and-forget process with no way to send a follow-up.
 
 Interactive mode drives OpenCode's full-screen TUI, which needs a real
@@ -47,7 +47,7 @@ docker run -d --name <container-name> --label opencode-sandbox=1 \
   -v "$HOME/.gitconfig:/root/.gitconfig:ro" \
   [-v "$HOME/.claude:/root/.claude:ro" -v "$HOME/.agents:/root/.agents:ro"] \
   -w /workspace \
-  ghcr.io/luongnv89/u2604dev:latest sleep infinity
+  ghcr.io/luongnv89/devbox:latest sleep infinity
 ```
 
 As soon as that returns, surface this copy-paste block to the user (do not
@@ -58,7 +58,8 @@ docker exec -it <container-name> zsh
 ```
 
 Drive the pane with a second `docker exec -it <container-name> zsh` (or
-`opencode` inside that shell). The keep-alive `sleep infinity` is PID 1, so
+`opencode2` inside that shell; older images may use `opencode`). The keep-alive
+`sleep infinity` is PID 1, so
 closing OpenCode does not tear the container down.
 
 **This is the default mount list** — project, opencode config, `~/.ssh`,
@@ -83,7 +84,8 @@ Before the first send, read the pane and confirm **both** are visible:
   OpenCode Zen`)
 
 If only a partial render shows (e.g. just the ASCII logo), wait and re-read —
-don't send yet. After launching `opencode`, a `sleep 6`–`8` before the first
+don't send yet. After launching `opencode2` (or `opencode` on an older image),
+a `sleep 6`–`8` before the first
 read-and-check is a reasonable starting point; always verify by reading the
 pane rather than trusting a fixed sleep alone.
 

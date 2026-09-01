@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker on PATH and running, plus the opencode-sandbox skill at v2.1.0 or newer. The tmux panel additionally needs `tmux`; without it the skill prints the attach command instead."
 effort: medium
 metadata:
-  version: 1.0.1
+  version: 1.0.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -103,7 +103,8 @@ older sandbox would silently mount the host credentials, which is the one
 failure this skill must never ship.
 
 Options: `--name` / `--session` to override generated names, `--image` to pass a
-different image through, `--no-ssh` / `--no-github` to isolate the container from
+different image through (default: `ghcr.io/luongnv89/devbox:latest`),
+`--no-ssh` / `--no-github` to isolate the container from
 GitHub, `--no-tmux` to skip the panel and just print the attach command, and
 `--sandbox-script` to point at `run_opencode.sh` explicitly.
 
@@ -131,8 +132,9 @@ login lines. The user must run these — OpenCode is unauthenticated by design:
 ```bash
 tmux attach-session -t <SESSION_NAME>
 # then, inside the panel:
-opencode auth login
-opencode
+opencode2 auth login
+opencode2
+# (older images may use `opencode` instead)
 ```
 
 Never run `tmux attach-session` yourself from a non-TTY tool
@@ -160,9 +162,9 @@ bash ~/.claude/skills/opencode-handoff/scripts/handoff.sh \
 Expected output: the sandbox reports `opencode-config=0 agents=1`, then
 `Credential boundary: OK`, `Global agent setup: 74 skills`, then
 `SESSION_NAME=opencode-handoff-my-app-1788169556` with its
-`tmux attach-session` line. The user attaches, runs `opencode auth login` with a
+`tmux attach-session` line. The user attaches, runs `opencode2 auth login` with a
 different account, and continues on the same tree with the same skills — on a
-fresh allowance. The host session stays untouched and still rate-limited.
+fresh allowance (`opencode` is used on older images). The host session stays untouched and still rate-limited.
 
 ## Acceptance Criteria
 
@@ -174,7 +176,7 @@ fresh allowance. The host session stays untouched and still rate-limited.
       credential directories are not bind-mounted
 - [ ] A **detached** tmux session was created and its `attach-session` line was
       shown to the user; the skill never attached to it itself
-- [ ] The `opencode auth login` step was surfaced, not assumed
+- [ ] The `opencode2 auth login` step was surfaced, not assumed
 - [ ] The container was **not** removed unless the user confirmed
 
 **Edge cases this skill accounts for:** an `opencode-sandbox` older than v2.1.0
@@ -195,7 +197,7 @@ sessions writing one working tree (decide ownership before starting).
   Agent setup:           √ <N> global skills, project .agents present
   Credential boundary:   √ no opencode config/token/key | × LEAK <path>
   Panel:                 √ tmux <session> (detached) | — n/a (no tmux)
-  Login surfaced:        √ opencode auth login shown to user
+  Login surfaced:        √ opencode2 auth login shown to user
   Container:             √ kept (<name>) | √ removed (user confirmed)
   ____________________________
   Result:               PASS | FAIL

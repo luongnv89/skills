@@ -33,8 +33,9 @@ Then:
 ```bash
 tmux attach-session -t <session>
 # inside the panel
-opencode auth login
-opencode
+opencode2 auth login
+opencode2
+# (older images may use `opencode` instead)
 ```
 
 ## Trigger phrases
@@ -47,7 +48,7 @@ opencode
 ## Requirements
 
 - Docker on PATH and running
-- `opencode-sandbox` v2.1.0 or newer (this skill composes its container logic)
+- `opencode-sandbox` v2.1.0 or newer (this skill composes its container logic); the default image is `ghcr.io/luongnv89/devbox:latest`
 - `tmux` for the panel — optional; without it you get the `docker exec` line
 
 ## Options
@@ -56,7 +57,7 @@ opencode
 |---|---|
 | `--project DIR` | project to hand off (required) |
 | `--name` / `--session` | override the generated container / tmux names |
-| `--image IMAGE` | use a different container image |
+| `--image IMAGE` | use a different container image (default: `ghcr.io/luongnv89/devbox:latest`) |
 | `--no-ssh` / `--no-github` | isolate the container from GitHub |
 | `--no-tmux` | skip the panel, just print the attach command |
 | `--sandbox-script PATH` | point at `run_opencode.sh` explicitly |

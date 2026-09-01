@@ -16,7 +16,8 @@
 # Optional:
 #   --name NAME          container name (default: opencode-handoff-<project>-<epoch>)
 #   --session NAME       tmux session name (default: derived from the container)
-#   --image IMAGE        docker image (passed through to run_opencode.sh)
+#   --image IMAGE        docker image (default: ghcr.io/luongnv89/devbox:latest;
+#                        passed through to run_opencode.sh)
 #   --no-ssh             do not mount ~/.ssh
 #   --no-github          do not mount ~/.config/gh or inject GH_TOKEN
 #   --no-tmux            create the container and print the attach command, but
@@ -35,7 +36,7 @@ usage() { grep '^#' "${BASH_SOURCE[0]}" | sed -e '1d' -e 's/^# \{0,1\}//'; }
 PROJECT_DIR=""
 CONTAINER_NAME=""
 SESSION_NAME=""
-IMAGE=""
+IMAGE="ghcr.io/luongnv89/devbox:latest"
 SANDBOX_SCRIPT=""
 WITH_SSH=1
 WITH_GITHUB=1
@@ -232,6 +233,19 @@ if docker exec "$CONTAINER_NAME" test -d /workspace/.agents 2>/dev/null; then
   echo "Project-local agent setup: /workspace/.agents (same relative path as on the host)." >&2
 fi
 
+OPENCODE_CLI="$(docker exec "$CONTAINER_NAME" sh -c '
+  if command -v opencode2 >/dev/null 2>&1; then
+    command -v opencode2
+  elif command -v opencode >/dev/null 2>&1; then
+    command -v opencode
+  fi
+' 2>/dev/null || true)"
+if [ -z "$OPENCODE_CLI" ]; then
+  echo "Error: neither 'opencode2' nor 'opencode' is available in container '$CONTAINER_NAME'. Use an image with the OpenCode CLI installed." >&2
+  echo "Remove the container with: docker rm -f '$CONTAINER_NAME'" >&2
+  exit 1
+fi
+
 ATTACH_CMD="docker exec -it ${CONTAINER_NAME} zsh"
 
 if [ "$WITH_TMUX" != "1" ]; then
@@ -272,8 +286,8 @@ Open the panel:
 
 Then, inside it (OpenCode starts unauthenticated — this is the fresh allowance):
 
-  opencode auth login
-  opencode
+  ${OPENCODE_CLI} auth login
+  ${OPENCODE_CLI}
 
 Container kept: ${CONTAINER_NAME}. Remove it only when you confirm:
   docker rm -f ${CONTAINER_NAME}

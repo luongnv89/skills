@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent-comms or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 2.1.1
+  version: 2.1.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -62,8 +62,8 @@ mid-run.
 ## One-shot mode
 
 `scripts/run_opencode.sh` starts a named container (`sleep infinity` as PID 1
-so it stays running), prints an attach command, then runs `opencode run --auto`
-via `docker exec`. One exit code from OpenCode, output on stdout — no polling,
+so it stays running), prints an attach command, then runs `opencode2 run --auto`
+via `docker exec` (`opencode` is used as a fallback for older images). One exit code from OpenCode, output on stdout — no polling,
 no TUI, no permission dialogs to click through (`--auto` handles them; see
 `references/mounts-and-credentials.md` → _Why `--auto` is required_).
 
@@ -109,8 +109,8 @@ file *readable*, not *followed*. When using `--with-claude-skills`, the
 task."`
 
 Additional options accepted by `run_opencode.sh`: `--image IMAGE` to override
-the default container image (`ghcr.io/luongnv89/u2604dev:latest`);
-`--format FORMAT` to set `opencode run`'s output format (`default` or `json`;
+the default container image (`ghcr.io/luongnv89/devbox:latest`);
+`--format FORMAT` to set `opencode2 run`'s output format (`default` or `json`;
 default: `default`); `--name NAME` to set the container name (default:
 `opencode-sandbox-<project>-<epoch>`); `--start-only` to create the container and
 print the attach command without running OpenCode; `--exec-in NAME` to run
@@ -281,7 +281,8 @@ the message or exits OpenCode entirely (see `references/interactive-mode.md`).
 ◆ OpenCode Sandbox (one-shot run)
 ··································································
   Docker daemon:         √ pass (docker info)
-  Image ready:           √ pass (ghcr.io/luongnv89/u2604dev:latest)
+  Image ready:           √ pass (ghcr.io/luongnv89/devbox:latest)
+  OpenCode CLI:          √ opencode2 (fallback: opencode)
   Mounts:                √ workspace, opencode config, ssh, gh, gitconfig [+ claude skills]
   Credentials:           √ ssh+gh on | √ --no-ssh --no-github (isolated)
   Attach command:        √ docker exec -it <name> zsh shown

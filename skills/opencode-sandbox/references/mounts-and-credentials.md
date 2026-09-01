@@ -61,7 +61,8 @@ somewhere else entirely (a plugin directory, a project-local
 
 ## Why `--auto` is required (and what credentials change)
 
-`opencode run` requires `--auto` to run non-interactively — without it,
+`opencode2 run` requires `--auto` to run non-interactively — without it (`opencode`
+is the fallback command on older images),
 OpenCode blocks on a permission dialog with nothing attached to answer it,
 and the container hangs until the process is killed. OpenCode's own `--help`
 labels `--auto` "dangerous": it auto-approves every action the agent wants
@@ -94,7 +95,7 @@ The account key itself lives elsewhere — `~/.local/share/opencode/auth.json`
 Pass `--no-opencode-config` for a container that must **not** inherit the host's
 OpenCode identity, e.g. one meant to run on a separate account with its own
 usage allowance. OpenCode inside then starts unauthenticated and needs its own
-`opencode auth login`.
+`opencode2 auth login` (`opencode auth login` on older images).
 
 Because that also drops the `skills/` wiring, `--no-opencode-config`
 `--with-agents` together re-mount just that subdirectory read-only:

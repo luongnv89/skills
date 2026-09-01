@@ -14,12 +14,13 @@
 #
 # Required:
 #   --project DIR          local directory to mount read-write at /workspace
-#   --message TEXT          prompt text passed to `opencode run`
+#   --message TEXT          prompt text passed to the OpenCode CLI
+#                           (`opencode2` when available, otherwise `opencode`)
 #                           (not required with --start-only)
 #
 # Optional:
 #   --file PATH              host file to copy to /scratch inside the
-#                             container, passed via opencode --file.
+#                             container, passed via the OpenCode CLI --file flag.
 #                             For long/complex tasks: write them to a file, pass --file, and give
 #                             a short --message like "Follow the attached file's instructions exactly."
 #   --with-claude-skills      mount ~/.claude (and ~/.agents, for symlinked skills) read-only
@@ -37,9 +38,9 @@
 #   --no-ssh                  do not mount ~/.ssh (default: mount it so git push works)
 #   --no-github               do not mount ~/.config/gh or inject GH_TOKEN
 #                             (default: both, so gh pr/push/merge work)
-#   --image IMAGE             docker image (default: ghcr.io/luongnv89/u2604dev:latest)
-#   --format FORMAT           opencode output format: default | json (default: default)
-#   --model MODEL             opencode model to use (e.g. opencode/muse-spark-1.2-contributor-free)
+#   --image IMAGE             docker image (default: ghcr.io/luongnv89/devbox:latest)
+#   --format FORMAT           OpenCode output format: default | json (default: default)
+#   --model MODEL             OpenCode model to use (e.g. opencode/muse-spark-1.2-contributor-free)
 #   --name NAME               container name (default: opencode-sandbox-<project>-<epoch>)
 #   --start-only              create the keep-alive container, print the attach
 #                             command, exit 0 (does not run OpenCode)
@@ -58,7 +59,7 @@ usage() {
   grep '^#' "${BASH_SOURCE[0]}" | sed -e '1d' -e 's/^# \{0,1\}//'
 }
 
-IMAGE="ghcr.io/luongnv89/u2604dev:latest"
+IMAGE="ghcr.io/luongnv89/devbox:latest"
 FORMAT="default"
 MODEL=""
 PROJECT_DIR=""
@@ -197,7 +198,19 @@ ensure_running() {
 
 run_opencode_in_container() {
   local oc_ec=0
+  local opencode_bin=""
   local opencode_args=(run "$MESSAGE")
+  opencode_bin="$(docker exec "$CONTAINER_NAME" sh -c '
+    if command -v opencode2 >/dev/null 2>&1; then
+      command -v opencode2
+    elif command -v opencode >/dev/null 2>&1; then
+      command -v opencode
+    fi
+  ' 2>/dev/null || true)"
+  if [ -z "$opencode_bin" ]; then
+    echo "Error: neither 'opencode2' nor 'opencode' is available in container '$CONTAINER_NAME'. Use an image with the OpenCode CLI installed." >&2
+    exit 127
+  fi
   RAN_OPENCODE=1
   if [ -n "$TASK_FILE" ]; then
     local basename
@@ -217,7 +230,7 @@ run_opencode_in_container() {
     opencode_args+=(--model "$MODEL")
   fi
   set +e
-  docker exec -w /workspace "$CONTAINER_NAME" opencode "${opencode_args[@]}"
+  docker exec -w /workspace "$CONTAINER_NAME" "$opencode_bin" "${opencode_args[@]}"
   oc_ec=$?
   set -e
   if [ "$REMOVE_ON_EXIT" != "1" ]; then
@@ -255,7 +268,7 @@ if [ "$WITH_OPENCODE_CONFIG" = "1" ]; then
   if [ -d "$HOME/.config/opencode" ]; then
     MOUNTS+=(-v "$HOME/.config/opencode:/root/.config/opencode")
   else
-    echo "Warning: $HOME/.config/opencode not found — the container will have no OpenCode auth/config and may prompt to log in. Run 'opencode' once on the host first if this task needs a real provider." >&2
+    echo "Warning: $HOME/.config/opencode not found — the container will have no OpenCode auth/config and may prompt to log in. Run 'opencode2' (or 'opencode') once on the host first if this task needs a real provider." >&2
   fi
 else
   echo "OpenCode config: not mounted (--no-opencode-config). OpenCode in this container starts unauthenticated and will need its own login." >&2

@@ -8,7 +8,7 @@
       "expected_output": "The skill runs one-shot mode with --no-ssh --no-github (user asked not to touch GitHub credentials), checks Docker, starts a kept container, shows docker exec attach, runs the summary task, and reports the result plus a Step Completion Report.",
       "files": [],
       "expectations": [
-        "The run started the container with --start-only (or equivalent docker run -d ... sleep infinity), showed docker exec -it <name> zsh to the user, then ran OpenCode with --exec-in (or docker exec ... opencode run --auto) rather than driving an interactive TUI",
+        "The run started the container with --start-only (or equivalent docker run -d ... sleep infinity), showed docker exec -it <name> zsh to the user, then ran OpenCode with --exec-in (or docker exec ... opencode2 run --auto, falling back to opencode for older images) rather than driving an interactive TUI",
         "The invocation includes --no-ssh and --no-github (or equivalent: no ~/.ssh mount and no GH_TOKEN) because the user asked not to touch GitHub credentials",
         "The report/output states the exit code from the container run",
         "A Step Completion Report is printed with the documented rows (Docker daemon, Image ready, Mounts, Credentials, Attach command, Task exit code, Container)"

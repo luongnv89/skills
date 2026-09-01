@@ -9,14 +9,14 @@ Error: No provider available
 Two distinct causes — check in this order:
 
 1. **`~/.config/opencode` wasn't mounted, or has no credentials at all.**
-   Confirm the host has a working OpenCode login: `opencode providers list`
-   should show at least one entry. If it shows none, the container can't
-   have credentials either — log in on the host first (`opencode` →
-   `/connect`), then retry.
+   Confirm the host has a working OpenCode login: `opencode2 providers list`
+   (or `opencode providers list` on older installs) should show at least one
+   entry. If it shows none, the container can't have credentials either — log
+   in on the host first (`opencode2` → `/connect`), then retry.
 2. **Transient provider-side hiccup.** Observed directly during testing: a
    run fails with this exact error, and an immediate retry of the identical
-   command succeeds. If `opencode providers list` shows a valid credential,
-   retry once before treating this as a real failure.
+   command succeeds. If `opencode2 providers list` (or the older `opencode providers list`) shows a
+   valid credential, retry once before treating this as a real failure.
 
 ## Rate limit stalls (free-tier `OpenCode Zen`)
 
@@ -35,7 +35,7 @@ observed mitigation. If a task stalls here for more than a couple of minutes:
 - If it stalls again immediately, the account is genuinely rate-limited —
   stop and tell the user rather than looping. Options: wait it out, or use
   `--model provider/model` with a different configured provider if one is
-  authenticated (`opencode providers list`).
+  authenticated (`opencode2 providers list`).
 
 ## `cdev run --help` is missing `--mount-opencode` / `--preset`
 

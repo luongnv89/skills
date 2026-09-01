@@ -16,8 +16,8 @@ running a task on the host's account — and wrong for this one. `handoff.sh`
 therefore passes `--no-opencode-config`.
 
 Mounting neither is what produces the fresh usage allowance: OpenCode in the
-container has no credential, so `opencode auth login` inside the panel
-establishes a new one.
+container has no credential, so `opencode2 auth login` inside the panel
+establishes a new one (`opencode` is the fallback on older images).
 
 ## The wiring problem, and why the subdirectory mount solves it
 

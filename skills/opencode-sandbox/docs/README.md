@@ -11,7 +11,7 @@
 
 ## Highlights
 
-- One-shot mode uses **`--start-only` then `--exec-in`**: a named keep-alive container, a copy-paste `docker exec -it <name> zsh` attach command *before* OpenCode runs, then `opencode run --auto` via `docker exec` — a plain exit code, no TUI to drive or permission dialogs to click through
+- One-shot mode uses **`--start-only` then `--exec-in`**: a named keep-alive container, a copy-paste `docker exec -it <name> zsh` attach command *before* OpenCode runs, then `opencode2 run --auto` via `docker exec` (falling back to `opencode` for older images) — a plain exit code, no TUI to drive or permission dialogs to click through
 - Container is **kept by default**; the agent asks before `docker rm`. Pass `--rm` only when you already want it gone
 - SSH (`~/.ssh`) and GitHub (`gh` config + token) are **on by default** so the container can commit, push, and open/merge PRs. Pass `--no-ssh --no-github` to isolate an untrusted task
 - Handles the `~/.claude` → `~/.agents` symlink gotcha automatically when mounting Claude Code skills into the container
@@ -32,7 +32,7 @@ graph TD
     A["Decide mode: one-shot or interactive"] --> B["Decide mounts: workspace + opencode + ssh/gh (or --no-ssh --no-github)"]
     B --> C["preflight.sh: Docker running, image pulled"]
     C --> D["--start-only: kept container + attach command"]
-    D --> E["--exec-in: opencode run --auto"]
+    D --> E["--exec-in: opencode2 run --auto"]
     E --> F["Review git diff on host, then ask before docker rm"]
     style A fill:#4CAF50,color:#fff
     style F fill:#2196F3,color:#fff
@@ -47,7 +47,7 @@ Model-invoked — ask to run OpenCode in a container (with git/gh by default), i
 | Path                                        | Description                                                                 |
 | -------------------------------------------- | ----------------------------------------------------------------------------- |
 | `scripts/preflight.sh`                       | Ensures Docker is running and the image is pulled                            |
-| `scripts/run_opencode.sh`                    | `--start-only` then `--exec-in`: kept container, attach command, `opencode run --auto` |
+| `scripts/run_opencode.sh`                    | `--start-only` then `--exec-in`: kept container, attach command, `opencode2 run --auto` (fallback: `opencode`) |
 | `references/mounts-and-credentials.md`       | Default SSH/GitHub mounts, `--no-ssh`/`--no-github` opt-out, `~/.claude` symlink gotcha |
 | `references/interactive-mode.md`             | TUI readiness timing, permission dialogs, completion detection               |
 | `references/troubleshooting.md`              | Provider errors, rate limits, outdated `cdev`, dependency-file leakage       |
@@ -59,5 +59,5 @@ copy-paste `docker exec -it <name> zsh` attach command, a prompt asking
 whether to remove the kept container, plus a Step Completion Report showing
 mounts used, exit code, attach shown, container kept/removed, and whether
 the host diff was reviewed before anything ships. One-shot mode's raw
-output is whatever `opencode run` printed (or JSON events, with
+output is whatever `opencode2 run` (or the older `opencode run`) printed (or JSON events, with
 `--format json`).

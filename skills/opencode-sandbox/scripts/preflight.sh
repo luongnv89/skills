@@ -2,10 +2,10 @@
 # preflight.sh — ensure Docker is running and the docker-dev image is present.
 #
 # Usage: preflight.sh [image]
-#   image   defaults to ghcr.io/luongnv89/u2604dev:latest
+#   image   defaults to ghcr.io/luongnv89/devbox:latest
 set -euo pipefail
 
-IMAGE="${1:-ghcr.io/luongnv89/u2604dev:latest}"
+IMAGE="${1:-ghcr.io/luongnv89/devbox:latest}"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "Error: 'docker' is not on PATH. Install Docker Desktop (https://www.docker.com/products/docker-desktop/) or Docker Engine, then retry." >&2
