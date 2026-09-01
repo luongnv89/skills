@@ -8,16 +8,17 @@ real container; change one only with the same evidence.
 | File | Key it holds | Default sandbox behavior |
 |---|---|---|
 | `~/.local/share/opencode/auth.json` | `opencode.type`, `opencode.key` | never mounted (outside `~/.config`) |
-| `~/.config/opencode/service.json` | `password` | **mounted** by the default `~/.config/opencode` mount |
+| `~/.config/opencode/service.json` | `password` | not mounted by handoff (sandbox mounts it only with `--with-opencode-config`) |
 
-`opencode-sandbox`'s default run mounts all of `~/.config/opencode`, which
-carries `service.json` along with it. That is correct for its own use case —
-running a task on the host's account — and wrong for this one. `handoff.sh`
-therefore passes `--no-opencode-config`.
+`opencode-sandbox` does not mount `~/.config/opencode` by default. It can mount
+that host profile only when `--with-opencode-config` is requested, which is
+wrong for this handoff. `handoff.sh` explicitly passes `--no-opencode-config`.
 
-Mounting neither is what produces the fresh usage allowance: OpenCode in the
-container has no credential, so `opencode auth login` inside the panel
-establishes a new one.
+The container therefore gets a fresh local OpenCode profile with no host
+credential. Anonymous/free models may work without login; `opencode2 auth login`
+inside the panel is optional when the selected provider requires it (`opencode`
+is the fallback on older images). A fresh local profile does not guarantee a
+fresh provider-side allowance.
 
 ## The wiring problem, and why the subdirectory mount solves it
 

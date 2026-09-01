@@ -5,20 +5,21 @@ license: MIT
 compatibility: "Requires Docker on PATH and running, plus the opencode-sandbox skill at v2.1.0 or newer. The tmux panel additionally needs `tmux`; without it the skill prints the attach command instead."
 effort: medium
 metadata:
-  version: 1.0.1
+  version: 1.0.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # OpenCode Handoff
 
-You hit the OpenCode usage limit mid-task. This skill gets you working again in
-a few minutes: it builds a sandbox container for the **same project** with the
-**same agent setup**, deliberately leaves the host's OpenCode config, token, and
-key behind, and opens it in a **new tmux panel**.
+You hit the OpenCode usage limit mid-task. This skill gives you a new local
+OpenCode profile for the **same project** with the **same agent setup**,
+deliberately leaves the host's OpenCode config, token, and key behind, and
+opens it in a **new tmux panel**.
 
-The credential exclusion is the point, not a side effect. OpenCode inside the
-container starts unauthenticated, so logging in there gives you a fresh usage
-allowance instead of the exhausted one.
+The credential exclusion is the point, not a side effect. Anonymous/free models
+may work without an account, and authentication is optional when the selected
+provider requires it. A fresh local profile does not guarantee a fresh provider,
+model, account, network, or service allowance.
 
 This skill **composes** two others rather than reimplementing them:
 
@@ -103,7 +104,8 @@ older sandbox would silently mount the host credentials, which is the one
 failure this skill must never ship.
 
 Options: `--name` / `--session` to override generated names, `--image` to pass a
-different image through, `--no-ssh` / `--no-github` to isolate the container from
+different image through (default: `ghcr.io/luongnv89/devbox:latest`),
+`--no-ssh` / `--no-github` to isolate the container from
 GitHub, `--no-tmux` to skip the panel and just print the attach command, and
 `--sandbox-script` to point at `run_opencode.sh` explicitly.
 
@@ -125,14 +127,17 @@ recreate rather than proceeding.
 
 ### Step 4 — Hand the panel to the user
 
-Surface the printed session and attach command as a fenced block, plus the two
-login lines. The user must run these — OpenCode is unauthenticated by design:
+Surface the printed session and attach command as a fenced block. OpenCode
+starts with a fresh local profile; start it directly for anonymous/free models,
+and log in only if the selected provider requires authentication:
 
 ```bash
 tmux attach-session -t <SESSION_NAME>
 # then, inside the panel:
-opencode auth login
-opencode
+opencode2
+# If authentication is required:
+opencode2 auth login
+# (older images may use `opencode` instead)
 ```
 
 Never run `tmux attach-session` yourself from a non-TTY tool
@@ -160,9 +165,10 @@ bash ~/.claude/skills/opencode-handoff/scripts/handoff.sh \
 Expected output: the sandbox reports `opencode-config=0 agents=1`, then
 `Credential boundary: OK`, `Global agent setup: 74 skills`, then
 `SESSION_NAME=opencode-handoff-my-app-1788169556` with its
-`tmux attach-session` line. The user attaches, runs `opencode auth login` with a
-different account, and continues on the same tree with the same skills — on a
-fresh allowance. The host session stays untouched and still rate-limited.
+`tmux attach-session` line. The user attaches and starts `opencode2` with a
+fresh local profile, optionally logging in when the selected provider requires
+it (`opencode` is used on older images). The host session stays untouched; a
+provider-side rate limit may still apply.
 
 ## Acceptance Criteria
 
@@ -174,7 +180,7 @@ fresh allowance. The host session stays untouched and still rate-limited.
       credential directories are not bind-mounted
 - [ ] A **detached** tmux session was created and its `attach-session` line was
       shown to the user; the skill never attached to it itself
-- [ ] The `opencode auth login` step was surfaced, not assumed
+- [ ] Optional `opencode2 auth login` instructions were surfaced, not assumed
 - [ ] The container was **not** removed unless the user confirmed
 
 **Edge cases this skill accounts for:** an `opencode-sandbox` older than v2.1.0
@@ -195,7 +201,7 @@ sessions writing one working tree (decide ownership before starting).
   Agent setup:           √ <N> global skills, project .agents present
   Credential boundary:   √ no opencode config/token/key | × LEAK <path>
   Panel:                 √ tmux <session> (detached) | — n/a (no tmux)
-  Login surfaced:        √ opencode auth login shown to user
+  Login surfaced:        √ optional opencode2 auth login shown to user
   Container:             √ kept (<name>) | √ removed (user confirmed)
   ____________________________
   Result:               PASS | FAIL

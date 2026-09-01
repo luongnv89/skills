@@ -8,7 +8,7 @@
       "expected_output": "The skill runs one-shot mode with --no-ssh --no-github (user asked not to touch GitHub credentials), checks Docker, starts a kept container, shows docker exec attach, runs the summary task, and reports the result plus a Step Completion Report.",
       "files": [],
       "expectations": [
-        "The run started the container with --start-only (or equivalent docker run -d ... sleep infinity), showed docker exec -it <name> zsh to the user, then ran OpenCode with --exec-in (or docker exec ... opencode run --auto) rather than driving an interactive TUI",
+        "The run started the container with --start-only (or equivalent docker run -d ... sleep infinity), showed docker exec -it <name> zsh to the user, then ran OpenCode with --exec-in (or docker exec ... opencode2 run --auto, falling back to opencode for older images) rather than driving an interactive TUI",
         "The invocation includes --no-ssh and --no-github (or equivalent: no ~/.ssh mount and no GH_TOKEN) because the user asked not to touch GitHub credentials",
         "The report/output states the exit code from the container run",
         "A Step Completion Report is printed with the documented rows (Docker daemon, Image ready, Mounts, Credentials, Attach command, Task exit code, Container)"
@@ -73,6 +73,18 @@
         "A copy-paste attach command of the form docker exec -it <container-name> zsh is shown to the user before OpenCode finishes (via --start-only, not only after a blocking run)",
         "The docker run that creates the container does not include --rm (unless the user asked for auto-remove)",
         "After the task, the assistant asks the user whether to remove the container rather than removing it unprompted"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "happy-path",
+      "prompt": "Start OpenCode in the sandbox without using my host OpenCode account or configuration; anonymous/free model use is preferred.",
+      "expected_output": "The skill leaves ~/.config/opencode unmounted by default, creates a fresh local OpenCode profile in the new container, and does not require login before trying anonymous/free models. It does not promise that a fresh profile bypasses provider-side rate limits.",
+      "files": [],
+      "expectations": [
+        "The docker run does not mount ~/.config/opencode unless --with-opencode-config was explicitly requested",
+        "The output reports a fresh local profile or opencode-config=0",
+        "The assistant explains that provider-, model-, account-, network-, or service-side limits can still apply"
       ]
     }
   ]
