@@ -5,7 +5,9 @@
 `run_opencode.sh` mounts **`~/.ssh`** and GitHub auth (`~/.config/gh` plus
 `GH_TOKEN`/`GITHUB_TOKEN` from `gh auth token`) **by default**, so `git
 commit`, `git push`, `gh pr create`, and `gh pr merge` work inside the
-container. `~/.gitconfig` is also on by default for commit authorship.
+container. `~/.gitconfig` is also on by default for commit authorship. The
+host OpenCode profile/config is **not** mounted by default; pass
+`--with-opencode-config` only when the task needs it.
 
 That is a real blast radius: an SSH key or `GH_TOKEN` reaches **every repo
 and org that credential is scoped to**, not just the mounted project.
@@ -15,15 +17,15 @@ read-only task, pass **`--no-ssh --no-github`** (and `--no-git-identity` if
 you also do not want commits attributed as you).
 
 Do not print the token. The script logs
-`Credentials: ssh=1 github=1 gitconfig=1 opencode-config=1 agents=0`
-(0 = off).
+`Credentials: ssh=1 github=1 gitconfig=1 opencode-config=0 agents=0`
+(0 = off; `opencode-config=1` only when `--with-opencode-config` is used).
 
 ## Standard mounts
 
 | Mount | Container path | When |
 |---|---|---|
 | project directory | `/workspace` | always — the task's target |
-| `~/.config/opencode` | `/root/.config/opencode` | default on — OpenCode auth/config. Skip with `--no-opencode-config` (OpenCode then starts unauthenticated; see below) |
+| `~/.config/opencode` | `/root/.config/opencode` | opt-in with `--with-opencode-config` — host OpenCode profile/config; omitted by default for a fresh local profile |
 | `~/.ssh` | `/root/.ssh` | default on — `git push` over SSH. Skip with `--no-ssh` |
 | `~/.config/gh` | `/root/.config/gh` | default on — `gh` CLI host login. Skip with `--no-github` |
 | `GH_TOKEN` / `GITHUB_TOKEN` | env | default on — from `gh auth token` on the host. Skip with `--no-github` |
@@ -78,10 +80,12 @@ not touch GitHub, pass `--no-ssh --no-github` so `--auto` cannot push.
 mistake can travel.
 
 
-## Excluding OpenCode's own config (`--no-opencode-config`)
+## Selecting the OpenCode profile
 
-Every default run mounts `~/.config/opencode` so the container inherits the
-host's OpenCode setup. That directory contains more than preferences:
+The default run does **not** mount `~/.config/opencode`, so the container gets
+a fresh local OpenCode profile. Pass `--with-opencode-config` only when the
+container must inherit the host's setup. That directory contains more than
+preferences:
 
 | File | Contents |
 |---|---|
@@ -92,13 +96,18 @@ host's OpenCode setup. That directory contains more than preferences:
 The account key itself lives elsewhere — `~/.local/share/opencode/auth.json`
 (`opencode.key`) — and is never mounted by this script.
 
-Pass `--no-opencode-config` for a container that must **not** inherit the host's
-OpenCode identity, e.g. one meant to run on a separate account with its own
-usage allowance. OpenCode inside then starts unauthenticated and needs its own
-`opencode2 auth login` (`opencode auth login` on older images).
+`--fresh-profile` and `--no-opencode-config` explicitly select the default
+isolated behavior. The script does not mount `~/.local/share/opencode`, so a
+new container also gets fresh local OpenCode state. Anonymous/free models may work without login; authenticate only
+if the selected provider requires it. This isolates local profile state but
+cannot reset provider-, model-, network-, or service-side rate limits.
 
-Because that also drops the `skills/` wiring, `--no-opencode-config`
-`--with-agents` together re-mount just that subdirectory read-only:
+`opencode2 auth login` (`opencode auth login` on older images) is optional and
+only needed for providers that require authentication.
+
+Because that also drops the `skills/` wiring, `--fresh-profile` (or
+`--no-opencode-config`) with `--with-agents` together re-mounts just that
+subdirectory read-only:
 
 ```
 -v ~/.agents:/root/.agents:ro

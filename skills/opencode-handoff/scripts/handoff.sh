@@ -4,8 +4,8 @@
 # Creates an opencode-sandbox container for a project with the host's agent
 # setup mounted but WITHOUT the host's OpenCode config, token, or key, then
 # opens a detached tmux session attached to it. OpenCode inside the container
-# is unauthenticated on purpose — that is what gives it a fresh usage
-# allowance. Log in inside the panel.
+# gets a fresh local profile; anonymous/free models may work without login.
+# Authenticate inside the panel only when the selected provider requires it.
 #
 # Usage:
 #   handoff.sh --project DIR [options]
@@ -110,7 +110,7 @@ Error: '$SANDBOX_SCRIPT' does not support $required_flag.
   To fix:  update opencode-sandbox to v2.1.0 or newer.
 
 Without it the container would inherit the host's OpenCode config and token,
-defeating the purpose of the handoff (a fresh usage allowance).
+defeating the purpose of the handoff (a fresh local profile).
 EOF
     exit 1
   fi
@@ -284,10 +284,13 @@ Open the panel:
 
   tmux attach-session -t ${SESSION_NAME}
 
-Then, inside it (OpenCode starts unauthenticated — this is the fresh allowance):
+Then, inside it (OpenCode starts with a fresh local profile; anonymous/free
+models may work without login):
 
-  ${OPENCODE_CLI} auth login
   ${OPENCODE_CLI}
+
+If the selected provider requires authentication:
+  ${OPENCODE_CLI} auth login
 
 Container kept: ${CONTAINER_NAME}. Remove it only when you confirm:
   docker rm -f ${CONTAINER_NAME}

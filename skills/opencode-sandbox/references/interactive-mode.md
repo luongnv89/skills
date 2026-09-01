@@ -40,7 +40,6 @@ performs):
 # Unique name, e.g. opencode-sandbox-<project>-$(date +%s)
 docker run -d --name <container-name> --label opencode-sandbox=1 \
   -v "$PROJECT_DIR:/workspace" \
-  -v "$HOME/.config/opencode:/root/.config/opencode" \
   -v "$HOME/.ssh:/root/.ssh" \
   -v "$HOME/.config/gh:/root/.config/gh" \
   -e GH_TOKEN="$(gh auth token)" -e GITHUB_TOKEN="$(gh auth token)" \
@@ -49,6 +48,9 @@ docker run -d --name <container-name> --label opencode-sandbox=1 \
   -w /workspace \
   ghcr.io/luongnv89/devbox:latest sleep infinity
 ```
+
+For a host-configured profile, add `-v "$HOME/.config/opencode:/root/.config/opencode"`
+only when using `--with-opencode-config`.
 
 As soon as that returns, surface this copy-paste block to the user (do not
 wait until OpenCode finishes):
@@ -62,8 +64,9 @@ Drive the pane with a second `docker exec -it <container-name> zsh` (or
 `sleep infinity` is PID 1, so
 closing OpenCode does not tear the container down.
 
-**This is the default mount list** — project, opencode config, `~/.ssh`,
-GitHub auth, gitconfig, plus optional Claude skills. Prefer
+**This is the default mount list** — project, a fresh local OpenCode profile,
+`~/.ssh`, GitHub auth, gitconfig, plus optional Claude skills. Add the host
+OpenCode config only with `--with-opencode-config`. Prefer
 `scripts/run_opencode.sh --start-only` over hand-rolling this, so token
 injection stays in one place. Pass `--no-ssh --no-github` on that script
 when the task must not reach GitHub. Do not log `gh auth token` output.

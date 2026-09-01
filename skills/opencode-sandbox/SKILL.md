@@ -5,17 +5,20 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent-comms or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 2.1.3
+  version: 3.0.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # OpenCode Sandbox
 
 Run OpenCode inside a [luongnv89/docker-dev](https://github.com/luongnv89/docker-dev)
-container for a local project. **SSH and GitHub auth are on by default**
-(`~/.ssh`, `~/.config/gh`, `GH_TOKEN` from `gh auth token`) so `git commit`,
-`git push`, `gh pr create`, and `gh pr merge` work in the container. Pass
-`--no-ssh --no-github` when the task must not reach GitHub. Details:
+container for a local project. **A fresh local OpenCode profile is used by
+default**: the host's `~/.config/opencode` is not mounted. Pass
+`--with-opencode-config` only when the task must reuse the host profile or
+credentials. SSH and GitHub auth remain on by default (`~/.ssh`,
+`~/.config/gh`, `GH_TOKEN` from `gh auth token`) so `git commit`, `git push`,
+`gh pr create`, and `gh pr merge` work in the container. Pass `--no-ssh
+--no-github` when the task must not reach GitHub. Details:
 `references/mounts-and-credentials.md`.
 
 **Keep-by-default:** the container stays running after the task so the user
@@ -27,7 +30,7 @@ can attach a shell. Do not remove it unless they confirm (or they asked for
 - Run OpenCode against a project and let it commit, push, open, or merge a PR
   (`gh` / SSH available inside the container)
 - OpenCode keeps hitting provider rate limits and the task needs a fresh
-  container session
+  local profile (a new container with the default mounts, or `--fresh-profile`)
 - The task must **not** touch GitHub — pass `--no-ssh --no-github` and review
   the host diff; push stays a separate step
 
@@ -74,19 +77,23 @@ any `docker rm` (Step 4).
 ### Step 1 — Decide mounts
 
 Every run mounts the project directory (`/workspace`). **On by default:**
-`~/.config/opencode` (OpenCode's own auth — skip with `--no-opencode-config`),
-`~/.ssh`, GitHub auth (`~/.config/gh` + `GH_TOKEN`), and `~/.gitconfig`. Opt
-out when the user asks to isolate, or the task must not reach GitHub:
+`~/.ssh`, GitHub auth (`~/.config/gh` + `GH_TOKEN`), and `~/.gitconfig`. The
+host's `~/.config/opencode` is not mounted unless `--with-opencode-config` is
+passed. Opt out when the user asks to isolate, or the task must not reach
+GitHub:
 
 - `--no-ssh` — do not mount `~/.ssh`
 - `--no-github` — do not mount `~/.config/gh` or inject `GH_TOKEN`
 - `--no-git-identity` — do not mount `~/.gitconfig`
-- `--no-opencode-config` — do not mount `~/.config/opencode`. OpenCode then
-  starts unauthenticated (`opencode-handoff` builds on this). Combined with
-  `--with-agents`, the script also mounts `~/.config/opencode/skills`
-  read-only so its relative skill symlinks still resolve — and nothing else
-  from that directory, including `service.json`. See
-  `references/mounts-and-credentials.md`.
+- `--with-opencode-config` — mount the host's `~/.config/opencode` profile and
+  credentials. This is opt-in; the default is a fresh local profile.
+- `--fresh-profile` — explicitly select a fresh local OpenCode profile (alias
+  for `--no-opencode-config`). A new profile does not reset provider, model,
+  network, or service rate limits. Anonymous/free models may work without
+  login; authenticate only when needed. Combined with `--with-agents`, the
+  script also mounts `~/.config/opencode/skills` read-only so its relative
+  skill symlinks still resolve — and nothing else from that directory,
+  including `service.json`. See `references/mounts-and-credentials.md`.
 
 Add flags only for extras the task needs:
 
@@ -108,8 +115,10 @@ file *readable*, not *followed*. When using `--with-claude-skills`, the
 /root/.claude/skills/<name>/SKILL.md and follow it as your playbook for this
 task."`
 
-Additional options accepted by `run_opencode.sh`: `--image IMAGE` to override
-the default container image (`ghcr.io/luongnv89/devbox:latest`);
+Additional options accepted by `run_opencode.sh`: `--with-opencode-config` to
+opt in to mounting the host OpenCode profile; `--fresh-profile` or
+`--no-opencode-config` to explicitly select a fresh local profile; `--image IMAGE`
+to override the default container image (`ghcr.io/luongnv89/devbox:latest`);
 `--format FORMAT` to set `opencode2 run`'s output format (`default` or `json`;
 default: `default`); `--name NAME` to set the container name (default:
 `opencode-sandbox-<project>-<epoch>`); `--start-only` to create the container and
@@ -265,6 +274,8 @@ unfinished (see `references/troubleshooting.md`), not as a pass.
       the host before anything is committed or pushed
 - [ ] SSH (`~/.ssh`) and GitHub auth (`GH_TOKEN` / `~/.config/gh`) were
       mounted unless the user asked to isolate (`--no-ssh --no-github`)
+- [ ] Host OpenCode config was not mounted unless `--with-opencode-config` was
+      explicitly requested
 - [ ] Dependency-file diffs (`package.json`, lockfiles) were checked for
       container-only binaries before treating the run as safe to merge
 
@@ -283,7 +294,8 @@ the message or exits OpenCode entirely (see `references/interactive-mode.md`).
   Docker daemon:         √ pass (docker info)
   Image ready:           √ pass (ghcr.io/luongnv89/devbox:latest)
   OpenCode CLI:          √ opencode2 (fallback: opencode)
-  Mounts:                √ workspace, opencode config, ssh, gh, gitconfig [+ claude skills]
+  Profile:               √ fresh by default | √ host profile when requested
+  Mounts:                √ workspace, host opencode config when requested, ssh, gh, gitconfig [+ claude skills]
   Credentials:           √ ssh+gh on | √ --no-ssh --no-github (isolated)
   Attach command:        √ docker exec -it <name> zsh shown
   Task exit code:        √ 0 | × <N> — <error from output>

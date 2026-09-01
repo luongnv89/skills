@@ -8,15 +8,13 @@ Error: No provider available
 
 Two distinct causes — check in this order:
 
-1. **`~/.config/opencode` wasn't mounted, or has no credentials at all.**
-   Confirm the host has a working OpenCode login: `opencode2 providers list`
-   (or `opencode providers list` on older installs) should show at least one
-   entry. If it shows none, the container can't have credentials either — log
-   in on the host first (`opencode2` → `/connect`), then retry.
-2. **Transient provider-side hiccup.** Observed directly during testing: a
-   run fails with this exact error, and an immediate retry of the identical
-   command succeeds. If `opencode2 providers list` (or the older `opencode providers list`) shows a
-   valid credential, retry once before treating this as a real failure.
+1. **`~/.config/opencode` wasn't mounted, or the selected provider needs auth.**
+   `opencode2 auth list` shows configured integrations (`opencode providers
+   list` on older installs). An empty list can be normal for anonymous/free
+   models; authenticate only if the selected provider requires it.
+2. **Transient provider-side hiccup.** A run can fail with this exact error and
+   an immediate retry may succeed. Retry once before treating it as a real
+   failure.
 
 ## Rate limit stalls (free-tier `OpenCode Zen`)
 
@@ -24,18 +22,17 @@ Two distinct causes — check in this order:
 Error from provider (Console): Provider rate limit exceeded [retrying in 6m 48s attempt #9]
 ```
 
-This is an account-level limit on OpenCode's free `OpenCode Zen` routing, not
-a docker-dev or container problem — it happens identically on the host. In
-testing, a **fresh container session avoided a stall that had already reached
-9 retries with minute-plus backoffs on the host** — but the credential is the
-same mounted `~/.config/opencode`, so this is not a reliable fix, only an
-observed mitigation. If a task stalls here for more than a couple of minutes:
+This is a provider/service limit, not a Docker image or local-profile
+problem. A new container or `--fresh-profile` only resets local OpenCode state;
+it does not reset provider-, model-, account-, network-, or service-side
+quotas. In a recent reproduction, both a host-configured container and a
+completely fresh profile stalled and recorded `provider.rate-limit` HTTP 429.
+If a task stalls here for more than a couple of minutes:
 
-- Retry once in a fresh container (new `docker run`, not a resumed session).
-- If it stalls again immediately, the account is genuinely rate-limited —
-  stop and tell the user rather than looping. Options: wait it out, or use
-  `--model provider/model` with a different configured provider if one is
-  authenticated (`opencode2 providers list`).
+- Stop the run instead of allowing an indefinite retry loop.
+- Wait for the provider window to reset, or use `--model provider/model` with
+  another authenticated/configured provider. Do not automatically rotate free
+  models or claim that a fresh profile bypasses the limit.
 
 ## `cdev run --help` is missing `--mount-opencode` / `--preset`
 

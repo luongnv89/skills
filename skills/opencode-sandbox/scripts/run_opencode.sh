@@ -26,13 +26,16 @@
 #   --with-claude-skills      mount ~/.claude (and ~/.agents, for symlinked skills) read-only
 #   --with-agents             mount ~/.agents read-only (global agent/skill library)
 #                             WITHOUT ~/.claude. When combined with
-#                             --no-opencode-config, also mounts
+#                             --fresh-profile/--no-opencode-config, also mounts
 #                             ~/.config/opencode/skills read-only so the relative
 #                             skill symlinks still resolve inside the container.
-#   --no-opencode-config      do not mount ~/.config/opencode (default: mount it).
-#                             Use for a container that must NOT inherit the host's
-#                             OpenCode config/credentials — e.g. a fresh usage
-#                             allowance. OpenCode inside will need its own login.
+#   --fresh-profile           do not mount the host's OpenCode config; create a
+#                             fresh local profile (alias: --no-opencode-config)
+#   --with-opencode-config    mount ~/.config/opencode (default: do not mount it)
+#                             to reuse the host's OpenCode profile/credentials
+#   --no-opencode-config      do not mount ~/.config/opencode
+#                             Anonymous/free models may work without login;
+#                             authenticate only if the selected provider requires it.
 #   --with-git-identity       mount ~/.gitconfig read-only (default: on)
 #   --no-git-identity         do not mount ~/.gitconfig
 #   --no-ssh                  do not mount ~/.ssh (default: mount it so git push works)
@@ -67,7 +70,7 @@ MESSAGE=""
 TASK_FILE=""
 WITH_CLAUDE_SKILLS=0
 WITH_AGENTS=0
-WITH_OPENCODE_CONFIG=1
+WITH_OPENCODE_CONFIG=0
 WITH_GIT_IDENTITY=1
 WITH_SSH=1
 WITH_GITHUB=1
@@ -92,7 +95,8 @@ while [ $# -gt 0 ]; do
     --file) TASK_FILE="$2"; shift 2 ;;
     --with-claude-skills) WITH_CLAUDE_SKILLS=1; shift ;;
     --with-agents) WITH_AGENTS=1; shift ;;
-    --no-opencode-config) WITH_OPENCODE_CONFIG=0; shift ;;
+    --fresh-profile|--no-opencode-config) WITH_OPENCODE_CONFIG=0; shift ;;
+    --with-opencode-config) WITH_OPENCODE_CONFIG=1; shift ;;
     --with-git-identity) WITH_GIT_IDENTITY=1; shift ;;
     --no-git-identity) WITH_GIT_IDENTITY=0; shift ;;
     --no-ssh) WITH_SSH=0; shift ;;
@@ -268,10 +272,10 @@ if [ "$WITH_OPENCODE_CONFIG" = "1" ]; then
   if [ -d "$HOME/.config/opencode" ]; then
     MOUNTS+=(-v "$HOME/.config/opencode:/root/.config/opencode")
   else
-    echo "Warning: $HOME/.config/opencode not found — the container will have no OpenCode auth/config and may prompt to log in. Run 'opencode2' (or 'opencode') once on the host first if this task needs a real provider." >&2
+    echo "Warning: $HOME/.config/opencode not found — --with-opencode-config was requested, but the container will have no OpenCode host profile/config. Anonymous/free models may still work without login." >&2
   fi
 else
-  echo "OpenCode config: not mounted (--no-opencode-config). OpenCode in this container starts unauthenticated and will need its own login." >&2
+  echo "OpenCode config: not mounted (default; use --with-opencode-config to reuse the host profile). A new local profile is used; anonymous/free models may work without login. Provider-side limits are unchanged." >&2
 fi
 
 if [ "$WITH_AGENTS" = "1" ]; then

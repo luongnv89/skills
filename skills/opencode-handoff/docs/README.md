@@ -2,8 +2,9 @@
 
 # OpenCode Handoff
 
-Hit the OpenCode usage limit mid-task? This skill gets you back to work in a
-few minutes, on the same project, with the same skills — on a fresh allowance.
+Hit the OpenCode usage limit mid-task? This skill gives you a fresh local
+OpenCode profile in a few minutes, on the same project, with the same skills.
+Provider-side limits may still apply.
 
 ## What it does
 
@@ -14,7 +15,8 @@ few minutes, on the same project, with the same skills — on a fresh allowance.
 3. Opens a detached tmux session attached to the container and hands you the
    `attach-session` line
 
-You log in inside the panel with a different account and carry on.
+Start OpenCode inside the panel without an account when anonymous/free models
+are available. Log in only if the selected provider requires authentication.
 
 ## Usage
 
@@ -33,8 +35,9 @@ Then:
 ```bash
 tmux attach-session -t <session>
 # inside the panel
-opencode2 auth login
 opencode2
+# If authentication is required:
+opencode2 auth login
 # (older images may use `opencode` instead)
 ```
 
@@ -42,7 +45,7 @@ opencode2
 
 - "I hit the OpenCode limit, get me a fresh session"
 - "hand this project off to a new OpenCode sandbox"
-- "continue this work with a fresh OpenCode usage limit"
+- "continue this work with a fresh OpenCode profile"
 - "same setup, new OpenCode account"
 
 ## Requirements
@@ -64,7 +67,7 @@ opencode2
 
 ## What is not shared
 
-Your OpenCode credentials. `~/.config/opencode/service.json` (a password) and
+Your OpenCode profile and credentials. `~/.config/opencode/service.json` (a password) and
 `~/.local/share/opencode/auth.json` (your key) never enter the container — the
 skill verifies this at runtime and refuses to hand over if either appears.
 SSH and GitHub auth *are* shared by default, so you can still commit and push.
