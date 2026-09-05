@@ -21,7 +21,7 @@ wget -qO- https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bas
 
 ```bash
 # Install to a custom prefix
-INSTALL_PREFIX=~/.local curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | INSTALL_PREFIX=~/.local bash
 
 # Download and inspect before running
 curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh -o install.sh

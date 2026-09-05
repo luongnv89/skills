@@ -16,23 +16,23 @@ After completing each major step, output a status report in this format. Use `�
   Result:             PASS | FAIL | PARTIAL
 ```
 
-## Social Media Check (step 1 of 5)
+## Social Media Check (step 1 of 6)
 
 ```
-◆ Social Media Check (step 1 of 5 — handle availability)
+◆ Social Media Check (step 1 of 6 — handle availability)
 ··································································
   Twitter available:      √ pass
   GitHub available:       √ pass
-  Reddit available:       × fail — r/[name] subreddit exists
+  Discord available:      × fail — server exists with exact name
   [Criteria]:             √ 2/3 met
   ____________________________
   Result:                 PARTIAL
 ```
 
-## Package Registry (step 2 of 5)
+## Package Registry (step 2 of 6)
 
 ```
-◆ Package Registry (step 2 of 5 — namespace availability)
+◆ Package Registry (step 2 of 6 — namespace availability)
 ··································································
   npm clear:              √ pass
   PyPI clear:             × fail — package exists (owner: example)
@@ -42,10 +42,10 @@ After completing each major step, output a status report in this format. Use `�
   Result:                 PARTIAL
 ```
 
-## Domain Check (step 3 of 5)
+## Domain Check (step 3 of 6)
 
 ```
-◆ Domain Check (step 3 of 5 — domain availability)
+◆ Domain Check (step 3 of 6 — domain availability)
 ··································································
   .com available:         × fail — active site in same industry
   .dev available:         √ pass
@@ -55,10 +55,10 @@ After completing each major step, output a status report in this format. Use `�
   Result:                 PARTIAL
 ```
 
-## Trademark Check (step 4 of 5)
+## Trademark Check (step 4 of 6)
 
 ```
-◆ Trademark Check (step 4 of 5 — trademark conflicts)
+◆ Trademark Check (step 4 of 6 — trademark conflicts)
 ··································································
   WIPO clear:              √ pass — no conflicts in classes 9/35/42
   EUIPO clear:             √ pass
@@ -68,15 +68,28 @@ After completing each major step, output a status report in this format. Use `�
   Result:                  PARTIAL
 ```
 
-## Risk Assessment (step 5 of 5)
+## Risk Assessment (step 5 of 6)
 
 ```
-◆ Risk Assessment (step 5 of 5 — final verdict)
+◆ Risk Assessment (step 5 of 6 — risk level)
 ··································································
   Trademark risk level:   √ pass — Low, no conflicts in classes 9/35/42
   Overall risk score:     √ pass — Moderate
-  Recommendation generated: √ pass — Modify: use variant
-  [Criteria]:             √ 3/3 met
+  [Criteria]:             √ 2/2 met
   ____________________________
   Result:                 PASS
 ```
+
+## Recommendation (step 6 of 6)
+
+```
+◆ Recommendation (step 6 of 6 — final verdict)
+··································································
+  Verdict issued:         √ pass — Modify
+  Variants suggested:     √ pass — "acme-cli"
+  [Criteria]:             √ 2/2 met
+  ____________________________
+  Result:                 PASS
+```
+
+On an Early-Exit run, steps 2-4 are skipped: emit reports for step 1 and step 6 only.

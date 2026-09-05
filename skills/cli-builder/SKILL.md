@@ -4,7 +4,7 @@ description: "Build production-quality CLIs with language detection and a five-s
 license: MIT
 effort: high
 metadata:
-  version: 1.0.5
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -208,7 +208,7 @@ Step Completion Report (Steps 4-5):
 - [ ] CLI design document is presented and explicitly approved before any implementation begins
 - [ ] Implementation plan is presented and explicitly approved before execution starts
 - [ ] `--help` works at every command level and `--version` is implemented
-- [ ] Exit codes follow POSIX convention (0 = success, 1 = runtime error, 2 = usage error)
+- [ ] Exit codes follow the canonical table in `references/testing-patterns.md`
 - [ ] Error messages go to stderr; clean output goes to stdout (pipeable)
 - [ ] `NO_COLOR` env var or `--no-color` flag is respected
 - [ ] Tests are written and pass before moving to the next phase
@@ -258,7 +258,7 @@ Every CLI built with this skill must include:
 
 - **Help text**: every command and option has a description (`--help` works at every level)
 - **Error messages**: written to stderr, include what went wrong and how to fix it
-- **Exit codes**: 0 = success, 1 = runtime error, 2 = usage error (follow POSIX convention)
+- **Exit codes**: follow the canonical table in `references/testing-patterns.md` (0 = success, non-zero = failure)
 - **POSIX conventions**: `--long-flag`, `-s` short flag, `--` to end options
 - **Pipeable I/O**: support stdin when it makes sense, clean stdout for piping
 - **No-color support**: respect `NO_COLOR` env var or `--no-color` flag

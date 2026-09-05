@@ -3,9 +3,9 @@
 Produce the report in this exact order and shape. Keep it scannable — the user wants
 "what's satisfied" and "what to do next, in priority order", not an essay.
 
-Write the report to a file when working in a repo (`viral-evaluation.md` at the repo root,
-or next to the landing page source). Also print the verdict block + top fixes inline so the
-user sees the headline result without opening the file.
+Always write the report to `viral-evaluation.md` — at the repo root, or in the current working
+directory when there is no repo. Also print the verdict block + top fixes inline so the user
+sees the headline result without opening the file.
 
 ---
 

@@ -4,7 +4,7 @@ description: "Review a product codebase and landing page against 32 viral princi
 license: MIT
 effort: high
 metadata:
-  version: 1.2.4
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -43,6 +43,27 @@ It **reads** the codebase, **fetches** the landing page, and **writes one report
 anything — so no repo-sync/branch guardrail is needed. If the user then asks you to *apply*
 fixes, that is a separate task (hand off to a copy/frontend skill); this skill stops at the
 prioritized plan.
+
+## Dependency Preflight (mandatory)
+
+This skill invokes `/browse`, and only on the **live URL** path — a local file or an
+auto-detected page needs nothing installed. Resolve it before fetching anything:
+
+```bash
+test -d "$HOME/.claude/skills/browse" || asm list -p claude --json | grep -q '"browse"' || {
+  echo "Missing required skill: browse" >&2
+  echo "Install it:      asm install github:garrytan/gstack:browse -p claude -s global --yes" >&2
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  echo "Verify:          asm list -p claude --json | grep 'browse'" >&2
+}
+```
+
+The install-path test runs first because `/browse` ships in gstack and may be present without
+`asm` knowing about it. `-p claude -s global` is required: `asm install` will not guess a provider
+non-interactively, and a project-scoped install lands where the `$HOME` test cannot see it.
+
+A missing `/browse` is **fail-soft**, not fatal: print the commands above, then ask the user for a
+local file or saved HTML of the page. Never score a URL you could not load — do not invent one.
 
 ## Inputs
 
@@ -106,8 +127,8 @@ Run these in sequence. Emit the matching Step Completion Report (see
   headline/proof/single-CTA first. Merge principles that share a root cause into one fix. Make
   each fix concrete enough to act on (give the actual proposed headline, the tier to cut, the
   CTA label) — quote what it is **Now** and what to **Change** it to.
-- Write the report to `viral-evaluation.md` (repo root or beside the landing-page source) and
-  also print the verdict block + top fixes inline.
+- Always write the report to `viral-evaluation.md` — repo root, or the current working directory
+  when there is no repo — and also print the verdict block + top fixes inline.
 
 ## Honest evaluation
 
@@ -131,7 +152,8 @@ After each phase, emit the report from `references/step-reports.md`. The three p
 - All 32 principles scored with specific evidence quoted from the product.
 - Virality Score computed correctly (PASS=1, PARTIAL=0.5, FAIL=0) and tier assigned.
 - Top fixes are concrete, prioritized by impact×ease, with before/after suggestions.
-- Report written to viral-evaluation.md ; Step Completion Reports emitted per phase.
+- Report always written to viral-evaluation.md (repo root, else the current working directory) and
+  also printed inline; Step Completion Reports emitted per phase.
 - Negative-trigger domains respected (no SEO/ASO/copy/code-review work).
 
 ## Expected output

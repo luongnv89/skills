@@ -190,10 +190,10 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**idea-validator**](skills/idea-validator/) | 1.5.0 | max | Market, feasibility, competitor checks for ideas |
-| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.2.4 | high | Score codebase + landing page vs 32 viral principles |
-| [**brand-name-checker**](skills/brand-name-checker/) | 1.3.2 | max | Trademark, domain, social, registry conflicts |
+| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.3.0 | high | Score codebase + landing page vs 32 viral principles |
+| [**brand-name-checker**](skills/brand-name-checker/) | 1.4.0 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.4.0 | max | Structured PRD from idea or validate notes |
-| [**tad-generator**](skills/tad-generator/) | 1.4.0 | max | Technical architecture document from PRD |
+| [**tad-generator**](skills/tad-generator/) | 1.5.0 | max | Technical architecture document from PRD |
 | [**tasks-generator**](skills/tasks-generator/) | 1.3.2 | max | Sprint tasks and plan from PRD |
 | [**plan-to-issues**](skills/plan-to-issues/) | 2.0.4 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
 
@@ -232,7 +232,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**landing-page-generator**](skills/landing-page-generator/) | 1.2.1 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.1 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.1.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
-| [**oss-ready**](skills/oss-ready/) | 1.2.2 | low | Add OSS files and templates |
+| [**oss-ready**](skills/oss-ready/) | 1.3.0 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 1.4.1 | medium | CLAUDE.md + AGENTS.md per best practices |
 | [**subagent-creator**](skills/subagent-creator/) | 1.1.2 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
 
@@ -240,18 +240,18 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**aso-marketing**](skills/aso-marketing/) | 1.2.2 | max | App Store + Google Play keyword and metadata optimization |
+| [**aso-marketing**](skills/aso-marketing/) | 1.3.0 | max | App Store + Google Play keyword and metadata optimization |
 | [**appstore-review-checker**](skills/appstore-review-checker/) | 1.2.2 | high | Pre-submission audit vs Apple guidelines |
 
 ### Tooling
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**cli-builder**](skills/cli-builder/) | 1.0.5 | high | 5-step CLI tool builder with approval gates |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.1.2 | medium | Hardware-aware Ollama tuning |
-| [**install-script-generator**](skills/install-script-generator/) | 2.2.2 | high | Cross-platform install.sh with env detection |
+| [**cli-builder**](skills/cli-builder/) | 1.1.0 | high | 5-step CLI tool builder with approval gates |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.2.0 | medium | Hardware-aware Ollama tuning |
+| [**install-script-generator**](skills/install-script-generator/) | 2.2.3 | high | Cross-platform install.sh with env detection |
 | [**opencode-handoff**](skills/opencode-handoff/) | 1.0.1 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
-| [**opencode-runner**](skills/opencode-runner/) | 1.4.2 | medium | Delegate work to opencode free cloud models |
+| [**opencode-runner**](skills/opencode-runner/) | 1.5.0 | medium | Delegate work to opencode free cloud models |
 | [**opencode-sandbox**](skills/opencode-sandbox/) | 2.1.1 | medium | Run OpenCode in a kept sandbox (SSH/gh on by default) |
 | [**herdr-agent-comms**](skills/herdr-agent-comms/) | 1.23.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.3.1 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |

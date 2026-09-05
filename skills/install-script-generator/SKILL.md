@@ -4,7 +4,7 @@ description: "Generate cross-platform install scripts for any software or librar
 license: MIT
 effort: high
 metadata:
-  version: 2.2.2
+  version: 2.2.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -68,8 +68,8 @@ If the working tree is dirty, `git stash push -u -m pre-sync` first, sync, then 
 2. Detect existing installations to avoid duplicate work.
 3. Plan a verification step for each phase.
 4. Plan rollback / cleanup on failure.
-5. Run `python3 scripts/plan_generator.py --target "<name>" --env-file env_info.json` to emit `installation_plan.yaml`.
-6. Run `python3 scripts/executor.py --plan installation_plan.yaml --dry-run` to verify the plan executes cleanly and rollback triggers correctly before Phase 3 generates `install.sh` from it.
+5. Run `python3 scripts/plan_generator.py --target "<name>" --env-file env_info.json --deps <dep1> <dep2> ...` (pass the dependencies resolved in step 1, space-separated; omit `--deps` only if there are none) to emit `installation_plan.yaml`.
+6. Run `python3 scripts/executor.py --plan installation_plan.yaml --dry-run` and confirm the report lists every step in the intended order with a rollback command present for each. Dry-run skips execution, so this checks the plan's shape, not that installation or rollback actually works.
 
 ### Phase 3 — Generation (primary output)
 

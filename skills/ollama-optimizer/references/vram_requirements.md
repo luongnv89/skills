@@ -16,7 +16,7 @@ Apple Silicon Macs share RAM between CPU and GPU (unified memory). The effective
 
 | System RAM | Effective GPU Memory | Max Model Size |
 |------------|---------------------|----------------|
-| 8GB | ~6GB usable | 7B Q4_K_M |
+| 8GB | ~6GB usable | 8B Q4_K_M |
 | 16GB | ~12GB usable | 14B Q4_K_M |
 | 32GB | ~24GB usable | 32B Q4_K_M |
 | 64GB | ~48GB usable | 70B Q4_K_M |

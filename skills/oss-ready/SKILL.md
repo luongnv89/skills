@@ -4,7 +4,7 @@ description: "Transform a project into a professional open-source repository by 
 license: MIT
 effort: low
 metadata:
-  version: 1.2.2
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -133,10 +133,10 @@ After completing each major step, output a status report in this format:
 
 Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
 
-### Analysis (step 1 of 4)
+### Analysis (step 1 of 7)
 
 ```
-◆ Analysis (step 1 of 4 — project profiling)
+◆ Analysis (step 1 of 7 — project profiling)
 ··································································
   Language detected:       √ pass — TypeScript (primary)
   Project type identified: √ pass — CLI tool
@@ -146,7 +146,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Result:                  PASS
 ```
 
-Repeat this format for each subsequent step (Core Files, GitHub Setup, Documentation), adapting the check names to what that step actually validates.
+Repeat this format for each subsequent step — Core Files, GitHub Templates, Documentation, Project Metadata, .gitignore, Checklist — adapting the check names to what that step actually validates. Steps 5 and 6 carry acceptance criteria of their own, so a run that reports complete without them has skipped verifiable work. Step 0 sets up the branch and gets no report.
 
 ## Guidelines
 
@@ -173,7 +173,7 @@ The skill is complete when every item below can be verified with `test -f`, `gre
 After a successful run on a TypeScript CLI project that started with only a partial `README.md`, the agent emits a final report shaped like this:
 
 ```
-◆ OSS Ready summary (4 of 4 steps complete)
+◆ OSS Ready summary (7 of 7 steps complete)
 ··································································
   Files created:
     √ LICENSE                                  (MIT)

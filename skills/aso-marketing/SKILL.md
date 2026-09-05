@@ -4,7 +4,7 @@ description: "Optimize App Store and Google Play listings via a 7-phase, plan-ap
 license: MIT
 effort: max
 metadata:
-  version: 1.2.2
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -113,7 +113,7 @@ Read `references/phases-4-7.md` (Phase 7 section). Produce the final summary rep
 
 ## Step Completion Reports
 
-After each major step, output a status report with `√` pass / `×` fail markers. Format and per-phase check lists are in `references/edge-cases.md` (Step Completion Reports section).
+Emit exactly 5 reports per run — the denominator `M` is always 5: Phase 1, Phases 2-3, Phase 4, Phases 5-6, Phase 7. Each uses `√` pass / `×` fail markers. Format and per-phase check lists are in `references/edge-cases.md` (Step Completion Reports section).
 
 ## Expected Output
 
