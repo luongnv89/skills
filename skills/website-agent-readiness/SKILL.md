@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -39,21 +39,6 @@ Do **not** use for:
   llms.txt, robots.txt, and AI-bot directives as *edits*). This skill stops at the plan.
 - App Store / Play Store optimisation — `/aso-marketing`, `/aso-audit`.
 - A plan you already have — go straight to `/plan-to-issues <path.md>`.
-
-## Leading terms
-
-- **check** — one of the scanner's 22 tests, keyed camelCase (`linkHeaders`, `dnsAid`)
-  inside one of five **categories**. Status is `pass`, `fail`, or `neutral`.
-- **failing check** — status `fail`. One failing check becomes exactly one plan task.
-  `neutral` is informational and is never filed.
-- **fix prompt** — the scanner's own remediation prose for a failing check. The task
-  description is this text, never something this skill composes.
-- **guide URL** — the scanner's hosted implementation guide for a check
-  (`/.well-known/agent-skills/<slug>/SKILL.md`). **Cited in the task, never fetched
-  or applied** — fetching and implementing them is out of scope.
-- **scan-faithful** — every word of the plan traces to the scan response. Never open the
-  target site's source, never guess at its stack, never add a task the scan did not fail.
-- **approval gate** — a full stop. The run ends its turn and waits for the user.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -169,14 +154,9 @@ The scanner needs to reach the site publicly. `localhost`, a private IP, or a
 password-walled staging host cannot be scanned — say so at G1 rather than after a
 failed call.
 
-`.agent-ready/` holds raw scan data — scratch, not a deliverable. Add it to
+`.agent-ready/` holds raw scan data — scratch, not a deliverable. Keep it there: the full 22-check response is far larger than the digest the run actually reasons over, and reading it wholesale burns context window the later phases need. Add it to
 `.gitignore` if the repo tracks one; only `agent-ready-plan.md` is meant to be committed,
 and only when the user asks.
-
-**Completion criteria:** `.agent-ready/scan.json` parses and contains `level` and
-`checks`; `.agent-ready/fixes.md` exists (it may be empty — the run degrades to the
-`nextLevel` prompts, and the plan's header carries a `**Note:**` naming every check
-whose description fell back to the check message).
 
 ## Phase 2 — Triage
 
@@ -205,9 +185,6 @@ Phase assignment, applied by the script:
 
 A phase with no failing checks is omitted. When the scan reports `isCommerce: false`,
 P4 is **deferred**, not filed — a brochure site does not need an agent payments backlog.
-
-**Completion criteria:** `.agent-ready/triage.json` exists and its task count equals the
-number of `fail` checks in `scan.json` minus the deferred ones.
 
 ## Phase 3 — Plan
 
@@ -256,10 +233,6 @@ scan reports no failing checks at all, and also when every failing check was def
 (commerce checks on a non-commerce site). Relay the reason the script prints, report the
 score, and stop. Do not write an empty plan to give Phase 4 something to do.
 
-**Completion criteria:** `agent-ready-plan.md` exists; both counts above match the triage
-task count; every task carries at least one `- [ ]` line. Or the renderer exited `3` and
-the run ends here, reported as a pass.
-
 ## Phase 4 — Issues
 
 **Input:** `agent-ready-plan.md`.
@@ -283,8 +256,35 @@ the run ends here, reported as a pass.
 Do not re-implement issue filing. Labels, epic body, the plan map, and duplicate
 detection all belong to `/plan-to-issues`; this skill's job ended when the plan parsed.
 
-**Completion criteria:** `/plan-to-issues` reports an epic and one issue per plan task,
-or the run stops with its error surfaced verbatim.
+## Acceptance Criteria
+
+A phase is complete only when its criterion holds. Verify the artifact on disk; never take a script's exit code as proof its output parses.
+
+- **Phase 1 — Scan:** `.agent-ready/scan.json` parses and contains `level` and `checks`; `.agent-ready/fixes.md` exists (it may be empty — the run degrades to the `nextLevel` prompts, and the plan's header carries a `**Note:**` naming every check whose description fell back to the check message).
+- **Phase 2 — Triage:** `.agent-ready/triage.json` exists and its task count equals the number of `fail` checks in `scan.json` minus the deferred ones.
+- **Phase 3 — Plan:** `agent-ready-plan.md` exists; both counts above match the triage task count; every task carries at least one `- [ ]` line. Or the renderer exited `3` and the run ends here, reported as a pass.
+- **Phase 4 — Issues:** `/plan-to-issues` reports an epic and one issue per plan task, or the run stops with its error surfaced verbatim.
+
+### Expected output
+
+Two artifacts and a tracker state. `.agent-ready/` holds the raw scan, triage worklist, and fix prose — scratch, never committed. `agent-ready-plan.md` is the one deliverable, in the exact grammar `/plan-to-issues` parses. Phase 4 leaves one epic plus one issue per plan task in the repo.
+
+```
+agent-ready-plan.md          17 tasks across P0-P3, P4 deferred (isCommerce false)
+epic #412                    17 sub-issues registered
+```
+
+## Edge cases
+
+| Input | Behaviour |
+|---|---|
+| `localhost`, a private IP, or a password-walled staging host | The scanner cannot reach it. Say so at gate G1, before the call, not after it fails |
+| Several URLs in one request | Confirm which one; this skill scans one site per run |
+| A site with zero failing checks | `triage_scan.py` exits 3 and writes nothing — `/plan-to-issues` rejects a file with no task headings |
+| `isCommerce: false` | P4 commerce tasks are deferred, not filed |
+| Empty `.agent-ready/fixes.md` | The run degrades to the `nextLevel` prompts and the plan header carries a `**Note:**` naming every check left without the scanner's prose |
+| A `neutral` check | Informational only; never becomes a task |
+| A user who already has a plan | Out of scope — go straight to `/plan-to-issues <path.md>` |
 
 ## Step Completion Reports
 
@@ -308,6 +308,7 @@ Emit one after each phase:
 |---|---|
 | `references/scan-api.md` | you need the API contract, the 22-check inventory, or the category → phase table |
 | `references/plan-format.md` | you are changing the plan's shape, or `/plan-to-issues` failed to parse it |
+| `references/leading-terms.md` | a term in this skill's vocabulary is unclear |
 
 Script paths are relative to **this skill's directory**, not the user's project. Resolve
 them before running — e.g. `bash "$SKILL_DIR/scripts/scan_site.sh" …`, or invoke with the
