@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent-comms in both modes; issue-resolver is required only in ISSUE mode."
 effort: max
 metadata:
-  version: 1.3.1
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -47,17 +47,9 @@ A request for review only/no fixes belongs to `issue-pr-review`, not this skill.
 | No merge | **USER-MERGE** only; never merge or enable auto-merge |
 | Clean workspace | **SWEEP** this run's worker panes/worktrees before handoff |
 
-## Leading Words
+## Vocabulary and Configuration
 
-- **ISSUE** — implementer resolves an open issue, then reviewer/fix rounds
-- **PR** — reviewer-first loop on an existing open PR; linked issue is optional
-- **ROUND** — one review plus its optional fix
-- **FINDING** — any reviewer item, including notes and partials
-- **CLEAN** — explicit clean verdict with zero FINDINGS
-- **FIXER** — PR-mode writer, created only after the first FINDINGS verdict and push-safety gate
-- **FRESHEN** — restart one worker with a compact handoff at the context gate
-- **SWEEP** — close spawned panes, remove loop worktrees, return main repo to default branch
-- **USER-MERGE** — final open-PR handoff; the human decides whether to merge
+The loop's leading words (ISSUE, PR, ROUND, FINDING, CLEAN, FIXER, FRESHEN, SWEEP, USER-MERGE) and the optional `.gitissue.yml` keys under `work_loop.*` are in `references/vocabulary-and-config.md`. Read it once before Phase 1. CLI flags override config; print `○ First run — using default config` when `.gitissue.yml` is absent, and never modify the file.
 
 ## Invocation
 
@@ -77,9 +69,28 @@ On failure, print the matching block from `references/error-messages.md` and sto
 2. Authenticated GitHub CLI: `which gh && gh auth status`
 3. GitHub remote: `git remote -v`
 4. Running Herdr server: `command -v herdr && herdr status` (never launch bare `herdr` from a non-TTY shell)
-5. Loadable skills in both modes: `issue-pr-review`, `herdr-agent-comms`
-6. Loadable `issue-resolver` skill in ISSUE mode only
-7. Bundled references present: `agent-prompts.md`, `context-gate.md`, `loop-protocol.md`, `cleanup.md`, `error-messages.md`, `output-format.md`
+5. Bundled references present: `agent-prompts.md`, `context-gate.md`, `loop-protocol.md`, `cleanup.md`, `error-messages.md`, `output-format.md`
+
+## Dependency Preflight (mandatory)
+
+This skill hands whole phases to other skills: `herdr-agent-comms` (every pane spawn, send, and wait) and `issue-pr-review` (the reviewer role) in **both** modes, plus `issue-resolver` for the ISSUE-mode implementer only. Resolve them before the repo sync below, the first step that changes anything:
+
+```bash
+req="herdr-agent-comms issue-pr-review"
+for s in $req; do
+  asm list -p claude --json | grep -q "\"$s\"" || {
+    echo "Missing required skill: $s" >&2
+    echo "Install it:      asm install $s -p claude --yes" >&2
+    echo "No asm yet:      npm install -g agent-skill-manager" >&2
+    echo "Verify:          asm list -p claude --json | grep '$s'" >&2
+    exit 1
+  }
+done
+```
+
+The mode is already chosen by the Mode Selector above. **In ISSUE mode, add `issue-resolver` to `req` before running this** — PR mode never calls it.
+
+`-p claude` is required: `asm install` refuses to guess a provider non-interactively, `--yes` does not cover that choice, and naming the same provider in the verification stops an install under a different tool from reporting success. On a miss, stop before the first mutation and print those commands — never continue with a partial run.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -109,34 +120,13 @@ fi
 
 If `origin` is missing or rebase/stash-pop conflicts occur, stop and ask the user. Never pop onto a half-finished rebase.
 
-## Configuration
-
-Optional `.gitissue.yml` keys (defaults when absent):
-
-| Key | Default | Role |
-|---|---|---|
-| `work_loop.max_rounds` | `5` | Maximum completed review ROUNDs |
-| `work_loop.agent_cli` | `"claude"` | Interactive worker launcher; autonomy follows the per-harness boot-gate matrix |
-| `work_loop.context_threshold` | `50` | FRESHEN at or above this percentage |
-| `work_loop.implementer_name` | `"impl-{N}"` | ISSUE implementer pane |
-| `work_loop.reviewer_name` | `"rev-{N}"` in ISSUE; `"rev-pr-{M}"` in PR | Reviewer pane |
-| `work_loop.fixer_name` | `"fix-{M}"` | PR FIXER pane, lazily spawned |
-| `work_loop.auto_cleanup` | `true` | Run SWEEP before handoff |
-
-CLI flags override config. `--no-cleanup` sets `auto_cleanup: false` for debugging and leaves panes/worktrees. Print `○ First run — using default config` when `.gitissue.yml` is absent; do not modify the file.
-
 ## Autonomous Worker Boot Gate (mandatory)
 
-Apply this gate to every reviewer, ISSUE implementer, and PR FIXER after its interactive CLI is ready and before sending any task:
+Every reviewer, ISSUE implementer, and PR FIXER passes this gate after its interactive CLI is ready and before it receives any task, and again after every FRESHEN because a restarted CLI is a new session.
 
-1. Identify the launcher executable from `agent_cli` and launch it bare — only its own verified flags, never invented auto-mode startup parameters.
-2. For **pi** (`pi`), there is nothing to activate: it is autonomous by default. Launch the bare configured command and record that fact.
-3. For **Claude Code** (`claude`), launch plain `claude`, then send the Shift+Tab keystroke until the auto-accept-edits mode is selected, and confirm its mode indicator with a bounded pane read before dispatching work.
-4. For **opencode** (`opencode`), launch plain `opencode`, then press Tab (or the configured `switch_agent` keybind) to select the full-permission Build agent and verify it; settings are the documented alternative.
-5. Never send an auto-mode slash command, never pass auto-mode startup flags (even where a harness exposes one), and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the post-boot per-harness switch above is the required mechanism. Any other CLI fails closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
-6. Repeat the gate after every FRESHEN because a restarted CLI is a new session.
+The invariants: launch the `agent_cli` executable **bare** with only its own verified flags, then apply the per-harness post-boot switch and verify it with a bounded pane read before dispatching work. Never send an auto-mode slash command, never pass auto-mode startup flags even where a harness exposes one, and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`. Any launcher not in the matrix fails closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
 
-The full per-harness matrix is in `references/loop-protocol.md`. A task prompt saying “work autonomously” does not satisfy this gate.
+The per-harness matrix — startup, switch, and what counts as verified for `pi`, `claude`, and `opencode` — is in `references/loop-protocol.md` → *Autonomous worker boot gate*, which is authoritative. A task prompt saying "work autonomously" does not satisfy this gate.
 
 ## Workflow Overview
 
@@ -173,8 +163,6 @@ Read `references/loop-protocol.md` after selecting the mode; it is authoritative
 3. Derive zero, one, or multiple linked issues from GitHub linkage and closing-keyword evidence. Retain all numbers as `issue_context: none | #N | #N,#K`; do not choose a canonical issue.
 4. If an explicit issue was also supplied, require it in that set or stop with the mismatch error.
 
-**Done when:** mode is unambiguous; target exists and is OPEN; required skills and Herdr root are available; linked-PR/issue evidence is recorded; no worker has spawned on a failing gate.
-
 ## Phase 2 — First Worker
 
 - **ISSUE:** spawn the implementer pane, send the initial issue-resolver prompt, and validate exactly one open linked PR. Then spawn the reviewer.
@@ -182,13 +170,11 @@ Read `references/loop-protocol.md` after selecting the mode; it is authoritative
 
 Use `herdr-agent-comms` readiness/send/wait mechanics. Boot workers before sending long tasks. After each worker is ready, pass the **Autonomous Worker Boot Gate** before sending role prompts.
 
-**Done when:** ISSUE has one validated open PR and a ready, autonomous reviewer, or an authoritative `already_resolved` terminal outcome; PR has only a ready, autonomous reviewer and the preflight head SHA. Any writer already spawned is also verified autonomous. If ISSUE reports `already_resolved` and a linked open PR appeared after preflight, require the same switch-to-PR confirmation; accept switches to full PR mode, decline aborts.
-
 ## Phase 3 — Review / Fix ROUNDs
 
 Start `round = 1`; a ROUND counts when REVIEW completes.
 
-1. Context-gate the reviewer at every ROUND start.
+1. Context-gate the reviewer at every ROUND start: FRESHEN it once its remaining context window drops to `work_loop.context_threshold` percent, because a worker that exhausts its token budget mid-review returns a truncated verdict rather than an error.
 2. Before review, refresh the PR and require its current `headRefName` and `headRefOid`; send that SHA in the reviewer prompt. Reviewer must report `reviewed_head_sha` matching it.
 3. Normalize verdicts strictly: notes are FINDINGS; contradictory CLEAN plus items becomes FINDINGS; one verdict-only re-prompt is allowed.
 4. On CLEAN, do not dispatch a writer. In PR mode, a FIXER must never have been spawned if every review was CLEAN.
@@ -199,8 +185,6 @@ Start `round = 1`; a ROUND counts when REVIEW completes.
 7. At max rounds, retain all remaining FINDINGS and stop for human decision.
 
 Full parse/retry rules are in `references/loop-protocol.md`.
-
-**Done when:** CLEAN has zero FINDINGS at the verified current SHA; or MAX_ROUNDS/FAILED records every remaining FINDING and a reason; every fix stayed on the same PR branch; PR-mode unsafe push paths spawned no FIXER.
 
 ## Phase 4 — SWEEP
 
@@ -213,15 +197,36 @@ Unless `--no-cleanup`, follow `references/cleanup.md`:
 
 Continue to handoff even if cleanup is PARTIAL so the PR URL and recovery steps are not lost.
 
-**Done when:** tracked worker panes are absent; no loop-created non-primary worktree remains; primary checkout is clean on the default branch, or each failed check has exact recovery instructions.
-
 ## Phase 5 — USER-MERGE Handoff
 
 Never run `gh pr merge` or enable auto-merge. Print the mode-specific final report with PR URL, branch, verified head SHA, `issue_context`, rounds, verdict, remaining FINDINGS, spawned roles, and cleanup state.
 
-**Done when:** the PR remains open; final facts match a fresh `gh pr view`; merge ownership is explicitly human; no second PR, force-push, or hidden unresolved FINDING occurred.
+## Acceptance Criteria
 
-## Failure Handling
+A phase is complete only when its criterion below holds. Never report PASS from a worker's claim alone — verify GitHub state, head SHA, pane list, and worktree list.
+
+- **Phase 1 — Preflight:** mode is unambiguous; target exists and is OPEN; required skills and Herdr root are available; linked-PR/issue evidence is recorded; no worker has spawned on a failing gate.
+- **Phase 2 — First Worker:** ISSUE has one validated open PR and a ready, autonomous reviewer, or an authoritative `already_resolved` terminal outcome; PR has only a ready, autonomous reviewer and the preflight head SHA. Any writer already spawned is also verified autonomous. If ISSUE reports `already_resolved` and a linked open PR appeared after preflight, require the same switch-to-PR confirmation; accept switches to full PR mode, decline aborts.
+- **Phase 3 — ROUNDs:** CLEAN has zero FINDINGS at the verified current SHA; or MAX_ROUNDS/FAILED records every remaining FINDING and a reason; every fix stayed on the same PR branch; PR-mode unsafe push paths spawned no FIXER.
+- **Phase 4 — SWEEP:** tracked worker panes are absent; no loop-created non-primary worktree remains; primary checkout is clean on the default branch, or each failed check has exact recovery instructions.
+- **Phase 5 — Handoff:** the PR remains open; final facts match a fresh `gh pr view`; merge ownership is explicitly human; no second PR, force-push, or hidden unresolved FINDING occurred.
+
+### Expected output
+
+Each phase and ROUND emits a Step Completion Report; the run ends with a USER-MERGE handoff naming the PR URL, branch, verified head SHA, `issue_context`, ROUNDs completed, final verdict, remaining FINDINGS, spawned roles, and cleanup state. The exact mode-specific layouts are in `references/output-format.md`.
+
+```text
+◆ ROUND 2 (PR)
+··································································
+  reviewed_head_sha:  √ pass (a1b2c3d)
+  Verdict:            × fail — 3 FINDINGS
+  Criteria:           √ 3/4 met
+  Result:             CONTINUE
+```
+
+## Edge Cases
+
+Each row is a situation the loop must handle rather than crash on. Exact stop and handoff blocks are in `references/error-messages.md`.
 
 | Situation | Response |
 |---|---|
@@ -262,7 +267,7 @@ After each phase and ROUND, emit:
   Result:             PASS | CONTINUE | FAIL | PARTIAL
 ```
 
-A PASS requires every stated **Done when** criterion; never report PASS from a worker's claim alone—verify GitHub state, SHA, pane list, and worktree list where applicable.
+A PASS requires the phase's criterion in **Acceptance Criteria** above.
 
 ## Additional Resources
 
@@ -271,5 +276,6 @@ A PASS requires every stated **Done when** criterion; never report PASS from a w
 - `references/context-gate.md` — role-specific FRESHEN rules
 - `references/cleanup.md` — mode-aware SWEEP
 - `references/output-format.md` — mode-specific Step Completion Reports and handoffs
+- `references/vocabulary-and-config.md` — leading words and `work_loop.*` config keys
 - `references/error-messages.md` — exact stop/handoff blocks
 - Required skills: `herdr-agent-comms`, `issue-pr-review`; ISSUE also requires `issue-resolver`
