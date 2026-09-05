@@ -24,14 +24,14 @@
 4. **Recommended environment variables**
    ```bash
    export OLLAMA_FLASH_ATTENTION=1
-   # For 8GB Macs running 7B models:
+   # For 8GB Macs running 8B models:
    export OLLAMA_KV_CACHE_TYPE=q8_0
    ```
 
 5. **Model recommendations by Mac**
    | Mac | RAM | Max Model |
    |-----|-----|-----------|
-   | M1/M2 MacBook Air 8GB | 8GB | 7B Q4_K_M |
+   | M1/M2 MacBook Air 8GB | 8GB | 8B Q4_K_M |
    | M1/M2 Pro 16GB | 16GB | 14B Q4_K_M |
    | M1/M2 Max 32GB | 32GB | 32B Q4_K_M |
    | M2/M3 Ultra 64GB+ | 64GB+ | 70B Q4_K_M |

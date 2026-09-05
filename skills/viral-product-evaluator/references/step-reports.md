@@ -39,7 +39,7 @@ Emit one after each phase. Use `√` pass, `×` fail, `—` for context.
   Each fix is actionable:  √ pass — quotes current + proposed
   Strengths listed:        √ pass
   Caveats listed:          √ pass
-  Report written:          √ pass — <file path> | — printed inline only
+  Report written:          √ pass — <file path> (always written, also printed inline)
   ____________________________
   Result:                  PASS | PARTIAL | FAIL
 ```

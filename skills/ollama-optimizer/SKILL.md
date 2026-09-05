@@ -4,7 +4,7 @@ description: "Optimize Ollama configuration for the current machine's hardware. 
 license: MIT
 effort: medium
 metadata:
-  version: 1.1.2
+  version: 1.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -20,6 +20,8 @@ Do not use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers (OpenAI, 
 
 ## Workflow
 
+**Fast path (opt-in only):** only skip full hardware analysis if the user explicitly asks to. Otherwise always run Phases 1-4 and follow the tier-based recommendation — do not apply shortcuts by default, and do not let them override a tier decision already made. For the per-platform shortcut commands and env vars, see [Platform-Specific Setup](references/platform_specific.md) and [Environment Variables](references/environment_variables.md).
+
 ### Phase 1: System Detection
 
 Run the detection script to gather hardware information:
@@ -34,34 +36,35 @@ Parse the JSON output to identify:
 - Total RAM / unified memory
 - GPU type, VRAM, and driver version
 - Current Ollama installation and environment variables
+- `hardware_tier` — the script's computed `category`, `max_model_size`, and `recommended_quant`
 
 ### Phase 2: Analyze and Recommend
 
-Based on detected hardware, determine the optimization profile:
+Use `hardware_tier` from Phase 1 as the tier decision. Do not re-derive it; the table below explains what each tier means and which optimizations it implies. Override the script only with an explicit reason (e.g. VRAM shared with a display), and state that reason in the report.
 
 **Hardware Tier Classification:**
 
-| Tier | Criteria | Max Model | Key Optimizations |
+| Tier (`category`) | Script band | Max Model | Key Optimizations |
 |------|----------|-----------|-------------------|
-| CPU-only | No GPU detected | 3B | num_thread tuning, Q4_K_M quant |
-| Low VRAM | <6GB VRAM | 3B | Flash attention, KV cache q4_0 |
-| Entry | 6-8GB VRAM | 8B | Flash attention, KV cache q8_0 |
-| Prosumer | 10-12GB VRAM | 14B | Flash attention, full offload |
-| Workstation | 16-24GB VRAM | 32B | Standard config, Q5_K_M option |
-| High-end | 48GB+ VRAM | 70B+ | Multiple models, Q5/Q6 quants |
+| `cpu_only` | No GPU detected | 3B | num_thread tuning, Q4_K_M quant |
+| `low_vram` | <6GB VRAM | 3B | Flash attention, KV cache q4_0 |
+| `entry` | 6-10GB VRAM | 8B | Flash attention, KV cache q8_0 |
+| `prosumer` | 10-16GB VRAM | 14B | Flash attention, full offload |
+| `workstation` | 16-48GB VRAM | 32B | Standard config, Q5_K_M option |
+| `high_end` | 48GB+ VRAM | 70B+ | Multiple models, Q5/Q6 quants |
 
 **Apple Silicon Special Case:**
-- Unified memory = shared CPU/GPU RAM
-- 8GB Mac → treat as 6GB VRAM tier
-- 16GB Mac → treat as 12GB VRAM tier
-- 32GB+ Mac → treat as workstation tier
+- Unified memory = shared CPU/GPU RAM; the script tiers it directly from total unified memory
+- 8GB Mac → `entry`
+- 16GB Mac → `prosumer`
+- 32GB Mac → `workstation`; 64GB+ Mac → `high_end`
 
 ### Phase 3: Generate Optimization Plan
 
 Create a structured optimization guide with these sections:
 
 #### 1. System Overview
-Present detected hardware specs and highlight constraints (e.g., "8GB unified memory limits to 7B models").
+Present detected hardware specs and highlight constraints (e.g., "8GB unified memory limits to 8B models").
 
 #### 2. Dependency Assessment
 List what's needed based on the platform:
@@ -95,17 +98,23 @@ PARAMETER num_ctx <size>      # Reduce context for memory savings
 
 #### 4. Execution Checklist
 Provide copy-paste commands in order:
-1. Set environment variables
+1. Back up the shell init file the user actually uses (`$SHELL` decides: `~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`) and append the env vars:
+   ```bash
+   RC=~/.zshrc  # or ~/.bashrc / ~/.bash_profile, matching $SHELL
+   cp "$RC" "$RC.ollama-bak"
+   printf '\n# ollama-optimizer start\nexport OLLAMA_FLASH_ATTENTION=1\n<KV cache + other export lines from section 3, per tier>\n# ollama-optimizer end\n' >> "$RC"
+   ```
 2. Restart Ollama service
 3. Pull recommended models
 4. Test with `ollama run <model> --verbose`
+5. Rollback (one command, same file as step 1): `cp ~/.zshrc.ollama-bak ~/.zshrc` — then restart Ollama.
 
-#### 5. Verification Commands
+### Phase 4: Verification
 
 ```bash
 # Benchmark current performance
 python3 scripts/benchmark_ollama.py --model <model>
-# Expected output: tokens/s and generation latency. Compare against tier baseline from Phase 2.
+# Expected output: tokens/s and generation latency — record as the post-tuning baseline.
 
 # Check GPU memory usage (NVIDIA)
 nvidia-smi
@@ -238,7 +247,3 @@ Generate an `ollama-optimization-guide.md` file. Ask the user where to save it (
 ## Rollback
 <commands to revert changes if needed>
 ```
-
-## Quick Optimization Commands (opt-in only)
-
-Only use this fast path if the user explicitly asks to skip full hardware analysis. Otherwise always run Phases 1-3 and follow the tier-based recommendation — do not apply these shortcuts by default, and do not let them override a tier decision already made. For the actual per-platform commands and env vars, see [Platform-Specific Setup](references/platform_specific.md) and [Environment Variables](references/environment_variables.md).

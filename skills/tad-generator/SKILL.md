@@ -4,7 +4,7 @@ description: "Generate a Technical Architecture Document (TAD) from a PRD. Use w
 license: MIT
 effort: max
 metadata:
-  version: 1.4.0
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -20,9 +20,9 @@ This skill uses parallel research agents with upfront content extraction. **Patt
 
 | Agent | Role | Parallelization |
 |-------|------|-----------------|
-| **prd-reader** | Read PRD + supporting docs, return structured extraction | Sequential (only once) |
-| **tech-researcher** | Handle one research round (spawned 5x in parallel) | Parallel (5 instances) |
-| **tad-writer** | Generate complete tad.md from all inputs | Sequential (after all research) |
+| **prd-reader** (`agents/prd-reader.md`) | Read PRD + supporting docs, return structured extraction | Sequential (only once) |
+| **tech-researcher** (`agents/tech-researcher.md`) | Handle one research round (spawned 5x in parallel) | Parallel (5 instances) |
+| **tad-writer** (`agents/tad-writer.md`) | Generate complete tad.md from all inputs | Sequential (after all research) |
 
 ### Research Rounds (5 Parallel)
 
@@ -110,7 +110,7 @@ Ask user (if not clear):
 
 ### Phase 4: Research & Validation
 
-Conduct the [5 research rounds](#research-rounds-5-parallel) defined under Subagent Architecture above.
+Spawn one **tech-researcher** subagent per round, using `agents/tech-researcher.md` as its prompt, for the [5 research rounds](#research-rounds-5-parallel) defined under Subagent Architecture above. Run them in parallel; do not reason the rounds inline in main context, which is what the subagent split exists to prevent.
 
 ### Phase 5: Generate TAD
 
@@ -133,7 +133,7 @@ See [references/tad-template.md](references/tad-template.md) for full template s
 ### Phase 6: README Maintenance (ideas repo)
 
 After writing `tad.md`, if the project folder is inside an `ideas` repo, update the repo README ideas table:
-- Preferred: `cd` to repo root and run `python3 scripts/update_readme_ideas_index.py` (if it exists)
+- Preferred: `cd` to the **ideas repo** root and run `python3 scripts/update_readme_ideas_index.py` if that repo ships it — the script belongs to the user's ideas repo, not to this skill
 - Fallback: update `README.md` manually (ensure TAD status becomes ✅ for that idea)
 
 ### Phase 7: Commit and push
@@ -149,7 +149,7 @@ git push origin <branch>
 
 ### Phase 8: Output
 
-1. Write `tad.md` to project folder
+1. Confirm `tad.md` is written (Phase 5) and committed (Phase 7) — do not re-write it here
 2. Summarize architecture decisions
 3. Highlight modular design benefits
 4. List cost estimates by phase
@@ -248,7 +248,7 @@ graph TD
 Triggered by the mode check above when `tad.md` already exists.
 
 1. Create a timestamped backup (`tad.md.bak.<timestamp>`).
-2. Ask which area changed — Stack | Infrastructure | Security | Data | Scaling — and map the answer to its matching numbered section in [Phase 5](#phase-5-generate-tad).
+2. Ask which area changed and map the answer to its numbered [Phase 5](#phase-5-generate-tad) section: Stack → 3. Technology Stack, Data → 5. Data Architecture, Infrastructure → 6. Infrastructure, Scaling → 6. Infrastructure (scaling is subsection 6.2, not a section of its own), Security → 7. Security.
 3. Apply changes to that section only, preserving the rest of the structure.
 4. Append a revision-history entry (date + summary) at the end of `tad.md`.
 

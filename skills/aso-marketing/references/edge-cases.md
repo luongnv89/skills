@@ -52,7 +52,7 @@ A run is successful when all are verifiable:
 
 ## Step Completion Reports
 
-After each major step, output:
+Emit exactly 5 reports per run — `M` is always 5, and the groupings below are the 5 steps:
 
 ```
 ◆ [Step Name] ([step N of M] — [context])
@@ -71,6 +71,7 @@ After each major step, output:
 - **Phase: Plan + Compliance (Phases 2-3)** — `Plan completeness`, `Policy compliance`, `Prohibited keyword scan`, `Trademark check`
 - **Phase: Execute (Phase 4)** — `Metadata fields updated`, `Character limits respected`, `Keywords correctly formatted`, `Implementation quality`
 - **Phase: Review + Verify (Phases 5-6)** — `No policy violations re-introduced`, `Best practices met`, `Cross-field keyword combinations valid`, `Localization market-aware`
+- **Phase: Summarize (Phase 7)** — `Summary report produced`, `Metadata comparison table present`, `Compliance status stated`, `Files modified listed`
 
 ## Cross-Skill Integration
 

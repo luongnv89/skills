@@ -4,7 +4,7 @@ description: "Run coding tasks via opencode using free cloud models. Use when as
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.2
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -149,19 +149,23 @@ If the user asks to change anything (different model, edit prompt, add/remove co
 Run the coding task with the confirmed model. **Always run in the background with output redirected to a log file** — this is required for the low-token monitoring strategy in Phase 5.
 
 ```bash
-LOG=/tmp/opencode-$$.log
-opencode run -m "[confirmed-model-id]" "[confirmed prompt]" > "$LOG" 2>&1 &
-OPENCODE_PID=$!
-echo "opencode started: pid=$OPENCODE_PID log=$LOG"
+RUN=/tmp/opencode-run-$(date +%s)
+opencode run -m "[confirmed-model-id]" "[confirmed prompt]" > "$RUN.log" 2>&1 &
+echo $! > "$RUN.pid"
+echo "opencode started: run=$RUN pid=$(cat "$RUN.pid")"
 ```
+
+**Record the `run=` value this prints and substitute it literally in Phases 5 and 6.** Every Bash call is a new shell: `$$` resolves to a different number each time and `OPENCODE_PID` is unset, so a re-derived path would poll a log that does not exist and `kill` nothing while still reporting success. The `.pid` file is what carries the process id between calls.
 
 ### Handling multi-line or complex prompts
 
 For tasks that reference files or need detailed context, use the `--file` flag:
 
 ```bash
-opencode run -m "[confirmed-model-id]" --file path/to/relevant-file.py "[task description]" > "$LOG" 2>&1 &
-OPENCODE_PID=$!
+RUN=/tmp/opencode-run-$(date +%s)
+opencode run -m "[confirmed-model-id]" --file path/to/relevant-file.py "[task description]" > "$RUN.log" 2>&1 &
+echo $! > "$RUN.pid"
+echo "opencode started: run=$RUN pid=$(cat "$RUN.pid")"
 ```
 
 Foreground execution is **discouraged** — streaming the full opencode output back into your context wastes tokens. The Phase 5 monitor reads only the log tail.
@@ -175,12 +179,13 @@ opencode output is verbose. Streaming the full log back into your context is exp
 Run **one** tiny status command per check. It returns at most ~200 bytes — enough to know status, elapsed time, and the latest activity line — without ingesting the whole log.
 
 ```bash
-LOG=/tmp/opencode-$$.log   # the same log file from Phase 4
+RUN=/tmp/opencode-run-1234567890   # paste the run= value Phase 4 printed
 status() {
-  if kill -0 $OPENCODE_PID 2>/dev/null; then s=running; else s=done; fi
-  bytes=$(wc -c < "$LOG" 2>/dev/null || echo 0)
-  last=$(tail -n 1 "$LOG" 2>/dev/null | tr -d '\r' | cut -c1-160)
-  printf 'status=%s pid=%s bytes=%s last=%q\n' "$s" "$OPENCODE_PID" "$bytes" "$last"
+  pid=$(cat "$RUN.pid" 2>/dev/null)
+  if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then s=running; else s=done; fi
+  bytes=$(wc -c < "$RUN.log" 2>/dev/null || echo 0)
+  last=$(tail -n 1 "$RUN.log" 2>/dev/null | tr -d '\r' | cut -c1-160)
+  printf 'status=%s pid=%s bytes=%s last=%q\n' "$s" "${pid:-none}" "$bytes" "$last"
 }
 status
 ```
@@ -226,15 +231,17 @@ Every execution — success, failure, error, or timeout — must end with cleanu
 
 ### Step 1: Kill the opencode process tree
 
-If you launched opencode in the background with a tracked PID:
+If you launched opencode in the background, read its pid back from the run's pidfile — `$OPENCODE_PID` from Phase 4 is gone by now:
 
 ```bash
+RUN=/tmp/opencode-run-1234567890   # paste the run= value Phase 4 printed
+pid=$(cat "$RUN.pid" 2>/dev/null)
 # Kill the main process and its children
-kill $OPENCODE_PID 2>/dev/null
+[ -n "$pid" ] && kill "$pid" 2>/dev/null
 # Wait briefly for graceful shutdown
 sleep 2
 # Force kill if still running
-kill -9 $OPENCODE_PID 2>/dev/null
+[ -n "$pid" ] && kill -9 "$pid" 2>/dev/null
 ```
 
 ### Step 2: Find and kill orphaned opencode processes
@@ -258,7 +265,7 @@ Be careful to only kill `opencode run` processes, not the user's interactive TUI
 ### Step 3: Clean up temp files
 
 ```bash
-rm -f "$LOG" 2>/dev/null
+rm -f "$RUN.log" "$RUN.pid" 2>/dev/null
 ```
 
 ### Step 4: Confirm cleanup

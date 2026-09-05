@@ -12,6 +12,8 @@ Testing patterns for CLI tools across languages. Every CLI built with the cli-bu
 
 ## Exit Code Conventions
 
+This table is canonical for the cli-builder skill; SKILL.md defers to it.
+
 | Code | Meaning | When to use |
 |------|---------|-------------|
 | 0 | Success | Command completed normally |
