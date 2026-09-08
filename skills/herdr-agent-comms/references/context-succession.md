@@ -13,7 +13,7 @@ Self-check at these checkpoints only — not on every tool call.
 | Checkpoint | When |
 |---|---|
 | Before a spawn wave | Phase 2, before the first `herdr pane split` |
-| Before a broadcast | Phase 6, before `broadcast.sh` |
+| Before a broadcast | Phase 7, before `broadcast.sh` |
 | After a reply relay | Phase 5, once the delta has been relayed |
 
 Never gate mid-cycle. If a send has dispatched and its wait has not resolved, finish Phase 5 first, then gate.
@@ -50,10 +50,10 @@ Anti-thrash: a generation may not HANDOFF until it has completed at least one fu
 ## HANDOFF procedure
 
 1. **Record the brief** from the template below. Compact state only — never transcripts, full diffs, or pasted worker output.
-2. **Spawn the successor** with the canonical `spawn_sub` workflow in `herdr-recipes.md`: plan the rightmost split, split `--direction right --no-focus` in `project_dir`, parse the pane id, equalize as a hard gate. Name it `main-g<N>` for generation `N` (the original main is `g1`); on collision, suffix an epoch. Launch the **same agent CLI the outgoing main is running**, bare, unless the user named a different one — a successor on an unfamiliar CLI cannot honor the brief. If the grid already holds more than four panes, warn that columns are cramped and ask before adding the successor column.
-3. **Ready-gate it** with `wait_for_idle.py --ready`. On non-zero, abort the HANDOFF: stay main, report the orphan pane id, and ask before closing it. A failed HANDOFF never leaves the fleet without an orchestrator.
-4. **Send the brief** through the full Phase 4 cycle — baseline, fresh `HERDR_DONE_` marker, preflight, `herdr pane run`, delivery check. Multi-line payload: use the guarded multi-line recipe in `herdr-recipes.md`.
-5. **Wait for the ack** `HANDOFF ACCEPTED gen=<N> fleet=<k>` via `wait_for_idle.py`. No ack (timeout or blocked) means the HANDOFF failed — stay main and report.
+2. **Spawn the successor** with the canonical `spawn_sub` workflow in `herdr-recipes.md`: plan the rightmost split, split `--direction right --no-focus` in `project_dir`, parse the pane id, equalize as a hard gate. Name it `main-g<N>` for generation `N` (the original main is `g1`); on collision, suffix an epoch. Use the **same agent kind the outgoing main is running** unless the user named a different one — a successor on an unfamiliar CLI cannot honor the brief. If the grid already holds more than four panes, warn that columns are cramped and ask before adding the successor column.
+3. **Ready-gate it** with `herdr agent start main-g<N> --kind KIND --pane <id> --timeout 60000`, which returns only when the successor is interactive-ready. On non-zero, abort the HANDOFF: stay main, report the orphan pane id, and ask before closing it. A failed HANDOFF never leaves the fleet without an orchestrator.
+4. **Send the brief** through the full Phase 4 cycle — `preflight_send.py`, then `herdr agent prompt main-g<N> "<brief>" --wait --timeout 180000`. The prompt argument carries newlines directly; no marker or baseline is needed.
+5. **Wait for the ack** `HANDOFF ACCEPTED gen=<N> fleet=<k>`: the `--wait` on that prompt settles the successor, then `herdr agent read main-g<N> --source recent-unwrapped --lines 40` must contain it. No ack (timeout, stall, or blocked) means the HANDOFF failed — stay main and report.
 6. **Retire this pane.** After the ack, issue no further writes to any fleet pane: no sends, no splits, no closes. Remain available for read-only reporting so the human is not stranded.
 7. **Announce the successor** to the human by pane id and name, with `herdr agent focus main-g<N>` so they can steer it directly.
 
@@ -78,7 +78,8 @@ outstanding (in order): {bullets}
 constraints: {confirmations granted or withheld · destructive scope · layout limits}
 
 Rules:
-1. Mint fresh baselines and completion markers. Never inherit mine.
+1. Preflight and prompt with your own `herdr agent prompt --wait` cycles.
+   Never inherit my in-flight waits.
 2. Never write to {old_pane}. Never close panes, tabs, or the server without
    explicit user confirmation.
 3. Re-verify every worker's status before your first send.

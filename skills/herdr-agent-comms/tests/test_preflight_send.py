@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Behavioral tests for preflight_send.py against a fake `herdr` CLI.
 
-The single-target twin of broadcast.sh Phase 1b (round 10, finding #2). Verifies
-the fail-closed enum validation: only idle/done/unknown are sendable; working,
-blocked, unverifiable-lookup, and OFF-ENUM values each get a distinct non-zero
-exit so a caller can never type a task into a working/blocked/unverifiable pane.
+preflight_send.py guards the one thing the server does not: `herdr agent prompt`
+refuses a `blocked` target itself, but happily accepts a `working` one, and its
+wait tracks lifecycle state rather than one turn. Each rejection reason gets a
+distinct exit code so a caller can branch on it.
 
 Run directly (stdlib unittest only):
     python3 -m unittest discover -s skills/herdr-agent-comms/tests -p 'test_*.py'
@@ -43,75 +43,83 @@ class FakeHerdrHarness:
         with open(self.state_path, encoding="utf-8") as f:
             return json.load(f)
 
-    def set_pane(self, pane_id, status, text="", name=None,
-                 fail_get=False, malformed_get=False):
+    def set_pane(self, pane_id, status, name=None, no_agent=False):
         state = self.read_state()
         state["panes"][pane_id] = {
-            "agent_status": status, "text": text, "name": name,
-            "fail_get": fail_get, "malformed_get": malformed_get,
+            "agent_status": status,
+            "text": "",
+            "name": name,
+            "no_agent": no_agent,
         }
         self.write_state(state)
 
-    def run_preflight(self, pane_id, timeout=8):
-        cmd = [sys.executable, str(PREFLIGHT), pane_id]
-        return subprocess.run(cmd, env=self.env, text=True, capture_output=True, timeout=timeout)
+    def run_preflight(self, target, timeout=8):
+        return subprocess.run(
+            [sys.executable, str(PREFLIGHT), target],
+            env=self.env,
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+        )
 
 
 class PreflightSendTests(unittest.TestCase):
     def setUp(self):
         self.h = FakeHerdrHarness()
 
-    def test_idle_is_sendable(self):
-        self.h.set_pane("p1", "idle")
-        cp = self.h.run_preflight("p1")
-        self.assertEqual(cp.returncode, 0, msg=f"stderr={cp.stderr!r}")
-        self.assertIn("idle", cp.stdout)
+    def test_sendable_statuses_exit_zero(self):
+        for status in ("idle", "done", "unknown"):
+            with self.subTest(status=status):
+                self.h.set_pane("w1:p1", status, name="reviewer")
+                res = self.h.run_preflight("reviewer")
+                self.assertEqual(res.returncode, 0, res.stderr)
+                self.assertEqual(res.stdout.strip(), status)
 
-    def test_done_is_sendable(self):
-        self.h.set_pane("p1", "done")
-        self.assertEqual(self.h.run_preflight("p1").returncode, 0)
+    def test_working_is_refused_with_code_2(self):
+        """The server does NOT refuse this; the skill must."""
+        self.h.set_pane("w1:p1", "working", name="reviewer")
+        res = self.h.run_preflight("reviewer")
+        self.assertEqual(res.returncode, 2)
+        self.assertIn("working", res.stderr)
+        self.assertEqual(res.stdout.strip(), "")
 
-    def test_unknown_is_sendable(self):
-        """A validly-absent status (non-integrated CLI) is still sendable."""
-        self.h.set_pane("p1", "unknown")
-        self.assertEqual(self.h.run_preflight("p1").returncode, 0)
+    def test_blocked_is_refused_with_code_3(self):
+        self.h.set_pane("w1:p1", "blocked", name="reviewer")
+        res = self.h.run_preflight("reviewer")
+        self.assertEqual(res.returncode, 3)
+        self.assertIn("blocked", res.stderr)
 
-    def test_working_returns_2(self):
-        self.h.set_pane("p1", "working")
-        cp = self.h.run_preflight("p1")
-        self.assertEqual(cp.returncode, 2, msg=f"stderr={cp.stderr!r}")
-        self.assertIn("working", cp.stderr.lower())
+    def test_off_enum_status_is_unverifiable_not_safe(self):
+        self.h.set_pane("w1:p1", 123, name="reviewer")
+        res = self.h.run_preflight("reviewer")
+        self.assertEqual(res.returncode, 4)
+        self.assertEqual(res.stdout.strip(), "")
 
-    def test_blocked_returns_3(self):
-        """The reported repro: a blocked trust dialog must NOT be sendable."""
-        self.h.set_pane("p1", "blocked", "Trust this workspace? [y/n]\n")
-        cp = self.h.run_preflight("p1")
-        self.assertEqual(cp.returncode, 3, msg=f"stderr={cp.stderr!r}")
-        self.assertIn("blocked", cp.stderr.lower())
+    def test_pane_without_detected_agent_reports_code_5(self):
+        """agent_not_found is a routing signal, not a generic failure."""
+        self.h.set_pane("w1:p9", "unknown", no_agent=True)
+        res = self.h.run_preflight("w1:p9")
+        self.assertEqual(res.returncode, 5)
+        self.assertIn("no detected agent", res.stderr)
 
-    def test_failed_lookup_returns_4_unverifiable(self):
-        self.h.set_pane("p1", "idle", fail_get=True)
-        cp = self.h.run_preflight("p1")
-        self.assertEqual(cp.returncode, 4, msg=f"stderr={cp.stderr!r}")
+    def test_unknown_target_reports_code_5(self):
+        res = self.h.run_preflight("ghost")
+        self.assertEqual(res.returncode, 5)
 
-    def test_malformed_lookup_returns_4_unverifiable(self):
-        self.h.set_pane("p1", "idle", malformed_get=True)
-        self.assertEqual(self.h.run_preflight("p1").returncode, 4)
+    def test_resolves_by_pane_id_too(self):
+        self.h.set_pane("w1:p1", "idle", name="reviewer")
+        res = self.h.run_preflight("w1:p1")
+        self.assertEqual(res.returncode, 0, res.stderr)
 
-    def test_numeric_offenum_status_returns_4_unverifiable(self):
-        """finding #1 hole: a numeric 123 status must be unverifiable, not
-        treated as a truthy sendable status (rc 4, not rc 0)."""
-        self.h.set_pane("p1", 123)
-        cp = self.h.run_preflight("p1")
-        self.assertEqual(cp.returncode, 4, msg=f"stderr={cp.stderr!r}")
-
-    def test_garbage_string_status_returns_4_unverifiable(self):
-        self.h.set_pane("p1", "totally-bogus")
-        self.assertEqual(self.h.run_preflight("p1").returncode, 4)
-
-    def test_empty_string_status_returns_4_unverifiable(self):
-        self.h.set_pane("p1", "")
-        self.assertEqual(self.h.run_preflight("p1").returncode, 4)
+    def test_usage_error_without_target(self):
+        res = subprocess.run(
+            [sys.executable, str(PREFLIGHT)],
+            env=self.h.env,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("usage", res.stderr)
 
 
 if __name__ == "__main__":

@@ -1,19 +1,19 @@
 ---
 name: herdr-agent-comms
-description: "Manage AI agent fleets in Herdr: split root + sub-agents into one tab as a tiled grid, message/wait/read via herdr CLI, steer any pane. Use for Herdr multi-agent fleets. Don't use for tmux, screen, or non-Herdr terminals."
+description: "Manage AI agent fleets in Herdr: tile root + sub-agents in one tab, start/prompt/wait/read via the herdr agent CLI, badge and monitor the fleet, steer any pane. Use for Herdr multi-agent fleets. Don't use for tmux, screen, or non-Herdr terminals."
 license: MIT
-compatibility: "Requires `herdr` on PATH and a running Herdr server (`herdr status`)."
+compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`). The agent surface (`agent start`, `agent prompt --wait`, `agent wait`) and `api snapshot` are load-bearing."
 effort: medium
 metadata:
-  version: 1.23.0
+  version: 2.0.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Herdr Agent Comms
 
-Build and control an AI-agent fleet in the root agent's Herdr tab. Keep the **root pane** as orchestrator; add each **sub-agent** as a right-hand split; equalize all columns; then send, wait, read, steer, or tear down through the `herdr` CLI.
+Build and control an AI-agent fleet in the root agent's Herdr tab. Keep the **root pane** as orchestrator; add each **sub-agent** as a right-hand split; equalize all columns; then start, prompt, wait, read, monitor, steer, or tear down through the `herdr` CLI.
 
-Use Herdr concepts, not tmux assumptions. Prefer status-aware helpers and relay reply deltas rather than whole panes to protect the context and token budget.
+Use Herdr concepts, not tmux assumptions. Let the server do the work: `herdr agent prompt --wait` submits and waits in one request, `herdr agent wait` is event-driven, and `herdr api snapshot` reports the whole fleet in one call. Relay reply deltas rather than whole panes to protect the context and token budget.
 
 ## Choose the Workflow
 
@@ -22,102 +22,130 @@ Use Herdr concepts, not tmux assumptions. Prefer status-aware helpers and relay 
 | Spawn sub-agents beside root | Phases 1–2, then 4–5 if assigning work |
 | Message an existing agent | Phases 3–5 |
 | Read without sending | Phase 3, then Phase 5 read only |
-| Broadcast to a fleet | Phases 3 and 6 |
-| Focus/steer a pane | Phase 3, then Phase 6 |
-| Close workers | Phase 6 teardown |
-| Main agent's own context is filling up | Phase 7 HANDOFF |
+| Check what the fleet is doing | Phase 6 |
+| Broadcast to a fleet | Phases 3 and 7 |
+| Focus/steer a pane | Phase 3, then Phase 7 |
+| Close workers | Phase 7 teardown |
+| Main agent's own context is filling up | Phase 8 HANDOFF |
 
 Read only the reference needed by that branch:
 
-- See `references/herdr-recipes.md` for guarded grid spawning, equalization semantics, multi-line sends, focus, and troubleshooting.
-- See `references/delivery-and-waiting.md` for preflight, completion markers, delivery verification, wait outcomes, and concurrent waits.
+- See `references/herdr-recipes.md` for guarded grid spawning, equalization semantics, multi-line prompts, focus, and troubleshooting.
+- See `references/delivery-and-waiting.md` for the one-call prompt contract, error codes, wait semantics, reading replies, and the no-agent fallback.
+- See `references/fleet-monitoring.md` for snapshot status, sidebar badges, notifications, and the run report.
 - See `references/context-succession.md` for the main agent's context gate, HANDOFF procedure, and handoff brief template.
 
 ## Check Prerequisites
 
 1. Run `command -v herdr` and `herdr status`. If the server is unavailable, ask the user to start Herdr from a real terminal; never run bare `herdr` from a non-TTY shell.
-2. Resolve the root pane, tab, and workspace from `HERDR_PANE_ID`, `HERDR_TAB_ID`, and `HERDR_WORKSPACE_ID`, or from `herdr pane current --current` and list/get commands.
-3. Run agents directly in Herdr panes. Do not nest tmux when agent detection is required.
-4. Treat the installed CLI as authoritative. Check uncertain commands with `herdr <group>` rather than inventing flags.
+2. Confirm `HERDR_ENV=1`. Outside a Herdr pane, do not inspect or control the focused session.
+3. Resolve the root pane, tab, and workspace from `HERDR_PANE_ID`, `HERDR_TAB_ID`, and `HERDR_WORKSPACE_ID`, or from `herdr pane current --current` and list/get commands.
+4. Run agents directly in Herdr panes. Do not nest tmux when agent detection is required.
+5. Treat the installed CLI as authoritative. Check uncertain commands with `herdr <group>` rather than inventing flags. Client and server versions can differ after an update; `herdr status` says whether the server supports what you are about to use.
 
 ## Follow Non-Negotiable Rules
 
-1. **Keep root as a role.** Never replace or close the root pane during fleet work. The one exception is a Phase 7 HANDOFF, where the orchestrator role migrates to a ready successor pane; even then the outgoing pane is retired to read-only, never closed without Rule 8 confirmation.
-2. **Run exactly one orchestrator.** Only the current main agent writes to fleet panes. After a HANDOFF ack, the outgoing agent issues no further sends, splits, or closes — two orchestrators writing the same panes corrupt each other's baselines.
-3. **Parse IDs.** Read opaque workspace/tab/pane IDs from JSON; never infer them from display order.
+1. **Keep root as a role.** Never replace or close the root pane during fleet work. The one exception is a Phase 8 HANDOFF, where the orchestrator role migrates to a ready successor pane; even then the outgoing pane is retired to read-only, never closed without Rule 8 confirmation.
+2. **Run exactly one orchestrator.** Only the current main agent writes to fleet panes. After a HANDOFF ack, the outgoing agent issues no further prompts, splits, or closes.
+3. **Parse IDs.** Read opaque workspace/tab/pane IDs from JSON; never infer them from display order. A pane moved to another workspace gets a new ID.
 4. **Use one equal-width row.** Split the current rightmost pane `right`, keep every worker in the root tab, then run the equalizer. Create separate tabs only when the user explicitly requests isolation.
-5. **Fail closed before writes.** Reject missing, ambiguous, `working`, `blocked`, malformed, or off-enum targets. Only a verified safe status may receive input.
-6. **Wait before follow-ups.** Never send while an agent is working. Every follow-up gets a fresh baseline and completion marker.
-7. **Surface blockers.** A trust, auth, or permission prompt needs a human; do not type a task or recovery Enter into it.
+5. **Fail closed before writes.** Herdr refuses a `blocked` target itself, but not a `working` one, and its wait tracks lifecycle state rather than one turn. Reject missing, ambiguous, `working`, or unverifiable targets yourself before dispatching.
+6. **Wait before follow-ups.** Never prompt while an agent is working. Every follow-up is its own `agent prompt --wait` cycle.
+7. **Surface blockers.** A trust, auth, or permission prompt needs a human. Focus the pane, notify, and never answer the dialog for them.
 8. **Confirm destruction.** Closing panes, tabs, workspaces, or the server can lose work. Obtain explicit approval and preserve the orchestrator pane unless the user says otherwise.
-9. **Gate your own context.** Self-check at every Phase 7 gate point; at or above the threshold, HANDOFF instead of continuing to fill this window.
+9. **Gate your own context.** Self-check at every Phase 8 gate point; at or above the threshold, HANDOFF instead of continuing to fill this window.
 
 ## Phase 1 — Resolve Root Context
 
 ```bash
 command -v herdr >/dev/null || { echo "Error: herdr is not installed" >&2; exit 1; }
+test "${HERDR_ENV:-}" = 1 || { echo "Error: not running inside a Herdr pane" >&2; exit 1; }
 herdr status || { echo "Error: Herdr server is unavailable" >&2; exit 1; }
 root_pane="${HERDR_PANE_ID:?}"; root_tab="${HERDR_TAB_ID:?}"; ws="${HERDR_WORKSPACE_ID:?}"
 ```
 
-Outside Herdr, list workspaces and agents, then choose the user-named or focused root. Resolve `project_dir` from the root pane's cwd, falling back to the current directory.
+Resolve `project_dir` from the root pane's cwd, falling back to the current directory. Resolve the skill's `scripts/` directory by probing repo-local installs before global ones.
 
 **Done when:** server status passes and concrete `root_pane`, `root_tab`, `ws`, and `project_dir` values are recorded.
 
 ## Phase 2 — Spawn and Ready the Fleet
 
-Before spawning, define each worker's unique name, CLI/model settings, task, and expected deliverable. Launch the interactive CLI first; submit the task only after readiness passes.
+Before spawning, define each worker's unique name, agent kind, task, and expected deliverable. Placement and launch are two steps: `herdr agent start` never creates or moves layout, and requires a pane already sitting at its shell prompt.
 
-Resolve the scripts directory by checking repo-local installs before global ones. Then use the canonical `spawn_sub` workflow in `references/herdr-recipes.md`:
+Use the canonical `spawn_sub` workflow in `references/herdr-recipes.md`:
 
 1. Run `next_grid_split.py --root-pane "$root_pane"` to plan the rightmost split.
-2. Split with `--direction right --no-focus` in `project_dir`.
+2. Split with `--direction right --no-focus` in `project_dir`, passing `--env "HERDR_ROLE=<name>"` so the worker can read its own role instead of being told it in every prompt.
 3. Parse the new pane ID from JSON.
 4. Run `next_grid_split.py --equalize --root-pane "$root_pane"`; abort on any error or non-convergence.
-5. Rename the pane and agent, then launch the CLI with `herdr pane run`.
-6. After all workers launch, run concurrent `wait_for_idle.py --ready` checks. Assign no work unless every worker returns 0.
+5. Rename the pane, then `herdr agent start <name> --kind KIND --pane <id> --timeout 60000`.
+6. Badge the worker with its job: `python3 scripts/badge.py <name> --title "<job>" --token role=<role>`.
 
-Use `pi` with only its verified flags (`--model`, `--thinking`), and launch `claude` or `opencode` bare — do not pass mode flags at startup; any mode switching happens after startup and is owned by the caller's own protocol. For any other agent CLI, launch it bare rather than inventing flags. Do not attach the long task to the initial launcher argv.
+`agent start` **is** the readiness gate: it returns only once Herdr detects the expected agent and considers it interactive-ready, and returns `agent_not_ready` immediately if the agent booted into a dialog. There is no separate readiness pass. Names must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Pass native agent flags only after `--`; never fold the task into argv.
 
-**Done when:** every worker has a unique name and pane ID in `root_tab`, the layout widths differ by at most one cell, root remains active, and all readiness checks pass.
+Confirm the fleet with `python3 scripts/fleet_status.py --tab "$root_tab" --fail-on-blocked` before assigning any work.
+
+**Done when:** every worker has a unique name and pane ID in `root_tab`, the layout widths differ by at most one cell, root remains active, and every `agent start` returned success.
 
 ## Phase 3 — Resolve One Exact Target
 
-Run `herdr agent get <name>` or `herdr pane get <pane-id>`. If a name is missing or ambiguous, list agents and ask; never silently retarget. Record both the name and pane ID and use that same pane ID for every later mutation.
+Run `herdr agent get <name>` or `herdr pane get <pane-id>`. If a name is missing or ambiguous, list agents and ask; never silently retarget. `agent_not_found` means the pane hosts no detected agent — start one, or take the pane-surface fallback in `references/delivery-and-waiting.md`. Record both the name and pane ID and use that same ID for every later mutation.
 
 **Done when:** one existing target resolves uniquely and its status is valid.
 
-## Phase 4 — Send Safely
+## Phase 4 — Prompt Safely
 
-Follow the canonical baseline → marker → preflight → send → delivery-check sequence in `references/delivery-and-waiting.md`:
+```bash
+python3 "$here/preflight_send.py" "$target" >/dev/null || exit $?
+herdr agent prompt "$target" "$task" --wait --timeout 180000
+```
 
-1. Capture `recent-unwrapped` output to a baseline file before sending.
-2. Create a fresh split `HERDR_DONE_` completion marker.
-3. Run `scripts/preflight_send.py` immediately before dispatch.
-4. Submit with `herdr pane run "$pane_id" "$task"`.
-5. Verify `working` status or transcript activity. Transcript activity may be prompt echo; only the joined marker proves completion.
+The preflight refuses `working` (2), `blocked` (3), unverifiable (4), and no-agent (5) targets. The prompt then submits text plus Enter as one ordered write honoring bracketed paste, refuses a blocked target server-side before writing anything, gates on observed activity, and waits for the first settled state — all in one request. That is why this skill no longer captures a transcript baseline or plants a completion marker: there is no gap between send and wait to race.
 
-For multi-line payloads or literal typing, use the guarded recipes in `references/herdr-recipes.md`. Re-run preflight immediately before any recovery Enter.
+Do not add `--until idle --until done`; those are the `--wait` defaults. Use `--until` only for a state-specific wait such as `--until blocked`.
 
-**Done when:** dispatch succeeded and status or transcript activity proves delivery; otherwise return a descriptive error.
+**Done when:** the prompt returned success, or a named error code was propagated.
 
-## Phase 5 — Wait, Read, and Verify
+## Phase 5 — Read and Verify
 
-Run `scripts/wait_for_idle.py` with the pre-send baseline and fresh completion marker. Handle its result: `0` completed, `1` error, `2` timeout, `3` blocked. Propagate non-zero results; do not report them as replies.
+Map the failure first. `agent_blocked` means nothing was sent and a human is needed. `agent_prompt_stalled` means it was submitted but no activity followed — inspect, never blindly resend. `timeout` means no settled state inside the budget. Propagate all three; do not report them as replies.
 
-Accept `idle` or `done` after observed work. Read a capped `recent-unwrapped` transcript and relay only the relevant delta. On timeout, inspect `pane get`, `pane read`, and `agent explain`; stop after the bounded retry budget.
+On success, read a capped transcript and relay only the relevant delta:
 
-**Done when:** the requested reply is captured and verified, or blocked/timeout evidence is reported without further writes.
+```bash
+herdr agent read "$target" --source recent-unwrapped --lines 80
+```
 
-## Phase 6 — Broadcast, Steer, or Tear Down
+Accept `idle` or `done` as settled; they differ only in whether the completion has been marked seen. If raising `--lines` reveals no more output, the agent is on the terminal's alternate screen — use the file fallback in `references/delivery-and-waiting.md` rather than a bigger line count.
 
-- **Broadcast:** run `scripts/broadcast.sh "<task>" <targets...>`. It resolves targets, preflights, baselines, dispatches safe panes first, waits concurrently, and fails if any target is skipped or unsuccessful.
-- **Steer:** focus with `herdr agent focus <name>`. For CLI follow-ups, repeat Phases 4–5 with a new baseline and marker.
-- **Tear down:** after explicit confirmation, close only worker panes created by this run. Close the root tab, workspace, or server only when explicitly requested.
+**Done when:** the requested reply is captured and verified, or blocked/stalled/timeout evidence is reported without further writes.
+
+## Phase 6 — Monitor and Report
+
+```bash
+python3 "$here/fleet_status.py" --tab "$root_tab"
+```
+
+One `herdr api snapshot` call renders every agent's status, badge and title, sorted by attention, at flat cost for any fleet size. Prefer it over per-agent `herdr agent get` polling, which costs N round trips and can report a fleet state that never existed at one instant.
+
+Keep the human oriented without making them read panes:
+
+- **Badge** each worker as its job changes: `python3 scripts/badge.py <name> --token phase=<phase>`. Display-only, so it never perturbs waits or rollups.
+- **Notify** only for events that need them: `herdr notification show "Agent blocked" --body "<name> needs input" --sound request`, and once at run completion with `--sound done`.
+
+See `references/fleet-monitoring.md` for field caps, token semantics, and workspace-level rollups.
+
+**Done when:** the current fleet state came from a snapshot call, not from memory of what was dispatched.
+
+## Phase 7 — Broadcast, Steer, or Tear Down
+
+- **Broadcast:** run `scripts/broadcast.sh "<task>" <targets...>`. It resolves all targets from one `agent list`, dedupes, refuses unsafe ones, dispatches `agent prompt --wait` concurrently, and maps every error code to a reason. `HAC_BADGE=1` badges each row with its phase.
+- **Steer:** focus with `herdr agent focus <name>`, which also marks that agent's completion seen. For follow-ups, repeat Phases 4–5.
+- **Tear down:** after explicit confirmation, close only worker panes created by this run. Close the root tab, workspace, or server only when explicitly requested. Never run `herdr server stop` from an active session unless the user intends to stop every pane process.
 
 **Done when:** every requested target has a recorded outcome and destructive actions match the user's confirmed scope.
 
-## Phase 7 — Hand Off the Orchestrator Role
+## Phase 8 — Hand Off the Orchestrator Role
 
 Long fleet runs outlive one context window. Self-check your own usage at three gate points — before a spawn wave, before a broadcast, and after each relayed reply — never mid-cycle between a dispatch and its wait.
 
@@ -127,7 +155,7 @@ Long fleet runs outlive one context window. Self-check your own usage at three g
 | `P < threshold` | Continue as main |
 | UNKNOWN or unavailable | Count relayed reads and spawn waves; HANDOFF at 20 reads or 4 spawn waves |
 
-HANDOFF spawns a successor with the same Phase 2 machinery — `main-g<N>` in the root tab, equalized, readiness-gated — then delivers a compact handoff brief through the Phase 4 cycle and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that pane is the orchestrator; this pane goes read-only and announces the new one with `herdr agent focus main-g<N>`. A successor that fails readiness or never acks means the HANDOFF failed: stay main, report the orphan pane, and ask before closing it.
+HANDOFF spawns a successor with the same Phase 2 machinery — `main-g<N>` in the root tab, equalized, started through `agent start` — then delivers a compact handoff brief through the Phase 4 cycle and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that pane is the orchestrator; this pane goes read-only and announces the new one with `herdr agent focus main-g<N>`. A successor that fails to start or never acks means the HANDOFF failed: stay main, report the orphan pane, and ask before closing it.
 
 Read `references/context-succession.md` for the gate-point table, UNKNOWN fallback logging, full procedure, and the brief template. Never paste transcripts or diffs into a brief.
 
@@ -140,7 +168,7 @@ Expected output for a successful fleet operation:
 ```text
 Fleet: PASS
 Root kept: w26:p1
-Workers: reviewer=done, tests=idle
+Workers: reviewer=settled, tests=settled
 Layout: 3 equal-width columns
 Replies: 2 captured, 0 blocked, 0 timed out
 ```
@@ -150,20 +178,22 @@ Acceptance criteria:
 - `herdr status` succeeds and every target resolves uniquely.
 - Root remains in its original pane and all default workers share its tab.
 - Spawned columns are equal within one terminal cell.
-- Every send passes preflight and every completed reply has delivery evidence.
-- Every agent ends as completed, blocked, timed out, or failed—none disappear from the report.
+- Every prompt passed preflight and returned either success or a named error code.
+- Every agent ends as settled, blocked, stalled, timed out, failed, or skipped — none disappear from the report.
+- The closing status came from `fleet_status.py`, not from recollection.
 - Errors and destructive confirmations are surfaced explicitly.
 - The context gate is evaluated at each gate point, and any HANDOFF ends with exactly one acked orchestrator.
 
 ## Handle Edge Cases
 
-- `blocked`: show the dialog and request human action.
-- `unknown`: use the wait helper's stability fallback or install the integration.
+- `blocked`: focus the pane, notify, and request human action.
+- `agent_not_found`: no detected agent in that pane — `agent start` it, or drop to the pane-surface fallback.
+- `unknown` status: `herdr integration status`, then `herdr agent explain <target> --json` to see which rule matched.
 - Name collision: suffix the requested name; never reuse an existing agent accidentally.
 - More than four panes: warn that columns become cramped; change layout only with user approval.
 - Unequal grid: rerun the equalizer and abort worker launch if it still fails.
 - Wrong workspace or accidental tab: stop, preserve work, and ask before moving or closing panes.
-- Successor never acks: HANDOFF failed—stay main, keep the fleet, and report the orphan pane before asking to close it.
+- Successor never acks: HANDOFF failed — stay main, keep the fleet, and report the orphan pane before asking to close it.
 
 ## Emit the Step Completion Report
 
@@ -174,8 +204,9 @@ Acceptance criteria:
   Root resolved:       √ pass (pane · tab · workspace)
   Targets:             √ pass (N/N unique)
   Layout/readiness:    √ pass (if spawning; otherwise — n/a)
-  Delivery:            √ pass (if sending; otherwise — n/a)
-  Replies:             √ pass (done|idle · blocked/timeouts reported)
+  Delivery:            √ pass (if prompting; otherwise — n/a)
+  Replies:             √ pass (settled · blocked/stalled/timeouts reported)
+  Fleet snapshot:      √ pass (N agents · statuses)
   Context gate:        √ pass (P% or UNKNOWN · continue | HANDOFF → main-gN)
   Destructive action:  — none (or confirmed scope)
   Result:              PASS | FAIL | PARTIAL

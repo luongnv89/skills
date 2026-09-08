@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
-"""Wait until a Herdr agent pane finishes work, then print what's new.
+"""Wait until a Herdr PANE finishes work, then print what's new. FALLBACK ONLY.
 
-Primary path: poll `herdr pane get` / status waits for working → idle|done|blocked.
-Fallback: poll `herdr pane read` until the transcript stops changing (unknown agents).
+For any pane hosting a detected agent, use the agent surface instead:
+`herdr agent prompt <target> "<task>" --wait --timeout MS` submits and waits in
+one server-side request, and `herdr agent wait <target>` is event-driven. Both
+beat this script, which polls and can call a slow-thinking agent settled.
+
+This exists for the one case the agent surface cannot address: a pane whose
+process Herdr does not recognize. `herdr agent get` returns `agent_not_found`
+for it, even though `herdr pane get` reports its `agent_status` as `unknown`.
+`preflight_send.py` exits 5 to route you here.
+
+Primary path: poll `herdr pane get` for working → idle|done|blocked.
+Fallback: poll `herdr pane read` until the transcript stops changing.
 
 By default this is a **post-send completion wait**: it will not treat a pre-existing
 idle/done pane as success until it has seen `working` (or a transcript change).
@@ -203,22 +213,30 @@ def pane_read(pane_id: str, lines: int) -> str | None:
     return extract_pane_text(cp.stdout)
 
 
-def wait_status(pane_id: str, status: str, timeout_ms: int) -> bool:
-    if timeout_ms <= 0:
-        return False
-    cp = run(
-        [
-            "herdr",
-            "wait",
-            "agent-status",
-            pane_id,
-            "--status",
-            status,
-            "--timeout",
-            str(timeout_ms),
-        ]
-    )
-    return cp.returncode == 0
+STATUS_POLL_S = 0.25
+
+
+def settle_sleep(deadline: float, cap_s: float = STATUS_POLL_S) -> None:
+    """Bounded pause between status re-reads.
+
+    herdr 0.9 exposes no pane-surface status wait: `herdr wait agent-status`
+    does not exist (`unknown command: wait`), and `herdr pane wait-output`
+    matches transcript text rather than lifecycle state. The status loop
+    therefore polls `herdr pane get`, and this pause is what keeps that poll
+    from spinning. The cap is load-bearing in the other direction too: control
+    MUST return to the caller before the deadline.
+
+    0.25s is chosen against both failure modes. It bounds detection latency
+    well inside the short timeouts callers actually pass (a 1s cap can miss a
+    transition that lands 1.2s into a 2s wait), while pacing the status loop
+    at one tick per 0.25s instead of running it flat out. That is ~4 herdr
+    calls per second on the working path and ~12 on the pre-task-idle path,
+    which issues three calls per tick, against the ~30 the spin produced.
+    """
+    remaining = deadline - time.time()
+    if remaining <= 0:
+        return
+    time.sleep(min(cap_s, remaining))
 
 
 def print_delta(baseline: str, final: str, full: bool) -> None:
@@ -329,19 +347,16 @@ def main() -> int:
             if st == "working":
                 saw_work = True
                 saw_working = True
-                # Single bounded wait, then loop back so the top-of-loop
+                # Single bounded pause, then loop back so the top-of-loop
                 # re-read + the `st in ("idle", "done")` branch handle whichever
-                # terminal state we reach. `wait done` returns the instant the
-                # pane goes `done`, so a working -> done settle is caught fast;
-                # a working -> idle settle is caught by the re-read after the
-                # slice expires (idle hits the same terminal branch). The cap
-                # (min 1s) is load-bearing: control MUST return to the re-read
-                # before the deadline. The old code did a SECOND wait — for
-                # `idle`, over the whole remaining deadline — so a pane that
-                # settled on `done` (never `idle`) blocked there until timeout
-                # and returned code 2 even though it had finished.
-                slice_ms = max(1, min(1_000, int((deadline - time.time()) * 1000)))
-                wait_status(pane_id, "done", slice_ms)
+                # terminal state we reach — `done` and `idle` both land in that
+                # one branch, so neither settle can strand us here. The cap is
+                # load-bearing in both directions: it bounds detection latency,
+                # and it guarantees control returns to the re-read before the
+                # deadline. Do NOT reintroduce a blocking status
+                # wait here: `herdr wait agent-status` does not exist, and
+                # calling it returned instantly, turning this loop into a spin.
+                settle_sleep(deadline)
                 continue
 
             if st in ("idle", "done"):
@@ -378,12 +393,10 @@ def main() -> int:
                 elif saw_work:
                     # Legacy fallback when no marker was arranged before send.
                     break
-                # Pre-task idle: wait for working (or transcript change via status loop)
-                slice_ms = min(5_000, max(1, int((deadline - time.time()) * 1000)))
-                if wait_status(pane_id, "working", slice_ms):
-                    saw_work = True
-                    saw_working = True
-                    continue
+                # Pre-task idle: pause, then re-read. A working transition is
+                # picked up by the top-of-loop read on the next iteration,
+                # which sets saw_work/saw_working in the `working` branch.
+                settle_sleep(deadline)
                 # Also check blocked while waiting to start.
                 st = agent_status(pane_id)
                 if _unverifiable(st, args):

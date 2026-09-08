@@ -7,16 +7,19 @@
 
 # Herdr Agent Comms
 
-> Tile **root + sub-agents** into **one grid tab** as equal-width columns — root stays put, workers stay the same size as root, messaging via the `herdr` CLI with status-aware waits.
+> Tile **root + sub-agents** into **one grid tab** as equal-width columns — root stays put, workers stay the same size as root, messaging via the `herdr` agent CLI with server-side waits and one-call fleet status.
 
 ## Highlights
 
 - **Root + sub-agents grid** — every column, including root, is resized to equal width as sub-agents are added.
 - **Root never replaced by accident** — the orchestrator pane stays put; only worker panes are closed on teardown.
 - **Context handoff** — when the main agent's own window passes 50%, it spawns a successor orchestrator pane, hands over a compact fleet brief, and goes read-only so a long run never dies of a full context.
-- **Fleet spawn** — agent CLI + model + thinking + optional skills, then assign tasks in parallel.
-- **Message & steer** — `pane run` / `agent send`, wait on `working` → `done`/`idle`, read transcripts.
-- **Broadcast** — fan one instruction to many agents; concurrent waits.
+- **Fleet spawn** — `herdr agent start` places and readiness-gates each worker in one call; native agent flags after `--`.
+- **Message & steer** — `herdr agent prompt --wait` submits and waits in a single server-side request, so there is no send-then-wait race to close.
+- **Monitor** — one `herdr api snapshot` call renders the whole fleet, sorted so blocked agents come first.
+- **Badge** — each worker's pane carries its assigned job in the human's sidebar via `herdr pane report-metadata`.
+- **Notify** — `herdr notification show` reaches the human when an agent blocks or a run completes.
+- **Broadcast** — fan one instruction to many agents; concurrent waits, per-target outcomes.
 - **Safe teardown** — close sub-panes after confirmation; never surprise `server stop` or kill root.
 
 ## When to Use
@@ -27,6 +30,7 @@
 | "Ask the reviewer agent what it found" | Resolve target, send, wait on status, relay reply |
 | "Broadcast 'pull main' to all fleet agents" | Fan-out send + concurrent collect |
 | "Focus the tests pane so I can steer" | `herdr agent focus tests` |
+| "What are all my fleet agents doing?" | One snapshot call, every agent's status, blocked first |
 | "Keep this fleet running even when you run out of context" | Hand the orchestrator role to a fresh `main-g2` pane with a compact brief |
 
 ## How It Works
@@ -34,12 +38,14 @@
 ```mermaid
 graph TD
     A["Resolve root pane + tab + workspace"] --> B["next_grid_split · split rightmost + --equalize to equal width"]
-    B --> C["Rename sub-pane · launch CLI · wait idle"]
-    C --> D["Submit tasks · broadcast"]
-    D --> E["Wait agent-status done|idle"]
-    E --> F["Read recent-unwrapped · focus to steer"]
+    B --> C["herdr agent start · returns only when ready"]
+    C --> C2["badge.py · job + role in the sidebar"]
+    C2 --> D["agent prompt --wait · submit and wait in one call"]
+    D --> E["Map settled | blocked | stalled | timeout"]
+    E --> F["agent read recent-unwrapped · focus to steer"]
+    F --> G["fleet_status.py · one api snapshot for the report"]
     style A fill:#4CAF50,color:#fff
-    style F fill:#2196F3,color:#fff
+    style G fill:#2196F3,color:#fff
 ```
 
 ## Usage
@@ -72,9 +78,15 @@ Or describe the goal — "tile a reviewer agent with my pane", "launch a Herdr f
 /herdr-agent-comms focus the tests agent so I can type into it
 ```
 
+### 4. Check the fleet
+
+```
+/herdr-agent-comms what is every fleet agent doing right now?
+```
+
 ## Requirements
 
-- Herdr installed (`herdr --version`) and server running (`herdr status`)
+- Herdr **0.9.0 or later** (`herdr --version`) and server running (`herdr status`) — the agent surface and `api snapshot` are load-bearing
 - Prefer running the orchestrator **inside** Herdr (`HERDR_ENV=1`) so `$HERDR_PANE_ID` is the root
 - Agent CLIs on PATH (`pi`, `claude`, `codex`, …) as needed
 - Optional: `herdr integration install <agent>` for better status
