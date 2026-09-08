@@ -82,6 +82,28 @@ class FakeHerdrHarness:
         cmd.extend(extra_args)
         return subprocess.run(cmd, env=self.env, text=True, capture_output=True, timeout=timeout + 10)
 
+    def count_herdr_calls(self):
+        """Put a logging `herdr` ahead of the fake on PATH, so a test can
+        assert how many CLI round trips the waiter actually made."""
+        shim_dir = os.path.join(self.tmpdir, "counting_bin")
+        os.makedirs(shim_dir, exist_ok=True)
+        self.call_log = os.path.join(self.tmpdir, "calls.log")
+        shim = os.path.join(shim_dir, "herdr")
+        with open(shim, "w", encoding="utf-8") as f:
+            f.write(
+                "#!/usr/bin/env bash\n"
+                f'echo "$*" >> {self.call_log}\n'
+                f'exec python3 "{HERE / "fake_herdr.py"}" "$@"\n'
+            )
+        os.chmod(shim, 0o755)
+        self.env["PATH"] = f"{shim_dir}{os.pathsep}{self.env['PATH']}"
+
+    def calls_made(self):
+        if not os.path.exists(self.call_log):
+            return []
+        with open(self.call_log, encoding="utf-8") as f:
+            return [ln.strip() for ln in f if ln.strip()]
+
 
 class WaitForIdleMarkerSemanticsTests(unittest.TestCase):
     def setUp(self):
@@ -397,6 +419,47 @@ class WaitForIdleMarkerSemanticsTests(unittest.TestCase):
         cp = self.h.run_waiter("p1", "--baseline-file", baseline, "--timeout", "5")
         t.join()
         self.assertEqual(cp.returncode, 0, msg=f"stdout={cp.stdout!r} stderr={cp.stderr!r}")
+
+
+class WaitForIdleStatusLoopPacingTests(unittest.TestCase):
+    """Regression: the status loop must poll, never spin.
+
+    `wait_status()` used to shell out to `herdr wait agent-status`, a command
+    herdr 0.9 does not have (`unknown command: wait`). It returned instantly
+    every time, and because the loop had no pause of its own, a pane that
+    stayed `working` produced a hot spin — ~149 CLI round trips and 85% CPU
+    over a 5s timeout, against the very fallback path this script documents.
+    """
+
+    def setUp(self):
+        self.h = FakeHerdrHarness()
+        self.h.count_herdr_calls()
+
+    def test_working_pane_does_not_busy_spin(self):
+        self.h.set_pane("p1", "working", "still going...\n")
+        baseline = self.h.baseline_file("still going...\n")
+
+        cp = self.h.run_waiter("p1", "--baseline-file", baseline, "--timeout", "3")
+        self.assertEqual(cp.returncode, 2, msg=f"stdout={cp.stdout!r} stderr={cp.stderr!r}")
+
+        calls = self.h.calls_made()
+        # One `pane get` per STATUS_POLL_S (0.25s) slice over a 3s wait, plus
+        # the initial resolve/baseline reads: ~14 in practice. The pre-fix spin
+        # made ~90 here, so the bound separates the two by a wide margin rather
+        # than pinning an exact count that machine speed would make flaky.
+        self.assertLessEqual(
+            len(calls), 30,
+            msg=f"status loop is spinning: {len(calls)} herdr calls in 3s\n" + "\n".join(calls[:20]),
+        )
+
+    def test_no_call_to_the_nonexistent_wait_subcommand(self):
+        """herdr 0.9 answers `herdr wait ...` with `unknown command: wait`."""
+        self.h.set_pane("p1", "working", "still going...\n")
+        baseline = self.h.baseline_file("still going...\n")
+        self.h.run_waiter("p1", "--baseline-file", baseline, "--timeout", "2")
+
+        offenders = [c for c in self.h.calls_made() if c.startswith("wait ")]
+        self.assertEqual(offenders, [], msg=f"called a nonexistent herdr subcommand: {offenders}")
 
 
 if __name__ == "__main__":

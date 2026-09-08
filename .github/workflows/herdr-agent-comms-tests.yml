@@ -36,7 +36,10 @@ jobs:
       - name: Byte-compile Python scripts
         run: |
           python3 -m py_compile \
+            skills/herdr-agent-comms/scripts/badge.py \
+            skills/herdr-agent-comms/scripts/fleet_status.py \
             skills/herdr-agent-comms/scripts/next_grid_split.py \
+            skills/herdr-agent-comms/scripts/preflight_send.py \
             skills/herdr-agent-comms/scripts/wait_for_idle.py \
             skills/herdr-agent-comms/tests/fake_herdr.py
 
