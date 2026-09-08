@@ -45,11 +45,11 @@ class FakeHerdrHarness:
             return json.load(f)
 
     def set_pane(self, pane_id, status, text, name=None, fail_get=False,
-                 fail_get_after=None, null_pane_get=False):
+                 fail_get_after=None, null_pane_get=False, fail_read=False):
         state = self.read_state()
         state["panes"][pane_id] = {
             "agent_status": status, "text": text, "name": name, "fail_get": fail_get,
-            "null_pane_get": null_pane_get,
+            "null_pane_get": null_pane_get, "fail_read": fail_read,
         }
         if fail_get_after is not None:
             # pane get succeeds fail_get_after times, then fails every call after.
@@ -254,21 +254,15 @@ class WaitForIdleMarkerSemanticsTests(unittest.TestCase):
         (so we take the terminal branch), then the transcript read fails. A
         failed read there must be an error (rc 1), never a success. Uses a
         pane id shaped like a real herdr id (w..:..) so resolve_pane accepts it
-        and the failure happens at the transcript read, not at resolution."""
+        and the failure happens at the transcript read, not at resolution.
+
+        Deterministic: `fail_read` keeps `pane get` succeeding (so the waiter
+        reaches the terminal branch) while `pane read` fails, instead of
+        racing a 0.05s delete window against the 0.25s status poll."""
         baseline_text = "task running\n"
-        self.h.set_pane("w1:p1", "working", baseline_text)
+        self.h.set_pane("w1:p1", "done", baseline_text, fail_read=True)
         baseline = self.h.baseline_file(baseline_text)
-
-        def flip_then_kill():
-            time.sleep(0.3)
-            self.h.set_status("w1:p1", "done")  # enter terminal branch...
-            time.sleep(0.05)
-            self.h.delete_pane("w1:p1")          # ...then the read fails
-
-        t = threading.Thread(target=flip_then_kill)
-        t.start()
         cp = self.h.run_waiter("w1:p1", "--baseline-file", baseline, "--timeout", "3")
-        t.join()
         # rc 1 (read failed) is the correct outcome; the bug returned 0.
         self.assertEqual(cp.returncode, 1, msg=f"stdout={cp.stdout!r} stderr={cp.stderr!r}")
 
@@ -410,7 +404,11 @@ class WaitForIdleMarkerSemanticsTests(unittest.TestCase):
         def do_work():
             time.sleep(0.1)
             self.h.set_status("p1", "working")
-            time.sleep(0.2)
+            # Hold `working` past several 0.25s status polls: the old 0.2s
+            # window could fall between two polls (plus subprocess overhead),
+            # miss `saw_working`, fall to content-stability (6s for 3x2s
+            # quiet cycles) and time out the 5s wait with rc 2.
+            time.sleep(1.0)
             self.h.append_text("p1", "reply without marker\n")
             self.h.set_status("p1", "idle")
 

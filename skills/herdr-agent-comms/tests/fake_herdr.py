@@ -147,6 +147,9 @@ def cmd_pane_read(args):
     if pid is None:
         print("")
         return 1
+    if state["panes"][pid].get("fail_read"):
+        print(json.dumps({"error": "simulated pane read failure"}), file=sys.stderr)
+        return 1
     print(state["panes"][pid]["text"])
     return 0
 
