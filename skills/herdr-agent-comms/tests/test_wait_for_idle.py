@@ -414,7 +414,11 @@ class WaitForIdleMarkerSemanticsTests(unittest.TestCase):
 
         t = threading.Thread(target=do_work)
         t.start()
-        cp = self.h.run_waiter("p1", "--baseline-file", baseline, "--timeout", "5")
+        # Fast content-stability fallback (0.2s x 2): if a slow CI poller
+        # misses the `working` window, the status loop breaks to fallback on
+        # transcript change, and the default 2.0s x 3 fallback needs 6s+
+        # which cannot fit the 5s timeout. With 0.2s x 2 it settles in ~0.6s.
+        cp = self.h.run_waiter("p1", "--baseline-file", baseline, "--timeout", "5", "--interval", "0.2", "--quiet-cycles", "2")
         t.join()
         self.assertEqual(cp.returncode, 0, msg=f"stdout={cp.stdout!r} stderr={cp.stderr!r}")
 
