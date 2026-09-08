@@ -46,11 +46,11 @@ project_dir=$(pwd)
 # happens to be installed globally.
 here=""
 for cand in \
-  "skills/herdr-agent-comms/scripts" \
-  ".agents/skills/herdr-agent-comms/scripts" \
-  ".claude/skills/herdr-agent-comms/scripts" \
-  "$HOME/.claude/skills/herdr-agent-comms/scripts" \
-  "$HOME/.agents/skills/herdr-agent-comms/scripts"; do
+  "skills/herdr-agent/scripts" \
+  ".agents/skills/herdr-agent/scripts" \
+  ".claude/skills/herdr-agent/scripts" \
+  "$HOME/.claude/skills/herdr-agent/scripts" \
+  "$HOME/.agents/skills/herdr-agent/scripts"; do
   if [ -f "$cand/next_grid_split.py" ]; then here="$cand"; break; fi
 done
 [ -n "$here" ] || { echo "Error: next_grid_split.py not found in any known install location (repo, .agents/, .claude/, \$HOME). Fix the install or set \$here manually before retrying." >&2; exit 1; }

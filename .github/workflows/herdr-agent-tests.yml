@@ -1,0 +1,49 @@
+name: herdr-agent tests
+
+on:
+  pull_request:
+    paths:
+      - "skills/herdr-agent/scripts/**"
+      - "skills/herdr-agent/tests/**"
+      - ".github/workflows/herdr-agent-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skills/herdr-agent/scripts/**"
+      - "skills/herdr-agent/tests/**"
+      - ".github/workflows/herdr-agent-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Syntax-check shell scripts
+        run: |
+          bash -n skills/herdr-agent/scripts/broadcast.sh
+          bash -n skills/herdr-agent/tests/bin/herdr
+
+      - name: Byte-compile Python scripts
+        run: |
+          python3 -m py_compile \
+            skills/herdr-agent/scripts/badge.py \
+            skills/herdr-agent/scripts/fleet_status.py \
+            skills/herdr-agent/scripts/next_grid_split.py \
+            skills/herdr-agent/scripts/preflight_send.py \
+            skills/herdr-agent/scripts/wait_for_idle.py \
+            skills/herdr-agent/tests/fake_herdr.py
+
+      - name: Run unit/fixture tests (mock herdr CLI, no live TUI needed)
+        run: |
+          cd skills/herdr-agent
+          python3 -m unittest discover -s tests -p 'test_*.py' -v

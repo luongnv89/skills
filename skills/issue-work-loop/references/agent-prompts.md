@@ -1,6 +1,6 @@
 # Agent Prompts — /issue-work-loop
 
-Send via `herdr-agent-comms` with baseline, fresh completion marker, preflight, wait, and reply-delta read. Substitute identifiers before sending.
+Send via `herdr-agent` with baseline, fresh completion marker, preflight, wait, and reply-delta read. Substitute identifiers before sending.
 
 Before any prompt below, the target session must pass the Autonomous Worker Boot Gate in `loop-protocol.md`: apply the per-harness switch from its matrix (pi is autonomous by default; Claude Code is switched via the Shift+Tab keystroke; opencode selects the Build agent via Tab or settings); never use a skip-permissions flag. Repeat after FRESHEN.
 

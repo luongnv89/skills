@@ -60,7 +60,7 @@
     {
       "id": 9,
       "prompt": "My Herdr workspace died — can you reattach my Herdr coding agents?",
-      "expected_output": "Should NOT trigger tmux-agent-comms as the primary skill (Herdr domain). Negative trigger: redirect to herdr-agent-comms or plain herdr help.",
+      "expected_output": "Should NOT trigger tmux-agent-comms as the primary skill (Herdr domain). Negative trigger: redirect to herdr-agent or plain herdr help.",
       "files": [],
       "expectations": []
     },

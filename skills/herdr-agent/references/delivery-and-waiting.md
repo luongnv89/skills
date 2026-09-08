@@ -1,6 +1,6 @@
 # Delivery and waiting (Herdr)
 
-Rationale for Phase 4–5 of `herdr-agent-comms`. Herdr 0.9 submits a prompt and
+Rationale for Phase 4–5 of `herdr-agent`. Herdr 0.9 submits a prompt and
 starts the wait in **one** server-side request. Use that. Everything below is
 about the cases it does not cover.
 
@@ -61,9 +61,9 @@ locations (repo-local first) rather than from `$0`:
 
 ```bash
 here=""
-for cand in "skills/herdr-agent-comms/scripts" ".agents/skills/herdr-agent-comms/scripts" \
-  ".claude/skills/herdr-agent-comms/scripts" "$HOME/.claude/skills/herdr-agent-comms/scripts" \
-  "$HOME/.agents/skills/herdr-agent-comms/scripts"; do
+for cand in "skills/herdr-agent/scripts" ".agents/skills/herdr-agent/scripts" \
+  ".claude/skills/herdr-agent/scripts" "$HOME/.claude/skills/herdr-agent/scripts" \
+  "$HOME/.agents/skills/herdr-agent/scripts"; do
   [ -f "$cand/preflight_send.py" ] && { here="$cand"; break; }
 done
 [ -n "$here" ] || { echo "Error: skill scripts not found in any install location" >&2; exit 1; }

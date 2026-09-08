@@ -42,7 +42,7 @@ import sys
 
 # Source identifies the reporter to Herdr. A pane accepts sequenced reports
 # from at most 32 distinct sources in its lifetime, so keep this constant.
-SOURCE = "user:herdr-agent-comms"
+SOURCE = "user:herdr-agent"
 
 STATUS_KEYS = {"idle", "working", "blocked", "done", "unknown"}
 

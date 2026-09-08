@@ -7,7 +7,7 @@ a report — attention ordering, scope filtering, fail-closed status reading, an
 the blocked exit code — rather than the exact table formatting.
 
 Run directly (stdlib unittest only):
-    python3 -m unittest discover -s skills/herdr-agent-comms/tests -p 'test_*.py'
+    python3 -m unittest discover -s skills/herdr-agent/tests -p 'test_*.py'
 """
 
 from __future__ import annotations

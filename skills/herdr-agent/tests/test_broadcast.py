@@ -7,7 +7,7 @@ targets it refuses, which it dedupes, how it maps Herdr's error codes, and that
 a refused or failed target is always reported rather than silently dropped.
 
 Run directly (stdlib unittest only):
-    python3 -m unittest discover -s skills/herdr-agent-comms/tests -p 'test_*.py'
+    python3 -m unittest discover -s skills/herdr-agent/tests -p 'test_*.py'
 """
 
 from __future__ import annotations

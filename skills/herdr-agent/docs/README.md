@@ -5,7 +5,7 @@
   If you're an AI agent, read the SKILL.md file instead for skill instructions.
 -->
 
-# Herdr Agent Comms
+# Herdr Agent
 
 > Tile **root + sub-agents** into **one grid tab** as equal-width columns — root stays put, workers stay the same size as root, messaging via the `herdr` agent CLI with server-side waits and one-call fleet status.
 
@@ -21,6 +21,7 @@
 - **Notify** — `herdr notification show` reaches the human when an agent blocks or a run completes.
 - **Broadcast** — fan one instruction to many agents; concurrent waits, per-target outcomes.
 - **Safe teardown** — close sub-panes after confirmation; never surprise `server stop` or kill root.
+- **Built-in `help`** — `/herdr-agent help` lists every operation, the safety rules and the requirements, and runs no `herdr` command, so it answers even before Herdr is installed.
 
 ## When to Use
 
@@ -51,7 +52,13 @@ graph TD
 ## Usage
 
 ```
-/herdr-agent-comms
+/herdr-agent
+```
+
+Not sure what to ask for? Start with the built-in summary:
+
+```
+/herdr-agent help
 ```
 
 Or describe the goal — "tile a reviewer agent with my pane", "launch a Herdr fleet grid beside me".
@@ -61,7 +68,7 @@ Or describe the goal — "tile a reviewer agent with my pane", "launch a Herdr f
 ### 1. Root + sub-agents grid (default)
 
 ```
-/herdr-agent-comms spin up 2 pi agents in a grid with my pane:
+/herdr-agent spin up 2 pi agents in a grid with my pane:
 - reviewer: thinking medium — review the last commit
 - tests: thinking low — propose a minimal test plan
 ```
@@ -69,19 +76,25 @@ Or describe the goal — "tile a reviewer agent with my pane", "launch a Herdr f
 ### 2. Message a running agent
 
 ```
-/herdr-agent-comms ask reviewer to summarize open risks; show me the reply
+/herdr-agent ask reviewer to summarize open risks; show me the reply
 ```
 
 ### 3. Steer live
 
 ```
-/herdr-agent-comms focus the tests agent so I can type into it
+/herdr-agent focus the tests agent so I can type into it
 ```
 
-### 4. Check the fleet
+### 4. See what the skill can do
 
 ```
-/herdr-agent-comms what is every fleet agent doing right now?
+/herdr-agent help
+```
+
+### 5. Check the fleet
+
+```
+/herdr-agent what is every fleet agent doing right now?
 ```
 
 ## Requirements

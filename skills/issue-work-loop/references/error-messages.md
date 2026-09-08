@@ -56,7 +56,7 @@ Use `✗ what failed`, `To fix:`, and exact identifiers. Never expose tokens. Is
 ✗ Missing required skill(s): {names}
 
   To fix:  install the missing skill(s), restart the session, and retry
-  Both:    issue-pr-review, herdr-agent-comms
+  Both:    issue-pr-review, herdr-agent
   ISSUE:   issue-resolver (not required in PR mode)
 ```
 

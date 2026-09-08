@@ -1,6 +1,6 @@
 # Fleet monitoring, status, and reporting (Herdr)
 
-Rationale for Phase 6 of `herdr-agent-comms`. Three surfaces, three audiences:
+Rationale for Phase 6 of `herdr-agent`. Three surfaces, three audiences:
 the snapshot answers *you*, metadata badges answer *the human glancing at the
 sidebar*, and notifications interrupt them when something actually needs them.
 

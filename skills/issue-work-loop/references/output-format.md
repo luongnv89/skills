@@ -8,7 +8,7 @@ Terminal style: `● ✓ ✗ ◆ ⚡ ⚠ ○`, two-space indent, separators, URL
 ◆ Preflight (ISSUE #{N})
 ··································································
   Git / gh / Herdr:  √ pass
-  Skills:             √ issue-resolver, issue-pr-review, herdr-agent-comms
+  Skills:             √ issue-resolver, issue-pr-review, herdr-agent
   Issue open:         √ #{N} — {title}
   Linked open PRs:    √ 0 | ⚠ 1 → awaiting switch | × {count}
   Criteria:           √ 4/4 met
@@ -23,7 +23,7 @@ Exactly one linked open PR prints the confirmation from `error-messages.md`; acc
 ◆ Preflight (PR #{M})
 ··································································
   Git / gh / Herdr:  √ pass
-  Skills:             √ issue-pr-review, herdr-agent-comms
+  Skills:             √ issue-pr-review, herdr-agent
   PR open:            √ #{M} — {title}
   Head:               √ {head_ref} @ {sha_short}
   Source / fork:      √ {owner_repo} | ⚠ unknown; review allowed

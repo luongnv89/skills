@@ -15,7 +15,7 @@
 - Container is **kept by default**; the agent asks before `docker rm`. Pass `--rm` only when you already want it gone
 - SSH (`~/.ssh`) and GitHub (`gh` config + token) are **on by default** so the container can commit, push, and open/merge PRs. Pass `--no-ssh --no-github` to isolate an untrusted task
 - Handles the `~/.claude` → `~/.agents` symlink gotcha automatically when mounting Claude Code skills into the container
-- Interactive mode (pairs with herdr-agent-comms or tmux-agent-comms) documents the OpenCode-specific TUI timing and permission-dialog quirks discovered while building this skill
+- Interactive mode (pairs with herdr-agent or tmux-agent-comms) documents the OpenCode-specific TUI timing and permission-dialog quirks discovered while building this skill
 
 ## When to Use
 

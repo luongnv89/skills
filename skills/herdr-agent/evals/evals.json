@@ -1,5 +1,5 @@
 {
-  "skill_name": "herdr-agent-comms",
+  "skill_name": "herdr-agent",
   "evals": [
     {
       "id": 1,
@@ -39,7 +39,7 @@
     {
       "id": 6,
       "prompt": "My SSH session died \u2014 can you reattach my tmux coding agents?",
-      "expected_output": "Should NOT trigger herdr-agent-comms as the primary skill (tmux domain). Negative trigger: redirect to tmux-agent-comms or plain tmux help.",
+      "expected_output": "Should NOT trigger herdr-agent as the primary skill (tmux domain). Negative trigger: redirect to tmux-agent-comms or plain tmux help.",
       "files": [],
       "expectations": []
     },
@@ -54,6 +54,13 @@
       "id": 8,
       "prompt": "What are all my Herdr fleet agents doing right now?",
       "expected_output": "Reports fleet state from a single `herdr api snapshot` call (via scripts/fleet_status.py), not from N per-agent `herdr agent get` invocations and not from recollection of what was dispatched. Lists every agent with name, pane id and semantic status, surfaces blocked agents first as needing a human, and distinguishes display-only metadata badges from semantic agent_status.",
+      "files": [],
+      "expectations": []
+    },
+    {
+      "id": 9,
+      "prompt": "/herdr-agent help",
+      "expected_output": "Answers from the Help branch before any prerequisite check: prints the usage summary (spawn, message, read, status, broadcast, steer, teardown, handoff, help), the safety behaviours and the herdr 0.9.0 / HERDR_ENV requirements. Runs no herdr command at all \u2014 no `herdr status`, no `agent list`, no pane inspection \u2014 mutates nothing, spawns nothing, and emits no step completion report. Does not refuse or error out when herdr is missing from PATH, since a help request is exactly what an uninstalled user asks.",
       "files": [],
       "expectations": []
     }
