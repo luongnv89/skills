@@ -452,6 +452,29 @@ class WaitForIdleStatusLoopPacingTests(unittest.TestCase):
             msg=f"status loop is spinning: {len(calls)} herdr calls in 3s\n" + "\n".join(calls[:20]),
         )
 
+    def test_pre_task_idle_pane_does_not_busy_spin(self):
+        """The second former call site: a pane still `idle` because the task
+        has not started yet. It used to wait on `--status working`, which was
+        the same nonexistent command, so this branch spun too."""
+        pane_text = "start\n"
+        self.h.set_pane("p1", "idle", pane_text)
+        # `herdr pane read` prints the text with a trailing newline, so the
+        # baseline must match that exactly or the loop takes the changed-text
+        # path instead of the pre-task-idle one under test.
+        baseline = self.h.baseline_file(pane_text + "\n")
+
+        cp = self.h.run_waiter("p1", "--baseline-file", baseline, "--timeout", "3")
+        self.assertEqual(cp.returncode, 2, msg=f"stdout={cp.stdout!r} stderr={cp.stderr!r}")
+
+        calls = self.h.calls_made()
+        # This branch issues three calls per tick (two `pane get`, one
+        # `pane read`), so its ceiling is higher than the working path's.
+        # Pre-fix it made ~86 here.
+        self.assertLessEqual(
+            len(calls), 50,
+            msg=f"pre-task-idle loop is spinning: {len(calls)} herdr calls in 3s\n" + "\n".join(calls[:20]),
+        )
+
     def test_no_call_to_the_nonexistent_wait_subcommand(self):
         """herdr 0.9 answers `herdr wait ...` with `unknown command: wait`."""
         self.h.set_pane("p1", "working", "still going...\n")

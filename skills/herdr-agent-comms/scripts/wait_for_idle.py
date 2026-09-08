@@ -228,8 +228,10 @@ def settle_sleep(deadline: float, cap_s: float = STATUS_POLL_S) -> None:
 
     0.25s is chosen against both failure modes. It bounds detection latency
     well inside the short timeouts callers actually pass (a 1s cap can miss a
-    transition that lands 1.2s into a 2s wait), while holding the status loop
-    to ~4 `pane get` calls per second instead of the ~30 the spin produced.
+    transition that lands 1.2s into a 2s wait), while pacing the status loop
+    at one tick per 0.25s instead of running it flat out. That is ~4 herdr
+    calls per second on the working path and ~12 on the pre-task-idle path,
+    which issues three calls per tick, against the ~30 the spin produced.
     """
     remaining = deadline - time.time()
     if remaining <= 0:
