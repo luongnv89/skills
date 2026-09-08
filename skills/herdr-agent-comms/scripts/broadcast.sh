@@ -1,27 +1,33 @@
 #!/usr/bin/env bash
-# Broadcast one message to several Herdr agents, then collect each reply.
+# Broadcast one prompt to several Herdr agents, then report each outcome.
 #
-# Sends to EVERY target first (fast), then waits on all of them CONCURRENTLY.
-# Wall-clock is the slowest single agent, not the sum.
+# Dispatch and wait are one server-side request per target (`herdr agent prompt
+# --wait`), and every target runs concurrently, so wall-clock is the slowest
+# single agent rather than the sum. There is no transcript baseline and no
+# completion marker: the server starts the wait in the same request that submits
+# the prompt, which is what those two mechanisms used to approximate from
+# outside.
 #
 # Usage:
 #   scripts/broadcast.sh "message" target1 target2 [target3 ...]
 #
-# Targets: agent names (reviewer) or pane ids (w26:p4)
+# Targets: agent names (reviewer) or pane ids (w1:p4). Duplicates that resolve
+# to the same pane are sent once.
 #
 # Options (env vars):
-#   HAC_TIMEOUT       per-agent wait timeout in seconds (default: 180)
-#   HAC_LINES         transcript lines used for baseline + reply (default: 60)
-#   HAC_WAIT_ARGS     extra args passed to wait_for_idle.py (e.g. "--full")
+#   HAC_TIMEOUT   per-agent wait timeout in seconds (default: 180)
+#   HAC_LINES     transcript lines printed per reply (default: 60; 0 = none)
+#   HAC_BADGE     set to 1 to badge each target's sidebar row with its phase
 #
-# Exit 0 if all agents settled idle/done; otherwise 1.
+# Exit 0 only when every target was dispatched and settled. Any refusal, send
+# failure, block, stall or timeout exits 1 with a per-target reason.
 
 set -u
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-waiter="$here/wait_for_idle.py"
-timeout="${HAC_TIMEOUT:-180}"
+timeout_s="${HAC_TIMEOUT:-180}"
 lines="${HAC_LINES:-60}"
+badge="${HAC_BADGE:-0}"
 
 if [ "$#" -lt 2 ]; then
   echo "Error: need a message and at least one target." >&2
@@ -32,261 +38,141 @@ if ! command -v herdr >/dev/null 2>&1; then
   echo "Error: herdr is not installed or not on PATH." >&2
   exit 1
 fi
-if [ ! -f "$waiter" ]; then
-  echo "Error: helper not found at $waiter — run broadcast.sh from the skill dir." >&2
-  exit 1
-fi
 
 msg="$1"; shift
 targets=("$@")
+timeout_ms=$((timeout_s * 1000))
 
-resolve_pane() {
-  local t="$1"
-  if herdr pane get "$t" >/dev/null 2>&1; then
-    printf '%s\n' "$t"
-    return 0
-  fi
-  herdr agent get "$t" 2>/dev/null | python3 -c '
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    a = d.get("result", {}).get("agent") or d.get("result", {})
-    print(a["pane_id"])
-except Exception:
-    sys.exit(1)
-'
+# One `herdr agent list` call resolves every target: name -> pane id and the
+# status in the same consistent view. Per-target `agent get` would cost N calls
+# and could observe a torn view where A is read before B changes state.
+roster="$(herdr agent list 2>/dev/null)" || {
+  echo "Error: 'herdr agent list' failed — is the Herdr server running?" >&2
+  exit 1
 }
 
-pane_status() {
-  # Print the pane's agent_status and return 0 ONLY when the lookup+parse
-  # actually succeeded. A failed `herdr pane get` or malformed JSON must
-  # return non-zero (NOT an empty "safe" status) so the caller can reject the
-  # target instead of sending into an unverifiable pane. A validly-absent
-  # status field prints "unknown" (non-integrated CLIs report that normally).
-  local out
-  out="$(herdr pane get "$1" 2>/dev/null)" || return 1
-  printf '%s' "$out" | python3 -c '
-import sys, json
+resolve() {
+  # resolve <target> -> "<pane_id> <status>" on stdout, non-zero if unresolved.
+  printf '%s' "$roster" | TARGET="$1" python3 -c '
+import json, os, sys
+target = os.environ["TARGET"]
 VALID = {"idle", "working", "blocked", "done", "unknown"}
 try:
-    d = json.load(sys.stdin)
-    pane = d["result"]["pane"]
+    agents = json.load(sys.stdin)["result"]["agents"]
 except Exception:
-    sys.exit(1)   # lookup/parse failure — NOT a safe empty status
-if not isinstance(pane, dict):
-    # Valid JSON but a null / non-object `pane` ({"result":{"pane":null}}):
-    # calling .get() would raise AttributeError (an ugly traceback). Treat it
-    # as an unverifiable status and exit cleanly.
     sys.exit(1)
-raw = pane.get("agent_status")
-if raw is None:
-    print("unknown")                 # validly absent (non-integrated CLI)
-elif isinstance(raw, str) and raw in VALID:
-    print(raw)
-else:
-    sys.exit(1)                       # off-enum/garbage (e.g. numeric 123) — unverifiable
+for a in agents:
+    if a.get("name") == target or a.get("pane_id") == target:
+        raw = a.get("agent_status")
+        status = raw if isinstance(raw, str) and raw in VALID else "unverifiable"
+        print(a.get("pane_id", ""), status)
+        sys.exit(0)
+sys.exit(1)
 '
 }
 
-# Phase 1: resolve all targets first, deduping by pane id so a name and its
-# pane-id alias (e.g. "reviewer" and "w26:p4") don't double-send.
-# (Plain arrays + linear scan, not associative arrays: this needs to run on
-# bash 3.2 too, e.g. macOS's default /bin/bash.)
-panes=()
-labels=()
-missing=()
+# Phase 1 — resolve and dedupe. A target that does not resolve is fatal: the
+# caller asked for a fleet, and silently shrinking it hides work that never ran.
+panes=(); labels=(); statuses=(); missing=()
 for t in "${targets[@]}"; do
-  if p="$(resolve_pane "$t")"; then
+  if line="$(resolve "$t")"; then
+    p="${line%% *}"; st="${line##* }"
     dup=""
-    for existing in "${panes[@]+"${panes[@]}"}"; do
-      if [ "$existing" = "$p" ]; then
-        dup=1
-        break
-      fi
+    for existing in ${panes[@]+"${panes[@]}"}; do
+      [ "$existing" = "$p" ] && { dup=1; break; }
     done
     if [ -n "$dup" ]; then
-      echo "Note: '$t' resolves to an already-targeted pane $p — skipping duplicate." >&2
+      echo "Note: '$t' resolves to already-targeted pane $p — skipping duplicate." >&2
       continue
     fi
-    panes+=("$p")
-    labels+=("$t")
+    panes+=("$p"); labels+=("$t"); statuses+=("$st")
   else
     missing+=("$t")
   fi
 done
 if [ "${#missing[@]}" -gt 0 ]; then
-  echo "Error: these targets don't resolve: ${missing[*]}" >&2
+  echo "Error: these targets host no detected agent: ${missing[*]}" >&2
   echo "List them with: herdr agent list" >&2
   exit 1
 fi
 
-# Phase 1b: reject panes that aren't safely sendable before we send.
-# - `working`: did not start working because of THIS broadcast, so waiting on
-#   it afterward cannot reliably distinguish this send's completion from the
-#   prior task's.
-# - `blocked`: a trust/auth/permission dialog is on screen. Typing the task
-#   into that dialog would submit garbage to the prompt, not the agent — skip
-#   it and surface the dialog instead (Critical Rule 7 in SKILL.md).
-# Skip both rather than risk a false "settled" report or a swallowed dialog.
-busy=()
-blocked=()
-unverifiable=()
-ready_panes=()
-ready_labels=()
+# Phase 2 — fail closed. `herdr agent prompt` refuses a blocked target itself
+# (agent_blocked, before writing any input), but it does NOT refuse a working
+# one, and its wait tracks lifecycle state rather than one turn: a prompt sent
+# into a working agent can be satisfied by the turn already in flight. Refuse
+# both here so a skipped target is reported rather than mis-reported as done.
+send_idx=(); skipped=()
 for i in "${!panes[@]}"; do
-  # A failed status lookup must NOT fall through as "safe to send" — reject
-  # the target rather than risk sending into a working/blocked pane whose
-  # state we couldn't confirm.
-  if ! st="$(pane_status "${panes[$i]}")"; then
-    unverifiable+=("${labels[$i]} (${panes[$i]})")
-    continue
-  fi
-  if [ "$st" = "working" ]; then
-    busy+=("${labels[$i]} (${panes[$i]})")
-    continue
-  fi
-  if [ "$st" = "blocked" ]; then
-    blocked+=("${labels[$i]} (${panes[$i]})")
-    continue
-  fi
-  # idle / done / unknown (validly reported) are sendable.
-  ready_panes+=("${panes[$i]}")
-  ready_labels+=("${labels[$i]}")
-done
-if [ "${#busy[@]}" -gt 0 ]; then
-  echo "Error: these targets are already working and were skipped: ${busy[*]}" >&2
-  echo "Wait for them to go idle/done first, or target only the idle agents." >&2
-fi
-if [ "${#blocked[@]}" -gt 0 ]; then
-  echo "Error: these targets are blocked (trust/auth dialog) and were skipped: ${blocked[*]}" >&2
-  echo "A human must answer the dialog first — see: herdr agent focus <name>." >&2
-fi
-if [ "${#unverifiable[@]}" -gt 0 ]; then
-  echo "Error: could not verify status for these targets (lookup/parse failed) and skipped them: ${unverifiable[*]}" >&2
-  echo "Refusing to send into a pane whose working/blocked state is unknown — check 'herdr pane get <id>'." >&2
-fi
-panes=("${ready_panes[@]+"${ready_panes[@]}"}")
-labels=("${ready_labels[@]+"${ready_labels[@]}"}")
-if [ "${#panes[@]}" -eq 0 ]; then
-  echo "Error: no targets left to send to." >&2
-  exit 1
-fi
-
-# Phase 2: snapshot every pane BEFORE send. A fast agent can finish before its
-# waiter starts; stable output after this baseline still proves new activity.
-tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/hac_broadcast.XXXXXX")"
-trap 'rm -rf "$tmpdir"' EXIT
-for i in "${!panes[@]}"; do
-  if ! herdr pane read "${panes[$i]}" --source recent-unwrapped --lines "$lines" \
-    >"$tmpdir/$i.baseline"; then
-    echo "Error: could not capture baseline for ${panes[$i]}" >&2
-    exit 1
-  fi
-done
-
-# Phase 3: fan out. The full marker is deliberately absent from the prompt:
-# prompt echo contains its two halves; only the completed reply joins them.
-#
-# A failed `pane run` here must NOT abort the whole broadcast: panes sent
-# to earlier in this loop are already mid-task, and abandoning them without
-# a wait/report would silently drop results the caller has no way to
-# recover. Record the failure and keep going; only successfully-dispatched
-# panes proceed to Phase 4.
-markers=()
-send_failed=()
-became_unsafe=()
-for i in "${!panes[@]}"; do
-  p="${panes[$i]}"
-  # Re-check status immediately before dispatch. The Phase 1b preflight and the
-  # Phase 2 baseline loop both run BEFORE this send, so a target that was idle
-  # then could have gone `working`/`blocked` (or become unverifiable) in the
-  # interval. Sending now would type into a dialog or race a prior task's
-  # completion. Skip it and fold it into the failure aggregation — same
-  # fail-closed, enum-validated check as Phase 1b.
-  if ! st="$(pane_status "$p")"; then
-    echo "Error: ${labels[$i]} ($p) status became unverifiable before dispatch — skipped (not sent)." >&2
-    became_unsafe+=("$i")
-    continue
-  fi
-  if [ "$st" = "working" ] || [ "$st" = "blocked" ]; then
-    echo "Error: ${labels[$i]} ($p) turned $st before dispatch — skipped (not sent)." >&2
-    became_unsafe+=("$i")
-    continue
-  fi
-  suffix="$(date +%s)_$$_${i}_${RANDOM}"
-  markers[$i]="HERDR_DONE_$suffix"
-  task="$msg
-
-After fully finishing the task, concatenate and print these two parts without spaces: HERDR_DONE_ and $suffix"
-  if ! herdr pane run "$p" "$task" >/dev/null; then
-    echo "Error: pane run failed for ${labels[$i]} ($p) — dispatch stopped for this target, already-sent panes still awaited." >&2
-    send_failed+=("$i")
-  fi
-done
-
-# Phase 4: wait concurrently, but only on panes the send actually reached.
-# Exclude both `send_failed` (pane run errored) and `became_unsafe` (skipped at
-# the pre-dispatch recheck) — neither was sent, so neither has a task to await.
-pids=()
-wait_indices=()
-for i in "${!panes[@]}"; do
-  skip=""
-  for f in "${send_failed[@]+"${send_failed[@]}"}" ${became_unsafe[@]+"${became_unsafe[@]}"}; do
-    [ "$f" = "$i" ] && { skip=1; break; }
-  done
-  [ -n "$skip" ] && continue
-  p="${panes[$i]}"
-  wait_indices+=("$i")
-  # shellcheck disable=SC2086
-  (
-    python3 "$waiter" "$p" --timeout "$timeout" ${HAC_WAIT_ARGS:-} \
-      --lines "$lines" --baseline-file "$tmpdir/$i.baseline" \
-      --completion-marker "${markers[$i]}" \
-      >"$tmpdir/$i.out" 2>"$tmpdir/$i.err"
-    echo "$?" >"$tmpdir/$i.code"
-  ) &
-  pids+=("$!")
-done
-for pid in "${pids[@]+"${pids[@]}"}"; do wait "$pid"; done
-
-# Phase 5: emit labeled blocks — dispatched panes first (settled/timeout/
-# blocked/error), then a distinct block per pane that never got a send.
-overall=0
-# Any pane we could NOT safely deliver to fails the broadcast — including
-# `unverifiable` targets (status lookup/parse failed). Omitting them here made
-# a mixed bad+good broadcast exit 0 even though some targets were skipped.
-if [ "${#busy[@]}" -gt 0 ] || [ "${#blocked[@]}" -gt 0 ] \
-   || [ "${#unverifiable[@]}" -gt 0 ] || [ "${#send_failed[@]}" -gt 0 ] \
-   || [ "${#became_unsafe[@]}" -gt 0 ]; then
-  overall=1
-fi
-for i in "${wait_indices[@]+"${wait_indices[@]}"}"; do
-  label="${labels[$i]}"
-  p="${panes[$i]}"
-  code="$(cat "$tmpdir/$i.code" 2>/dev/null || echo "?")"
-  case "$code" in
-    0) state="idle/done" ;;
-    2) state="TIMEOUT"; overall=1 ;;
-    3) state="BLOCKED (needs human)"; overall=1 ;;
-    *) state="error"; overall=1 ;;
+  case "${statuses[$i]}" in
+    idle|done|unknown) send_idx+=("$i") ;;
+    working) skipped+=("${labels[$i]}: working (a turn is already in flight)") ;;
+    blocked) skipped+=("${labels[$i]}: blocked (a human must answer a dialog)") ;;
+    *)       skipped+=("${labels[$i]}: unverifiable status") ;;
   esac
-  echo "===== $label ($p) [$state, exit $code] ====="
-  cat "$tmpdir/$i.out" 2>/dev/null
-  if [ "$code" != "0" ]; then
-    cat "$tmpdir/$i.err" 2>/dev/null >&2
+done
+
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "$tmpdir"' EXIT
+
+# Phase 3 — dispatch every safe target concurrently. Each job submits and waits
+# in a single request, so there is no send-then-wait race to close.
+#
+# The Phase 2 branch used the roster read from T0. Resolving and badging N
+# targets takes real time, so recheck each target immediately before its own
+# dispatch. Herdr refuses a target that turned `blocked` in that window, but it
+# does NOT refuse one that turned `working` — and that is the case that reads
+# back the wrong reply. preflight_send.py is the single place that check lives.
+pids=(); raced=()
+for i in ${send_idx[@]+"${send_idx[@]}"}; do
+  if ! reason="$(python3 "$here/preflight_send.py" "${panes[$i]}" 2>&1 >/dev/null)"; then
+    raced+=("${labels[$i]}: became unsafe before dispatch — ${reason#Error: }")
+    continue
   fi
-  echo
-done
-for i in "${send_failed[@]+"${send_failed[@]}"}"; do
-  echo "===== ${labels[$i]} (${panes[$i]}) [SEND-FAILED, not waited] =====" >&2
-done
-for i in "${became_unsafe[@]+"${became_unsafe[@]}"}"; do
-  echo "===== ${labels[$i]} (${panes[$i]}) [BECAME-UNSAFE before dispatch, not sent] =====" >&2
+  if [ "$badge" = "1" ]; then
+    python3 "$here/badge.py" "${panes[$i]}" --token phase=working \
+      --ttl-ms "$((timeout_ms + 60000))" >/dev/null 2>&1 || true
+  fi
+  herdr agent prompt "${panes[$i]}" "$msg" --wait --timeout "$timeout_ms" \
+    >"$tmpdir/$i.out" 2>"$tmpdir/$i.err" &
+  pids+=("$!:$i")
 done
 
-if [ "${#send_failed[@]}" -gt 0 ] || [ "${#became_unsafe[@]}" -gt 0 ]; then
-  ndrop=$(( ${#send_failed[@]} + ${#became_unsafe[@]} ))
-  echo "Partial results: $ndrop of ${#panes[@]} target(s) never received the message (see SEND-FAILED / BECAME-UNSAFE above). Results above are only for targets successfully dispatched." >&2
-fi
+# Phase 4 — collect. Herdr reports failures as a JSON error object with a code;
+# map the codes back to a human reason instead of printing raw protocol noise.
+overall=0
+for entry in ${pids[@]+"${pids[@]}"}; do
+  jp="${entry%%:*}"; i="${entry#*:}"
+  label="${labels[$i]}"; pane="${panes[$i]}"
+  if wait "$jp"; then
+    echo "$label ($pane): settled"
+    if [ "$lines" -gt 0 ] 2>/dev/null; then
+      echo "--- $label reply (last $lines lines) ---"
+      herdr agent read "$pane" --source recent-unwrapped --lines "$lines" \
+        || echo "  (reply read failed)" >&2
+    fi
+    [ "$badge" = "1" ] && python3 "$here/badge.py" "$pane" --token phase=done \
+      --ttl-ms 600000 >/dev/null 2>&1
+  else
+    code="$(sed -n 's/.*"code"[[:space:]]*:[[:space:]]*"\([a-z_]*\)".*/\1/p' "$tmpdir/$i.err" | head -1)"
+    case "$code" in
+      agent_blocked)         reason="BLOCKED — a human must answer a dialog; nothing was sent" ;;
+      agent_prompt_stalled)  reason="STALLED — submitted, but no agent activity followed" ;;
+      timeout)               reason="TIMEOUT — no settled state within ${timeout_s}s" ;;
+      agent_not_found)       reason="GONE — the agent left this pane mid-run" ;;
+      "")                    reason="FAILED — $(head -1 "$tmpdir/$i.err" 2>/dev/null)" ;;
+      *)                     reason="FAILED ($code)" ;;
+    esac
+    echo "$label ($pane): $reason" >&2
+    [ "$badge" = "1" ] && python3 "$here/badge.py" "$pane" --token phase="$code" \
+      --ttl-ms 600000 >/dev/null 2>&1
+    overall=1
+  fi
+done
 
+for s in ${skipped[@]+"${skipped[@]}"} ${raced[@]+"${raced[@]}"}; do
+  echo "Skipped $s" >&2
+  overall=1
+done
+
+echo "Broadcast: ${#pids[@]} dispatched, $(( ${#skipped[@]} + ${#raced[@]} )) skipped"
 exit "$overall"

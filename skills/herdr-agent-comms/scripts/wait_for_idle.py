@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
-"""Wait until a Herdr agent pane finishes work, then print what's new.
+"""Wait until a Herdr PANE finishes work, then print what's new. FALLBACK ONLY.
 
-Primary path: poll `herdr pane get` / status waits for working → idle|done|blocked.
-Fallback: poll `herdr pane read` until the transcript stops changing (unknown agents).
+For any pane hosting a detected agent, use the agent surface instead:
+`herdr agent prompt <target> "<task>" --wait --timeout MS` submits and waits in
+one server-side request, and `herdr agent wait <target>` is event-driven. Both
+beat this script, which polls and can call a slow-thinking agent settled.
+
+This exists for the one case the agent surface cannot address: a pane whose
+process Herdr does not recognize. `herdr agent get` returns `agent_not_found`
+for it, even though `herdr pane get` reports its `agent_status` as `unknown`.
+`preflight_send.py` exits 5 to route you here.
+
+Primary path: poll `herdr pane get` for working → idle|done|blocked.
+Fallback: poll `herdr pane read` until the transcript stops changing.
 
 By default this is a **post-send completion wait**: it will not treat a pre-existing
 idle/done pane as success until it has seen `working` (or a transcript change).
