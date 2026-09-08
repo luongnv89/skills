@@ -7,7 +7,7 @@ wait tracks lifecycle state rather than one turn. Each rejection reason gets a
 distinct exit code so a caller can branch on it.
 
 Run directly (stdlib unittest only):
-    python3 -m unittest discover -s skills/herdr-agent-comms/tests -p 'test_*.py'
+    python3 -m unittest discover -s skills/herdr-agent/tests -p 'test_*.py'
 """
 
 from __future__ import annotations

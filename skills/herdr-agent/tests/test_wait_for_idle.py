@@ -6,7 +6,7 @@ already carrying the completion marker) before this send must not be
 reported as settled for THIS send.
 
 Run directly (stdlib unittest only):
-    python3 -m unittest discover -s skills/herdr-agent-comms/tests -p 'test_*.py'
+    python3 -m unittest discover -s skills/herdr-agent/tests -p 'test_*.py'
 """
 
 from __future__ import annotations

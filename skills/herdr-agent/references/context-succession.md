@@ -1,4 +1,4 @@
-# Context succession (HANDOFF) — herdr-agent-comms
+# Context succession (HANDOFF) — herdr-agent
 
 Read this when the main agent's own context gate fires, or before starting a fleet run expected to outlast one context window.
 
@@ -61,7 +61,7 @@ Anti-thrash: a generation may not HANDOFF until it has completed at least one fu
 
 ```text
 You are now the MAIN AGENT (orchestrator) for this Herdr fleet. Load the
-`herdr-agent-comms` skill and continue the run from the state below.
+`herdr-agent` skill and continue the run from the state below.
 
 generation: {N}   (previous main: {old_pane} — retired, read-only)
 handoff threshold: {T}%   — keep gating your own context at this number

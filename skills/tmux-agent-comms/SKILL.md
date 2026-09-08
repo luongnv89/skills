@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires `tmux` on PATH. Optional Python 3 for wait/preflight/broadcast helpers."
 effort: medium
 metadata:
-  version: 2.3.0
+  version: 2.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -15,7 +15,7 @@ Manage CLI agents in separate tmux sessions. Treat each session as one agent; or
 
 New sessions open in a terminal tab inside the current app by default. If the environment cannot open one, create the session detached and print the exact attach command. Never invoke `attach-session` from a non-TTY tool.
 
-Use `herdr-agent-comms` instead when agents live in Herdr.
+Use `herdr-agent` instead when agents live in Herdr.
 
 ## When to Use
 

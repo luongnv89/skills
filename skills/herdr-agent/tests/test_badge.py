@@ -7,7 +7,7 @@ label validation Herdr would otherwise reject server-side, and the refusal to
 send an empty report.
 
 Run directly (stdlib unittest only):
-    python3 -m unittest discover -s skills/herdr-agent-comms/tests -p 'test_*.py'
+    python3 -m unittest discover -s skills/herdr-agent/tests -p 'test_*.py'
 """
 
 from __future__ import annotations

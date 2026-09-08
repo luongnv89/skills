@@ -9,7 +9,7 @@ terminal/pty that stays alive across multiple reads and writes. This skill
 does not implement pane management itself — pair it with whichever
 pane-management skill is available in the session:
 
-- **herdr-agent-comms** — if `herdr` is on PATH and its server is running
+- **herdr-agent** — if `herdr` is on PATH and its server is running
 - **tmux-agent-comms** — if using plain tmux instead
 
 Use that skill's split/send/wait/read primitives to drive the pane. The

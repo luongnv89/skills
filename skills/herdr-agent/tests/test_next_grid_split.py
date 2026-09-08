@@ -2,7 +2,7 @@
 """Fixture tests for next_grid_split.py's equal-width column planning.
 
 Run directly (stdlib unittest only, no live herdr needed):
-    python3 -m unittest discover -s skills/herdr-agent-comms/tests -p 'test_*.py'
+    python3 -m unittest discover -s skills/herdr-agent/tests -p 'test_*.py'
 
 These cover the pure arithmetic that decides the split ratio and each
 equalizer resize op. The exact `herdr pane split --ratio` / `herdr pane

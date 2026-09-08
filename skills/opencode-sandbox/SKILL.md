@@ -2,10 +2,10 @@
 name: opencode-sandbox
 description: "Run OpenCode in a docker-dev sandbox (SSH/gh on by default; --no-ssh/--no-github to isolate). Prints docker exec attach; kept until you confirm rm. Don't use for opencode.ai (opencode-runner), Herdr, or the app."
 license: MIT
-compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent-comms or tmux-agent-comms)."
+compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 3.0.0
+  version: 3.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -232,7 +232,7 @@ Do not treat leftover containers as a failure of the OpenCode task.
 
 For watching OpenCode work live or steering it mid-task. Needs a real
 pane/terminal the agent can repeatedly read and write — pair this skill with
-**herdr-agent-comms** or **tmux-agent-comms** for the pane mechanics. Read
+**herdr-agent** or **tmux-agent-comms** for the pane mechanics. Read
 `references/interactive-mode.md` for what's specific to OpenCode-in-a-container
 on top of those primitives: TUI readiness timing (sending too early drops the
 message, or worse, a second premature send exits OpenCode entirely),

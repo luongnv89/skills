@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker on PATH and running, plus the opencode-sandbox skill at v2.1.0 or newer. The tmux panel additionally needs `tmux`; without it the skill prints the attach command instead."
 effort: medium
 metadata:
-  version: 1.0.4
+  version: 1.0.5
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -38,7 +38,7 @@ This skill **composes** two others rather than reimplementing them:
 
 Do **not** use it to run a one-shot task in a container (that is
 `opencode-sandbox`), to call opencode.ai's hosted models (`opencode-runner`), or
-to manage Herdr panes (`herdr-agent-comms`).
+to manage Herdr panes (`herdr-agent`).
 
 ## Repo Sync Before Edits (mandatory)
 

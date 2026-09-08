@@ -1,15 +1,15 @@
 ---
-name: herdr-agent-comms
-description: "Manage AI agent fleets in Herdr: tile root + sub-agents in one tab, start/prompt/wait/read via the herdr agent CLI, badge and monitor the fleet, steer any pane. Use for Herdr multi-agent fleets. Don't use for tmux, screen, or non-Herdr terminals."
+name: herdr-agent
+description: "Manage AI agent fleets in Herdr: tile root + sub-agents in one tab, start/prompt/wait/read/monitor via the herdr agent CLI, steer any pane; `help` lists every operation. Use for Herdr fleets. Don't use for tmux, screen, or non-Herdr terminals."
 license: MIT
-compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`). The agent surface (`agent start`, `agent prompt --wait`, `agent wait`) and `api snapshot` are load-bearing."
+compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. The agent surface (`agent start`, `agent prompt --wait`, `agent wait`) and `api snapshot` are load-bearing."
 effort: medium
 metadata:
-  version: 2.0.0
+  version: 3.0.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
-# Herdr Agent Comms
+# Herdr Agent
 
 Build and control an AI-agent fleet in the root agent's Herdr tab. Keep the **root pane** as orchestrator; add each **sub-agent** as a right-hand split; equalize all columns; then start, prompt, wait, read, monitor, steer, or tear down through the `herdr` CLI.
 
@@ -19,6 +19,7 @@ Use Herdr concepts, not tmux assumptions. Let the server do the work: `herdr age
 
 | Request | Follow |
 |---|---|
+| `help`, or what this does and how to drive it | Help below — answer and stop |
 | Spawn sub-agents beside root | Phases 1–2, then 4–5 if assigning work |
 | Message an existing agent | Phases 3–5 |
 | Read without sending | Phase 3, then Phase 5 read only |
@@ -34,6 +35,42 @@ Read only the reference needed by that branch:
 - See `references/delivery-and-waiting.md` for the one-call prompt contract, error codes, wait semantics, reading replies, and the no-agent fallback.
 - See `references/fleet-monitoring.md` for snapshot status, sidebar badges, notifications, and the run report.
 - See `references/context-succession.md` for the main agent's context gate, HANDOFF procedure, and handoff brief template.
+
+## Answer a Help Request
+
+Resolve this branch **before** Prerequisites. A help request runs no `herdr` command, touches no pane, and changes nothing, because someone asking how this works may not have Herdr installed yet. Take it on `help`, `--help`, `/herdr-agent help`, or any plain question about what the skill does or how to drive it. Answer, then stop: no fleet work, no completion report.
+
+```text
+herdr-agent — build and control an AI-agent fleet in your Herdr tab.
+
+WHAT YOU CAN ASK FOR
+  spawn      "spin up agents named tests and docs beside my pane"
+  message    "ask reviewer to summarize the open PRs"
+  read       "show me what tests said"      (reads only, sends nothing)
+  status     "what is my fleet doing right now?"
+  broadcast  "tell every agent to pull latest main"
+  steer      "focus the docs pane so I can type in it"
+  teardown   "shut the fleet down"          (asks before closing anything)
+  handoff    "keep driving this run when your context fills up"
+  help       this summary
+
+HOW IT BEHAVES
+  Your pane stays the orchestrator and is never closed by accident.
+  Workers land as equal-width columns in that same tab, not new tabs.
+  A prompt aimed at a busy or blocked agent is refused before it is sent.
+  Every send waits for a settled state, and blocked, stalled or timed-out
+  agents are reported rather than silently retried.
+  Closing panes, tabs, workspaces or the server needs your approval.
+
+WHAT IT NEEDS
+  herdr 0.9.0 or later on PATH, a running server (`herdr status`), and this
+  session inside a Herdr pane (HERDR_ENV=1).
+  Not for tmux or GNU screen — use tmux-agent-comms there.
+```
+
+For a narrower question such as how to broadcast, answer from that one phase instead of printing the whole block, and name the phase so the user can ask for it again by name.
+
+**Done when:** the user has the summary or their specific answer, and no `herdr` command ran.
 
 ## Check Prerequisites
 
@@ -175,6 +212,7 @@ Replies: 2 captured, 0 blocked, 0 timed out
 
 Acceptance criteria:
 
+- A `help` request prints the usage summary, runs no `herdr` command, and emits no completion report.
 - `herdr status` succeeds and every target resolves uniquely.
 - Root remains in its original pane and all default workers share its tab.
 - Spawned columns are equal within one terminal cell.
@@ -198,7 +236,7 @@ Acceptance criteria:
 ## Emit the Step Completion Report
 
 ```text
-◆ Herdr Agent Comms ([operation])
+◆ Herdr Agent ([operation])
 ··································································
   Server:              √ pass
   Root resolved:       √ pass (pane · tab · workspace)

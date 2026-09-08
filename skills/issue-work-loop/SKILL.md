@@ -2,10 +2,10 @@
 name: issue-work-loop
 description: "Run Herdr loops for one open GitHub issue (resolve→review→fix) or an existing PR (review→lazy fixer) until CLEAN. Don't use for plain resolution without review, review-only/no-fix requests, backlog automation, or merging."
 license: MIT
-compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent-comms in both modes; issue-resolver is required only in ISSUE mode."
+compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent in both modes; issue-resolver is required only in ISSUE mode."
 effort: max
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -38,7 +38,7 @@ A request for review only/no fixes belongs to `issue-pr-review`, not this skill.
 
 | Rule | Meaning |
 |---|---|
-| Herdr panes | Spawn and communicate via `herdr-agent-comms`, not Agent-tool subagents |
+| Herdr panes | Spawn and communicate via `herdr-agent`, not Agent-tool subagents |
 | Role split | ISSUE keeps an implementer; PR starts with a reviewer and lazily adds a **FIXER** |
 | Autonomous workers | Every reviewer and writer passes the autonomous-mode boot gate before receiving work |
 | Notes count | Every fix, note, and partial item is a FINDING |
@@ -73,10 +73,10 @@ On failure, print the matching block from `references/error-messages.md` and sto
 
 ## Dependency Preflight (mandatory)
 
-This skill hands whole phases to other skills: `herdr-agent-comms` (every pane spawn, send, and wait) and `issue-pr-review` (the reviewer role) in **both** modes, plus `issue-resolver` for the ISSUE-mode implementer only. Resolve them before the repo sync below, the first step that changes anything:
+This skill hands whole phases to other skills: `herdr-agent` (every pane spawn, send, and wait) and `issue-pr-review` (the reviewer role) in **both** modes, plus `issue-resolver` for the ISSUE-mode implementer only. Resolve them before the repo sync below, the first step that changes anything:
 
 ```bash
-req="herdr-agent-comms issue-pr-review"
+req="herdr-agent issue-pr-review"
 for s in $req; do
   asm list -p claude --json | grep -q "\"$s\"" || {
     echo "Missing required skill: $s" >&2
@@ -168,7 +168,7 @@ Read `references/loop-protocol.md` after selecting the mode; it is authoritative
 - **ISSUE:** spawn the implementer pane, send the initial issue-resolver prompt, and validate exactly one open linked PR. Then spawn the reviewer.
 - **PR:** spawn the reviewer first. Do not spawn an implementer or FIXER, and never call `issue-resolver`.
 
-Use `herdr-agent-comms` readiness/send/wait mechanics. Boot workers before sending long tasks. After each worker is ready, pass the **Autonomous Worker Boot Gate** before sending role prompts.
+Use `herdr-agent` readiness/send/wait mechanics. Boot workers before sending long tasks. After each worker is ready, pass the **Autonomous Worker Boot Gate** before sending role prompts.
 
 ## Phase 3 — Review / Fix ROUNDs
 
@@ -278,4 +278,4 @@ A PASS requires the phase's criterion in **Acceptance Criteria** above.
 - `references/output-format.md` — mode-specific Step Completion Reports and handoffs
 - `references/vocabulary-and-config.md` — leading words and `work_loop.*` config keys
 - `references/error-messages.md` — exact stop/handoff blocks
-- Required skills: `herdr-agent-comms`, `issue-pr-review`; ISSUE also requires `issue-resolver`
+- Required skills: `herdr-agent`, `issue-pr-review`; ISSUE also requires `issue-resolver`
