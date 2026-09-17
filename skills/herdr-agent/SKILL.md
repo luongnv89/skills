@@ -2,10 +2,10 @@
 name: herdr-agent
 description: "Manage AI agent fleets in Herdr: tile root + sub-agents in one tab, start/prompt/wait/read/monitor via the herdr agent CLI, steer any pane; `help` lists every operation. Use for Herdr fleets. Don't use for tmux, screen, or non-Herdr terminals."
 license: MIT
-compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. The agent surface (`agent start`, `agent prompt --wait`, `agent wait`) and `api snapshot` are load-bearing."
+compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.1.0
+  version: 3.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -68,7 +68,8 @@ HOW IT BEHAVES
 
 WHAT IT NEEDS
   herdr 0.9.0 or later on PATH, a running server (`herdr status`), and this
-  session inside a Herdr pane (HERDR_ENV=1).
+  session inside a Herdr pane (HERDR_ENV=1). Default same-kind launches need
+  the server's `pane process-info` API to return full argv.
   Not for tmux or GNU screen — use tmux-agent-comms there.
 ```
 
@@ -95,7 +96,7 @@ For a narrower question such as how to broadcast, answer from that one phase ins
 7. **Surface blockers.** A trust, auth, or permission prompt needs a human. Focus the pane, notify, and never answer the dialog for them.
 8. **Confirm destruction.** Closing panes, tabs, workspaces, or the server can lose work. Obtain explicit approval and preserve the orchestrator pane unless the user says otherwise.
 9. **Gate your own context.** Self-check at every Phase 8 gate point; at or above the threshold, HANDOFF instead of continuing to fill this window.
-10. **Mirror the main agent.** Start every worker, including a HANDOFF successor, on the **inherited launch profile**: the same harness kind, model, thinking level, and setup flags as the main agent. Change only what the user names for that worker, or what a calling skill's launch contract requires (for example `--without flags` for a skill that demands bare launches). A field is named only by a concrete value: a kind, a model ID or alias, a thinking level, or a flag. Ask when a request is vague ("something cheaper") or names a model from another harness without a kind. A worker of a different kind inherits nothing else. Never guess a value you cannot read; report it UNKNOWN.
+10. **Mirror the main agent.** Start every worker, including a HANDOFF successor, on the **inherited launch profile**: the same harness kind, model, thinking level, and setup flags as the main agent. Change only what the user names for that worker, or what a calling skill's launch contract requires (for example `--without flags` for a skill that demands bare launches). A field is named only by a concrete value: a kind, a model ID or alias, a thinking level, or a flag. Ask when a request is vague ("something cheaper") or names a model from another harness without a kind. A worker of a different kind inherits nothing else. Never guess a value you cannot read: model or thinking may be reported UNKNOWN, but unreadable same-kind setup flags abort the launch unless `--without flags` explicitly opts out.
 
 ## Phase 1 — Resolve Root Context
 
@@ -121,7 +122,7 @@ python3 "$here/launch_profile.py" --root-pane "$root_pane" \
   --main-model "$main_model" --main-thinking "$main_thinking" >/dev/null
 ```
 
-Set `main_model` and `main_thinking` to your own model ID and thinking level, and leave either one empty rather than guess. On Claude Code, leave `main_thinking` empty, because the script reads `CLAUDE_EFFORT`. Relay the summary line to the user before the first split, including any `⚠` or `warning:` line. A worker with an `UNKNOWN` field still starts, on its config default. If the user already declined bypass for this run, pass `--without bypass` on every worker. `references/launch-profile.md` has the source order, per-kind flags, and what never carries over.
+Set `main_model` and `main_thinking` to your own model ID and thinking level, and leave either one empty rather than guess. On Claude Code, leave `main_thinking` empty, because the script reads `CLAUDE_EFFORT`. Relay the summary line to the user before the first split, including any `⚠` or `warning:` line. A worker with an `UNKNOWN` model or thinking level still starts on its config default. Missing or malformed root argv aborts a same-kind launch before the split; `--without flags` is the explicit reduced-inheritance opt-out. If the user already declined bypass for this run, pass `--without bypass` on every worker. `references/launch-profile.md` has the source order, per-kind flags, and what never carries over.
 
 Use the canonical `spawn_sub` workflow in `references/herdr-recipes.md`:
 
@@ -231,7 +232,7 @@ Acceptance criteria:
 - `herdr status` succeeds and every target resolves uniquely.
 - Root remains in its original pane and all default workers share its tab.
 - Spawned columns are equal within one terminal cell.
-- Every worker runs the main agent's launch profile (kind, model, thinking level, setup flags) except fields the user named. UNKNOWN fields and inherited permission bypass are reported, never guessed or hidden.
+- Every worker runs the main agent's launch profile (kind, model, thinking level, setup flags) except fields the user named. UNKNOWN model/thinking values and inherited permission bypass are reported; unreadable same-kind setup flags fail closed unless explicitly disabled.
 - Every prompt passed preflight and returned either success or a named error code.
 - Every agent ends as settled, blocked, stalled, timed out, failed, or skipped — none disappear from the report.
 - The closing status came from `fleet_status.py`, not from recollection.
@@ -248,6 +249,7 @@ Acceptance criteria:
 - Unequal grid: rerun the equalizer and abort worker launch if it still fails.
 - Wrong workspace or accidental tab: stop, preserve work, and ask before moving or closing panes.
 - Successor never acks: HANDOFF failed — stay main, keep the fleet, and report the orphan pane before asking to close it.
+- Root process-info has only `argv0`, no full `argv`: abort before splitting or starting; update/restart Herdr, or use `--without flags` only when reduced inheritance is intentional.
 - A start times out after inheriting a flag: the CLI rejected it; read the pane for its message before retrying.
 
 ## Emit the Step Completion Report

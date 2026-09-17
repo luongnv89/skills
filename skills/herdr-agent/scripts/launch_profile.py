@@ -26,13 +26,16 @@ Nothing but the kind is inherited when the worker's kind differs from the main
 agent's: a Claude model id or effort level means nothing to another CLI. Root
 argv is read only for kinds with a verified flag table (claude, pi, codex).
 Session, resume, print, prompt, credential-bearing and unrecognised flags are
-dropped and named, never guessed at. UNKNOWN is not an error: the worker starts
-on its config default and the profile line says so. Setup-flag values are never
-printed, because inline settings or MCP JSON can carry credentials.
+dropped and named, never guessed at. An UNKNOWN model or thinking level is not
+an error: the worker starts on its config default and the profile line says so.
+Unreadable setup flags fail closed unless --without flags explicitly disables
+their inheritance. Setup-flag values are never printed, because inline settings
+or MCP JSON can carry credentials.
 
 Exit codes:
     0  profile resolved (with --start: the agent also reported ready)
     1  error: herdr missing, main agent's kind unreadable and no --kind given,
+       same-kind root argv unreadable without --without flags,
        --model/--thinking for a kind with no flag mapping, or agent start failed
     2  usage error
 
@@ -334,23 +337,52 @@ def read_main_kind(root: str) -> tuple[str | None, str]:
 
 
 def read_root_argv(root: str, spec: dict) -> tuple[list[str] | None, str]:
-    """Return the tokens after the harness binary in the root pane's foreground argv."""
+    """Return tokens after the harness binary, requiring process-info's full argv."""
     data, err = herdr_json(["pane", "process-info", "--pane", root])
     if data is None:
         return None, err
-    info = (data.get("result") or {}).get("process_info") or {}
+    result = data.get("result")
+    info = result.get("process_info") if isinstance(result, dict) else None
+    if not isinstance(info, dict):
+        return None, "process-info returned a malformed result"
+    raw_procs = info.get("foreground_processes")
+    if not isinstance(raw_procs, list) or any(not isinstance(p, dict) for p in raw_procs):
+        return None, "process-info returned malformed foreground_processes"
     leader = info.get("foreground_process_group_id")
-    procs = [p for p in info.get("foreground_processes") or [] if isinstance(p, dict)]
-    for proc in sorted(procs, key=lambda p: p.get("pid") != leader):
-        argv = [str(t) for t in proc.get("argv") or []]
-        for idx, tok in enumerate(argv):
-            base = os.path.basename(tok)
-            for ext in (".js", ".mjs", ".cjs"):
-                if base.endswith(ext):
-                    base = base[: -len(ext)]
-            if base in spec["binaries"]:
-                return argv[idx + 1 :], ""
-    return None, "no foreground process runs the harness binary"
+    leaders = [proc for proc in raw_procs if proc.get("pid") == leader]
+    candidates = leaders or raw_procs
+
+    def binary_name(token: str) -> str:
+        base = os.path.basename(token)
+        for ext in (".js", ".mjs", ".cjs"):
+            if base.endswith(ext):
+                return base[: -len(ext)]
+        return base
+
+    for proc in candidates:
+        argv0 = proc.get("argv0")
+        hinted = isinstance(argv0, str) and binary_name(argv0) in spec["binaries"]
+        raw_argv = proc.get("argv")
+        if raw_argv is None:
+            if hinted:
+                return None, "process-info returned argv0 without full argv"
+            continue
+        if (
+            not isinstance(raw_argv, list)
+            or not raw_argv
+            or any(not isinstance(token, str) or not token for token in raw_argv)
+        ):
+            if hinted or leaders:
+                return None, "process-info returned malformed argv"
+            continue
+        indexes = [
+            idx for idx, token in enumerate(raw_argv)
+            if binary_name(token) in spec["binaries"]
+        ]
+        wrapped = indexes and indexes[0] == 1 and binary_name(raw_argv[0]) in {"node", "bun"}
+        if indexes and (hinted or indexes[0] == 0 or wrapped):
+            return raw_argv[indexes[0] + 1 :], ""
+    return None, "no foreground process has full argv for the harness binary"
 
 
 def resolve_field(spec, field, explicit, main_value, env, root_groups, explicit_groups):
@@ -428,8 +460,18 @@ def build_profile(args, native: list[str]) -> tuple[dict | None, list[str], str]
     if inherited:
         tail, perr = read_root_argv(root, spec)
         if tail is None:
-            warnings.append(f"root launch flags unreadable ({perr}); flags UNKNOWN")
-            flags_source = "UNKNOWN"
+            if "flags" not in args.without:
+                return None, [], (
+                    f"cannot safely inherit the main agent's setup flags ({perr}). "
+                    "The Herdr server's pane process-info API must provide full argv; "
+                    "update/restart the server, or pass --without flags to explicitly "
+                    "start with reduced inheritance."
+                )
+            warnings.append(
+                f"root launch flags unreadable ({perr}); setup flag inheritance "
+                "explicitly disabled"
+            )
+            flags_source = "opted out"
         else:
             root_groups, dropped = parse_groups(spec, tail, strict=True)
             flags_source = "root argv"

@@ -15,6 +15,8 @@ Set `main_model` and `main_thinking` from your own runtime: the exact model ID a
 
 The command writes one summary line to stderr and the profile JSON to stdout. Relay the summary to the user before the first split, including any `⚠` or `warning:` line. Each worker is then started with `--start` (see `spawn_sub` in `herdr-recipes.md`), which queries Herdr and the environment again for that worker. If the user changes your model or thinking level mid-run, update `main_model` and `main_thinking` before the next wave.
 
+Herdr 0.9.0 supplies the required `pane process-info` endpoint, but its payload can contain only `argv0` for the harness process. No supported minimum version makes full argv unconditional on every platform, so the script validates the response at runtime. A same-kind launch fails before `agent start` unless the matching process has a non-empty string-array `argv`. Update and restart the Herdr server when it cannot provide one. If reduced inheritance is intentional, `--without flags` is the explicit opt-out; it permits the launch and reports that setup-flag inheritance was disabled.
+
 ```text
 Launch profile: claude (inherited from main) · model claude-opus-5[1m] (self-report) · thinking max (env CLAUDE_EFFORT) · flags none (root argv)
 ```
@@ -31,7 +33,7 @@ Launch profile: claude (inherited from main) · model claude-opus-5[1m] (self-re
 
 The main agent's own report ranks above argv because argv only records values from launch time, and the harness config can differ from both. A live check found the main agent running at effort `max` while `~/.claude/settings.json` said `medium`, so a worker started with no flags would have run at `medium`.
 
-**UNKNOWN is not a failure.** The worker starts on its config default, and the summary says `model UNKNOWN (worker uses its config default)`. Report it and never guess a value.
+**UNKNOWN applies only to model and thinking.** The worker starts on its config default, and the summary says `model UNKNOWN (worker uses its config default)`. Setup flags are security-relevant: missing, empty, malformed, or otherwise unreadable root argv fails closed instead of being labeled UNKNOWN. Only `--without flags` permits that reduced-inheritance launch.
 
 ## The kind gate
 
@@ -61,8 +63,10 @@ Checked against the `--help` output of claude 2.1.274, pi and codex 0.153.4. A k
 
 The main agent's permission settings are part of its setup. `--dangerously-skip-permissions`, `--permission-mode bypassPermissions`, codex `--sandbox danger-full-access` or `--ask-for-approval never`, and pi `--approve` all carry over. This gives a worker no access the orchestrator lacks, since the orchestrator can already run commands in any worker pane. Without them, every worker would stop at a permission dialog that Rule 7 says only the human may answer.
 
-Carrying them over is never silent. The summary prints `⚠ permission bypass inherited from main: …`, and that line must reach the user before the first split. If the user wants workers without it, pass `--without bypass`. To drop every inherited setup flag but keep the model and thinking level, pass `--without flags`. A permission posture set through shared settings, such as `defaultMode`, reaches the worker through its config and is not affected by these options.
+Carrying them over is never silent. The summary prints `⚠ permission bypass inherited from main: …`, and that line must reach the user before the first split. If the user wants workers without it, pass `--without bypass`. To drop every inherited setup flag but keep a model and thinking level recoverable from self-report, environment, or readable argv, pass `--without flags`. This is also the only explicit opt-out when process-info cannot provide full argv; a missing launch-time model or thinking flag may then fall back to the CLI config default. A permission posture set through shared settings, such as `defaultMode`, reaches the worker through its config and is not affected by these options.
 
 ## When a start fails
+
+If process-info omits full argv, `launch_profile.py` exits before calling `herdr agent start`. Update and restart the Herdr server, or retry with `--without flags` only when launching without inherited setup flags is intentional.
 
 A flag the CLI rejects makes the agent exit immediately. `herdr agent start` then waits out its whole timeout before it returns an error. `launch_profile.py` reports the failure and names the pane. Read the CLI's own message with `herdr pane read <pane> --source recent-unwrapped --lines 20`, fix or `--without` the offending field, and start again.

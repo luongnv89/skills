@@ -254,12 +254,80 @@ class LaunchProfileTests(unittest.TestCase):
         self.assertFalse(profile["inherited"])
         self.assertEqual(profile["model"], {"value": "opus", "source": "self-report"})
 
-    def test_unreadable_process_info_leaves_flags_unknown_but_still_starts(self):
+    def test_unreadable_process_info_fails_closed_before_start(self):
         self.h.set_root(processes=[["claude", "--ide"]], fail_process_info=True)
         res, pane = self.start("--main-model", "opus")
+        self.assertEqual(res.returncode, 1)
+        self.assertNotIn("start_args", pane)
+        self.assertIn("cannot safely inherit", res.stderr)
+        self.assertIn("--without flags", res.stderr)
+
+        res, pane = self.start("--main-model", "opus", "--without", "flags")
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(pane["start_args"], ["--model", "opus"])
-        self.assertIn("flags UNKNOWN", res.stderr)
+        self.assertIn("setup flag inheritance explicitly disabled", res.stderr)
+
+    def test_real_090_argv0_only_payload_fails_closed_before_start(self):
+        observed_payload = [
+            {
+                "argv": ["rg", "--", "pi", "/Users/test/project"],
+                "argv0": "rg",
+                "cmdline": "rg -- pi /Users/test/project",
+                "cwd": "/Users/test/project",
+                "name": "rg",
+                "pid": 48014,
+            },
+            {
+                "argv0": "pi",
+                "cwd": "/Users/test/project",
+                "name": "node",
+                "pid": 10764,
+            },
+        ]
+        self.h.set_root(kind="pi", process_info_processes=observed_payload, leader=1)
+        res, pane = self.start(
+            "--kind", "pi", "--main-model", "anthropic/claude-sonnet-4"
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertNotIn("start_args", pane)
+        self.assertIn("process-info returned argv0 without full argv", res.stderr)
+        self.assertIn("--without flags", res.stderr)
+
+        res, pane = self.start("--without", "bypass")
+        self.assertEqual(res.returncode, 1)
+        self.assertNotIn("start_args", pane)
+
+        res, pane = self.start("--kind", "claude")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(pane["kind"], "claude")
+        self.assertEqual(pane["start_args"], [])
+
+    def test_argv0_only_payload_starts_only_with_explicit_flags_opt_out(self):
+        argv0_only = [{
+            "argv0": "pi",
+            "cwd": "/Users/test/project",
+            "name": "node",
+            "pid": 10764,
+        }]
+        self.h.set_root(kind="pi", process_info_processes=argv0_only, leader=0)
+        res, pane = self.start(
+            "--main-model", "anthropic/claude-sonnet-4", "--without", "flags"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(pane["start_args"], ["--model", "anthropic/claude-sonnet-4"])
+        self.assertIn("setup flag inheritance explicitly disabled", res.stderr)
+        self.assertIn("flags none (opted out)", res.stderr)
+
+    def test_malformed_argv_fails_closed_before_start(self):
+        malformed_values = ("pi --no-tools", [], ["pi", ""], ["pi", 7])
+        for raw_argv in malformed_values:
+            with self.subTest(argv=raw_argv):
+                malformed = [{"argv": raw_argv, "argv0": "pi", "pid": 10764}]
+                self.h.set_root(kind="pi", process_info_processes=malformed, leader=0)
+                res, pane = self.start()
+                self.assertEqual(res.returncode, 1)
+                self.assertNotIn("start_args", pane)
+                self.assertIn("process-info returned malformed argv", res.stderr)
 
     def test_credential_and_setup_flag_values_are_never_printed(self):
         self.h.set_root(kind="pi", processes=[[

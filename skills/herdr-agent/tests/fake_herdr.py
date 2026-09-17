@@ -27,6 +27,7 @@ Per-pane test hooks beyond the fields above:
   "processes": [["claude", "--model", "opus"], ...]  # foreground argv lists
   "leader": 0                    # index of the process group leader
   "fail_process_info": true      # `pane process-info` fails
+  "process_info_processes": [...]  # exact process-info process fixtures
 `agent start` records its --kind as "kind" and the args after `--` as
 "start_args" on the pane, so a test can assert exactly what was launched.
 
@@ -395,16 +396,18 @@ def cmd_pane_process_info(args):
     pane = state["panes"][pid]
     if pane.get("fail_process_info"):
         return herdr_error("internal", "simulated process-info failure")
-    procs = [
-        {
-            "argv": argv,
-            "argv0": os.path.basename(argv[0]) if argv else "",
-            "cmdline": " ".join(argv),
-            "name": os.path.basename(argv[0]) if argv else "",
-            "pid": 100 + n,
-        }
-        for n, argv in enumerate(pane.get("processes", []))
-    ]
+    procs = pane.get("process_info_processes")
+    if procs is None:
+        procs = [
+            {
+                "argv": argv,
+                "argv0": os.path.basename(argv[0]) if argv else "",
+                "cmdline": " ".join(argv),
+                "name": os.path.basename(argv[0]) if argv else "",
+                "pid": 100 + n,
+            }
+            for n, argv in enumerate(pane.get("processes", []))
+        ]
     leader = procs[pane.get("leader", 0)]["pid"] if procs else None
     print(
         json.dumps(
