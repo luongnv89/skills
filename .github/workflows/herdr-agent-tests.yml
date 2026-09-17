@@ -38,6 +38,7 @@ jobs:
           python3 -m py_compile \
             skills/herdr-agent/scripts/badge.py \
             skills/herdr-agent/scripts/fleet_status.py \
+            skills/herdr-agent/scripts/launch_profile.py \
             skills/herdr-agent/scripts/next_grid_split.py \
             skills/herdr-agent/scripts/preflight_send.py \
             skills/herdr-agent/scripts/wait_for_idle.py \

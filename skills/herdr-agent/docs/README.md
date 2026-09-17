@@ -15,6 +15,7 @@
 - **Root never replaced by accident** — the orchestrator pane stays put; only worker panes are closed on teardown.
 - **Context handoff** — when the main agent's own window passes 50%, it spawns a successor orchestrator pane, hands over a compact fleet brief, and goes read-only so a long run never dies of a full context.
 - **Fleet spawn** — `herdr agent start` places and readiness-gates each worker in one call; native agent flags after `--`.
+- **Workers mirror the main agent** — every sub-agent, HANDOFF successor included, starts on the same harness, model, thinking level and launch flags as the agent running the skill. Name a different kind, model or thinking level to override. An `UNKNOWN` model or thinking value falls back to the CLI's config default; unreadable same-kind launch flags fail closed unless `--without flags` explicitly opts out.
 - **Message & steer** — `herdr agent prompt --wait` submits and waits in a single server-side request, so there is no send-then-wait race to close.
 - **Monitor** — one `herdr api snapshot` call renders the whole fleet, sorted so blocked agents come first.
 - **Badge** — each worker's pane carries its assigned job in the human's sidebar via `herdr pane report-metadata`.
@@ -27,7 +28,8 @@
 
 | Say this... | Skill will... |
 |---|---|
-| "Spin up 2 Herdr agents beside me: reviewer and tests" | Build a grid in the root tab, launch agents in equal-width columns |
+| "Spin up 2 Herdr agents beside me: reviewer and tests" | Build a grid in the root tab, launch agents in equal-width columns on your own harness, model and thinking level |
+| "Add a codex agent to get a second opinion" | Start a codex worker; your model, thinking level and flags are not carried into a different CLI |
 | "Ask the reviewer agent what it found" | Resolve target, send, wait on status, relay reply |
 | "Broadcast 'pull main' to all fleet agents" | Fan-out send + concurrent collect |
 | "Focus the tests pane so I can steer" | `herdr agent focus tests` |
@@ -39,7 +41,7 @@
 ```mermaid
 graph TD
     A["Resolve root pane + tab + workspace"] --> B["next_grid_split · split rightmost + --equalize to equal width"]
-    B --> C["herdr agent start · returns only when ready"]
+    B --> C["launch_profile.py --start · mirrors main, returns only when ready"]
     C --> C2["badge.py · job + role in the sidebar"]
     C2 --> D["agent prompt --wait · submit and wait in one call"]
     D --> E["Map settled | blocked | stalled | timeout"]
@@ -99,7 +101,7 @@ Or describe the goal — "tile a reviewer agent with my pane", "launch a Herdr f
 
 ## Requirements
 
-- Herdr **0.9.0 or later** (`herdr --version`) and server running (`herdr status`) — the agent surface and `api snapshot` are load-bearing
+- Herdr **0.9.0 or later** (`herdr --version`) and server running (`herdr status`) — default same-kind launches additionally require `pane process-info` to return full argv; version alone cannot guarantee platform process visibility
 - Prefer running the orchestrator **inside** Herdr (`HERDR_ENV=1`) so `$HERDR_PANE_ID` is the root
 - Agent CLIs on PATH (`pi`, `claude`, `codex`, …) as needed
 - Optional: `herdr integration install <agent>` for better status

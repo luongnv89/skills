@@ -2,16 +2,16 @@
 name: herdr-agent
 description: "Manage AI agent fleets in Herdr: tile root + sub-agents in one tab, start/prompt/wait/read/monitor via the herdr agent CLI, steer any pane; `help` lists every operation. Use for Herdr fleets. Don't use for tmux, screen, or non-Herdr terminals."
 license: MIT
-compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. The agent surface (`agent start`, `agent prompt --wait`, `agent wait`) and `api snapshot` are load-bearing."
+compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.0.0
+  version: 3.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Herdr Agent
 
-Build and control an AI-agent fleet in the root agent's Herdr tab. Keep the **root pane** as orchestrator; add each **sub-agent** as a right-hand split; equalize all columns; then start, prompt, wait, read, monitor, steer, or tear down through the `herdr` CLI.
+Build and control an AI-agent fleet in the root agent's Herdr tab. Keep the **root pane** as orchestrator; add each **sub-agent** as a right-hand split running the main agent's own launch profile; equalize all columns; then start, prompt, wait, read, monitor, steer, or tear down through the `herdr` CLI.
 
 Use Herdr concepts, not tmux assumptions. Let the server do the work: `herdr agent prompt --wait` submits and waits in one request, `herdr agent wait` is event-driven, and `herdr api snapshot` reports the whole fleet in one call. Relay reply deltas rather than whole panes to protect the context and token budget.
 
@@ -32,6 +32,7 @@ Use Herdr concepts, not tmux assumptions. Let the server do the work: `herdr age
 Read only the reference needed by that branch:
 
 - See `references/herdr-recipes.md` for guarded grid spawning, equalization semantics, multi-line prompts, focus, and troubleshooting.
+- See `references/launch-profile.md` for where a worker's kind, model, thinking level, and flags come from, the kind gate, and what never carries over.
 - See `references/delivery-and-waiting.md` for the one-call prompt contract, error codes, wait semantics, reading replies, and the no-agent fallback.
 - See `references/fleet-monitoring.md` for snapshot status, sidebar badges, notifications, and the run report.
 - See `references/context-succession.md` for the main agent's context gate, HANDOFF procedure, and handoff brief template.
@@ -57,6 +58,9 @@ WHAT YOU CAN ASK FOR
 HOW IT BEHAVES
   Your pane stays the orchestrator and is never closed by accident.
   Workers land as equal-width columns in that same tab, not new tabs.
+  New agents mirror yours: same harness, model, thinking level and launch
+  flags, unless you name something else. An inherited permission bypass
+  is announced before any agent starts.
   A prompt aimed at a busy or blocked agent is refused before it is sent.
   Every send waits for a settled state, and blocked, stalled or timed-out
   agents are reported rather than silently retried.
@@ -64,7 +68,8 @@ HOW IT BEHAVES
 
 WHAT IT NEEDS
   herdr 0.9.0 or later on PATH, a running server (`herdr status`), and this
-  session inside a Herdr pane (HERDR_ENV=1).
+  session inside a Herdr pane (HERDR_ENV=1). Default same-kind launches need
+  the server's `pane process-info` API to return full argv.
   Not for tmux or GNU screen — use tmux-agent-comms there.
 ```
 
@@ -91,6 +96,7 @@ For a narrower question such as how to broadcast, answer from that one phase ins
 7. **Surface blockers.** A trust, auth, or permission prompt needs a human. Focus the pane, notify, and never answer the dialog for them.
 8. **Confirm destruction.** Closing panes, tabs, workspaces, or the server can lose work. Obtain explicit approval and preserve the orchestrator pane unless the user says otherwise.
 9. **Gate your own context.** Self-check at every Phase 8 gate point; at or above the threshold, HANDOFF instead of continuing to fill this window.
+10. **Mirror the main agent.** Start every worker, including a HANDOFF successor, on the **inherited launch profile**: the same harness kind, model, thinking level, and setup flags as the main agent. Change only what the user names for that worker, or what a calling skill's launch contract requires (for example `--without flags` for a skill that demands bare launches). A field is named only by a concrete value: a kind, a model ID or alias, a thinking level, or a flag. Ask when a request is vague ("something cheaper") or names a model from another harness without a kind. A worker of a different kind inherits nothing else. Never guess a value you cannot read: model or thinking may be reported UNKNOWN, but unreadable same-kind setup flags abort the launch unless `--without flags` explicitly opts out.
 
 ## Phase 1 — Resolve Root Context
 
@@ -107,7 +113,16 @@ Resolve `project_dir` from the root pane's cwd, falling back to the current dire
 
 ## Phase 2 — Spawn and Ready the Fleet
 
-Before spawning, define each worker's unique name, agent kind, task, and expected deliverable. Placement and launch are two steps: `herdr agent start` never creates or moves layout, and requires a pane already sitting at its shell prompt.
+Before spawning, define each worker's unique name, task, and expected deliverable. Placement and launch are two steps: `herdr agent start` never creates or moves layout, and requires a pane already sitting at its shell prompt.
+
+Resolve the inherited launch profile once per spawn wave, as its own tool call before the call that splits, so the user sees it before any agent starts:
+
+```bash
+python3 "$here/launch_profile.py" --root-pane "$root_pane" \
+  --main-model "$main_model" --main-thinking "$main_thinking" >/dev/null
+```
+
+Set `main_model` and `main_thinking` to your own model ID and thinking level, and leave either one empty rather than guess. On Claude Code, leave `main_thinking` empty, because the script reads `CLAUDE_EFFORT`. Relay the summary line to the user before the first split, including any `⚠` or `warning:` line. A worker with an `UNKNOWN` model or thinking level still starts on its config default. Missing or malformed root argv aborts a same-kind launch before the split; `--without flags` is the explicit reduced-inheritance opt-out. If the user already declined bypass for this run, pass `--without bypass` on every worker. `references/launch-profile.md` has the source order, per-kind flags, and what never carries over.
 
 Use the canonical `spawn_sub` workflow in `references/herdr-recipes.md`:
 
@@ -115,14 +130,14 @@ Use the canonical `spawn_sub` workflow in `references/herdr-recipes.md`:
 2. Split with `--direction right --no-focus` in `project_dir`, passing `--env "HERDR_ROLE=<name>"` so the worker can read its own role instead of being told it in every prompt.
 3. Parse the new pane ID from JSON.
 4. Run `next_grid_split.py --equalize --root-pane "$root_pane"`; abort on any error or non-convergence.
-5. Rename the pane, then `herdr agent start <name> --kind KIND --pane <id> --timeout 60000`.
+5. Rename the pane, then start it by running the same command plus `--start <name> --pane <id> --timeout 60000`. Add only what the user named: `--kind`, `--model`, `--thinking`, `--without bypass|flags`, or native flags after `--`. The command runs `herdr agent start` on the profile.
 6. Badge the worker with its job: `python3 scripts/badge.py <name> --title "<job>" --token role=<role>`.
 
-`agent start` **is** the readiness gate: it returns only once Herdr detects the expected agent and considers it interactive-ready, and returns `agent_not_ready` immediately if the agent booted into a dialog. There is no separate readiness pass. Names must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Pass native agent flags only after `--`; never fold the task into argv.
+`agent start` **is** the readiness gate: it returns only once Herdr detects the expected agent and considers it interactive-ready, and returns `agent_not_ready` immediately if the agent booted into a dialog. There is no separate readiness pass. Names must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Never fold the task into argv.
 
 Confirm the fleet with `python3 scripts/fleet_status.py --tab "$root_tab" --fail-on-blocked` before assigning any work.
 
-**Done when:** every worker has a unique name and pane ID in `root_tab`, the layout widths differ by at most one cell, root remains active, and every `agent start` returned success.
+**Done when:** every worker has a unique name and pane ID in `root_tab`, the layout widths differ by at most one cell, root remains active, the launch-profile summary reached the user, and every start returned success.
 
 ## Phase 3 — Resolve One Exact Target
 
@@ -192,7 +207,7 @@ Long fleet runs outlive one context window. Self-check your own usage at three g
 | `P < threshold` | Continue as main |
 | UNKNOWN or unavailable | Count relayed reads and spawn waves; HANDOFF at 20 reads or 4 spawn waves |
 
-HANDOFF spawns a successor with the same Phase 2 machinery — `main-g<N>` in the root tab, equalized, started through `agent start` — then delivers a compact handoff brief through the Phase 4 cycle and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that pane is the orchestrator; this pane goes read-only and announces the new one with `herdr agent focus main-g<N>`. A successor that fails to start or never acks means the HANDOFF failed: stay main, report the orphan pane, and ask before closing it.
+HANDOFF spawns a successor with the same Phase 2 machinery — `main-g<N>` in the root tab, equalized, started on the inherited launch profile so it runs your harness, model, and thinking level — then delivers a compact handoff brief through the Phase 4 cycle and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that pane is the orchestrator; this pane goes read-only and announces the new one with `herdr agent focus main-g<N>`. A successor that fails to start or never acks means the HANDOFF failed: stay main, report the orphan pane, and ask before closing it.
 
 Read `references/context-succession.md` for the gate-point table, UNKNOWN fallback logging, full procedure, and the brief template. Never paste transcripts or diffs into a brief.
 
@@ -205,6 +220,7 @@ Expected output for a successful fleet operation:
 ```text
 Fleet: PASS
 Root kept: w26:p1
+Profile: claude · claude-opus-5[1m] · thinking max (inherited)
 Workers: reviewer=settled, tests=settled
 Layout: 3 equal-width columns
 Replies: 2 captured, 0 blocked, 0 timed out
@@ -216,6 +232,7 @@ Acceptance criteria:
 - `herdr status` succeeds and every target resolves uniquely.
 - Root remains in its original pane and all default workers share its tab.
 - Spawned columns are equal within one terminal cell.
+- Every worker runs the main agent's launch profile (kind, model, thinking level, setup flags) except fields the user named. UNKNOWN model/thinking values and inherited permission bypass are reported; unreadable same-kind setup flags fail closed unless explicitly disabled.
 - Every prompt passed preflight and returned either success or a named error code.
 - Every agent ends as settled, blocked, stalled, timed out, failed, or skipped — none disappear from the report.
 - The closing status came from `fleet_status.py`, not from recollection.
@@ -232,6 +249,8 @@ Acceptance criteria:
 - Unequal grid: rerun the equalizer and abort worker launch if it still fails.
 - Wrong workspace or accidental tab: stop, preserve work, and ask before moving or closing panes.
 - Successor never acks: HANDOFF failed — stay main, keep the fleet, and report the orphan pane before asking to close it.
+- Root process-info has only `argv0`, no full `argv`: abort before splitting or starting; update/restart Herdr, or use `--without flags` only when reduced inheritance is intentional.
+- A start times out after inheriting a flag: the CLI rejected it; read the pane for its message before retrying.
 
 ## Emit the Step Completion Report
 
@@ -241,6 +260,7 @@ Acceptance criteria:
   Server:              √ pass
   Root resolved:       √ pass (pane · tab · workspace)
   Targets:             √ pass (N/N unique)
+  Launch profile:      √ pass (kind · model · thinking · N flags; UNKNOWN and ⚠ named — if spawning; otherwise — n/a)
   Layout/readiness:    √ pass (if spawning; otherwise — n/a)
   Delivery:            √ pass (if prompting; otherwise — n/a)
   Replies:             √ pass (settled · blocked/stalled/timeouts reported)
