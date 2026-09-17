@@ -50,8 +50,8 @@ Anti-thrash: a generation may not HANDOFF until it has completed at least one fu
 ## HANDOFF procedure
 
 1. **Record the brief** from the template below. Compact state only — never transcripts, full diffs, or pasted worker output.
-2. **Spawn the successor** with the canonical `spawn_sub` workflow in `herdr-recipes.md`: plan the rightmost split, split `--direction right --no-focus` in `project_dir`, parse the pane id, equalize as a hard gate. Name it `main-g<N>` for generation `N` (the original main is `g1`); on collision, suffix an epoch. Use the **same agent kind the outgoing main is running** unless the user named a different one — a successor on an unfamiliar CLI cannot honor the brief. If the grid already holds more than four panes, warn that columns are cramped and ask before adding the successor column.
-3. **Ready-gate it** with `herdr agent start main-g<N> --kind KIND --pane <id> --timeout 60000`, which returns only when the successor is interactive-ready. On non-zero, abort the HANDOFF: stay main, report the orphan pane id, and ask before closing it. A failed HANDOFF never leaves the fleet without an orchestrator.
+2. **Place the successor** with the placement half of `spawn_sub` in `herdr-recipes.md` (not `spawn_sub` itself, which also starts the agent): plan the rightmost split, split `--direction right --no-focus` in `project_dir`, parse the pane id, equalize as a hard gate. Name it `main-g<N>` for generation `N` (the original main is `g1`); on collision, suffix an epoch. Start it on the **inherited launch profile** (`launch-profile.md`), meaning the outgoing main's harness kind, model, thinking level and setup flags, unless the user named a different one for the successor itself. A successor on an unfamiliar CLI or a weaker model cannot honor the brief. Overrides the user set for workers (for example "no bypass for workers") do not apply to the successor, which replaces the main agent; record them in the brief so the successor keeps applying them. If the grid already holds more than four panes, warn that columns are cramped and ask before adding the successor column.
+3. **Ready-gate it** with `launch_profile.py --root-pane <this pane> --main-model … --main-thinking … --start main-g<N> --pane <id> --timeout 60000`, plus any override the user named for the successor. That runs `herdr agent start` on the profile and returns only when the successor is interactive-ready. On non-zero, abort the HANDOFF: stay main, report the orphan pane id, and ask before closing it. A failed HANDOFF never leaves the fleet without an orchestrator.
 4. **Send the brief** through the full Phase 4 cycle — `preflight_send.py`, then `herdr agent prompt main-g<N> "<brief>" --wait --timeout 180000`. The prompt argument carries newlines directly; no marker or baseline is needed.
 5. **Wait for the ack** `HANDOFF ACCEPTED gen=<N> fleet=<k>`: the `--wait` on that prompt settles the successor, then `herdr agent read main-g<N> --source recent-unwrapped --lines 40` must contain it. No ack (timeout, stall, or blocked) means the HANDOFF failed — stay main and report.
 6. **Retire this pane.** After the ack, issue no further writes to any fleet pane: no sends, no splits, no closes. Remain available for read-only reporting so the human is not stranded.
@@ -67,6 +67,8 @@ generation: {N}   (previous main: {old_pane} — retired, read-only)
 handoff threshold: {T}%   — keep gating your own context at this number
 workspace: {ws}   tab: {root_tab}   project_dir: {project_dir}
 your pane: {new_pane}   — use it as root_pane for every later operation
+launch profile: {kind · model · thinking · user-named overrides, e.g. without bypass}
+                — start every new worker on it
 
 objective: {one-paragraph restatement of the user's ask}
 

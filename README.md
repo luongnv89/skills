@@ -253,7 +253,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**opencode-handoff**](skills/opencode-handoff/) | 1.0.5 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
 | [**opencode-runner**](skills/opencode-runner/) | 1.5.0 | medium | Delegate work to opencode free cloud models |
 | [**opencode-sandbox**](skills/opencode-sandbox/) | 3.0.1 | medium | Run OpenCode in a kept sandbox (SSH/gh on by default) |
-| [**herdr-agent**](skills/herdr-agent/) | 3.0.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
+| [**herdr-agent**](skills/herdr-agent/) | 3.1.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.4.1 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.3.1 | medium | Spawn, message, read CLI agents in tmux |
 

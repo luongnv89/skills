@@ -51,9 +51,23 @@ for cand in \
   ".claude/skills/herdr-agent/scripts" \
   "$HOME/.claude/skills/herdr-agent/scripts" \
   "$HOME/.agents/skills/herdr-agent/scripts"; do
-  if [ -f "$cand/next_grid_split.py" ]; then here="$cand"; break; fi
+  if [ -f "$cand/launch_profile.py" ]; then here="$cand"; break; fi   # 3.1.0+ only
 done
-[ -n "$here" ] || { echo "Error: next_grid_split.py not found in any known install location (repo, .agents/, .claude/, \$HOME). Fix the install or set \$here manually before retrying." >&2; exit 1; }
+[ -n "$here" ] || { echo "Error: launch_profile.py not found in any known install location (repo, .agents/, .claude/, \$HOME). Fix the install or set \$here manually before retrying." >&2; exit 1; }
+
+# The inherited launch profile (references/launch-profile.md): every worker runs
+# the main agent's harness kind, model, thinking level and setup flags unless
+# the user names others. Set these to the exact values your harness states, or
+# leave them empty; never guess. On Claude Code leave main_thinking empty; the
+# script reads CLAUDE_EFFORT. Shell variables do not survive between tool calls:
+# define them, $here and spawn_sub in the same invocation that spawns.
+# Run this resolve as its OWN tool call first and relay its summary (and any ⚠
+# line) to the user before the call that splits.
+main_model=""      # e.g. claude-opus-5[1m]
+main_thinking=""
+python3 "$here/launch_profile.py" --root-pane "$root_pane" \
+  --main-model "$main_model" --main-thinking "$main_thinking" >/dev/null \
+  || { echo "Error: launch profile unresolved; pass --kind for each worker." >&2; exit 1; }
 
 # Canonical guarded spawn: every critical step is checked, the pane id is
 # printed ONLY after `herdr agent start` reports the agent ready, and any
@@ -68,8 +82,14 @@ done
 # burning the whole timeout, and the name still resolves for `agent read` and
 # `agent send-keys` so you can show the human what it is asking.
 spawn_sub() {
-  local name=$1 kind=$2; shift 2   # remaining args, if any, are native agent args
+  local name=$1; shift   # the rest are launch_profile.py overrides:
+                         # [--kind K] [--model M] [--thinking T] [--without bypass|flags] [-- native flags]
   local plan split_from ratio j pane
+  # Resolve this worker's profile (with its overrides) BEFORE touching layout,
+  # so a bad override fails without leaving an orphan split pane.
+  python3 "$here/launch_profile.py" --root-pane "$root_pane" \
+    --main-model "${main_model:-}" --main-thinking "${main_thinking:-}" "$@" >/dev/null 2>&1 || {
+    echo "Error: launch profile for '$name' failed; nothing was split." >&2; return 1; }
   herdr agent list | grep -q "\"name\":\"$name\"" && name="${name}-$(date +%s)"
   # plan line: "split <rightmost> right --ratio <1/N>" (new right pane -> 1/N target)
   plan=$(python3 "$here/next_grid_split.py" --root-pane "$root_pane") || {
@@ -92,13 +112,14 @@ spawn_sub() {
     return 1
   fi
   herdr pane rename "$pane" "$name" >/dev/null || { echo "Error: rename failed; orphan $pane." >&2; return 1; }
-  # `agent start` names the agent itself — no separate `agent rename` — and
-  # blocks until it is interactive-ready. Native agent flags go after `--`;
-  # never fold the task itself into argv.
-  local extra=()
-  [ "$#" -gt 0 ] && extra=(-- "$@")
-  herdr agent start "$name" --kind "$kind" --pane "$pane" --timeout 60000 \
-    ${extra[@]+"${extra[@]}"} >/dev/null \
+  # `launch_profile.py --start` runs `herdr agent start` on the inherited launch
+  # profile: it names the agent itself (no separate `agent rename`) and blocks
+  # until it is interactive-ready. A user-named kind, model, thinking level or
+  # native flag replaces the inherited value; native flags go after `--`.
+  # Never fold the task itself into argv.
+  python3 "$here/launch_profile.py" --root-pane "$root_pane" \
+    --main-model "${main_model:-}" --main-thinking "${main_thinking:-}" \
+    --start "$name" --pane "$pane" --timeout 60000 "$@" >/dev/null \
     || { echo "Error: agent start failed for '$name'; orphan $pane." >&2; return 1; }
   printf '%s\n' "$pane"   # ONLY after the agent reported ready
 }
@@ -108,9 +129,9 @@ spawn_sub() {
 # next spawn would build on a broken layout. Each call places the pane AND waits
 # for readiness, so a failure means the fleet is not up: abort rather than
 # assign work into a half-built grid.
-p_reviewer=$(spawn_sub reviewer claude) || { echo "reviewer failed; aborting" >&2; exit 1; }
-p_tests=$(spawn_sub tests pi --thinking low) || { echo "tests failed; aborting" >&2; exit 1; }
-# optional third: p_docs=$(spawn_sub docs claude) || { echo "docs failed; aborting" >&2; exit 1; }
+p_reviewer=$(spawn_sub reviewer) || { echo "reviewer failed; aborting" >&2; exit 1; }            # mirrors main
+p_tests=$(spawn_sub tests --thinking low) || { echo "tests failed; aborting" >&2; exit 1; }      # one field named
+# a different harness inherits nothing else: p_docs=$(spawn_sub docs --kind pi) || { echo "docs failed; aborting" >&2; exit 1; }
 
 # Badge each worker so the human can read the fleet from the sidebar without
 # opening a single pane (see references/fleet-monitoring.md).
@@ -160,7 +181,7 @@ are always two steps in this order:
 | Step | Command |
 |---|---|
 | 1. Place | `next_grid_split.py` plan → `herdr pane split … --ratio R --no-focus` → `--equalize` |
-| 2. Launch | `herdr agent start <name> --kind KIND --pane <id> --timeout 60000 [-- <agent-args>]` |
+| 2. Launch | `launch_profile.py --start <name> --pane <id> …`, which runs `herdr agent start <name> --kind KIND --pane <id> --timeout 60000 -- <profile args>` |
 
 Never `herdr pane run <pane> "claude"` to launch an agent. That works, but you
 then own detection and readiness yourself; `agent start` returns only when Herdr
@@ -228,7 +249,9 @@ for name in reviewer tests docs; do
   j=$(herdr tab create --workspace "$ws" --cwd "$project_dir" --label "$name" --no-focus)
   pane=$(printf '%s' "$j" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["root_pane"]["pane_id"])')
   herdr pane rename "$pane" "$name"
-  herdr agent start "$name" --kind claude --pane "$pane" --timeout 60000 >/dev/null \
+  python3 "$here/launch_profile.py" --root-pane "$root_pane" \
+    --main-model "$main_model" --main-thinking "$main_thinking" \
+    --start "$name" --pane "$pane" --timeout 60000 >/dev/null \
     || { echo "Error: agent start failed for $name (pane $pane)." >&2; exit 1; }
 done
 ```
@@ -352,6 +375,7 @@ The hand-rolled equivalent, and why each safeguard exists, is in
 | `blocked` | Human must answer dialog; `agent focus` to show it |
 | Panes too narrow | Fewer agents (equal-width columns shrink every time); tab-per-agent only if user asks |
 | Wrong project files | Confirm `--cwd` before spawn |
+| Worker on a different model or thinking level than main | Read its launch-profile summary line: an `UNKNOWN` field fell back to config; pass `--main-model` / `--main-thinking` (`references/launch-profile.md`) |
 | Name not found | `herdr agent list`; names are unique session-wide |
 | Accidentally focused spawn | Pass `--no-focus` on `pane split` / `agent start` |
 

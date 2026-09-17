@@ -23,6 +23,12 @@ Per-pane test hooks beyond the fields above:
   "fail_prompt": "<error_code>"  # `agent prompt` fails with this code
   "no_agent": true               # agent-surface commands report agent_not_found
   "fail_metadata": true          # `pane report-metadata` fails
+  "kind": "pi"                   # detected agent kind (default claude)
+  "processes": [["claude", "--model", "opus"], ...]  # foreground argv lists
+  "leader": 0                    # index of the process group leader
+  "fail_process_info": true      # `pane process-info` fails
+`agent start` records its --kind as "kind" and the args after `--` as
+"start_args" on the pane, so a test can assert exactly what was launched.
 
 Supported subcommands (only what the scripts under test call):
   pane get <id>
@@ -32,6 +38,7 @@ Supported subcommands (only what the scripts under test call):
   pane run <id> <text...>
   pane send-keys <id> enter
   pane report-metadata <id> --source S [--title T] [--token K=V] [--ttl-ms N] ...
+  pane process-info --pane <id>
   agent get <name-or-id>
   agent list
   agent read <name-or-id> --source ... --lines N
@@ -330,11 +337,16 @@ def cmd_agent_wait(args):
 def cmd_agent_start(args):
     state = load_state()
     name = args[0]
-    pane_id = None
-    it = iter(args[1:])
+    rest, native = args[1:], []
+    if "--" in rest:
+        rest, native = rest[: rest.index("--")], rest[rest.index("--") + 1 :]
+    pane_id = kind = None
+    it = iter(rest)
     for a in it:
         if a == "--pane":
             pane_id = next(it)
+        elif a == "--kind":
+            kind = next(it)
     pid = find_pane_by_id(state, pane_id) if pane_id else None
     if pid is None:
         return herdr_error("not_found", f"pane {pane_id} not found")
@@ -344,6 +356,9 @@ def cmd_agent_start(args):
     pane["name"] = name
     pane["agent_status"] = "idle"
     pane["no_agent"] = False
+    if kind:
+        pane["kind"] = kind
+    pane["start_args"] = native
     save_state(state)
     print(json.dumps({"result": {"agent": agent_record(state, pid)}}))
     return 0
@@ -368,6 +383,44 @@ def cmd_pane_report_metadata(args):
             next(it)
     save_state(state)
     print(json.dumps({"result": {"type": "ok"}}))
+    return 0
+
+
+def cmd_pane_process_info(args):
+    state = load_state()
+    pane_id = args[args.index("--pane") + 1] if "--pane" in args else None
+    pid = find_pane_by_id(state, pane_id) if pane_id else None
+    if pid is None:
+        return herdr_error("not_found", f"pane {pane_id} not found")
+    pane = state["panes"][pid]
+    if pane.get("fail_process_info"):
+        return herdr_error("internal", "simulated process-info failure")
+    procs = [
+        {
+            "argv": argv,
+            "argv0": os.path.basename(argv[0]) if argv else "",
+            "cmdline": " ".join(argv),
+            "name": os.path.basename(argv[0]) if argv else "",
+            "pid": 100 + n,
+        }
+        for n, argv in enumerate(pane.get("processes", []))
+    ]
+    leader = procs[pane.get("leader", 0)]["pid"] if procs else None
+    print(
+        json.dumps(
+            {
+                "result": {
+                    "process_info": {
+                        "foreground_process_group_id": leader,
+                        "foreground_processes": procs,
+                        "pane_id": pid,
+                        "shell_pid": 99,
+                    },
+                    "type": "pane_process_info",
+                }
+            }
+        )
+    )
     return 0
 
 
@@ -424,6 +477,8 @@ def main(argv):
             return cmd_pane_send_keys(rest)
         if sub == "report-metadata":
             return cmd_pane_report_metadata(rest)
+        if sub == "process-info":
+            return cmd_pane_process_info(rest)
     elif group == "agent":
         sub = argv[1]
         rest = argv[2:]

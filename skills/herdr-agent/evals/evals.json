@@ -11,7 +11,7 @@
     {
       "id": 2,
       "prompt": "Spin up two Herdr agents for this project named 'tests' and 'docs'. Use pi with thinking low for both. Split them from my current pane so I can see root + both agents in one tab.",
-      "expected_output": "Checks herdr status and HERDR_ENV, resolves root pane (HERDR_PANE_ID or equivalent), builds a same-tab grid including root by splitting the rightmost column twice with --no-focus and equalizing every column each time (not new tabs, not unequal widths), then launches each worker with `herdr agent start <name> --kind pi --pane <id>` passing native flags after `--` \u2014 not `pane run` plus a separate agent rename plus a readiness poll. Treats agent start's return as the readiness gate. Keeps the root agent pane. No server stop.",
+      "expected_output": "Checks herdr status and HERDR_ENV, resolves root pane (HERDR_PANE_ID or equivalent), builds a same-tab grid including root by splitting the rightmost column twice with --no-focus and equalizing every column each time (not new tabs, not unequal widths), then starts each worker through `launch_profile.py --start <name> --pane <id> --kind pi --thinking low` (or native `--thinking low` after `--`), which runs `herdr agent start <name> --kind pi --pane <id>` \u2014 not `pane run` plus a separate agent rename plus a readiness poll. Because the user named pi, the main agent's own model, thinking level and launch flags are not carried over unless the main agent is itself pi, in which case only the thinking level is overridden. Treats agent start's return as the readiness gate. Keeps the root agent pane. No server stop.",
       "files": [],
       "expectations": []
     },
@@ -25,7 +25,7 @@
     {
       "id": 4,
       "prompt": "Launch three Herdr agents (reviewer, tests, docs) for this repo with different tasks in parallel and keep them visible in one view so I can jump into any pane to steer.",
-      "expected_output": "Resolves root pane/tab, builds a same-tab grid including root by rightmost-column splits + equal-width resize for three sub-agents (no-focus), starts each through herdr agent start, badges each pane with its job via herdr pane report-metadata so the human can read the fleet from the sidebar, submits distinct tasks, explains the human can herdr agent focus a pane to steer, does not create per-agent tabs, does not nest tmux.",
+      "expected_output": "Resolves root pane/tab, resolves the inherited launch profile once with launch_profile.py (passing the main agent's own model id and thinking level) and relays its summary line, builds a same-tab grid including root by rightmost-column splits + equal-width resize for three sub-agents (no-focus), starts each through launch_profile.py --start so every worker runs the main agent's harness kind, model, thinking level and setup flags because no kind was named, badges each pane with its job via herdr pane report-metadata so the human can read the fleet from the sidebar, submits distinct tasks, explains the human can herdr agent focus a pane to steer, does not create per-agent tabs, does not nest tmux.",
       "files": [],
       "expectations": []
     },
@@ -61,6 +61,20 @@
       "id": 9,
       "prompt": "/herdr-agent help",
       "expected_output": "Answers from the Help branch before any prerequisite check: prints the usage summary (spawn, message, read, status, broadcast, steer, teardown, handoff, help), the safety behaviours and the herdr 0.9.0 / HERDR_ENV requirements. Runs no herdr command at all \u2014 no `herdr status`, no `agent list`, no pane inspection \u2014 mutates nothing, spawns nothing, and emits no step completion report. Does not refuse or error out when herdr is missing from PATH, since a help request is exactly what an uninstalled user asks.",
+      "files": [],
+      "expectations": []
+    },
+    {
+      "id": 10,
+      "prompt": "Add one more Herdr agent called 'critic' beside my pane to challenge the reviewer's findings.",
+      "expected_output": "Does not ask which agent CLI, model or thinking level to use, and does not hardcode claude or pi. Resolves the inherited launch profile from the main agent: the kind from `herdr agent get` on the root pane, the model and thinking level from the agent's own runtime (--main-model / --main-thinking; on Claude Code, CLAUDE_EFFORT), and setup flags from the root pane's argv via `herdr pane process-info`. Relays the summary line before the split, naming any UNKNOWN field or \u26a0 inherited permission bypass. Spawns critic through the guarded split + equalize path and starts it with launch_profile.py --start, so it runs the same harness, model and thinking level as the main agent. Never guesses a model id it cannot read: an UNKNOWN field still starts on the config default and is reported.",
+      "files": [],
+      "expectations": []
+    },
+    {
+      "id": 11,
+      "prompt": "Spin up a codex agent named 'second-opinion' next to me \u2014 I want a different model family to review the plan.",
+      "expected_output": "Treats codex as a user-named kind. When the main agent is not codex, starts the worker with launch_profile.py --start second-opinion --kind codex, which runs herdr agent start --kind codex, and does NOT pass the main agent's model id, thinking/effort level or launch flags (no claude --model or --effort, no permission-bypass switches) to it. The summary line says model, thinking and flags are not inherited. Uses the guarded same-tab split + equalize path, keeps root, and reports the resolved profile in the completion report.",
       "files": [],
       "expectations": []
     }
