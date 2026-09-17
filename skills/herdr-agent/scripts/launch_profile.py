@@ -23,8 +23,10 @@ Resolution, first source with a value wins:
     flags     root argv, filtered through the kind's setup-flag allowlist
 
 Nothing but the kind is inherited when the worker's kind differs from the main
-agent's: a Claude model id or effort level means nothing to another CLI. Root
-argv is read only for kinds with a verified flag table (claude, pi, codex).
+agent's: a Claude model id or effort level means nothing to another CLI. When
+the main kind is unreadable, an explicit worker kind proves no relationship:
+--without flags is required, and main model/thinking self-reports are ignored.
+Root argv is read only for kinds with a verified flag table (claude, pi, codex).
 Session, resume, print, prompt, credential-bearing and unrecognised flags are
 dropped and named, never guessed at. An UNKNOWN model or thinking level is not
 an error: the worker starts on its config default and the profile line says so.
@@ -418,20 +420,29 @@ def build_profile(args, native: list[str]) -> tuple[dict | None, list[str], str]
     """Return (profile, argv for agent start, error)."""
     root = args.root_pane
     main_kind, err = read_main_kind(root)
-    if main_kind is None and not args.kind:
-        return None, [], (
-            f"cannot read the main agent's harness from pane {root} ({err}). "
-            f"Pass --kind KIND for this worker, or check 'herdr agent get {root}'."
-        )
+    if main_kind is None:
+        if not args.kind:
+            return None, [], (
+                f"cannot read the main agent's harness from pane {root} ({err}). "
+                "Pass --kind KIND --without flags for an explicit reduced-inheritance "
+                f"worker, or check 'herdr agent get {root}'."
+            )
+        if "flags" not in args.without:
+            return None, [], (
+                f"cannot verify whether worker kind '{args.kind}' matches the main "
+                f"agent's unreadable harness ({err}). Pass --without flags to "
+                "explicitly start without inheriting the main profile."
+            )
     kind = args.kind or main_kind
     inherited = main_kind is not None and kind == main_kind
-    # Herdr may not detect the root agent; the caller's --kind then stands in
-    # for it, and the self-reported model and thinking level still apply.
-    self_reported = inherited or main_kind is None
+    self_reported = inherited
     spec = KINDS.get(kind)
     warnings: list[str] = []
     if main_kind is None:
-        warnings.append(f"main agent's harness unreadable ({err}); nothing inherited")
+        warnings.append(
+            f"main agent's harness unreadable ({err}); model, thinking level and "
+            "setup flags not inherited"
+        )
 
     if spec is None:
         if args.model or args.thinking:

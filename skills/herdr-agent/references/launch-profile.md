@@ -15,7 +15,7 @@ Set `main_model` and `main_thinking` from your own runtime: the exact model ID a
 
 The command writes one summary line to stderr and the profile JSON to stdout. Relay the summary to the user before the first split, including any `⚠` or `warning:` line. Each worker is then started with `--start` (see `spawn_sub` in `herdr-recipes.md`), which queries Herdr and the environment again for that worker. If the user changes your model or thinking level mid-run, update `main_model` and `main_thinking` before the next wave.
 
-Herdr 0.9.0 supplies the required `pane process-info` endpoint, but its payload can contain only `argv0` for the harness process. No supported minimum version makes full argv unconditional on every platform, so the script validates the response at runtime. A same-kind launch fails before `agent start` unless the matching process has a non-empty string-array `argv`. Update and restart the Herdr server when it cannot provide one. If reduced inheritance is intentional, `--without flags` is the explicit opt-out; it permits the launch and reports that setup-flag inheritance was disabled.
+Herdr 0.9.0 supplies the required `pane process-info` endpoint, but its payload can contain only `argv0` for the harness process. No supported minimum version makes full argv unconditional on every platform, so the script validates the response at runtime. A same-kind launch fails before `agent start` unless the matching process has a non-empty string-array `argv`. Update and restart the Herdr server when it cannot provide one. If reduced inheritance is intentional, `--without flags` is the explicit opt-out; it permits the launch and reports that setup-flag inheritance was disabled. The same opt-out is required when `herdr agent get` cannot identify the main kind, because a user-named worker kind is not proof that the two kinds match.
 
 ```text
 Launch profile: claude (inherited from main) · model claude-opus-5[1m] (self-report) · thinking max (env CLAUDE_EFFORT) · flags none (root argv)
@@ -37,7 +37,9 @@ The main agent's own report ranks above argv because argv only records values fr
 
 ## The kind gate
 
-A worker inherits model, thinking level and flags only when its kind equals the main agent's kind. If the user names a different kind, the worker gets that CLI's config defaults plus whatever the user named. A Claude model ID or effort level means nothing to `pi` or `codex`, so `--main-model` and `--main-thinking` are ignored across kinds.
+A worker inherits model, thinking level and flags only when its kind equals the main agent's **detected** kind. If the user names a different kind, the worker gets that CLI's config defaults plus whatever the user named. A Claude model ID or effort level means nothing to `pi` or `codex`, so `--main-model` and `--main-thinking` are ignored across kinds.
+
+If the main kind is unreadable, `--kind` selects the worker but establishes no inheritance relationship. The launch is refused unless `--without flags` explicitly selects reduced inheritance. On that path, `--main-model`, `--main-thinking`, and the main harness environment are ignored; only worker-specific `--model`, `--thinking`, or native flags are applied.
 
 ## Per-kind flag names
 
@@ -63,7 +65,7 @@ Checked against the `--help` output of claude 2.1.274, pi and codex 0.153.4. A k
 
 The main agent's permission settings are part of its setup. `--dangerously-skip-permissions`, `--permission-mode bypassPermissions`, codex `--sandbox danger-full-access` or `--ask-for-approval never`, and pi `--approve` all carry over. This gives a worker no access the orchestrator lacks, since the orchestrator can already run commands in any worker pane. Without them, every worker would stop at a permission dialog that Rule 7 says only the human may answer.
 
-Carrying them over is never silent. The summary prints `⚠ permission bypass inherited from main: …`, and that line must reach the user before the first split. If the user wants workers without it, pass `--without bypass`. To drop every inherited setup flag but keep a model and thinking level recoverable from self-report, environment, or readable argv, pass `--without flags`. This is also the only explicit opt-out when process-info cannot provide full argv; a missing launch-time model or thinking flag may then fall back to the CLI config default. A permission posture set through shared settings, such as `defaultMode`, reaches the worker through its config and is not affected by these options.
+Carrying them over is never silent. The summary prints `⚠ permission bypass inherited from main: …`, and that line must reach the user before the first split. If the user wants workers without it, pass `--without bypass`. When the main kind is detected, `--without flags` drops every inherited setup flag but keeps a model and thinking level recoverable from self-report, environment, or readable argv. This is also the only explicit opt-out when process-info cannot provide full argv; a missing launch-time model or thinking flag may then fall back to the CLI config default. When the main kind is unreadable, the same option permits launch but no main model or thinking source is trusted. A permission posture set through shared settings, such as `defaultMode`, reaches the worker through its config and is not affected by these options.
 
 ## When a start fails
 

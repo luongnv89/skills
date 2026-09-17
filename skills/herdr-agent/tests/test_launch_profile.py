@@ -243,16 +243,40 @@ class LaunchProfileTests(unittest.TestCase):
         self.assertEqual(res.returncode, 1)
         self.assertIn("no model/thinking flag mapping for kind 'gemini'", res.stderr)
 
-    def test_unreadable_main_kind_needs_an_explicit_kind(self):
+    def test_unreadable_main_kind_requires_reduced_inheritance_for_same_looking_kind(self):
         self.h.set_root(no_agent=True)
         res = self.h.run([])
         self.assertEqual(res.returncode, 1)
-        self.assertIn("Pass --kind KIND", res.stderr)
-        # An explicit kind stands in for the undetected root: the self-report
-        # still applies, only argv (unreadable without a detected agent) does not.
-        profile, _ = self.resolve("--kind", "claude", "--main-model", "opus")
-        self.assertFalse(profile["inherited"])
-        self.assertEqual(profile["model"], {"value": "opus", "source": "self-report"})
+        self.assertIn("Pass --kind KIND --without flags", res.stderr)
+
+        res, pane = self.start(
+            "--kind", "claude", "--main-model", "opus", "--main-thinking", "high"
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertNotIn("start_args", pane)
+        self.assertIn("cannot verify whether worker kind 'claude' matches", res.stderr)
+        self.assertIn("--without flags", res.stderr)
+
+        res, pane = self.start(
+            "--kind", "claude", "--main-model", "opus", "--main-thinking", "high",
+            "--without", "flags",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(pane["start_args"], [])
+        self.assertIn("model — (not inherited)", res.stderr)
+        self.assertIn("thinking — (not inherited)", res.stderr)
+
+    def test_unreadable_main_kind_does_not_cross_apply_self_report_to_different_kind(self):
+        self.h.set_root(no_agent=True)
+        res, pane = self.start(
+            "--kind", "pi",
+            "--main-model", "claude-opus-5[1m]", "--main-thinking", "max",
+            "--without", "flags",
+            extra_env={"HERDR_PANE_ID": ROOT, "CLAUDE_EFFORT": "max"},
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(pane["start_args"], [])
+        self.assertIn("main agent's harness unreadable", res.stderr)
 
     def test_unreadable_process_info_fails_closed_before_start(self):
         self.h.set_root(processes=[["claude", "--ide"]], fail_process_info=True)
