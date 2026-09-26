@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent in both modes; issue-resolver is required only in ISSUE mode."
 effort: max
 metadata:
-  version: 1.4.1
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -88,6 +88,10 @@ for s in $req; do
 done
 ```
 
+Resolve `herdr_agent_dir` from the installed `herdr-agent` skill's location,
+not the working repository. Set `here` to its absolute `scripts/` directory;
+stop before sync if that location or `launch_profile.py` cannot be verified.
+
 The mode is already chosen by the Mode Selector above. **In ISSUE mode, add `issue-resolver` to `req` before running this** — PR mode never calls it.
 
 `-p claude` is required: `asm install` refuses to guess a provider non-interactively, `--yes` does not cover that choice, and naming the same provider in the verification stops an install under a different tool from reporting success. On a miss, stop before the first mutation and print those commands — never continue with a partial run.
@@ -119,6 +123,48 @@ fi
 ```
 
 If `origin` is missing or rebase/stash-pop conflicts occur, stop and ask the user. Never pop onto a half-finished rebase.
+
+## Selective Worker Launch Profile (mandatory)
+
+The dependency preflight resolves the installed `herdr-agent` directory and
+its absolute scripts directory as `here`; a missing helper, or a helper whose
+`--help` output does not advertise `--without bypass`, is a fatal preflight
+error. Never assume a repository-relative `skills/herdr-agent/scripts/` path.
+Before **every** Herdr worker launch, use the installed
+`"$here/launch_profile.py"` and pass `--without bypass`:
+
+- the initial ISSUE implementer/resolver;
+- the first and every replacement REVIEWER;
+- an ISSUE resolver retry or fix worker;
+- a PR FIXER; and
+- every retry or FRESHEN replacement of any of those workers.
+
+This is a selective opt-out: it removes inherited permission bypasses while
+preserving restrictive inherited setup flags. Put `--without bypass` on the
+`--start` invocation itself; never replace it with `--without flags`, a native
+skip-permissions argument, or an unverified launcher fallback.
+
+The helper is root-side evidence, not a target-state verifier: it reads the
+main pane's kind/argv and returns names only (`flags`/`explicit`) entries. It does
+not return the destination pane's effective cwd, configuration, or environment.
+`herdr agent start` launches in the destination pane, not the caller; caller
+`pwd`, caller environment, guessed paths, or an empty `profile.bypass` value
+cannot prove the worker's effective state. The names-only `flags`/`explicit`
+fields and inherited-only `profile.bypass` are not proof; inspect exact native,
+configuration, and environment inputs. Explicit native/config/environment
+bypass is prohibited. Unknown, unmapped, malformed, or unverified input fails
+closed; never use a native/unverified fallback. Before starting, follow the
+concrete evidence and fail-closed gate in `references/loop-protocol.md`.
+If the target environment or configuration (including inherited inline
+settings values) cannot be established from actual local evidence, stop before
+`herdr agent start`; do not invent a Herdr inspection command.
+
+The probe is not an immutable start snapshot. Re-probe root state and the
+stable local evidence immediately before every start, using the exact same
+worker kind/model/thinking/native inputs. If a source changes or stable
+provenance cannot be established, discard the old result and stop. The detailed
+parser, inspection boundary, prohibited bypass forms, and blocked-path wording
+are authoritative in `references/loop-protocol.md`.
 
 ## Autonomous Worker Boot Gate (mandatory)
 
