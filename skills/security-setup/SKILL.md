@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.4.1
+  version: 1.4.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -15,8 +15,9 @@ Install a local-first security hardening stack for a project. Favor checks that 
 offline at hook time, produce machine-readable output, and give developers a clear
 summary before code leaves their machine.
 
-Keep the orchestrator short for the agent's context budget: detailed matrices, templates,
-and long verification scenarios live in `references/`. Link, don't inline.
+<!-- Maintainer note — not runtime guidance: keep this orchestrator short for the
+agent's context budget; detailed matrices, templates, and long verification
+scenarios live in `references/`. Link, don't inline. -->
 
 This skill may trigger automatically per its description, but it never writes
 silently: Phase 1 always dry-runs the planned changes and waits for explicit
