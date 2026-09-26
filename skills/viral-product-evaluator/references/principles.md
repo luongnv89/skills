@@ -254,20 +254,41 @@ positioning and the actual stack/feature set)?
 
 ## Scoring
 
-Map verdicts to points, then sum and normalize to 100:
+Pass all 32 verdicts to `scripts/virality_score.py` — the deterministic boundary for the
+Virality Score. The model owns per-principle verdicts and evidence; the helper owns coverage
+validation, point summation, normalization, and the tier lookup. Never tally, normalize, or
+round the score in prose.
 
-- **PASS = 1.0**, **PARTIAL = 0.5**, **FAIL = 0.0**
-- `Virality Score = round( (sum of points / 32) × 100 )`
+**Input.** One JSON object with a single `verdicts` map keyed by principle number `"1"`–`"32"`,
+each value `PASS`, `PARTIAL`, or `FAIL` (the contract's point mapping: **PASS = 1.0**,
+**PARTIAL = 0.5**, **FAIL = 0.0**):
 
-**Count mechanically — do not tally by hand.** Hand-counting 32 items is error-prone. After
-assigning all verdicts, list the principle numbers under each bucket (PASS / PARTIAL / FAIL),
-assert the three lists cover all 32 with no overlap, then compute the score from the bucket
-sizes. If you have a code tool available, count with it; otherwise write the three explicit
-lists and verify `len(PASS)+len(PARTIAL)+len(FAIL) == 32` before computing. State the final
-`PASS:n / PARTIAL:n / FAIL:n` and the arithmetic once, and don't show scratch recounts in the
-report.
+```json
+{"verdicts": {"1": "PASS", "2": "PARTIAL", "…": "…", "32": "FAIL"}}
+```
 
-Tiers:
+All 32 keys are required. Missing, duplicate, extra, or non-canonical keys and unknown verdict
+values exit `2` with a stable `error[virality-input]: ...` diagnostic on stderr and no stdout —
+fix the verdict map and rerun rather than computing around the error.
+
+**Invocation.** Resolve the helper from this skill's installed directory to a quoted absolute
+path; stdin is the default and preferred when the verdicts are in memory:
+
+```bash
+printf '%s' "$verdicts_json" | python3 "$script_path" --input -
+```
+
+For a JSON file, pass a quoted absolute path — `python3 "$script_path" --input
+"/absolute/path/verdicts.json"` — relative paths are rejected. The helper uses only Python's
+standard library: no network, subprocess, `eval`, git, or file writes.
+
+**Output.** Exit 0 writes one canonical JSON object: `counts` (`pass`/`partial`/`fail`),
+`points` (the verdict-point sum), `score` (`points ÷ 32 × 100`, Decimal `ROUND_HALF_UP` to the
+nearest integer — an exact `x.5` rounds up), and `tier`. State the returned
+`PASS:n / PARTIAL:n / FAIL:n` counts and the score once in the report; don't show scratch
+recounts.
+
+Tiers (assigned by the helper):
 - **85–100 — Viral-ready.** Sharp positioning; tune the long tail.
 - **65–84 — Promising.** Strong bones, a few high-impact gaps.
 - **40–64 — Needs work.** Core virality levers (hero, paywall, proof) are leaking.

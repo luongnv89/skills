@@ -4,7 +4,7 @@ description: "Generate sprint-based development tasks from a PRD. Use when asked
 license: MIT
 effort: max
 metadata:
-  version: 1.3.4
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -138,8 +138,8 @@ From PRD, extract:
 
 1. **Map Dependencies**: For each task, identify "Depends On" and "Blocks"
 2. **Group Parallel Tasks**: Assign tasks to execution waves
-3. **Calculate Critical Path** — the longest dependency chain; it sets the minimum duration. Referred to as "critical path" everywhere below.
-4. **Validate**: reject **circular dependencies** (the dependency graph must be a DAG — no cycles) and broken references
+3. **Validate and calculate deterministically**: pass the combined `{"tasks": [...]}` graph to `scripts/analyze_dependencies.py`; it validates the canonical IDs, edge direction, effort units, cycles, critical path, and direct bottlenecks. Read [references/dependency-analysis.md](references/dependency-analysis.md) for the exact schema and CLI. Do not re-compute these numeric results in prose.
+4. **Explain and render**: keep feature coverage, mitigation, parallel-opportunity judgments, and the final `tasks.md` narrative in the resolver; reject the helper's errors and never override its result.
 
 ### Phase 5: Generate tasks.md
 

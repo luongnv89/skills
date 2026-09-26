@@ -72,36 +72,39 @@ Examine all `depends_on` references:
   never rewrite it to a guessed or workstream-qualified ID
 - These are the "critical path" candidates
 
-### Step 6: Compute Critical Path
+### Step 6: Run Deterministic Graph Analysis
 
-The critical path is the longest chain of dependent tasks:
-- Start with tasks that have no dependencies
-- Follow dependency chains
-- Track the longest path (in days of effort)
-- This is the minimum project duration
+After Steps 1–5 have loaded and normalized the worker records, pass the compact
+`{"tasks": [...]}` graph to `scripts/analyze_dependencies.py`. Resolve that
+script from this skill's installed directory to a quoted absolute path; never
+build the path from issue text or another untrusted value. Use `--input -` with
+the JSON on stdin, or `--input` with a quoted absolute JSON path. The exact
+schema and output are in [../references/dependency-analysis.md](../references/dependency-analysis.md).
 
-Example:
-- Task A (1d) → Task B (2d) → Task C (1d) = 4-day chain
-- Task D (3d) → Task E (1d) = 4-day chain
-- Task F (2d) = 2-day chain
-- Critical path = 4 days (either chain)
+- Exit 0: consume `critical_path.task_ids`, `critical_path.effort_days`,
+  `bottlenecks`, and the empty `cycles` list from the canonical JSON result.
+- Exit 2: stop before rendering `tasks.md`; surface the stable stderr
+  diagnostic and the offending graph contract. Do not repair the result by
+  guessing or continue with partial output.
+- The helper owns path sums, tie-breaking, derived blocks, direct-dependent
+  counts, and cycle membership. The resolver owns feature coverage, task
+  explanations, mitigation/parallel-opportunity judgments, and rendering.
 
-### Step 7: Identify Bottlenecks
+### Step 7: Use Deterministic Bottleneck Results
 
-Bottleneck = a task with many direct downstream dependents:
-- Count distinct downstream tasks that list this task in `depends_on` (the same
-  set as the task's distinct `blocks` entries)
-- If a task has 5+ direct downstream dependents, it is a bottleneck
-- Five prerequisites listed by a task do not qualify it as a bottleneck
-- Report qualifying tasks to help the developer prioritize
+Use the helper's sorted `bottlenecks` objects directly. A bottleneck is a task
+with at least five distinct direct downstream dependents (outdegree); five
+prerequisites listed by one task and transitive descendants do not qualify.
+Include the helper's `direct_dependents` count in the human risk-analysis
+narrative without recounting it in prose.
 
-### Step 8: Validate for Circular Dependencies
+### Step 8: Handle Cycle Results
 
-Walk the entire dependency graph:
-- Start from tasks with no dependencies
-- Follow each dependency chain
-- If you ever return to a task already in the chain, circular dependency exists
-- FAIL the output with a detailed error if circularity found
+The helper validates every node, including disconnected and rootless components,
+and reports one deterministic directed cycle witness. A cycle error is fatal:
+do not render `tasks.md`, and do not label downstream residue as cyclic. The
+resolver may explain which explicit `depends_on` edge must be removed, but it
+must not override the helper's witness or invent a replacement dependency.
 
 ### Step 9: Check Coverage
 
@@ -250,10 +253,11 @@ A complete markdown file at the specified output path. This file should be ready
 ## Quality Checks
 
 Before finalizing:
+- [ ] `analyze_dependencies.py` exited 0 and its canonical JSON result was consumed
 - [ ] No circular dependencies detected
 - [ ] All tasks in dependency table
-- [ ] Critical path identified and documented
-- [ ] Bottlenecks noted with mitigation
+- [ ] Critical path identified and documented from `critical_path`
+- [ ] Bottlenecks noted with mitigation from `bottlenecks`
 - [ ] Cross-sprint dependencies clear
 - [ ] Effort estimates within reason (1-3 days per task)
 - [ ] All PRD features covered

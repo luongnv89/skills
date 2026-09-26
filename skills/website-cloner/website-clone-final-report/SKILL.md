@@ -4,7 +4,7 @@ description: "Generate a website-clone closure report comparing baseline analysi
 license: MIT
 effort: high
 metadata:
-  version: 1.3.1
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -154,7 +154,7 @@ If any input is missing, note it and proceed only to produce a clearly `PARTIAL`
 
 ## Step 2: Compute Deltas
 
-Compare matching baseline and after-snapshot fields:
+Extract matching baseline and after-snapshot fields:
 
 | Metric | Baseline source | After source |
 |--------|-----------------|--------------|
@@ -165,11 +165,21 @@ Compare matching baseline and after-snapshot fields:
 | SEO score and five dimension scores | `analysis.seo.*` | `builder.seo.*` |
 | HTTPS, mixed content, header list, exposed metadata | `analysis.security.*` | `builder.security.*` |
 
-For numeric metrics, normalize to the displayed unit and calculate percentage delta as
-`((after - before) / before) × 100`, rounded to the nearest whole percent. If the baseline is zero,
-show the absolute `after - before` change and label percentage delta `N/A (zero baseline)`. Compare
-security booleans directly and arrays by reproducible counts; do not invent qualitative ratings.
-For UI/UX, describe changes based on tasks.md versus the Phase 1 analysis.
+Build one comparison record per field — `{"kind": "numeric|boolean|array", "before": <value>,
+"after": <value>}`, plus `before_unit`/`after_unit` on numeric records when the snapshots state
+units — keyed by the canonical dotted field names, and pass `{"comparisons": {...}}` to the local
+pure-stdlib [`scripts/compute_deltas.py`](scripts/compute_deltas.py). It validates kinds and units,
+computes `absolute_change` and `percent_change` (Decimal `ROUND_HALF_UP`, nearest whole percent),
+compares booleans directly, and counts array elements. Read
+[references/delta-computation.md](references/delta-computation.md) for the exact contract and CLI.
+Do not calculate, round, or count deltas in prose.
+
+Render the helper's results directly. When a numeric result carries `reason: "zero_baseline"`,
+show the absolute `after - before` change and label the percentage `N/A (zero baseline)`; when a
+value was missing or null, mark the cell unavailable rather than inventing it — every such field
+keeps the report `PARTIAL`. Render security arrays by the helper's `before_count`/`after_count`
+and never invent qualitative ratings. For UI/UX, describe changes based on tasks.md versus the
+Phase 1 analysis — that remains model judgment.
 
 ## Step 3: Identify Deviations
 
@@ -211,7 +221,7 @@ Verify the report before saving:
 
 - Every source file is named as present or missing; no absent input is silently treated as evidence.
 - Required comparison data comprises all five performance fields, SEO overall score plus all five dimension scores, and the four security fields (`https`, `mixed_content`, `security_headers`, `exposed_metadata`) in both snapshots.
-- For each numeric metric, show the formula, deterministic unit, and correctly rounded delta; label estimates and never invent unavailable values.
+- For each numeric metric, show the deterministic unit and the helper-computed delta — the signed whole percent, or the absolute change labeled `N/A (zero baseline)`; label estimates and never invent unavailable values.
 - Each qualitative claim cites an implemented task, builder deviation, or baseline observation.
 - `final-report.md` contains implementation summary, performance, SEO, security, UI/UX, deviations, caveats, and Pages URL sections.
 - `PASS` requires valid baseline, builder metadata, tasks, and PRD inputs; a responsive Pages URL; `after_snapshot_status: complete`; every required comparison supported; and a non-empty saved report.
@@ -223,7 +233,7 @@ Verify the report before saving:
 ◆ Final Comparison Report
 ··································································
   Inputs accounted for: √ pass | × partial ([missing])
-  Deltas verified:      √ pass | × partial ([unavailable])
+  Deltas verified:      √ pass | × partial ([unavailable/helper diagnostic])
   Deviations compared:  √ pass
   Report saved:         √ pass ([absolute path])
   Pages URL:            √ pass | × unavailable
@@ -239,4 +249,5 @@ Use `PASS` only when every required comparison above is supported. Any unavailab
 | No analysis input | Produce a qualitative report only if useful; result is `PARTIAL` |
 | No builder metadata | Request builder metadata from the orchestrator; any saved report is `PARTIAL` |
 | Missing/incomplete after snapshot | Preserve unavailable values and analyzer errors; result is `PARTIAL` |
+| Invalid delta input | Stop before writing the report; surface the helper's `error[delta-input]` diagnostic and correct the comparison records |
 | No tasks.md or prd.md | Describe only supported implementation/deviation facts; result is `PARTIAL` |

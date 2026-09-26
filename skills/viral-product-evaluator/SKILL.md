@@ -4,7 +4,7 @@ description: "Review a product codebase and landing page against 32 viral princi
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -116,8 +116,10 @@ Run these in sequence. Emit the matching Step Completion Report (see
 - Tag every `judgment`/`visual` principle (hero punch, emotional headline, OG-image design,
   founder presence, novelty, price-vs-competitor) as **low-confidence** and record what a human
   must eyeball.
-- Compute the **Virality Score**: `PASS=1, PARTIAL=0.5, FAIL=0`, summed over 32, ×100/32,
-  rounded. Assign the tier (Viral-ready / Promising / Needs work / Not viral yet).
+- Compute the **Virality Score** with `scripts/virality_score.py`: pass every verdict as
+  `{"verdicts": {"<principle number>": "PASS|PARTIAL|FAIL", ...}}` and use the helper's
+  `counts`, `score`, and `tier` (contract in `references/principles.md` → Scoring). Do not
+  tally or round in prose.
 
 ### Phase 3 — Prioritize fixes & write the report
 
@@ -150,7 +152,8 @@ After each phase, emit the report from `references/step-reports.md`. The three p
 ## Acceptance Criteria
 
 - All 32 principles scored with specific evidence quoted from the product.
-- Virality Score computed correctly (PASS=1, PARTIAL=0.5, FAIL=0) and tier assigned.
+- Virality Score and tier come from `scripts/virality_score.py` over all 32 verdicts
+  (PASS=1, PARTIAL=0.5, FAIL=0); per-principle verdicts and evidence remain model-owned.
 - Top fixes are concrete, prioritized by impact×ease, with before/after suggestions.
 - Report always written to viral-evaluation.md (repo root, else the current working directory) and
   also printed inline; Step Completion Reports emitted per phase.
@@ -177,7 +180,10 @@ A report containing:
 ## Reference files
 
 - `references/principles.md` — the 32-principle rubric: per-principle checks, evidence source,
-  PASS/PARTIAL/FAIL bars, confidence flags, and the scoring formula. **Load every run.**
+  PASS/PARTIAL/FAIL bars, confidence flags, and the `scripts/virality_score.py` scoring
+  contract. **Load every run.**
 - `references/report-template.md` — exact output shape (verdict block, scorecard, prioritized
   fixes, strengths, caveats) with a calibration example.
 - `references/step-reports.md` — Step Completion Report formats for the three phases.
+- `scripts/virality_score.py` — deterministic Virality Score + tier helper (`tests/` holds its
+  stdlib fixtures).
