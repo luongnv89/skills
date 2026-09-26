@@ -3,8 +3,8 @@ name: subagent-creator
 description: "Create, evaluate, or improve Claude Code subagent files (.claude/agents/*.md) — the frontmatter + system prompt defining a delegatable specialist. Don't use for skills (skill-creator), CLAUDE.md/AGENTS.md (agent-config), or running an agent."
 effort: high
 metadata:
-  version: 1.1.3
-  author: "Luong NGUYEN <edgardo.montesdeoca@montimage.eu>"
+  version: 1.1.4
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Subagent Creator
@@ -33,7 +33,7 @@ If the request is ambiguous ("look at my agent"), assume **Evaluate** and confir
 
 These apply on every write, regardless of branch.
 
-### Repo Sync Before Edits (when target is a project repo)
+### Repo Sync Before Edits (mandatory)
 
 A subagent written to `.claude/agents/` lives in a version-controlled repo. **Before creating or editing a file there**, sync to avoid clobbering remote work:
 
