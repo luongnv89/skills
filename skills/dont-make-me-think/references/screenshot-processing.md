@@ -1,6 +1,6 @@
 # Screenshot Pre-processing Reference
 
-When a screenshot is provided as input, run `scripts/process_screenshots.py` before visual analysis. This produces structured data so the agent doesn't need to generate image-processing code at runtime.
+When exact numeric palette, dimensions, or density evidence, or consistent multi-image summaries, are needed for a screenshot review, use `scripts/process_screenshots.py`. If capable image input is available, direct visual review is also valid. Disclose unavailable measurements and never invent precise numbers through direct inspection. If the helper fails or an image is invalid, disclose the failure.
 
 ## Usage
 
@@ -26,7 +26,7 @@ python3 scripts/process_screenshots.py screenshot.png --quiet
 
 ## Output
 
-Two outputs are always produced:
+When invoked, the script produces two outputs:
 
 1. **JSON to stdout** — structured data for the agent to consume programmatically
 2. **Markdown to stderr** — human-readable report for quick verification
@@ -87,8 +87,11 @@ PNG, JPG/JPEG, GIF, WEBP, BMP, TIFF. Max file size: 50 MB.
 
 ## Dependencies
 
+These dependencies are required only when running the helper:
+
+- Python 3
 - Pillow 12.x
 - OpenCV 4.x
 - NumPy
 
-All are available in the skills environment. No external APIs or OCR engines required.
+Direct visual review does not require these libraries. The helper uses no external APIs or OCR engines.

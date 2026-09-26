@@ -4,7 +4,7 @@ description: "Review UI usability using Steve Krug's principles and produce a sc
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.1
+  version: 1.4.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -75,17 +75,20 @@ Follow this workflow to keep the agent's context budget tight:
 
 ## Screenshot Pre-processing
 
-When the input is a screenshot, run the pre-processing script **before** visual analysis, so the
-review rests on measured data instead of image-processing code written at runtime:
+When the input is a screenshot, choose the analysis path based on available image capability and
+evidence needs. If the image input can be inspected directly, review it directly. Use the
+pre-processing script when exact numeric palette, dimensions, or density evidence, or consistent
+multi-image summaries, are needed:
 
 ```bash
 python3 scripts/process_screenshots.py <image_path> [--recursive]
 ```
 
-It always produces both outputs: JSON on stdout — metadata, color palette, layout regions, visual
-density, quality score, warnings — and a human-readable markdown report on stderr. Populate the
-review from the JSON; read the markdown for a quick sanity check. If the script fails or the image
-is invalid, fall back to visual analysis and note the failure in the review.
+When run, it produces both outputs: JSON on stdout — metadata, color palette, layout regions, visual
+density, quality score, warnings — and a human-readable markdown report on stderr. Populate numeric
+claims from the JSON and read the markdown for a quick sanity check. Disclose unavailable measurements
+and never fabricate precise numbers through direct inspection. If the script fails or the image is
+invalid, use direct visual analysis when available and disclose the failure.
 
 Read `references/screenshot-processing.md` for the full flag set, every extracted field, and how to
 map the output onto the scorecard.
@@ -94,7 +97,7 @@ map the output onto the scorecard.
 
 | Input type | Action |
 |---|---|
-| Screenshot/image | Pre-process with `scripts/process_screenshots.py`, then analyze visually |
+| Screenshot/image | Review directly when image capability is available; use `scripts/process_screenshots.py` for exact numeric or consistent multi-image evidence; disclose failures |
 | Live URL | Use `/browse` to navigate, screenshot, interact |
 | HTML/CSS/JS code | Read code, focus on user experience |
 | Wireframe/mockup | Focus on information architecture, not polish |
@@ -281,7 +284,7 @@ Thinking Cost: HIGH — 3 critical issues found (disabled button, missing nav la
 | User wants "just a quick check" | Deliver a condensed review (top 3 issues only) rather than the full 10-lens report |
 | Redesign Mode on a CSS framework (Tailwind, Bootstrap) | Preserve the framework classes; only change values, not the framework itself |
 | UI has no issues | Output the scorecard with high scores and a "What Works" section only; do not fabricate problems |
-| Multiple screenshots provided | Pre-process each with the script; run batch analysis (`--recursive` if directory) |
+| Multiple screenshots provided | Review directly when image capability is available; use multiple paths or `--recursive` for consistent measurements or summaries; disclose failures |
 | Screenshot is very large (>4K) | Note in the review that detail may be excessive; consider recommending downscaled reference |
 
 ## Acceptance Criteria
