@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -73,7 +73,7 @@ anything** — a preflight that clears after the plan is written just moves the 
 ```bash
 asm list -p claude --json | grep -q '"plan-to-issues"' || {
   echo "Missing required skill: plan-to-issues" >&2
-  echo "Install it:      asm install plan-to-issues -p claude --yes" >&2
+  echo "Install it:      asm install github:luongnv89/skills:skills/plan-to-issues -p claude --yes" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2
   echo "Verify:          asm list -p claude --json | grep 'plan-to-issues'" >&2
   exit 1
@@ -89,7 +89,7 @@ skill. Check them here too, or Phase 4 fails inside someone else's skill:
 ```bash
 gh auth status >/dev/null 2>&1 || { echo "✗ gh not authenticated — run: gh auth login" >&2; exit 1; }
 asm list -p claude --json | grep -q '"issue-creator"' || \
-  echo "⚠ issue-creator missing — /plan-to-issues will need it: asm install issue-creator -p claude --yes" >&2
+  echo "⚠ issue-creator missing — /plan-to-issues will need it: asm install https://github.com/luongnv89/idd --skill skills/issue-creator -p claude --yes" >&2
 ```
 
 On a miss, **stop before Phase 3**. Phases 1–2 are read-only and may still be reported.
