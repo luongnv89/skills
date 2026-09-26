@@ -25,10 +25,10 @@ There is **no** `npm`, `pnpm`, `make`, or `pytest` in this repo. Don't invent te
 
 ## Hard rules
 
-1. **IMPORTANT:** Bump `metadata.version` (semver) on every SKILL.md edit. No exceptions.
-2. **IMPORTANT:** Quote any frontmatter string containing `:` `#` `-` `<` `>` `|` `,` `&` `?` `!` to keep YAML valid.
-3. **YOU MUST** keep each `SKILL.md` under 500 lines. Split overflow into `references/`.
-4. **YOU MUST** start every `docs/README.md` with the AI-skip HTML comment (see existing skills for the boilerplate).
+1. Bump `metadata.version` (semver) on every SKILL.md edit. No exceptions.
+2. Quote any frontmatter string containing `:` `#` `-` `<` `>` `|` `,` `&` `?` `!` to keep YAML valid.
+3. Keep each `SKILL.md` under 500 lines. Split overflow into `references/`.
+4. Start every `docs/README.md` with the AI-skip HTML comment (see existing skills for the boilerplate).
 5. Never edit anything under `~/.claude/skills/` or `~/.claude/CLAUDE.md` from this repo.
 6. Never edit `dist/` artifacts; regenerate via `package_skill.py` instead.
 7. Never commit `*-workspace/` contents, `.claude/scheduled_tasks.lock`, or local scratch files.
@@ -62,6 +62,5 @@ There is **no** `npm`, `pnpm`, `make`, or `pytest` in this repo. Don't invent te
 - Never re-run commands to "verify" unless the outcome was uncertain.
 - Don't echo back large blocks of code or file contents unless asked.
 - Batch related edits into single operations. Don't make 5 edits when 1 handles it.
-- Skip confirmations like "I'll continue..." Just do it.
-- If a task needs 1 tool call, don't use 3. Plan before acting.
-- Do not summarize what you just did unless the result is ambiguous or you need additional input.
+- Report results and blockers plainly; skip filler like "I'll continue...".
+- If a task needs 1 tool call, don't use 3.
