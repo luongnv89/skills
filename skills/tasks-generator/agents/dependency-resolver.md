@@ -34,24 +34,42 @@ From sprint_plan_json, read the feature dependencies:
 - Which features depend on which
 - Use this to validate that sprint workers assigned tasks correctly to sprints
 
-### Step 3: Validate In-Sprint Dependencies
+### Step 3: Validate Dependency References
 
-For each sprint:
-- Check that all `depends_on` references are within the same sprint
-- Check for circular dependencies within the sprint (should not exist, but validate)
-- If any circular deps found, report them with details
+Across all loaded sprint outputs:
+- Require every task ID to match `<sprint>.<index>` and each sprint's indices
+  to be unique across workstreams; keep `workstream` as a separate field
+- Check that every `depends_on` and `blocks` reference names an emitted task ID;
+  reject dangling or fabricated IDs
+- For each `depends_on`, allow a same-sprint dependency or an existing task in
+  an earlier sprint; reject unknown or later-sprint dependencies
+- Build a normalized combined in-memory map: for every verified `depends_on`,
+  derive the reciprocal `blocks` entry on the prerequisite task. Therefore
+  `blocks` may point to the same or a later sprint, including edges absent from
+  an individual parallel worker's output
+- Do not create a dependency absent from an explicit worker `depends_on`; a
+  derived reciprocal `blocks` entry is representation, not a new dependency
+- Require normalized `depends_on` and `blocks` to be exact inverse edges
+- Check for circular dependencies across the complete normalized graph
+- If any invalid reference or cycle is found, report it with details
 
 ### Step 4: Map Feature Dependencies to Task Dependencies
 
 Features have dependencies (from requirements). Map these to tasks:
-- If Feature A depends on Feature B, and tasks from Feature B are in Sprint 1, and tasks from Feature A are in Sprint 2, then tasks in Sprint 2 should depend on tasks in Sprint 1
-- Do NOT invent inter-task dependencies (let sprint workers specify them)
-- But DO wire sprint-level dependencies: "All sprint 2 tasks depend on sprint 1 completion" conceptually
+- If Feature A depends on Feature B, connect tasks only when the referenced
+  task IDs exist in the loaded sprint outputs
+- Do NOT invent inter-task dependencies or placeholder task IDs; preserve the
+  explicit edges supplied by sprint workers
+- Describe sprint-level ordering conceptually without fabricating task-level
+  edges
 
 ### Step 5: Identify Cross-Sprint Dependencies
 
 Examine all `depends_on` references:
-- If a task in Sprint N depends on a task in Sprint N-1, mark it as a cross-sprint dependency
+- If a task in Sprint N depends on a task in any earlier sprint, mark it as a
+  cross-sprint dependency and preserve the exact canonical IDs
+- Verify that every such reference resolves to an emitted prior-sprint task;
+  never rewrite it to a guessed or workstream-qualified ID
 - These are the "critical path" candidates
 
 ### Step 6: Compute Critical Path
@@ -70,10 +88,12 @@ Example:
 
 ### Step 7: Identify Bottlenecks
 
-Bottleneck = a task that many other tasks depend on:
-- Count inbound `blocks` references
-- If a task is blocked by 5+ other tasks, it's a bottleneck
-- Report these to help the developer prioritize
+Bottleneck = a task with many direct downstream dependents:
+- Count distinct downstream tasks that list this task in `depends_on` (the same
+  set as the task's distinct `blocks` entries)
+- If a task has 5+ direct downstream dependents, it is a bottleneck
+- Five prerequisites listed by a task do not qualify it as a bottleneck
+- Report qualifying tasks to help the developer prioritize
 
 ### Step 8: Validate for Circular Dependencies
 
@@ -138,19 +158,19 @@ Any delay to a critical path task delays the entire project by the same amount.
 ### Workstreams
 
 #### Project Setup
-- Task 1.setup.1
-- Task 1.setup.2
+- Task 1.1
+- Task 1.2
 
 #### Backend
-- Task 1.backend.1
-- Task 1.backend.2
+- Task 1.3
+- Task 1.4
 
 #### Frontend
-- Task 1.frontend.1
+- Task 1.5
 
 ### Tasks
 
-#### Task 1.setup.1: Initialize project repository and CI/CD pipeline
+### Task 1.1: Initialize project repository and CI/CD pipeline
 
 **Description**: Set up the repo structure, package.json (or equivalent), and basic CI/CD workflow for automated testing and deployment.
 
@@ -164,7 +184,7 @@ Any delay to a critical path task delays the entire project by the same amount.
 
 **Dependencies**: None
 
-**Blocks**: Task 1.backend.1, Task 1.frontend.1
+**Blocks**: Task 1.3, Task 1.5
 
 **PRD Reference**: Foundation for [feature name]
 
@@ -178,8 +198,8 @@ Any delay to a critical path task delays the entire project by the same amount.
 
 | Task ID | Title | Sprint | Depends On | Blocks | Effort |
 |---------|-------|--------|-----------|--------|--------|
-| 1.setup.1 | Initialize repo | 1 | None | 1.backend.1, 1.frontend.1 | 1d |
-| 1.backend.1 | Create DB schema | 1 | 1.setup.1 | 1.backend.2, 2.backend.1 | 1d |
+| 1.1 | Initialize repo | 1 | None | 1.3, 1.5 | 1d |
+| 1.3 | Create DB schema | 1 | 1.1 | 1.4, 2.1 | 1d |
 [...]
 
 ---
@@ -189,14 +209,14 @@ Any delay to a critical path task delays the entire project by the same amount.
 ### Sprint 1 Execution Order
 
 **Week 1**:
-- Day 1: Start Task 1.setup.1 (blocks others, do first)
-- Day 1-2 (parallel): Once setup is done, start Task 1.backend.1 and Task 1.frontend.1 in parallel
+- Day 1: Start Task 1.1 (blocks others, do first)
+- Day 1-2 (parallel): Once setup is done, start Task 1.3 and Task 1.5 in parallel
 
 ### Cross-Sprint Dependencies
 
 **Sprint 1 → Sprint 2**:
-- All Sprint 2 backend tasks depend on Sprint 1 data model tasks (Task 1.backend.1)
-- All Sprint 2 frontend tasks depend on Sprint 1 API design (Task 1.backend.2)
+- All Sprint 2 backend tasks depend on Sprint 1 data model tasks (Task 1.3)
+- All Sprint 2 frontend tasks depend on Sprint 1 API design (Task 1.4)
 
 Start Sprint 2 immediately after Sprint 1 is complete to maintain momentum.
 
