@@ -1,6 +1,6 @@
 ---
 name: convert-documents-to-markdown
-description: "Convert Word (.doc, .docx), PowerPoint (.ppt, .pptx), Excel (.xls, .xlsx), OpenDocument (.odt, .ods, .odp), RTF, EPUB, CSV, and PDF files to GitHub-Flavored Markdown. Use when a task needs the contents of an office document, spreadsheet, presentation, ebook, or PDF you cannot read directly. Don't use for text or Markdown files you can already read, or for creating or editing documents."
+description: "Convert Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF files to GitHub-Flavored Markdown when you cannot read the document directly. Don't use for text or Markdown files you can already read, or for creating or editing documents."
 license: MIT
 compatibility: "Requires Node.js 20+ (runs via npx, no install). Optional FIRECRAWL_API_KEY raises hosted-OCR limits."
 effort: low

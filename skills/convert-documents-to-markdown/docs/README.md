@@ -30,4 +30,4 @@ Mirrored from [firecrawl/anydoc](https://github.com/firecrawl/anydoc) (`skills/c
 
 ## Supply-chain pin
 
-The `npx` invocations pin `@firecrawl/anydoc@0.2.4` (published 2026-08-27) rather than floating on `latest`. Bump procedure is documented in the SKILL.md attribution section.
+The `npx` invocations pin `@firecrawl/anydoc@0.2.4` (published 2026-08-27) rather than floating on `latest`. Bump procedure is documented in `references/attribution.md`.

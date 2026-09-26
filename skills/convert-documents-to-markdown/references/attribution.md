@@ -20,17 +20,22 @@ mirror time:
 
 1. `npm view @firecrawl/anydoc time --json` — list every version's publish date.
 2. Pick the newest version published at least 7 days ago.
-3. Replace the `@0.2.4` pin in the SKILL.md command block and the docs/README.md examples.
-4. Bump `metadata.version` in SKILL.md and add a CHANGELOG entry under `## Unreleased`.
+3. Replace the `@0.2.4` pin everywhere it appears:
+   - `../SKILL.md` — the `## Instructions` command block, the `## Example` command, and the `## Attribution` mention
+   - `../docs/README.md` — the "When to Use" table row and the `## Supply-chain pin` section
+   - `evals/evals.json` needs no edit — its expectation is version-agnostic on purpose
+   - The root `README.md` catalog row carries no pin; `CHANGELOG.md` entries are history — do not rewrite the `@0.2.4` mention there, add a new `## Unreleased` entry instead
+4. Bump `metadata.version` in SKILL.md alongside that CHANGELOG entry.
 
 ## Deviations from upstream
 
 Everything outside this list is verbatim upstream content:
 
-- Frontmatter `description` is quoted and gains a negative-trigger clause (repo convention).
+- Frontmatter `description` is quoted, gains a negative-trigger clause (repo convention), and is trimmed to ≤250 chars: upstream's parenthetical extension lists (e.g. `(.doc, .docx)`) are dropped — rule 1 still carries the full list — and "Use when a task needs the contents of an office document, spreadsheet, presentation, ebook, or PDF you cannot read directly" becomes "when you cannot read the document directly".
 - Frontmatter gains `compatibility`, `effort`, `metadata.version`, and an expanded
   `metadata.author` credit (upstream has none of these).
-- The three `npx` commands pin `@0.2.4` (upstream floats on `latest`).
+- The `npx` invocations pin `@0.2.4` (upstream floats on `latest`).
+- Upstream's intro line "Run the anydoc CLI. It needs Node 20+ and no install:" became "Run the anydoc CLI:" under `## Instructions`; the Node 20+ / no-install requirement moved to `## Prerequisites`.
 - Rule 5 adds that `--ocr hosted` uploads the file to Firecrawl's hosted API and asks the
   agent to confirm first; the upstream text only links to Firecrawl Parse.
 - `## When to use`, `## Prerequisites`, `## Instructions`, `## Example`, `## Edge cases`,

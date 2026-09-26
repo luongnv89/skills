@@ -9,7 +9,7 @@
       "expected_output": "Triggers the skill and runs the pinned anydoc CLI on the file, emitting GitHub-Flavored Markdown.",
       "files": [],
       "expectations": [
-        "Invokes anydoc via npx -y @firecrawl/anydoc@0.2.4, not an unversioned or @latest spec",
+        "Invokes anydoc via the pinned `@firecrawl/anydoc@<version>` spec from SKILL.md, not an unversioned or `@latest` spec",
         "Passes the document path as the CLI argument",
         "Surfaces the converted Markdown (stdout or -o file) without prompting the user"
       ]
