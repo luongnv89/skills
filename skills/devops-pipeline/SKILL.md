@@ -4,7 +4,7 @@ description: "Configure pre-commit hooks and lean GitHub Actions for shift-left 
 license: MIT
 effort: medium
 metadata:
-  version: 2.2.1
+  version: 2.2.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -81,13 +81,13 @@ Identify:
 
 ### 2. Configure Pre-commit Hooks (maximize local coverage)
 
-Install pre-commit framework:
+If `pre-commit` is absent, show the install command and stop — see [Edge Cases](#edge-cases). Do not install it automatically.
 
 ```bash
 pip install pre-commit  # or brew install pre-commit
 ```
 
-Create `.pre-commit-config.yaml` based on detected stack. See [references/precommit-configs.md](references/precommit-configs.md) for language-specific configurations.
+When `pre-commit` is available, create `.pre-commit-config.yaml` based on detected stack. See [references/precommit-configs.md](references/precommit-configs.md) for language-specific configurations.
 
 **`pre-commit` stage — every commit, under 10 seconds on changed files:**
 - Format checks (Prettier, Black/Ruff, gofmt, rustfmt)
@@ -248,10 +248,10 @@ A run passes when **all** of the following are true:
 ## Edge Cases
 
 - **No package manager detected**: Prompt the user for the language/build system before generating hooks; never guess silently.
-- **Pre-commit not installed**: Emit the install command (`pip install pre-commit` or `brew install pre-commit`) and stop; don't generate config files for a tool that isn't present.
+- **Pre-commit not installed**: Show the install command (`pip install pre-commit` or `brew install pre-commit`) and stop; do not install it automatically or generate config files.
 - **Existing `.pre-commit-config.yaml`**: Merge new hooks into the existing file rather than overwriting; preserve user-defined hooks and pinned revs.
 - **Monorepo with multiple languages**: Generate one config with per-language hook sections and `files:` path filters so hooks only run on relevant subdirectories. Local `language: system` entries must also target the package dir (`npm --prefix frontend`, `pytest backend/tests`) — `files:` only filters which files trigger the hook, not cwd.
-- **No `origin` remote**: Skip the repo-sync step and inform the user; proceed with local-only setup.
+- **No `origin` remote**: Stop and ask the user whether a local-only setup with no repo sync is acceptable; do not proceed automatically.
 - **Tests take >60 seconds**: Demote to the next lane — `pre-commit` to `pre-push`, or `pre-push` to CI — and record the reason in a comment on the hook so the next reader knows it was measured, not guessed.
 - **Legacy config with deprecated stage names**: Run `pre-commit migrate-config` before merging new hooks in, so the file does not end up half-migrated.
 - **Team bypasses hooks with `--no-verify`**: Local gates cannot stop this. Keep the CI bypass guard, and report the bypass rate rather than adding more hooks.

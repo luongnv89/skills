@@ -224,11 +224,11 @@ Then continue with all other applicable guidelines.
 The profile is machine-generated and may be incomplete. For uncertain cases:
 
 **If the profile is silent on a topic** (e.g., no metadata description provided, no UGC moderation system documented):
-- Use **WARNING** if the guideline is critical
+- Mark it **WARNING** and list it under "requires manual verification"
 - Cite what couldn't be verified: "Could not verify account deletion UI from code scan"
 
 **If evidence is contradictory** (e.g., permission declared but no usage found):
-- Use **WARNING** or **FAIL** based on severity
+- Mark it **WARNING** when the profile cannot resolve the contradiction; reserve **FAIL** for a concrete violation supported by the evidence
 - Explain both findings: "Location permission declared but no CoreLocation usage detected in code. Developer should verify if permission is actually needed."
 
 **If the profile has suspicious patterns** (findings.suspicious_patterns array):
@@ -317,7 +317,7 @@ Before writing audit-results.json, verify:
 
 ## Important Notes
 
-1. **Strictness**: Apply guidelines as Apple Reviewers would. When in doubt, flag as WARNING or FAIL rather than PASS.
+1. **Evidence threshold**: When the profile cannot confirm or rule out an issue, mark it **WARNING** and list it under "requires manual verification"; reserve **FAIL** for issues the evidence shows.
 2. **Cross-reference**: If one guideline findings inform another (e.g., location usage affects privacy guideline), make sure both are consistent.
 3. **No assumptions**: Only use what's in the profile. Don't assume features exist if not mentioned.
 4. **External verification needed**: For things like "app crashes", "screenshot accuracy", "subscription pricing display" — these cannot be verified from static profile. Mark as WARNING with recommendation to test.

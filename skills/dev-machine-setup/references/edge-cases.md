@@ -6,8 +6,8 @@ Non-happy-path situations `dev-machine-setup` may hit. Machine states that `dete
 ## No `python3` on a factory machine
 
 `detect_env.py` needs `python3`. Without it, use the fallback one-liners in `detect.md` to get OS/arch,
-build the gap list by hand from the baseline table in SKILL.md, and install Python early so later runs
-get the full report.
+build the gap list by hand from the baseline table in [`procedure.md` § 3](procedure.md#3-baseline-gaps--skipped-in-tune),
+and install Python early so later runs get the full report.
 
 ## Windows ARM64 (Snapdragon / Copilot+)
 

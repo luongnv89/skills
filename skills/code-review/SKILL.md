@@ -4,7 +4,7 @@ description: "Review or improve code — one skill, four modes: bug/security rev
 license: MIT
 effort: high
 metadata:
-  version: 2.1.2
+  version: 2.1.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
 ---
