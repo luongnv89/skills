@@ -4,7 +4,7 @@ description: "Generate a website-clone closure report comparing baseline analysi
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -192,7 +192,7 @@ No approval gate is required for this phase — it's the last step and informati
 
 ## Step 6: Save Report
 
-Persist the assembled report using the Write tool — never `echo > path`, since markdown bodies routinely contain backticks, dollar signs, and backslashes that the shell would mangle.
+Persist the assembled content using the `Write` tool with literal content only. If the `Write` tool is unavailable, stop with a descriptive error and do not use shell persistence or another output path.
 
 Default output path: `$PROJECT_DIR/final-report.md`, falling back to `~/workspace/clones/YYYY_MM_DD_slug/final-report.md` when no project dir is set.
 

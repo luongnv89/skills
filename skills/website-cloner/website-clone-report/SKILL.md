@@ -4,7 +4,7 @@ description: "Generate a plain-language report from website-analyzer JSON and sa
 license: MIT
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -23,7 +23,7 @@ Do **not** use for technical audit reports targeting developers — those belong
 
 ## Prerequisites
 
-1. Require valid website-analyzer JSON and a proposed output path.
+1. Require valid website-analyzer JSON. Resolve an optional `--output <path>` using the documented fallback below.
 2. Read `references/api_reference.md` when validating fields or translating metrics; use only the needed reference mappings to protect the context budget.
 3. Confirm the user can review the draft and explicitly approve persistence.
 4. Stop with a descriptive error when the JSON is invalid or contains an analyzer `error` variant.
@@ -169,7 +169,7 @@ Do **not** persist the file until explicit approval.
 
 ## Step 6: Persist Final Report
 
-Once approved, persist the report using the `Write` tool — do not shell out to `echo` or `cat` redirection.
+Once approved, persist the assembled content using the `Write` tool with literal content only. If the `Write` tool is unavailable, stop with a descriptive error and do not use shell persistence or another output path.
 
 - **Path:** the value passed via `--output <path>`. If absent, fall back to `$PROJECT_DIR/report.md` when the orchestrator set `$PROJECT_DIR`, otherwise to `report.md` in the current working directory.
 - **Content:** the approved markdown report assembled in Step 3, with any edits from Step 5 applied.

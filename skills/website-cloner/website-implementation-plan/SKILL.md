@@ -4,7 +4,7 @@ description: "Generate phased tasks.md from an approved website PRD, with landin
 license: MIT
 effort: high
 metadata:
-  version: 1.3.2
+  version: 1.3.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -212,9 +212,7 @@ Do **not** persist until explicit approval.
 
 ## Step 8: Persist tasks.md
 
-```bash
-printf '%s\n' "$TASKS_CONTENT" > "$OUTPUT_PATH"
-```
+Persist the assembled content using the `Write` tool with literal content only. If the `Write` tool is unavailable, stop with a descriptive error and do not use shell persistence or another output path.
 
 Default: `$PROJECT_DIR/tasks.md` or `~/workspace/clones/YYYY_MM_DD_slug/tasks.md`.
 

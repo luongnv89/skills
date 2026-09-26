@@ -4,7 +4,7 @@ description: "Generate an approval-gated improvement PRD from a report and basel
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -157,11 +157,7 @@ Do **not** persist until explicit approval.
 
 ## Step 7: Persist prd.md
 
-Write to output path:
-
-```bash
-printf '%s\n' "$PRD_CONTENT" > "$OUTPUT_PATH"
-```
+Persist the assembled content using the `Write` tool with literal content only. If the `Write` tool is unavailable, stop with a descriptive error and do not use shell persistence or another output path.
 
 Default: `$PROJECT_DIR/prd.md` or `~/workspace/clones/YYYY_MM_DD_slug/prd.md`.
 
