@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 3.0.2
+  version: 3.0.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -120,7 +120,8 @@ opt in to mounting the host OpenCode profile; `--fresh-profile` or
 `--no-opencode-config` to explicitly select a fresh local profile; `--image IMAGE`
 to override the default container image (`ghcr.io/luongnv89/devbox:latest`);
 `--format FORMAT` to set `opencode2 run`'s output format (`default` or `json`;
-default: `default`); `--name NAME` to set the container name (default:
+default: `default`); `--model MODEL` to pick the OpenCode model (e.g.
+`opencode/muse-spark-1.2-contributor-free`); `--name NAME` to set the container name (default:
 `opencode-sandbox-<project>-<epoch>`); `--start-only` to create the container and
 print the attach command without running OpenCode; `--exec-in NAME` to run
 OpenCode in an already-started container; `--rm` to auto-remove the
