@@ -4,7 +4,7 @@ description: "Analyze a website's UI/UX, category, style, performance, surface s
 license: MIT
 effort: high
 metadata:
-  version: 1.4.0
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -27,6 +27,18 @@ Do **not** use for full penetration testing, deep security audits, or App Store 
 2. Confirm page-fetch access is available; never bypass authentication, paywalls, or bot protections.
 3. When an output path is supplied, validate that its directory exists and is writable; skip this check for stdout.
 4. If any prerequisite fails, return a descriptive error with the failing input and corrective action.
+
+## Repo Sync Before Edits (mandatory)
+
+When an output path is supplied and it lives inside a git worktree, sync before writing the analysis to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section when writing to stdout or to a path outside any git repository.
 
 ## Workflow
 

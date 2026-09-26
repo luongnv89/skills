@@ -4,7 +4,7 @@ description: "Generate phased tasks.md from an approved website PRD, with landin
 license: MIT
 effort: high
 metadata:
-  version: 1.3.3
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -20,6 +20,18 @@ Trigger when the user asks to:
 - Create an implementation plan for a site rebuild
 
 Do **not** use for building or coding — that is Phase 5 (website-builder).
+
+## Repo Sync Before Edits (mandatory)
+
+The approved `tasks.md` is persisted with `Write`. When that output path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository.
 
 ## Workflow
 

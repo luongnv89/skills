@@ -210,12 +210,12 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Phase | Version | What it does |
 |---|---|---|
-| website-analyzer | 1.3.0 | 6-dimension analysis → JSON |
-| website-clone-report | 1.2.2 | Stakeholder report from analysis |
-| website-improvement-prd | 1.3.0 | Improvement PRD |
-| website-implementation-plan | 1.3.2 | tasks.md from PRD |
+| website-analyzer | 1.5.0 | 6-dimension analysis → JSON |
+| website-clone-report | 1.3.0 | Stakeholder report from analysis |
+| website-improvement-prd | 1.4.0 | Improvement PRD |
+| website-implementation-plan | 1.4.0 | tasks.md from PRD |
 | website-builder | 1.4.0 | Build improved site |
-| website-clone-final-report | 1.3.0 | Before/after summary |
+| website-clone-final-report | 1.5.0 | Before/after summary |
 
 **Diagram generator engines** (install the umbrella or a single engine):
 
