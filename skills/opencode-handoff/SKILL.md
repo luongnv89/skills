@@ -1,11 +1,11 @@
 ---
 name: opencode-handoff
-description: "Resume a limit-blocked OpenCode session in a fresh sandbox: same project and agent setup, no host OpenCode config/token/key, attached in a tmux panel. Don't use for one-shot sandbox tasks (opencode-sandbox), opencode.ai (opencode-runner), or Herdr."
+description: "Migrate a limit-blocked OpenCode session to a fresh sandbox: same project and agent setup, no host OpenCode config/token/key, attached in a tmux panel. Don't use for one-shot sandbox tasks (opencode-sandbox), opencode.ai (opencode-runner), or Herdr."
 license: MIT
 compatibility: "Requires Docker on PATH and running, plus the opencode-sandbox skill at v2.1.0 or newer. The tmux panel additionally needs `tmux`; without it the skill prints the attach command instead."
 effort: medium
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

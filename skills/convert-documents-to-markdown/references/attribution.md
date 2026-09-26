@@ -38,6 +38,8 @@ Everything outside this list is verbatim upstream content:
 - Upstream's intro line "Run the anydoc CLI. It needs Node 20+ and no install:" became "Run the anydoc CLI:" under `## Instructions`; the Node 20+ / no-install requirement moved to `## Prerequisites`.
 - Rule 5 adds that `--ocr hosted` uploads the file to Firecrawl's hosted API and asks the
   agent to confirm first; the upstream text only links to Firecrawl Parse.
+- `## Repo Sync Before Edits (mandatory)` is additive structure for CLAUDE.md rule 14 —
+  syncs the worktree before `-o <path>` writes into one; upstream has no such section.
 - `## When to use`, `## Prerequisites`, `## Instructions`, `## Example`, `## Edge cases`,
   and this `## Attribution` section are additive structure; upstream's six rules and exit
   codes are unchanged.

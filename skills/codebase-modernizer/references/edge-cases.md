@@ -40,3 +40,14 @@ exactly what was not scanned, by path. Never silently truncate — an unstated c
 When the user names only some dimensions, the others are **Not Assessed — out of requested
 scope**, and empty P0–P4 phases collapse to a one-line note. Never drop or renumber a phase to
 close the gap.
+
+## Monorepo
+
+`scripts/dep_scan.sh` probes the repo root only; **re-run it once per package
+directory** and merge the results, one ecosystem row and `id_start` block per package. Never accept
+"Ecosystems detected: none" while nested manifests exist. Scope other dimensions to the packages
+the user names, or all of them if unspecified.
+
+## Existing report files
+
+Back them up as `MODERNIZATION_REPORT_backup_YYYY_MM_DD_HHMMSS.md` before overwriting.

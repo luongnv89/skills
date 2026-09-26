@@ -4,7 +4,7 @@ description: "Review a product codebase and landing page against 32 viral princi
 license: MIT
 effort: high
 metadata:
-  version: 1.4.1
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -63,6 +63,18 @@ non-interactively, and a project-scoped install lands where the `$HOME` test can
 
 A missing `/browse` is **fail-soft**, not fatal: print the commands above, then ask the user for a
 local file or saved HTML of the page. Never score a URL you could not load — do not invent one.
+
+## Repo Sync Before Edits (mandatory)
+
+Phase 3 writes `viral-evaluation.md` to the repo root or current working directory. When that path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository.
 
 ## Inputs
 
@@ -133,15 +145,7 @@ Run these in sequence. Emit the matching Step Completion Report (see
 
 ## Honest evaluation
 
-This is a critique tool — its value is candor. Do not inflate scores to be encouraging. If the
-hero fails, say it fails and show the fix. At the same time, do not invent flaws: a genuine PASS
-is a PASS. Low-confidence verdicts must be labeled, never laundered into false certainty. When
-extra instructions justify a deliberate deviation (e.g. a strategic free tier), score the
-principle as written and explain the trade-off in the caveats — don't silently pass it.
-
-On any failure to fetch inputs or read evidence, report the concrete error and stop — do not
-guess or continue with incomplete data. Confirm with the user before fetching inputs and
-before writing `viral-evaluation.md`. If a principle cannot be evidenced, mark FAIL or low-confidence; never invent.
+This is a critique tool — its value is candor: never inflate scores, never invent flaws, label low-confidence verdicts. The full candor rules are in `references/honest-evaluation.md`.
 
 ## Step Completion Reports
 
@@ -184,5 +188,7 @@ A report containing:
 - `references/report-template.md` — exact output shape (verdict block, scorecard, prioritized
   fixes, strengths, caveats) with a calibration example.
 - `references/step-reports.md` — Step Completion Report formats for the three phases.
+- `references/honest-evaluation.md` — the full candor rules: no inflation, no invented flaws,
+  labelled low-confidence, stop on fetch/read failure.
 - `scripts/virality_score.py` — deterministic Virality Score + tier helper (`tests/` holds its
   stdlib fixtures).

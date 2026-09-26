@@ -152,10 +152,10 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 2.1.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
-| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.1 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
-| [**test-coverage**](skills/test-coverage/) | 1.3.1 | low | Target untested branches and edge cases |
-| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.4.1 | medium | Usability review using Krug's principles |
+| [**code-review**](skills/code-review/) | 2.1.3 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
+| [**test-coverage**](skills/test-coverage/) | 1.3.2 | low | Target untested branches and edge cases |
+| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.4.3 | medium | Usability review using Krug's principles |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
@@ -180,29 +180,29 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**auto-push**](skills/auto-push/) | 1.0.5 | low | Commit message + stage + push with secret and size checks |
-| [**devops-pipeline**](skills/devops-pipeline/) | 2.0.3 | medium | Pre-commit + GitHub Actions quality gates |
+| [**devops-pipeline**](skills/devops-pipeline/) | 2.2.2 | medium | Pre-commit + GitHub Actions quality gates |
 | [**security-setup**](skills/security-setup/) | 1.4.2 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**fork-upstream-sync**](skills/fork-upstream-sync/) | 1.3.4 | medium | Sync a fork with upstream while keeping feature branches and open PRs mergeable |
-| [**release-manager**](skills/release-manager/) | 2.6.0 | max | Bump, changelog, tag, GitHub release, publish |
+| [**release-manager**](skills/release-manager/) | 2.6.4 | max | Bump, changelog, tag, GitHub release, publish |
 
 ### Product Planning
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**idea-validator**](skills/idea-validator/) | 1.5.0 | max | Market, feasibility, competitor checks for ideas |
-| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.3.0 | high | Score codebase + landing page vs 32 viral principles |
-| [**brand-name-checker**](skills/brand-name-checker/) | 1.4.0 | max | Trademark, domain, social, registry conflicts |
-| [**prd-generator**](skills/prd-generator/) | 1.4.0 | max | Structured PRD from idea or validate notes |
-| [**tad-generator**](skills/tad-generator/) | 1.5.0 | max | Technical architecture document from PRD |
-| [**tasks-generator**](skills/tasks-generator/) | 1.3.2 | max | Sprint tasks and plan from PRD |
-| [**plan-to-issues**](skills/plan-to-issues/) | 2.1.0 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
+| [**idea-validator**](skills/idea-validator/) | 1.5.1 | max | Market, feasibility, competitor checks for ideas |
+| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.5.0 | high | Score codebase + landing page vs 32 viral principles |
+| [**brand-name-checker**](skills/brand-name-checker/) | 1.4.2 | max | Trademark, domain, social, registry conflicts |
+| [**prd-generator**](skills/prd-generator/) | 1.4.3 | max | Structured PRD from idea or validate notes |
+| [**tad-generator**](skills/tad-generator/) | 1.5.1 | max | Technical architecture document from PRD |
+| [**tasks-generator**](skills/tasks-generator/) | 1.4.1 | max | Sprint tasks and plan from PRD |
+| [**plan-to-issues**](skills/plan-to-issues/) | 2.1.1 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
 
 ### Frontend & Design
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**frontend-design**](skills/frontend-design/) | 1.2.5 | high | Production UIs with usability-first approach |
-| [**logo-designer**](skills/logo-designer/) | 1.2.3 | medium | 7 SVG logo variants from project context |
+| [**frontend-design**](skills/frontend-design/) | 1.2.7 | high | Production UIs with usability-first approach |
+| [**logo-designer**](skills/logo-designer/) | 1.2.5 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.3.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 | [**website-cloner**](skills/website-cloner/) | 1.3.0 | high | 6-phase URL to improved Vite/React/Tailwind site |
 
@@ -228,20 +228,20 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**doc-manager**](skills/doc-manager/) | 2.0.3 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**landing-page-generator**](skills/landing-page-generator/) | 1.2.1 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
-| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.1 | high | Technical SEO + AI-bot directives |
+| [**doc-manager**](skills/doc-manager/) | 2.0.4 | medium | Generate/update docs to match code, cited to path:line, never invented |
+| [**landing-page-generator**](skills/landing-page-generator/) | 1.3.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.3 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.3 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
-| [**oss-ready**](skills/oss-ready/) | 1.3.0 | low | Add OSS files and templates |
-| [**agent-config**](skills/agent-config/) | 1.4.1 | medium | CLAUDE.md + AGENTS.md per best practices |
+| [**oss-ready**](skills/oss-ready/) | 1.3.1 | low | Add OSS files and templates |
+| [**agent-config**](skills/agent-config/) | 1.4.3 | medium | CLAUDE.md + AGENTS.md per best practices |
 | [**subagent-creator**](skills/subagent-creator/) | 1.1.4 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
-| [**convert-documents-to-markdown**](skills/convert-documents-to-markdown/) | 1.0.0 | low | Office docs, ebooks, CSV & PDF → GitHub-Flavored Markdown via anydoc (mirrored from firecrawl/anydoc) |
+| [**convert-documents-to-markdown**](skills/convert-documents-to-markdown/) | 1.1.0 | low | Office docs, ebooks, CSV & PDF → GitHub-Flavored Markdown via anydoc (mirrored from firecrawl/anydoc) |
 
 ### App Store
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**aso-marketing**](skills/aso-marketing/) | 1.3.0 | max | App Store + Google Play keyword and metadata optimization |
+| [**aso-marketing**](skills/aso-marketing/) | 1.3.1 | max | App Store + Google Play keyword and metadata optimization |
 | [**appstore-review-checker**](skills/appstore-review-checker/) | 1.3.0 | high | Pre-submission audit vs Apple guidelines |
 
 ### Tooling
@@ -249,14 +249,14 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**cli-builder**](skills/cli-builder/) | 1.1.0 | high | 5-step CLI tool builder with approval gates |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.2.0 | medium | Hardware-aware Ollama tuning |
-| [**install-script-generator**](skills/install-script-generator/) | 2.2.3 | high | Cross-platform install.sh with env detection |
-| [**opencode-handoff**](skills/opencode-handoff/) | 1.1.0 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
-| [**opencode-runner**](skills/opencode-runner/) | 1.5.0 | medium | Delegate work to opencode free cloud models |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.2.1 | medium | Hardware-aware Ollama tuning |
+| [**install-script-generator**](skills/install-script-generator/) | 2.2.4 | high | Cross-platform install.sh with env detection |
+| [**opencode-handoff**](skills/opencode-handoff/) | 1.1.1 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
+| [**opencode-runner**](skills/opencode-runner/) | 1.5.1 | medium | Delegate work to opencode free cloud models |
 | [**opencode-sandbox**](skills/opencode-sandbox/) | 3.1.0 | medium | Run OpenCode in a kept sandbox (SSH/gh on by default) |
-| [**herdr-agent**](skills/herdr-agent/) | 3.1.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
+| [**herdr-agent**](skills/herdr-agent/) | 3.1.4 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.5.3 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
-| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.3.1 | medium | Spawn, message, read CLI agents in tmux |
+| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.3.2 | medium | Spawn, message, read CLI agents in tmux |
 | [**dev-machine-setup**](skills/dev-machine-setup/) | 0.9.3 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
 
 ---

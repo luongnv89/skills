@@ -4,7 +4,7 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.4.1
+  version: 1.4.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -190,6 +190,19 @@ After each major step, emit a status report. The general template, plus per-step
 - Trademark search completed against WIPO, EUIPO, and INPI (unless the Early-Exit Rule fired)
 - Risk level assigned (Low / Moderate / High) with supporting rationale
 - Final recommendation delivered (Proceed / Modify / Abandon) with named alternatives if needed
+
+## Expected Output
+
+For `check "acme-flow"` where no hard conflicts surface but `.com` is parked:
+
+```text
+SOCIAL: Clear
+REGISTRY: npm (available) | PyPI (available) | Homebrew (available) | apt (available)
+DOMAIN: .com (taken) | .io (available) | .app (available)
+TM: WIPO (clear) | EUIPO (clear) | INPI (clear)
+RISK: Moderate - .com held by unrelated parked page; socials and registries clear
+RECOMMEND: Proceed - pair the .io domain with the clear social handles
+```
 
 ## Edge Cases
 
