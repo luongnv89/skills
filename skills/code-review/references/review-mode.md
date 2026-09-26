@@ -3,10 +3,6 @@
 
 Review code for quality issues, code smells, and pragmatic programming violations.
 
-## When to Use
-
-Use this skill when the user asks for a code review, PR review, audit, security check, or "review my changes". Trigger on phrases like "review this code", "audit this repo", "check this PR for issues", or "find bugs in these files". Do not trigger for performance profiling, writing new features from scratch, or test-case generation.
-
 ## Quick Start
 
 First, record `git rev-parse HEAD`, `git status`, and local tracking observations without
@@ -48,7 +44,7 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
 **Mode 1: Small PR/Diff (Fast Path - Inline)**
 - Changed files: <50
 - Total lines changed: <5000
-- Process: Run complete review inline in SKILL.md; no subagents needed
+- Process: Run complete review inline in [`references/review-mode.md`](./review-mode.md); no subagents needed
 - Git commands:
   ```bash
   git diff --name-only <base>..HEAD
@@ -83,7 +79,7 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
   5. Full validation pass
 - Output: CODE_REVIEW.md with sampled findings + note about sampling strategy
 
-If the Agent tool is unavailable, degrade gracefully per `references/subagent-architecture.md`: run sequential inline review instead of Mode 2/3 subagent batching.
+If the Agent tool is unavailable, use the inline workflow in [`references/review-mode.md`](./review-mode.md) sequentially instead of Mode 2/3 subagent batching.
 
 ## Review Checklist
 

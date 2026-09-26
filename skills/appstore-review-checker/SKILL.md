@@ -4,7 +4,7 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
