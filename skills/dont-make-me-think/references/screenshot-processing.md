@@ -61,7 +61,7 @@ Use `-o report.md` to write markdown to a file instead of stderr.
 ## How to Use the Output in a Review
 
 1. **Parse the JSON** (stdout) to get factual data
-2. **Populate the scorecard** with visual_density and quality_score
+2. **Cite `visual_density` and `quality_score`** as evidence under the relevant lenses and as quality caveats — they do not map onto the per-lens 0–10 scorecard fields
 3. **Reference the color palette** when discussing design consistency
 4. **Use layout regions** to pinpoint where issues are located
 5. **Check warnings** for quality concerns that might affect the review
