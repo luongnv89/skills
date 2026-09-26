@@ -57,7 +57,7 @@ It prints one labeled block per agent with the reply delta and a state tag (`idl
 
 ## Periodic fleet status during long runs
 
-When orchestrating multiple agents for more than a few minutes, keep the user informed on a guidance cadence of about **every 5 minutes**. The cadence is read-only: inspect panes, summarize, and continue waiting. Do **not** send keystrokes, attach, or otherwise interrupt agents that are still working.
+When orchestrating multiple agents for more than a few minutes, emit a read-only status table when existing bounded observation detects a session state change (done, blocked, stalled) and at each Phase 7 gate point, within the same overall wait budget. Keep existing polling and timeouts; do not add a watcher or reset deadlines. Inspect panes, summarize, and continue waiting. Do **not** send keystrokes, attach, or otherwise interrupt agents that are still working.
 
 A useful status report is a compact table:
 

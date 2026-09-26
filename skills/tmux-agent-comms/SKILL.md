@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires `tmux` on PATH. Optional Python 3 for wait/preflight/broadcast helpers."
 effort: medium
 metadata:
-  version: 2.3.1
+  version: 2.3.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -132,7 +132,7 @@ Read `references/tmux-recipes.md` for classification commands, periodic fleet st
 
 - **Continue:** restart Phase 3 with a fresh baseline and marker.
 - **Broadcast:** run `"$here/broadcast.sh" "<message>" <session...>`; it preflights, sends first, then waits concurrently. Do not serialize send/wait by agent.
-- **Long fleet run:** emit a read-only status table about every five minutes within the same overall wait budget.
+- **Long fleet run:** emit a read-only status table when existing bounded observation detects a session state change (done, blocked, stalled) and at each Phase 7 gate point, within the same overall wait budget.
 - **Tear down:** after explicit confirmation, prefer `tmux kill-session -t <name>` over `tmux kill-server`.
 
 **Complete when:** every follow-up has an independent proof cycle, broadcast failures are reported per target, or confirmed teardown affects only named sessions.
