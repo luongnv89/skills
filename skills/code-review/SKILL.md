@@ -4,7 +4,7 @@ description: "Review or improve code — one skill, four modes: bug/security rev
 license: MIT
 effort: high
 metadata:
-  version: 2.1.1
+  version: 2.1.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
 ---
@@ -38,12 +38,19 @@ mode you need — this protects the agent's context budget.
 
 ## Safety: cleanup writes code — the other three do not
 
-`review`, `perf`, and `clean` are strictly **read-only**: they analyze and report, never touching
-source. `cleanup` **modifies files**. Therefore:
+`review`, `perf`, and `clean` are **source-read-only**: they analyze and report without touching
+source files. Review and perf may write only the named report artifact their mode specifies
+(`CODE_REVIEW.md` for review; perf returns its report in the response). During review/perf analysis,
+they must not otherwise mutate the index, refs, stash, branch, worktree, or remote state.
+`clean` retains its own report-writing and sync contract. `cleanup` **modifies files**. Therefore:
 
 - **Never enter `cleanup` by weak inference.** Run it only when the user explicitly asks to
   refactor / clean up the codebase (or passes `mode:cleanup`). A plain "review my code" must never
   rewrite files — stay in a read-only mode.
+- Review and perf analysis record `git rev-parse HEAD`, `git status`, and local tracking
+  observations without claiming remote freshness. They do not fetch, stash, pull, rebase,
+  checkout/switch, create or delete branches/worktrees, or apply source fixes. A separately
+  approved mutation workflow owns its own freshness and stash-first sync contract.
 - **Confirm before the first write** in `cleanup`, and follow that mode's own gating.
 
 ## Repo Sync Before Edits
