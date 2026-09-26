@@ -49,8 +49,8 @@ Required: `viewBox="0 0 width height"` with proper numbers
 
 ```
 ✅ Correct:
-  <svg viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg">
-  <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 320 72" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
 
 ❌ Incorrect:
   <svg viewBox="240 60"> (missing 0 0)
@@ -139,7 +139,7 @@ Examples:
 - [ ] Text (product name) is readable without zooming
 
 #### logo-mark.svg
-- [ ] viewBox is square (equal width and height, e.g., 60x60)
+- [ ] viewBox is exactly `0 0 64 64` (canonical square mark)
 - [ ] Contains symbol only (no text)
 - [ ] Symbol is centered and fills most of viewBox (safe padding 5-10%)
 - [ ] Recognizable as a standalone icon
@@ -151,7 +151,7 @@ Examples:
 - [ ] Text is centered and readable
 
 #### logo-icon.svg
-- [ ] viewBox is square (e.g., 192x192)
+- [ ] viewBox is exactly `0 0 512 512` (canonical square app icon)
 - [ ] Contains symbol with padding on all sides
 - [ ] Safe area: symbol doesn't touch edges (padding of at least 5-10%)
 - [ ] Has background (recommended: subtle color or rounded rect with stroke)
@@ -225,251 +225,64 @@ For each file:
 
 ### Step 6: Create Validation Report
 
-Generate a comprehensive validation report:
+Write a concise, unfilled validation report to `output_path`. It must contain observations from this fresh review, not an assumed verdict.
 
 ```markdown
 # SVG Validation Report
 
 **Date**: [ISO date]
 **Project**: [product name]
-**Validation Status**: ✅ PASS / ⚠️ WARNINGS / ❌ CRITICAL ISSUES
+**Validation Status**: [PASS | WARNINGS | CRITICAL ISSUES]
 
----
+## File Completeness and Required viewBoxes
 
-## File Completeness
+| File | Expected viewBox | Status | Evidence |
+|------|------------------|--------|----------|
+| `logo-mark.svg` | `0 0 64 64` | [ ] | |
+| `logo-full.svg` | `0 0 320 72` | [ ] | |
+| `logo-wordmark.svg` | `0 0 180 40` | [ ] | |
+| `logo-icon.svg` | `0 0 512 512` | [ ] | |
+| `favicon.svg` | `0 0 16 16` | [ ] | |
+| `logo-white.svg` | `0 0 320 72` | [ ] | |
+| `logo-black.svg` | `0 0 320 72` | [ ] | |
 
-| File | Status | Notes |
-|------|--------|-------|
-| logo-full.svg | ✅ | 240x60 viewBox, symbol + text |
-| logo-mark.svg | ✅ | 60x60 viewBox, symbol only |
-| logo-wordmark.svg | ✅ | 180x60 viewBox, text only |
-| logo-icon.svg | ✅ | 192x192 viewBox, padded symbol |
-| favicon.svg | ✅ | 16x16 viewBox, simplified design |
-| logo-white.svg | ✅ | 240x60 viewBox, white colors |
-| logo-black.svg | ✅ | 240x60 viewBox, black/primary colors |
+## Structure
 
-**Status**: ✅ All 7 files present and accounted for
+| Check | Status | Evidence |
+|-------|--------|----------|
+| All seven named files are present | [ ] | |
+| XML is well-formed and UTF-8 encoded | [ ] | |
+| Each root has its expected `viewBox` and SVG namespace | [ ] | |
+| No `<image>`, data URI, or `src=` raster embedding | [ ] | |
+| Every path has non-empty, valid `d` data | [ ] | |
+| Text elements have coordinates, font, size, and the actual product name | [ ] | |
+| Colors follow the brand palette and contrast requirements | [ ] | |
+| File size and trailing whitespace are reasonable | [ ] | |
 
----
+## Mark Consistency
 
-## SVG Structure Validation
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Canonical paths and accent elements were extracted from `logo-mark.svg` | [ ] | |
+| `logo-full.svg`, `logo-icon.svg`, `logo-white.svg`, and `logo-black.svg` use matching geometry and layers | [ ] | |
+| Monochrome variants differ only in color | [ ] | |
 
-### XML Well-Formedness
-- [x] All tags properly closed
-- [x] No malformed attributes
-- [x] No unescaped special characters
+## Wordmark Consistency
 
-### viewBox Attributes
-| File | viewBox | Status |
-|------|---------|--------|
-| logo-full.svg | 0 0 240 60 | ✅ Correct |
-| logo-mark.svg | 0 0 60 60 | ✅ Correct |
-| logo-wordmark.svg | 0 0 180 60 | ✅ Correct |
-| logo-icon.svg | 0 0 192 192 | ✅ Correct |
-| favicon.svg | 0 0 16 16 | ✅ Correct |
-| logo-white.svg | 0 0 240 60 | ✅ Correct |
-| logo-black.svg | 0 0 240 60 | ✅ Correct |
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Product-name text matches in full, wordmark, white, and black variants | [ ] | |
+| Font family and weight match | [ ] | |
+| Positioning remains consistent in full, white, and black variants | [ ] | |
 
-### Raster Embedding
-- [x] No `<image>` tags found
-- [x] No embedded base64 or data URIs
-- [x] All pure vector: paths, rects, circles, text, groups
+## Issues
 
-### Namespace
-- [x] `xmlns="http://www.w3.org/2000/svg"` present on all files
-
-### Path Syntax
-- [x] All `<path>` elements have valid `d` attributes
-- [x] No incomplete or malformed paths
-- [x] Paths are optimized (rounded to 2 decimals)
-
-### Text Elements
-- [x] All text elements have x, y coordinates
-- [x] All text elements have font-family specified
-- [x] All text elements have font-size specified
-- [x] Product name "fastbuild" used (not placeholder `[name]`)
-- [x] Text is centered and readable
-
----
-
-## File-Specific Validation
-
-### logo-full.svg
-- [x] Landscape dimensions (240x60)
-- [x] Contains symbol on left, text on right
-- [x] Symbol and text are well-spaced
-- [x] Text "fastbuild" is readable and prominent
-
-### logo-mark.svg
-- [x] Square dimensions (60x60)
-- [x] Symbol only, no text
-- [x] Symbol centered with safe padding
-- [x] Recognizable as standalone icon
-
-### logo-wordmark.svg
-- [x] Landscape dimensions (180x60)
-- [x] Text only, no symbol
-- [x] Text "fastbuild" is legible
-- [x] Proper spacing and alignment
-
-### logo-icon.svg
-- [x] Square dimensions (192x192)
-- [x] Symbol with safe padding (not touching edges)
-- [x] Background: subtle dark color with rounded corners
-- [x] iOS/Android appropriate
-
-### favicon.svg
-- [x] Tiny size (16x16)
-- [x] Design heavily simplified (no fine details)
-- [x] Symbol is bold and recognizable at 16px
-- [x] High contrast: neon green on dark background
-- [x] No small text or fine lines
-
-### logo-white.svg
-- [x] Dimensions match logo-full.svg (240x60)
-- [x] Colors: white (#FFFFFF) symbol and text
-- [x] Transparent background
-- [x] Suitable for dark backgrounds
-
-### logo-black.svg
-- [x] Dimensions match logo-full.svg (240x60)
-- [x] Colors: black (#000000) symbol and text
-- [x] Transparent background
-- [x] Suitable for light backgrounds
-
----
-
-## Color Validation
-
-| Color | File | Purpose | Valid | Notes |
-|-------|------|---------|-------|-------|
-| #0A0A0A | full, icon | Primary | ✅ | From brand palette |
-| #00FF41 | favicon | Accent | ✅ | Neon green highlight |
-| #FFFFFF | white | Light backgrounds | ✅ | Good contrast |
-| #000000 | black | Dark backgrounds | ✅ | Good contrast |
-
-**Contrast Check**: All colors meet WCAG AA (4.5:1 minimum) ✅
-
----
-
-## Encoding and Format
-
-- [x] All files UTF-8 encoded
-- [x] Proper .svg file extensions
-- [x] File sizes reasonable (< 50KB)
-- [x] No bloated whitespace
-
----
-
-## Overall Validation Status
-
-✅ **PASS — All SVG files are properly structured, complete, and ready for use.**
-
-### Summary
-- **Files**: 7/7 present and valid
-- **Structure**: All XMLwell-formed, viewBox correct, no rasters
-- **Content**: Product name correct, symbol recognizable, text readable
-- **Colors**: Valid hex codes, good contrast, brand-aligned
-- **Encoding**: UTF-8, proper format, optimized size
-
----
-
-## Next Steps
-
-1. **Preview in context**:
-   - View logo-full.svg on website header
-   - View logo-icon.svg on iOS/Android simulators
-   - View favicon.svg in browser tab
-
-2. **Update project files**:
-   - Add `assets/logo/` directory to README (with logo image)
-   - Update HTML `<link rel="icon">` to point to favicon.svg
-   - Create or update brand_kit.md with colors and typography
-
-3. **Commit to repository**:
-   - Stage all 7 SVG files
-   - Commit with message: "feat: add professional logo assets"
-   - Push to main branch
-
-4. **Integrate into project**:
-   - App icon (iOS): Use logo-icon.svg
-   - App icon (Android): Use logo-icon.svg (adaptive icon)
-   - Website favicon: Use favicon.svg in HTML `<link>`
-   - Website header: Use logo-full.svg or logo-wordmark.svg
-   - Dark backgrounds: Use logo-white.svg
-   - Light backgrounds: Use logo-black.svg
-
----
-
-**Validation Complete. SVGs are production-ready.**
+| Severity | File | Issue | Evidence | Status |
+|----------|------|-------|----------|--------|
+| [severity] | [file or —] | [observed issue or none] | [pointer] | [open/verified] |
 ```
 
-Or, if issues found:
-
-```markdown
-# SVG Validation Report — ISSUES FOUND
-
-## Critical Issues
-
-### ❌ logo-full.svg: Missing viewBox
-
-**Issue**: SVG tag has width/height but no viewBox
-```xml
-<svg width="240" height="60">  ❌ WRONG
-<svg viewBox="0 0 240 60">     ✅ CORRECT
-```
-
-**Impact**: Logo won't scale properly
-**Fix**: Replace width/height with viewBox attribute
-
----
-
-### ❌ logo-mark.svg: Contains Embedded Raster
-
-**Issue**: SVG contains `<image>` tag with base64-encoded PNG
-```xml
-<image xlink:href="data:image/png;base64,iVBORw0KG..." />  ❌ NOT ALLOWED
-```
-
-**Impact**: Raster defeats the purpose of SVG (not scalable, bloated)
-**Fix**: Rebuild symbol as pure vector shapes (paths, circles, rects)
-
----
-
-## Medium Issues
-
-### ⚠️ favicon.svg: Design Not Simplified Enough
-
-**Issue**: favicon.svg contains fine details that are unreadable at 16x16
-- Thin lines (< 1px)
-- Small text
-- Complex symbol with many path points
-
-**Impact**: Favicon will be blurry/unreadable in browser tab
-**Fix**: Simplify the design for tiny size — use bold shapes, remove fine details
-
----
-
-## Issues Summary
-
-| Severity | Count | Files |
-|----------|-------|-------|
-| Critical | 2 | logo-full.svg, logo-mark.svg |
-| Medium | 1 | favicon.svg |
-| Minor | 0 | — |
-
-**Status**: ❌ NEEDS REVISION
-
----
-
-## Fixes Required
-
-1. **logo-full.svg**: Add `viewBox="0 0 240 60"` to SVG tag
-2. **logo-mark.svg**: Remove `<image>` tag, rebuild symbol using `<path>`, `<circle>`, etc.
-3. **favicon.svg**: Simplify design, increase stroke width, remove fine details
-
-After applying these fixes, re-run validation for re-approval.
-```
+Populate statuses, evidence, and issue rows only after reviewing the actual files.
 
 ## Output Format
 
