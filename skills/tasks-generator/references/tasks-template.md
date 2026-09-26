@@ -15,6 +15,11 @@
 
 A reviewer-friendly minimal example of the generated `tasks.md`:
 
+> Contract: every task ID is `<sprint>.<index>`, with one index sequence across
+> all workstreams in a sprint. Workstream names belong in the workstream section
+> or field, never in the ID. A dependency may reference an existing task in an
+> earlier sprint; `Depends On` and `Blocks` must remain inverse edges.
+
 ```markdown
 # Development Tasks — <Project Name>
 
@@ -171,7 +176,7 @@ Next: review Sprint 1 / Wave 1 tasks before kickoff.
 - [ ] [Specific, testable condition 2]
 - [ ] [Specific, testable condition 3]
 
-**Dependencies**: [None / Task X.X]
+**Dependencies**: [None / Task <sprint>.<index>]
 
 **PRD Reference**: [Section or requirement]
 

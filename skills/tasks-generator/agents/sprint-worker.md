@@ -31,11 +31,17 @@ From the sprint plan, identify independent workstreams (e.g., backend, frontend,
 
 ### Step 3: Generate Workstream Tasks
 
-For each workstream, generate tasks following this structure:
+For each workstream, generate tasks following this structure. Assign one 1-based
+`index` sequence across the whole sprint, including all parallel workstreams;
+keep the workstream name in `workstream` rather than encoding it in the ID.
+Every `depends_on` and `blocks` value must be an emitted or verified
+`<sprint>.<index>` ID. Within this worker output, `blocks` records same-sprint
+edges only; a dependency on an earlier sprint is recorded only in this task's
+`depends_on` and never by editing another worker's output.
 
 ```json
 {
-  "task_id": "SPRINT_SPRINT_NUMBER.WORKSTREAM_ID.TASK_ID",
+  "task_id": "<sprint>.<index>",
   "title": "[Action-oriented Title]",
   "description": "What and why, referencing the feature from PRD",
   "acceptance_criteria": [
@@ -49,8 +55,8 @@ For each workstream, generate tasks following this structure:
     "testing_strategy": "How to test this task"
   },
   "effort_estimate": "1d|2d|3d",
-  "depends_on": ["TASK_ID_FROM_PRIOR_SPRINT"] or [],
-  "blocks": ["TASK_ID_LATER_IN_SPRINT"] or [],
+  "depends_on": ["<sprint>.<index>"] or [],
+  "blocks": ["<sprint>.<index>"] or [],
   "workstream": "backend|frontend|infra|...",
   "priority": "blocker|p0|p1|p2",
   "implementation_notes": "Specific guidance on how to implement",
@@ -97,22 +103,33 @@ Acceptance Criteria:
 ### Step 7: Identify In-Sprint Dependencies
 
 If Task B depends on Task A (both in the same sprint):
-- Mark Task A in Task B's `depends_on`
+- Mark Task A's canonical `<sprint>.<index>` ID in Task B's `depends_on`
 - This guides the developer on execution order
-- Mark Task B in Task A's `blocks`
+- Mark Task B's canonical ID in Task A's `blocks`
+- Keep same-sprint `depends_on` and `blocks` fields as exact inverses; do not
+  add an in-sprint edge on only one side
+- Cross-sprint reciprocal `blocks` entries are normalized later by the
+  dependency-resolver from verified `depends_on` edges
 
 Example:
-- Task 1: "Create database schema" → blocks Task 2, 3, 4
-- Task 2: "Write data access layer" → depends on Task 1
-- Task 3: "Build API endpoints" → depends on Task 1
-- Task 2 and 3 can run in parallel after Task 1 is done
+- Task 1.1: "Create database schema" → blocks Task 1.2, 1.3
+- Task 1.2: "Write data access layer" → depends on Task 1.1
+- Task 1.3: "Build API endpoints" → depends on Task 1.1
+- Task 1.2 and 1.3 can run in parallel after Task 1.1 is done
 
 ### Step 8: Cross-Sprint Dependencies
 
 If THIS sprint's task depends on a prior sprint's task:
-- Get the task ID from the prior sprint's output
-- List it in `depends_on`
-- This allows the dependency-resolver agent to wire cross-sprint deps
+- Use the exact canonical ID from an available prior sprint output (for
+  example, `1.4`), never a workstream-qualified variant or an invented
+  placeholder
+- If the prior output or referenced task is missing, report the unresolved
+  dependency and stop; never guess or synthesize an ID
+- Record only that exact ID in this task's `depends_on`; do not edit the prior
+  worker output or add a reciprocal `blocks` entry there
+- The dependency-resolver verifies the explicit edge in its combined in-memory
+  map and derives the reciprocal `blocks` entry for rendering
+- Do not fabricate a task ID to represent a sprint-level dependency
 
 ### Step 9: Estimate Effort
 
@@ -127,6 +144,12 @@ Assign 1d (1 day), 2d (2 days), or 3d (3 days):
 Check:
 - All features in THIS sprint have tasks
 - All tasks have clear acceptance criteria
+- Every task ID matches `<sprint>.<index>` and indices are unique across the
+  whole sprint, including parallel workstreams
+- Every dependency and `blocks` reference names an emitted or verified task ID;
+  missing prior-sprint output is an error, not a reason to guess
+- Same-sprint `depends_on` and `blocks` are exact inverse edges; cross-sprint
+  reciprocal `blocks` entries are the resolver's normalized in-memory output
 - No circular dependencies exist
 - Tasks are appropriately sized (1-3 days)
 - Workstream balance is reasonable (frontend ≠ backend by massive amounts)
@@ -140,13 +163,13 @@ Save the sprint tasks as JSON:
   "sprint_number": 1,
   "sprint_title": "Sprint 1 - POC Foundation",
   "workstreams": {
-    "project_setup": ["TASK_ID_1", "TASK_ID_2"],
-    "backend": ["TASK_ID_3", "TASK_ID_4"],
-    "frontend": ["TASK_ID_5"]
+    "project_setup": ["1.1", "1.2"],
+    "backend": ["1.3", "1.4"],
+    "frontend": ["1.5"]
   },
   "tasks": [
     {
-      "task_id": "1.setup.1",
+      "task_id": "1.1",
       "title": "Initialize project repository and CI/CD pipeline",
       "description": "Set up the repo structure, package.json (or equivalent), and basic CI/CD workflow for automated testing and deployment.",
       "acceptance_criteria": [
@@ -162,7 +185,7 @@ Save the sprint tasks as JSON:
       },
       "effort_estimate": "1d",
       "depends_on": [],
-      "blocks": ["1.backend.1", "1.frontend.1"],
+      "blocks": ["1.3", "1.5"],
       "workstream": "project_setup",
       "priority": "blocker",
       "implementation_notes": "Use template from .github/workflows/ if it exists. Ensure Node version is pinned.",
