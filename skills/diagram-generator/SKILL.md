@@ -4,7 +4,7 @@ description: "Generate a diagram and route to the right engine — draw.io XML (
 license: MIT
 effort: high
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -49,6 +49,18 @@ asm list -p claude --json | grep -q "\"$engine\"" || {
 ```
 
 A missing routed engine stops the run before any output is written.
+
+## Repo Sync Before Edits (mandatory)
+
+The selected engine writes the diagram file. When that output path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository (e.g. a scratch directory).
 
 ## How to use
 

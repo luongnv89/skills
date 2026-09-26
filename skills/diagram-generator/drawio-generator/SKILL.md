@@ -4,8 +4,8 @@ description: "Generate professional diagrams as valid draw.io XML — flowcharts
 license: MIT
 effort: high
 metadata:
-  version: 1.2.3
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.3.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Draw.io Diagram Generator
@@ -22,6 +22,18 @@ If the Agent tool is unavailable (e.g., Claude.ai), execute each phase inline:
 - Phase 1 & 2: Gather requirements directly in conversation
 - Phase 3: Generate the XML in this context
 - Phase 4: Self-review against the 9 checks (less rigorous, but functional)
+
+## Repo Sync Before Edits (mandatory)
+
+The `.drawio` file is written at the end of the workflow. When that output path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository.
 
 ## Core Workflow
 
