@@ -27,7 +27,7 @@ The rules this skill enforces, and where they come from. Read before drafting or
 | Codex combined budget | 32 KiB |
 | Claude hard load cap | 4 MiB (larger files are skipped) |
 
-Earlier revisions of this skill enforced an 80-line ceiling sourced from community write-ups. The official figure supersedes it: audit against **under 200 lines**, and treat anything past 150 as a prompt to path-scope or extract.
+Use the **under 200-line** target; anything past 150 lines is a prompt to path-scope or extract.
 
 When a file outgrows the budget, in this order:
 

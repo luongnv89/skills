@@ -4,7 +4,7 @@ description: "Generate Product Requirements Documents from `idea.md` and `valida
 license: MIT
 effort: max
 metadata:
-  version: 1.4.1
+  version: 1.4.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

@@ -4,7 +4,7 @@ description: "Generate landing pages with PAS, AIDA, or StoryBrand from a produc
 license: MIT
 effort: high
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

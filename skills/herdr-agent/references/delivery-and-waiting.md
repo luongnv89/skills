@@ -23,9 +23,9 @@ That single call does all of this server-side:
 --until done`; pass `--until` only for a state-specific wait such as
 `--until blocked`.
 
-This is why the old pre-send transcript baseline and `HERDR_DONE_` completion
-marker are gone. They existed to tell "this reply" from "the reply already on
-screen" across two separate calls. One request has no gap to race.
+Submission and waiting are atomic, so no pre-send transcript baseline or
+`HERDR_DONE_` completion marker is needed: there is no gap to race or confuse
+this reply with earlier output.
 
 Exit status is 1 for a server error, 2 for a CLI syntax error, and the error
 body is JSON on stderr:

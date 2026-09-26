@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 3.0.1
+  version: 3.0.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

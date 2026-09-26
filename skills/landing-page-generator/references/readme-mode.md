@@ -4,8 +4,7 @@ Transform a project's existing `README.md` into a concise, visual, developer-fri
 landing page. Use this mode when the source material is a repository README (not an open
 product brief) and the deliverable is a rewritten `README.md` file in the repo.
 
-> Merged from the former `readme-to-landing-page` skill. For marketing landing-page **copy**
-> from a product brief, use Mode A in `SKILL.md` instead.
+> For marketing landing-page **copy** from a product brief, use Mode A in `SKILL.md` instead.
 
 ## Core Principle: Show, Don't Tell
 

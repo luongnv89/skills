@@ -14,5 +14,5 @@ naive scoping creates.
 5. **Workflow tampering.** Stage `.github/workflows/foo.yml` with
    `${{ github.event.issue.title }}` interpolated into a `run:` step. The
    trip-all rule fires; `semgrep` runs.
-6. **Full scan.** `python3 scripts/security_check.py --all` behaves like
-   pre-1.3.0 (every configured check executes).
+6. **Full scan.** `python3 scripts/security_check.py --all` runs every
+   configured check regardless of the staged file set.
