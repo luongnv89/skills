@@ -181,7 +181,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 |---|---|---|---|
 | [**auto-push**](skills/auto-push/) | 1.0.5 | low | Commit message + stage + push with secret and size checks |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.0.3 | medium | Pre-commit + GitHub Actions quality gates |
-| [**security-setup**](skills/security-setup/) | 1.4.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
+| [**security-setup**](skills/security-setup/) | 1.4.2 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**fork-upstream-sync**](skills/fork-upstream-sync/) | 1.3.4 | medium | Sync a fork with upstream while keeping feature branches and open PRs mergeable |
 | [**release-manager**](skills/release-manager/) | 2.6.0 | max | Bump, changelog, tag, GitHub release, publish |
 
