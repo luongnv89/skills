@@ -4,7 +4,7 @@ description: "Transform a project into a professional open-source repository by 
 license: MIT
 effort: low
 metadata:
-  version: 1.3.0
+  version: 1.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -13,24 +13,44 @@ metadata:
 Transform a project into a professional open-source repository with standard community files and GitHub templates.
 
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+Before creating/updating/deleting files in an existing repository, require a named branch and use the stash-first sync flow below. A detached HEAD stops before any stash or sync operation:
 
 ```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
+branch="$(git symbolic-ref --quiet --short HEAD)" || {
+  echo "✗ Detached HEAD — stop before stashing or syncing."
+  exit 1
+}
+dirty=0
+if [ -n "$(git status --porcelain)" ]; then
+  git stash push -u -m "pre-sync: ${branch} $(date +%Y-%m-%dT%H:%M:%S)" || {
+    echo "✗ Could not stash local changes — resolution stopped."
+    echo "  Recovery: inspect git status; do not discard the working tree."
+    exit 1
+  }
+  dirty=1
+fi
+
+if ! git fetch origin || ! git pull --rebase origin "$branch"; then
+  echo "✗ Repository sync failed — resolution stopped."
+  if [ "$dirty" -eq 1 ]; then
+    echo "  Your changes remain safe in the stash."
+    echo "  Recovery: git stash list"
+    echo "            git stash show -p stash@{0}"
+  fi
+  exit 1
+fi
+
+if [ "$dirty" -eq 1 ]; then
+  git stash pop --index || {
+    echo "✗ Stash restore failed — resolution stopped; your changes remain safe in the stash."
+    echo "  Recovery: git stash list"
+    echo "            git stash show -p stash@{0}"
+    echo "            git checkout stash@{0} -- <path>"
+    echo "            git stash pop --index stash@{0}"
+    exit 1
+  }
+fi
 ```
-
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
 ## Workflow
 
@@ -209,7 +229,8 @@ The skill should detect and handle these inputs explicitly rather than fail sile
 - **Private/internal projects** — confirm with the user before adding public-facing files like SECURITY.md or community templates.
 - **Pre-existing `.github/` workflows or templates** — preserve them; merge only the missing files.
 - **Non-English README** — keep the existing language; do not translate, only add structurally missing sections in the same language.
-- **Detached HEAD or dirty working tree** — abort with the sync warning above; never force changes onto an unstable branch.
+- **Detached HEAD** — stop before stashing or syncing; never force changes onto an unstable branch.
+- **Dirty working tree** — use the stash-first Repo Sync flow above. If stashing, syncing, or restoring fails, stop and use the printed recovery commands; never discard changes.
 
 ## Assets
 

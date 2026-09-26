@@ -4,7 +4,7 @@ description: "Generate or update docs to match the code, citing each claim to pa
 license: MIT
 effort: medium
 metadata:
-  version: 2.0.3
+  version: 2.0.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -12,7 +12,7 @@ metadata:
 
 Keep a project's Markdown documentation **true to the code**. Every run ends with each doc `updated`, `verified-current`, or `flagged` — and every non-obvious claim traced to a source. Scope is Markdown only (`README.md`, `docs/*.md`, per-component READMEs); docstrings and comments are read as source-of-truth but not rewritten.
 
-**Prime directive — never invent.** If the code does not show it and the user has not stated it, do not write it. When a fact is unclear or docs conflict with code, **ask the user**, then record the resolution in `docs/DECISIONS.md`. A guess is a defect here, not a convenience.
+**Prime directive — never invent.** If the code does not show it and the user has not stated it, do not write it. For code-provable facts, reconcile the docs to the code and cite `path:line`; ask the user only when code cannot settle an intent or fact, then record the resolution in `docs/DECISIONS.md`. Preserve user-authored prose unless the user approves its deletion. A guess is a defect here, not a convenience.
 
 ## Repo Sync Before Edits (mandatory)
 

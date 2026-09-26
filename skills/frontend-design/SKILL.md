@@ -4,7 +4,7 @@ description: "Build production-grade frontend interfaces with distinctive aesthe
 license: MIT
 effort: high
 metadata:
-  version: 1.2.5
+  version: 1.2.6
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -50,13 +50,14 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 
 ## Design Thinking
 
-Before coding, understand the context and commit to a BOLD aesthetic direction:
+Before coding, identify the active style source and commit to a clear aesthetic direction:
+- **Brief precedence**: If the user provides a style preference, palette, or brand guidelines, follow that explicit brief. Otherwise, the Default Style Guide below is binding: keep its four core colors (with the text-only status-color exception below) and elegant, clear, clean, professional language; make the result distinctive through composition, typography, spacing, depth, and motion rather than extra core colors.
 - **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
+- **Tone**: With an explicit brief, honor its direction. Without one, choose from directions such as brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, or industrial/utilitarian only when the direction remains compatible with the default style guide; use these options for inspiration rather than as permission to contradict it.
 - **Constraints**: Technical requirements (framework, performance, accessibility).
 - **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work when they fit the active style source — the key is intentionality, not intensity.
 
 Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
 - Production-grade and functional
@@ -74,7 +75,7 @@ When the user does **not** provide a specific style preference, color palette, o
 4. **Bright Green Usage Constraint:** The Bright Green color is strictly reserved for highlights (text, borders, or lines); it must *never* be used as a background color.
 5. **System Status Colors:** Danger (`#EF4444`), Warning (`#F59E0B`), and Info (`#3B82F6`) may only be applied to text elements, not backgrounds or primary UI components.
 
-If the user provides their own colors, brand kit, or style direction, use those instead and ignore this default guide.
+If the user provides their own colors, brand kit, or style direction, use those instead of the default palette and aesthetic. An explicit brief overrides only those defaults; preserve accessibility requirements and keep system status colors text-only, not backgrounds or primary UI components.
 
 ## Usability Principles — "Don't Make Me Think"
 
@@ -111,14 +112,14 @@ For the full step-by-step guideline, see `references/usability-guide.md`.
 
 Focus on:
 - **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
+- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Under the no-brief default, stay within its four-color palette; an explicit brief may override that palette. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
 - **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
 - **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Under the no-brief default, keep gradients, textures, and other effects within the four-color palette; transparency and depth effects are fine. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
 
 NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
 
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
+Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. With an explicit brief, vary between light and dark themes, different fonts, and different aesthetics as requested; without one, vary composition and typography while remaining within the default palette and elegant, clear, clean style. NEVER converge on common choices (Space Grotesk, for example) across generations.
 
 **IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
 
