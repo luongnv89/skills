@@ -4,7 +4,7 @@ description: "Build an improved website clone from a URL via 6-phase gated workf
 license: MIT
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -66,6 +66,35 @@ Why nested: the phases are tightly coupled to this umbrella's data flow (analysi
 When invoking phase skills below, refer to them by name (`/website-analyzer`, `/website-clone-report`, …); the runtime resolves names regardless of filesystem path.
 
 See the individual phase skill docs for their full references/ and scripts/. This orchestrator stays short to fit the agent's context budget.
+
+## Dependency Preflight (mandatory)
+
+This skill invokes six sibling phase skills: `website-analyzer` (Phase 1), `website-clone-report`
+(Phase 2), `website-improvement-prd` (Phase 3), `website-implementation-plan` (Phase 4),
+`website-builder` (Phase 5), and `website-clone-final-report` (Phase 6). Detect them all **before**
+the repo sync below, the first step that changes anything, and report every missing one in a
+single pass:
+
+```bash
+missing=""
+for s in website-analyzer website-clone-report website-improvement-prd website-implementation-plan website-builder website-clone-final-report; do
+  test -d "$HOME/.claude/skills/$s" || test -d "$HOME/.agents/skills/$s" \
+    || asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
+done
+if [ -n "$missing" ]; then
+  for s in $missing; do
+    echo "Missing sibling skill: $s" >&2
+    echo "Install it:      asm install github:luongnv89/skills:skills/website-cloner/$s -p claude --yes" >&2
+    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
+  done
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+fi
+```
+
+A missing sibling is **not a stop** — this suite is designed fail-soft (#251). Print the block,
+name the phases that will be skipped, cap the result at `PARTIAL`, and continue per Edge Cases.
+Never invoke a sibling that was reported missing; a prerequisite that is not a sibling skill still
+stops the run.
 
 ## Repo Sync Before Edits (mandatory)
 

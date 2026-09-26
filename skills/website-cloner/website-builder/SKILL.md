@@ -4,7 +4,7 @@ description: "Build an approved Vite/React/Tailwind plan, collect assets, verify
 license: MIT
 effort: high
 metadata:
-  version: 1.3.2
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -51,6 +51,25 @@ Do **not** use for design review or planning — those are upstream phases.
 8. Re-audit the deployed URL for comparable after metrics
 9. Emit builder metadata
 ```
+
+## Dependency Preflight (mandatory)
+
+Step 7 re-audits the deployed site by invoking the sibling `website-analyzer` skill. Detect it
+**before** the repo sync below, the first step that changes anything:
+
+```bash
+test -d "$HOME/.claude/skills/website-analyzer" || test -d "$HOME/.agents/skills/website-analyzer" \
+  || asm list -p claude --json | grep -q '"website-analyzer"' || {
+  echo "Missing sibling skill: website-analyzer" >&2
+  echo "Install it:      asm install github:luongnv89/skills:skills/website-cloner/website-analyzer -p claude --yes" >&2
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  echo "Verify:          asm list -p claude --json | grep 'website-analyzer'" >&2
+  echo "Step 7 will be skipped and the result capped at PARTIAL." >&2
+}
+```
+
+A missing `website-analyzer` is **not a stop**: print the block, skip Step 7's re-audit, and return
+`PARTIAL` — the same degrade Step 7 documents for a failed re-audit. Steps 1–6 never invoke it.
 
 ## Repo Sync Before Edits (mandatory)
 

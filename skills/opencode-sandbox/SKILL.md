@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 3.0.3
+  version: 3.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -33,6 +33,34 @@ can attach a shell. Do not remove it unless they confirm (or they asked for
   local profile (a new container with the default mounts, or `--fresh-profile`)
 - The task must **not** touch GitHub — pass `--no-ssh --no-github` and review
   the host diff; push stays a separate step
+
+## Dependency Preflight (mandatory)
+
+Interactive mode delegates pane mechanics to **herdr-agent** or **tmux-agent-comms** — either one
+satisfies it, and only interactive mode needs it. Detect both **before** the repo sync below, the
+first step that changes anything:
+
+```bash
+pane=""
+for s in herdr-agent tmux-agent-comms; do
+  test -d "$HOME/.claude/skills/$s" || test -d "$HOME/.agents/skills/$s" \
+    || asm list -p claude --json | grep -q "\"$s\"" || continue
+  pane="$pane $s"
+done
+if [ -z "$pane" ]; then
+  for s in herdr-agent tmux-agent-comms; do
+    echo "Missing pane skill: $s" >&2
+    echo "Install it:      asm install $s -p claude --yes" >&2
+    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
+  done
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  echo "Either one satisfies interactive mode — one-shot mode needs neither." >&2
+fi
+```
+
+A missing pane skill is **not a stop**: print the block, tell the user interactive mode is
+unavailable until one of the two is installed, and continue with the default
+`--start-only`/`--exec-in` flow. One-shot mode never blocks on this.
 
 ## Repo Sync Before Edits (mandatory)
 

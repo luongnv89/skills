@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent in both modes; issue-resolver is required only in ISSUE mode."
 effort: max
 metadata:
-  version: 1.5.2
+  version: 1.5.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -77,15 +77,19 @@ This skill hands whole phases to other skills: `herdr-agent` (every pane spawn, 
 
 ```bash
 req="herdr-agent issue-pr-review"
+missing=""
 for s in $req; do
-  asm list -p claude --json | grep -q "\"$s\"" || {
+  asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
+done
+if [ -n "$missing" ]; then
+  for s in $missing; do
     echo "Missing required skill: $s" >&2
     echo "Install it:      asm install $s -p claude --yes" >&2
-    echo "No asm yet:      npm install -g agent-skill-manager" >&2
-    echo "Verify:          asm list -p claude --json | grep '$s'" >&2
-    exit 1
-  }
-done
+    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
+  done
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  exit 1
+fi
 ```
 
 Resolve `herdr_agent_dir` from the installed `herdr-agent` skill's location,
@@ -94,7 +98,7 @@ stop before sync if that location or `launch_profile.py` cannot be verified.
 
 The mode is already chosen by the Mode Selector above. **In ISSUE mode, add `issue-resolver` to `req` before running this** — PR mode never calls it.
 
-`-p claude` is required: `asm install` refuses to guess a provider non-interactively, `--yes` does not cover that choice, and naming the same provider in the verification stops an install under a different tool from reporting success. On a miss, stop before the first mutation and print those commands — never continue with a partial run.
+`-p claude` is required: `asm install` refuses to guess a provider non-interactively, `--yes` does not cover that choice, and naming the same provider in the verification stops an install under a different tool from reporting success. All missing skills are reported in one pass, then the run stops before the first mutation — never continue with a partial run.
 
 ## Repo Sync Before Edits (mandatory)
 

@@ -153,7 +153,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**code-review**](skills/code-review/) | 2.1.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
-| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.2.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
+| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.1 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.3.1 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.4.1 | medium | Usability review using Krug's principles |
 
@@ -195,7 +195,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**prd-generator**](skills/prd-generator/) | 1.4.0 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.5.0 | max | Technical architecture document from PRD |
 | [**tasks-generator**](skills/tasks-generator/) | 1.3.2 | max | Sprint tasks and plan from PRD |
-| [**plan-to-issues**](skills/plan-to-issues/) | 2.0.4 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
+| [**plan-to-issues**](skills/plan-to-issues/) | 2.1.0 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
 
 ### Frontend & Design
 
@@ -203,8 +203,8 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 |---|---|---|---|
 | [**frontend-design**](skills/frontend-design/) | 1.2.5 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.2.3 | medium | 7 SVG logo variants from project context |
-| [**diagram-generator**](skills/diagram-generator/) | 1.1.2 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
-| [**website-cloner**](skills/website-cloner/) | 1.2.1 | high | 6-phase URL to improved Vite/React/Tailwind site |
+| [**diagram-generator**](skills/diagram-generator/) | 1.2.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
+| [**website-cloner**](skills/website-cloner/) | 1.3.0 | high | 6-phase URL to improved Vite/React/Tailwind site |
 
 **Website cloner phases** (install individually or as suite):
 
@@ -214,7 +214,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | website-clone-report | 1.2.2 | Stakeholder report from analysis |
 | website-improvement-prd | 1.3.0 | Improvement PRD |
 | website-implementation-plan | 1.3.2 | tasks.md from PRD |
-| website-builder | 1.3.1 | Build improved site |
+| website-builder | 1.4.0 | Build improved site |
 | website-clone-final-report | 1.3.0 | Before/after summary |
 
 **Diagram generator engines** (install the umbrella or a single engine):
@@ -251,11 +251,11 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**cli-builder**](skills/cli-builder/) | 1.1.0 | high | 5-step CLI tool builder with approval gates |
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.2.0 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.2.3 | high | Cross-platform install.sh with env detection |
-| [**opencode-handoff**](skills/opencode-handoff/) | 1.0.5 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
+| [**opencode-handoff**](skills/opencode-handoff/) | 1.1.0 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
 | [**opencode-runner**](skills/opencode-runner/) | 1.5.0 | medium | Delegate work to opencode free cloud models |
-| [**opencode-sandbox**](skills/opencode-sandbox/) | 3.0.1 | medium | Run OpenCode in a kept sandbox (SSH/gh on by default) |
+| [**opencode-sandbox**](skills/opencode-sandbox/) | 3.1.0 | medium | Run OpenCode in a kept sandbox (SSH/gh on by default) |
 | [**herdr-agent**](skills/herdr-agent/) | 3.1.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
-| [**issue-work-loop**](skills/issue-work-loop/) | 1.4.1 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
+| [**issue-work-loop**](skills/issue-work-loop/) | 1.5.3 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.3.1 | medium | Spawn, message, read CLI agents in tmux |
 
 ---

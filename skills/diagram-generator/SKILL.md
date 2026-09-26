@@ -4,7 +4,7 @@ description: "Generate a diagram and route to the right engine — draw.io XML (
 license: MIT
 effort: high
 metadata:
-  version: 1.1.2
+  version: 1.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -29,6 +29,33 @@ Routing rules:
 - The user wants a hand-drawn / sketch / wireframe look → **Excalidraw**.
 - No format signal → ask one question: "Precise and editable (draw.io) or hand-drawn sketch (Excalidraw)?" Keep routing blocked until the user answers. Only after explicit delegation such as "just pick", "choose for me", or "use the default", choose **draw.io** for architecture/C4/technical diagrams and **Excalidraw** for wireframes/brainstorms.
 - The user asks for **Mermaid**, a slide deck, or brand/marketing graphics → out of scope; say so (Mermaid is native markdown; use a presentation or design tool for the others).
+
+## Dependency Preflight (mandatory)
+
+This skill routes to one of two nested skills — `drawio-generator` or `excalidraw-generator` —
+and invokes it by name. Detect which are installed **before** routing below. Either engine alone
+is enough to proceed; both missing means there is nothing to invoke:
+
+```bash
+missing=""
+for s in drawio-generator excalidraw-generator; do
+  test -d "$HOME/.claude/skills/$s" || test -d "$HOME/.agents/skills/$s" \
+    || asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
+done
+if [ -n "$missing" ]; then
+  for s in $missing; do
+    echo "Missing engine skill: $s" >&2
+    echo "Install it:      asm install github:luongnv89/skills:skills/diagram-generator/$s -p claude --yes" >&2
+    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
+  done
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  [ "$(echo $missing | wc -w)" -eq 2 ] && exit 1
+fi
+```
+
+With both missing, stop — the run cannot produce a diagram. With exactly one missing, report it and
+continue: the routing rules above decide when the installed engine may substitute (never silently,
+and never when the user explicitly requested the missing one).
 
 ## How to use
 
