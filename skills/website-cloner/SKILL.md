@@ -78,8 +78,7 @@ single pass:
 ```bash
 missing=""
 for s in website-analyzer website-clone-report website-improvement-prd website-implementation-plan website-builder website-clone-final-report; do
-  test -d "$HOME/.claude/skills/$s" || test -d "$HOME/.agents/skills/$s" \
-    || asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
+  asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
 done
 if [ -n "$missing" ]; then
   for s in $missing; do

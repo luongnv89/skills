@@ -32,30 +32,23 @@ Routing rules:
 
 ## Dependency Preflight (mandatory)
 
-This skill routes to one of two nested skills — `drawio-generator` or `excalidraw-generator` —
-and invokes it by name. Detect which are installed **before** routing below. Either engine alone
-is enough to proceed; both missing means there is nothing to invoke:
+Routing above selects exactly one engine — `drawio-generator` or `excalidraw-generator` — which
+"How to use" then invokes by name. Once routing picks `engine`, and **before** invoking it, verify
+that engine is installed:
 
 ```bash
-missing=""
-for s in drawio-generator excalidraw-generator; do
-  test -d "$HOME/.claude/skills/$s" || test -d "$HOME/.agents/skills/$s" \
-    || asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
-done
-if [ -n "$missing" ]; then
-  for s in $missing; do
-    echo "Missing engine skill: $s" >&2
-    echo "Install it:      asm install github:luongnv89/skills:skills/diagram-generator/$s -p claude --yes" >&2
-    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
-  done
+engine=drawio-generator   # or excalidraw-generator — whichever routing selected
+asm list -p claude --json | grep -q "\"$engine\"" || {
+  echo "Missing required skill: $engine" >&2
+  echo "Install it:      asm install github:luongnv89/skills:skills/diagram-generator/$engine -p claude --yes" >&2
+  echo "Verify:          asm list -p claude --json | grep '\"$engine\"'" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2
-  [ "$(echo $missing | wc -w)" -eq 2 ] && exit 1
-fi
+  echo "Stop — never substitute the other engine; if it is installed, the user may re-request it explicitly." >&2
+  exit 1
+}
 ```
 
-With both missing, stop — the run cannot produce a diagram. With exactly one missing, report it and
-continue: the routing rules above decide when the installed engine may substitute (never silently,
-and never when the user explicitly requested the missing one).
+A missing routed engine stops the run before any output is written.
 
 ## How to use
 
@@ -75,15 +68,6 @@ stays short to protect the agent's context budget; it only routes.
    missing essentials before routing.
 3. Check whether the requested output path already exists. Let the selected engine run its own
    confirmation, backup, dry-run, error, and rollback safeguards before any overwrite.
-
-If the user explicitly requested a format, tool, editing target, or aesthetic and its engine is unavailable,
-stop and explain which nested skill must be installed; provide the matching command
-(`asm install github:luongnv89/skills:skills/diagram-generator/drawio-generator` or
-`asm install github:luongnv89/skills:skills/diagram-generator/excalidraw-generator`) and ask the user to
-install it or explicitly change the requested output. Do not substitute the other engine. If no format or aesthetic was explicit, an available
-engine may be offered as a fallback only after explaining the output difference and receiving user approval.
-If neither engine is available, fail with an installation error and name both required skills. Never invent
-XML or JSON under the wrong engine as a fallback.
 
 ## Example
 
@@ -122,5 +106,4 @@ criteria and expected result are verified.
 
 - **User explicitly wants both formats** — generate with one engine first, then offer to regenerate the same diagram in the other.
 - **Ambiguous, no answer to the routing question** — keep routing blocked and ask the question again; silence or timeout is not approval to choose an engine. Apply the routing heuristics only when the user explicitly delegates the choice (for example, "just pick", "choose for me", or "use the default").
-- **Explicitly requested engine is unavailable** — do not fall back. Report the unavailable nested skill, provide its installation guidance, and ask the user to install it or explicitly approve a different format/aesthetic.
-- **No explicit format and the selected engine is unavailable** — offer the installed engine as an alternative, explain its format/aesthetic, and route only after explicit user approval.
+- **Routed engine is unavailable** — the Dependency Preflight stops the run with its install command; the other engine is only an alternative the user may re-request explicitly. Never substitute silently or invent output under the wrong engine.

@@ -84,7 +84,10 @@ done
 if [ -n "$missing" ]; then
   for s in $missing; do
     echo "Missing required skill: $s" >&2
-    echo "Install it:      asm install $s -p claude --yes" >&2
+    case "$s" in
+      issue-*) echo "Install it:      asm install https://github.com/luongnv89/idd --skill skills/$s -p claude --yes" >&2 ;;
+      *)       echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2 ;;
+    esac
     echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
   done
   echo "No asm yet:      npm install -g agent-skill-manager" >&2

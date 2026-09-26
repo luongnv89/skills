@@ -76,7 +76,7 @@ any issue is filed — a half-created backlog is worse than one not started.
 | `git` + a GitHub remote | tool | the tracker is resolved from `origin` |
 | `gh`, ready | tool | the only tracker driver — "ready" means the intended account, `repo` scope, write access, issues enabled, an unambiguous target repo, and API budget |
 | `python3` | tool | runs `scripts/render_dashboard.py` |
-| **`issue-creator`** skill | **skill** | writes every issue body; no fallback path. Install: `asm install https://github.com/luongnv89/idd --skill issue-creator -p claude --yes` (and `npm install -g agent-skill-manager` if `asm` is missing); verify with `asm list -p claude \| grep issue-creator` |
+| **`issue-creator`** skill | **skill** | writes every issue body; no fallback path. Install: `asm install https://github.com/luongnv89/idd --skill skills/issue-creator -p claude --yes` (and `npm install -g agent-skill-manager` if `asm` is missing); verify with `asm list -p claude \| grep issue-creator` |
 | `codebase-modernizer` skill | skill, optional | one way to produce a plan file; never required — the conversation path needs no file |
 | this skill's `references/`, `agents/`, `scripts/` | bundled | a truncated install fails mid-run |
 
@@ -96,18 +96,15 @@ ls "$HOME/.claude/skills/issue-creator/SKILL.md" 2>/dev/null \
   || ls "$HOME/.agents/skills/issue-creator/SKILL.md" 2>/dev/null \
   || asm list -p claude --json | grep -q '"issue-creator"' || {
   echo "Missing required skill: issue-creator" >&2
-  echo "Install it:      asm install https://github.com/luongnv89/idd --skill issue-creator -p claude --yes" >&2
+  echo "Install it:      asm install https://github.com/luongnv89/idd --skill skills/issue-creator -p claude --yes" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2
   echo "Verify:          asm list -p claude --json | grep 'issue-creator'" >&2
   exit 1
 }
 ```
 
-Filesystem detection runs before `asm list` because `issue-creator` ships in the `idd` repo and may
-be present without `asm` tracking the name — Phase 0 re-runs the same check via
-`references/preflight.md` alongside the env/`gh`/bundled/input battery. A miss stops the run before
-any stash, sync, or issue. `-p claude` belongs in the install and verify commands — `asm install`
-does not guess a provider non-interactively.
+Filesystem detection leads because `issue-creator` may be installed without `asm` tracking it —
+the same check Phase 0 re-runs via `references/preflight.md`.
 
 ## Repo Sync Before Edits (mandatory)
 

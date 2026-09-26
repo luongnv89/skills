@@ -58,8 +58,7 @@ Step 7 re-audits the deployed site by invoking the sibling `website-analyzer` sk
 **before** the repo sync below, the first step that changes anything:
 
 ```bash
-test -d "$HOME/.claude/skills/website-analyzer" || test -d "$HOME/.agents/skills/website-analyzer" \
-  || asm list -p claude --json | grep -q '"website-analyzer"' || {
+asm list -p claude --json | grep -q '"website-analyzer"' || {
   echo "Missing sibling skill: website-analyzer" >&2
   echo "Install it:      asm install github:luongnv89/skills:skills/website-cloner/website-analyzer -p claude --yes" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2

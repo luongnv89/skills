@@ -47,8 +47,7 @@ mounts, and credentials are owned by that skill (composition table above). Verif
 **before** the repo sync below, the first step that changes anything:
 
 ```bash
-test -d "$HOME/.claude/skills/opencode-sandbox" || test -d "$HOME/.agents/skills/opencode-sandbox" \
-  || asm list -p claude --json | grep -q '"opencode-sandbox"' || {
+asm list -p claude --json | grep -q '"opencode-sandbox"' || {
   echo "Missing required skill: opencode-sandbox (v2.1.0 or newer)" >&2
   echo "Install it:      asm install github:luongnv89/skills:skills/opencode-sandbox -p claude --yes" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2

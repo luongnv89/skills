@@ -37,30 +37,44 @@ can attach a shell. Do not remove it unless they confirm (or they asked for
 ## Dependency Preflight (mandatory)
 
 Interactive mode delegates pane mechanics to **herdr-agent** or **tmux-agent-comms** — either one
-satisfies it, and only interactive mode needs it. Detect both **before** the repo sync below, the
-first step that changes anything:
+satisfies it (`references/interactive-mode.md` uses it for every pane spawn, send, and wait).
+One-shot mode invokes no other skill. The check runs the moment interactive mode is selected, in
+"Choose a mode" below — before the repo sync and every other side effect — and stops the run if
+neither is installed.
+
+## Choose a mode
+
+| Mode | Use when | Go to |
+|---|---|---|
+| **One-shot** (default) | Single task, no need to watch it work | "One-shot mode" below |
+| **Interactive** | User wants to watch live or steer mid-task | `references/interactive-mode.md` |
+
+Default to one-shot — it needs no pane-management skill, has no TUI-timing
+gotchas, and its completion signal is a plain process exit code. Reach for
+interactive mode only when the task genuinely needs a human in the loop
+mid-run.
+
+**Interactive mode selected → pane-skill check.** Run it before continuing; one-shot mode prints
+nothing and skips it entirely:
 
 ```bash
 pane=""
 for s in herdr-agent tmux-agent-comms; do
-  test -d "$HOME/.claude/skills/$s" || test -d "$HOME/.agents/skills/$s" \
-    || asm list -p claude --json | grep -q "\"$s\"" || continue
-  pane="$pane $s"
+  asm list -p claude --json | grep -q "\"$s\"" && { pane=$s; break; }
 done
 if [ -z "$pane" ]; then
   for s in herdr-agent tmux-agent-comms; do
-    echo "Missing pane skill: $s" >&2
-    echo "Install it:      asm install $s -p claude --yes" >&2
+    echo "Missing required skill: $s (either one satisfies interactive mode)" >&2
+    echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
     echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
   done
   echo "No asm yet:      npm install -g agent-skill-manager" >&2
-  echo "Either one satisfies interactive mode — one-shot mode needs neither." >&2
+  exit 1
 fi
 ```
 
-A missing pane skill is **not a stop**: print the block, tell the user interactive mode is
-unavailable until one of the two is installed, and continue with the default
-`--start-only`/`--exec-in` flow. One-shot mode never blocks on this.
+Missing → print the block and **stop before any side effect**. Never fall back to one-shot
+silently — the user may re-request it explicitly.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -77,18 +91,6 @@ rebase conflicts, stop and ask the user before continuing.
 
 Skip this step when the task is **read-only inspect** (list files, summarize)
 and will not write the tree. Always sync when the container will edit files.
-
-## Choose a mode
-
-| Mode | Use when | Go to |
-|---|---|---|
-| **One-shot** (default) | Single task, no need to watch it work | "One-shot mode" below |
-| **Interactive** | User wants to watch live or steer mid-task | `references/interactive-mode.md` |
-
-Default to one-shot — it needs no pane-management skill, has no TUI-timing
-gotchas, and its completion signal is a plain process exit code. Reach for
-interactive mode only when the task genuinely needs a human in the loop
-mid-run.
 
 ## One-shot mode
 
