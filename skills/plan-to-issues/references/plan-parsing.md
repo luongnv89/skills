@@ -16,7 +16,8 @@ which is why one skill covers them. Match the task heading as `^#{3,4} Task <id>
 silently parses a `/tasks-generator` plan as empty.
 
 One run parses one file. A `tasks/` directory is resolved to a single `*.md` by Plan discovery
-(SKILL.md → *Mode selection*) before parsing starts, so every command here takes one `"$PLAN"`.
+(`references/input-resolution.md` → *Plan discovery candidates*) before parsing starts, so every
+command here takes one `"$PLAN"`.
 
 A file with no task heading is not a plan — stop with the "Plan file has no task headings" error
 in `references/preflight.md` rather than parsing prose or falling back to the conversation.

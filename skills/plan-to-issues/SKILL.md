@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.0.4
+  version: 2.0.5
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -45,7 +45,7 @@ One line each; full definitions in `references/glossary.md`.
   `<!-- plan-dashboard:end -->`. **Static**: it names which issue implements which task and asserts
   no status, so it never goes stale. Only that region is ever rewritten.
 - **source marker** — binds an epic to its input: `<!-- plan-to-issues:plan=<path> -->` on the file
-  path (unchanged from 1.x, so existing epics keep resolving), or
+  path (a fixed format — existing epics are found by it), or
   `<!-- plan-to-issues:conversation=<slug> -->` on the conversation path.
 - **source-faithful** — every word of every issue traces to the input. Never open source files,
   never predict affected files, never add analysis the input did not contain.
@@ -76,7 +76,7 @@ any issue is filed — a half-created backlog is worse than one not started.
 | `git` + a GitHub remote | tool | the tracker is resolved from `origin` |
 | `gh`, ready | tool | the only tracker driver — "ready" means the intended account, `repo` scope, write access, issues enabled, an unambiguous target repo, and API budget |
 | `python3` | tool | runs `scripts/render_dashboard.py` |
-| **`issue-creator`** skill | **skill** | writes every issue body; no fallback path. Install: `asm install issue-creator` (and `npm i -g @agent-skills/manager` if `asm` is missing); verify with `asm list \| grep issue-creator` |
+| **`issue-creator`** skill | **skill** | writes every issue body; no fallback path. Install: `asm install issue-creator` (and `npm install -g agent-skill-manager` if `asm` is missing); verify with `asm list \| grep issue-creator` |
 | `codebase-modernizer` skill | skill, optional | one way to produce a plan file; never required — the conversation path needs no file |
 | this skill's `references/`, `agents/`, `scripts/` | bundled | a truncated install fails mid-run |
 
