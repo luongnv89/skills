@@ -47,7 +47,8 @@ Load only the reference you need for the current step — keep the working conte
 ## Repo Sync Before Edits (mandatory)
 
 When the audit target is a git worktree, Phase 3 writes `APPSTORE_AUDIT.md` at its root and
-Phase 4 edits project files — sync the branch before the first write:
+Phase 4 edits project files — sync the branch before the first write (`PROJECT_DIR` is the
+audited project's root):
 
 ```bash
 branch="$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD)"
