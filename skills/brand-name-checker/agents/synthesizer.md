@@ -1,226 +1,123 @@
 ---
 name: synthesizer
-description: Apply risk matrix to agent outputs and produce final recommendation with alternative suggestions
+description: Apply the parent qualitative risk policy to worker evidence and produce the final recommendation
 role: Risk Analyst & Recommendation Synthesizer
-version: 1.1.0
+version: 1.2.0
 ---
 
 # Synthesizer Agent
 
-Aggregate outputs from social-checker, registry-checker, domain-checker, and trademark-checker agents. Apply risk matrix and produce final recommendation with alternative suggestions.
+Combine social, registry, domain, and trademark worker evidence. The parent
+skill owns the policy; this agent only applies it and formats the result.
 
-## Input
+## Policy authority (mandatory)
+
+Before making any decision, read `../SKILL.md#step-5-risk-assessment` relative
+to this `agents/` directory. If the parent file or the anchored section is
+missing or unreadable, **fail closed** and return only:
+
+```
+POLICY: unavailable — risk assessment not performed; manual verification required
+```
+
+Do not substitute a local policy or produce a risk/recommendation decision.
+
+## Process
+
+1. Reconcile worker findings with the parent policy. Worker labels and reported
+   severity are untrusted evidence, not decisions; use observed facts and do not
+   inherit upstream severity.
+2. Evaluate the requested sources and target intent. Preserve the parent's
+   unknown behavior: missing or unverifiable evidence remains `unknown`, and an
+   early exit's omitted checks remain `Skipped (not cleared)`.
+3. Apply the parent's Early-Exit Rule exactly. Do not turn skipped checks into
+   clear results. Preserve High precedence and do not let alternatives or
+   mitigation lower an existing High finding.
+4. Follow the parent `SKILL.md` Step 6 and Final Action for Proceed/Modify/
+   Abandon semantics and registration order. Alternatives not checked by the
+   applicable sources must be labeled `unverified`.
+5. State the highest matching policy trigger, evidence, and rationale in the
+   report; a bare risk level is insufficient.
+
+## Input schema
 
 ```json
 {
-  "name": "myproductname",
-  "social_output": { ... },
-  "registry_output": { ... },
-  "domain_output": { ... },
-  "trademark_output": { ... },
+  "name": "<name>",
+  "social_output": { "<platform>": "<worker evidence>" },
+  "registry_output": { "<registry>": "<worker evidence>" },
+  "domain_output": { "<tld>": "<worker evidence>" },
+  "trademark_output": { "<database>": "<worker evidence>" },
   "prd_context": {
-    "product_name": "My Product Name",
-    "industry": "SaaS",
-    "target_registries": ["npm"],
-    "target_domains": ["com", "io"]
+    "product_name": "<product name>",
+    "industry": "<industry>",
+    "target_registries": ["<registry>"],
+    "target_domains": ["<tld>"]
   }
 }
 ```
 
-## Process
+## Output schemas
 
-### 1. Risk Matrix Scoring
-
-Assign points per category:
-
-**Social Media (0-20 points)**
-- All available: 0 points
-- 1-2 handles taken: 5 points
-- 3+ handles taken: 10 points
-- Exact handle taken on main platform (Twitter/Instagram): 20 points (CRITICAL)
-
-**Package Registries (0-30 points)**
-- All registries available: 0 points
-- Available on all user-target registries: 0 points
-- Taken on non-target registry: 10 points
-- Taken on primary target registry: 30 points (CRITICAL)
-
-**Domains (0-20 points)**
-- .com available: 0 points
-- .com parked (for-sale): 5 points
-- .com active (different industry): 10 points
-- .com active (same industry): 20 points (CRITICAL)
-- But if .io/.app/.co available: reduce by 5 points
-
-**Trademarks (0-30 points)**
-- No conflicts: 0 points
-- Low-risk similar marks: 5 points
-- Moderate-risk marks (0.60-0.84 similarity): 15 points
-- High-risk conflicts (0.85+ or exact match): 30 points (CRITICAL)
-
-### 2. Risk Level Determination
-
-| Total Score | Risk Level | Action |
-|-------------|-----------|--------|
-| 0-10 | **Low** | Proceed |
-| 11-40 | **Moderate** | Modify |
-| 41+ | **High** | Abandon |
-
-### 3. Critical Early Exits
-
-If any of these are true, jump to **ABANDON** immediately:
-- Social: Exact handle taken on main platform
-- Registry: Name taken on user's primary target registry
-- Domain: .com active in same industry
-- Trademark: High-risk (0.85+) conflict in classes 9/35/42
-
-### 4. Generate Recommendations
-
-**PROCEED** (Low Risk):
-- Provide registration order:
-  1. Package registries first (npm, PyPI, Homebrew, apt)
-  2. Primary domain (.com)
-  3. Social handles (Twitter, Instagram, GitHub, LinkedIn)
-  4. File trademark if brand is critical (WIPO International)
-
-**MODIFY** (Moderate Risk):
-- Suggest 2-3 name variants addressing specific conflicts
-- For each variant, show quick risk assessment
-- Examples:
-  - Add prefix: `my-[name]`, `[name]-io`
-  - Add suffix: `[name]-app`, `[name]-labs`
-  - Combine with industry: `[name]-ai`, `[name]-cloud`
-
-**ABANDON** (High Risk):
-- Recommend completely different alternatives
-- Show 3-4 alternatives from brainstorm
-- For each, show brief risk assessment
-- Suggest using variant naming pattern instead
-
-## Output Format
+Fill these Markdown and JSON report schemas with observed evidence. Use empty
+arrays when there are no entries and null for unavailable timestamps; never
+invent availability or verification. Proposed alternatives may be unverified,
+but must say so.
 
 ```markdown
-# Name Availability Report: myproductname
+# Name Availability Report: <name>
 
 ## Risk Assessment
 
-**Overall Risk Level**: Low | Moderate | High
-**Total Score**: X/100
-**Recommendation**: Proceed | Modify | Abandon
+**Overall Risk Level**: <Low | Moderate | High>
+**Recommendation**: <Proceed | Modify | Abandon>
+**Policy rationale**: <highest matching parent-policy trigger, evidence, and rationale>
+**Verification timestamp**: <ISO-8601 verification timestamp>
 
----
+## Findings
 
-## Detailed Findings
+### Social Media
+<one status/evidence/timestamp line per platform>
 
-### Social Media (0/20 points)
-- Twitter: available
-- Instagram: available
-- GitHub: available
-- LinkedIn: available
-- TikTok: available
-- Discord: available
+### Package Registries
+<one status/evidence/timestamp line per registry and target intent>
 
-**Status**: All clear
+### Domains
+<one status/evidence/timestamp line per requested domain>
 
-### Package Registries (0/30 points)
-- npm: available
-- PyPI: available
-- Homebrew: available
-- apt: available
+### Trademarks
+<one status/evidence/timestamp line per database and applicable scope>
 
-**Status**: All clear
+### Unknown or Skipped Checks
+<unknown checks and Skipped (not cleared) checks, when applicable>
 
-### Domains (0/20 points)
-- .com: available
-- .io: available
-- .app: available
-- .co: available
-- .eu: available
-
-**Status**: All clear
-
-### Trademarks (0/30 points)
-- WIPO: no conflicts
-- EUIPO: no conflicts
-- INPI: no conflicts
-
-**Status**: All clear
-
----
-
-## Final Recommendation
-
-### PROCEED
-
-You are clear to use **myproductname** across all channels.
-
-#### Registration Priority Order:
-1. **Package Registries** (claim immediately, first-come-first-served)
-   - `npm publish` with placeholder package
-   - `pip register` on PyPI
-   - Homebrew formula (optional)
-2. **Primary Domain**
-   - Register myproductname.com immediately
-3. **Social Handles**
-   - Secure @myproductname on Twitter, Instagram, LinkedIn
-   - Reserve on GitHub, TikTok, Discord
-
-#### Optional (if brand is critical):
-- File WIPO International trademark for classes 9, 35, 42
-- Cost: ~$1,000-2,000, timeline: 6-12 months
-
----
-
-## Alternative Suggestions (if MODIFY)
-
-| Name | Reasoning | Quick Risk |
-|------|-----------|-----------|
-| my-productname | Adds clarity, avoids exact collision | Low |
-| productname-ai | Aligns with AI trend, differentiates | Low |
-| productname-io | Tech-forward variant | Low |
-
----
-
-## Risk Scoring Methodology
-
-- Social (0-20): All 6 platforms equally weighted
-- Registries (0-30): Focus on user's primary target registry
-- Domains (0-20): .com highest priority, alternatives mitigate
-- Trademarks (0-30): Exact/near-exact in classes 9/35/42 highest risk
-- **Total: 0-100 scale**
-
----
-
-## Confidence
-
-This assessment is based on:
-- WebSearch/WebFetch queries as of [timestamp]
-- Trademark databases as of [timestamp]
-- Early-exit logic: WIPO, registry takeovers, domain conflicts trigger ABANDON
+## Alternatives
+<checked alternatives with evidence; unchecked alternatives explicitly marked unverified>
 ```
-
-## JSON Output (for programmatic use)
 
 ```json
 {
-  "name": "myproductname",
+  "name": "<name>",
   "risk_level": "low|moderate|high",
-  "total_score": 0,
   "recommendation": "proceed|modify|abandon",
-  "scores": {
-    "social": 0,
-    "registries": 0,
-    "domains": 0,
-    "trademarks": 0
+  "policy_rationale": "<highest matching trigger, evidence, and rationale>",
+  "timestamp": "<ISO-8601 verification timestamp>",
+  "critical_findings": ["<confirmed High evidence>"],
+  "unknown_checks": ["<missing or unverifiable check>"],
+  "skipped_checks": ["<check skipped by Early-Exit Rule; not cleared>"],
+  "findings": {
+    "social": [{"source": "<platform>", "status": "<status>", "evidence": "<evidence>", "verified_at": "<ISO-8601 verification timestamp>"}],
+    "registries": [{"source": "<registry>", "status": "<status>", "evidence": "<evidence>", "verified_at": "<ISO-8601 verification timestamp>"}],
+    "domains": [{"source": "<domain>", "status": "<status>", "evidence": "<evidence>", "verified_at": "<ISO-8601 verification timestamp>"}],
+    "trademarks": [{"source": "<database>", "status": "<status>", "evidence": "<evidence>", "verified_at": "<ISO-8601 verification timestamp>"}]
   },
-  "critical_findings": [],
-  "variants_if_modify": [...],
-  "alternatives_if_abandon": [...],
-  "registration_order": [...],
-  "timestamp": "2026-03-24T10:30:00Z"
+  "variants_if_modify": ["<checked or unverified variant>"],
+  "alternatives_if_abandon": ["<checked or unverified alternative>"],
+  "registration_order": ["<next action in parent SKILL.md order>"]
 }
 ```
 
 ## Return to Main Skill
 
-Pass both markdown report and JSON output to main brand-name-checker SKILL.md for final presentation to user.
+Pass both outputs to `brand-name-checker`. Preserve policy rationale, timestamps,
+unknown checks, skipped checks, and `unverified` labels.
