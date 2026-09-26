@@ -5,7 +5,7 @@ license: MIT
 effort: high
 compatibility: "macOS, Linux (Debian/Ubuntu/Fedora/Arch), Windows (winget/PowerShell). Needs network and a package manager or permission to install one. Additive by default; anything that changes a working install needs an explicit per-item yes."
 metadata:
-  version: 0.9.2
+  version: 0.9.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -165,7 +165,6 @@ the session file. `Result` is one of:
 - Phase 5 verified by **re-running** `detect_env.py`; the report's counts come from that re-run.
 - The FINAL REPORT printed with a `Result` of READY / PARTIAL / BLOCKED and every gap and finding accounted
   for as fixed, declined, or deferred.
-- `quick_validate.py` exits 0 on the shipped SKILL.md.
 
 **Expected output:** the FINAL REPORT block (`references/report-template.md`).
 
