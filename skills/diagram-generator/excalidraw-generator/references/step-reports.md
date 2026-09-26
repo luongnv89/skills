@@ -43,7 +43,6 @@ Use `√` for pass, `×` for fail, `—` for brief context. The "Criteria" line 
 ◆ Generate (step 3 of 4 — [diagram type])
 ··································································
   JSON valid:             √ pass
-  File written:           √ pass ([filename].excalidraw)
   ____________________________
   Result:                 PASS | FAIL | PARTIAL
 ```
@@ -54,6 +53,7 @@ Use `√` for pass, `×` for fail, `—` for brief context. The "Criteria" line 
 ··································································
   Quality checks 10/10:   √ pass | × fail — [checks failed]
   Text sizing correct:    √ pass | × fail — [elements affected]
+  File written:           √ pass ([filename].excalidraw)
   ____________________________
   Result:                 PASS | FAIL | PARTIAL
 ```
