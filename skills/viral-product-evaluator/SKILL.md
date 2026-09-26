@@ -4,7 +4,7 @@ description: "Review a product codebase and landing page against 32 viral princi
 license: MIT
 effort: high
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -32,7 +32,6 @@ turning a README into a page (`landing-page-generator`), or bug-hunting code rev
 - Read access to the target codebase directory.
 - Landing page signal: public URL, local file, or auto-detectable in the tree.
 - The skill's `references/*.md` files present for the rubric and output shape.
-- User confirmation on any deviation from the 32 principles.
 
 Missing prerequisites → stop and report before gathering evidence.
 
@@ -141,8 +140,8 @@ extra instructions justify a deliberate deviation (e.g. a strategic free tier), 
 principle as written and explain the trade-off in the caveats — don't silently pass it.
 
 On any failure to fetch inputs or read evidence, report the concrete error and stop — do not
-guess or continue with incomplete data. Confirm with the user on every gate and before
-finalizing the report. If a principle cannot be evidenced, mark FAIL or low-confidence; never invent.
+guess or continue with incomplete data. Confirm with the user before fetching inputs and
+before writing `viral-evaluation.md`. If a principle cannot be evidenced, mark FAIL or low-confidence; never invent.
 
 ## Step Completion Reports
 
