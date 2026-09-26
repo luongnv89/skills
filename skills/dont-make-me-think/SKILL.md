@@ -4,7 +4,7 @@ description: "Review UI usability using Steve Krug's principles and produce a sc
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.2
+  version: 1.4.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -91,7 +91,7 @@ and never fabricate precise numbers through direct inspection. If the script fai
 invalid, use direct visual analysis when available and disclose the failure.
 
 Read `references/screenshot-processing.md` for the full flag set, every extracted field, and how to
-map the output onto the scorecard.
+use the output in the review.
 
 ### Input Handling
 
