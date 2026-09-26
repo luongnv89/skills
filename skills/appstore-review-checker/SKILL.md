@@ -4,7 +4,7 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.2.3
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -43,6 +43,20 @@ Load only the reference you need for the current step — keep the working conte
 - `references/edge-cases.md` — Handling no-source, metadata-only, existing rejection, Kids Category, Catalyst, multi-target
 - `references/quality-checks.md` — Acceptance criteria, step completion report format, static-audit limits, common red-flag patterns
 - `references/guidelines.md` — Full 150+ App Store guideline checklist plus Top 20 Rejection Triggers
+
+## Repo Sync Before Edits (mandatory)
+
+When the audit target is a git worktree, Phase 3 writes `APPSTORE_AUDIT.md` at its root and
+Phase 4 edits project files — sync the branch before the first write:
+
+```bash
+branch="$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD)"
+git -C "$PROJECT_DIR" fetch origin && git -C "$PROJECT_DIR" pull --rebase origin "$branch"
+```
+
+If the tree is dirty: stash (`-u`), sync, pop. If `origin` is missing or the rebase conflicts,
+stop and ask the user. Not a git repo at all — or a metadata-only audit with no checkout? Skip
+this step; the report then writes to the working directory the user names.
 
 ## Audit Workflow (Summary)
 
