@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent in both modes; issue-resolver is required only in ISSUE mode."
 effort: max
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -127,11 +127,11 @@ If `origin` is missing or rebase/stash-pop conflicts occur, stop and ask the use
 ## Selective Worker Launch Profile (mandatory)
 
 The dependency preflight resolves the installed `herdr-agent` directory and
-its absolute scripts directory as `here`; a missing `launch_profile.py` is a
-fatal preflight error. Never assume a repository-relative
-`skills/herdr-agent/scripts/` path. Before **every** Herdr worker launch, resolve
-the effective launch profile from `"$here/launch_profile.py"` and pass
-`--without bypass`:
+its absolute scripts directory as `here`; a missing helper, or a helper whose
+`--help` output does not advertise `--without bypass`, is a fatal preflight
+error. Never assume a repository-relative `skills/herdr-agent/scripts/` path.
+Before **every** Herdr worker launch, use the installed
+`"$here/launch_profile.py"` and pass `--without bypass`:
 
 - the initial ISSUE implementer/resolver;
 - the first and every replacement REVIEWER;
@@ -144,21 +144,27 @@ preserving restrictive inherited setup flags. Put `--without bypass` on the
 `--start` invocation itself; never replace it with `--without flags`, a native
 skip-permissions argument, or an unverified launcher fallback.
 
-Parse and verify the helper's JSON before `herdr agent start`. Use the exact
-worker kind, model, thinking level, native arguments, cwd, environment, and
-worker configuration intended for that `--start` call. Use the same inputs
-when resolving and starting; re-resolve if any input changes. The helper's
-`flags` and `explicit` entries are names only, so inspect native values and effective
-configuration/settings/environment independently. Require the selective
-`without` value, a known and verifiable permission profile, no inherited
-`bypass`, and no bypass in explicit native arguments, worker configuration, or
-environment. Explicit native, config, and environment bypass is prohibited
-too. `profile.bypass` is an inherited-only summary: an empty value is
-**not** proof that explicit native, config, or environment bypass is absent.
-Reject unmapped or unknown permission profiles and malformed, missing, or
-failed profile data; fail closed before launching, with no native/unverified
-fallback. The detailed gate and prohibited forms are authoritative in
-`references/loop-protocol.md`.
+The helper is root-side evidence, not a target-state verifier: it reads the
+main pane's kind/argv and returns names only (`flags`/`explicit`) entries. It does
+not return the destination pane's effective cwd, configuration, or environment.
+`herdr agent start` launches in the destination pane, not the caller; caller
+`pwd`, caller environment, guessed paths, or an empty `profile.bypass` value
+cannot prove the worker's effective state. The names-only `flags`/`explicit`
+fields and inherited-only `profile.bypass` are not proof; inspect exact native,
+configuration, and environment inputs. Explicit native/config/environment
+bypass is prohibited. Unknown, unmapped, malformed, or unverified input fails
+closed; never use a native/unverified fallback. Before starting, follow the
+concrete evidence and fail-closed gate in `references/loop-protocol.md`.
+If the target environment or configuration (including inherited inline
+settings values) cannot be established from actual local evidence, stop before
+`herdr agent start`; do not invent a Herdr inspection command.
+
+The probe is not an immutable start snapshot. Re-probe root state and the
+stable local evidence immediately before every start, using the exact same
+worker kind/model/thinking/native inputs. If a source changes or stable
+provenance cannot be established, discard the old result and stop. The detailed
+parser, inspection boundary, prohibited bypass forms, and blocked-path wording
+are authoritative in `references/loop-protocol.md`.
 
 ## Autonomous Worker Boot Gate (mandatory)
 

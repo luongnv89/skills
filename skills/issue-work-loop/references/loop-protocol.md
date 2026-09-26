@@ -229,30 +229,54 @@ implementer/resolver, each reviewer, an ISSUE resolver retry or fix worker, the
 PR FIXER, and every retry or FRESHEN replacement. A fresh pane or a restarted
 CLI never inherits a previous profile check.
 
+### Installed-helper capability gate
+
 Dependency Preflight records `herdr_agent_dir` as the absolute installed
 `herdr-agent` directory. Carry that value into this phase; do not derive it
-from the repository checkout or invent a repo-relative fallback. Define the
-helper directory and fail before any worker launch if it is missing:
+from the repository checkout or invent a repo-relative fallback. Check the
+installed helper and its supported selective option before splitting or
+starting a worker:
 
 ```bash
 here=""
 if [ -n "${herdr_agent_dir:-}" ] && [ -d "$herdr_agent_dir/scripts" ]; then
   here="$(cd -- "$herdr_agent_dir/scripts" 2>/dev/null && pwd -P)"
 fi
-[ -n "$here" ] && [ -f "$here/launch_profile.py" ] || {
+[ -n "$here" ] || {
+  echo "Error: installed herdr-agent directory is unavailable; refusing to launch a worker" >&2
+  exit 1
+}
+helper="$here/launch_profile.py"
+[ -f "$helper" ] || {
   echo "Error: installed herdr-agent launch_profile.py is missing; refusing to launch a worker" >&2
   exit 1
 }
+helper_usage="$(python3 "$helper" --help 2>&1)" || {
+  echo "Error: installed herdr-agent launch_profile.py --help failed; refusing to launch a worker" >&2
+  exit 1
+}
+if ! grep -Fq -- "--without" <<<"$helper_usage" ||
+   ! grep -Fq -- "bypass" <<<"$helper_usage"; then
+  echo "Error: installed launch_profile.py does not support --without bypass; refusing to launch a worker" >&2
+  exit 1
+fi
 ```
 
+A missing helper or unsupported `--without bypass` is a hard stop, not a
+fallback to a repository copy, `--without flags`, a native skip-permissions
+switch, or an unverified launcher.
+
+### Probe and target evidence
+
 Resolve and verify the profile with the **exact** kind, model, thinking level,
-native arguments, cwd, environment, and worker configuration intended for the
-worker's `--start` call. Keep the same inputs for both calls; if any input
-changes, discard the old result and resolve again. For example, the profile
-probe and start share the same `worker_profile_args` and `worker_native_args`
-Bash arrays. Populate these from the actual worker launch request: helper
-kind/model/thinking options in the former, native arguments in the latter
-(an empty array when none). Do not substitute or omit supplied values.
+native arguments, destination pane, requested cwd/environment, and worker
+configuration intended for the worker's `--start` call. Keep the same launch
+inputs for both calls; if any input changes, discard the old result and resolve
+again. For example, the profile probe and start share the same
+`worker_profile_args` and `worker_native_args` Bash arrays. Populate these from
+the actual worker launch request: helper kind/model/thinking options in the
+former, native arguments in the latter (an empty array when none). Do not
+substitute or omit supplied values.
 
 ```bash
 profile_args=(
@@ -260,38 +284,111 @@ profile_args=(
   --main-model "$main_model" --main-thinking "$main_thinking"
   "${worker_profile_args[@]}" --without bypass
 )
-profile_json="$(python3 "$here/launch_profile.py" \
+profile_json="$(python3 "$helper" \
   "${profile_args[@]}" -- "${worker_native_args[@]}")" || {
   echo "Error: worker launch profile failed; refusing to launch" >&2
   exit 1
 }
+if ! printf '%s\n' "$profile_json" | python3 -c '
+import json
+import sys
+try:
+    profile = json.load(sys.stdin)
+except Exception:
+    raise SystemExit(1)
+required = (
+    "kind", "inherited", "model", "thinking", "flags", "flags_source",
+    "without", "explicit", "bypass", "dropped", "warnings", "argc",
+)
+if not isinstance(profile, dict) or any(key not in profile for key in required):
+    raise SystemExit(1)
+if not isinstance(profile["kind"], str) or profile["kind"] not in {"claude", "pi", "codex"}:
+    raise SystemExit(1)
+if not isinstance(profile["inherited"], bool):
+    raise SystemExit(1)
+if not isinstance(profile["flags_source"], str) or profile["flags_source"] == "not mapped":
+    raise SystemExit(1)
+if not all(
+    isinstance(profile[key], dict)
+    and isinstance(profile[key].get("value"), str)
+    and isinstance(profile[key].get("source"), str)
+    for key in ("model", "thinking")
+):
+    raise SystemExit(1)
+if not isinstance(profile["without"], list) or any(not isinstance(item, str) for item in profile["without"]):
+    raise SystemExit(1)
+if "bypass" not in profile["without"] or "flags" in profile["without"]:
+    raise SystemExit(1)
+if profile["bypass"] != [] or not isinstance(profile["explicit"], list):
+    raise SystemExit(1)
+if any(not isinstance(item, str) for item in profile["explicit"]):
+    raise SystemExit(1)
+if not all(isinstance(profile[key], list) for key in ("flags", "dropped", "warnings")):
+    raise SystemExit(1)
+if not isinstance(profile["argc"], int) or profile["argc"] < 0:
+    raise SystemExit(1)
+'; then
+  echo "Error: worker launch profile JSON is malformed, unmapped, or not selectively filtered; refusing to launch" >&2
+  exit 1
+fi
 ```
 
-The helper's `flags` and `explicit` JSON entries are names only; they cannot
-prove native permission values or the worker's effective config/settings or
-environment. Independently inspect those values in the same worker cwd,
-configuration, and environment, and require any supplied kind/model/thinking
-value to match the profile's effective value (or verify the expected inherited
-source when the override is empty). Reject unmapped or unknown permission
-profiles and malformed, missing, or failed profile data. Require `without` to
-contain `bypass` but not blanket `flags`, and require empty inherited
-`profile.bypass`; that field is an **inherited-only** summary, so
-`profile.bypass: []` is **not** proof that explicit native, config, or
-environment bypass is absent. Explicit native, config, and environment bypass
-is prohibited too. Unknown or unverifiable effective profile data fails closed
-before `herdr agent start`, with no native/unverified fallback, including
-retry and replacement launches. Reject skip-permissions switches,
-`--permission-mode bypassPermissions`, Pi `--approve`, Codex dangerous
-full-access/never-approval settings, and equivalent bypasses supplied through
-native arguments or configuration. Preserve restrictive inherited setup flags;
-never substitute `--without flags` or override restrictive settings to get past
-a blocked launch. Report the blocked worker and the unverifiable source, without
-printing credential-bearing values.
+The parser validates only the helper contract: it does not treat names only
+`flags`/`explicit` or an empty inherited-only `profile.bypass` as proof that
+native, configuration, or environment bypass is absent. The following evidence
+boundary is mandatory before the start command:
+
+- `herdr agent get "$root_pane"` identifies the main kind, and
+  `herdr pane process-info --pane "$root_pane"` supplies the root foreground
+  argv. Inspect the actual token/value pairs in memory and redact values in any
+  report; inherited inline settings cannot be replaced by a JSON field name.
+- Inspect every actual worker argument and every local file it names, including
+  `--settings`, `--mcp-config`, `--config`, and inline JSON/config values. Keep
+  only redacted provenance (for example, a path plus metadata/digest), never
+  print credential-bearing content, and stop if an effective configuration
+  source cannot be identified or read.
+- `herdr pane split --cwd ... --env ...` creates the destination pane, while
+  `herdr agent start ... --pane "$worker_pane"` launches there, not in the
+  caller. The split request is launch input, not proof of the destination's
+  effective cwd/environment. The helper JSON has no destination config or
+  environment readback. Do not use caller `pwd`, caller environment, guessed
+  paths, or an empty `profile.bypass` as target evidence.
+- Use only actual local target-pane evidence from a supported Herdr response for
+  destination cwd/environment. No supported `launch_profile.py` field or
+  documented command supplies that readback; do not invent `herdr pane env`,
+  `herdr agent config`, or an equivalent. If effective target environment or
+  configuration, including inherited inline settings values, cannot be
+  established from real local inspection/evidence, report the source and stop
+  before `herdr agent start`:
+
+```text
+Error: worker target cwd/environment/configuration cannot be established from supported local evidence; refusing to start
+```
+
+Retain selective filtering for every launch: require `without` to contain
+`bypass` but not blanket `flags`, require empty inherited `profile.bypass`, and
+reject skip-permissions switches, `--permission-mode bypassPermissions`, Pi
+`--approve`, Codex dangerous full-access/never-approval settings, and
+explicit native/configuration/environment bypasses; every such bypass is
+prohibited. Preserve restrictive inherited setup flags. Unknown or unverifiable
+profile data fails closed,
+including on retries and replacements, without a native/unverified fallback.
+
+The probe is not an immutable start snapshot. Immediately before starting,
+repeat `herdr agent get "$root_pane"`,
+`herdr pane process-info --pane "$root_pane"`, the local configuration/source
+inspection, and any supported destination-pane evidence. Re-run the helper with
+the same `profile_args`, `worker_native_args`, destination pane, and recorded
+launch provenance. Compare only stable, redacted source identities (root kind
+and argv fingerprint, configuration path/metadata or inline-value digest, and
+target pane/evidence source); never print the values. If any source changes,
+discard the old profile and re-probe. If stable provenance cannot be
+established, stop rather than start on stale or caller-side evidence.
 
 Only after all checks above PASS, start with the same verified inputs:
 
 ```bash
-python3 "$here/launch_profile.py" "${profile_args[@]}" \
+python3 "$helper" "${profile_args[@]}" \
   --start "$worker_name" --pane "$worker_pane" --timeout 60000 \
   -- "${worker_native_args[@]}" || {
   echo "Error: worker start rejected after profile verification" >&2

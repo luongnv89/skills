@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -84,6 +85,122 @@ class WorkerLaunchContractTests(unittest.TestCase):
         next_heading = body.find("\n## ", len(heading))
         return body if next_heading < 0 else body[:next_heading]
 
+    def protocol_bash_block(self, heading):
+        section = self.selective_profile_section(PROTOCOL, heading)
+        blocks = re.findall(r"```bash\n(.*?)```", section, re.DOTALL)
+        self.assertTrue(blocks, heading)
+        return blocks[0]
+
+    def run_capability_gate(self, mode):
+        installed = self.tmpdir / "installed"
+        scripts = installed / "scripts"
+        scripts.mkdir(parents=True, exist_ok=True)
+        env = dict(self.env)
+        if mode == "empty":
+            env.pop("herdr_agent_dir", None)
+        else:
+            env["herdr_agent_dir"] = str(installed)
+        helper = scripts / "launch_profile.py"
+        helper.unlink(missing_ok=True)
+        if mode != "missing":
+            if mode == "help-fail":
+                body = "import sys\nsys.exit(7)\n"
+            elif mode == "unsupported":
+                body = "print('usage: --without flags')\n"
+            else:
+                body = "print('usage: --without bypass')\n"
+            helper.write_text(body, encoding="utf-8")
+        return subprocess.run(
+            ["bash", "-c", self.protocol_bash_block("### Installed-helper capability gate")],
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def run_profile_parser(self, profile_json):
+        helper = self.tmpdir / "profile-helper.py"
+        helper.write_text(
+            "import os\nprint(os.environ['PROFILE_JSON'], end='')\n",
+            encoding="utf-8",
+        )
+        env = dict(self.env)
+        env["helper"] = str(helper)
+        env["PROFILE_JSON"] = (
+            profile_json if isinstance(profile_json, str) else json.dumps(profile_json)
+        )
+        script = "\n".join(
+            (
+                "root_pane='root'",
+                "main_model=''",
+                "main_thinking=''",
+                "worker_profile_args=()",
+                "worker_native_args=()",
+                self.protocol_bash_block("### Probe and target evidence"),
+            )
+        )
+        return subprocess.run(
+            ["bash", "-c", script],
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    @staticmethod
+    def valid_profile():
+        return {
+            "kind": "claude",
+            "inherited": True,
+            "model": {"value": "", "source": "UNKNOWN"},
+            "thinking": {"value": "", "source": "UNKNOWN"},
+            "flags": [],
+            "flags_source": "root argv",
+            "without": ["bypass"],
+            "explicit": [],
+            "bypass": [],
+            "dropped": [],
+            "warnings": [],
+            "argc": 0,
+        }
+
+    def test_installed_helper_capability_gate_is_executable_and_fail_closed(self):
+        snippet = self.protocol_bash_block("### Installed-helper capability gate")
+        self.assertIn('[ -n "$here" ] ||', snippet)
+        for mode in ("empty", "missing", "unsupported", "help-fail"):
+            with self.subTest(mode=mode):
+                result = self.run_capability_gate(mode)
+                self.assertNotEqual(result.returncode, 0, result.stderr)
+        supported = self.run_capability_gate("supported")
+        self.assertEqual(supported.returncode, 0, supported.stderr)
+
+    def test_extracted_profile_parser_rejects_unverifiable_helper_json(self):
+        valid = self.valid_profile()
+        cases = {
+            "valid": (valid, True),
+            "malformed": ("{not-json", False),
+            "non-dict": ([], False),
+            "missing": ({key: value for key, value in valid.items() if key != "argc"}, False),
+            "inherited bypass": ({**valid, "bypass": ["permission"]}, False),
+            "unknown kind": ({**valid, "kind": "gemini"}, False),
+            "blanket flags": ({**valid, "without": ["bypass", "flags"]}, False),
+            "model non-string": (
+                {**valid, "model": {"value": None, "source": "UNKNOWN"}},
+                False,
+            ),
+            "thinking non-string": (
+                {**valid, "thinking": {"value": 7, "source": "UNKNOWN"}},
+                False,
+            ),
+        }
+        for name, (payload, accepted) in cases.items():
+            with self.subTest(case=name):
+                result = self.run_profile_parser(payload)
+                if accepted:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                else:
+                    self.assertNotEqual(result.returncode, 0, result.stderr)
+
     def test_each_doc_section_requires_the_complete_worker_profile_policy(self):
         sections = (
             self.selective_profile_section(
@@ -110,6 +227,28 @@ class WorkerLaunchContractTests(unittest.TestCase):
             for group in required_groups:
                 for phrase in group:
                     self.assertIn(phrase.lower(), lowered, phrase)
+
+    def test_policy_has_capability_and_fail_closed_target_gate(self):
+        section = self.selective_profile_section(
+            PROTOCOL, "## Selective worker launch-profile gate"
+        ).lower()
+        required_phrases = (
+            'helper="$here/launch_profile.py"',
+            'python3 "$helper" --help',
+            "does not support --without bypass",
+            "profile_json",
+            "python3 -c",
+            "destination pane",
+            "caller environment",
+            "inherited inline settings",
+            "process-info",
+            "no destination config",
+            "not an immutable start snapshot",
+            "supported local evidence",
+            "refusing to start",
+        )
+        for phrase in required_phrases:
+            self.assertIn(phrase.lower(), section, phrase)
 
     def test_selective_bypass_preserves_restrictive_inherited_flags(self):
         cases = (
