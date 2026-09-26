@@ -4,7 +4,7 @@ description: "Generate a plain-language report from website-analyzer JSON and sa
 license: MIT
 effort: high
 metadata:
-  version: 1.2.3
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -27,6 +27,18 @@ Do **not** use for technical audit reports targeting developers — those belong
 2. Read `references/api_reference.md` when validating fields or translating metrics; use only the needed reference mappings to protect the context budget.
 3. Confirm the user can review the draft and explicitly approve persistence.
 4. Stop with a descriptive error when the JSON is invalid or contains an analyzer `error` variant.
+
+## Repo Sync Before Edits (mandatory)
+
+The approved report is persisted with `Write`. When that output path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository.
 
 ## Workflow
 

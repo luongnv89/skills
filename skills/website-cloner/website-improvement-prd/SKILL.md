@@ -4,7 +4,7 @@ description: "Generate an approval-gated improvement PRD from a report and basel
 license: MIT
 effort: high
 metadata:
-  version: 1.3.2
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -20,6 +20,25 @@ Trigger when the user asks to:
 - Plan improvements with measurable metrics
 
 Do **not** use for implementation planning or coding — those are separate phases.
+
+## Prerequisites
+
+1. Require the Phase 1 analysis (`analysis.json`) and the approved Phase 2 report — ask for their paths if not supplied.
+2. Confirm the `Write` tool is available; if it is not, stop with a descriptive error.
+3. Confirm the output path (`$PROJECT_DIR/prd.md` or the `~/workspace/clones/YYYY_MM_DD_slug/prd.md` fallback) is writable before drafting.
+4. If any prerequisite fails, stop with a descriptive error naming the failing input and corrective action.
+
+## Repo Sync Before Edits (mandatory)
+
+The approved `prd.md` is persisted with `Write`. When that output path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository.
 
 ## Workflow
 
