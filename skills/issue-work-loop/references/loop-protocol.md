@@ -420,15 +420,45 @@ Do not count mode activation as a ROUND. Do not send the worker task in the same
 
 ## Herdr send/wait contract
 
-For every probe, resolve, review, fix, or parse re-prompt (autonomous-mode switches are keystrokes verified by bounded pane reads, not message sends):
+For normal worker transport, delegate to the current `herdr-agent` skill's
+**Phase 4 — Prompt Safely** and **Phase 5 — Read and Verify**. Those phases are
+the transport source of truth; do not reproduce an older pane protocol here.
 
-1. Capture recent-unwrapped baseline.
-2. Mint a fresh completion marker.
-3. Run `preflight_send.py` immediately before `pane run`.
-4. Wait with `wait_for_idle.py` using baseline + marker.
-5. Read reply delta only.
+### Detected-agent path (normal)
 
+For every probe, resolve, review, fix, or parse re-prompt:
+
+1. Resolve the exact target and require the installed `preflight_send.py` to
+   pass immediately before dispatching the task. A working, blocked, or
+   unverifiable target stops dispatch; only exit 5 permits the fallback below.
+2. For a detected agent, submit and wait in one server request:
+   `herdr agent prompt "$target" "$task" --wait --timeout 180000`.
+3. On success, read only the relevant reply delta with
+   `herdr agent read "$target" --source recent-unwrapped --lines 80`.
+
+The normal detected-agent path does not capture a pre-send transcript baseline,
+mint a completion marker, call `pane run`, or invoke `wait_for_idle.py`. A
+prompt plus `--wait` is one server-side request, so do not blindly resend after
+an uncertain result.
+
+Preserve the source error mapping exactly: `agent_blocked` (BLOCKED) means
+nothing was sent and a human must resolve the dialog; `agent_prompt_stalled`
+(STALLED) means the prompt was submitted but no activity followed; `timeout`
+(TIMEOUT) means no settled state arrived within the budget. Inspect and report
+these outcomes; never treat them as replies or blindly resend.
 Blocked/trust dialog: surface it; never send another task or type into the dialog.
+
+### Explicit no-agent fallback
+
+If preflight exits 5 (no detected agent, `agent_not_found` from agent lookup),
+use the current `herdr-agent` Phase 4–5 pane-surface fallback in that installed
+skill's `references/delivery-and-waiting.md` only after verifying that no detected
+agent exists. In that explicitly verified fallback, follow the source's documented
+`pane run` + `wait_for_idle.py` contract; it is not the normal transport.
+
+Autonomous-mode switches are keystrokes verified by bounded reads, not task
+sends. Keep them separate from the task prompt, and repeat the boot gate after
+every FRESHEN.
 
 ## Max rounds and handoff
 
