@@ -45,7 +45,7 @@ Use this template when presenting the prioritized improvement plan to the user:
 
 ### Safety First: Diff & Confirm Protocol
 
-**CRITICAL:** For every file modification, you MUST follow this safety protocol:
+For every file modification, follow this safety protocol:
 1. **Generate Diff:** Create a clear diff of the changes.
 2. **Show Preview:** Present the diff or a detailed summary of changes to the user.
 3. **Request Confirmation:** Ask for explicit approval for the specific file(s) before writing (e.g., "Apply these changes to `robots.txt`? [Y/n]").

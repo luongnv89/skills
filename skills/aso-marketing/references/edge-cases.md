@@ -38,7 +38,6 @@
 
 A run is successful when all are verifiable:
 
-- [ ] **Description ≤40 words with imperative verb** — Frontmatter passes asm eval check.
 - [ ] **Analysis report produced** — App Overview, Metadata Status table, Key Findings.
 - [ ] **ASO plan covers all required fields** — Title, subtitle/short desc, keywords (iOS), full description, visual recommendations.
 - [ ] **Compliance check ran and passed** — Phase 3 report present and PASS before plan shown.

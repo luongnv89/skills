@@ -277,7 +277,6 @@ JSON structure:
 
 ## Tips
 
-- Be thorough in metadata audit — missing data leads to gaps in the plan
 - Competitive analysis is for understanding the market, not copying. Flag opportunities to differentiate.
 - If existing metadata is poor, note this clearly — it will drive high-priority fixes in the plan
 - Localization can be a major opportunity for growth — flag any high-potential markets not yet localized

@@ -1,6 +1,6 @@
 # Expected Output Skeleton
 
-The generated `prd.md` MUST follow this skeleton (lengths vary, headings and formatting are fixed). Reviewers and graders can pattern-match on this structure.
+The generated `prd.md` follows this skeleton (lengths vary; headings and formatting are fixed so reviewers find each section in the same place).
 
 ```markdown
 # Product Requirements Document: <Product Name>
