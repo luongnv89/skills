@@ -4,7 +4,7 @@ description: "Manage software releases end-to-end: bump version, generate change
 license: MIT
 effort: max
 metadata:
-  version: 2.6.3
+  version: 2.6.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -152,7 +152,7 @@ If `gh` CLI is available and the repo is on GitHub:
 ```bash
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
-  --notes-file CHANGELOG.md \
+  --notes-file "$WORKSPACE/changelog-generator/release-notes.md" \
   --latest
 ```
 
