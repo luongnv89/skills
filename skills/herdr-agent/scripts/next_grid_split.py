@@ -4,7 +4,10 @@
 All panes in the tab (root + every sub-agent) are kept as equal-width
 columns side by side, left to right. This models the *real* Herdr 0.7.4
 `pane split` / `pane resize` semantics, verified live against a running
-herdr server (see SKILL.md "Equal-width columns — verified semantics"):
+herdr server (see herdr-recipes.md "Equal-width columns — verified
+semantics"). That verification PREDATES the skill's herdr 0.9.0
+requirement — re-confirm these semantics on 0.9+ with the throwaway-tab
+probe before relying on them:
 
   * `herdr pane split <pane> --direction right --ratio R`
         R is the fraction the EXISTING (first/left) child keeps of the
@@ -377,7 +380,9 @@ def split_ratio(new_count: int) -> float:
 
     Verified live against herdr 0.7.4: from two equal 105/105 columns,
     splitting the rightmost with `--ratio 0.333` (=1/3) yields a new pane of
-    width 70 (= 210/3, the equal target). See SKILL.md / herdr-recipes.md.
+    width 70 (= 210/3, the equal target). That verification predates the
+    skill's herdr 0.9.0 requirement — re-confirm on 0.9+ before relying on
+    it. See herdr-recipes.md "Equal-width columns — verified semantics".
     """
     if new_count < 2:
         raise SystemExit("new column count must be >= 2 to split")
