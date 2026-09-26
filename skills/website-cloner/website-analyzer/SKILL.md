@@ -4,7 +4,7 @@ description: "Analyze a website's UI/UX, category, style, performance, surface s
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -81,6 +81,9 @@ Produce structured JSON at the requested output path (or stdout):
   },
   "seo": {
     "score": 72,
+    "status": "PASS | PARTIAL",
+    "availability": "available | partial | unavailable",
+    "reason": null,
     "title_tag": "present | missing | duplicate",
     "meta_description": "present | missing | too-short",
     "heading_structure": "h1:N h2:N ...",
@@ -151,7 +154,14 @@ Always label as surface-level.
 
 ## Step 5: SEO Scoring
 
-Compute each dimension's 0–100 sub-score using the rubrics below, then combine with the weights to yield the overall `seo.score`. Round each sub-score to the nearest integer; the final score is `round(Σ weight_i × sub_i)`.
+Use the rubrics below to make evidence-backed integer sub-scores, or explicit
+`null` when a dimension cannot be computed. Then pass exactly the five-key
+`seo.dimension_scores` map to the local pure-stdlib
+[`scripts/score_seo.py`](scripts/score_seo.py). It validates the schema,
+renormalizes weights over known dimensions, and calculates `seo.score` with
+Decimal `ROUND_HALF_UP`. Read [references/seo-scoring.md](references/seo-scoring.md)
+for the input/output contract and safe CLI invocation. Do not calculate,
+round, or override the aggregate score in prose.
 
 | Dimension | Weight | Sub-score rubric (0–100) |
 |-----------|--------|--------------------------|
@@ -161,7 +171,13 @@ Compute each dimension's 0–100 sub-score using the rubrics below, then combine
 | Structured data | 20% | 100 if at least one valid JSON-LD block is present and parses (any schema). 60 if only Open Graph or Twitter Card meta tags are present (no JSON-LD). 30 if only microdata or RDFa. 0 if none. |
 | Crawlability (canonical, robots, sitemap) | 30% | Start at 0. +40 if a `<link rel="canonical">` resolves to an absolute URL. +30 if `robots.txt` is fetchable and not `Disallow: /`. +30 if a sitemap is referenced (via `robots.txt` `Sitemap:` directive, `<link rel="sitemap">`, or a fetchable `/sitemap.xml`). Cap at 100. |
 
-When a sub-score cannot be computed (e.g. `robots.txt` unreachable), record the dimension as `null` in `dimension_scores` and exclude it from the weighted sum, redistributing its weight proportionally across the remaining dimensions. Note any nulls in `seo.notes`.
+When a sub-score cannot be computed (e.g. `robots.txt` unreachable), record
+that dimension explicitly as `null` in `dimension_scores`; the helper excludes
+it and redistributes its weight proportionally across remaining known
+dimensions. Keep `seo.status: "PARTIAL"` and the helper's unavailable fields.
+If all five dimensions are `null`, preserve `seo.score: null` and
+`availability: "unavailable"`; never substitute `0` or `100`, and never rank
+or compare that result as numeric.
 
 ## Step 6: UI/UX, Category, Style
 
@@ -178,13 +194,15 @@ When a sub-score cannot be computed (e.g. `robots.txt` unreachable), record the 
 | Paywall / login | `{"error": "paywall"}` — stop |
 | Redirect loop | `{"error": "redirect-loop"}` — stop |
 | Empty page | `{"error": "empty"}` — stop |
+| Invalid SEO score input | Stop before emitting the final analysis; surface the helper's `error[seo-input]` diagnostic and correct the five-key map. |
 
 ## Acceptance Criteria
 
 Verify the expected output before reporting success:
 
 - JSON parses and contains `url`, `timestamp`, `ui_ux`, `category`, `style`, `performance`, `security`, and `seo`.
-- `seo.score` is an integer from 0 through 100 and matches the weighted, null-adjusted dimension calculation.
+- `seo.score` is the helper's integer from 0 through 100 when at least one dimension is known, and matches its weighted, null-adjusted calculation.
+- All five `seo.dimension_scores` keys are present with integer `0..100` values or explicit `null`; all-null output preserves `seo.score: null`, `seo.status: "PARTIAL"`, and `availability: "unavailable"`.
 - Performance estimates use `lcp_estimate_seconds`, unitless `cls_estimate`, `ttfb_estimate_seconds`, and `total_page_weight_kb`, plus an explicit static-analysis limitation.
 - Every unavailable measurement is `null` or an error field, never an invented value.
 - The output is written to the requested destination; assert the file exists and can be parsed when a path is supplied.
@@ -198,7 +216,7 @@ Emit this after analysis:
 ··································································
   Input fetched:        √ pass | × fail ([reason])
   Six dimensions:      √ pass | × partial ([missing])
-  SEO calculation:     √ pass | × partial ([null dimensions])
+  SEO calculation:     √ pass | × partial ([null dimensions/helper diagnostic])
   Output JSON:         √ pass ([path or stdout])
   Result:              PASS | PARTIAL | FAIL
 ```
