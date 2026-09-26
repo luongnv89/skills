@@ -234,7 +234,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.3 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.3.0 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 1.4.1 | medium | CLAUDE.md + AGENTS.md per best practices |
-| [**subagent-creator**](skills/subagent-creator/) | 1.1.2 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
+| [**subagent-creator**](skills/subagent-creator/) | 1.1.4 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
 | [**convert-documents-to-markdown**](skills/convert-documents-to-markdown/) | 1.0.0 | low | Office docs, ebooks, CSV & PDF → GitHub-Flavored Markdown via anydoc (mirrored from firecrawl/anydoc) |
 
 ### App Store
