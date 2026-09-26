@@ -189,10 +189,11 @@ has confirmed both.
 
 ### Equal-width columns — verified semantics
 
-These were confirmed **live against herdr 0.7.4**; the CLI has no `--help`, so
-run experiments in a throwaway `herdr tab create` and read `herdr pane layout`
-before/after (close the probe tab when done — never probe the session's own
-tab). Results:
+These were confirmed **live against herdr 0.7.4** — they **predate the
+skill's herdr 0.9.0 requirement**, so re-confirm them on 0.9+ before relying
+on them. The CLI has no `--help`, so run experiments in a throwaway
+`herdr tab create` and read `herdr pane layout` before/after (close the
+probe tab when done — never probe the session's own tab). Results:
 
 - **`pane split <p> --direction right --ratio R`** — `R` is the fraction the
   **existing (left) child** keeps of the pane `p`; the new (right) pane gets

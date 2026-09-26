@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.1.2
+  version: 3.1.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
