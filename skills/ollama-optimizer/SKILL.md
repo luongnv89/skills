@@ -4,7 +4,7 @@ description: "Optimize Ollama configuration for the current machine's hardware. 
 license: MIT
 effort: medium
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -107,7 +107,7 @@ Provide copy-paste commands in order:
 2. Restart Ollama service
 3. Pull recommended models
 4. Test with `ollama run <model> --verbose`
-5. Rollback (one command, same file as step 1): `cp ~/.zshrc.ollama-bak ~/.zshrc` — then restart Ollama.
+5. Rollback (one command, same file as step 1): `cp "$RC.ollama-bak" "$RC"` — then restart Ollama.
 
 ### Phase 4: Verification
 
@@ -185,7 +185,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ··································································
   Guide generated:        √ pass — ollama-optimization-guide.md written
   Parameters tuned:       √ pass — OLLAMA_FLASH_ATTENTION=1, KV_CACHE_TYPE=q8_0
-  Model recommendations ready: √ pass — llama3.1:14b-instruct-q4_K_M suggested
+  Model recommendations ready: √ pass — llama3.1:8b-instruct-q4_K_M suggested
   [Criteria]:             √ 3/3 met
   ____________________________
   Result:                 PASS
