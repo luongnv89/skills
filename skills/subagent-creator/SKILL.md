@@ -3,7 +3,7 @@ name: subagent-creator
 description: "Create, evaluate, or improve Claude Code subagent files (.claude/agents/*.md) — the frontmatter + system prompt defining a delegatable specialist. Don't use for skills (skill-creator), CLAUDE.md/AGENTS.md (agent-config), or running an agent."
 effort: high
 metadata:
-  version: 1.1.2
+  version: 1.1.3
   author: "Luong NGUYEN <edgardo.montesdeoca@montimage.eu>"
 ---
 

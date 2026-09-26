@@ -22,17 +22,20 @@ Use this five-part skeleton. It's the structure the source guideline's example a
 You are an expert <specialty> specializing in <domain/focus>.
 
 When invoked:
-1. <first concrete action — usually orient: read the diff, capture the error>
-2. <analysis step>
-3. <produce-the-output step>
+- **Goal:** <what this invocation must determine or produce>
+- **Inputs:** <files, errors, request, or other evidence to inspect>
+- **Constraints:** <scope, tool, safety, and approval boundaries>
+- **Done when:** <verifiable output and evidence criteria>
 
 ## <Process> (the how, expanded)
 
-1. **<Phase>**
-   - <concrete sub-step>
-   - <concrete sub-step>
-2. **<Phase>**
-   - ...
+Describe the concrete goals, constraints, and evidence for the work. Use outcome-based bullets or short prose for analysis/review agents. Use an ordered list only when operations must be sequenced—for example, capture the current state before a mutation and obtain approval before writing.
+
+- **<Outcome or phase>**
+  - <command, file, or evidence that establishes the outcome>
+  - <constraint or boundary to preserve>
+- **<Outcome or phase>**
+  - ...
 
 ## Output Format
 
@@ -48,10 +51,10 @@ For each <finding / fix / item>:
 
 Why each part:
 - **Role line** — sets identity and focus in one sentence. Keep it tight.
-- **When invoked** — the ordered actions the agent takes immediately. This is what makes behavior repeatable across runs.
-- **Process** — expands the *how* with concrete sub-steps. Be specific: name the commands (`git diff`, `grep -r`), the files, the order.
+- **When invoked** — states the goal, inputs, constraints, and verifiable done criteria. Use ordered actions only when sequencing matters.
+- **Process** — makes the goals, constraints, and evidence concrete. Be specific: name the commands (`git diff`, `grep -r`) and files; preserve required order for stateful or destructive work.
 - **Output Format** — the single highest-value section for a delegatable agent. The main agent consumes this output; a fixed shape makes results parseable and comparable. Use labeled fields.
-- **Checklist** — verifiable done-criteria so the agent doesn't stop early. Tie each box to a state the agent can check, not a vibe.
+- **Checklist** — verifiable done-criteria the agent and its caller can check. Tie each box to a state, not a vibe.
 
 ### Annotated reference example
 
@@ -104,7 +107,7 @@ For each issue investigated:
 - [ ] No regressions introduced
 ```
 
-Everything is actionable: real commands, ordered steps, labeled output, checkable boxes. Match that altitude — avoid filler like "be thorough" or "think carefully," which change nothing the agent does.
+Everything is actionable: concrete goals, constraints, evidence, labeled output, and checkable done criteria. Use ordered steps only when sequencing matters; for analysis/review, outcome-based bullets are enough. Match that altitude — avoid filler like "be thorough" or "think carefully," which change nothing the agent does.
 
 ## Writing the `description` (the trigger)
 
