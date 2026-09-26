@@ -5,7 +5,7 @@ license: MIT
 effort: high
 compatibility: "macOS, Linux (Debian/Ubuntu/Fedora/Arch), Windows (winget/PowerShell). Needs network and a package manager or permission to install one. Additive by default; anything that changes a working install needs an explicit per-item yes."
 metadata:
-  version: 0.9.1
+  version: 0.9.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
