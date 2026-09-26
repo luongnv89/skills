@@ -222,6 +222,86 @@ Follow `references/context-gate.md`:
 
 Never gate/spawn a writer before a CLEAN exit or before PR push-safety PASS.
 
+## Selective worker launch-profile gate
+
+This gate runs before **every** Herdr worker launch: the initial ISSUE
+implementer/resolver, each reviewer, an ISSUE resolver retry or fix worker, the
+PR FIXER, and every retry or FRESHEN replacement. A fresh pane or a restarted
+CLI never inherits a previous profile check.
+
+Dependency Preflight records `herdr_agent_dir` as the absolute installed
+`herdr-agent` directory. Carry that value into this phase; do not derive it
+from the repository checkout or invent a repo-relative fallback. Define the
+helper directory and fail before any worker launch if it is missing:
+
+```bash
+here=""
+if [ -n "${herdr_agent_dir:-}" ] && [ -d "$herdr_agent_dir/scripts" ]; then
+  here="$(cd -- "$herdr_agent_dir/scripts" 2>/dev/null && pwd -P)"
+fi
+[ -n "$here" ] && [ -f "$here/launch_profile.py" ] || {
+  echo "Error: installed herdr-agent launch_profile.py is missing; refusing to launch a worker" >&2
+  exit 1
+}
+```
+
+Resolve and verify the profile with the **exact** kind, model, thinking level,
+native arguments, cwd, environment, and worker configuration intended for the
+worker's `--start` call. Keep the same inputs for both calls; if any input
+changes, discard the old result and resolve again. For example, the profile
+probe and start share the same `worker_profile_args` and `worker_native_args`
+Bash arrays. Populate these from the actual worker launch request: helper
+kind/model/thinking options in the former, native arguments in the latter
+(an empty array when none). Do not substitute or omit supplied values.
+
+```bash
+profile_args=(
+  --root-pane "$root_pane"
+  --main-model "$main_model" --main-thinking "$main_thinking"
+  "${worker_profile_args[@]}" --without bypass
+)
+profile_json="$(python3 "$here/launch_profile.py" \
+  "${profile_args[@]}" -- "${worker_native_args[@]}")" || {
+  echo "Error: worker launch profile failed; refusing to launch" >&2
+  exit 1
+}
+```
+
+The helper's `flags` and `explicit` JSON entries are names only; they cannot
+prove native permission values or the worker's effective config/settings or
+environment. Independently inspect those values in the same worker cwd,
+configuration, and environment, and require any supplied kind/model/thinking
+value to match the profile's effective value (or verify the expected inherited
+source when the override is empty). Reject unmapped or unknown permission
+profiles and malformed, missing, or failed profile data. Require `without` to
+contain `bypass` but not blanket `flags`, and require empty inherited
+`profile.bypass`; that field is an **inherited-only** summary, so
+`profile.bypass: []` is **not** proof that explicit native, config, or
+environment bypass is absent. Explicit native, config, and environment bypass
+is prohibited too. Unknown or unverifiable effective profile data fails closed
+before `herdr agent start`, with no native/unverified fallback, including
+retry and replacement launches. Reject skip-permissions switches,
+`--permission-mode bypassPermissions`, Pi `--approve`, Codex dangerous
+full-access/never-approval settings, and equivalent bypasses supplied through
+native arguments or configuration. Preserve restrictive inherited setup flags;
+never substitute `--without flags` or override restrictive settings to get past
+a blocked launch. Report the blocked worker and the unverifiable source, without
+printing credential-bearing values.
+
+Only after all checks above PASS, start with the same verified inputs:
+
+```bash
+python3 "$here/launch_profile.py" "${profile_args[@]}" \
+  --start "$worker_name" --pane "$worker_pane" --timeout 60000 \
+  -- "${worker_native_args[@]}" || {
+  echo "Error: worker start rejected after profile verification" >&2
+  exit 1
+}
+```
+
+This is caller-side policy only: do not change `herdr-agent` defaults or its
+launch-profile contract.
+
 ## Autonomous worker boot gate
 
 Every newly launched or FRESHENed reviewer, ISSUE implementer, and PR FIXER must pass this gate before receiving role work:
