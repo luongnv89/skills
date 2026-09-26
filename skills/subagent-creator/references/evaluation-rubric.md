@@ -36,8 +36,8 @@ Read the target file once (frontmatter + body), state its claimed responsibility
 ## 5. System-prompt body structure
 
 - [ ] Opens with a one-line **role** statement (`You are an expert … specializing in …`).
-- [ ] Has an ordered **When invoked** action list.
-- [ ] Has a **Process** section with concrete sub-steps (real commands/files, not vague advice).
+- [ ] States the invocation's goal, inputs, constraints, and verifiable done criteria; use an ordered **When invoked** action list only when sequencing is required (for example, stateful or destructive work).
+- [ ] Has a **Process** section that makes goals, constraints, and evidence concrete (real commands/files where relevant); analysis/review work may be outcome-based, while stateful or destructive work preserves required order (for example, capture before mutate and approval before write).
 - [ ] Has a fixed **Output Format** so the main agent can consume results.
 - [ ] Has verifiable **completion criteria** (a checklist or equivalent).
 - [ ] Is example-rich and concrete — names commands, files, labels.
