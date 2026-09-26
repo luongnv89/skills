@@ -90,7 +90,7 @@ Disallow: /private/
 User-agent: GPTBot
 Allow: /
 
-User-agent: anthropic-ai
+User-agent: ClaudeBot
 Allow: /
 
 Sitemap: https://example.com/sitemap.xml

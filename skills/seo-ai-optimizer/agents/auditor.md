@@ -12,7 +12,7 @@ Run the SEO audit script on the target website and perform manual review checks 
 
 - **Input**: The user's website project directory (passed as `<project_root>`)
 - **Output**: `<project_root>/seo-audit.json` — structured JSON with all findings
-- **Reference**: `../references/technical-seo.md` and `../SKILL.md` for manual review checklist
+- **Reference**: `../references/technical-seo.md` and `../references/workflow-detail.md` (Step 2) for the manual review checklist
 - **Script**: `../scripts/audit_seo.py` — automated scanning
 
 ## Phase 1: Run the Automated Audit Script
@@ -37,7 +37,7 @@ The script automatically:
 
 After running the script, manually review items that require human judgment:
 
-### Manual Review Checklist (from SKILL.md Step 2: Audit)
+### Manual Review Checklist (from references/workflow-detail.md Step 2: Audit)
 
 1. **Title/Description Quality**
    - Are page titles compelling and keyword-relevant? (not just technically present)

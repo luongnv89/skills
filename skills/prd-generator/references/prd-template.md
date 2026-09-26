@@ -79,8 +79,8 @@ Priority: Must-have, Should-have, Could-have, Won't-have (MVP)
 - As a [user type], I want to [action] so that [benefit]
 
 **Acceptance Criteria**:
-- [ ] Criterion 1
-- [ ] Criterion 2
+- [ ] Given <context> / When <action> / Then <outcome>
+- [ ] Given <context> / When <action> / Then <outcome>
 
 **Edge Cases**:
 - [Edge case handling]

@@ -4,7 +4,7 @@ description: "Manage software releases end-to-end: bump version, generate change
 license: MIT
 effort: max
 metadata:
-  version: 2.6.1
+  version: 2.6.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
