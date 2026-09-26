@@ -4,7 +4,7 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -85,11 +85,11 @@ Use WebFetch to check these registries directly:
 | **apt** | Search: `"[NAME]" site:packages.debian.org OR site:packages.ubuntu.com` | Package listing found |
 
 For each registry, report:
-- **Available**: 404 / not found — safe to claim
+- **Available**: 404 / not found from the registry source — record the source evidence and scope
 - **Taken**: Package exists — note the owner, description, and last publish date (a recently claimed but empty package could indicate namespace squatting)
 - **Similar**: No exact match but close variants exist (e.g., `name-js`, `py-name`) — worth noting
 
-**If the name is taken on a registry the user plans to publish to**, flag it prominently and suggest variants (e.g., `name-cli`, `name-py`, `name-lib`, prefixed with org scope like `@org/name` for npm).
+**If the name is taken on any target registry**, flag it prominently and suggest variants (e.g., `name-cli`, `name-py`, `name-lib`, prefixed with org scope like `@org/name` for npm). If target registry intent is missing or unverifiable, record it as unknown rather than treating every registry as clear.
 
 ### Step 3: Domain Check (if Step 1 clear)
 
@@ -101,9 +101,10 @@ Use WebSearch to check:
 Search: `site:[NAME].com` and `"[NAME].com" domain availability`
 
 **Status:**
-- Available: No active site
-- Parked: Domain exists but for-sale/parking
+- Available: an authoritative availability result confirms the domain is unregistered
+- Parked: Domain exists but is for-sale/parking
 - Active: In use (flag if same industry)
+- Unknown: the source is unavailable or only shows that no active site was found; do not infer availability
 
 ### Step 4: Trademark Check (if Step 1 clear)
 
@@ -119,27 +120,45 @@ Focus on Nice Classes 9, 35, 42 (software/technology). Note if marks are live or
 
 ### Step 5: Risk Assessment
 
-| Risk Level | Criteria |
-|------------|----------|
-| **Low** | Social handles available, .com available/parked, no trademark conflicts, package registries available |
-| **Moderate** | Some handles taken (not exact), .com taken but alternatives available, similar trademarks exist, or name taken on a registry the user doesn't plan to use |
-| **High** | Multiple handles taken, .com active in same industry, active trademarks in classes 9/35/42, or name taken on a target package registry |
+This section is the single authority for qualitative risk policy. The synthesizer must read and follow this section rather than inventing a second matrix. Classify each source result as confirmed, clear, or unknown/unverifiable. Upstream worker labels and severity fields are evidence only; re-check their underlying facts and do not blindly trust numeric severity.
+
+#### Qualitative risk matrix
+
+Risk precedence is **High > Moderate > Low**. Select the highest matching trigger; never average findings. "Multiple handles" means **two or more** confirmed non-exact handle collisions on distinct platforms.
+
+| Risk level | Highest matching trigger |
+|------------|--------------------------|
+| **High** | Exact social handle collision on any of the 6 platforms (the Early-Exit Rule); two or more confirmed non-exact social handle collisions; a confirmed collision on **any target registry**; an active `.com` in the same industry; an active trademark conflict in Nice Classes 9, 35, 42; a well-known-brand/typosquat conflict; or the existing elevated trademark-collision risk for a very short name. |
+| **Moderate** | No High trigger, but one confirmed non-exact social handle collision; a different-industry active `.com`; a similar trademark; a confirmed collision on a non-target registry; or any unknown/unverifiable check or target intent. |
+| **Low** | Every required check and target intent is explicitly verified, with no High or Moderate trigger and no unknown result; `.com` is verified available or parked. |
+
+Unknown policy: if checks or target intent are missing or unverifiable and there is no known High finding, use **provisional Moderate + Modify** pending verification. Unknown is not a confirmed collision and never Low clearance. An existing High finding remains High. No averaging or mitigation reduces High. Checks skipped by the Early-Exit Rule remain skipped, not cleared.
+
+The exact-handle Early-Exit Rule is unchanged: an exact handle collision on any of the 6 platforms immediately returns an Abandon recommendation and skips the remaining checks. Report those checks as skipped, not clear.
+
+#### Recommendation semantics
+
+- **Proceed**: only for a fully verified Low result; state the evidence and limitations, and never represent unknown checks as clearance.
+- **Modify**: for Moderate, including provisional Moderate; suggest variants that address confirmed conflicts and identify pending verification.
+- **Abandon**: for High; mitigation or available alternatives cannot lower the High result.
+- Any alternative that was not checked through the applicable sources must be labeled **unverified**; never invent availability or a Low assessment.
 
 ### Step 6: Recommendation
 
-- **Proceed**: Low risk - name is viable
-- **Modify**: Moderate risk - suggest 1-2 variants addressing conflicts
-- **Abandon**: High risk - suggest completely different alternatives
+Follow the recommendation semantics above and the registration order in Final Action.
 
 ## Output Format
 
+Return this compact text report. Replace bracketed fields with observed evidence only; use `Unknown` when a check is unverifiable and `Skipped (not cleared)` for checks omitted by the Early-Exit Rule. The `RISK` line must state the highest matching trigger and its policy rationale, not only the level.
+
 ```
-SOCIAL: Clear | NEGATIVE: [reason]
-REGISTRY: npm (status) | PyPI (status) | Homebrew (status) | apt (status)
-DOMAIN: .com (status) | .io (status) | .app (status)
-TM: WIPO (status) | EUIPO (status) | INPI (status)
-RISK: [Low/Moderate/High] - [reason]
-RECOMMEND: [Proceed/Modify/Abandon] (+ variants if needed)
+SOCIAL: [Clear | NEGATIVE: reason | Unknown: reason]
+REGISTRY: npm ([status]) | PyPI ([status]) | Homebrew ([status]) | apt ([status])
+DOMAIN: .com ([status]) | .io ([status]) | .app ([status])
+TM: WIPO ([status]) | EUIPO ([status]) | INPI ([status])
+SKIPPED: [sources, if any; skipped is not cleared]
+RISK: [Low | Moderate | High] - [highest matching trigger, evidence, and policy rationale]
+RECOMMEND: [Proceed | Modify | Abandon] - [reason and checked or unverified alternatives]
 ```
 
 ## PRD Integration
@@ -165,38 +184,27 @@ After each major step, emit a status report. The general template, plus per-step
 
 ## Acceptance Criteria
 
-- Social media check completed across all 6 platforms with clear available/taken status
+- Social media check completed across all 6 platforms with explicit available/taken/unknown status
 - Package registry status confirmed for npm, PyPI, Homebrew, and apt (unless the Early-Exit Rule fired)
 - Domain availability checked for .com and at least two alternative TLDs (unless the Early-Exit Rule fired)
 - Trademark search completed against WIPO, EUIPO, and INPI (unless the Early-Exit Rule fired)
 - Risk level assigned (Low / Moderate / High) with supporting rationale
 - Final recommendation delivered (Proceed / Modify / Abandon) with named alternatives if needed
 
-## Expected Output
-
-```
-SOCIAL: Clear (Twitter, Instagram, GitHub, LinkedIn, TikTok, Discord all available)
-REGISTRY: npm (available) | PyPI (TAKEN — owner: example-org, last publish: 2022-03) | Homebrew (available) | apt (available)
-DOMAIN: .com (active — unrelated industry) | .io (available) | .app (available)
-TM: WIPO (clear) | EUIPO (clear) | INPI (similar mark in class 42 — "Acme Tools SAS", filed 2021)
-RISK: Moderate — PyPI name taken on a target registry; .com parked; minor trademark similarity in France
-RECOMMEND: Modify — use "acme-cli" (npm/PyPI clear, .com available, no TM conflicts)
-```
-
 ## Edge Cases
 
 - **Exact social handle taken on any of the 6 platforms**: Early-Exit Rule (see Subagent Architecture) — skip all remaining checks and return an Abandon recommendation with alternative name suggestions.
-- **Rate-limited registry API**: Retry once after 5 seconds; if still blocked, mark the registry as "unchecked" and note it in the report — do not skip silently.
-- **Trademark database unavailable**: Note the outage per database; downgrade risk only if all three TM sources are inaccessible (warn user).
+- **Rate-limited registry API**: Retry once after 5 seconds; if still blocked, mark the registry as "unchecked"/unknown and note it in the report — do not skip silently. Apply the unknown policy; do not infer availability.
+- **Trademark database unavailable**: Note the outage per database and mark the affected check unknown. Do not downgrade a known High finding; without a known High finding, use provisional Moderate + Modify pending verification.
 - **Name contains special characters or spaces**: Normalize to slug form (e.g., `my tool` → `my-tool`) before all checks; report both the original and normalized forms.
 - **Very short names (1–3 characters)**: Flag high trademark collision risk upfront; abbreviations are almost always claimed across social and TM databases.
 - **Name already in use by a well-known brand (typosquat risk)**: Escalate to High risk even if all technical checks pass.
 
 ## Final Action
 
-- **Proceed**: Confirm safe to use, suggest registration order:
+- **Proceed**: Only for a fully verified Low result; state the evidence and limitations, then suggest registration order:
   1. **Package registries first** — claim names on npm/PyPI/Homebrew immediately, even with a placeholder package. These are first-come-first-served and the most vulnerable to namespace squatting.
   2. **Domain** — register the primary domain.
   3. **Social handles** — secure handles on key platforms.
-- **Modify**: Recommend best variant with explanation
-- **Abandon**: Recommend best alternative from suggestions
+- **Modify**: Recommend a variant addressing confirmed conflicts and list any pending verification. Alternatives not checked are **unverified**, never available by assertion.
+- **Abandon**: Recommend the best alternative from suggestions; mark unchecked alternatives **unverified** and do not claim that any option is clear.
