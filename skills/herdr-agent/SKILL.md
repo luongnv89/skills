@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.1.1
+  version: 3.1.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -152,7 +152,7 @@ python3 "$here/preflight_send.py" "$target" >/dev/null || exit $?
 herdr agent prompt "$target" "$task" --wait --timeout 180000
 ```
 
-The preflight refuses `working` (2), `blocked` (3), unverifiable (4), and no-agent (5) targets. The prompt then submits text plus Enter as one ordered write honoring bracketed paste, refuses a blocked target server-side before writing anything, gates on observed activity, and waits for the first settled state — all in one request. That is why this skill no longer captures a transcript baseline or plants a completion marker: there is no gap between send and wait to race.
+The preflight refuses `working` (2), `blocked` (3), unverifiable (4), and no-agent (5) targets. The prompt then submits text plus Enter as one ordered write honoring bracketed paste, refuses a blocked target server-side before writing anything, gates on observed activity, and waits for the first settled state — all in one request. Submission and waiting are atomic, so no transcript baseline or completion marker is needed: there is no gap between send and wait to race.
 
 Do not add `--until idle --until done`; those are the `--wait` defaults. Use `--until` only for a state-specific wait such as `--until blocked`.
 

@@ -1,7 +1,6 @@
 # Step Completion Reports — per-phase check names
 
-Moved verbatim out of `SKILL.md` to keep the body inside the context budget. The generic
-report format and its `√` / `×` / `—` legend stay in `SKILL.md` under
+The generic report format and its `√` / `×` / `—` legend stay in `SKILL.md` under
 `## Step Completion Reports`; this file holds the phase-specific check names.
 
 Emit one block after each of the seven workflow phases. The `step N of 7` label is fixed —

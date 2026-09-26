@@ -93,7 +93,7 @@ rewrites a commit that may already be pushed or referenced elsewhere).
 
 ## A second run reuses a stale container `--name`
 
-Both modes now pass an explicit `--name`. One-shot defaults to
+Both modes pass an explicit `--name`. One-shot defaults to
 `opencode-sandbox-<project>-<epoch>` (unique per invocation). Interactive must
 do the same. If you reuse a name that is still in use — including a
 **kept** container the user declined to remove — Docker fails: `docker:

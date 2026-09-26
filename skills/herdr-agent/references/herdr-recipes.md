@@ -203,8 +203,7 @@ tab). Results:
   tab, so the new pane's `(1-R) = (N-1)/N` share of it equals `1/N` of the
   whole tab — the equal target. Verified live: from 105/105, splitting the
   rightmost at `--ratio 0.333` (=1/3) gives a new pane of 70 (= 210/3), i.e.
-  the equal target — NOT 35, which is what the earlier inverted `(N-1)/N`
-  value produced. The equalizer then fixes the disturbed inner columns.
+  the equal target. The equalizer then fixes the disturbed inner columns.
 - **`pane resize --pane P --direction D --amount A`** — `A` is a **delta**, a
   fraction of the whole tab area width (`A * area_width` cells), *not* an
   absolute target width. `--direction D` moves the edge on side `D`: a pane
@@ -282,7 +281,7 @@ herdr pane run "$pane" "bash -lc 'tail -f /tmp/app.log'" || { echo "Error: launc
 `herdr agent prompt <target> "<text>"` takes the payload as one argument and
 honors the pane's live bracketed-paste mode, so newlines, code fences, and
 quotes go in as text rather than as a stream of Enter presses. Pass the whole
-task directly; the old type-then-Enter dance is no longer needed.
+task directly.
 
 ```bash
 task=$(cat <<'EOF'
