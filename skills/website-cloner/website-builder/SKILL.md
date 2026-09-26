@@ -4,7 +4,7 @@ description: "Build an approved Vite/React/Tailwind plan, collect assets, verify
 license: MIT
 effort: high
 metadata:
-  version: 1.3.1
+  version: 1.3.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -206,7 +206,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: lts/*
           cache: npm
       - uses: actions/configure-pages@v5
       - run: npm ci
