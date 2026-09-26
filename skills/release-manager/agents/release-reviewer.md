@@ -76,5 +76,5 @@ Rules for status:
 ## Constraints
 - Do NOT modify any files. Only read and report.
 - Do NOT ask the user questions — flag uncertainties as medium-severity issues.
-- Be thorough but practical — flag real problems, not style nitpicks.
+- Flag real problems, not style nitpicks.
 - You have fresh context and no bias from the generation process. Use that independence to catch things the other agents might have rationalized away.

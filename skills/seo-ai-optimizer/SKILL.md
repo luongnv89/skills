@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.3.2
+  version: 1.3.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

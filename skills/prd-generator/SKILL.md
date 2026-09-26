@@ -4,7 +4,7 @@ description: "Generate Product Requirements Documents from `idea.md` and `valida
 license: MIT
 effort: max
 metadata:
-  version: 1.4.2
+  version: 1.4.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -160,7 +160,6 @@ Entered per the Mode selection note above, once Phase 1's backup (`prd.backup.YY
 
 ## Guidelines
 
-- **Thorough**: Cover all sections comprehensively
 - **Realistic**: Base on validate.md feasibility ratings
 - **Specific**: Include concrete metrics and criteria
 - **Actionable**: Every section guides implementation

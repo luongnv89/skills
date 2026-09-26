@@ -515,10 +515,9 @@ Create a summary of all changes:
 
 1. **Preserve code style**: Match the existing code style (indentation, naming, patterns)
 2. **Add comments**: Explain non-obvious additions, especially if SEO-specific
-3. **Don't break things**: If a file is critical, be extra careful with modifications
-4. **Framework versions**: Ensure compatibility with the framework version in use
-5. **Test before moving on**: Each implemented change should be buildable/parseable
-6. **Document changes well**: User will review and may need to understand what changed
+3. **Framework versions**: Ensure compatibility with the framework version in use
+4. **Test before moving on**: Each implemented change should be buildable/parseable
+5. **Document changes well**: User will review and may need to understand what changed
 
 ## Limitations
 
