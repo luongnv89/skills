@@ -4,7 +4,7 @@ description: "Build an improved website clone from a URL via 6-phase gated workf
 license: MIT
 effort: high
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -29,7 +29,7 @@ Do **not** use for single-phase work (use the specific sibling skill directly).
 - Optional: GitHub token if you want Pages deploy automation in Phase 5.
 - User approval at gates (explicit confirmation before Phases 3, 4, 5 advance).
 
-If a prerequisite is missing, stop and report it — do not guess paths or credentials.
+If a prerequisite other than a sibling phase skill is missing, stop and report it — do not guess paths or credentials. A missing sibling skill is not a stop: see Edge Cases (skip the phase, cap the result at `PARTIAL`).
 
 ## Workflow
 
