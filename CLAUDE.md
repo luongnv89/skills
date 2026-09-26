@@ -7,7 +7,7 @@ Project context for Claude when working in this repo. Skill **definitions** live
 - Validate a skill: `python3 ~/.claude/skills/skill-creator/scripts/quick_validate.py skills/<skill-name>`
 - Package a skill: `python3 ~/.claude/skills/skill-creator/scripts/package_skill.py skills/<skill-name>`
 - Scaffold a new skill: `python3 ~/.claude/skills/skill-creator/scripts/init_skill.py <name> --path skills/`
-- Local install dry-run: `bash install.sh` (interactive TUI; never pipe to non-tty without flags)
+- Local install: `bash install.sh` (interactive TUI that installs for real; takes no flags, needs a TTY)
 
 There is **no** `npm`, `pnpm`, `make`, or `pytest` in this repo. Don't invent test commands.
 
