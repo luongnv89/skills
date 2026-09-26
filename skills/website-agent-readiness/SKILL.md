@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -280,7 +280,7 @@ epic #412                    17 sub-issues registered
 |---|---|
 | `localhost`, a private IP, or a password-walled staging host | The scanner cannot reach it. Say so at gate G1, before the call, not after it fails |
 | Several URLs in one request | Confirm which one; this skill scans one site per run |
-| A site with zero failing checks | `triage_scan.py` exits 3 and writes nothing — `/plan-to-issues` rejects a file with no task headings |
+| A site with zero failing checks | `render_plan.py` exits 3 and writes nothing — `/plan-to-issues` rejects a file with no task headings |
 | `isCommerce: false` | P4 commerce tasks are deferred, not filed |
 | Empty `.agent-ready/fixes.md` | The run degrades to the `nextLevel` prompts and the plan header carries a `**Note:**` naming every check left without the scanner's prose |
 | A `neutral` check | Informational only; never becomes a task |

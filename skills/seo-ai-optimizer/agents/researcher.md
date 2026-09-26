@@ -31,13 +31,15 @@ For each category, prepare 2-3 targeted web searches.
 
 ## Phase 2: Execute Web Searches
 
+Before running searches, derive `current_year` from the current calendar date at runtime and set `previous_year` to `current_year - 1`. Substitute those values in the runtime query examples and freshness guidance below; keep historical sample dates in the output schema unchanged.
+
 Perform at least 4 focused web searches covering:
 
 ### Search 1: Latest SEO Best Practices
 
 ```
-Query: "SEO best practices 2026"
-Or: "Google ranking factors 2026"
+Query: "SEO best practices {current_year}"
+Or: "Google ranking factors {current_year}"
 Or: "E-E-A-T signals search engine optimization latest"
 ```
 
@@ -51,9 +53,9 @@ Extract:
 ### Search 2: Modern Meta Tags and Structured Data
 
 ```
-Query: "schema.org JSON-LD best practices 2026"
+Query: "schema.org JSON-LD best practices {current_year}"
 Or: "OpenGraph meta tags implementation guide latest"
-Or: "Twitter cards vs modern social sharing 2026"
+Or: "Twitter cards vs modern social sharing {current_year}"
 ```
 
 Extract:
@@ -66,7 +68,7 @@ Extract:
 
 ```
 Query: "llms.txt specification latest update"
-Or: "GPTBot ClaudeBot robots.txt directives 2026"
+Or: "GPTBot ClaudeBot robots.txt directives {current_year}"
 Or: "AI-plugin.json standard ChatGPT plugin configuration"
 ```
 
@@ -82,7 +84,7 @@ Extract:
 For the detected framework (Next.js, Nuxt, Astro, Hugo, SvelteKit, etc.):
 
 ```
-Query: "[Framework] SEO best practices 2026"
+Query: "[Framework] SEO best practices {current_year}"
 Or: "[Framework] next-seo @nuxtjs/seo configuration guide"
 Or: "[Framework] server-side rendering SEO optimization"
 ```
@@ -97,7 +99,7 @@ Extract:
 ### Search 5 (if time allows): Core Web Vitals and Performance
 
 ```
-Query: "Core Web Vitals 2026 SEO impact"
+Query: "Core Web Vitals {current_year} SEO impact"
 Or: "INP interaction to next paint Google ranking"
 ```
 
@@ -342,7 +344,7 @@ Before producing output:
 ### Research Quality Checklist
 
 - [ ] At least 4 web searches performed and documented
-- [ ] Search dates recorded (should be recent — March 2026 or later)
+- [ ] Search dates recorded (should be recent — within the current or previous calendar year)
 - [ ] Findings synthesized, not just copied from sources
 - [ ] Conflicts between research and audit identified
 - [ ] Framework-specific guidance included
@@ -353,7 +355,7 @@ Before producing output:
 
 ## Important Notes
 
-1. **Use recent sources**: Prefer articles/docs from 2026, fallback to 2025 if 2026 unavailable
+1. **Use recent sources**: Prefer articles/docs from `current_year`, fallback to `previous_year` if `current_year` sources are unavailable
 2. **Multiple sources**: If a finding appears in 2+ independent sources, it's more reliable
 3. **Official sources first**: Prefer Google Search Central, OpenGraph official docs, schema.org, frameworks' official docs
 4. **Date findings**: Record when research was performed and when sources were published

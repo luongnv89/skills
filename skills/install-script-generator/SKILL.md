@@ -4,7 +4,7 @@ description: "Generate cross-platform install scripts for any software or librar
 license: MIT
 effort: high
 metadata:
-  version: 2.2.3
+  version: 2.2.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -119,7 +119,7 @@ See `references/edge-cases.md` for the full list. Highlights:
 
 ## Step Completion Reports
 
-After each phase, emit a `◆` block with `√`/`×` checks and a `Result: PASS | FAIL | PARTIAL` line. The exact templates for the four phases live in `references/edge-cases.md` so you can copy them verbatim without bloating SKILL.md.
+After each phase, emit a `◆` block with `√`/`×` checks and a `Result: PASS | FAIL | PARTIAL` line; the format and per-phase checks are in `references/edge-cases.md`.
 
 ## Expected Output
 
