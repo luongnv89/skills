@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.1.0
+  version: 2.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -35,23 +35,7 @@ Own four things, delegate the rest. Never write an issue body; never invent work
 
 ## Leading terms
 
-One line each; full definitions in `references/glossary.md`.
-
-- **input** — a **plan file** at any path, or **conversational intent** from the user's turns.
-- **task** — one atomic unit of work. One task, one issue.
-- **worklist** — the structured parse of the input; one schema for both inputs.
-- **label set** — `phase:<p>`, one type label, `dim:<d>` per closed dimension, `priority:<p>`.
-- **epic plan map** — the phase-grouped block between `<!-- plan-dashboard:start -->` and
-  `<!-- plan-dashboard:end -->`. **Static**: it names which issue implements which task and asserts
-  no status, so it never goes stale. Only that region is ever rewritten.
-- **source marker** — binds an epic to its input: `<!-- plan-to-issues:plan=<path> -->` on the file
-  path (a fixed format — existing epics are found by it), or
-  `<!-- plan-to-issues:conversation=<slug> -->` on the conversation path.
-- **source-faithful** — every word of every issue traces to the input. Never open source files,
-  never predict affected files, never add analysis the input did not contain.
-- **idempotent re-run** — a task already having an issue under this epic is skipped: automatic on
-  the file path, **operator-supplied** on the conversation path.
-- **verify-by-re-read** — confirm every mutation by reading the object back, never by exit code.
+The terms this skill relies on — **input**, **task**, **worklist**, **label set**, **epic plan map**, **source marker**, **source-faithful**, **idempotent re-run**, **verify-by-re-read** — are defined in `references/glossary.md`; read it once before Phase 0.
 
 ## Prompt Injection Boundary
 

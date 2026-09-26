@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.1.3
+  version: 3.1.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -19,7 +19,7 @@ Use Herdr concepts, not tmux assumptions. Let the server do the work: `herdr age
 
 | Request | Follow |
 |---|---|
-| `help`, or what this does and how to drive it | Help below — answer and stop |
+| `help`, or what this does and how to drive it | Help in `references/help-request.md` — answer and stop |
 | Spawn sub-agents beside root | Phases 1–2, then 4–5 if assigning work |
 | Message an existing agent | Phases 3–5 |
 | Read without sending | Phase 3, then Phase 5 read only |
@@ -41,39 +41,7 @@ Read only the reference needed by that branch:
 
 Resolve this branch **before** Prerequisites. A help request runs no `herdr` command, touches no pane, and changes nothing, because someone asking how this works may not have Herdr installed yet. Take it on `help`, `--help`, `/herdr-agent help`, or any plain question about what the skill does or how to drive it. Answer, then stop: no fleet work, no completion report.
 
-```text
-herdr-agent — build and control an AI-agent fleet in your Herdr tab.
-
-WHAT YOU CAN ASK FOR
-  spawn      "spin up agents named tests and docs beside my pane"
-  message    "ask reviewer to summarize the open PRs"
-  read       "show me what tests said"      (reads only, sends nothing)
-  status     "what is my fleet doing right now?"
-  broadcast  "tell every agent to pull latest main"
-  steer      "focus the docs pane so I can type in it"
-  teardown   "shut the fleet down"          (asks before closing anything)
-  handoff    "keep driving this run when your context fills up"
-  help       this summary
-
-HOW IT BEHAVES
-  Your pane stays the orchestrator and is never closed by accident.
-  Workers land as equal-width columns in that same tab, not new tabs.
-  New agents mirror yours: same harness, model, thinking level and launch
-  flags, unless you name something else. An inherited permission bypass
-  is announced before any agent starts.
-  A prompt aimed at a busy or blocked agent is refused before it is sent.
-  Every send waits for a settled state, and blocked, stalled or timed-out
-  agents are reported rather than silently retried.
-  Closing panes, tabs, workspaces or the server needs your approval.
-
-WHAT IT NEEDS
-  herdr 0.9.0 or later on PATH, a running server (`herdr status`), and this
-  session inside a Herdr pane (HERDR_ENV=1). Default same-kind launches need
-  the server's `pane process-info` API to return full argv.
-  Not for tmux or GNU screen — use tmux-agent-comms there.
-```
-
-For a narrower question such as how to broadcast, answer from that one phase instead of printing the whole block, and name the phase so the user can ask for it again by name.
+The full help text is in `references/help-request.md`. For a narrower question such as how to broadcast, answer from that one phase instead of printing the whole block, and name the phase so the user can ask for it again by name.
 
 **Done when:** the user has the summary or their specific answer, and no `herdr` command ran.
 

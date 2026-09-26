@@ -4,7 +4,7 @@ description: "Audit a stale, inherited, or messy codebase — deps, bugs, securi
 license: MIT
 effort: max
 metadata:
-  version: 1.3.1
+  version: 1.3.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -326,17 +326,11 @@ Source files changed: 0
 
 ## Edge Cases
 
-Two that change how the run is invoked or protect existing work. A user asking mid-run to apply
+Two cases change how the run is invoked or protect existing work — **monorepo** layouts and
+**existing report files**; both live in `references/edge-cases.md`. A user asking mid-run to apply
 fixes is handled by the Read-only contract above. Every other case — not a git repo, no manifest,
 no network, baseline RED, a huge repo, a narrowed dimension filter — is in
 `references/edge-cases.md`, read when it arises.
-
-- **Monorepo** — `scripts/dep_scan.sh` probes the repo root only; **re-run it once per package
-  directory** and merge the results, one ecosystem row and `id_start` block per package. Never accept
-  "Ecosystems detected: none" while nested manifests exist. Scope other dimensions to the packages
-  the user names, or all of them if unspecified.
-- **Existing report files** — back them up as `MODERNIZATION_REPORT_backup_YYYY_MM_DD_HHMMSS.md`
-  before overwriting.
 
 ## Reference files
 

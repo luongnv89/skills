@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Node.js 20+ (runs via npx, no install). Optional FIRECRAWL_API_KEY raises hosted-OCR limits."
 effort: low
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: "Firecrawl — mirrored by Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -19,6 +19,18 @@ Use this skill when a file's contents are locked in a binary or office format yo
 
 - Node.js 20+ on `PATH` — anydoc runs through `npx`, no install.
 - Optional: `FIRECRAWL_API_KEY` for higher limits on the hosted OCR path (rule 5).
+
+## Repo Sync Before Edits (mandatory)
+
+When `-o <path>` writes the Markdown output inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section when writing to stdout or to a path outside any git repository.
 
 ## Instructions
 

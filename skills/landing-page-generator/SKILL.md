@@ -4,7 +4,7 @@ description: "Generate landing pages with PAS, AIDA, or StoryBrand from a produc
 license: MIT
 effort: high
 metadata:
-  version: 1.2.2
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -44,6 +44,18 @@ Before writing, confirm the user supplied enough detail to make specific claims:
 
 If proof is missing, write placeholders clearly labeled `[proof needed]`; never invent customers,
 metrics, guarantees, scarcity, or compliance claims.
+
+## Repo Sync Before Edits (mandatory)
+
+Mode B rewrites `README.md` inside the repo. Sync before that write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section for Mode A, which emits copy in chat and writes nothing.
 
 ## Workflow (Mode A — Landing copy)
 
