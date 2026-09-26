@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -246,7 +246,8 @@ If the current working directory looks like the root of an `ideas` repo (contain
 After file updates are complete:
 - Commit immediately with a clear message.
 - Push immediately to remote.
-- If push is rejected: `git fetch origin && git rebase origin/main && git push`.
+- If push is rejected, rebase onto the current branch's upstream and retry: `branch="$(git rev-parse --abbrev-ref HEAD)" && git fetch origin && git rebase "origin/$branch" && git push`.
+- If the push still fails after the retry (`origin` missing, rebase conflict, repeated rejection), stop and ask the user before continuing — the same guard as Repo Sync above.
 
 Do not ask for additional push permission once this skill is invoked.
 
