@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.0.5
+  version: 2.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -76,12 +76,35 @@ any issue is filed — a half-created backlog is worse than one not started.
 | `git` + a GitHub remote | tool | the tracker is resolved from `origin` |
 | `gh`, ready | tool | the only tracker driver — "ready" means the intended account, `repo` scope, write access, issues enabled, an unambiguous target repo, and API budget |
 | `python3` | tool | runs `scripts/render_dashboard.py` |
-| **`issue-creator`** skill | **skill** | writes every issue body; no fallback path. Install: `asm install issue-creator` (and `npm install -g agent-skill-manager` if `asm` is missing); verify with `asm list \| grep issue-creator` |
+| **`issue-creator`** skill | **skill** | writes every issue body; no fallback path. Install: `asm install https://github.com/luongnv89/idd --skill skills/issue-creator -p claude --yes` (and `npm install -g agent-skill-manager` if `asm` is missing); verify with `asm list -p claude \| grep issue-creator` |
 | `codebase-modernizer` skill | skill, optional | one way to produce a plan file; never required — the conversation path needs no file |
 | this skill's `references/`, `agents/`, `scripts/` | bundled | a truncated install fails mid-run |
 
 `gh` gets six readiness probes rather than one `command -v`, because every way it can be
 half-configured fails *after* issues start landing.
+
+## Dependency Preflight (mandatory)
+
+The one hard skill dependency is `issue-creator` — this skill hands it every issue body and has no
+fallback (table above). Detect it **before** the repo sync below, the first step that changes
+anything:
+
+```bash
+ls "$HOME/.claude/skills/issue-creator/SKILL.md" 2>/dev/null \
+  || ls ".claude/skills/issue-creator/SKILL.md" 2>/dev/null \
+  || ls "$HOME"/.claude/plugins/*/skills/issue-creator/SKILL.md 2>/dev/null \
+  || ls "$HOME/.agents/skills/issue-creator/SKILL.md" 2>/dev/null \
+  || asm list -p claude --json | grep -q '"issue-creator"' || {
+  echo "Missing required skill: issue-creator" >&2
+  echo "Install it:      asm install https://github.com/luongnv89/idd --skill skills/issue-creator -p claude --yes" >&2
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  echo "Verify:          asm list -p claude --json | grep 'issue-creator'" >&2
+  exit 1
+}
+```
+
+Filesystem detection leads because `issue-creator` may be installed without `asm` tracking it —
+the same check Phase 0 re-runs via `references/preflight.md`.
 
 ## Repo Sync Before Edits (mandatory)
 

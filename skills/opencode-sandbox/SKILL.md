@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker (Desktop or Engine) on PATH and running. Interactive mode additionally needs `cdev` (auto-installable from luongnv89/docker-dev) plus a pane-management skill (herdr-agent or tmux-agent-comms)."
 effort: medium
 metadata:
-  version: 3.0.3
+  version: 3.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -34,6 +34,48 @@ can attach a shell. Do not remove it unless they confirm (or they asked for
 - The task must **not** touch GitHub — pass `--no-ssh --no-github` and review
   the host diff; push stays a separate step
 
+## Dependency Preflight (mandatory)
+
+Interactive mode delegates pane mechanics to **herdr-agent** or **tmux-agent-comms** — either one
+satisfies it (`references/interactive-mode.md` uses it for every pane spawn, send, and wait).
+One-shot mode invokes no other skill. The check runs the moment interactive mode is selected, in
+"Choose a mode" below — before the repo sync and every other side effect — and stops the run if
+neither is installed.
+
+## Choose a mode
+
+| Mode | Use when | Go to |
+|---|---|---|
+| **One-shot** (default) | Single task, no need to watch it work | "One-shot mode" below |
+| **Interactive** | User wants to watch live or steer mid-task | `references/interactive-mode.md` |
+
+Default to one-shot — it needs no pane-management skill, has no TUI-timing
+gotchas, and its completion signal is a plain process exit code. Reach for
+interactive mode only when the task genuinely needs a human in the loop
+mid-run.
+
+**Interactive mode selected → pane-skill check.** Run it before continuing; one-shot mode prints
+nothing and skips it entirely:
+
+```bash
+pane=""
+for s in herdr-agent tmux-agent-comms; do
+  asm list -p claude --json | grep -q "\"$s\"" && { pane=$s; break; }
+done
+if [ -z "$pane" ]; then
+  for s in herdr-agent tmux-agent-comms; do
+    echo "Missing required skill: $s (either one satisfies interactive mode)" >&2
+    echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
+    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
+  done
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  exit 1
+fi
+```
+
+Missing → print the block and **stop before any side effect**. Never fall back to one-shot
+silently — the user may re-request it explicitly.
+
 ## Repo Sync Before Edits (mandatory)
 
 The container only sees whatever is on disk at `docker run` time — sync the
@@ -49,18 +91,6 @@ rebase conflicts, stop and ask the user before continuing.
 
 Skip this step when the task is **read-only inspect** (list files, summarize)
 and will not write the tree. Always sync when the container will edit files.
-
-## Choose a mode
-
-| Mode | Use when | Go to |
-|---|---|---|
-| **One-shot** (default) | Single task, no need to watch it work | "One-shot mode" below |
-| **Interactive** | User wants to watch live or steer mid-task | `references/interactive-mode.md` |
-
-Default to one-shot — it needs no pane-management skill, has no TUI-timing
-gotchas, and its completion signal is a plain process exit code. Reach for
-interactive mode only when the task genuinely needs a human in the loop
-mid-run.
 
 ## One-shot mode
 

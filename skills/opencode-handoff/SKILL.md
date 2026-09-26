@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires Docker on PATH and running, plus the opencode-sandbox skill at v2.1.0 or newer. The tmux panel additionally needs `tmux`; without it the skill prints the attach command instead."
 effort: medium
 metadata:
-  version: 1.0.5
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -39,6 +39,28 @@ This skill **composes** two others rather than reimplementing them:
 Do **not** use it to run a one-shot task in a container (that is
 `opencode-sandbox`), to call opencode.ai's hosted models (`opencode-runner`), or
 to manage Herdr panes (`herdr-agent`).
+
+## Dependency Preflight (mandatory)
+
+This skill executes the sibling `opencode-sandbox` skill's `run_opencode.sh` — container lifecycle,
+mounts, and credentials are owned by that skill (composition table above). Verify it is installed
+**before** the repo sync below, the first step that changes anything:
+
+```bash
+asm list -p claude --json | grep -q '"opencode-sandbox"' || {
+  echo "Missing required skill: opencode-sandbox (v2.1.0 or newer)" >&2
+  echo "Install it:      asm install github:luongnv89/skills:skills/opencode-sandbox -p claude --yes" >&2
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+  echo "Verify:          asm list -p claude --json | grep 'opencode-sandbox'" >&2
+  exit 1
+}
+```
+
+`handoff.sh` then verifies the resolved script supports `--no-opencode-config` and `--with-agents` —
+that check enforces the v2.1.0 floor from `compatibility` and fails closed on an older install.
+`tmux-agent-comms` is cited for its pane rules only: `handoff.sh` creates the tmux session itself,
+so this skill never invokes it and it needs no preflight. `-p claude` is required on install and
+verify — `asm install` does not guess a provider non-interactively.
 
 ## Repo Sync Before Edits (mandatory)
 

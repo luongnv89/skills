@@ -177,7 +177,7 @@ back to the user after they install something.
 
 | Skill | Required | Source repo | Install |
 |---|---|---|---|
-| `issue-creator` | **yes** | `luongnv89/idd` | `asm install https://github.com/luongnv89/idd --skill issue-creator` |
+| `issue-creator` | **yes** | `luongnv89/idd` | `asm install https://github.com/luongnv89/idd --skill skills/issue-creator` |
 | `codebase-modernizer` | only when no plan exists yet | `luongnv89/skills` | `asm install github:luongnv89/skills:skills/codebase-modernizer` |
 
 ## Failure blocks
@@ -199,7 +199,7 @@ install line **and** the line that installs `asm` itself — assume the user has
 
   2. Install the skill:
 
-       asm install https://github.com/luongnv89/idd --skill issue-creator
+       asm install https://github.com/luongnv89/idd --skill skills/issue-creator
 
      No asm, one-off:  npx skills add https://github.com/luongnv89/idd --skill issue-creator
 

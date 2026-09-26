@@ -4,7 +4,7 @@ description: "Audit a stale, inherited, or messy codebase — deps, bugs, securi
 license: MIT
 effort: max
 metadata:
-  version: 1.3.0
+  version: 1.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -45,14 +45,22 @@ both enumerated in the report's Artifacts section: a **declared delegate artifac
 ## Dependency Preflight (mandatory)
 
 This skill **invokes** two other skills during the audit: `code-review` (modes `review` and `perf`)
-and `dont-make-me-think` (`UX`). Resolve both **before Phase 0**, the first phase that probes
-anything:
+and `dont-make-me-think` (`UX`). Detect both **before Phase 0**, the first phase that probes
+anything, and report every missing one in a single pass — never install from a preflight:
 
 ```bash
-npm install -g agent-skill-manager                                     # only if `asm` is missing
-asm install code-review -p claude --yes
-asm install dont-make-me-think -p claude --yes
-asm list -p claude --json | grep -E 'code-review|dont-make-me-think'   # verify
+missing=""
+for s in code-review dont-make-me-think; do
+  asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
+done
+if [ -n "$missing" ]; then
+  for s in $missing; do
+    echo "Missing required skill: $s" >&2
+    echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
+    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
+  done
+  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+fi
 ```
 
 `-p claude` is not decoration: `asm install` refuses to guess a provider non-interactively, `--yes`
@@ -60,8 +68,9 @@ does not cover that choice, and naming the same provider in the verification sto
 a different tool from reporting success.
 
 A dependency that stays missing is **fail-soft**, not fatal: record that dimension **Not Assessed —
-skill unavailable**, continue, and name it in Limitations. The six *inline* dimensions below name
-their skill in a plan task and never invoke it, so they need no preflight.
+skill unavailable** — `BUG` and `PERF` when `code-review` is missing, `UX` when
+`dont-make-me-think` is — continue, and name it in Limitations. The six *inline* dimensions below
+name their skill in a plan task and never invoke it, so they need no preflight.
 
 ## Leading terms
 
