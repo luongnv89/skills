@@ -9,32 +9,23 @@ Use this skill when the user asks for a code review, PR review, audit, security 
 
 ## Quick Start
 
-First, run the Repo Sync workflow below. Then complete the Environment Check to pick a mode (PR/diff vs full audit). Next, follow the Instructions phases (checklist scan -> findings synthesis -> validation). Finally, emit the Output Format report and verify Acceptance Criteria.
+First, record `git rev-parse HEAD`, `git status`, and local tracking observations without
+claiming remote freshness. Review analysis is source-read-only: do not fetch, stash, pull, rebase,
+checkout/switch, create or delete branches/worktrees, or mutate the index, refs, stash, branch,
+or any other worktree path. The only permitted file write is the named `CODE_REVIEW.md` report
+artifact. Then complete the Environment Check to pick a mode (PR/diff vs full audit). Next, follow
+the Instructions phases (checklist scan -> findings synthesis -> validation). Finally, emit the
+Output Format report and verify Acceptance Criteria.
 
 ## Overview
 
 The skill orchestrates parallel reviewer subagents over batched files, then runs a validator pass. Each phase has explicit steps below. Read only the section you need; the rest is reference material.
 
-## Repo Sync Before Edits (mandatory)
+## Analysis Boundary (mandatory)
 
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
-
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
-
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+Review mode never performs repository sync or source mutation during analysis. If a separately
+approved mutation is requested, hand it off to a workflow with its own freshness check and
+stash-first sync contract; this mode does not apply fixes.
 
 ## Environment Check
 

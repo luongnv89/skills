@@ -11,35 +11,25 @@ Analyze code for performance issues following this priority order:
 4. **Caching opportunities** - repeated computations, redundant I/O, memoization candidates
 5. **Concurrency issues** - race conditions, deadlocks, thread safety problems
 
-## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+## Analysis Boundary (mandatory)
 
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
+Performance analysis is source-read-only. Record `git rev-parse HEAD`, `git status`, and local
+tracking observations without claiming remote freshness. Do not fetch, stash, pull, rebase,
+checkout/switch, create or delete branches/worktrees, or mutate the index, refs, stash, branch,
+or worktree during analysis. A named report artifact may be written only when this mode's output
+contract specifies one; otherwise findings are report output, not source files.
 
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+Any source mutation is a separate, explicitly approved workflow. It must establish its own
+freshness check and stash-first sync contract before edits; this mode never performs that work.
 
 ## Workflow
 
 ### Prerequisites
 
-Before making any changes:
-1. Check the current branch - if already on a feature branch for this task, skip
-2. Check the repo for branch naming conventions (e.g., `feat/`, `feature/`, etc.)
-3. Create and switch to a new branch following the repo's convention, or fallback to: `feat/optimize-<target>`
-   - Example: `feat/optimize-api-handlers`
+Before analysis:
+1. Record the current `HEAD`, status, and local tracking observations without claiming remote freshness.
+2. Confirm the target code, language, runtime context, and review scope.
+3. Do not create or switch branches/worktrees; mutation belongs to the handoff below.
 
 ### 1. Analysis
 
@@ -49,12 +39,14 @@ Before making any changes:
 4. For each issue found, estimate the performance impact (e.g., "reduces API response from ~500ms to ~50ms")
 5. Report findings sorted by severity (Critical first)
 
-### 2. Apply Fixes
+### 2. Mutation Handoff (separate, explicit approval)
 
-1. Present the optimization report to the user
-2. On approval, apply fixes starting with Critical/High severity
-3. Run existing tests after each change to verify no regressions
-4. If no tests exist, warn the user before applying changes
+This mode stops after presenting the optimization report; it never applies fixes or creates or
+switches branches. If the user separately approves a mutation workflow, that workflow must
+re-check `HEAD`, status, and local tracking observations, detect incoming changes, and use its
+stash-first sync contract before edits. It owns branch creation, source changes, per-fix tests,
+security scans, and rollback. No mutation step may be inferred from this report or run as part of
+performance analysis.
 
 ## Response Format
 
@@ -93,11 +85,11 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Prerequisites** — checks: `Branch setup`, `Naming convention detected`, `Feature branch created`
+**Phase: Prerequisites** — checks: `Scope recorded`, `Tracking observation recorded`, `No mutation started`
 
 **Phase: Analysis** — checks: `Issue detection`, `Priority categories covered`, `Impact estimated`, `Findings sorted by severity`
 
-**Phase: Apply Fixes** — checks: `Fix application`, `User approval obtained`, `Existing tests run`, `No regressions introduced`, `Critical issues resolved`, `Warnings documented`
+**Phase: Mutation Handoff** — checks: `Fix application deferred`, `User approval required`, `Freshness and stash-first contract`, `Existing tests required`, `No regressions requirement`, `Warnings documented`
 
 ## Severity Levels
 
@@ -117,9 +109,10 @@ A run is acceptable only when all of the following are verifiable:
 - Produces an optimization report grouped by severity (Critical, High, Medium, Low) — assert at least one severity bucket appears or the "no issues found" branch fires.
 - Each reported issue includes `Location`, `Category`, `Problem`, `Impact`, and `Fix` — verify by checking the rendered template fields are non-empty.
 - Impact statement includes a quantitative estimate (e.g., "~500ms → ~50ms", "O(n²) → O(n log n)") — assert the Impact line contains a number, complexity class, or before/after pair.
-- Fixes are applied only after explicit user approval — verify the agent emits an approval prompt before any `Edit`/`Write` tool call.
-- Existing tests run after each applied fix and the result is reported — verify a test command was executed and its pass/fail status is logged.
-- A feature branch following the repo convention is checked out before edits — verify with `git rev-parse --abbrev-ref HEAD` matching `feat/*` or repo equivalent.
+- This mode applies no fixes; any separately approved mutation handoff requires explicit user approval before edits.
+- A separately approved mutation workflow runs existing tests after each applied fix and reports the result; if no tests exist, it warns before applying changes.
+- A separately approved mutation workflow checks out a feature branch following the repo convention before edits; this mode does not create or switch branches.
+- The mutation handoff carries a fresh HEAD/status/tracking check and a stash-first sync contract.
 - Each phase emits a Step Completion Report block with `Result: PASS | FAIL | PARTIAL` — assert the block is present in the transcript.
 
 ## Expected Output
@@ -158,8 +151,8 @@ Expected result: a markdown report with one block per issue, sorted Critical →
 
 - **No performance issues found**: emit a "code is already well-optimized" note and recommend runtime profiling tools (`perf`, `py-spy`, Chrome DevTools) — do NOT invent low-severity findings to fill the report.
 - **File exceeds 2000 lines**: stop and ask the user which functions/sections to focus on; do not silently truncate.
-- **Tests are absent**: warn the user before applying any fix and require explicit confirmation; never apply changes silently.
-- **Optimization regresses tests**: revert the specific change immediately via `git checkout -- <file>` after `git diff` confirms the scope and the user confirms the revert; never force-push, and back up the diff with `git stash` before discarding so work is recoverable.
-- **Repo lacks `origin` or rebase fails**: stop and ask the user to confirm before any recovery; run `git status` and `git stash --dry-run`-style inspection first, take a backup branch (`git branch backup/pre-recovery`), and never run destructive `reset --hard` or `rm` without explicit confirmation.
+- **Tests are absent**: the mutation handoff warns before applying any fix and requires explicit confirmation; this analysis mode never applies changes silently.
+- **Optimization regresses tests**: the separately approved mutation workflow confirms the diff scope, preserves work through its stash-first recovery contract, and requires approval before reverting; this mode never runs checkout, stash, or discard operations.
+- **Repo lacks `origin` or sync fails**: the mutation workflow stops before edits and reports the recovery path; performance analysis records its local observations and does not attempt recovery.
 - **Mixed-language project**: analyze each language with its own checklist; do not apply JavaScript heuristics to Python code.
 - **Premature optimization candidates**: skip micro-optimizations unless a measurable hot path is identified — flag them as Low only when a profile or benchmark backs the claim.
