@@ -16,8 +16,8 @@ The full definitions of the terms SKILL.md uses. Read once before Phase 0.
   issue implements which task and asserts no issue status, so it never goes stale as work proceeds.
   Only the region between the sentinels is ever rewritten.
 - **source marker** — the comment binding an epic to its input:
-  `<!-- plan-to-issues:plan=<path> -->` on the file path (unchanged from 1.x, so epics created by
-  earlier versions keep resolving), or `<!-- plan-to-issues:conversation=<slug> -->` on the
+  `<!-- plan-to-issues:plan=<path> -->` on the file path (a fixed format — existing epics are found
+  by it), or `<!-- plan-to-issues:conversation=<slug> -->` on the
   conversation path. An epic carries exactly one kind, never both.
 - **source-faithful** — every word of every issue traces to the input text. Never open source files,
   never predict affected files, never add analysis the input did not contain.

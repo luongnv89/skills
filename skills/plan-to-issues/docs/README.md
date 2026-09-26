@@ -22,32 +22,38 @@ It writes to your issue tracker, not to your code. No source file is modified.
 
 | Artifact | Contents |
 |---|---|
-| **One epic issue** | Whole-effort acceptance criteria (the plan's milestones) plus a live dashboard: every child issue grouped by phase, per-phase progress bars, milestone status, critical path, and what's actionable right now |
+| **One epic issue** | Whole-effort acceptance criteria (the plan's milestones) plus a static plan map: every child issue grouped by phase, with goals, milestones, and critical path. Live open/closed status comes from the epic's registered sub-issues, not the body |
 | **One issue per task** | Written by `/issue-creator` — normalized template, acceptance criteria, the plan text preserved verbatim as reporter context — bound to the epic with `Part of #N` |
 | **A label scheme** | `phase:p0`, `dim:dep`, `priority:high`, `bug`/`improvement`/`feature` — derived by rule from the plan, so you can filter the backlog by phase, dimension, or urgency |
 
 ## The dashboard
 
-The epic body renders like this, and `sync` refreshes it from live issue states:
+The epic body renders a static plan map like this. The epic's registered sub-issues provide live
+open/closed status; `sync` only updates the map when the issue set or plan changes:
 
 ```markdown
-## Implementation Dashboard
+<!-- plan-dashboard:start -->
+## Plan
 
-**Progress:** 12/50 closed ██░░░░░░░░ 24% · **Last synced:** 2026-08-26
+**Plan:** `MODERNIZATION_PLAN.md` · **Baseline at audit:** AMBER — builds; 41/58 tests pass
 
-| Phase | Progress | Milestone | Status |
-|---|---|---|---|
-| Pre Agent environment | 3/3 ██████████ 100% | ME — CLAUDE.md and AGENTS.md exist | ✅ met |
-| P0 Stabilize | 4/6 ███████░░░ 67% | M0 — baseline-green reproducible in CI | ◐ in progress |
-| P1 Secure & Patch | 0/11 ░░░░░░░░░░ 0% | M1 — zero High/Critical advisories | ○ not started |
+Open/closed status is live in the **Sub-issues** panel above — this map is static and is rewritten only when issues are filed.
 
-### P0 — Stabilize · 4/6 ███████░░░ 67%
+| Phase | Milestone | Tasks |
+|---|---|---|
+| Pre Agent environment | ME — CLAUDE.md and AGENTS.md exist | 3 |
+| P0 Stabilize | M0 — baseline-green reproducible in CI | 6 |
+| P1 Secure & Patch | M1 — zero High/Critical advisories | 11 |
 
-- [x] #104 — 0.1 Commit the lockfile and restore the build
-- [ ] #108 — 0.5 Add the CI workflow  ·  depends on #104, #107
+### P0 — Stabilize
 
-**Critical path:** #101 ✅ → #102 ✅ → #104 ✅ → #118 ○
-**Next actionable** — open, every dependency closed: #105, #106, #107
+**Goal:** build green, tests runnable, CI running · **Milestone M0:** build green; test suite runs
+
+- #104 — 0.1 Commit the lockfile and restore the build
+- #108 — 0.5 Add the CI workflow · depends on #104, #107
+
+**Critical path:** #101 → #102 → #104 → #118
+<!-- plan-dashboard:end -->
 ```
 
 ## Usage
@@ -57,7 +63,7 @@ The epic body renders like this, and `sync` refreshes it from live issue states:
 /plan-to-issues docs/PLAN.md           # explicit plan path
 /plan-to-issues --dry-run              # preview the issue table and dashboard, create nothing
 /plan-to-issues --phase P0,P1          # file only these phases (others show as "not filed")
-/plan-to-issues sync 100               # refresh epic #100's dashboard from live issue states
+/plan-to-issues sync 100               # re-render epic #100's map when issues or the plan change
 ```
 
 Typical flow:
@@ -66,7 +72,7 @@ Typical flow:
 /codebase-modernizer   →  MODERNIZATION_REPORT.md + MODERNIZATION_PLAN.md
 /plan-to-issues        →  epic #100 + 50 labelled issues
 /issue-resolver 104    →  atomic PR closing #104
-/plan-to-issues sync 100  →  dashboard shows P0 at 5/6
+/plan-to-issues sync 100  →  static map includes newly filed tasks
 ```
 
 ## Requirements

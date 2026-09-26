@@ -18,7 +18,7 @@ else lives here. Read this when a run hits something unusual.
   one first; this skill never orphans children by silently re-parenting.
 - **Deferred findings** — the plan's Deferred table is rendered in the dashboard as a table. Deferred
   work is a decision, not a backlog item: no issues are filed for it.
-- **Plan file deleted before a sync** — sync still refreshes states from the tracker and notes
+- **Plan file deleted before a sync** — sync still compares the epic's registered children and notes
   `plan file not found — unmapped-task check skipped`.
 - **Non-GitHub remote** — stop at Phase 0. `gh` is the only supported tracker driver.
 - **Issues disabled, or the repo archived** — stop at preflight probe G4. There is nothing to file into,

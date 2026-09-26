@@ -168,8 +168,8 @@ the body was hand-edited; **stop**.
 
 ## Conversation-sourced epics (source kind `conversation`)
 
-Everything above governs `source.kind == "file"` and is unchanged. When Phase 0 resolved
-conversational intent instead, the same five steps run with these deltas.
+Everything above governs `source.kind == "file"`. When Phase 0 resolved conversational intent
+instead, the same five steps run with these deltas.
 
 **Step 0 — normalize.** There is no path to normalize.
 

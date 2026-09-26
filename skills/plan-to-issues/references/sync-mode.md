@@ -3,7 +3,7 @@
 The full procedure behind SKILL.md's *Sync mode* summary. Read this when running
 `/plan-to-issues sync <epic#>`.
 
-**Sync is no longer part of the working loop.** The map carries no issue state, so nothing in it
+**Sync is not part of the working loop.** The map carries no issue state, so nothing in it
 goes stale as work proceeds — open/closed lives in the epic's **sub-issues panel**, which GitHub
 maintains. Run sync only when the *set* of issues or the *plan* changes: more tasks filed, a task
 added to the plan, a child re-parented. Running it after an issue merely closes is a no-op that
@@ -36,10 +36,10 @@ gh groups only).
    outside the sentinels and is preserved byte-for-byte like the rest of the body.
 
 **Completion criteria:** every issue registered as a sub-issue of the epic appears exactly once in
-the new map under its own phase; every plan task with no issue renders `(not filed)`; the rendered
-date is updated; and the region outside the sentinels — the plan-binding marker included — is
-unchanged. No status, count or percentage is asserted anywhere in the block, so there is nothing for
-a later issue close to falsify.
+the new map under its own phase; every plan task with no issue renders `(not filed)`; the footer
+uses the caller-supplied render date; and the region outside the sentinels — the plan-binding marker included — is unchanged. Static plan-derived task
+counts are allowed, but no issue-state-derived status, count, or percentage is asserted anywhere in
+the block, so there is nothing for a later issue close to falsify.
 
 
 
@@ -48,7 +48,7 @@ a later issue close to falsify.
 ## Conversation-sourced epics
 
 Sync is **source-agnostic**: it re-renders the map of an existing epic and never resolves an input,
-so an epic bound with `<!-- plan-to-issues:conversation=<slug> -->` syncs by the same six steps as
+so an epic bound with `<!-- plan-to-issues:conversation=<slug> -->` syncs by the same five steps as
 one bound with `<!-- plan-to-issues:plan=<path> -->`. Two deltas:
 
 **Step 2 — identify the source.** Read the epic body and branch on which marker it carries. An epic

@@ -1,7 +1,8 @@
 # The epic plan map
 
-The epic body is the deliverable people read. It answers "how far along is the plan, and what can be
-started now?" without opening the plan. Read this in Phase 5 and in Sync mode.
+The epic body is the deliverable people read. It maps each plan task to its child issue without
+asserting tracker state; live open/closed status comes from GitHub's registered sub-issues. Read this
+in Phase 5 and in Sync mode.
 
 ## Sentinels
 
@@ -94,12 +95,11 @@ Open/closed status is live in the **Sub-issues** panel above — this map is sta
 - **Task-line grammar is fixed:** `- #<n> — <task-id> <title>`, em-dash `—` between number and
   task id. Sync parses it back; a hyphen there breaks the parse.
 - **Nothing in the block may depend on issue state.** No checkbox, no progress bar, no percentage,
-  no milestone verdict, no "next actionable". Every one of those is a claim that goes stale the
-  moment an issue closes, and re-truing them is the only reason the old design needed a `sync` after
-  each close. A checkbox cannot delegate the job either: GitHub does **not** auto-check a task-list
-  box from the referenced issue's state — a closed issue referenced from another body still renders
-  `aria-label="Incomplete task"`. Live status is the **sub-issues panel's** job (SKILL.md Phase 4
-  registers every child), and it needs no help from this block.
+  no milestone verdict, no "next actionable". These are tracker claims, not plan assertions, and do
+  not belong in the map. A checkbox cannot delegate the job either: GitHub does **not** auto-check a
+  task-list box from the referenced issue's state — a closed issue referenced from another body still
+  renders `aria-label="Incomplete task"`. Live status is the **sub-issues panel's** job (SKILL.md
+  Phase 4 registers every child), and it needs no help from this block.
 - **What may live here is what the *plan* asserts,** not what the tracker reports: phase order,
   goals, milestone exit conditions, which issue implements which task, declared dependencies, the
   critical-path ordering, and the deferred table. A per-phase task **count** is fine — it changes
@@ -148,11 +148,16 @@ output stays reproducible.
 
 ## Sync algorithm
 
+The command block below expands the five logical steps in `references/sync-mode.md` into seven shell
+operations, including a final verify-by-re-read. The sentinel probes remain exact and anchored as
+shown; they are not a second step count.
+
 ```bash
 gh issue view <epic> --json body --jq '.body' > epic-body.md          # 1. fetch
 grep -cFx '<!-- plan-dashboard:start -->' epic-body.md                # 2. gate: must be 1
 grep -oE '^- #[0-9]+ — [A-Za-z0-9.]+' epic-body.md                   # 3. children + task ids
-gh issue list --state all --limit 500 --json number,state,title       # 4. live states, one call
+repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+gh api "repos/$repo/issues/<epic>/sub_issues" --jq '.[].number'     # 4. registered children; no state fetch
 python3 scripts/render_dashboard.py < dashboard-input.json            # 5. re-render
 gh issue edit <epic> --body-file epic-body-updated.md                 # 6. write back
 gh issue view <epic> --json body --jq '.body' \

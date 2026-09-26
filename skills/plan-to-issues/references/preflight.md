@@ -289,8 +289,8 @@ not a degrade, not a fall-through to re-drafting, and not `sync`.
 **The file-kind check resolves the plan to a single file inside the repo: passing it means `[ -f "$plan" ]`
 holds *and* that `references/epic-identity.md` step 0 will accept the path.**
 A `tasks/` directory hit is resolved here — `tasks/tasks.md`, else the single `*.md` inside it, else
-list them and ask which (SKILL.md → *Mode selection* → *Plan discovery*). Resolve it in Phase 0, not
-later: `references/epic-identity.md` step 0 refuses anything that is not one file, and by Phase 3
+list them and ask which (`references/input-resolution.md` → *Plan discovery candidates*).
+Resolve it in Phase 0, not later: `references/epic-identity.md` step 0 refuses anything that is not one file, and by Phase 3
 this run has already created labels. A directory that resolves to nothing, or to several files the
 user will not choose between, is a `×` on the **input** group — the same failure as no plan at all:
 

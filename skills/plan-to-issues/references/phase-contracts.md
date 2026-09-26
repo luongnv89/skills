@@ -1,6 +1,6 @@
 # Phase Contracts (detail)
 
-The full prose for Phases 0–5, moved out of SKILL.md to keep it within the context budget.
+The full prose for Phases 0–6, moved out of SKILL.md to keep it within the context budget.
 SKILL.md carries the contract in condensed form and points here; nothing below is optional.
 
 ## Phase 0 — Preflight (gate)
@@ -108,9 +108,9 @@ and its body holds exactly one source marker for this input and one sentinel pai
 
 ## Phase 4 — File the issues, one batch per phase
 
-Format and invocation: `references/issue-creator-bridge.md`; full rationale:
-`references/phase-contracts.md`. One `/issue-creator … --parent <epic>` call **per phase** — batches
-of 5–15 keep rate limits, progress, and resumption at phase granularity. Non-negotiables:
+Format and invocation: `references/issue-creator-bridge.md`. One `/issue-creator … --parent <epic>`
+call **per phase** — batches of 5–15 keep rate limits, progress, and resumption at phase granularity.
+Non-negotiables:
 
 - Titles are `<task-id>: <imperative title>` — the prefix is how issues map back to tasks.
 - The task block is passed **verbatim**, so `/issue-creator` keeps it in Reporter Context. This
