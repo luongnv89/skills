@@ -4,7 +4,7 @@ description: "Sync a GitHub fork with upstream while keeping unmerged feature br
 license: MIT
 effort: medium
 metadata:
-  version: 1.3.3
+  version: 1.3.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -34,7 +34,7 @@ Pick one path per user request:
 
 Paths B then C is the usual full sync (PR mergeable, fork `main` carries your WIP).
 
-## Repo sync before edits (mandatory)
+## Repo Sync Before Edits (mandatory)
 
 Before any rebase, reset, or force push:
 
