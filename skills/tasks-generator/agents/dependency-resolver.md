@@ -70,6 +70,11 @@ Examine all `depends_on` references:
   cross-sprint dependency and preserve the exact canonical IDs
 - Verify that every such reference resolves to an emitted prior-sprint task;
   never rewrite it to a guessed or workstream-qualified ID
+- Resolve each entry in a sprint output's `unresolved_dependencies` against
+  the combined map — all sprint outputs are loaded here, so a prerequisite a
+  parallel worker could not see may exist now; wire it as an explicit
+  `depends_on` edge when it resolves, otherwise surface it in the report
+  (e.g., Assumptions Made) as unresolved rather than inventing an ID
 - These are the "critical path" candidates
 
 ### Step 6: Run Deterministic Graph Analysis

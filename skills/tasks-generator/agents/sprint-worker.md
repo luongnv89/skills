@@ -123,8 +123,12 @@ If THIS sprint's task depends on a prior sprint's task:
 - Use the exact canonical ID from an available prior sprint output (for
   example, `1.4`), never a workstream-qualified variant or an invented
   placeholder
-- If the prior output or referenced task is missing, report the unresolved
-  dependency and stop; never guess or synthesize an ID
+- If the prior output is unavailable mid-run (parallel generation) or the
+  referenced task is missing from it, do NOT stop: record the edge in this
+  output's `unresolved_dependencies` array as
+  `{"task_id": "<sprint>.<index>", "needs": "<feature or task description>", "expected_sprint": <n>}`
+  and continue; the dependency-resolver resolves it against the combined map,
+  which is complete by then. Never guess or synthesize an ID
 - Record only that exact ID in this task's `depends_on`; do not edit the prior
   worker output or add a reciprocal `blocks` entry there
 - The dependency-resolver verifies the explicit edge in its combined in-memory
@@ -147,7 +151,8 @@ Check:
 - Every task ID matches `<sprint>.<index>` and indices are unique across the
   whole sprint, including parallel workstreams
 - Every dependency and `blocks` reference names an emitted or verified task ID;
-  missing prior-sprint output is an error, not a reason to guess
+  a missing prior-sprint output goes to `unresolved_dependencies` — it is not
+  a reason to stop or to guess an ID
 - Same-sprint `depends_on` and `blocks` are exact inverse edges; cross-sprint
   reciprocal `blocks` entries are the resolver's normalized in-memory output
 - No circular dependencies exist
@@ -193,6 +198,7 @@ Save the sprint tasks as JSON:
     }
   ],
   "task_count": 5,
+  "unresolved_dependencies": [],
   "total_effort_days": 11,
   "workstream_effort": {
     "project_setup": "1d",

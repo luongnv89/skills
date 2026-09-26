@@ -4,7 +4,7 @@ description: "Generate sprint-based development tasks from a PRD. Use when asked
 license: MIT
 effort: max
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
