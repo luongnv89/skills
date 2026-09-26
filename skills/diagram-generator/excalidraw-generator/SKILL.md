@@ -4,8 +4,8 @@ description: "Generate diagrams as valid Excalidraw JSON — flowcharts, archite
 license: MIT
 effort: high
 metadata:
-  version: 1.3.4
-  author: Luong NGUYEN <luongnv89@gmail.com>
+  version: 1.4.0
+  author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Excalidraw Diagram Generator
@@ -25,6 +25,18 @@ Triggers/exclusions are set by the frontmatter `description` above. Output is an
 If the Agent tool is available, use the subagent review loop described in `references/style-and-iteration.md` (Subagent Architecture). It provides fresh-context validation and avoids single-pass context overflow.
 
 If the Agent tool is unavailable (e.g., Claude.ai), execute every phase inline and self-review against the 10 checks (less rigorous, but functional).
+
+## Repo Sync Before Edits (mandatory)
+
+The `.excalidraw` file (and any companion `.md`) is written to the current working directory at the end of the workflow. When that path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin
+git pull --rebase origin "$branch"
+```
+
+If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository.
 
 ## Core Workflow
 

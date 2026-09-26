@@ -203,7 +203,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 |---|---|---|---|
 | [**frontend-design**](skills/frontend-design/) | 1.2.5 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.2.3 | medium | 7 SVG logo variants from project context |
-| [**diagram-generator**](skills/diagram-generator/) | 1.2.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
+| [**diagram-generator**](skills/diagram-generator/) | 1.3.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 | [**website-cloner**](skills/website-cloner/) | 1.3.0 | high | 6-phase URL to improved Vite/React/Tailwind site |
 
 **Website cloner phases** (install individually or as suite):
@@ -221,8 +221,8 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Engine | Version | What it does |
 |---|---|---|
-| drawio-generator | 1.2.3 | draw.io XML — precise, editable, C4, swimlanes |
-| excalidraw-generator | 1.3.3 | Excalidraw JSON — hand-drawn, sketch, wireframes |
+| drawio-generator | 1.3.0 | draw.io XML — precise, editable, C4, swimlanes |
+| excalidraw-generator | 1.4.0 | Excalidraw JSON — hand-drawn, sketch, wireframes |
 
 ### Documentation
 
