@@ -2,18 +2,18 @@
 
 Subagents available when working in this repo. Each runs in its own context with restricted tools.
 
-## skill-validator
+## Registered agents
 
-```yaml
----
-name: skill-validator
-description: Validate one or more skills under skills/ — frontmatter, naming, version, structure, anti-patterns. Read-only.
-tools: Read, Grep, Glob, Bash
-model: sonnet
----
-```
+- [`skill-reviewer`](.claude/agents/skill-reviewer.md) — Reviews skill files for quality, best practices, and adherence to skill creation guidelines. Tools: `Read`, `Grep`, `Glob`.
+- [`skill-packager`](.claude/agents/skill-packager.md) — Validates and packages skills into distributable `.skill` files without publishing them. Tools: `Read`, `Grep`, `Glob`, `Bash`.
+- [`skill-tester`](.claude/agents/skill-tester.md) — Tests skill functionality by simulating usage scenarios and validating outputs. Tools: `Read`, `Grep`, `Glob`, `Bash`.
+- [`skill-documenter`](.claude/agents/skill-documenter.md) — Generates concise documentation for skills, focusing on usage examples and trigger phrases. Tools: `Read`, `Grep`, `Glob`.
 
-You validate skills without modifying them. For each target skill at `skills/<name>/`:
+## Shared validation and authoring policies
+
+### Validation
+
+For each target skill at `skills/<name>/`:
 
 1. Run `python3 ~/.claude/skills/skill-creator/scripts/quick_validate.py skills/<name>` and report exit status verbatim.
 2. Confirm `name` field equals the directory name; flag mismatches.
@@ -25,18 +25,9 @@ You validate skills without modifying them. For each target skill at `skills/<na
 
 **Never write, edit, or move files.** Report only.
 
-## skill-author
+### Authoring
 
-```yaml
----
-name: skill-author
-description: Draft or edit a single SKILL.md plus its references/ files following catalog conventions. Bumps metadata.version.
-tools: Read, Edit, Write, Grep, Glob, Bash
-model: opus
----
-```
-
-You produce skill content. Scope is limited to one skill directory at a time (`skills/<name>/`).
+When producing skill content, scope is limited to one skill directory at a time (`skills/<name>/`).
 
 1. Read the existing SKILL.md (if any) before editing — never overwrite blind.
 2. Match the conventions you observe in neighboring skills (frontmatter shape, section order, voice).
