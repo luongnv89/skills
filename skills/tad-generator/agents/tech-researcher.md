@@ -2,12 +2,12 @@
 name: tech-researcher
 description: Handle one research round (spawned 5x in parallel) for technology stack, infrastructure, security, risk assessment, or holistic review
 role: Technical Research Specialist
-version: 1.1.0
+version: 1.1.1
 ---
 
 # Tech Researcher Agent
 
-Execute one focused research round on assigned topic. Spawned in parallel (5 instances) for independent analysis of Technology Stack, Infrastructure, Security, Risk Assessment, or Holistic Review.
+Execute one focused, product-neutral research round. Five instances run in parallel for technology stack, infrastructure, security, risk assessment, and holistic review. Research only the assigned domain using the supplied PRD extraction and available project evidence; do not assume a preferred vendor, stack, scale, metric, or cost.
 
 ## Input
 
@@ -15,96 +15,93 @@ Execute one focused research round on assigned topic. Spawned in parallel (5 ins
 {
   "research_round": "technology_stack",
   "prd_extracted": {
-    "product_name": "PinBoard",
-    "platforms": { "web": true, "api": true },
-    "core_features": [...],
-    "data_model": { "scale": "10K to 100K users", "storage": "10TB by year 2" },
-    "constraints": { "budget": "$2M", "timeline": "4 months", "team": "4 engineers" }
+    "product_name": "<product name from PRD>",
+    "platforms": { "web": true, "api": false },
+    "core_features": ["<feature from PRD>"],
+    "data_model": {
+      "scale": "<scale from PRD>",
+      "storage": "<storage requirement from PRD>"
+    },
+    "constraints": {
+      "budget": "<budget from PRD or TBD>",
+      "timeline": "<timeline from PRD or TBD>",
+      "team": "<team constraint from PRD or TBD>"
+    }
   }
 }
 ```
+
+Use the actual `prd_extracted` shape supplied by the caller. A missing field is `Unknown`/`TBD`, not permission to invent a value. Return one JSON object for the assigned round to `tad-writer`; do not rely on another round's conclusions.
 
 ## Research Rounds (5 parallel instances)
 
 ### Round 1: Technology Stack Validation
 
-**Input**: Platform requirements (web, api), integrations, data model, constraints
+**Input**: PRD platform requirements, integrations, data model, non-functional requirements, and constraints.
 
 **Research approach**:
-1. Validate React/TypeScript for web frontend against performance targets (<2s page load)
-2. Validate Node.js/Python for backend against API response SLA (<200ms)
-3. Review database options: PostgreSQL vs. MongoDB for pin data model
-4. Validate search solutions: Elasticsearch for tag search at 1M pins scale
-5. Review media storage: AWS S3, Cloudinary, or self-hosted CDN for image/media caching
+1. Compare suitable frontend approaches against the PRD's platform, accessibility, and performance targets.
+2. Compare suitable backend runtimes/frameworks against API latency, throughput, integration, and team constraints.
+3. Evaluate data-store choices against the extracted entities, consistency needs, query patterns, and scale.
+4. Evaluate search/indexing approaches against the extracted query and scale requirements.
+5. Evaluate file/media storage and delivery approaches only when the PRD requires them.
 
-**Output**:
+**Output** (preserve this nested schema; replace placeholders with evidence-backed values):
 
 ```json
 {
   "research_round": "technology_stack",
   "findings": {
     "frontend": {
-      "recommended": "React 19 + TypeScript",
-      "rationale": "Team expertise, ecosystem maturity, performance meets <2s load time targets",
-      "performance_notes": "React 19 concurrent features enable sub-2s load for boards with 100+ pins",
+      "recommended": "<evidence-backed choice or TBD>",
+      "rationale": "<PRD/research evidence>",
+      "performance_notes": "<measured or sourced note, or TBD>",
       "alternatives": [
-        {
-          "choice": "Vue 3",
-          "tradeoff": "Smaller ecosystem for AI/image processing libraries"
-        },
-        {
-          "choice": "Svelte",
-          "tradeoff": "Team unfamiliarity, smaller community"
-        }
+        { "choice": "<alternative>", "tradeoff": "<evidence-backed tradeoff>" },
+        { "choice": "<alternative>", "tradeoff": "<evidence-backed tradeoff>" }
       ]
     },
     "backend": {
-      "recommended": "Node.js (Express) + TypeScript",
-      "rationale": "Rapid development (4-month MVP), team can reuse JavaScript skills",
-      "performance_notes": "Node.js handles 5K concurrent users with clustering, meets <200ms API response",
-      "considerations": [
-        "Shared context with frontend TypeScript reduces cognitive load",
-        "npm ecosystem dominates for integrations (Figma, Slack plugins)"
-      ],
+      "recommended": "<evidence-backed choice or TBD>",
+      "rationale": "<PRD/research evidence>",
+      "performance_notes": "<measured or sourced note, or TBD>",
+      "considerations": ["<evidence-backed consideration>"],
       "alternatives": [
-        {
-          "choice": "Python (FastAPI)",
-          "tradeoff": "Better for AI/ML later, but slower initial development"
-        }
+        { "choice": "<alternative>", "tradeoff": "<evidence-backed tradeoff>" }
       ]
     },
     "database": {
-      "recommended": "PostgreSQL + MongoDB hybrid",
-      "rationale": "PostgreSQL for relational data (users, boards, permissions), MongoDB for flexible pin metadata",
-      "scaling": "PostgreSQL handles user/board model well, MongoDB flexible for varied pin attributes",
-      "cost": "PostgreSQL managed (RDS): ~$500/mo, MongoDB Atlas: ~$300/mo"
+      "recommended": "<evidence-backed choice or TBD>",
+      "rationale": "<PRD/research evidence>",
+      "scaling": "<evidence-backed scaling note or TBD>",
+      "cost": "<currency/cadence cost from evidence or TBD>"
     },
     "search": {
-      "recommended": "Elasticsearch (managed AWS OpenSearch)",
-      "rationale": "Achieves <500ms tag search at 1M pins scale",
-      "cost": "AWS OpenSearch: ~$800/mo for production cluster"
+      "recommended": "<evidence-backed choice or TBD>",
+      "rationale": "<PRD/research evidence>",
+      "cost": "<currency/cadence cost from evidence or TBD>"
     },
     "media": {
-      "recommended": "AWS S3 + CloudFront CDN",
-      "rationale": "Global distribution, cost-effective caching, 99.99% uptime",
-      "cost": "S3 storage: ~$0.023 per GB, CloudFront: ~$0.085 per GB transferred"
+      "recommended": "<evidence-backed choice or not applicable>",
+      "rationale": "<PRD/research evidence>",
+      "cost": "<currency/cadence cost from evidence or TBD>"
     }
   },
-  "confidence": "high",
-  "timestamp": "2026-03-24T10:15:00Z"
+  "confidence": "high|medium|low",
+  "timestamp": "<ISO-8601 timestamp>"
 }
 ```
 
 ### Round 2: Infrastructure Validation
 
-**Input**: Scale targets, uptime SLA, deployment preferences, constraints
+**Input**: Extracted scale, availability, recovery, deployment, delivery, and budget constraints.
 
 **Research approach**:
-1. Compare hosting: Vercel vs. AWS vs. GCP for web frontend
-2. Validate database hosting options for 10TB scale
-3. Review backup/disaster recovery (RPO: 1h, RTO: 2h)
-4. Estimate monthly costs by phase (MVP, Growth, Enterprise)
-5. Evaluate CDN strategy for global users
+1. Compare deployment and hosting approaches against team, workload, and portability constraints.
+2. Validate data and service hosting choices against the extracted scale and availability targets.
+3. Review backup and disaster-recovery options against the PRD's RPO/RTO evidence.
+4. Estimate costs by lifecycle phase only from supplied prices, measurements, or cited research; show arithmetic and label assumptions.
+5. Evaluate delivery, caching, and observability needs when supported by the PRD.
 
 **Output**:
 
@@ -112,63 +109,55 @@ Execute one focused research round on assigned topic. Spawned in parallel (5 ins
 {
   "research_round": "infrastructure",
   "findings": {
-    "hosting_recommendation": "Vercel (frontend) + AWS RDS + AWS OpenSearch",
-    "rationale": "Vercel simplifies frontend deployments (4-person team), AWS handles data tier at scale",
+    "hosting_recommendation": "<evidence-backed choice or TBD>",
+    "rationale": "<PRD/research evidence>",
     "environments": {
-      "development": "Local + Vercel preview deployments",
-      "staging": "AWS RDS Postgres (replica), Vercel staging environment",
-      "production": "Multi-AZ RDS Primary + Standby, OpenSearch cluster"
+      "development": "<evidence-backed environment>",
+      "staging": "<evidence-backed environment or TBD>",
+      "production": "<evidence-backed environment or TBD>"
     },
     "cost_breakdown": {
       "phase_1_mvp": {
-        "timeline": "months 1-4",
-        "monthly": "$1,500",
+        "timeline": "<phase dates or duration>",
+        "monthly": "<currency/cadence total derived from evidence or TBD>",
         "components": [
-          { "name": "Vercel Pro", "cost": "$20/mo" },
-          { "name": "AWS RDS (db.t3.medium)", "cost": "$300/mo" },
-          { "name": "AWS OpenSearch (dev tier)", "cost": "$200/mo" },
-          { "name": "S3 + CloudFront", "cost": "$500/mo" },
-          { "name": "Other (monitoring, logging)", "cost": "$480/mo" }
+          { "name": "<component>", "cost": "<currency/cadence cost>" }
         ]
       },
       "phase_2_growth": {
-        "timeline": "months 5-12",
-        "monthly": "$4,500",
+        "timeline": "<phase dates or duration>",
+        "monthly": "<currency/cadence total derived from evidence or TBD>",
         "components": [
-          { "name": "Vercel Team", "cost": "$50/mo" },
-          { "name": "AWS RDS (db.r6g.xlarge Multi-AZ)", "cost": "$1,800/mo" },
-          { "name": "AWS OpenSearch (production cluster)", "cost": "$1,200/mo" },
-          { "name": "S3 + CloudFront (higher volume)", "cost": "$1,000/mo" },
-          { "name": "Other (monitoring, logging, backups)", "cost": "$450/mo" }
+          { "name": "<component>", "cost": "<currency/cadence cost>" }
         ]
       }
     },
     "disaster_recovery": {
-      "rpo": "1 hour",
-      "rto": "2 hours",
-      "strategy": "RDS automated backups (daily), 35-day retention, cross-region backup to S3",
-      "testing": "Monthly DR drills to validate RTO target"
+      "rpo": "<PRD/research RPO or TBD>",
+      "rto": "<PRD/research RTO or TBD>",
+      "strategy": "<evidence-backed strategy>",
+      "testing": "<evidence-backed validation cadence or TBD>"
     },
     "uptime_sla": {
-      "target": "99.5% (4.5 hours downtime/month)",
-      "implementation": "Multi-AZ RDS, managed services (RDS, OpenSearch), CloudFront caching"
+      "target": "<PRD/research target or TBD>",
+      "implementation": "<evidence-backed implementation or TBD>"
     }
   },
-  "confidence": "high",
-  "timestamp": "2026-03-24T10:20:00Z"
+  "confidence": "high|medium|low",
+  "timestamp": "<ISO-8601 timestamp>"
 }
 ```
 
 ### Round 3: Security Review
 
-**Input**: Authentication model, data privacy requirements, compliance needs, integrations
+**Input**: PRD authentication, authorization, privacy, compliance, data-protection, and integration requirements.
 
 **Research approach**:
-1. Review OAuth implementation (Google, GitHub) for phishing resistance
-2. Validate data encryption: TLS in transit, AES-256 at rest
-3. Review GDPR/CCPA requirements: right to export, right to deletion
-4. Assess SOC 2 roadmap feasibility
-5. Review API security: rate limiting, JWT token strategy
+1. Evaluate authentication flows and standards against the supplied requirements.
+2. Evaluate authorization boundaries and resource roles against the data model.
+3. Trace encryption and key-management requirements to the PRD and cited research.
+4. Map privacy and compliance obligations without claiming an unrequested certification.
+5. Review API controls, token lifecycle, input validation, and cross-origin policy from evidence.
 
 **Output**:
 
@@ -177,58 +166,51 @@ Execute one focused research round on assigned topic. Spawned in parallel (5 ins
   "research_round": "security",
   "findings": {
     "authentication": {
-      "recommended": "OAuth 2.0 (Google, GitHub) + Email/Password with 2FA",
-      "rationale": "Reduces phishing, leverages provider security, meets user expectations",
-      "implementation": "Auth0 or Supabase for managed auth",
-      "cost": "Auth0: $600-1000/mo at 10K users"
+      "recommended": "<evidence-backed method or TBD>",
+      "rationale": "<PRD/research evidence>",
+      "implementation": "<evidence-backed implementation or TBD>",
+      "cost": "<currency/cadence cost from evidence or TBD>"
     },
     "authorization": {
-      "model": "Role-based access control (RBAC): owner, editor, viewer per board",
-      "enforcement": "Policy engine in backend (e.g., Oso, Casbin)",
-      "board_sharing": "Invite links with optional password protection"
+      "model": "<evidence-backed model or TBD>",
+      "enforcement": "<evidence-backed enforcement or TBD>",
+      "board_sharing": "<resource-sharing policy or not applicable>"
     },
     "data_encryption": {
-      "in_transit": "TLS 1.3 on all endpoints",
-      "at_rest": "AES-256 for sensitive data (user emails, API tokens)",
-      "keys": "AWS KMS for key management"
+      "in_transit": "<evidence-backed control or TBD>",
+      "at_rest": "<evidence-backed control or TBD>",
+      "keys": "<evidence-backed key-management approach or TBD>"
     },
     "data_privacy": {
-      "gdpr_compliance": [
-        "Data export endpoint (JSON download)",
-        "Account deletion cascade (pins, boards, preferences)",
-        "Privacy policy with clear data usage terms"
-      ],
-      "ccpa_compliance": [
-        "California residents can request data access/deletion",
-        "Opt-out mechanism for third-party data sharing (if applicable)"
-      ]
+      "gdpr_compliance": ["<requirement or not applicable>"],
+      "ccpa_compliance": ["<requirement or not applicable>"]
     },
     "compliance_roadmap": {
-      "mvp": "GDPR compliance (4 months)",
-      "growth_phase": "SOC 2 Type II audit (month 8-10)",
-      "enterprise": "HIPAA/FedRAMP if needed (post-Series A)"
+      "mvp": "<evidence-backed scope or TBD>",
+      "growth_phase": "<evidence-backed scope or TBD>",
+      "enterprise": "<evidence-backed scope or TBD>"
     },
     "api_security": {
-      "rate_limiting": "100 requests/min per user",
-      "jwt_tokens": "15-minute access tokens, 7-day refresh tokens",
-      "cors_policy": "Strict origin validation for Figma/Slack integrations"
+      "rate_limiting": "<evidence-backed limit or TBD>",
+      "jwt_tokens": "<token lifecycle or not applicable>",
+      "cors_policy": "<evidence-backed cross-origin policy or TBD>"
     }
   },
-  "confidence": "high",
-  "timestamp": "2026-03-24T10:25:00Z"
+  "confidence": "high|medium|low",
+  "timestamp": "<ISO-8601 timestamp>"
 }
 ```
 
 ### Round 4: Risk Assessment
 
-**Input**: Architecture choices, scale targets, integrations, team constraints
+**Input**: Evidence-backed architecture candidates, scale, integrations, constraints, and open questions.
 
 **Research approach**:
-1. Identify bottlenecks: single points of failure, scaling limits
-2. Assess vendor lock-in: AWS, Vercel, Auth0, Elasticsearch
-3. Evaluate team skill gaps: DevOps, database optimization
-4. Review regulatory risks: data residency, compliance
-5. Assess integration risks: Figma plugin API changes, Slack app lifecycle
+1. Identify bottlenecks and single points of failure supported by the inputs.
+2. Assess portability and dependency risks without assuming a vendor choice.
+3. Evaluate team or operational skill gaps against the proposed work.
+4. Review regulatory, data-residency, and privacy risks that the PRD actually names.
+5. Identify integration and delivery risks, each with a mitigation and validation timing.
 
 **Output**:
 
@@ -238,64 +220,48 @@ Execute one focused research round on assigned topic. Spawned in parallel (5 ins
   "findings": {
     "critical_risks": [
       {
-        "risk": "Database scaling bottleneck at 1M pins",
-        "likelihood": "high (month 8-10)",
-        "impact": "5K concurrent users may experience slow searches",
-        "mitigation": "Pre-plan PostgreSQL sharding, implement caching layer (Redis)",
-        "cost": "$500/mo Redis cluster",
-        "timeline_to_implement": "2-3 months lead time"
-      },
-      {
-        "risk": "Figma plugin API breakage",
-        "likelihood": "medium (Figma updates ~quarterly)",
-        "impact": "Figma integration broken until patched",
-        "mitigation": "Maintain plugin version compatibility matrix, automated testing",
-        "cost": "10% engineering time for compatibility",
-        "timeline_to_implement": "Already in SDLC"
+        "risk": "<evidence-backed risk>",
+        "likelihood": "<evidence-backed likelihood>",
+        "impact": "<evidence-backed impact>",
+        "mitigation": "<specific mitigation>",
+        "cost": "<currency/cadence cost or TBD>",
+        "timeline_to_implement": "<evidence-backed timing or TBD>"
       }
     ],
     "high_risks": [
       {
-        "risk": "AWS cost overruns during growth phase",
-        "likelihood": "medium",
-        "impact": "Budget for phase 2 could exceed $2M runway",
-        "mitigation": "Monthly cost monitoring, reserved instances for predictable load",
-        "cost": "Reserved instances save ~30%",
-        "timeline_to_implement": "Month 3-4"
-      },
-      {
-        "risk": "Vendor lock-in with AWS + Vercel",
-        "likelihood": "low (easy exit to GCP/Azure)",
-        "impact": "Limited flexibility for enterprise deployment options",
-        "mitigation": "Use Terraform for IaC, containerized backend for portability",
-        "cost": "Minimal",
-        "timeline_to_implement": "Initial architecture design"
+        "risk": "<evidence-backed risk>",
+        "likelihood": "<evidence-backed likelihood>",
+        "impact": "<evidence-backed impact>",
+        "mitigation": "<specific mitigation>",
+        "cost": "<currency/cadence cost or TBD>",
+        "timeline_to_implement": "<evidence-backed timing or TBD>"
       }
     ],
     "team_gaps": [
       {
-        "gap": "DevOps/SRE expertise",
-        "impact": "Production incident response slower",
-        "mitigation": "Use managed services (RDS, OpenSearch, Vercel) to reduce ops burden",
-        "hire_timeline": "Month 4-5 if team grows"
+        "gap": "<evidence-backed gap>",
+        "impact": "<evidence-backed impact>",
+        "mitigation": "<specific mitigation>",
+        "hire_timeline": "<evidence-backed timing or TBD>"
       }
     ]
   },
-  "confidence": "medium",
-  "timestamp": "2026-03-24T10:30:00Z"
+  "confidence": "high|medium|low",
+  "timestamp": "<ISO-8601 timestamp>"
 }
 ```
 
 ### Round 5: Holistic Review
 
-**Input**: All extracted PRD data, business goals, team dynamics
+**Input**: All extracted PRD data, business goals, team constraints, assumptions, and open questions.
 
 **Research approach**:
-1. Validate architecture aligns with PRD vision
-2. Review product-market fit signals from validation
-3. Assess team capability to execute in 4 months
-4. Identify blockers or assumptions needing validation
-5. Suggest quick wins and MVP scope optimization
+1. Validate architecture alignment with the PRD's stated vision and priorities.
+2. Review only product-market or validation signals supplied by the inputs.
+3. Assess execution viability against the extracted team, timeline, and dependencies.
+4. Identify blockers and assumptions requiring validation.
+5. Suggest evidence-backed quick wins and MVP-scope tradeoffs.
 
 **Output**:
 
@@ -304,64 +270,53 @@ Execute one focused research round on assigned topic. Spawned in parallel (5 ins
   "research_round": "holistic_review",
   "findings": {
     "prd_alignment": {
-      "assessment": "Architecture supports all critical features (pins, boards, sharing)",
-      "mvp_scope": "Core features implementable in 4 months with 4 engineers",
-      "alignment_score": "0.95 (high alignment)"
+      "assessment": "<evidence-backed assessment>",
+      "mvp_scope": "<evidence-backed scope assessment>",
+      "alignment_score": "<score or qualitative assessment from evidence>"
     },
-    "product_market_fit_signals": [
-      "Design/product teams validated willingness to pay $10-20/seat/month",
-      "Existing tools (Pinterest, Moodboard) lack team collaboration - clear gap",
-      "TAM: ~100K potential users in design/product vertical"
-    ],
+    "product_market_fit_signals": ["<signal supplied by validation evidence>"],
     "team_execution_viability": {
-      "team_size": "4 engineers, 1 designer, 1 PM",
-      "assessment": "Achievable for MVP, but tight timeline (4 months)",
-      "recommendations": [
-        "Use proven tech stack (React, Node.js) team already knows",
-        "Reduce scope if auth/integrations slow initial development",
-        "Hire DevOps by month 4 before growth phase",
-        "Plan for technical debt paydown in months 5-6 (post-MVP)"
-      ]
+      "team_size": "<team constraint from PRD>",
+      "assessment": "<evidence-backed assessment>",
+      "recommendations": ["<evidence-backed recommendation>"]
     },
     "blockers": [
       {
-        "blocker": "Figma plugin API documentation clarity",
-        "impact": "May delay Figma integration if docs incomplete",
-        "mitigation": "Prototype Figma integration in sprint 1 to validate API surface"
+        "blocker": "<evidence-backed blocker>",
+        "impact": "<evidence-backed impact>",
+        "mitigation": "<specific mitigation>"
       }
     ],
-    "quick_wins": [
-      "Use Auth0/Supabase for managed auth (avoid building from scratch)",
-      "Leverage existing design system libraries (e.g., shadcn/ui) for faster UI dev",
-      "Deploy to Vercel from day 1 for CI/CD automation"
-    ],
-    "overall_assessment": "Architecture is sound, team is capable, timeline is aggressive but achievable. Key risk is database scaling in growth phase - plan mitigation by month 3-4.",
-    "confidence": "high"
+    "quick_wins": ["<evidence-backed quick win>"],
+    "overall_assessment": "<evidence-backed overall assessment>",
+    "confidence": "high|medium|low"
   },
-  "timestamp": "2026-03-24T10:35:00Z"
+  "timestamp": "<ISO-8601 timestamp>"
 }
 ```
 
 ## Output Format (all rounds)
 
-Each researcher returns:
+Each researcher returns this outer object. Keep the exact field names and types; populate `references` only with actual sources or benchmarks used by the round:
 
 ```json
 {
   "research_round": "technology_stack|infrastructure|security|risk_assessment|holistic_review",
-  "findings": { ... },
+  "findings": { "...": "round-specific object above" },
   "confidence": "high|medium|low",
-  "references": ["url to research", "url to benchmark"],
-  "timestamp": "2026-03-24T10:15:00Z"
+  "references": ["<actual research URL or benchmark>"],
+  "timestamp": "<ISO-8601 timestamp>"
 }
 ```
 
 ## Graceful Degradation
 
-If research unavailable:
-- Return best-practice recommendations for round topic
-- Mark as `confidence: "low"` with note: "Based on industry standards, not project-specific research"
+If research is unavailable:
+
+- Return best-practice recommendations for the assigned round only.
+- Mark `confidence` as `"low"` and include the note: `"Based on industry standards, not project-specific research"`.
+- Mark unsupported values `Unknown`/`TBD`; do not fabricate references, measurements, versions, or costs.
 
 ## Return to Main Skill
 
-Pass all 5 research round outputs to tad-writer agent for synthesis into final TAD document.
+Pass all five round outputs, unchanged in schema and provenance, to `tad-writer` for synthesis into the final TAD.

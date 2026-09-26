@@ -4,7 +4,7 @@ description: "Generate an approval-gated improvement PRD from a report and basel
 license: MIT
 effort: high
 metadata:
-  version: 1.3.1
+  version: 1.3.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -66,7 +66,7 @@ Example: "Replace the current hero section with a centered layout featuring a cl
 Example: "The current hero burying the CTA below two content sections. Users must scroll past unrelated content before seeing the sign-up option (Phase 1 UI/UX friction point: 'CTA not immediately visible')."
 
 **Expected Value:** Measurable impact.
-Example: "Estimated +15–25% improvement in CTA click-through rate. Reduced scroll depth requirement from 600px to 0px for primary action."
+Example: "If Phase 1 measured a primary CTA scroll distance, make the CTA visible without scrolling (scroll distance to CTA: <measured distance> → 0px). Click-through/conversion impact is not measurable from a static crawl; measure it after launch."
 
 ---
 

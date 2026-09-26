@@ -4,7 +4,7 @@ description: "Generate a Technical Architecture Document (TAD) from a PRD. Use w
 license: MIT
 effort: max
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -26,11 +26,13 @@ This skill uses parallel research agents with upfront content extraction. **Patt
 
 ### Research Rounds (5 Parallel)
 
-- **Round 1**: Technology Stack validation (React, Node.js, PostgreSQL, Elasticsearch)
-- **Round 2**: Infrastructure validation (Vercel, AWS, CDN, cost estimation)
-- **Round 3**: Security review (auth, encryption, compliance, API security)
-- **Round 4**: Risk assessment (bottlenecks, vendor lock-in, team gaps)
-- **Round 5**: Holistic review (PRD alignment, team capability, quick wins)
+- **Round 1**: Technology stack validation against PRD requirements, constraints, data, and performance targets
+- **Round 2**: Infrastructure validation (deployment, persistence, resilience, delivery, observability, and cost evidence)
+- **Round 3**: Security review (authentication, authorization, encryption, privacy, compliance, and API controls)
+- **Round 4**: Risk assessment (bottlenecks, dependencies, operational gaps, and mitigations)
+- **Round 5**: Holistic review (PRD alignment, assumptions, team capability, blockers, and quick wins)
+
+**Evidence rule**: Every product-specific technology, version, metric, scale, number, and cost in the TAD must trace to `prd_extracted` or one of the five actual research outputs. Show inputs and arithmetic for derived values, label assumptions, mark unsupported values `Unknown`/`TBD`, preserve actual research references, and never invent research or sources.
 
 ### Parallelization Strategy
 
