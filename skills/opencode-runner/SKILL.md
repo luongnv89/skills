@@ -4,7 +4,7 @@ description: "Run coding tasks via opencode using free cloud models. Use when as
 license: MIT
 effort: medium
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -155,7 +155,7 @@ echo $! > "$RUN.pid"
 echo "opencode started: run=$RUN pid=$(cat "$RUN.pid")"
 ```
 
-**Record the `run=` value this prints and substitute it literally in Phases 5 and 6.** Every Bash call is a new shell: `$$` resolves to a different number each time and `OPENCODE_PID` is unset, so a re-derived path would poll a log that does not exist and `kill` nothing while still reporting success. The `.pid` file is what carries the process id between calls.
+**Record the `run=` value this prints and substitute it literally in every later Phase 5 and Phase 6 shell.** Each Bash call starts fresh, so rebind `RUN` to that recorded prefix before reading `"$RUN.log"` or `"$RUN.pid"`; the `.pid` file is the ownership record for the launched process and carries its process id between calls.
 
 ### Handling multi-line or complex prompts
 
@@ -190,7 +190,7 @@ status() {
 status
 ```
 
-That single line is your full progress sample. Do not `tail -n 50`, do not `cat $LOG`, do not stream stdout — those defeat the purpose.
+That single line is your full progress sample. Do not `tail -n 50`, do not `cat "$RUN.log"`, do not stream stdout — those defeat the purpose.
 
 ### Cadence (mandatory)
 
@@ -211,9 +211,9 @@ Do not paste the raw log. Do not summarize what opencode is "thinking" — you c
 
 When `status=done`:
 
-1. **Read the tail only**, not the whole log: `tail -n 40 "$LOG"`. That's the summary opencode prints at the end (files changed, tokens used, errors).
+1. **Read the tail only**, not the whole log: `tail -n 40 "$RUN.log"`. That's the summary opencode prints at the end (files changed, tokens used, errors).
 2. Report: final status (success/fail), files mentioned in the tail, and token count if opencode printed one.
-3. If the user wants the full output, point them to `$LOG` — do not paste it.
+3. If the user wants the full output, point them to `"$RUN.log"` — do not paste it.
 4. If the task failed, suggest retrying with the next free model from the Phase 2 list.
 5. **Run Phase 6 cleanup** — mandatory, even on success.
 
@@ -231,7 +231,7 @@ Every execution — success, failure, error, or timeout — must end with cleanu
 
 ### Step 1: Kill the opencode process tree
 
-If you launched opencode in the background, read its pid back from the run's pidfile — `$OPENCODE_PID` from Phase 4 is gone by now:
+If you launched opencode in the background, use the pidfile for the recorded run prefix as the ownership record:
 
 ```bash
 RUN=/tmp/opencode-run-1234567890   # paste the run= value Phase 4 printed
@@ -309,9 +309,9 @@ The skill run is considered successful when all of the following are verifiable:
 - [ ] **Task delegated to opencode** — The coding task is executed via `opencode run`, not by the skill editing files directly or writing code itself.
 - [ ] **Low-token monitoring used** — Phase 5 polls via the single-line `status()` helper. The raw log is never streamed back; only the last line, byte count, and status are reported per poll. Max 6 polls per run.
 - [ ] **Stall/timeout handled** — No byte growth across two consecutive polls or no completion after ~5 min triggers a confirmation with the user and (if approved) a kill + cleanup.
-- [ ] **Completion summary delivered** — On `status=done`, the skill reads only `tail -n 40 "$LOG"` and summarizes files changed and token usage.
+- [ ] **Completion summary delivered** — On `status=done`, the skill reads only `tail -n 40 "$RUN.log"` and summarizes files changed and token usage.
 - [ ] **Cleanup runs on every exit path** — Phase 6 runs whether the task succeeded, failed, errored, stalled, or timed out. No orphaned `opencode run` processes remain.
-- [ ] **Temp files removed** — `$LOG` (and any other temp files created) are deleted during cleanup.
+- [ ] **Temp files removed** — `"$RUN.log"` and `"$RUN.pid"` (and any other temp files created) are deleted during cleanup.
 - [ ] **No fallback to self** — If opencode is unavailable, the user rejects the confirmation, or all free models fail, the skill stops. It never falls back to editing files or writing code itself.
 
 ---
