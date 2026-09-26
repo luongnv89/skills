@@ -4,7 +4,7 @@ description: "Generate diagrams as valid Excalidraw JSON — flowcharts, archite
 license: MIT
 effort: high
 metadata:
-  version: 1.3.3
+  version: 1.3.4
   author: Luong NGUYEN <luongnv89@gmail.com>
 ---
 
@@ -50,7 +50,7 @@ Wait for confirmation. If the user says "just do it" or the request is straightf
 
 ### Phase 3: Generate
 
-Write a `.excalidraw` file (raw JSON, no wrapper) in the current working directory. Use kebab-case names (`auth-flow.excalidraw`). The required envelope:
+Compose the `.excalidraw` document in memory (raw JSON, no wrapper) — the file is written to the current working directory in Phase 4, after validation passes. Use kebab-case names (`auth-flow.excalidraw`). The required envelope:
 
 ```json
 {
@@ -69,7 +69,7 @@ Set `theme` and `viewBackgroundColor` to whatever suits the diagram. For full el
 
 ### Phase 4: Validate
 
-Before writing the file, run all 10 checks on the in-memory JSON. Fix and re-check until all pass. Full check definitions and fix recipes are in `references/validation-checks.md`. Quick summary:
+Before writing the file, run all 10 checks on the in-memory JSON. Fix and re-check until all pass, then write the `.excalidraw` file to the current working directory. Full check definitions and fix recipes are in `references/validation-checks.md`. Quick summary:
 
 1. **Valid JSON** — top-level keys present.
 2. **Required fields** — every element has the full field list (id, type, geometry, styling, `boundElements`, `seed`, etc.). Text adds `text/fontSize/fontFamily/textAlign/verticalAlign/containerId/originalText/lineHeight/autoResize`. Arrows add `points/startBinding/endBinding/startArrowhead/endArrowhead`.
@@ -94,7 +94,7 @@ For every text element with `containerId`:
 
 Boundary/container labels (e.g., "System Boundary") must be standalone text with `containerId: null`, positioned near the top-left of the container — never bound to it.
 
-**Fix**: increase the shape's height/width to fit the text and shift elements below it to keep spacing. Always set `lineHeight: 1.25` and `autoResize: true` on text. Never patch individual outputs — fix this skill's instructions if a new failure pattern emerges.
+**Fix**: increase the shape's height/width to fit the text and shift elements below it to keep spacing. Always set `lineHeight: 1.25` and `autoResize: true` on text. Never patch individual outputs — report a new failure pattern in the step completion report instead.
 
 After all checks pass, emit the validation summary (10/10 passed, element counts, binding counts, "all shapes sized to fit", any auto-fixes applied).
 
