@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -37,7 +37,7 @@ Do **not** use for:
 
 - **Applying** the fixes to a site's codebase — that is `/seo-ai-optimizer` (it owns
   llms.txt, robots.txt, and AI-bot directives as *edits*). This skill stops at the plan.
-- App Store / Play Store optimisation — `/aso-marketing`, `/aso-audit`.
+- App Store / Play Store optimisation — `/aso-marketing`.
 - A plan you already have — go straight to `/plan-to-issues <path.md>`.
 
 ## Repo Sync Before Edits (mandatory)
