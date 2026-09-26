@@ -4,7 +4,7 @@ description: "Generate unit tests for untested branches and edge cases. Use when
 license: MIT
 effort: low
 metadata:
-  version: 1.3.1
+  version: 1.3.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -164,4 +164,4 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 - Place test files alongside source or in the project's existing test directory
 - Group related test cases logically
 - Use descriptive test names that explain the scenario
-- Do not mock what you do not own — prefer integration tests for external boundaries
+- Do not mock what you do not own — prefer real collaborators over mocks at external boundaries
