@@ -1,0 +1,53 @@
+{
+  "skill_name": "convert-documents-to-markdown",
+  "evals": [
+    {
+      "id": 1,
+      "name": "convert-docx-positive",
+      "kind": "happy-path",
+      "prompt": "I have a report.docx I can't read — extract its contents as Markdown.",
+      "expected_output": "Triggers the skill and runs the pinned anydoc CLI on the file, emitting GitHub-Flavored Markdown.",
+      "files": [],
+      "expectations": [
+        "Invokes anydoc via npx -y @firecrawl/anydoc@0.2.4, not an unversioned or @latest spec",
+        "Passes the document path as the CLI argument",
+        "Surfaces the converted Markdown (stdout or -o file) without prompting the user"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "scanned-pdf-exit-3",
+      "kind": "edge",
+      "prompt": "anydoc just failed on my scanned.pdf saying pages need OCR. What now?",
+      "expected_output": "Explains exit 3 and that rerunning with --ocr hosted uploads the file to Firecrawl's hosted Parse API, optionally with FIRECRAWL_API_KEY for higher limits.",
+      "files": [],
+      "expectations": [
+        "Identifies exit code 3 as 'pages of a PDF need OCR'",
+        "States plainly that --ocr hosted sends the file to Firecrawl's hosted API",
+        "Mentions --api-key or FIRECRAWL_API_KEY for higher limits"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "negative-readable-markdown",
+      "kind": "negative-trigger",
+      "prompt": "Summarize the notes in notes.md.",
+      "expected_output": "Does not trigger the skill — notes.md is plain Markdown the agent can read directly.",
+      "files": [],
+      "expectations": [
+        "Does not invoke the anydoc CLI"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "negative-create-document",
+      "kind": "negative-trigger",
+      "prompt": "Draft a new Word document with the project charter.",
+      "expected_output": "Does not trigger the skill — it converts documents to Markdown, it does not create or edit documents.",
+      "files": [],
+      "expectations": [
+        "Does not invoke the anydoc CLI"
+      ]
+    }
+  ]
+}
