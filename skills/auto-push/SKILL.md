@@ -4,7 +4,7 @@ description: "Generate a commit message, stage all changes, and push to remote a
 license: MIT
 effort: low
 metadata:
-  version: 1.0.4
+  version: 1.0.5
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -16,7 +16,7 @@ metadata:
 
 Trigger this skill when the user asks to "commit and push everything", "ship this", "auto-push", or otherwise wants a one-shot stage-commit-push for the current working tree. Skip when they want PRs, code review, releases, or tags.
 
-## Sync Repo Before Edits
+## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
 
 ```bash

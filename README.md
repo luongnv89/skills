@@ -179,7 +179,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**auto-push**](skills/auto-push/) | 1.0.4 | low | Commit message + stage + push with secret and size checks |
+| [**auto-push**](skills/auto-push/) | 1.0.5 | low | Commit message + stage + push with secret and size checks |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.0.3 | medium | Pre-commit + GitHub Actions quality gates |
 | [**security-setup**](skills/security-setup/) | 1.4.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**fork-upstream-sync**](skills/fork-upstream-sync/) | 1.3.3 | medium | Sync a fork with upstream while keeping feature branches and open PRs mergeable |
