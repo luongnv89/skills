@@ -31,7 +31,7 @@ Confirm to proceed, or tell me what to change.
 ## Phase 5 — Low-token progress polls
 
 ```
-opencode started: pid=48211 log=/tmp/opencode-12345.log
+opencode started: run=/tmp/opencode-run-1234567890 pid=48211
 Poll 1 (t+30s):  running, 1.1 KB,  last: "Reading utils/http.py …"
 Poll 2 (t+90s):  running, 4.2 KB,  last: "Editing utils/http.py …"
 Poll 3 (t+150s): done,    7.8 KB,  last: "Done. 3 files changed, 147 lines added."
@@ -91,7 +91,7 @@ If the task fails or times out, the output instead shows which model was tried, 
 ```
 ◆ Execution (phase 4 of 6 — task delegation)
 ··································································
-  Backgrounded with log:  √ pass — pid=48211 log=/tmp/opencode-12345.log
+  Backgrounded with log:  √ pass — opencode started: run=/tmp/opencode-run-1234567890 pid=48211
   Foreground avoided:     √ pass
   [Criteria]:             √ 2/2 met
   ____________________________
@@ -117,8 +117,8 @@ If the task fails or times out, the output instead shows which model was tried, 
 ```
 ◆ Cleanup (phase 6 of 6 — process termination)
 ··································································
-  Processes killed:       √ pass — OPENCODE_PID terminated
-  Temp files cleaned:     √ pass — $LOG removed
+  Processes killed:       √ pass — pidfile-owned process terminated
+  Temp files cleaned:     √ pass — "$RUN.log" and "$RUN.pid" removed
   [Criteria]:             √ 2/2 met
   ____________________________
   Result:                 PASS
