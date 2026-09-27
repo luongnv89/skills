@@ -69,3 +69,7 @@ asm install github:luongnv89/skills:skills/logo-designer
 - 7 SVG files in `/assets/logo/` (full, mark, wordmark, icon, favicon, white, black)
 - Design rationale document with color specifications
 - Brand kit suggestions with Tailwind config
+
+## Example
+
+[`examples/logo-designer`](https://github.com/luongnv89/skills/tree/main/examples/logo-designer) walks through a complete real run: the Agent Skills logo in this repository. It includes the brief, the project analysis, 26 concept sketches with test renders, the concept board the user chose from, the decisions, the final files, and the validation report.

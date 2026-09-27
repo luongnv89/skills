@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Skills: logo concepts, round 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#0A0A0A; --paper:#FAFAFA; --line:#E5E5E5; --muted:#737373; --g:#22C55E; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"Instrument Sans",system-ui,sans-serif; background:#F4F4F4; color:var(--ink); -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1180px; margin:0 auto; padding:56px 28px 80px; }
+  .eyebrow { font:500 12px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:#16A34A; }
+  h1 { font-size:40px; font-weight:600; letter-spacing:-.02em; margin:14px 0 12px; }
+  h2 { font-size:22px; font-weight:600; letter-spacing:-.01em; margin:56px 0 6px; }
+  p.lead { font-size:17px; color:#404040; max-width:760px; line-height:1.55; }
+  p.sub { font-size:14px; color:var(--muted); margin-bottom:18px; }
+  .mono { font-family:"IBM Plex Mono",monospace; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .grid6 { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .card header { display:flex; justify-content:space-between; align-items:baseline; padding:16px 18px; border-bottom:1px solid var(--line); }
+  .card header b { font-size:16px; font-weight:600; }
+  .card header span { font:400 12px "IBM Plex Mono",monospace; color:var(--muted); }
+  .pair { display:grid; grid-template-columns:1fr 1fr; }
+  .stage { display:flex; align-items:center; justify-content:center; padding:34px; }
+  .light { background:var(--paper); color:var(--ink); }
+  .dark { background:var(--ink); color:#FAFAFA; }
+  .stage svg.big { width:180px; height:180px; }
+  .row { display:flex; align-items:center; gap:22px; padding:18px; border-top:1px solid var(--line); flex-wrap:wrap; }
+  .row small { font:400 11px "IBM Plex Mono",monospace; color:var(--muted); display:block; text-align:center; margin-top:6px; }
+  .tile { background:var(--ink); display:flex; align-items:center; justify-content:center; color:#FAFAFA; box-shadow:inset 0 0 0 1px rgba(255,255,255,.06); }
+  .t120 { width:120px; height:120px; border-radius:27px; } .t120 svg { width:80px; height:80px; }
+  .t36 { width:36px; height:36px; border-radius:8px; } .t36 svg { width:24px; height:24px; }
+  .sizes { display:flex; align-items:end; gap:14px; padding:10px 14px; border-radius:10px; }
+  .story { margin-top:26px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .story div { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:14px; color:#404040; line-height:1.5; }
+  .story b { display:block; color:var(--ink); font-size:15px; margin-bottom:4px; }
+  .lockup { display:flex; align-items:center; gap:16px; padding:30px 26px; }
+  .lockup svg { width:56px; height:56px; flex:none; }
+  .wm-a { font-size:34px; font-weight:600; letter-spacing:-.025em; }
+  .wm-b { font-size:25px; font-weight:500; letter-spacing:.16em; }
+  .wm-c { font-size:35px; font-weight:600; letter-spacing:-.035em; }
+  .wm-a i, .wm-c i { font-style:normal; font-weight:400; color:#525252; }
+  .dark .wm-a i, .dark .wm-c i { color:#A3A3A3; }
+  .swatch { display:flex; gap:10px; align-items:center; padding:14px 18px; border-top:1px solid var(--line); font-size:13px; }
+  .chip { width:22px; height:22px; border-radius:6px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); }
+  .rej img { width:100%; display:block; border-bottom:1px solid var(--line); }
+  .rej div { padding:10px 12px; font-size:12.5px; line-height:1.4; color:#404040; }
+  .rej b { display:block; font-size:13px; color:var(--ink); }
+  .tag { display:inline-block; font:500 11px "IBM Plex Mono",monospace; padding:3px 8px; border-radius:999px; border:1px solid #16A34A; color:#15803D; margin-left:8px; vertical-align:middle; }
+  @media (max-width:900px){ .grid2,.grid3,.story{grid-template-columns:1fr} .grid6{grid-template-columns:repeat(3,1fr)} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="ring-round" d="M45.62 17.23A22 22 0 1 1 18.38 17.23" fill="none" stroke="currentColor" stroke-width="5.75" stroke-linecap="round"/>
+    <path id="ring-keyed" d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="currentColor"/>
+    <path id="card" fill-rule="evenodd" d="M26.75 4.5H34L39.5 10V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28h1.5v4.5h-1.5zM29.75 28h1.5v4.5h-1.5zM32.75 28h1.5v4.5h-1.5zM35.75 28h1.5v4.5h-1.5z"/>
+    <symbol id="A" viewBox="0 0 64 64"><use href="#ring-round"/><use href="#card" fill="var(--g)"/></symbol>
+    <symbol id="B" viewBox="0 0 64 64"><use href="#ring-keyed"/><use href="#card" fill="var(--g)"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="eyebrow">Agent Skills · Logo concepts · Round 1</div>
+  <h1>Plug in. Power up.</h1>
+  <p class="lead">In <i>The Matrix</i>, Tank loads a program, Neo opens his eyes, and says “I know kung fu.” The mark captures that moment. A skill card is seated inside the agent, and together they form the universal <b>power-on</b> symbol. One card goes in and the agent is instantly capable.</p>
+  <div class="story">
+    <div><b>The card</b>A memory card with a chamfered corner and four contacts. Each skill is a self-contained module you slot in.</div>
+    <div><b>The ring</b>The agent. It is an open loop with a single port, and the card passes through it.</div>
+    <div><b>The green</b>Green only appears on the card. It is the “powered on” LED, and it nods to the Matrix phosphor.</div>
+  </div>
+
+  <h2>Two finalists, same idea</h2>
+  <p class="sub">Both share one card. They differ only in how the ring meets it.</p>
+  <div class="grid2">
+    <section class="card">
+      <header><b>A · Power-On</b><span>round caps · classic power glyph</span></header>
+      <div class="pair">
+        <div class="stage light"><svg class="big"><use href="#A"/></svg></div>
+        <div class="stage dark"><svg class="big"><use href="#A"/></svg></div>
+      </div>
+      <div class="row">
+        <div><div class="tile t120"><svg><use href="#A"/></svg></div><small>README · 120px</small></div>
+        <div><div class="tile t36"><svg><use href="#A"/></svg></div><small>nav · 36px</small></div>
+        <div><div class="sizes light"><svg width="64" height="64"><use href="#A"/></svg><svg width="32" height="32"><use href="#A"/></svg><svg width="16" height="16"><use href="#A"/></svg></div><small>64 · 32 · 16 px</small></div>
+        <div><div class="sizes dark"><svg width="32" height="32"><use href="#A"/></svg><svg width="16" height="16"><use href="#A"/></svg></div><small>on dark</small></div>
+      </div>
+    </section>
+    <section class="card">
+      <header><b>B · Keyed Slot <span class="tag">recommended</span></b><span>precision cut · engineered fit</span></header>
+      <div class="pair">
+        <div class="stage light"><svg class="big"><use href="#B"/></svg></div>
+        <div class="stage dark"><svg class="big"><use href="#B"/></svg></div>
+      </div>
+      <div class="row">
+        <div><div class="tile t120"><svg><use href="#B"/></svg></div><small>README · 120px</small></div>
+        <div><div class="tile t36"><svg><use href="#B"/></svg></div><small>nav · 36px</small></div>
+        <div><div class="sizes light"><svg width="64" height="64"><use href="#B"/></svg><svg width="32" height="32"><use href="#B"/></svg><svg width="16" height="16"><use href="#B"/></svg></div><small>64 · 32 · 16 px</small></div>
+        <div><div class="sizes dark"><svg width="32" height="32"><use href="#B"/></svg><svg width="16" height="16"><use href="#B"/></svg></div><small>on dark</small></div>
+      </div>
+    </section>
+  </div>
+
+  <h2>Wordmark casing</h2>
+  <p class="sub">Previewed in Instrument Sans, the typeface the docs site already uses. The final files will have the wordmark converted to outlines, so it looks the same on GitHub and everywhere else.</p>
+  <div class="grid3">
+    <section class="card"><header><b>1 · Title case</b><span>Agent Skills</span></header>
+      <div class="lockup light"><svg><use href="#B"/></svg><span class="wm-a">Agent <i>Skills</i></span></div>
+      <div class="lockup dark"><svg><use href="#B"/></svg><span class="wm-a">Agent <i>Skills</i></span></div></section>
+    <section class="card"><header><b>2 · Tracked caps</b><span>AGENT SKILLS</span></header>
+      <div class="lockup light"><svg><use href="#B"/></svg><span class="wm-b">AGENT SKILLS</span></div>
+      <div class="lockup dark"><svg><use href="#B"/></svg><span class="wm-b">AGENT SKILLS</span></div></section>
+    <section class="card"><header><b>3 · Lowercase</b><span>agent skills</span></header>
+      <div class="lockup light"><svg><use href="#B"/></svg><span class="wm-c">agent <i>skills</i></span></div>
+      <div class="lockup dark"><svg><use href="#B"/></svg><span class="wm-c">agent <i>skills</i></span></div></section>
+  </div>
+
+  <h2>Accent green</h2>
+  <p class="sub">The accent only ever colors the card.</p>
+  <div class="grid3">
+    <section class="card" style="--g:#22C55E"><div class="pair"><div class="stage dark"><div class="tile t120"><svg><use href="#B"/></svg></div></div><div class="stage light"><svg width="96" height="96"><use href="#B"/></svg></div></div>
+      <div class="swatch"><span class="chip" style="background:#22C55E"></span><b>Brand green #22C55E</b>&nbsp;· current, matches the docs site</div></section>
+    <section class="card" style="--g:#00FF41"><div class="pair"><div class="stage dark"><div class="tile t120"><svg><use href="#B"/></svg></div></div><div class="stage light"><svg width="96" height="96"><use href="#B"/></svg></div></div>
+      <div class="swatch"><span class="chip" style="background:#00FF41"></span><b>Matrix phosphor #00FF41</b>&nbsp;· cinematic, weak on white</div></section>
+    <section class="card" style="--g:#10B981"><div class="pair"><div class="stage dark"><div class="tile t120"><svg><use href="#B"/></svg></div></div><div class="stage light"><svg width="96" height="96"><use href="#B"/></svg></div></div>
+      <div class="swatch"><span class="chip" style="background:#10B981"></span><b>Emerald #10B981</b>&nbsp;· cooler, jewel tone</div></section>
+  </div>
+
+  <h2>Explored and set aside</h2>
+  <p class="sub">Other ways of showing a card being plugged in, and why each was dropped.</p>
+  <div class="grid6">
+    <section class="card rej"><img src="../concepts/01-first-sketches/A1.svg" alt=""><div><b>Card + slot bar</b>Looks like a top hat.</div></section>
+    <section class="card rej"><img src="../concepts/01-first-sketches/A2.svg" alt=""><div><b>Card + code rain</b>Looks like a paper shredder.</div></section>
+    <section class="card rej"><img src="../concepts/01-first-sketches/B1.svg" alt=""><div><b>U-slot device</b>Chunky, and reads like a toaster.</div></section>
+    <section class="card rej"><img src="../concepts/01-first-sketches/B2.svg" alt=""><div><b>Card on a body</b>Looks like a jar or a battery.</div></section>
+    <section class="card rej"><img src="../concepts/02-power-on/K1.svg" alt=""><div><b>Rain cartridge</b>Looks like a text document at small sizes.</div></section>
+    <section class="card rej"><img src="../concepts/01-first-sketches/C1.svg" alt=""><div><b>“S” monogram</b>Generic, and the card idea is lost.</div></section>
+  </div>
+</div>
+</body>
+</html>

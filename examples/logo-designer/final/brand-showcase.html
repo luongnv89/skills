@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Skills — Brand Identity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0A0A0A;
+    --paper: #FAFAFA;
+    --phosphor: #00FF41;
+    --phosphor-deep: #008F11;
+    --surface: #111111;
+    --border: #262626;
+    --muted: #A3A3A3;
+    --sans: "Instrument Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--phosphor); }
+  a:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--phosphor);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--phosphor);
+  }
+  section { padding: 88px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 30px; font-weight: 600; letter-spacing: -0.01em; margin: 14px 0 10px; }
+  .section-sub { color: var(--muted); max-width: 560px; margin-bottom: 48px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    text-align: center;
+    padding: 120px 0 104px;
+    background:
+      repeating-linear-gradient(90deg, rgba(250,250,250,0.045) 0 1px, transparent 1px 56px),
+      var(--ink);
+  }
+  .hero .mark { width: 160px; height: 160px; margin: 40px auto 44px; display: block; }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 44px);
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-indent: .16em; /* optical center for tracked caps */
+    margin: 18px 0 20px;
+  }
+  .hero .tagline { font-size: 18px; font-weight: 500; }
+  .hero .lede { color: var(--muted); max-width: 520px; margin: 10px auto 0; }
+
+  /* ---------- Concept ---------- */
+  .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+  .concept-figure {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 28px 28px;
+  }
+  .markbox { position: relative; width: min(212px, 70%); margin: 0 auto; }
+  .markbox svg { display: block; width: 100%; height: auto; }
+  .mk {
+    position: absolute;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--phosphor);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 12px; font-weight: 500; line-height: 22px;
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+  .legend { list-style: none; counter-reset: mk; margin-top: 26px; }
+  .legend li {
+    counter-increment: mk;
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+  }
+  .legend li:first-child { border-top: 0; }
+  .legend li::before {
+    content: counter(mk);
+    flex: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--phosphor);
+    color: var(--phosphor);
+    font-family: var(--mono);
+    font-size: 12px; line-height: 20px;
+    text-align: center;
+  }
+  .legend b { color: var(--paper); font-weight: 600; font-size: 14px; }
+  .legend span { color: var(--muted); font-size: 13px; }
+  .concept-copy p { color: var(--muted); margin-bottom: 18px; }
+  .concept-copy p strong { color: var(--paper); font-weight: 600; }
+
+  /* ---------- Variants ---------- */
+  .variants { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card {
+    position: relative;
+    border-radius: 12px;
+    padding: 56px 32px 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    transition: transform .18s ease;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card.light { background: var(--paper); box-shadow: 0 10px 28px rgba(0,0,0,.28); }
+  .card.dark { background: var(--surface); border: 1px solid var(--border); }
+  .card.full { grid-column: 1 / -1; min-height: 220px; }
+  .card .tag {
+    position: absolute; top: 16px; left: 18px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  }
+  .card.light .tag { color: #525252; }
+  .card.dark .tag { color: var(--muted); }
+  .card .file {
+    position: absolute; bottom: 14px; right: 18px;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .card.light .file { color: #737373; }
+  .card.dark .file { color: var(--muted); }
+  .card img { display: block; max-width: 100%; }
+  .card .img-full { width: min(440px, 82%); height: auto; }
+  .card .img-mark { width: 104px; height: auto; }
+  .card .img-icon { width: 128px; height: auto; }
+  .card .img-wordmark { width: min(300px, 80%); height: auto; }
+  .favicon-sizes { display: flex; align-items: flex-end; gap: 36px; }
+  .favicon-sizes figure { text-align: center; }
+  .favicon-sizes figcaption {
+    margin-top: 12px; font-family: var(--mono); font-size: 10px; color: var(--muted);
+    letter-spacing: .12em;
+  }
+  .favicon-sizes img { image-rendering: auto; }
+
+  /* ---------- Palette ---------- */
+  .pal-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+    margin: 30px 0 14px;
+  }
+  .pal-group:first-of-type .pal-label { margin-top: 0; }
+  .palette { display: grid; gap: 16px; }
+  .pal-neutrals { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .pal-signal { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .chip { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .chip .swatch { height: 88px; }
+  .chip .meta { padding: 12px 14px 14px; background: var(--surface); }
+  .chip .hex { font-family: var(--mono); font-size: 12px; color: var(--paper); }
+  .chip .name { font-size: 13px; font-weight: 600; margin-top: 4px; }
+  .chip .role { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+
+  /* ---------- Typography ---------- */
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .type-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px; min-width: 0; }
+  .type-card .spec { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 18px; letter-spacing: .04em; }
+  .t-wordmark { font-weight: 500; font-size: clamp(20px, 6.4vw, 30px); letter-spacing: .16em; white-space: nowrap; }
+  .t-heading { font-weight: 600; font-size: 26px; }
+  .t-body { font-weight: 400; font-size: 16px; color: var(--muted); }
+  .t-mono { font-family: var(--mono); font-weight: 400; font-size: 14px; color: var(--paper); overflow-x: auto; white-space: nowrap; }
+  .t-mono .cmt { color: var(--muted); }
+
+  /* ---------- Developer reference ---------- */
+  .dev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .code-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; min-width: 0; }
+  .code-card h3 {
+    font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+  }
+  .code-card pre { padding: 18px 20px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; }
+  .code-card .wide { grid-column: 1 / -1; }
+  /* plain-span syntax highlighting — palette colors only */
+  .c-k, .c-p, .c-f { color: var(--paper); }      /* keywords, keys, filenames */
+  .c-s { color: var(--phosphor); }               /* strings, values */
+  .c-t, .c-c { color: var(--muted); }            /* punctuation, comments */
+
+  /* ---------- Footer ---------- */
+  footer { border-top: 1px solid var(--border); padding: 40px 0 56px; }
+  footer .inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  footer .brand { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--muted); }
+
+  @media (max-width: 780px) {
+    .concept-grid, .variants, .type-grid, .dev-grid { grid-template-columns: 1fr; }
+    .card.full { grid-column: auto; }
+    section { padding: 64px 0; }
+    .hero { padding: 88px 0 72px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= HERO ======================= -->
+<header class="hero">
+  <div class="container">
+    <span class="label">Brand Identity</span>
+    <svg class="mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Agent Skills mark">
+      <defs>
+        <filter id="cardGlow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+          <feFlood flood-color="#00FF41" flood-opacity="0.5" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="#FAFAFA"/>
+      <path d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="#00FF41" fill-rule="evenodd" filter="url(#cardGlow)"/>
+    </svg>
+    <h1>AGENT SKILLS</h1>
+    <p class="tagline">Plug in. Power up.</p>
+    <p class="lede">A brand identity for plug-and-play agent capabilities — a skill card seated in the agent ring, forming the universal power-on symbol.</p>
+  </div>
+</header>
+
+<!-- ======================= CONCEPT ======================= -->
+<section id="concept">
+  <div class="container">
+    <span class="label">Design Concept</span>
+    <h2>The Keyed Slot</h2>
+    <p class="section-sub">One symbol, one idea: the moment a skill is loaded, the agent powers on.</p>
+    <div class="concept-grid">
+      <div class="concept-figure">
+        <div class="markbox">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Annotated Agent Skills mark">
+            <path d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="#FAFAFA"/>
+            <path d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="#00FF41" fill-rule="evenodd"/>
+          </svg>
+          <span class="mk" style="left:47%;top:28%">1</span>
+          <span class="mk" style="left:69%;top:20%">2</span>
+          <span class="mk" style="left:50%;top:89%">3</span>
+        </div>
+        <ol class="legend">
+          <li><div><b>Skill card</b><br><span>the chamfer and contacts make it a memory card</span></div></li>
+          <li><div><b>Keyed slot</b><br><span>the ring is cut parallel to the card with a uniform clearance</span></div></li>
+          <li><div><b>Agent ring</b><br><span>an open loop; card + ring = the power-on symbol</span></div></li>
+        </ol>
+      </div>
+      <div class="concept-copy">
+        <p><strong>“I know kung fu.”</strong> The mark is inspired by The Matrix: Tank loads a program, Neo opens his eyes, and he is instantly capable. A skill is plugged in — the agent powers on with a new ability.</p>
+        <p><strong>Plug in, power up.</strong> A chamfered memory card seated in an open agent ring reads as the universal power symbol — the instant a skill connects, the system comes alive.</p>
+        <p><strong>Engineered fit.</strong> The keyed cut in the ring runs parallel to the card with a uniform clearance — a precise, plug-and-play socket rather than decoration.</p>
+        <p><strong>Color as signal.</strong> Phosphor <span class="c-s" style="font-family:var(--mono)">#00FF41</span> is the Matrix code green and the “powered on” LED — it lives only on the card, and only on dark surfaces. On light backgrounds the mark switches to Phosphor Deep <span class="c-s" style="font-family:var(--mono)">#008F11</span>, where pure phosphor is too weak.</p>
+        <p><strong>Calm counterweight.</strong> The wordmark is tracked caps in Instrument Sans Medium — quiet, premium typography against the bold mark, and the same typeface as the docs site.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= VARIANTS ======================= -->
+<section id="variants">
+  <div class="container">
+    <span class="label">Logo Variants</span>
+    <h2>One mark, seven files</h2>
+    <p class="section-sub">Every variant carries the same canonical geometry — only fills and scale change.</p>
+    <div class="variants">
+      <div class="card light full">
+        <span class="tag">Primary · light</span>
+        <img class="img-full" src="logo-full.svg" alt="Agent Skills full lockup on light">
+        <span class="file">logo-full.svg</span>
+      </div>
+      <div class="card dark full">
+        <span class="tag">Reversed · dark</span>
+        <img class="img-full" src="logo-white.svg" alt="Agent Skills full lockup in white on dark">
+        <span class="file">logo-white.svg</span>
+      </div>
+      <div class="card light">
+        <span class="tag">Mark · light</span>
+        <img class="img-mark" src="logo-mark.svg" alt="Agent Skills mark on light">
+        <span class="file">logo-mark.svg</span>
+      </div>
+      <div class="card light">
+        <span class="tag">App icon</span>
+        <img class="img-icon" src="logo-icon.svg" alt="Agent Skills app icon">
+        <span class="file">logo-icon.svg</span>
+      </div>
+      <div class="card light">
+        <span class="tag">Wordmark</span>
+        <img class="img-wordmark" src="logo-wordmark.svg" alt="Agent Skills wordmark">
+        <span class="file">logo-wordmark.svg</span>
+      </div>
+      <div class="card dark">
+        <span class="tag">Favicon</span>
+        <div class="favicon-sizes">
+          <figure><img src="favicon.svg" width="64" height="64" alt="Favicon at 64px"><figcaption>64px</figcaption></figure>
+          <figure><img src="favicon.svg" width="32" height="32" alt="Favicon at 32px"><figcaption>32px</figcaption></figure>
+          <figure><img src="favicon.svg" width="16" height="16" alt="Favicon at 16px"><figcaption>16×16px</figcaption></figure>
+        </div>
+        <span class="file">favicon.svg</span>
+      </div>
+      <div class="card light full">
+        <span class="tag">Mono · print</span>
+        <img class="img-full" src="logo-black.svg" alt="Agent Skills full lockup in black">
+        <span class="file">logo-black.svg</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= PALETTE ======================= -->
+<section id="palette">
+  <div class="container">
+    <span class="label">Color Palette</span>
+    <h2>Dark surface, phosphor signal</h2>
+    <p class="section-sub">Phosphor is reserved for the powered-on card — never large fills, never body text.</p>
+    <div class="pal-group">
+      <h3 class="pal-label">Neutrals</h3>
+      <div class="palette pal-neutrals">
+        <div class="chip">
+          <div class="swatch" style="background:#0A0A0A"></div>
+          <div class="meta"><div class="hex">#0A0A0A</div><div class="name">Ink</div><div class="role">Ring &amp; wordmark on light; page background</div></div>
+        </div>
+        <div class="chip">
+          <div class="swatch" style="background:#111111"></div>
+          <div class="meta"><div class="hex">#111111</div><div class="name">Surface</div><div class="role">Dark cards, elevated panels</div></div>
+        </div>
+        <div class="chip">
+          <div class="swatch" style="background:#262626"></div>
+          <div class="meta"><div class="hex">#262626</div><div class="name">Border</div><div class="role">Hairlines, dark card borders</div></div>
+        </div>
+        <div class="chip">
+          <div class="swatch" style="background:#A3A3A3"></div>
+          <div class="meta"><div class="hex">#A3A3A3</div><div class="name">Muted</div><div class="role">Secondary text, captions</div></div>
+        </div>
+        <div class="chip">
+          <div class="swatch" style="background:#FAFAFA"></div>
+          <div class="meta"><div class="hex">#FAFAFA</div><div class="name">Paper</div><div class="role">Light surfaces; ring on dark</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="pal-group">
+      <h3 class="pal-label">Signal</h3>
+      <div class="palette pal-signal">
+        <div class="chip">
+          <div class="swatch" style="background:#00FF41"></div>
+          <div class="meta"><div class="hex">#00FF41</div><div class="name">Phosphor</div><div class="role">The card on dark — powered-on signal</div></div>
+        </div>
+        <div class="chip">
+          <div class="swatch" style="background:#008F11"></div>
+          <div class="meta"><div class="hex">#008F11</div><div class="name">Phosphor Deep</div><div class="role">The card on light — phosphor is too weak there</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= TYPOGRAPHY ======================= -->
+<section id="typography">
+  <div class="container">
+    <span class="label">Typography</span>
+    <h2>Instrument Sans + IBM Plex Mono</h2>
+    <p class="section-sub">Tracked caps carry the brand; the docs site’s own typeface carries the UI.</p>
+    <div class="type-grid">
+      <div class="type-card">
+        <div class="t-wordmark">AGENT SKILLS</div>
+        <div class="spec">Wordmark · Instrument Sans Medium 500 · all caps · +0.16em tracking · outlined in every SVG</div>
+      </div>
+      <div class="type-card">
+        <div class="t-heading">Plug in. Power up.</div>
+        <div class="spec">Headings · Instrument Sans SemiBold 600</div>
+      </div>
+      <div class="type-card">
+        <div class="t-body">A skill is a portable unit of agent capability. Seat the card in the ring and the agent powers on — no retraining, no reboot.</div>
+        <div class="spec">Body · Instrument Sans Regular 400</div>
+      </div>
+      <div class="type-card">
+        <div class="t-mono">$ npx skills add \<br>&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/luongnv89/skills \<br>&nbsp;&nbsp;&nbsp;&nbsp;--skill logo-designer<br><span class="cmt"># skill card seated, agent powered on</span></div>
+        <div class="spec">Code &amp; filenames · IBM Plex Mono 400/500</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= DEVELOPER REFERENCE ======================= -->
+<section id="dev">
+  <div class="container">
+    <span class="label">Developer Reference</span>
+    <h2>Drop-in tokens</h2>
+    <p class="section-sub">Copy-paste config for the palette, plus the asset map.</p>
+    <div class="dev-grid">
+      <div class="code-card">
+        <h3>tailwind.config.js</h3>
+<pre><span class="c-p">colors</span><span class="c-t">:</span> <span class="c-t">{</span>
+  <span class="c-p">brand</span><span class="c-t">:</span> <span class="c-t">{</span>
+    <span class="c-p">ink</span><span class="c-t">:</span> <span class="c-s">'#0A0A0A'</span><span class="c-t">,</span>
+    <span class="c-p">surface</span><span class="c-t">:</span> <span class="c-s">'#111111'</span><span class="c-t">,</span>
+    <span class="c-p">border</span><span class="c-t">:</span> <span class="c-s">'#262626'</span><span class="c-t">,</span>
+    <span class="c-p">muted</span><span class="c-t">:</span> <span class="c-s">'#A3A3A3'</span><span class="c-t">,</span>
+    <span class="c-p">paper</span><span class="c-t">:</span> <span class="c-s">'#FAFAFA'</span><span class="c-t">,</span>
+    <span class="c-p">phosphor</span><span class="c-t">:</span> <span class="c-s">'#00FF41'</span><span class="c-t">,</span>
+    <span class="c-s">'phosphor-deep'</span><span class="c-t">:</span> <span class="c-s">'#008F11'</span><span class="c-t">,</span>
+  <span class="c-t">}</span>
+<span class="c-t">}</span></pre>
+      </div>
+      <div class="code-card">
+        <h3>CSS variables</h3>
+<pre><span class="c-k">:root</span> <span class="c-t">{</span>
+  <span class="c-p">--brand-ink</span><span class="c-t">:</span> <span class="c-s">#0A0A0A</span><span class="c-t">;</span>
+  <span class="c-p">--brand-surface</span><span class="c-t">:</span> <span class="c-s">#111111</span><span class="c-t">;</span>
+  <span class="c-p">--brand-border</span><span class="c-t">:</span> <span class="c-s">#262626</span><span class="c-t">;</span>
+  <span class="c-p">--brand-muted</span><span class="c-t">:</span> <span class="c-s">#A3A3A3</span><span class="c-t">;</span>
+  <span class="c-p">--brand-paper</span><span class="c-t">:</span> <span class="c-s">#FAFAFA</span><span class="c-t">;</span>
+  <span class="c-p">--brand-phosphor</span><span class="c-t">:</span> <span class="c-s">#00FF41</span><span class="c-t">;</span>
+  <span class="c-p">--brand-phosphor-deep</span><span class="c-t">:</span> <span class="c-s">#008F11</span><span class="c-t">;</span>
+<span class="c-t">}</span></pre>
+      </div>
+      <div class="code-card">
+        <h3>Favicon</h3>
+<pre><span class="c-t">&lt;</span><span class="c-k">link</span> <span class="c-p">rel</span><span class="c-t">=</span><span class="c-s">"icon"</span> <span class="c-p">type</span><span class="c-t">=</span><span class="c-s">"image/svg+xml"</span>
+      <span class="c-p">href</span><span class="c-t">=</span><span class="c-s">"assets/logo/favicon.svg"</span><span class="c-t">&gt;</span></pre>
+      </div>
+      <div class="code-card">
+        <h3>File map — assets/logo/</h3>
+<pre><span class="c-f">logo-full.svg      </span><span class="c-c">mark + wordmark lockup (light bg)</span>
+<span class="c-f">logo-white.svg     </span><span class="c-c">full lockup, all white (dark bg)</span>
+<span class="c-f">logo-black.svg     </span><span class="c-c">full lockup, all black (mono/print)</span>
+<span class="c-f">logo-mark.svg      </span><span class="c-c">mark only — canonical source</span>
+<span class="c-f">logo-icon.svg      </span><span class="c-c">512 app icon on ink tile</span>
+<span class="c-f">logo-wordmark.svg  </span><span class="c-c">outlined caps wordmark</span>
+<span class="c-f">favicon.svg        </span><span class="c-c">16px redraw: tile, no contacts</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container inner">
+    <span class="brand">Agent Skills · Brand Identity · Luong NGUYEN</span>
+    <span class="brand">Plug in. Power up.</span>
+  </div>
+</footer>
+
+</body>
+</html>
