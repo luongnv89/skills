@@ -20,7 +20,7 @@ assets/logo/
 └── brand-showcase.html  # Brand identity showcase page
 ```
 
-Root README uses `assets/logo/logo-icon.svg` (`README.md:2`). The GitHub Pages site uses copies in `docs/assets/logo/` (`favicon.svg`, `logo-icon.svg`, `logo-full.svg`), which must stay byte-identical to `assets/logo/`.
+Root README uses `assets/logo/logo-icon.svg` (`README.md:2`). The GitHub Pages site serves byte-identical copies of all eight files from `docs/assets/logo/`, so the showcase is live at https://luongnv89.github.io/skills/assets/logo/brand-showcase.html. Re-copy them whenever `assets/logo/` changes.
 
 ### Usage Guidelines
 
@@ -105,4 +105,4 @@ Both are OFL-licensed Google Fonts.
 4. **Scales to 16px** — the favicon drops the contacts and adds a tile
 5. **High contrast** — Ink/Paper 18.97:1, Phosphor/Ink 14.50:1, Phosphor Deep/Paper 4.08:1 (WCAG relative luminance)
 
-Note: the docs site UI accent is still `#22C55E` (`docs/index.html` `--accent`); moving it to Phosphor is a separate change.
+The GitHub Pages landing page (`docs/index.html`) uses these tokens directly. Phosphor appears there only as a signal (the mark's card, status dots, eyebrow labels, focus rings), never as a button fill or body text.

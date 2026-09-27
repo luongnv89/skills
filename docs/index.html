@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>document.documentElement.classList.add('js');</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent Skills — Ready-made skills for AI coding agents</title>
+  <title>Agent Skills — Plug in a skill. Your agent knows it.</title>
   <!--
     SKILL COUNT — counting rule (do not guess it; it is asserted mechanically).
 
@@ -15,12 +16,12 @@
                count.
       Command: git ls-files skills | grep -c '/SKILL\.md$'
                (equivalently, on a clean tree: find skills -name SKILL.md | wc -l)
-      Value:   42 skills
+      Value:   48 skills
 
     The number appears in five page-visible places: this meta description, the
-    hero badge, the "Current catalog docs" card, the "N skills" social-proof
-    card, and the footer line under it — plus the Value line above, which is
-    written in the same "<n> skills" form on purpose so that it is checked too.
+    hero release pill, the "N skills" stat, the "View all N skills" catalog
+    button, and the footer line — plus the Value line above, which is written
+    in the same "<n> skills" form on purpose so that it is checked too.
     Change all six together.
 
     scripts/validate-contribute.sh re-derives the count and fails when any of
@@ -30,25 +31,26 @@
     remove a site, update expected_sites in that script. Run it after adding or
     removing a skill.
   -->
-  <meta name="description" content="Agent Skills v2.0.0 — 42 installable workflows for AI coding agents. Browse the GitHub Pages catalog, install with one command. Claude Code, Cursor, Copilot, Codex, OpenCode, and Google Antigravity. MIT licensed.">
+  <meta name="description" content="Agent Skills — 48 installable workflows for AI coding agents. Install one with a single command for Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, or Google Antigravity. MIT licensed.">
+  <meta name="theme-color" content="#0A0A0A">
   <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Sans:wdth,wght@75..100,400..700&amp;display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0a;
+      color-scheme: dark;
+      --ink: #0A0A0A;
       --surface: #111111;
-      --surface-2: #1a1a1a;
       --border: #262626;
-      --text: #f5f5f5;
-      --muted: #a3a3a3;
-      --accent: #22c55e;
-      --accent-dim: #16a34a;
-      --accent-glow: rgba(34, 197, 94, 0.15);
-      --max: 1120px;
-      --radius: 12px;
-      --transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --border-hi: #3A3A3A;
+      --muted: #A3A3A3;
+      --paper: #FAFAFA;
+      --phosphor: #00FF41;
+      --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+      --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+      --sans: "Instrument Sans", system-ui, -apple-system, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,886 +58,1498 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: "Instrument Sans", system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 400;
+      font-size: 17px;
       line-height: 1.6;
+      background: var(--ink);
+      color: var(--paper);
       -webkit-font-smoothing: antialiased;
     }
 
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    a { color: inherit; text-decoration: none; }
 
-    .mono { font-family: "IBM Plex Mono", monospace; }
+    :focus-visible {
+      outline: 2px solid var(--phosphor);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
 
     .container {
-      width: min(var(--max), calc(100% - 2rem));
+      max-width: 1160px;
       margin-inline: auto;
+      padding-inline: 32px;
     }
 
-    /* Nav */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      border-bottom: 1px solid var(--border);
-      background: rgba(10, 10, 10, 0.85);
-      backdrop-filter: blur(12px);
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      clip-path: inset(50%); overflow: hidden; white-space: nowrap;
     }
 
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 0;
-      gap: 1rem;
-      position: relative;
+    .skip {
+      position: absolute; left: 16px; top: -60px; z-index: 100;
+      padding: 10px 18px; border-radius: 10px;
+      background: var(--paper); color: var(--ink);
+      font-weight: 600; font-size: 14px;
+      transition: top 180ms var(--ease-out);
     }
+    .skip:focus-visible { top: 12px; }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: var(--text);
-      text-decoration: none;
+    /* ---------- Type ---------- */
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--phosphor);
+    }
+    h1 {
+      font-size: clamp(2.6rem, 6.2vw, 4.75rem);
       font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.02;
     }
-
-    .brand img { width: 36px; height: 36px; }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      font-size: 0.9rem;
+    h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.08;
     }
+    h1, h2, h3 { text-wrap: balance; }
+    p, .lead { text-wrap: pretty; }
+    .lead { font-size: 19px; color: var(--muted); }
 
-    .nav-links a { color: var(--muted); text-decoration: none; }
-    .nav-links a:hover { color: var(--text); text-decoration: none; }
-
-    .menu-toggle {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 44px;
-      height: 44px;
-      border-radius: 6px;
-      font-size: 1.25rem;
-      line-height: 1;
-      cursor: pointer;
-      transition: border-color var(--transition);
-    }
-
-    .menu-toggle:hover { border-color: var(--accent); }
-
-    /* Buttons — Precision Plug */
+    /* ---------- Buttons ---------- */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 22px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-family: var(--sans);
+      font-size: 15px;
       font-weight: 600;
-      font-size: 0.95rem;
-      text-decoration: none;
-      border: none;
       cursor: pointer;
-      transition: all var(--transition);
+      transition: transform 120ms var(--ease-out),
+                  background-color 180ms var(--ease-out),
+                  border-color 180ms var(--ease-out),
+                  color 180ms var(--ease-out);
     }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--paper); color: var(--ink); }
+    .btn-secondary { background: transparent; color: var(--paper); border-color: var(--border); }
+    .btn-sm { min-height: 36px; padding: 0 14px; font-size: 13.5px; border-radius: 8px; }
 
-    .btn:hover { text-decoration: none; transform: translateY(-1px); }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 3px;
+    @media (hover: hover) and (pointer: fine) {
+      .btn-primary:hover { background: #FFFFFF; transform: translateY(-1px); }
+      .btn-secondary:hover { border-color: var(--border-hi); transform: translateY(-1px); }
     }
+    .btn-secondary:focus-visible { border-color: var(--border-hi); }
 
-    .nav-links a:focus-visible,
-    .menu-toggle:focus-visible,
-    .tag:focus-visible,
-    .copy-btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #0a0a0a;
-      box-shadow: 0 0 0 0 var(--accent-glow);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-dim);
-      box-shadow: 0 4px 24px var(--accent-glow);
-    }
-
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
+    /* ---------- Command block ---------- */
+    .cmd {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: 640px;
+      margin-inline: auto;
+      padding: 6px 6px 6px 18px;
+      background: var(--surface);
       border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .cmd .prompt { color: var(--muted); font-family: var(--mono); font-size: 14px; flex: none; }
+    .cmd-scroll {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+      mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+    }
+    .cmd-scroll::-webkit-scrollbar { display: none; }
+    .cmd-scroll code {
+      display: block;
+      white-space: nowrap;
+      padding: 12px 8px 12px 0;
+      font-family: var(--mono);
+      font-size: 13.5px;
+      color: var(--paper);
+    }
+    .cmd-rows { display: block; padding: 0; }
+    .cmd-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 6px 6px 18px;
+    }
+    .cmd-row + .cmd-row { border-top: 1px solid var(--border); }
+    .cmd-row .copy { min-width: 34px; min-height: 34px; padding: 0 8px; }
+    .cmd-alt { margin: 14px auto 30px; color: var(--muted); font-size: 13.5px; }
+    .cmd-alt a {
+      color: var(--paper);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--border-hi);
+    }
+    .copy {
+      flex: none;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 44px; min-height: 44px;
+      padding: 0 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 120ms var(--ease-out);
+    }
+    .js .copy { display: inline-flex; }
+    .copy:active { transform: scale(.97); }
+    .copy.copied { color: var(--phosphor); border-color: var(--border-hi); }
+    @media (hover: hover) and (pointer: fine) {
+      .copy:hover { color: var(--paper); border-color: var(--border-hi); }
     }
 
-    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    /* ---------- Nav ---------- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(10, 10, 10, .8);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      height: 64px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      color: var(--paper);
+    }
+    .brand .bmark { display: block; }
+    .brand .bword { display: block; height: 11px; width: auto; color: var(--paper); }
+    .nav-links { display: flex; align-items: center; gap: 26px; }
+    .nav-links a:not(.btn) {
+      color: var(--muted);
+      font-size: 14.5px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      transition: color 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .nav-links a:not(.btn):hover { color: var(--paper); }
+    }
+    .nav-links a:not(.btn):focus-visible { color: var(--paper); }
 
-    /* Hero */
+    .menu-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 44px; height: 44px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--paper);
+      cursor: pointer;
+      transition: border-color 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .menu-btn:hover { border-color: var(--border-hi); }
+    }
+    .nav-panel { display: none; }
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .menu-btn { display: inline-flex; }
+      .nav-panel {
+        position: absolute;
+        top: 100%; left: 0; right: 0;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 32px 20px;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .nav-panel.open { display: flex; }
+      .nav-panel a:not(.btn) {
+        display: flex; align-items: center;
+        min-height: 44px;
+        color: var(--muted);
+        font-size: 15px;
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-panel .btn { margin-top: 14px; align-self: flex-start; }
+    }
+
+    /* ---------- Hero ---------- */
     .hero {
-      padding: 5rem 0 4rem;
-      text-align: center;
       position: relative;
+      text-align: center;
+      padding: clamp(88px, 12vw, 148px) 0 clamp(72px, 9vw, 110px);
       overflow: hidden;
     }
-
     .hero::before {
       content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--accent-glow), transparent 70%);
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg,
+        rgba(250, 250, 250, .045) 0 1px, transparent 1px 56px);
+      -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 30%, #000 30%, transparent 75%);
+      mask-image: radial-gradient(ellipse 70% 80% at 50% 30%, #000 30%, transparent 75%);
       pointer-events: none;
     }
-
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 50%; top: 120px;
+      width: 480px; height: 320px;
+      transform: translateX(-50%);
+      background: radial-gradient(closest-side, rgba(0, 255, 65, .10), transparent);
+      pointer-events: none;
+    }
     .hero .container { position: relative; }
-
-    .badge {
-      display: inline-block;
-      padding: 0.35rem 0.85rem;
+    .hero .hmark { width: 132px; height: 132px; margin: 0 auto 36px; display: block; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 34px;
+      padding: 0 16px;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: var(--surface);
-      font-size: 0.8rem;
+      font-family: var(--mono);
+      font-size: 12.5px;
       color: var(--muted);
-      margin-bottom: 1.5rem;
+      transition: border-color 150ms var(--ease-out), color 150ms var(--ease-out);
     }
-
-    .badge strong { color: var(--accent); }
-
-    h1 {
-      font-size: clamp(2.25rem, 5vw, 3.5rem);
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      max-width: 18ch;
-      margin-inline: auto;
+    .pill .led {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--phosphor);
+      flex: none;
     }
-
-    .hero-sub {
-      margin-top: 1.25rem;
-      font-size: clamp(1.05rem, 2vw, 1.25rem);
+    .pill svg { width: 11px; height: 11px; }
+    @media (hover: hover) and (pointer: fine) {
+      .pill:hover { border-color: var(--border-hi); color: var(--paper); }
+    }
+    .pill:focus-visible { color: var(--paper); }
+    .hero h1 { margin: 30px 0 22px; }
+    .hero h1 .ph { color: var(--phosphor); }
+    .hero .sub {
       color: var(--muted);
-      max-width: 52ch;
-      margin-inline: auto;
+      font-size: 19px;
+      max-width: 560px;
+      margin: 0 auto 34px;
     }
+    .hero .cmd { margin-bottom: 14px; text-align: left; }
+    .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
-    .hero-cta {
-      margin-top: 2rem;
+    /* Hero plug-in sequence — plays once */
+    @keyframes cardIn {
+      from { transform: translateY(-24px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    @keyframes ringOn { to { opacity: 1; } }
+    @keyframes glowOn { to { opacity: .55; } }
+    @keyframes heroUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero .hring  { opacity: .28; animation: ringOn 260ms var(--ease-out) 520ms both; }
+    .hero .hcard  { opacity: 0; transform: translateY(-24px); transform-box: fill-box;
+                    animation: cardIn 600ms var(--ease-out) 0ms both; }
+    .hero .hglow  { opacity: 0; animation: glowOn 400ms var(--ease-out) 560ms both; }
+    .hero .fadeup { opacity: 0; animation: heroUp 360ms var(--ease-out)
+                    calc(700ms + var(--i, 0) * 60ms) both; }
+
+    /* ---------- Tool strip ---------- */
+    .tools {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 0;
+    }
+    .tools ul {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
       justify-content: center;
-    }
-
-    .trust-bar {
-      margin-top: 2.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      justify-content: center;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .trust-bar span { display: flex; align-items: center; gap: 0.4rem; }
-    .trust-bar .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-
-    /* Sections */
-    section { padding: 4.5rem 0; }
-
-    section + section { border-top: 1px solid var(--border); }
-
-    .section-label {
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 0.75rem;
+      gap: 10px 30px;
+      list-style: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .14em;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      margin-bottom: 0.75rem;
-    }
-
-    h2 {
-      font-size: clamp(1.75rem, 3vw, 2.25rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
-    }
-
-    .lead {
       color: var(--muted);
-      font-size: 1.1rem;
-      max-width: 60ch;
-      margin-bottom: 2rem;
+    }
+    .tools li:first-child { color: var(--paper); }
+
+    /* ---------- Sections ---------- */
+    .section {
+      padding: clamp(88px, 12vw, 148px) 0;
+    }
+    .section + .section { border-top: 1px solid var(--border); }
+    .section-head { max-width: 640px; margin-bottom: 56px; }
+    .section-head .eyebrow { display: block; margin-bottom: 16px; }
+    .section-head h2 { margin-bottom: 18px; }
+
+    /* ---------- Reveal ---------- */
+    .js [data-reveal] {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
+      transition-delay: calc(var(--i, 0) * 60ms);
+    }
+    .js [data-reveal].is-in { opacity: 1; transform: none; }
+
+    /* ---------- Why ---------- */
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .pane {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      padding: 30px;
+    }
+    .pane h3 {
+      font-size: 15px; font-weight: 600;
+      margin-bottom: 20px;
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .pane h3 .k {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+    }
+    .pane ul { list-style: none; }
+    .pane li {
+      display: flex; gap: 12px; align-items: baseline;
+      padding: 9px 0;
+      font-size: 15.5px;
+    }
+    .pane.adhoc { color: var(--muted); }
+    .pane.adhoc li::before { content: "–"; color: var(--muted); flex: none; }
+    .pane.skill { border-color: var(--border-hi); }
+    .pane.skill li::before {
+      content: "";
+      flex: none;
+      width: 11px; height: 6px;
+      border-left: 2px solid var(--phosphor);
+      border-bottom: 2px solid var(--phosphor);
+      transform: rotate(-45deg) translate(1px, -3px);
     }
 
-    /* Cards & Features — Precision Plug polish */
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.25rem;
+    /* ---------- Steps ---------- */
+    .steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-bottom: 44px; }
+    .step { position: relative; padding: 30px 30px 30px 0; }
+    .step + .step { padding-left: 30px; border-left: 1px solid var(--border); }
+    .step + .step::before {
+      content: "";
+      position: absolute; left: -4px; top: 38px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--border-hi);
     }
+    .step .num {
+      font-family: var(--mono); font-size: 13px; font-weight: 500;
+      color: var(--phosphor); letter-spacing: .1em;
+      display: block; margin-bottom: 14px;
+    }
+    .step h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .step p { color: var(--muted); font-size: 15px; }
 
-    .card {
+    /* ---------- Terminal ---------- */
+    .tpanel {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
-      position: relative;
+      border-radius: 14px;
       overflow: hidden;
     }
-
-    .card::before {
-      content: "";
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 0;
-      background: var(--accent);
-      transition: width 0.2s ease;
+    .tpanel .thead {
+      padding: 0 12px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
-
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(34, 197, 94, 0.35);
-      box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
+    html:not(.js) .tpanel .thead { display: none; }
+    .tabs { display: none; gap: 4px; }
+    .js .tabs { display: flex; }
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 10px 11px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 150ms var(--ease-out);
     }
-
-    .card:hover::before { width: 3px; }
-
-    .card h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+    .tab[aria-selected="true"] { color: var(--paper); border-bottom-color: var(--phosphor); }
+    .tab .tag {
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--phosphor);
     }
-
-    .card p { color: var(--muted); font-size: 0.95rem; }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
+    @media (hover: hover) and (pointer: fine) {
+      .tab:not([aria-selected="true"]):hover { color: var(--paper); }
     }
-
-    .feature {
-      padding: 1.5rem;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
-      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    .plabel {
+      padding: 14px 20px 0;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
-
-    .feature:hover {
-      transform: translateY(-2px);
-      border-color: rgba(34, 197, 94, 0.3);
-      box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.4);
-    }
-
-    .feature-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: var(--accent-glow);
-      border: 1px solid rgba(34, 197, 94, 0.3);
+    .js .plabel { display: none; }
+    .js .tpanel [role="tabpanel"]:not(.is-open) { display: none; }
+    .tbody { padding: 10px 12px; overflow-x: auto; }
+    .trow {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-      transition: transform 0.2s ease, background 0.2s ease;
+      gap: 12px;
+      border-radius: 8px;
+      padding: 0 8px 0 10px;
+      min-height: 42px;
     }
-
-    .feature:hover .feature-icon {
-      transform: scale(1.08);
-      background: rgba(34, 197, 94, 0.12);
+    .trow .tcode {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      white-space: nowrap;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--paper);
+      padding: 11px 0;
     }
-
-    .feature h3 { font-size: 1.05rem; margin-bottom: 0.5rem; }
-    .feature p { color: var(--muted); font-size: 0.9rem; }
-
-    /* Steps */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
+    .trow .tcode::-webkit-scrollbar { display: none; }
+    .trow .tcode .prompt { color: var(--muted); }
+    .trow.tcomment .tcode { color: var(--muted); overflow: visible; }
+    .trow .copy {
+      min-height: 34px; min-width: 34px;
+      padding: 0 8px;
+      opacity: 0;
+      transition: opacity 150ms var(--ease-out), color 150ms var(--ease-out),
+                  border-color 150ms var(--ease-out), transform 120ms var(--ease-out);
     }
-
-    .step-num {
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 0.75rem;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.08em;
+    .trow .copy svg { width: 14px; height: 14px; }
+    @media (hover: none) { .trow .copy { opacity: 1; } }
+    @media (hover: hover) and (pointer: fine) {
+      .trow:hover .copy, .trow:focus-within .copy { opacity: 1; }
     }
-
-    /* Code block with copy */
-    .code-block {
+    .trow .copy:focus-visible { opacity: 1; }
+    .picker {
+      margin: 4px 8px 12px 36px;
+      background: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      overflow-x: auto;
+    }
+    .picker pre {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+      white-space: pre;
+    }
+    .picker .pk { color: var(--muted); }
+    .picker .pc { color: var(--phosphor); }
+    .picker .pn { color: var(--paper); font-weight: 500; }
+    .picker figcaption {
+      margin-top: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    @media (max-width: 760px) {
+      .picker { margin-left: 8px; }
+    }
+    .upgrade-note {
+      margin: 26px 0 22px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .asm-note {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 640px;
+    }
+    .asm-note a {
+      color: var(--paper);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--border-hi);
+    }
+    .upgrade-note code {
+      font-family: var(--mono); font-size: 13px;
+      color: var(--paper);
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      margin-top: 2rem;
-      overflow-x: auto;
-      position: relative;
-    }
-
-    .code-block code {
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 0.85rem;
-      color: var(--accent);
-      white-space: pre;
-      display: block;
-      padding-right: 4rem;
-    }
-
-    .copy-btn {
-      position: absolute;
-      top: 0.6rem;
-      right: 0.6rem;
-      font-family: "IBM Plex Mono", monospace;
-      font-size: 0.68rem;
-      padding: 0.5rem 0.75rem;
-      min-height: 44px;
-      min-width: 44px;
-      background: var(--surface-2);
-      color: var(--accent);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all var(--transition);
-      line-height: 1;
-    }
-
-    .copy-btn:hover {
-      border-color: var(--accent);
-      background: rgba(34, 197, 94, 0.08);
-    }
-
-    .copy-btn.copied {
-      color: var(--text);
-      border-color: var(--accent);
-    }
-
-    /* Categories & Tags */
-    .categories {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      margin-top: 1.5rem;
-    }
-
-    .tag {
-      padding: 0.4rem 0.85rem;
       border-radius: 6px;
-      background: var(--surface-2);
+      padding: 2px 7px;
+    }
+
+    /* ---------- Bento ---------- */
+    .bento { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .tile {
+      background: var(--surface);
       border: 1px solid var(--border);
-      font-size: 0.85rem;
-      color: var(--muted);
-      transition: all var(--transition);
+      border-radius: 14px;
+      padding: 30px;
+      transition: border-color 180ms var(--ease-out), transform 180ms var(--ease-out);
     }
-
-    .tag:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+    .tile.wide { grid-column: span 2; }
+    .tile h3 { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+    .tile p { color: var(--muted); font-size: 15px; max-width: 46ch; }
+    .tile .num {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: .16em; color: var(--muted);
+      display: block; margin-bottom: 20px;
     }
-
-    /* FAQ */
-    .faq-list { margin-top: 2rem; }
-
-    .faq-item {
-      border-bottom: 1px solid var(--border);
-      padding: 1.25rem 0;
+    @media (hover: hover) and (pointer: fine) {
+      .tile:hover { border-color: var(--border-hi); transform: translateY(-2px); }
     }
-
-    .faq-item:last-child { border-bottom: none; }
-
-    .faq-item h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-
-    .faq-item p { color: var(--muted); font-size: 0.95rem; }
-
-    /* Final CTA */
-    .final-cta {
-      text-align: center;
-      padding: 5rem 0;
-      background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 50%, var(--bg) 100%);
-    }
-
-    .final-cta h2 { margin-bottom: 0.75rem; }
-    .final-cta .lead { margin-inline: auto; margin-bottom: 2rem; }
-
-    .risk-reversal {
-      margin-top: 1.25rem;
-      font-size: 0.85rem;
+    .minitree {
+      margin-top: 20px;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.9;
       color: var(--muted);
     }
+    .minitree .dir { color: var(--paper); }
 
-    /* Footer */
-    footer {
+    /* ---------- Stats ---------- */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
       border-top: 1px solid var(--border);
-      padding: 2rem 0;
-      text-align: center;
-      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat { padding: clamp(48px, 6vw, 80px) 32px; }
+    .stat + .stat { border-left: 1px solid var(--border); }
+    .stat .big {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.08;
+      margin-bottom: 12px;
+    }
+    .stat p { color: var(--muted); font-size: 15px; }
+
+    /* ---------- Catalog ---------- */
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 44px; }
+    .chip-link {
+      display: inline-flex; align-items: center;
+      min-height: 38px; padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-family: var(--mono); font-size: 12.5px;
+      color: var(--muted);
+      transition: color 150ms var(--ease-out), border-color 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .chip-link:hover { color: var(--paper); border-color: var(--border-hi); }
+    }
+    .chip-link:focus-visible { color: var(--paper); }
+
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .scard {
+      --c: 18px;
+      display: block;
+      padding: 1px;
+      border-radius: 14px;
+      background: var(--border);
+      clip-path: polygon(0 0, calc(100% - var(--c)) 0, 100% var(--c), 100% 100%, 0 100%);
+      transition: background-color 200ms var(--ease-out);
+    }
+    .scard-in {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 24px 24px 20px;
+      border-radius: 13px;
+      background: var(--surface);
+      clip-path: polygon(0 0, calc(100% - (var(--c) - 0.586px)) 0, 100% calc(var(--c) - 0.586px), 100% 100%, 0 100%);
+    }
+    .scard .cat {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .scard .name {
+      font-family: var(--mono); font-size: 17px; font-weight: 500;
+      color: var(--paper);
+      margin-bottom: 8px;
+    }
+    .scard .desc { color: var(--muted); font-size: 14.5px; flex: 1; }
+    .scard .foot {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 22px;
+    }
+    .scard .contacts { display: flex; gap: 4px; }
+    .scard .contacts i {
+      width: 10px; height: 3px; border-radius: 2px;
+      background: #333333;
+      transition: background-color 200ms var(--ease-out);
+    }
+    .scard .contacts i:nth-child(2) { transition-delay: 40ms; }
+    .scard .contacts i:nth-child(3) { transition-delay: 80ms; }
+    .scard .contacts i:nth-child(4) { transition-delay: 120ms; }
+    .scard .arr { color: var(--muted); transition: color 150ms var(--ease-out), transform 150ms var(--ease-out); }
+    .scard .arr svg { width: 14px; height: 14px; display: block; }
+    @media (hover: hover) and (pointer: fine) {
+      .scard:hover { background: var(--border-hi); }
+      .scard:hover .contacts i { background: var(--phosphor); }
+      .scard:hover .arr { color: var(--paper); transform: translateX(2px); }
+    }
+    .scard:focus-visible { background: var(--border-hi); }
+    .scard:focus-visible .contacts i { background: var(--phosphor); }
+    .catalog-more { margin-top: 36px; }
+
+    /* ---------- Release ---------- */
+    .release-panel {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .release-panel .col { padding: 34px 30px; }
+    .release-panel .col + .col { border-left: 1px solid var(--border); }
+    .release-panel h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+    .release-panel h3 code, .release-panel p code {
+      font-family: var(--mono); font-size: .88em; font-weight: 400;
+    }
+    .release-panel p { color: var(--muted); font-size: 14.5px; }
+    .release-more { margin-top: 26px; }
+
+    /* ---------- FAQ ---------- */
+    .faq { max-width: 760px; }
+    .faq details { border-bottom: 1px solid var(--border); }
+    .faq summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 4px;
+      min-height: 44px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--paper);
+      transition: color 150ms var(--ease-out);
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary .plus {
+      flex: none;
+      width: 22px; height: 22px;
+      color: var(--muted);
+      transition: transform 200ms var(--ease-out), color 150ms var(--ease-out);
+    }
+    .faq details[open] summary .plus { transform: rotate(45deg); color: var(--phosphor); }
+    @media (hover: hover) and (pointer: fine) {
+      .faq summary:hover { color: var(--phosphor); }
+    }
+    .faq summary:focus-visible { color: var(--phosphor); }
+    .faq .answer { padding: 0 4px 24px; color: var(--muted); font-size: 15.5px; max-width: 62ch; }
+    .faq .answer a {
+      color: var(--paper);
+      text-decoration: underline;
+      text-decoration-color: var(--border-hi);
+      text-underline-offset: 3px;
+      transition: text-decoration-color 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .faq .answer a:hover { text-decoration-color: var(--phosphor); }
+    }
+
+    /* ---------- Final CTA ---------- */
+    .cta { text-align: center; }
+    .cta .cmark { width: 72px; height: 72px; margin: 0 auto 28px; display: block; color: var(--paper); }
+    .cta h2 { margin-bottom: 14px; }
+    .cta .lead { margin-bottom: 34px; }
+    .cta .cmd { margin-bottom: 30px; text-align: left; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ---------- Footer ---------- */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 0 40px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 56px;
+    }
+    .footer .fbrand { display: inline-flex; align-items: center; gap: 12px; color: var(--paper); }
+    .footer .fbrand .bword { height: 13px; width: auto; }
+    .footer .tagline { margin-top: 16px; font-weight: 600; font-size: 15px; }
+    .footer .fdesc { margin-top: 6px; color: var(--muted); font-size: 14px; max-width: 30ch; }
+    .footer h4 {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .footer ul { list-style: none; }
+    .footer li a {
+      display: inline-flex; align-items: center;
+      min-height: 34px;
+      color: var(--muted);
+      font-size: 14.5px;
+      transition: color 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .footer li a:hover { color: var(--paper); }
+    }
+    .footer li a:focus-visible { color: var(--paper); }
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13.5px;
       color: var(--muted);
     }
+    .footer-bottom a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--border-hi); }
 
-    footer a { color: var(--muted); }
-    footer a:hover { color: var(--accent); }
-
-    /* Motion — restrained, respects reduced motion */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: none; }
+    /* ---------- Breakpoints ---------- */
+    @media (max-width: 1024px) {
+      .bento, .cards { grid-template-columns: 1fr 1fr; }
+      .tile.wide { grid-column: span 2; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .container { padding-inline: 22px; }
+      .hero .hmark { width: 96px; height: 96px; }
+      .compare, .bento, .cards, .stats, .release-panel { grid-template-columns: 1fr; }
+      .tile.wide { grid-column: auto; }
+      .steps { grid-template-columns: 1fr; }
+      .step { padding: 22px 0 22px 30px; border-left: 1px solid var(--border); }
+      .step + .step { padding-left: 30px; border-left: 1px solid var(--border); }
+      .step::before {
+        content: "";
+        position: absolute; left: -4px; top: 30px;
+        width: 7px; height: 7px; border-radius: 50%;
+        background: var(--border-hi);
+      }
+      .step + .step::before { top: 30px; }
+      .stats .stat + .stat { border-left: 0; border-top: 1px solid var(--border); }
+      .release-panel .col + .col { border-left: 0; border-top: 1px solid var(--border); }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
     }
 
-    .hero .container,
-    .card,
-    .feature,
-    .steps > *,
-    .features > * {
-      opacity: 0;
-      animation: fadeUp 0.55s ease forwards;
-    }
-
-    /* Stagger grid children */
-    .grid-3 > *:nth-child(2) { animation-delay: 80ms; }
-    .grid-3 > *:nth-child(3) { animation-delay: 140ms; }
-
+    /* ---------- Reduced motion ---------- */
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .hero .container,
-      .card,
-      .feature,
-      .steps > *,
-      .features > * {
-        animation: none;
-        opacity: 1;
-        transform: none;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .hero { padding-top: 3rem; padding-bottom: 3rem; }
-
-      .nav-links {
-        display: none;
-        position: absolute;
-        top: calc(100% + 1px);
-        left: 0;
-        right: 0;
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
-        padding: 1rem;
-        flex-direction: column;
-        gap: 0.85rem;
-        align-items: flex-start;
-        z-index: 60;
-      }
-
-      .nav-links.open {
-        display: flex;
-      }
-
-      .menu-toggle { display: inline-flex; }
+      .hero .hring { opacity: 1; animation: none; }
+      .hero .hcard { opacity: 1; transform: none; animation: none; }
+      .hero .hglow { opacity: .55; animation: none; }
+      .hero .fadeup { opacity: 1; transform: none; animation: none; }
+      .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+      .faq details[open] summary .plus { transition: none; }
     }
   </style>
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
 
-  <nav>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="as-mark" viewBox="0 0 64 64">
+        <path d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="currentColor"/>
+        <path d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="var(--card,#00FF41)" fill-rule="evenodd"/>
+      </symbol>
+      <symbol id="as-wordmark" viewBox="76.88 28.36 232 19.76">
+        <path d="M76.88 47.85 84.1 28.65H86.56L79.65 47.85ZM91.73 47.85 84.82 28.65H87.41L94.66 47.85ZM80.53 40.2H90.82V42.54H80.53ZM109.57 48.12Q106.56 48.12 104.37 46.9Q102.18 45.69 101 43.5Q99.81 41.32 99.81 38.36Q99.81 35.42 101 33.17Q102.18 30.92 104.29 29.65Q106.4 28.38 109.15 28.38Q111.33 28.38 113.11 29.2Q114.88 30.01 116.01 31.45Q117.15 32.89 117.36 34.78H114.53Q114.27 32.94 112.83 31.86Q111.39 30.78 109.23 30.78Q107.25 30.78 105.78 31.72Q104.32 32.65 103.5 34.33Q102.69 36.01 102.69 38.3Q102.69 40.62 103.52 42.29Q104.34 43.96 105.93 44.85Q107.52 45.74 109.76 45.74Q111.36 45.74 112.59 45.29Q113.81 44.84 114.72 43.96L117.47 45Q115.97 46.54 114.03 47.33Q112.08 48.12 109.57 48.12ZM114.64 45V39.1L115.47 39.93H109.73V37.58H117.47V45ZM125.28 47.85V28.65H128.11V47.85ZM126.67 47.85V45.53H138.62V47.85ZM126.67 39.08V36.76H137.66V39.08ZM126.67 30.97V28.65H138.38V30.97ZM146.46 47.85V28.65H149.74L159.92 45.08L159.28 45.21V28.65H162V47.85H158.72L148.54 31.42L149.18 31.29V47.85ZM175.58 47.85V30.97H169.1V28.65H184.89V30.97H178.41V47.85ZM208.46 48.09Q205 48.09 202.92 46.44Q200.84 44.78 200.49 41.72H203.24Q203.48 43.72 204.84 44.76Q206.2 45.8 208.52 45.8Q210.46 45.8 211.46 45.08Q212.46 44.36 212.46 43.02Q212.46 41.82 211.8 41.12Q211.13 40.41 209.69 39.96L206.36 38.89Q203.8 38.06 202.6 36.81Q201.4 35.56 201.4 33.64Q201.4 32.01 202.21 30.84Q203.02 29.66 204.5 29.01Q205.98 28.36 207.96 28.36Q211 28.36 212.82 29.89Q214.65 31.42 214.92 34.14H212.17Q211.85 32.33 210.78 31.49Q209.72 30.65 207.85 30.65Q206.09 30.65 205.1 31.34Q204.12 32.04 204.12 33.29Q204.12 34.3 204.77 34.98Q205.42 35.66 206.94 36.14L210.44 37.26Q212.86 38.04 214.02 39.37Q215.18 40.7 215.18 42.73Q215.18 45.29 213.42 46.69Q211.66 48.09 208.46 48.09ZM222.39 47.85V28.65H225.21V47.85ZM224.63 37.88 234.15 28.65H238.01L228.17 37.88ZM234.57 47.85 224.57 37.88H228.17L238.55 47.85ZM245.37 47.85V28.65H248.2V47.85ZM256.42 47.85V28.65H259.24V47.85ZM257.8 47.85V45.53H268.9V47.85ZM276.39 47.85V28.65H279.22V47.85ZM277.78 47.85V45.53H288.87V47.85ZM302.15 48.09Q298.69 48.09 296.61 46.44Q294.53 44.78 294.18 41.72H296.93Q297.17 43.72 298.53 44.76Q299.89 45.8 302.21 45.8Q304.15 45.8 305.15 45.08Q306.15 44.36 306.15 43.02Q306.15 41.82 305.49 41.12Q304.82 40.41 303.38 39.96L300.05 38.89Q297.49 38.06 296.29 36.81Q295.09 35.56 295.09 33.64Q295.09 32.01 295.9 30.84Q296.71 29.66 298.19 29.01Q299.67 28.36 301.65 28.36Q304.69 28.36 306.51 29.89Q308.34 31.42 308.61 34.14H305.86Q305.54 32.33 304.47 31.49Q303.41 30.65 301.54 30.65Q299.78 30.65 298.79 31.34Q297.81 32.04 297.81 33.29Q297.81 34.3 298.46 34.98Q299.11 35.66 300.63 36.14L304.13 37.26Q306.55 38.04 307.71 39.37Q308.88 40.7 308.88 42.73Q308.88 45.29 307.11 46.69Q305.35 48.09 302.15 48.09Z" fill="currentColor"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <nav class="nav" aria-label="Main">
     <div class="container nav-inner">
-      <a class="brand" href="#">
-        <img src="assets/logo/logo-icon.svg" alt="" width="36" height="36">
-        Agent Skills
+      <a class="brand" href="#top" aria-label="Agent Skills home">
+        <svg class="bmark" width="28" height="28" aria-hidden="true"><use href="#as-mark"/></svg>
+        <svg class="bword" viewBox="0 0 232 19.76" height="11" aria-hidden="true"><use href="#as-wordmark"/></svg>
       </a>
-      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
       <div class="nav-links">
-        <a class="hide-mobile" href="#problem">Problem</a>
-        <a class="hide-mobile" href="#solution">Solution</a>
-        <a class="hide-mobile" href="#whats-new">What's New</a>
-        <a class="hide-mobile" href="#catalog">Catalog</a>
-        <a class="hide-mobile" href="#faq">FAQ</a>
-        <a class="btn btn-primary" href="https://github.com/luongnv89/skills">View on GitHub</a>
+        <a href="#install">How it works</a>
+        <a href="#catalog">Catalog</a>
+        <a href="#whats-new">What&rsquo;s new</a>
+        <a href="#faq">FAQ</a>
+        <a class="btn btn-secondary btn-sm" href="https://github.com/luongnv89/skills">GitHub ↗</a>
       </div>
+      <button class="menu-btn" aria-expanded="false" aria-controls="nav-panel" aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 5.5h13M2.5 12.5h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="nav-panel" id="nav-panel">
+      <a href="#install">How it works</a>
+      <a href="#catalog">Catalog</a>
+      <a href="#whats-new">What&rsquo;s new</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn-secondary btn-sm" href="https://github.com/luongnv89/skills">GitHub ↗</a>
     </div>
   </nav>
 
-  <!-- HERO (PAS opener) -->
-  <header class="hero">
+  <header class="hero" id="top">
     <div class="container">
-      <div class="badge"><strong>v2.0.0</strong> · <strong>42 skills</strong> · <a href="https://luongnv89.github.io/skills/" style="color: inherit; text-decoration: underline;">Live on GitHub Pages</a> · MIT</div>
-      <h1>Stop Rebuilding Agent Skills</h1>
-      <p class="hero-sub">
-        Your AI coding agent restarts from zero every session. Agent Skills gives you a browsable catalog of standalone, versioned workflows — including this site from <code class="mono">docs/</code>. Install only what you need with one command. Your agent follows the same process every time.
-      </p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="#install">Install My First Skill</a>
-        <a class="btn btn-secondary" href="https://github.com/luongnv89/skills#skill-catalog">Browse the Catalog</a>
+      <svg class="hmark" viewBox="0 0 64 64" role="img" aria-label="Agent Skills mark" style="color:var(--paper)">
+        <defs>
+          <filter id="heroGlow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+            <feFlood flood-color="#00FF41" result="color"/>
+            <feComposite in="color" in2="blur" operator="in"/>
+          </filter>
+        </defs>
+        <path class="hglow" d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="#00FF41" fill-rule="evenodd" filter="url(#heroGlow)"/>
+        <path class="hring" d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="currentColor"/>
+        <path class="hcard" d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="#00FF41" fill-rule="evenodd"/>
+      </svg>
+      <a class="pill fadeup" style="--i:0" href="https://github.com/luongnv89/skills/releases/tag/v2.0.0">
+        <span class="led" aria-hidden="true"></span>
+        v2.0.0 · 48 skills · MIT
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6h7M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <h1 class="fadeup" style="--i:1">Plug in a skill.<br>Your agent knows&nbsp;it<span class="ph">.</span></h1>
+      <p class="sub fadeup" style="--i:2">Tested, versioned workflows for AI coding agents. Install one or several at once with agent-skill-manager (asm), and your agent follows the same expert process every time.</p>
+      <div class="cmd cmd-rows fadeup" style="--i:3">
+        <div class="cmd-row">
+          <span class="prompt" aria-hidden="true">$</span>
+          <div class="cmd-scroll"><code>npm install -g agent-skill-manager</code></div>
+          <button class="copy" data-copy="npm install -g agent-skill-manager" aria-label="Copy: npm install -g agent-skill-manager">
+            <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+          </button>
+        </div>
+        <div class="cmd-row">
+          <span class="prompt" aria-hidden="true">$</span>
+          <div class="cmd-scroll"><code>asm install github:luongnv89/skills</code></div>
+          <button class="copy" data-copy="asm install github:luongnv89/skills" aria-label="Copy: asm install github:luongnv89/skills">
+            <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+          </button>
+        </div>
       </div>
-      <div class="trust-bar">
-        <span><span class="dot"></span> Claude Code · Cursor · Copilot · Codex · Antigravity</span>
-        <span><span class="dot"></span> Open source on GitHub</span>
-        <span><span class="dot"></span> Skills install independently</span>
+      <p class="cmd-alt fadeup" style="--i:4">Tick as many skills as you like, then press Enter. Prefer npx? <a href="#install">See install options</a></p>
+      <div class="hero-cta fadeup" style="--i:5">
+        <a class="btn btn-primary" href="#catalog">Browse the catalog</a>
+        <a class="btn btn-secondary" href="https://github.com/luongnv89/skills">View on GitHub</a>
       </div>
     </div>
   </header>
 
-  <!-- PROBLEM -->
-  <section id="problem">
-    <div class="container">
-      <div class="section-label">Problem</div>
-      <h2>Every session starts from scratch</h2>
-      <p class="lead">
-        You rewrite instructions for code review, releases, and planning on every project. Different chats produce different quality.
-      </p>
-      <div class="grid-3">
-        <div class="card">
-          <h3>Prompt drift</h3>
-          <p>You retype the same checklist. Wording shifts between sessions and the agent's output quality drops.</p>
-        </div>
-        <div class="card">
-          <h3>No durable standard</h3>
-          <p>Without a written workflow on disk, the agent cannot apply the same steps consistently across projects.</p>
-        </div>
-        <div class="card">
-          <h3>Tool fragmentation</h3>
-          <p>Each AI tool stores skills in different locations. You maintain duplicate instructions by hand.</p>
-        </div>
+  <main id="main">
+    <div class="tools" aria-label="Compatible agent tools">
+      <div class="container">
+        <ul>
+          <li>Works with</li>
+          <li>Claude Code</li>
+          <li>Cursor</li>
+          <li>Windsurf</li>
+          <li>GitHub Copilot</li>
+          <li>OpenAI Codex</li>
+          <li>OpenCode</li>
+          <li>Google Antigravity</li>
+        </ul>
       </div>
     </div>
-  </section>
 
-  <!-- AGITATE -->
-  <section id="agitate">
-    <div class="container">
-      <div class="section-label">Agitate</div>
-      <h2>Bad agent output compounds</h2>
-      <p class="lead">
-        Vague or varying instructions ship inconsistent patterns into code and team habits.
-      </p>
-      <div class="grid-3">
-        <div class="card">
-          <h3>Review gaps reach main</h3>
-          <p>Without a fixed checklist, security and edge cases get skipped when time is short.</p>
+    <section class="section" id="why">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Why skills</span>
+          <h2>Prompts drift. Skills don&rsquo;t.</h2>
+          <p class="lead">Instructions retyped from memory change every session, and so does the output. A skill is a written workflow your agent loads by name.</p>
         </div>
-        <div class="card">
-          <h3>Onboarding repeats the work</h3>
-          <p>New contributors and new projects force you to rebuild prompts from memory or stale chat logs.</p>
-        </div>
-        <div class="card">
-          <h3>Token and focus waste</h3>
-          <p>Pasting long instructions each session burns context and still omits the templates and guardrails that matter.</p>
+        <div class="compare">
+          <div class="pane adhoc" data-reveal>
+            <h3><span class="k">Before</span> Ad-hoc prompt</h3>
+            <ul>
+              <li>Retyped each session, worded differently each time</li>
+              <li>Lives in chat history</li>
+              <li>Skips checks when time is short</li>
+              <li>Rebuilt for every tool and project</li>
+            </ul>
+          </div>
+          <div class="pane skill" data-reveal style="--i:1">
+            <h3><span class="k">After</span> Agent skill</h3>
+            <ul>
+              <li>Written once, versioned with semver</li>
+              <li>Installed as files, globally or per project</li>
+              <li>Same steps, templates, and checks on every run</li>
+              <li>One format across seven agent tools</li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- SOLUTION -->
-  <section id="solution">
-    <div class="container">
-      <div class="section-label">Solution</div>
-      <h2>Install a skill. Run the same workflow every time.</h2>
-      <p class="lead">
-        Agent Skills is a catalog of standalone workflows. Pick the capabilities you need. Install with one command. Your agent executes the documented process on every project.
-      </p>
-      <div class="features">
-        <div class="feature">
-          <div class="feature-icon">◇</div>
-          <h3>Standalone by design</h3>
-          <p>Install only code-review, or only release-manager. Each skill ships as its own directory with SKILL.md, references, and scripts.</p>
+    <section class="section" id="install">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">How it works</span>
+          <h2>Three steps. One command.</h2>
         </div>
-        <div class="feature">
-          <div class="feature-icon">⚡</div>
-          <h3>One-command install</h3>
-          <p><code class="mono">npx skills add</code> or <code class="mono">asm install</code>. The command places files in the correct path for Claude Code, Cursor, Windsurf, Copilot, Codex, OpenCode, or Google Antigravity.</p>
+        <div class="steps">
+          <div class="step" data-reveal>
+            <span class="num">01</span>
+            <h3>Pick your skills</h3>
+            <p>Browse seven categories, from code review to App Store listings.</p>
+          </div>
+          <div class="step" data-reveal style="--i:1">
+            <span class="num">02</span>
+            <h3>Install them</h3>
+            <p>Tick several in asm&rsquo;s picker, or name one. <code>asm</code> places them where your agent looks, globally or per project.</p>
+          </div>
+          <div class="step" data-reveal style="--i:2">
+            <span class="num">03</span>
+            <h3>Call it by name</h3>
+            <p>Your agent loads the skill and follows its steps, templates, and checks.</p>
+          </div>
         </div>
-        <div class="feature">
-          <div class="feature-icon">✓</div>
-          <h3>Documented process</h3>
-          <p>Skills include acceptance criteria, guardrails, templates, and references so the agent has the full context on disk.</p>
+        <div class="tpanel" data-reveal>
+          <div class="thead">
+            <div class="tabs" role="tablist" aria-label="Install method">
+              <button class="tab" role="tab" id="tab-asm" aria-selected="true" aria-controls="panel-asm" tabindex="0">asm <span class="tag">Recommended</span></button>
+              <button class="tab" role="tab" id="tab-npx" aria-selected="false" aria-controls="panel-npx" tabindex="-1">npx</button>
+            </div>
+          </div>
+          <div class="plabel">asm</div>
+          <div class="tbody is-open" id="panel-asm" role="tabpanel" aria-labelledby="tab-asm" tabindex="0">
+            <div class="trow tcomment"><code class="tcode"># install asm once (Node.js 22+)</code></div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>npm install -g agent-skill-manager</code>
+              <button class="copy" data-copy="npm install -g agent-skill-manager" aria-label="Copy: npm install -g agent-skill-manager">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            <div class="trow tcomment"><code class="tcode"># pick several skills at once: Space to tick, Enter to install</code></div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>asm install github:luongnv89/skills</code>
+              <button class="copy" data-copy="asm install github:luongnv89/skills" aria-label="Copy: asm install github:luongnv89/skills">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            <figure class="picker">
+              <span class="sr-only">Illustration of asm&rsquo;s skill picker with code-review, test-coverage and auto-push ticked.</span>
+              <pre aria-hidden="true">  <span class="pk">[ ]</span> <span class="pn">Select All / Deselect All</span>
+  <span class="pc">[*]</span> <span class="pn">code-review</span>
+  <span class="pc">[*]</span> <span class="pn">test-coverage</span>
+<span class="pc">&gt;</span> <span class="pc">[*]</span> <span class="pn">auto-push</span>
+  <span class="pk">[ ]</span> <span class="pn">release-manager</span>
+  <span class="pk">[ ]</span> <span class="pn">security-setup</span>
+
+  ↑/↓ Navigate  Space Toggle  a All  / Search  Enter Confirm  Esc Cancel</pre>
+              <figcaption>asm&rsquo;s picker: tick several skills, then press Enter</figcaption>
+            </figure>
+            <div class="trow tcomment"><code class="tcode"># or add one skill directly</code></div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>asm install github:luongnv89/skills:skills/code-review</code>
+              <button class="copy" data-copy="asm install github:luongnv89/skills:skills/code-review" aria-label="Copy: asm install github:luongnv89/skills:skills/code-review">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            <div class="trow tcomment"><code class="tcode"># or start with every skill ticked</code></div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>asm install github:luongnv89/skills --all</code>
+              <button class="copy" data-copy="asm install github:luongnv89/skills --all" aria-label="Copy: asm install github:luongnv89/skills --all">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            <div class="trow tcomment"><code class="tcode"># search the catalog and see what you have</code></div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>asm search "code review"</code>
+              <button class="copy" data-copy="asm search &quot;code review&quot;" aria-label="Copy: asm search &quot;code review&quot;">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>asm list</code>
+              <button class="copy" data-copy="asm list" aria-label="Copy: asm list">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="plabel">npx</div>
+          <div class="tbody" id="panel-npx" role="tabpanel" aria-labelledby="tab-npx" tabindex="0">
+            <div class="trow tcomment"><code class="tcode"># one skill</code></div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>npx skills add https://github.com/luongnv89/skills --skill code-review</code>
+              <button class="copy" data-copy="npx skills add https://github.com/luongnv89/skills --skill code-review" aria-label="Copy: npx skills add https://github.com/luongnv89/skills --skill code-review">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+            <div class="trow tcomment"><code class="tcode"># several at once</code></div>
+            <div class="trow">
+              <code class="tcode"><span class="prompt">$ </span>npx skills add https://github.com/luongnv89/skills --skill code-review --skill auto-push --skill test-coverage</code>
+              <button class="copy" data-copy="npx skills add https://github.com/luongnv89/skills --skill code-review --skill auto-push --skill test-coverage" aria-label="Copy: npx skills add https://github.com/luongnv89/skills --skill code-review --skill auto-push --skill test-coverage">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="asm-note" data-reveal>agent-skill-manager (asm) installs, searches, and audits skills across your agent tools, and scans each skill before it installs. <a href="https://github.com/luongnv89/asm">asm on GitHub ↗</a></p>
+        <p class="upgrade-note" data-reveal>Upgrading from v1? <code>docs-generator</code> is now <code>doc-manager</code>.</p>
+        <a class="btn btn-secondary" data-reveal href="https://github.com/luongnv89/skills#install">All install options</a>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">What you get</span>
+          <h2>Built like software, not like a prompt.</h2>
+        </div>
+        <div class="bento">
+          <div class="tile wide" data-reveal>
+            <span class="num">01</span>
+            <h3>Standalone</h3>
+            <p>Install code-review alone or ten skills together. Each one ships as its own folder, with nothing shared at runtime.</p>
+            <pre class="minitree"><span class="dir">&lt;name&gt;/</span>
+├── SKILL.md
+├── references/
+├── scripts/
+└── docs/</pre>
+          </div>
+          <div class="tile" data-reveal style="--i:1">
+            <span class="num">02</span>
+            <h3>One command</h3>
+            <p>asm&rsquo;s picker installs every skill you tick, in one pass. Paths handled for seven agent tools.</p>
+          </div>
+          <div class="tile" data-reveal>
+            <span class="num">03</span>
+            <h3>Versioned</h3>
+            <p>Semver and a changelog for every skill.</p>
+          </div>
+          <div class="tile" data-reveal style="--i:1">
+            <span class="num">04</span>
+            <h3>Structured</h3>
+            <p>Steps, templates, checklists, and self-validation, written down.</p>
+          </div>
+          <div class="tile" data-reveal style="--i:2">
+            <span class="num">05</span>
+            <h3>Light on context</h3>
+            <p>The agent reads SKILL.md first and loads references only when the task needs them.</p>
+          </div>
+          <div class="tile wide" data-reveal>
+            <span class="num">06</span>
+            <h3>Suites</h3>
+            <p>Multi-phase products install whole or one phase at a time: website-cloner runs six phases, diagram-generator routes to two engines.</p>
+          </div>
         </div>
       </div>
-      <p style="margin-top: 2rem; color: var(--muted); font-size: 0.95rem;">
-        <strong style="color: var(--text);">Why it beats ad-hoc prompts:</strong> version-controlled, shareable with your team, and structured so agents load only the references the task needs.
-      </p>
-    </div>
-  </section>
+    </section>
 
-  <!-- HOW IT WORKS -->
-  <section id="install">
-    <div class="container">
-      <div class="section-label">How it works</div>
-      <h2>Three steps to a repeatable agent workflow</h2>
-      <div class="steps">
-        <div class="card">
-          <div class="step-num">Step 01</div>
-          <h3>Browse the catalog</h3>
-          <p>Choose from categories: code quality, shipping, product planning, design, documentation, tooling.</p>
-        </div>
-        <div class="card">
-          <div class="step-num">Step 02</div>
-          <h3>Install with one command</h3>
-          <p>Run the npx or asm command. Choose global install or project-local scope.</p>
-        </div>
-        <div class="card">
-          <div class="step-num">Step 03</div>
-          <h3>Use in any session</h3>
-          <p>Your agent loads the skill by name and follows the exact workflow, references, and rules.</p>
+    <section aria-label="At a glance">
+      <div class="container">
+        <div class="stats" data-reveal>
+          <div class="stat">
+            <div class="big">48 skills</div>
+            <p>Each one installs on its own.</p>
+          </div>
+          <div class="stat">
+            <div class="big">7 agent tools</div>
+            <p>Claude Code, Cursor, Windsurf, Copilot, Codex, OpenCode, Antigravity.</p>
+          </div>
+          <div class="stat">
+            <div class="big">MIT licensed</div>
+            <p>Free to use, fork, and extend.</p>
+          </div>
         </div>
       </div>
-      <div class="code-block" id="install-command">
-        <button class="copy-btn" onclick="copyInstallCommand()" aria-label="Copy install command">Copy</button>
-        <code>npx skills add https://github.com/luongnv89/skills --skill code-review</code>
-      </div>
-      <p style="margin-top: 1rem; color: var(--muted); font-size: 0.9rem;">
-        Install several at once: add <code class="mono">--skill security-setup --skill code-review</code> or <code class="mono">--skill website-cloner</code>. Latest tagged release in the changelog: <a href="https://github.com/luongnv89/skills/releases/tag/v2.0.0">v2.0.0</a>.
-      </p>
-      <a class="btn btn-primary" href="https://github.com/luongnv89/skills#install" style="margin-top: 1.5rem;">Get the Install Commands</a>
-    </div>
-  </section>
+    </section>
 
-  <!-- WHAT'S NEW -->
-  <section id="whats-new">
-    <div class="container">
-      <div class="section-label">Release</div>
-      <h2>What's new in v2.0.0</h2>
-      <p class="lead">Major catalog release — breaking rename, new shipping and modernization skills, orchestrator succession, and a measurable evals harness. This GitHub Pages home is the public catalog.</p>
-      <div class="grid-3">
-        <div class="card">
-          <h3>Breaking: doc-manager</h3>
-          <p><code class="mono">docs-generator</code> is now <code class="mono">doc-manager</code>. Update install flags and bookmarks. Overlapping skills were consolidated into fewer entry points.</p>
+    <section class="section" id="catalog">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Catalog</span>
+          <h2>Pick what you need today.</h2>
+          <p class="lead">Seven categories. Every skill stands alone, so install one or ten.</p>
         </div>
-        <div class="card">
-          <h3>New skills</h3>
-          <p>codebase-modernizer, issue-work-loop, diagram-generator, fork-upstream-sync, and herdr-agent.</p>
+        <div class="chips" data-reveal>
+          <a class="chip-link" href="https://github.com/luongnv89/skills#code-quality">Code Quality</a>
+          <a class="chip-link" href="https://github.com/luongnv89/skills#shipping">Shipping</a>
+          <a class="chip-link" href="https://github.com/luongnv89/skills#product-planning">Product Planning</a>
+          <a class="chip-link" href="https://github.com/luongnv89/skills#frontend--design">Frontend &amp; Design</a>
+          <a class="chip-link" href="https://github.com/luongnv89/skills#documentation">Documentation</a>
+          <a class="chip-link" href="https://github.com/luongnv89/skills#app-store">App Store</a>
+          <a class="chip-link" href="https://github.com/luongnv89/skills#tooling">Tooling</a>
         </div>
-        <div class="card">
-          <h3>HANDOFF &amp; evals</h3>
-          <p>Orchestrator context succession plus an evals delta harness so catalog changes stay measurable.</p>
+        <div class="cards">
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/code-review">
+            <span class="scard-in">
+              <span class="cat">Code Quality</span>
+              <span class="name">code-review</span>
+              <span class="desc">Review or improve code in four modes: bugs and security, performance, clean-code audit, and slop cleanup.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/codebase-modernizer">
+            <span class="scard-in">
+              <span class="cat">Code Quality</span>
+              <span class="name">codebase-modernizer</span>
+              <span class="desc">Audit a whole repo and get a phased, testable plan to modernize it.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/release-manager">
+            <span class="scard-in">
+              <span class="cat">Shipping</span>
+              <span class="name">release-manager</span>
+              <span class="desc">Bump the version, write the changelog, tag, release on GitHub, and publish.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/security-setup">
+            <span class="scard-in">
+              <span class="cat">Shipping</span>
+              <span class="name">security-setup</span>
+              <span class="desc">Pre-commit secret scans, dependency checks, static analysis, and gated CI.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/prd-generator">
+            <span class="scard-in">
+              <span class="cat">Product Planning</span>
+              <span class="name">prd-generator</span>
+              <span class="desc">Turn an idea or validation notes into a structured PRD.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/logo-designer">
+            <span class="scard-in">
+              <span class="cat">Frontend &amp; Design</span>
+              <span class="name">logo-designer</span>
+              <span class="desc">Seven SVG logo variants from your project&rsquo;s context. It designed the logo on this page.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/doc-manager">
+            <span class="scard-in">
+              <span class="cat">Documentation</span>
+              <span class="name">doc-manager</span>
+              <span class="desc">Generate or update docs to match the code, every claim cited to path:line.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/website-cloner">
+            <span class="scard-in">
+              <span class="cat">Frontend &amp; Design</span>
+              <span class="name">website-cloner</span>
+              <span class="desc">A six-phase suite that turns a URL into an improved Vite, React, and Tailwind site.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/issue-work-loop">
+            <span class="scard-in">
+              <span class="cat">Tooling</span>
+              <span class="name">issue-work-loop</span>
+              <span class="desc">Resolve one GitHub issue with an implementer and reviewer loop until the review is clean.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+        </div>
+        <a class="btn btn-secondary catalog-more" data-reveal href="https://github.com/luongnv89/skills#skill-catalog">View all 48 skills on GitHub</a>
+      </div>
+    </section>
+
+    <section class="section" id="whats-new">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Latest release</span>
+          <h2>What&rsquo;s new in v2.0.0</h2>
+        </div>
+        <div class="release-panel" data-reveal>
+          <div class="col">
+            <h3>Breaking: <code>doc-manager</code></h3>
+            <p><code>docs-generator</code> is now <code>doc-manager</code>. Update your install flags and bookmarks.</p>
+          </div>
+          <div class="col">
+            <h3>New skills</h3>
+            <p><code>codebase-modernizer</code>, <code>issue-work-loop</code>, <code>diagram-generator</code>, <code>fork-upstream-sync</code>, and <code>herdr-agent</code>.</p>
+          </div>
+          <div class="col">
+            <h3>HANDOFF and evals</h3>
+            <p>Orchestrator context succession, plus an evals harness that keeps catalog changes measurable.</p>
+          </div>
+        </div>
+        <a class="btn btn-secondary release-more" data-reveal href="https://github.com/luongnv89/skills/releases/tag/v2.0.0">Read the release notes</a>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">FAQ</span>
+          <h2>Common questions</h2>
+        </div>
+        <div class="faq" data-reveal>
+          <details>
+            <summary>Do I need every skill?<svg class="plus" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5v13M4.5 11h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+            <div class="answer">No. Each skill is independent. Install only what your project needs.</div>
+          </details>
+          <details>
+            <summary>Which agents work?<svg class="plus" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5v13M4.5 11h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+            <div class="answer">Any tool that loads skill files. The installer handles paths for Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, and Google Antigravity.</div>
+          </details>
+          <details>
+            <summary>How is a skill different from a prompt?<svg class="plus" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5v13M4.5 11h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+            <div class="answer">A skill is a versioned workflow with references, templates, and quality checks, stored as files. A prompt is a one-off instruction in chat history.</div>
+          </details>
+          <details>
+            <summary>Does it touch my runtime code?<svg class="plus" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5v13M4.5 11h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+            <div class="answer">No. Skills guide your agent during development. Nothing ships with your app.</div>
+          </details>
+          <details>
+            <summary>Can I write my own?<svg class="plus" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5v13M4.5 11h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+            <div class="answer">Yes. Follow <a href="https://github.com/luongnv89/skills/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> and the <a href="https://github.com/luongnv89/skills/blob/main/docs/guide-building-agent-skills.md">authoring guide</a>. The same format and validation tools apply.</div>
+          </details>
+          <details>
+            <summary>Is it free?<svg class="plus" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 4.5v13M4.5 11h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+            <div class="answer">Yes. MIT licensed.</div>
+          </details>
         </div>
       </div>
-      <a class="btn btn-secondary" href="https://github.com/luongnv89/skills/releases/tag/v2.0.0" style="margin-top: 2rem;">Release notes on GitHub</a>
-    </div>
-  </section>
+    </section>
 
-  <!-- SOCIAL PROOF -->
-  <section id="proof">
-    <div class="container">
-      <div class="section-label">Social proof</div>
-      <h2>Built for developers who ship with agents</h2>
-      <p class="lead">
-        Open source and designed to work in the tools you already use.
-      </p>
-      <div class="grid-3">
-        <div class="card">
-          <h3>42 skills</h3>
-          <p>Code review, issue-work-loop, codebase-modernizer, release-manager, website-cloner suite, Herdr/tmux agent comms — each installs on its own.</p>
+    <section class="section cta">
+      <div class="container">
+        <svg class="cmark" viewBox="0 0 64 64" aria-hidden="true"><use href="#as-mark"/></svg>
+        <h2 data-reveal>Plug in. Power up.</h2>
+        <p class="lead" data-reveal style="--i:1">Pick your skills and install them in under a minute.</p>
+        <div class="cmd cmd-rows" data-reveal style="--i:2">
+          <div class="cmd-row">
+            <span class="prompt" aria-hidden="true">$</span>
+            <div class="cmd-scroll"><code>npm install -g agent-skill-manager</code></div>
+            <button class="copy" data-copy="npm install -g agent-skill-manager" aria-label="Copy: npm install -g agent-skill-manager">
+              <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
+          </div>
+          <div class="cmd-row">
+            <span class="prompt" aria-hidden="true">$</span>
+            <div class="cmd-scroll"><code>asm install github:luongnv89/skills</code></div>
+            <button class="copy" data-copy="asm install github:luongnv89/skills" aria-label="Copy: asm install github:luongnv89/skills">
+              <svg viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 4.5v-2A1.5 1.5 0 0 0 8 1H2.5A1.5 1.5 0 0 0 1 2.5V8a1.5 1.5 0 0 0 1.5 1.5h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="card">
-          <h3>Multi-tool support</h3>
-          <p>Installers handle paths for Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, OpenCode, and Google Antigravity.</p>
-        </div>
-        <div class="card">
-          <h3>MIT licensed</h3>
-          <p>Free to use, inspect, fork, and contribute. No strings attached.</p>
+        <div class="cta-btns" data-reveal style="--i:3">
+          <a class="btn btn-primary" href="#catalog">Browse the catalog</a>
+          <a class="btn btn-secondary" href="https://github.com/luongnv89/skills">View on GitHub</a>
         </div>
       </div>
-      <p style="margin-top: 2rem; color: var(--muted); font-size: 0.9rem;">
-        Catalog <strong>v2.0.0</strong> on GitHub Pages — 42 installable workflows, suite-aware installers, HANDOFF succession, and evals harness.
-      </p>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <!-- CATALOG PREVIEW -->
-  <section id="catalog">
+  <footer class="footer">
     <div class="container">
-      <div class="section-label">Catalog</div>
-      <h2>Pick what you need today</h2>
-      <p class="lead">Seven categories — plus multi-phase suites like website-cloner and diagram-generator. Install one skill or ten. They stand alone.</p>
-      <div class="categories">
-        <span class="tag">Code Quality</span>
-        <span class="tag">Shipping</span>
-        <span class="tag">Product Planning</span>
-        <span class="tag">Frontend &amp; Design</span>
-        <span class="tag">Documentation</span>
-        <span class="tag">App Store</span>
-        <span class="tag">Tooling</span>
-      </div>
-      <div class="features" style="margin-top: 2rem;">
-        <div class="feature">
-          <h3>code-review</h3>
-          <p>Structured reviews by severity using Code Smells and Pragmatic Programmer patterns.</p>
+      <div class="footer-grid">
+        <div>
+          <a class="fbrand" href="#top" aria-label="Agent Skills home">
+            <svg width="36" height="36" aria-hidden="true"><use href="#as-mark"/></svg>
+            <svg class="bword" viewBox="0 0 232 19.76" height="13" aria-hidden="true"><use href="#as-wordmark"/></svg>
+          </a>
+          <p class="tagline">Plug in. Power up.</p>
+          <p class="fdesc">48 installable workflows for AI coding agents.</p>
         </div>
-        <div class="feature">
-          <h3>codebase-modernizer</h3>
-          <p>Read-only whole-repo audit and a phased, testable modernization plan.</p>
+        <div>
+          <h4>Project</h4>
+          <ul>
+            <li><a href="https://github.com/luongnv89/skills">GitHub</a></li>
+            <li><a href="https://github.com/luongnv89/skills/releases/tag/v2.0.0">Release v2.0.0</a></li>
+            <li><a href="https://github.com/luongnv89/skills/blob/main/CHANGELOG.md">Changelog</a></li>
+            <li><a href="https://github.com/luongnv89/skills/blob/main/CONTRIBUTING.md">Contribute</a></li>
+          </ul>
         </div>
-        <div class="feature">
-          <h3>release-manager</h3>
-          <p>Version bump, changelog, tags, GitHub release, and package publish in one workflow.</p>
+        <div>
+          <h4>Learn</h4>
+          <ul>
+            <li><a href="https://github.com/luongnv89/skills/blob/main/docs/guide-building-agent-skills.md">Authoring guide</a></li>
+            <li><a href="https://github.com/luongnv89/skills/blob/main/docs/brand_kit.md">Brand kit</a></li>
+            <li><a href="assets/logo/brand-showcase.html">Brand showcase</a></li>
+            <li><a href="https://github.com/luongnv89/skills/tree/main/examples/logo-designer">Logo case study</a></li>
+            <li><a href="https://github.com/luongnv89/skills/blob/main/SECURITY.md">Security</a></li>
+          </ul>
         </div>
-        <div class="feature">
-          <h3>doc-manager</h3>
-          <p>Generate or reconcile Markdown docs to match the code, with citations and runbook checks.</p>
-        </div>
-        <div class="feature">
-          <h3>issue-work-loop</h3>
-          <p>Implementer and reviewer loop on one GitHub issue until the PR review is CLEAN.</p>
-        </div>
-        <div class="feature">
-          <h3>herdr-agent</h3>
-          <p>Manage Herdr agent fleets: tile panes, message/wait/read, and steer any pane.</p>
-        </div>
-        <div class="feature">
-          <h3>website-cloner</h3>
-          <p>Six-phase orchestrator to analyze, plan, and rebuild an improved site.</p>
+        <div>
+          <h4>Author</h4>
+          <ul>
+            <li><a href="https://luongnv.com">Website</a></li>
+            <li><a href="https://medium.com/@luongnv89">Blog</a></li>
+            <li><a href="https://github.com/luongnv89/claude-howto">Claude How-To</a></li>
+          </ul>
         </div>
       </div>
-      <a class="btn btn-secondary" href="https://github.com/luongnv89/skills#skill-catalog" style="margin-top: 2rem;">View Full Catalog on GitHub</a>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq">
-    <div class="container">
-      <div class="section-label">FAQ</div>
-      <h2>Common questions</h2>
-      <div class="faq-list">
-        <div class="faq-item">
-          <h3>Do I need all the skills?</h3>
-          <p>No. Each skill is independent. Install only what your current project needs.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Which AI tools are supported?</h3>
-          <p>Any agent tool that supports skills. The installer handles file paths for Claude Code, Cursor, Windsurf, Copilot, Codex, OpenCode, and Google Antigravity automatically.</p>
-        </div>
-        <div class="faq-item">
-          <h3>How is this different from a custom prompt?</h3>
-          <p>A skill is a structured workflow with references, templates, and quality checks — version-controlled and shareable. A prompt is a one-off instruction that lives in chat history.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Does this affect my runtime code?</h3>
-          <p>No. Skills guide your agent during development. Nothing to deploy, no runtime dependencies in your app.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Can I create my own skills?</h3>
-          <p>Yes. Follow the contributing guide and use the skill-creator scripts documented there. Same format, same validation tooling.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Is it free?</h3>
-          <p>Yes. MIT licensed. Install, fork, and contribute at no cost.</p>
-        </div>
+      <div class="footer-bottom">
+        <span><a href="https://github.com/luongnv89/skills/blob/main/LICENSE">MIT License</a> · Made by Luong NGUYEN</span>
       </div>
-    </div>
-  </section>
-
-  <!-- FINAL CTA -->
-  <section class="final-cta">
-    <div class="container">
-      <h2>Install your first skill in under a minute</h2>
-      <p class="lead">Ship v2.0.0 — no bundle, no framework. One command installs a standalone workflow. Breaking: use <code class="mono">--skill doc-manager</code>, not <code class="mono">docs-generator</code>.</p>
-      <a class="btn btn-primary" href="https://github.com/luongnv89/skills#install">Install code-review</a>
-      <p class="risk-reversal">MIT licensed · open source · global or per-project scope</p>
-    </div>
-  </section>
-
-  <footer>
-    <div class="container">
-      <p>
-        <a href="https://github.com/luongnv89/skills">GitHub</a> ·
-        <a href="https://github.com/luongnv89/skills/releases/tag/v2.0.0">v2.0.0</a> ·
-        <a href="https://github.com/luongnv89/skills/blob/main/CONTRIBUTING.md">Contribute</a> ·
-        <a href="https://github.com/luongnv89/skills/blob/main/LICENSE">MIT License</a>
-      </p>
-      <p style="margin-top: 0.75rem;">Agent Skills — ready-made workflows for AI coding agents</p>
     </div>
   </footer>
 
+  <div class="sr-only" aria-live="polite" id="copy-live"></div>
+
   <script>
-    // Mobile nav toggle (Precision Plug)
     (function () {
-      const toggle = document.querySelector('.menu-toggle');
-      const links = document.querySelector('.nav-links');
-      if (!toggle || !links) return;
+      'use strict';
 
-      toggle.addEventListener('click', () => {
-        const isOpen = links.classList.toggle('open');
-        toggle.setAttribute('aria-expanded', String(isOpen));
-        toggle.textContent = isOpen ? '✕' : '☰';
+      // Nav toggle + Escape
+      var menuBtn = document.querySelector('.menu-btn');
+      var panel = document.getElementById('nav-panel');
+      function closeMenu() {
+        panel.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menuBtn.setAttribute('aria-label', 'Open menu');
+      }
+      menuBtn.addEventListener('click', function () {
+        var open = panel.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open));
+        menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
       });
-
-      // Close on link click (mobile)
-      links.addEventListener('click', (e) => {
-        if (e.target.tagName === 'A' && links.classList.contains('open')) {
-          links.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.textContent = '☰';
+      panel.addEventListener('click', function (e) {
+        if (e.target.closest('a')) closeMenu();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('open')) {
+          closeMenu();
+          menuBtn.focus();
         }
       });
-    })();
 
-    // Copy install command (with feedback)
-    function copyInstallCommand() {
-      const block = document.getElementById('install-command');
-      if (!block) return;
-      const code = block.querySelector('code');
-      const btn = block.querySelector('.copy-btn');
-      if (!code || !btn) return;
-
-      const text = code.innerText.trim();
-      // Robust original state capture (data attrs survive rapid clicks; prevents capturing 'Copied' as original)
-      if (!btn.dataset.originalText) {
-        btn.dataset.originalText = btn.textContent;
+      // Install-method tabs
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+      function activateTab(tab) {
+        tabs.forEach(function (t) {
+          var sel = t === tab;
+          t.setAttribute('aria-selected', String(sel));
+          t.tabIndex = sel ? 0 : -1;
+          var p = document.getElementById(t.getAttribute('aria-controls'));
+          if (p) { p.classList.toggle('is-open', sel); p.hidden = !sel; }
+        });
       }
-      if (!btn.dataset.originalLabel) {
-        btn.dataset.originalLabel = btn.getAttribute('aria-label') || 'Copy install command';
+      if (tabs.length) {
+        tabs.forEach(function (t) {
+          t.addEventListener('click', function () { activateTab(t); });
+          t.addEventListener('keydown', function (e) {
+            var i = tabs.indexOf(t), n = null;
+            if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+            else if (e.key === 'Home') n = 0;
+            else if (e.key === 'End') n = tabs.length - 1;
+            if (n !== null) { e.preventDefault(); tabs[n].focus(); activateTab(tabs[n]); }
+          });
+        });
+        activateTab(document.querySelector('.tab[aria-selected="true"]'));
       }
-      const original = btn.dataset.originalText;
-      const originalLabel = btn.dataset.originalLabel;
 
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copied';
-        btn.classList.add('copied');
-        btn.setAttribute('aria-label', 'Copied to clipboard');
-        setTimeout(() => {
-          btn.textContent = original;
-          btn.classList.remove('copied');
-          btn.setAttribute('aria-label', originalLabel);
-        }, 1600);
-      }).catch(() => {
-        // Fallback for very old browsers
-        const ta = document.createElement('textarea');
+      // Copy buttons
+      var live = document.getElementById('copy-live');
+      function fallbackCopy(text, done) {
+        var ta = document.createElement('textarea');
         ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:absolute;left:-9999px';
         document.body.appendChild(ta);
         ta.select();
-        document.execCommand('copy');
+        try { document.execCommand('copy'); } catch (e) { /* noop */ }
         document.body.removeChild(ta);
-        btn.textContent = 'Copied';
-        btn.classList.add('copied');
-        btn.setAttribute('aria-label', 'Copied to clipboard');
-        setTimeout(() => {
-          btn.textContent = original;
-          btn.classList.remove('copied');
-          btn.setAttribute('aria-label', originalLabel);
-        }, 1400);
+        done();
+      }
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-copy]');
+        if (!btn) return;
+        var label = btn.querySelector('.copy-label');
+        var done = function () {
+          btn.classList.add('copied');
+          if (label) label.textContent = 'Copied';
+          live.textContent = 'Copied to clipboard';
+          setTimeout(function () {
+            btn.classList.remove('copied');
+            if (label) label.textContent = 'Copy';
+          }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(btn.dataset.copy).then(done, function () {
+            fallbackCopy(btn.dataset.copy, done);
+          });
+        } else {
+          fallbackCopy(btn.dataset.copy, done);
+        }
       });
-    }
+
+      // Scroll reveals
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              en.target.classList.add('is-in');
+              io.unobserve(en.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
+      } else {
+        document.querySelectorAll('[data-reveal]').forEach(function (el) { el.classList.add('is-in'); });
+      }
+    })();
   </script>
 </body>
 </html>
