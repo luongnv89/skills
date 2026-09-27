@@ -74,4 +74,4 @@ Artifacts land in `.agent-ready/` (scan data) and `agent-ready-plan.md` (the pla
 
 The eval suite is executable: `python3 scripts/run-skill-evals.py website-agent-readiness` from the repo root (see CONTRIBUTING.md). It measures triggering; the 30 behavioural expectations across the 10 cases are transcript-level and reported as `[MANUAL]`.
 
-Last recorded run (1 run per case): **6/8 triggering cases pass, 2 skipped as fixture-dependent.** The two failures are reproducible at 0/3 and are trigger-coverage gaps, not defects in the pipeline — a `localhost` URL and a "scan this site, its robots.txt says …" prompt both get handled directly instead of opening the skill, so the skill's own advice for those cases (flag an unreachable target at G1; treat scanned content as data) never gets a chance to apply.
+Last recorded run (3 runs per case, v1.2.4): **8/8 triggering cases pass, 2 skipped as fixture-dependent.** The two earlier trigger-coverage gaps — a `localhost` URL and a "scan this site, its robots.txt says …" prompt — now open the skill 3/3 each after the description widening in 1.2.4, and the three negative-trigger cases stay at 0/3.

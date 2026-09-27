@@ -1,11 +1,11 @@
 ---
 name: website-agent-readiness
-description: "Scan a live site with isitagentready.com, then approve each step: triage the 0-5 agent-readiness score, write agent-ready-plan.md, file issues via /plan-to-issues. Don't use for applying llms.txt/SEO fixes (seo-ai-optimizer) or app-store ASO."
+description: "Scan a site for agent readiness via isitagentready.com — 'make this site agent-ready' or 'scan this site', incl. localhost/private URLs and robots.txt checks. Triage the 0-5 score, write agent-ready-plan.md, file issues via /plan-to-issues. Not for llms.txt/SEO fixes (seo-ai-optimizer) or app-store ASO."
 license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.2.3
+  version: 1.2.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -29,8 +29,8 @@ the target site. The output is a reviewed plan and a set of issues someone then 
 
 Trigger when the user asks to:
 
-- Make a website agent-ready, or check whether a site is ready for AI agents
-- Score a site on llms.txt / MCP / robots.txt / agent-protocol support and plan the gaps
+- Make a website agent-ready — localhost and private URLs included (the scanner flags unreachable targets at gate G1) — or check whether a site is ready for AI agents
+- Scan a site for agent readiness: score it on llms.txt / MCP / robots.txt / agent-protocol support and plan the gaps
 - Turn an agent-readiness scan into a tracked backlog
 
 Do **not** use for:
