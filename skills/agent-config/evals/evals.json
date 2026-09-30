@@ -1,0 +1,134 @@
+{
+  "skill_name": "agent-config",
+  "evals": [
+    {
+      "id": 1,
+      "name": "fresh-repo-writes-agents-md-only",
+      "kind": "happy-path",
+      "prompt": "Set up agent instructions for this repo so coding agents know how to build, test, and work in it. Go ahead and write them.",
+      "expected_output": "Fixture pnpm-fresh (evals/build-fixtures.sh). Branch agents-only: a lean AGENTS.md at the root with pnpm-pinned commands including a single-test form, Never and Ask-first constraints, a Done-when with the CI commands, and the token-efficiency block once. No CLAUDE.md is created.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "AGENTS.md exists at the repo root after the run",
+        "No CLAUDE.md or .claude/CLAUDE.md was created",
+        "AGENTS.md pins pnpm (not npm) and includes a single-test command for one file",
+        "AGENTS.md has a constraints section with both a Never tier and an Ask-first tier, and says src/generated/ is not hand-edited",
+        "AGENTS.md has a Done-when section naming the exact lint, typecheck, and test commands",
+        "AGENTS.md contains no directory tree and no overview that restates package.json or the README",
+        "'## Token Efficiency' appears exactly once in AGENTS.md",
+        "AGENTS.md is under 200 lines",
+        "The run performed the shadow check (looked for CLAUDE.md, .claude/CLAUDE.md, CLAUDE.local.md at or above the repo) before writing",
+        "The response includes a Step Completion Report ending in a Result line"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "claude-md-only-migrates-to-agents-md",
+      "kind": "happy-path",
+      "prompt": "Update our agent config and apply the changes.",
+      "expected_output": "Fixture uv-claude-only (evals/build-fixtures.sh). Branch migrate: shared rules move from CLAUDE.md into a new AGENTS.md; CLAUDE.md shrinks to @AGENTS.md plus the two Claude-only lines; the directory tree and generic advice are pruned; a diff is shown.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "AGENTS.md exists and contains the uv commands (uv sync, uv run pytest, uv run ruff check, uv run mypy src)",
+        "AGENTS.md keeps the domain rules: never edit a merged migration, money is Decimal never float, use uv never pip",
+        "The first non-empty line of CLAUDE.md is @AGENTS.md",
+        "CLAUDE.md keeps the Claude-only lines (plan mode for migrations, the /release skill) and none of the shared rules",
+        "Neither file contains the src/ directory tree or 'Write clean, readable code'",
+        "'## Token Efficiency' appears exactly once across both files, in AGENTS.md",
+        "AGENTS.md contains no Claude-only terms (plan mode, /release)",
+        "The response shows a diff or before/after of CLAUDE.md",
+        "The response names the migrate branch or explains that shared rules moved to AGENTS.md so Claude still loads them"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "explicit-claude-md-is-honored",
+      "kind": "happy-path",
+      "prompt": "Create a CLAUDE.md for this project. Write it directly.",
+      "expected_output": "Fixture go-bare (evals/build-fixtures.sh). Branch claude-only: the user named CLAUDE.md and no AGENTS.md exists, so a standalone CLAUDE.md is written with the Go commands and the token-efficiency block. No AGENTS.md is created.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "CLAUDE.md exists at the repo root",
+        "No AGENTS.md was created",
+        "CLAUDE.md includes go test ./... (or make test) and a single-test form such as go test ./internal/store -run TestKey",
+        "'## Token Efficiency' appears exactly once in CLAUDE.md",
+        "CLAUDE.md is under 200 lines and has no directory tree",
+        "The response states the target decision: CLAUDE.md because the user asked for it by name"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "audit-flags-shadowed-agents-md",
+      "kind": "happy-path",
+      "prompt": "Audit my agent config files.",
+      "expected_output": "Fixture audit-shadowed (evals/build-fixtures.sh). Read-only audit: flags that CLAUDE.md shadows AGENTS.md (no @AGENTS.md import, only prose), the duplicated pnpm rule, the inferable layout line, and the missing token block; routes each failing line; modifies nothing.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "No files were modified (git status is clean after the run)",
+        "The report says CLAUDE.md does not import AGENTS.md, so Claude Code reads CLAUDE.md only and ignores AGENTS.md",
+        "The report recommends replacing the 'Read AGENTS.md' prose with an @AGENTS.md import",
+        "The report flags the rule duplicated in both files (pnpm, not npm)",
+        "The report flags the source-layout line as inferable content",
+        "The report gives pass, fail, or N/A per checklist section",
+        "The report suggests /memory, /context, or /doctor prompt-audit to confirm what loads"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "claude-local-md-warns-not-edited",
+      "kind": "edge",
+      "prompt": "Create an AGENTS.md for this repo and write it.",
+      "expected_output": "Fixture npm-local-shadow (evals/build-fixtures.sh). AGENTS.md is written with npm/jest commands; the personal CLAUDE.local.md is untouched; the response warns that it stops Claude from reading AGENTS.md for its owner and suggests @AGENTS.md as its first line or the claude-md-and-agents-md setting.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "AGENTS.md exists after the run",
+        "CLAUDE.local.md is byte-identical to the fixture's original",
+        "No CLAUDE.md was created",
+        "The response warns that CLAUDE.local.md stops Claude Code from reading AGENTS.md",
+        "The response suggests @AGENTS.md as the first line of CLAUDE.local.md or setting Project instructions to claude-md-and-agents-md",
+        "AGENTS.md uses the npm and jest commands from package.json"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "symlinked-claude-md-edits-target",
+      "kind": "edge",
+      "prompt": "We switched this repo from npm to pnpm. Update the agent instructions accordingly and apply it.",
+      "expected_output": "Fixture npm-symlinked (evals/build-fixtures.sh). CLAUDE.md is a symlink to AGENTS.md, so the branch is agents-only: AGENTS.md is edited to pnpm, and the symlink stays a symlink.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "CLAUDE.md is still a symlink pointing to AGENTS.md",
+        "AGENTS.md uses pnpm commands and no longer tells agents to use npm",
+        "No separate CLAUDE.md wrapper file was written",
+        "'## Token Efficiency' appears exactly once in AGENTS.md",
+        "The run identified CLAUDE.md as a symlink to AGENTS.md before editing"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "readme-request-does-not-trigger",
+      "kind": "negative-trigger",
+      "prompt": "Write a README.md for this project explaining what it does and how to install and run it.",
+      "expected_output": "Fixture pnpm-fresh (evals/build-fixtures.sh). The README is written on its own merits; agent-config's workflow is not applied.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "README.md was written or updated",
+        "No AGENTS.md or CLAUDE.md was created",
+        "The run did not perform agent-config's shadow check or emit its branch report"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "subagent-request-does-not-trigger",
+      "kind": "negative-trigger",
+      "prompt": "Create a Claude Code subagent at .claude/agents/pr-reviewer.md that reviews pull requests for security issues.",
+      "expected_output": "Fixture pnpm-fresh (evals/build-fixtures.sh). The subagent file is written; agent-config's workflow is not applied.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        ".claude/agents/pr-reviewer.md exists with YAML frontmatter",
+        "No AGENTS.md or CLAUDE.md was created or modified",
+        "The run did not perform agent-config's shadow check or emit its branch report"
+      ]
+    }
+  ]
+}

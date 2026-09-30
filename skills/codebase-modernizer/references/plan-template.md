@@ -14,7 +14,7 @@ you should not modernize on top of a known vulnerability. Pre is never collapsed
 
 | Phase | Goal | Exit milestone |
 |---|---|---|
-| **Pre Agent environment** | project env an AI agent can use autonomously; `CLAUDE.md` and `AGENTS.md` created or improved | `ME` — both files exist (create or update via planned `/agent-config`); recorded build/test commands documented in `CLAUDE.md` and Pre.1 notes |
+| **Pre Agent environment** | project env an AI agent can use autonomously; `CLAUDE.md` and `AGENTS.md` created or improved | `ME` — both files exist (create or update via planned `/agent-config`); recorded build/test commands documented in `AGENTS.md` and Pre.1 notes; `CLAUDE.md` is a thin `@AGENTS.md` wrapper |
 | **P0 Stabilize** | build green, tests runnable, lockfile committed, CI running the suite | `M0` — baseline-green reproducible in CI from a clean checkout |
 | **P1 Secure & Patch** | close vulnerabilities, ship waves W1–W2 | `M1` — zero known High/Critical advisories; patch/minor current |
 | **P2 Modernize** | runtime/toolchain upgrade (W3), then one major per task (W4+) | `M2` — every major current or deferred with written rationale |
@@ -83,7 +83,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 
 ## Phase Pre — Agent environment
 
-**Goal:** <one line> · **Milestone ME:** <CLAUDE.md and AGENTS.md created or improved; recorded build/test commands documented in CLAUDE.md and Pre.1 notes>
+**Goal:** <one line> · **Milestone ME:** <CLAUDE.md and AGENTS.md created or improved; recorded build/test commands documented in AGENTS.md and Pre.1 notes; CLAUDE.md imports AGENTS.md>
 
 ### Sprint Pre — Agent-runnable environment
 
@@ -111,7 +111,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 
 **Acceptance Criteria**:
 - [ ] `CLAUDE.md` exists at the repo root (create via `/agent-config` if absent)
-- [ ] `CLAUDE.md` names the recorded build/test commands (improve via `/agent-config update` if already present)
+- [ ] `CLAUDE.md` imports `@AGENTS.md` as its first line and holds only Claude-specific lines; it repeats no rule from `AGENTS.md` (Claude Code reads `AGENTS.md` only through this import once a `CLAUDE.md` exists)
 
 **Dependencies**: Pre.1
 
@@ -127,7 +127,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 
 **Acceptance Criteria**:
 - [ ] `AGENTS.md` exists at the repo root (create via `/agent-config` if absent)
-- [ ] `AGENTS.md` is improved against agent-config checklists only (subagent definitions; update if already present). Recorded build/test commands stay on Pre.1 notes and `CLAUDE.md`
+- [ ] `AGENTS.md` is the cross-agent source of truth: it names the recorded build/test commands, constraints, and done-when checks, and passes agent-config's checklist (improve via `/agent-config update` if already present)
 
 **Dependencies**: Pre.1
 
@@ -188,7 +188,7 @@ run in parallel.
 
 | ID | Phase | Exit condition (measurable) | Verify with |
 |---|---|---|---|
-| ME | Pre | `CLAUDE.md` and `AGENTS.md` exist (create or update); recorded build/test commands documented in `CLAUDE.md` and Pre.1 notes | `test -f CLAUDE.md && test -f AGENTS.md` |
+| ME | Pre | `CLAUDE.md` and `AGENTS.md` exist (create or update); recorded build/test commands documented in `AGENTS.md` and Pre.1 notes; `CLAUDE.md` is a thin `@AGENTS.md` wrapper | `test -f CLAUDE.md && test -f AGENTS.md && grep -q '^@AGENTS.md' CLAUDE.md` |
 | M0 | P0 | clean checkout → build + suite green in CI | CI run link / `<command>` |
 | M1 | P1 | `npm audit --json` reports 0 high+ advisories | `<command>` |
 

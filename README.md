@@ -153,7 +153,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**code-review**](skills/code-review/) | 2.1.3 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
-| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
+| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.3 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.3.2 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.4.3 | medium | Usability review using Krug's principles |
 
@@ -233,7 +233,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.3 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.5 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.3.1 | low | Add OSS files and templates |
-| [**agent-config**](skills/agent-config/) | 1.4.3 | medium | CLAUDE.md + AGENTS.md per best practices |
+| [**agent-config**](skills/agent-config/) | 2.0.1 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
 | [**subagent-creator**](skills/subagent-creator/) | 1.1.4 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
 | [**convert-documents-to-markdown**](skills/convert-documents-to-markdown/) | 1.1.0 | low | Office docs, ebooks, CSV & PDF → GitHub-Flavored Markdown via anydoc (mirrored from firecrawl/anydoc) |
 

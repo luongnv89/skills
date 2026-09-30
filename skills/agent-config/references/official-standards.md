@@ -1,46 +1,92 @@
-# Official Standards — Anthropic + AGENTS.md
+# Official Standards: AGENTS.md, Claude Code, Codex
 
-The rules this skill enforces, and where they come from. Read before drafting or auditing.
+The rules this skill enforces, and where they come from. For evidence on *what* to write, see `agents-md-writing.md`.
 
-## Anthropic — Claude Code memory & best practices
+## AGENTS.md (the open standard)
 
-- `CLAUDE.md` is loaded every session and is **context, not enforced configuration**. Claude may still deviate. To block an action regardless of what Claude decides, use a `PreToolUse` hook plus permissions.
-- **Target under 200 lines.** Longer files cost tokens and measurably reduce adherence. The hard load cap is 4 MiB; anything larger is skipped entirely.
-- Write what you would otherwise have to re-explain. Add a line when the same mistake happens twice, a review catches a repo-specific fact, or a new teammate would need it.
-- Multi-step procedures and folder-only rules do **not** belong in the root file — move them to a skill or a path-scoped rule.
-- `@imports` organize files but **do not shrink context**: imported files still load at launch. Path-scoped `.claude/rules/*.md` files (with a `paths:` key) load only when matching files are touched.
-- Tooling: `/init` drafts the file, `/context` confirms it loaded, `/doctor` prunes what Claude can infer from the repo.
+- A README **for agents**, in plain Markdown, with no required fields or schema. The Agentic AI Foundation (Linux Foundation) stewards it. Codex, Cursor, Copilot, Jules, Aider, Zed, Factory, and Claude Code, among others, read it.
+- **The closest file wins.** A nested `AGENTS.md` in a monorepo package takes precedence over its ancestors, and an explicit user prompt overrides every file.
+- Agents run the checks the file lists and fix failures before they finish.
 
-## AGENTS.md standard + OpenAI Codex
+## Claude Code: which file it reads
 
-- `AGENTS.md` is a README **for agents**: setup, commands, style deltas, tests, PR rules, security. Plain Markdown, no required schema, any agent can read it.
-- **Closest file wins.** Nested `AGENTS.md` files override ancestors; the personal global file lives at `~/.codex/AGENTS.md`.
-- Keep it small — Codex's default combined budget is **32 KiB**.
-- Maintain it as a feedback loop: when the agent is wrong twice, add a rule; when it reads too much, add routing pointers instead of prose.
+Claude Code reads `AGENTS.md` natively from **v2.1.277**, through a built-in `agents-md` plugin. With the default setting, `claude-md-or-agents-md`:
 
-## Size budget (one number governs)
+| The repository has | Claude reads |
+|---|---|
+| `AGENTS.md`, and no `CLAUDE.md`, `.claude/CLAUDE.md`, or `CLAUDE.local.md` in the working directory or above | `AGENTS.md` |
+| `AGENTS.md` plus any of those CLAUDE files | the CLAUDE files only |
+| a `CLAUDE.md` that imports `@AGENTS.md` | `CLAUDE.md`, with `AGENTS.md` included once (never twice) |
+
+- **Files that don't count toward that check**, and load alongside `AGENTS.md`: `~/.claude/CLAUDE.md`, the managed-policy `CLAUDE.md`, and `.claude/rules/*.md`.
+- **What Claude reads**:
+  - At session start, every `AGENTS.md` and `.claude/AGENTS.md` from the working directory up.
+  - On demand, a subdirectory's `AGENTS.md`, when Claude reads a file there and that directory has no CLAUDE file.
+  - Inside `AGENTS.md`, `@path` imports are expanded and `claudeMdExcludes` applies.
+- **What Claude never reads**: `AGENTS.local.md`, `AGENTS.override.md`, or anything under `.agents/`.
+- **The Project instructions setting** (in `/config`) has four values:
+  - `claude-md-or-agents-md` is the default.
+  - `claude-md-and-agents-md` reads both: each directory's CLAUDE files first, then its `AGENTS.md`.
+  - `claude-md` reads CLAUDE files only.
+  - `managed-only` reads only the organization's managed instructions.
+
+  It can be set in user or managed settings (`pluginConfigs["agents-md@builtin"].options.instructionFiles`) but is **ignored in project and local settings**. A repo cannot force it, so the `@AGENTS.md` import is the only fix that can be committed for a shadowed `AGENTS.md`.
+- **When there's no AGENTS.md support**, Claude reads CLAUDE files only:
+  - before v2.1.277;
+  - when the `agents-md` plugin is disabled;
+  - sometimes, in the first session after upgrading from v2.1.276 or earlier;
+  - before v2.1.281, in some Bedrock or telemetry-off sessions.
+
+  The fix is a `CLAUDE.md` that holds `@AGENTS.md`.
+- **How a directly read AGENTS.md differs from CLAUDE.md**:
+  - `InstructionsLoaded` hooks don't fire.
+  - The `AGENTS.md` of a directory added with `--add-dir` doesn't load.
+  - An external `@path` import loads only if external imports were already approved for the project.
+- **Old workarounds**:
+  - A `CLAUDE.md` containing `@AGENTS.md` can stay; it never loads the file twice.
+  - For prose telling Claude to read `AGENTS.md`, delete the file or replace the prose with the import.
+  - A `CLAUDE.md` symlinked to `AGENTS.md` works and reads once. Edit and Write won't write through the link, though. Windows clones also check the link out as a one-line text file unless `core.symlinks` is on, so prefer the import when anyone uses Windows.
+  - Remove a `SessionStart` hook that prints `AGENTS.md`, because it adds a second copy.
+- **Commands that cause drift**: `/init` writes a `CLAUDE.md`, which then shadows `AGENTS.md`. `/import` appends a one-time *copy* of `AGENTS.md` into `CLAUDE.md`. Replace the copy with `@AGENTS.md`.
+
+## Claude Code: memory rules for both files
+
+- These files are context, not enforcement. They're delivered as a user message after the system prompt. To block an action no matter what, use a `PreToolUse` hook plus permissions.
+- Keep each file **under 200 lines**. Claude Code warns at startup when a file, or the combined set, runs long. The hard cap is 4 MiB, and larger files are skipped.
+- `@imports` organize files but **don't shrink context**, because imported files load at launch. Path-scoped `.claude/rules/*.md` files (with `paths:` frontmatter) load only when Claude reads a matching file. Rules without `paths:` load at launch.
+- Add a line when the agent repeats a mistake, when a review catches a repo fact, or when a teammate would need it. Multi-step procedures go in skills. Folder-only rules go in path-scoped rules or nested files.
+- Commit and PR rules compete with Claude's built-in git instructions. Turn those off with the `includeGitInstructions` setting, and set trailers with `attribution`.
+- Revisit the file after major model releases. Rules that worked around an older model's limits become overhead.
+
+## OpenAI Codex
+
+- **Global scope**: Codex reads `~/.codex/AGENTS.override.md`, or else `~/.codex/AGENTS.md`.
+- **Project scope**: from the git root down to the working directory, Codex reads, per directory, `AGENTS.override.md`, or else `AGENTS.md`, or else a name from `project_doc_fallback_filenames`. It reads at most one file per directory.
+- Files are concatenated root to leaf, so closer files come later and win. Codex stops at `project_doc_max_bytes`, which defaults to **32 KiB**, and skips empty files.
+
+## Size budget
 
 | Scope | Budget |
 |---|---|
-| Per file, target | **under 200 lines** |
-| Practical sweet spot | **40–150 lines** |
-| Codex combined budget | 32 KiB |
-| Claude hard load cap | 4 MiB (larger files are skipped) |
+| Per file, target | **under 200 lines** (sweet spot 40–150) |
+| Codex, combined | 32 KiB |
+| Claude, hard cap | 4 MiB (larger files are skipped) |
 
-Use the **under 200-line** target; anything past 150 lines is a prompt to path-scope or extract.
+When a file runs over budget, fix it in this order:
 
-When a file outgrows the budget, in this order:
+1. Path-scope folder rules into a nested `AGENTS.md` or `.claude/rules/*.md`.
+2. Extract procedures into a skill.
+3. Replace pasted docs with a pointer.
 
-1. Path-scope folder-specific rules into `.claude/rules/*.md` or a nested `AGENTS.md`.
-2. Extract multi-step procedures into a skill.
-3. Replace pasted documentation with a pointer: "before X, read `docs/y.md`".
-4. Do **not** reach for `@import` to save tokens — imports still load at launch.
+Never `@import` to save tokens. In monorepos, use nested per-package files plus `claudeMdExcludes` for directories the team never touches.
 
-In monorepos, prefer nested per-package files plus `claudeMdExcludes` for directories the team never touches.
+## Verifying the file works
 
-## Verifying the file actually works
-
-- `/context` — confirm the file loaded at all.
-- `/doctor` — cut anything Claude can infer from the repo.
-- Give the agent a task the file is supposed to constrain. If a line is ignored, the official remedies, in order: shorten the file, make the line more specific, move it closer to the files it governs, or stop relying on prose and enforce it with a hook.
-- Watch for drift: the same rule living in both `AGENTS.md` and `CLAUDE.md` is a documented failure mode, not redundancy.
+- **Claude Code**:
+  - At session start, look for the line `no CLAUDE.md found; AGENTS.md loaded: <path>`.
+  - `/memory` lists the path (v2.1.280+).
+  - `/context` shows CLAUDE files under **Memory files**.
+  - `/doctor` trims what Claude can infer (v2.1.206+).
+  - `/doctor prompt-audit` audits `CLAUDE.md`, `CLAUDE.local.md`, and `AGENTS.md` for stale or conflicting rules (v2.1.283+).
+- **Codex**: run `codex --ask-for-approval never "Summarize the current instructions."`.
+- **Any agent**: give the agent a task the file should constrain. If it ignores a line, shorten the file, make the line more specific, move it closer to the files it governs, or enforce it with a hook.
