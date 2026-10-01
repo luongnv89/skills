@@ -70,7 +70,7 @@ skill-name/
 
 If a skill ships a `README.md`, place it under `docs/` (not at the skill root and not under `references/`) and start it with the AI-skip HTML comment. The runtime loader reads `SKILL.md` + `references/` + `scripts/` + `agents/` when a skill triggers; `docs/` sits outside that set, so a README parked there costs zero runtime tokens (`CLAUDE.md:20`).
 
-**Suite folders.** Multi-phase products use an umbrella at `skills/<umbrella>/` plus children at `skills/<umbrella>/<child>/` (e.g. `website-cloner`, `diagram-generator`). Installers discover both levels (`install.sh:44-46`). Each `SKILL.md` — umbrella and child — has `name` equal to **its own** directory name and its own `metadata.version`.
+**Suite folders.** Multi-phase products use an umbrella at `skills/<umbrella>/` plus children at `skills/<umbrella>/<child>/` (e.g. `diagram-generator`). Installers discover both levels (`install.sh:44-46`). Each `SKILL.md` — umbrella and child — has `name` equal to **its own** directory name and its own `metadata.version`.
 
 ### SKILL.md Requirements
 

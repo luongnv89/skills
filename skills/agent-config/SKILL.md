@@ -4,13 +4,13 @@ description: "Create, update, or audit AGENTS.md (default) or CLAUDE.md agent in
 license: MIT
 effort: medium
 metadata:
-  version: 2.0.1
+  version: 2.0.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 ## When to Use
 
-Create, update, or audit the instruction files coding agents load every session. **`AGENTS.md` is the default output**: it's the open standard that Claude Code (v2.1.277+), Codex, Cursor, Copilot, and others read. Produce `CLAUDE.md` as the output only on an **explicit request**, meaning the user asks for a CLAUDE.md to be written or edited ("create a CLAUDE.md", "add X to CLAUDE.md"). Naming it as a *source* doesn't count ("migrate our CLAUDE.md to AGENTS.md"), and neither does a CLAUDE.md that already exists on disk. Skip READMEs and contributor docs, skills (`skill-creator`), and subagent files under `.claude/agents/` (`subagent-creator`).
+Create, update, or audit the instruction files coding agents load every session. **`AGENTS.md` is the default output**: it's the open standard that Claude Code (v2.1.277+), Codex, Cursor, Copilot, and others read. Produce `CLAUDE.md` as the output only on an **explicit request**, meaning the user asks for a CLAUDE.md to be written or edited ("create a CLAUDE.md", "add X to CLAUDE.md"). Naming it as a *source* doesn't count ("migrate our CLAUDE.md to AGENTS.md"), and neither does a CLAUDE.md that already exists on disk. Skip READMEs and contributor docs, skills (`skill-creator`), and subagent files under `.claude/agents/`.
 
 ## Core Principle
 

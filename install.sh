@@ -43,7 +43,7 @@ detect_os() {
 
 # ─── Discover skills (folders containing SKILL.md) ─────────────────────────
 # Walks top-level skills/*/ and one extra level skills/*/*/ so suite umbrellas
-# (e.g., website-cloner/) and their child skills are both installable.
+# (e.g., diagram-generator/) and their child skills are both installable.
 discover_skills() {
   local dir desc prev_nullglob
   prev_nullglob=$(shopt -p nullglob)
@@ -198,7 +198,7 @@ strip_frontmatter() {
 }
 
 # ─── Copy skill source into destination, skipping nested child skills ──────
-# Suite umbrellas (e.g., website-cloner/) physically contain their phase
+# Suite umbrellas (e.g., diagram-generator/) physically contain their phase
 # children. Each child is independently installable via its own discover_skills
 # entry, so a plain `cp -r "$src"/*` would duplicate every child inside the
 # umbrella's destination. Skip any subdirectory that has its own SKILL.md.
