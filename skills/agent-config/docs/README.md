@@ -7,51 +7,53 @@
 
 # Agent Config
 
-> Create, update, or audit CLAUDE.md and AGENTS.md configuration files following official best practices.
+> Create, update, or audit `AGENTS.md` (the default) or `CLAUDE.md` agent instruction files, using the official docs and published research on what helps agents.
 
 ## Highlights
 
-- Generate a cross-agent `AGENTS.md` (the shared source of truth) plus a thin `CLAUDE.md` wrapper that imports it — no duplicated rules
-- Enforce the official size budget: under 200 lines per file, 40–150 as the sweet spot
-- Route every instruction to the layer that owns it — always-on facts in the root file, procedures in a skill, hard stops in a `PreToolUse` hook, verification in tests
-- Audit existing configs against the official Anthropic and AGENTS.md guidance, flagging contradictions, cross-file drift, and machine-checkable rules that should be gates instead of prose
-- Support directory-specific instructions at multiple levels (home, project, nested, `.claude/rules/*.md`)
-- Include token efficiency rules to minimize unnecessary tool calls and verbose output
+- **AGENTS.md by default.** Claude Code reads `AGENTS.md` natively from v2.1.277, as do Codex, Cursor, Copilot, and others, so one file serves every agent. `CLAUDE.md` is written only when you ask for it by name.
+- **Shadow check.** A `CLAUDE.md`, `.claude/CLAUDE.md`, or `CLAUDE.local.md` in the working directory or above it stops Claude Code from reading `AGENTS.md`. The skill finds these files and fixes the problem: it moves shared rules into `AGENTS.md` and turns the `CLAUDE.md` into an `@AGENTS.md` import.
+- **Minimal by design.** It writes only what an agent can't infer (exact commands, pins, *Never* / *Ask first* boundaries, and the checks that define "done"), then prunes overviews and directory trees. Research shows bloated generated files cost about 20% more without improving success.
+- **Claude-only lines stay out of the shared file.** Plan mode, hooks, and skill notes go to `.claude/rules/`, which loads alongside `AGENTS.md` without shadowing it.
+- **Audits flag load failures.** An audit reports a shadowed `AGENTS.md`, prose that says "read AGENTS.md" where an import belongs, duplicated rules, and prose standing in for hooks or tests. Each finding names the layer the rule should move to.
+- The token-efficiency rules go into the source-of-truth file exactly once: never into wrappers, nested package files, or `.claude/rules/`.
 
 ## When to Use
 
 | Say this... | Skill will... |
 |---|---|
-| "Create a CLAUDE.md for this project" | Analyze project and generate config |
-| "Audit my agent config" | Review existing files against best practices |
-| "Update CLAUDE.md" | Improve existing configuration |
-| "Set up AGENTS.md" | Create the cross-agent source-of-truth config |
+| "Set up agent instructions for this repo" | Write a lean `AGENTS.md`, with no `CLAUDE.md` |
+| "Update our agent config" (repo has only `CLAUDE.md`) | Migrate the shared rules into `AGENTS.md` and turn `CLAUDE.md` into an `@AGENTS.md` import, after showing you the diff |
+| "Create a CLAUDE.md for this project" | Write `CLAUDE.md`: a thin `@AGENTS.md` wrapper if `AGENTS.md` exists, otherwise a standalone file |
+| "Audit my AGENTS.md" | Report pass/fail per checklist item, including whether Claude Code actually loads the file, without changing anything |
 
 ## How It Works
 
 ```mermaid
 graph TD
-    A["Analyze Project"] --> B{"Create, Update, or Audit?"}
-    B -->|Create| C["Draft Config"]
-    B -->|Update| D["Improve Existing"]
-    B -->|Audit| E["Review & Report"]
-    C --> F["Write Config File"]
-    D --> F
-    E --> F
+    A["Pick mode: create, update, or audit"] --> B["Resolve target: AGENTS.md unless CLAUDE.md is named"]
+    B --> C["Shadow check: CLAUDE files at or above the target"]
+    C --> D{"Branch"}
+    D -->|agents-only| E["Draft AGENTS.md and prune"]
+    D -->|migrate / wrapper| F["AGENTS.md plus @AGENTS.md wrapper"]
+    D -->|claude-only| G["Standalone CLAUDE.md"]
+    D -->|audit| H["Checklist report, no writes"]
+    E --> I["Verify: under 200 lines, token block once, nothing shadowed"]
+    F --> I
+    G --> I
     style A fill:#4CAF50,color:#fff
-    style B fill:#FF9800,color:#fff
-    style F fill:#2196F3,color:#fff
+    style I fill:#2196F3,color:#fff
 ```
 
 ## Installation
 
-Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
+Install with [npx (Vercel)](https://www.npmjs.com/package/skills):
 
 ```bash
 npx skills add https://github.com/luongnv89/skills --skill agent-config
 ```
 
-Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
+Or with [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
 asm install github:luongnv89/skills:skills/agent-config
@@ -61,29 +63,25 @@ asm install github:luongnv89/skills:skills/agent-config
 
 ```
 /agent-config
+/agent-config audit
+/agent-config packages/api/AGENTS.md
 ```
-
-## Token Efficiency
-
-The source-of-truth file (`AGENTS.md` when both exist) includes a **Token Efficiency** section with rules to reduce wasteful agent behavior. The `CLAUDE.md` wrapper inherits it via `@AGENTS.md` and does not copy it:
-
-- No re-reading files just written or edited
-- No re-running commands to "verify" unless outcome was uncertain
-- Batch related edits into single operations
-- Skip confirmations and summaries unless needed
-- Plan before acting — minimize unnecessary tool calls
 
 ## Output
 
-Production-ready `AGENTS.md` / `CLAUDE.md` files following the official section order — Project, Commands, Layout, Conventions, Constraints, Done when, Read when needed — plus token efficiency rules. Audits report each finding with the layer it should move to.
+- **agents-only** (the default): a production-ready `AGENTS.md` under 200 lines, with Commands, Constraints (*Never* / *Ask first*), Done when, optional sections only where they hold non-inferable facts, and the token-efficiency block.
+- **migrate / wrapper**: the same `AGENTS.md`, plus a `CLAUDE.md` that opens with `@AGENTS.md` and holds only Claude-only lines.
+- **claude-only**: a standalone `CLAUDE.md`, written only when you ask for one and no `AGENTS.md` exists.
+- **audit**: a checklist report with routing recommendations. No files are changed.
 
 ## Resources
 
 | File | Purpose |
 |---|---|
-| `references/official-standards.md` | The Anthropic and AGENTS.md rules this skill enforces, with size budgets |
-| `references/knowledge-routing.md` | Which layer owns each instruction, section templates, maintenance loop |
-| `references/claude-md-checklist.md` | The 7-section audit checklist |
+| `references/agents-md-writing.md` | How to write the best AGENTS.md: evidence table, 10 rules, template, bad-to-better lines |
+| `references/official-standards.md` | AGENTS.md standard, Claude Code loading rules (shadowing, settings, versions), Codex discovery, size budget, verification |
+| `references/agents-md-checklist.md` | The 7-section audit checklist and a sample report |
+| `references/knowledge-routing.md` | Which layer owns each instruction, file scopes, the `CLAUDE.md` wrapper, the maintenance loop |
 | `references/anti-patterns.md` | Content and structural failure modes |
-| `references/token-efficiency-block.md` | The always-injected block |
-| `references/optional-blocks.md` | Opt-in orchestration / coding-discipline blocks |
+| `references/token-efficiency-block.md` | The block injected into every file |
+| `references/optional-blocks.md` | Opt-in orchestration and coding-discipline blocks |

@@ -4,7 +4,7 @@ description: "Audit a stale, inherited, or messy codebase — deps, bugs, securi
 license: MIT
 effort: max
 metadata:
-  version: 1.3.2
+  version: 1.3.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -237,7 +237,7 @@ skeleton (unconditional **Pre**, then **P0–P4** — do not rename or renumber 
 
 | Phase | Goal | Milestone |
 |---|---|---|
-| **Pre Agent environment** | env an AI agent can use autonomously; `CLAUDE.md` / `AGENTS.md` created or improved | `ME` — both files exist (create or update via planned `/agent-config`); recorded commands documented |
+| **Pre Agent environment** | env an AI agent can use autonomously; `CLAUDE.md` / `AGENTS.md` created or improved | `ME` — both files exist (create or update via planned `/agent-config`); recorded commands in `AGENTS.md`, which `CLAUDE.md` imports |
 | **P0 Stabilize** | build green, tests runnable, lockfile committed, CI running | `M0` — baseline-green reproducible in CI |
 | **P1 Secure & Patch** | vulnerabilities closed, security patch + patch/minor **upgrade waves** | `M1` — zero known High/Critical vulns; patch/minor current |
 | **P2 Modernize** | each major dependency bump and runtime/toolchain upgrade, one task each | `M2` — every major current or deferred with written rationale |

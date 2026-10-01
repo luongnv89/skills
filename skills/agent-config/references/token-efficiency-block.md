@@ -1,6 +1,6 @@
 # Token Efficiency Block
 
-Insert this verbatim section once into the source-of-truth file — `AGENTS.md` when writing both (or when `AGENTS.md` already exists), otherwise the single target. Do not copy it into the `CLAUDE.md` wrapper; that file opens with `@AGENTS.md` and inherits the block.
+Insert this section verbatim, once, into the source-of-truth file. That file is `AGENTS.md` by default, or `CLAUDE.md` on the claude-only branch. Never copy the block into a `CLAUDE.md` wrapper, because the `@AGENTS.md` import already brings it in.
 
 ```markdown
 ## Token Efficiency

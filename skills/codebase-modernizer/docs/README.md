@@ -97,7 +97,7 @@ filled in with a plausible guess. The Limitations section lists every one of the
 
 | Phase | Goal | Milestone |
 |---|---|---|
-| **Pre Agent environment** | env an agent can use autonomously; create or improve `CLAUDE.md` / `AGENTS.md` | both files exist (create or update); commands documented in `CLAUDE.md` and Pre.1 notes |
+| **Pre Agent environment** | env an agent can use autonomously; create or improve `CLAUDE.md` / `AGENTS.md` | both files exist (create or update); commands documented in `AGENTS.md` (which `CLAUDE.md` imports) and Pre.1 notes |
 | **P0 Stabilize** | build green, tests runnable, CI running | baseline reproducible in CI |
 | **P1 Secure & Patch** | vulnerabilities closed, waves W1–W2 shipped | zero High/Critical advisories |
 | **P2 Modernize** | runtime upgrade, then majors one at a time | every major current or deferred with a reason |
