@@ -106,7 +106,7 @@ A skill is a self-contained playbook: frontmatter metadata, instructions, option
 | Structured | Steps, templates, checklists, self-validation |
 | Tool-agnostic | Same skill works in Claude Code, Cursor, Windsurf, Codex, Copilot |
 | Scannable | Tables, diagrams, short outputs |
-| Suite support | Multi-phase products (e.g. website-cloner) with independent phases |
+| Suite support | Multi-phase products (e.g. diagram-generator) with independent phases |
 
 ---
 
@@ -182,7 +182,6 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**auto-push**](skills/auto-push/) | 1.0.5 | low | Commit message + stage + push with secret and size checks |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.2.2 | medium | Pre-commit + GitHub Actions quality gates |
 | [**security-setup**](skills/security-setup/) | 1.4.2 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
-| [**fork-upstream-sync**](skills/fork-upstream-sync/) | 1.3.4 | medium | Sync a fork with upstream while keeping feature branches and open PRs mergeable |
 | [**release-manager**](skills/release-manager/) | 2.6.4 | max | Bump, changelog, tag, GitHub release, publish |
 
 ### Product Planning
@@ -204,18 +203,6 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**frontend-design**](skills/frontend-design/) | 1.2.7 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.2.5 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.3.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
-| [**website-cloner**](skills/website-cloner/) | 1.3.0 | high | 6-phase URL to improved Vite/React/Tailwind site |
-
-**Website cloner phases** (install individually or as suite):
-
-| Phase | Version | What it does |
-|---|---|---|
-| website-analyzer | 1.5.0 | 6-dimension analysis → JSON |
-| website-clone-report | 1.3.0 | Stakeholder report from analysis |
-| website-improvement-prd | 1.4.0 | Improvement PRD |
-| website-implementation-plan | 1.4.0 | tasks.md from PRD |
-| website-builder | 1.4.0 | Build improved site |
-| website-clone-final-report | 1.5.0 | Before/after summary |
 
 **Diagram generator engines** (install the umbrella or a single engine):
 
@@ -233,9 +220,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.3 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.5 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.3.1 | low | Add OSS files and templates |
-| [**agent-config**](skills/agent-config/) | 2.0.1 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
-| [**subagent-creator**](skills/subagent-creator/) | 1.1.4 | high | Create, evaluate, improve Claude Code subagent files (.claude/agents/*.md) |
-| [**convert-documents-to-markdown**](skills/convert-documents-to-markdown/) | 1.1.0 | low | Office docs, ebooks, CSV & PDF → GitHub-Flavored Markdown via anydoc (mirrored from firecrawl/anydoc) |
+| [**agent-config**](skills/agent-config/) | 2.0.2 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
 
 ### App Store
 
@@ -251,9 +236,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**cli-builder**](skills/cli-builder/) | 1.1.0 | high | 5-step CLI tool builder with approval gates |
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.2.1 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.2.4 | high | Cross-platform install.sh with env detection |
-| [**opencode-handoff**](skills/opencode-handoff/) | 1.1.1 | medium | Resume a limit-blocked OpenCode session in a fresh sandbox |
 | [**opencode-runner**](skills/opencode-runner/) | 1.5.1 | medium | Delegate work to opencode free cloud models |
-| [**opencode-sandbox**](skills/opencode-sandbox/) | 3.1.0 | medium | Run OpenCode in a kept sandbox (SSH/gh on by default) |
 | [**herdr-agent**](skills/herdr-agent/) | 3.1.4 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.5.3 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.3.2 | medium | Spawn, message, read CLI agents in tmux |
@@ -265,7 +248,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 Most skills are `skills/<name>/`. Multi-phase products live under a suite folder: umbrella at `skills/<umbrella>/` + phases at `skills/<umbrella>/<phase>/`.
 
-Current suites: [website-cloner](skills/website-cloner/) (6 sequential phases) and [diagram-generator](skills/diagram-generator/) (draw.io + Excalidraw engines behind one router). Install an umbrella or any child. Installers discover both levels.
+Current suite: [diagram-generator](skills/diagram-generator/) (draw.io + Excalidraw engines behind one router). Install the umbrella or any child. Installers discover both levels.
 
 Mirror the layout for your own multi-skill products.
 
