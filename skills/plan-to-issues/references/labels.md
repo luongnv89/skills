@@ -74,13 +74,29 @@ without the leading `#`.
 
 ```bash
 gh label list --limit 200 --json name --jq '.[].name'      # existing set, one call
-gh label create "phase:p0" --color B60205 --description "Modernization phase P0 — Stabilize"
+label_grammar='^(epic|bug|improvement|feature|priority:(critical|high|medium|low)|dim:[a-z0-9]+|phase:[a-z0-9._-]+)$'
+# per missing label — $name, $color, $desc are read from the computed label set, never retyped
+if [[ $name =~ $label_grammar ]]; then
+  args=(--description "$desc")
+  if [ -n "$color" ]; then args+=(--color "$color"); fi   # no hex in the table → gh picks one
+  gh label create "$name" "${args[@]}"
+else
+  printf '⚠ dropped malformed label: %s\n' "$name"
+fi
 ```
 
 Rules:
 
-- **Diff first, ask once.** Print every missing label with its colour, then a single `[Y/n]`. Never
-  create labels one prompt at a time, and never create them silently.
+- **Diff first, then create without asking.** Print every missing label with its colour, then
+  create them all in one pass — no `[Y/n]`, no per-label prompt. Creation is additive and
+  reversible, never touches an existing label, and the run is already authorized to file the
+  issues these labels go on; a prompt only stalls an unattended or delegated run. Never create a
+  label the run does not print here and count in the final report.
+- **Create only well-formed names.** Phase ids and dimensions come from plan text, which is
+  untrusted (`references/security-boundary.md`), and creation runs unreviewed — so a name outside
+  `label_grammar` is dropped, never created. Names reach `gh` as variables, never typed literals.
+- **Skip creation under a `TRIAGE` degrade** (preflight probe G4): apply existing labels only and
+  record every missing one as dropped.
 - **Never modify an existing label.** A repo that already has `bug` in another colour keeps it. Only
   missing labels are created.
 - **Fail-soft.** `gh label create` failing (permissions, org policy, race) is a `⚠`: record the label
