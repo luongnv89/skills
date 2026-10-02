@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires git, GitHub CLI (gh) authenticated (`gh auth status`), and the issue-creator skill installed."
 effort: high
 metadata:
-  version: 2.1.1
+  version: 2.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (resolve input → worklist → label set → epic → per-phase issue-creator batch → sub-issue registration → static map render → verify-by-re-read)"
 ---
@@ -176,9 +176,9 @@ fresh: user confirmed. `--epic`: Source parsed, no confirm. Else do not file.
 
 Compute each task's **label set** per `references/labels.md`, take the union — plus `epic`, which
 Phase 3 needs — diff it against `gh label list --json name --limit 200`, print the missing labels
-with their colours, and **ask once**. Declining is not fatal: continue with the labels that exist
-and record every dropped one in the final report. A permissions failure on `gh label create` is a
-`⚠`, never a stop.
+with their colours, then **create them without asking** (well-formed names only; none under a
+`TRIAGE` degrade). A failed `gh label create` is a `⚠`, never a stop: record the label as dropped
+and name it in the final report.
 
 **Completion criteria:** every task has ≥ 2 labels resolved (`phase:` and a type label are
 mandatory); `gh label list` contains every label about to be applied, or it is on the dropped list.

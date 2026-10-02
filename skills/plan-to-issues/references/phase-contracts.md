@@ -73,10 +73,12 @@ schema; no confirm was asked; then created + skipped equals the restored worklis
 
 Read `references/labels.md`. Compute each task's **label set**, take the union — plus `epic`, which
 Phase 3 needs — and diff it against `gh label list --json name --limit 200`. Print the missing
-labels with their colours and **ask once**.
+labels with their colours, then **create them without asking** — no `[Y/n]`. Only names that match
+the label grammar in `references/labels.md` are created, and none under a `TRIAGE` degrade.
 
-Declining is not fatal: continue with the labels that exist and record every dropped one in the
-final report. A permissions failure on `gh label create` is a `⚠`, never a stop.
+A malformed name or a failed `gh label create` (permissions, org policy, race) is a `⚠`, never a
+stop: record the label as dropped, continue with the labels that exist, and name it in the final
+report.
 
 **Completion criteria:** every task has ≥ 2 labels resolved (`phase:` and a type label are
 mandatory); `gh label list` contains every label about to be applied, or the label is on the

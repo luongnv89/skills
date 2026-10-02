@@ -101,6 +101,10 @@ started. Missing pieces are reported together, each with its exact install comma
 
 - **Re-running is safe.** A plan task that already has an issue under the epic is skipped, not
   duplicated. If a batch dies halfway through a rate limit, re-run it.
+- **Missing labels are created for you, without a prompt.** The run prints the labels it is adding,
+  creates them, and counts them in the final report. It only creates names that fit the scheme and
+  never recolours or renames a label you already have. To see them first, run `--dry-run`, which
+  creates nothing.
 - **It never edits an epic it didn't write.** The dashboard sits between HTML sentinels; `sync`
   refuses to touch an issue that has none.
 - **It never reads your source code.** Everything in every issue traces to a line of the plan. That
