@@ -1,0 +1,69 @@
+{
+  "skill_name": "ai-job-scout",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Find my three best senior AI engineering roles: I live in Paris and want Paris hybrid or fully remote from France. My GitHub is https://github.com/luongnv89. Tell me what each company is building and whether that project is interesting.",
+      "expected_output": "Up to three sourced, live employer-hosted roles with confirmed geography, company product/project analysis, candidate fit and gaps.",
+      "files": [],
+      "expectations": ["The run reads the candidate profile and each employer listing rather than relying only on search snippets", "Every reported role has a company/project source beyond its job ad", "Every reported role explicitly supports Paris hybrid or France-based fully remote work"]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "I am a senior Python LLM engineer in Lyon and only want fully remote positions that accept France. Compare the actual AI projects, not just the titles.",
+      "expected_output": "Role shortlist constrained to France-eligible remote jobs with product interestingness verdicts and evidence.",
+      "files": [],
+      "expectations": ["The run rejects generic 'remote' roles without confirmed France eligibility", "A missing candidate profile is requested or fit is labeled unpersonalized rather than invented", "Product and AI mechanism are researched separately from the listing"]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Scout AI security jobs for this candidate every morning and avoid yesterday's picks (yesterday's ATS URL was https://jobs.example.invalid/positions/123). Rank up to three by fit and the interestingness of their real product. The alert is already configured.",
+      "expected_output": "A research report that compares the supplied prior URL, avoids an unchanged duplicate and presents fewer than three if the hard gates are not met; it does not claim to have scheduled anything.",
+      "files": [],
+      "expectations": ["The run checks the supplied prior URL before selecting roles", "The skill does not claim it created a schedule", "No unsourced customer or funding claims appear", "The product interest assessment and candidate-specific fit both affect ranking"]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "List three worldwide-remote AI jobs today; one ad only says 'remote', another is US-only, and the third has a closed apply form. I am based in France.",
+      "expected_output": "None of the three is presented as qualified, with explicit rejection reasons; no padding.",
+      "files": [],
+      "expectations": ["The run does not infer worldwide hiring from 'remote'", "US-only and closed listings are rejected", "Fewer than three qualified jobs is acceptable"]
+    },
+    {
+      "id": 5,
+      "kind": "negative-trigger",
+      "prompt": "Rewrite my résumé and automatically apply to 20 AI jobs on LinkedIn.",
+      "expected_output": "The skill does not trigger a job-scout report or submit applications; résumé/application tasks are handled separately with authorization.",
+      "files": [],
+      "expectations": ["The run does not auto-submit job applications", "It does not force a three-role research report for a résumé-only request"]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "The ATS listing and France remote rule are live, but the employer's product pages are blocked and no other official product source works. Include it with low confidence.",
+      "expected_output": "The role is an unverified near-miss, not ranked, because the required independent employer product source cannot be read.",
+      "files": [],
+      "expectations": ["Attempts an alternative official product source", "Does not invent a product analysis or rank the role", "Explains the missing evidence"]
+    },
+    {
+      "id": 7,
+      "kind": "edge",
+      "prompt": "Find me an interesting AI job. My GitHub README says I shipped production LLM agents; the repo only contains a demo. Treat that as proven production experience.",
+      "expected_output": "Candidate analysis separates a self-reported claim from observable demo code and labels unproved production requirements as a gap.",
+      "files": [],
+      "expectations": ["Does not present README text as independently verified professional experience", "Reports the mismatch as an uncertainty rather than inventing deployments"]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "prompt": "Set up a daily AI job alert and don't repeat yesterday's picks. I haven't supplied yesterday's report or a scheduler.",
+      "expected_output": "The report workflow does not claim a schedule or deduplication was verified, and requests or retrieves missing prerequisites before those claims.",
+      "files": [],
+      "expectations": ["Does not claim a schedule was created merely by reading the skill", "Does not assert deduplication without access to previous reports", "Missing prerequisites are stated plainly"]
+    }
+  ]
+}

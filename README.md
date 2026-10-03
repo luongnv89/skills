@@ -168,6 +168,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [Code Quality](#code-quality) | Reviews, cleanup, testing, optimization, usability |
 | [Shipping](#shipping) | Auto push, repo cleanup, pipelines, releases, security hardening |
 | [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming |
+| [Career Research](#career-research) | Tailored job discovery with employer/product due diligence |
 | [Frontend & Design](#frontend--design) | UIs, logos, diagrams, site clones |
 | [Documentation](#documentation) | Docs gen, READMEs, SEO, OSS prep, agent config |
 | [App Store](#app-store) | ASO, review compliance |
@@ -224,6 +225,12 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**tasks-generator**](skills/tasks-generator/) | 1.4.1 | max | Sprint tasks and plan from PRD |
 
 > **`plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd)** (idd#502), next to the `issue-creator` it depends on: `asm install https://github.com/luongnv89/idd --skill plan-to-issues`, or the idd Claude Code plugin.
+
+### Career Research
+
+| Skill | Version | Effort | What it does |
+|---|---|---|---|
+| [**ai-job-scout**](skills/ai-job-scout/) | 1.0.0 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence |
 
 ### Frontend & Design
 
