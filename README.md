@@ -143,6 +143,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | [Code Quality](#code-quality) | Reviews, cleanup, testing, optimization, usability |
 | [Shipping](#shipping) | Auto push, pipelines, releases, security hardening |
 | [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming |
+| [Career Research](#career-research) | Tailored job discovery with employer/product due diligence |
 | [Frontend & Design](#frontend--design) | UIs, logos, diagrams, site clones |
 | [Documentation](#documentation) | Docs gen, READMEs, SEO, OSS prep, agent config |
 | [App Store](#app-store) | ASO, review compliance |
@@ -195,6 +196,12 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**tad-generator**](skills/tad-generator/) | 1.5.1 | max | Technical architecture document from PRD |
 | [**tasks-generator**](skills/tasks-generator/) | 1.4.1 | max | Sprint tasks and plan from PRD |
 | [**plan-to-issues**](skills/plan-to-issues/) | 2.2.0 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
+
+### Career Research
+
+| Skill | Version | Effort | What it does |
+|---|---|---|---|
+| [**ai-job-scout**](skills/ai-job-scout/) | 1.0.0 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence |
 
 ### Frontend & Design
 
