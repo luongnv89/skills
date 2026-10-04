@@ -156,6 +156,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.3 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.3.2 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.4.3 | medium | Usability review using Krug's principles |
+| [**ux-ax-review**](skills/ux-ax-review/) | 1.0.3 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
