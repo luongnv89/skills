@@ -141,7 +141,7 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | Category | What it covers |
 |---|---|
 | [Code Quality](#code-quality) | Reviews, cleanup, testing, optimization, usability |
-| [Shipping](#shipping) | Auto push, pipelines, releases, security hardening |
+| [Shipping](#shipping) | Auto push, repo cleanup, pipelines, releases, security hardening |
 | [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming |
 | [Frontend & Design](#frontend--design) | UIs, logos, diagrams, site clones |
 | [Documentation](#documentation) | Docs gen, READMEs, SEO, OSS prep, agent config |
@@ -181,6 +181,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**auto-push**](skills/auto-push/) | 1.0.5 | low | Commit message + stage + push with secret and size checks |
+| [**cleanup-project**](skills/cleanup-project/) | 1.0.0 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.2.2 | medium | Pre-commit + GitHub Actions quality gates |
 | [**security-setup**](skills/security-setup/) | 1.4.2 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**release-manager**](skills/release-manager/) | 2.6.4 | max | Bump, changelog, tag, GitHub release, publish |
