@@ -1,0 +1,101 @@
+{
+  "skill_name": "cleanup-project",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-cleanup-run",
+      "kind": "happy-path",
+      "prompt": "I'm about to start a new feature. Clean up this repo first so I have a clean foundation: deal with my uncommitted stuff, fix the gitignore, and get rid of branches that are already merged.",
+      "expected_output": "Fetches with --prune without stashing, reviews each uncommitted change for keep or discard, switches to main and pulls ff-only, proposes an ignore diff, sweeps merged branches locally and on origin after one confirmation, lists unmerged branches, and ends with a verified report.",
+      "files": [],
+      "expectations": [
+        "Runs git fetch origin --prune before reading refs and does not stash or pull before the uncommitted review.",
+        "Shows each uncommitted change with its diff and asks keep or discard for it.",
+        "Runs git switch main and git pull --ff-only only after every change has a decision.",
+        "Shows a candidate table of merged branches with evidence before deleting anything, and takes one explicit confirmation.",
+        "Deletes merged branches both locally (git branch -d or -D) and on origin (git push origin --delete).",
+        "Ends by checking git branch --show-current is main and git status --porcelain is empty, and prints a final report."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "squash-merged-branch",
+      "kind": "edge",
+      "prompt": "feat/filters was squash-merged into main through a GitHub PR, but git branch --merged doesn't list it. Can you clean up merged branches including that one?",
+      "expected_output": "Detects feat/filters as merged via patch equivalence (squash-tree cherry check) or a merged PR whose headRefOid matches the tip, lists it with that evidence, and deletes it with git branch -D plus git push origin --delete only after confirmation.",
+      "files": [],
+      "expectations": [
+        "Does not rely on git branch --merged alone; uses git cherry, the squash-tree check, or gh pr list --state merged.",
+        "When using the merged-PR signal, compares the PR headRefOid with the branch tip before counting it as merged.",
+        "Uses git branch -D for the squash-merged branch and states that -d refuses it.",
+        "Asks for explicit confirmation before running any delete command."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "dirty-tree-no-silent-discard",
+      "kind": "edge",
+      "prompt": "Clean up my repo. I have a bunch of modified files, a staged new file, and some random untracked files. I haven't looked at them yet.",
+      "expected_output": "Reviews every change one by one, never discards anything without the user's explicit answer, uses git restore --staged --worktree for tracked discards and a git clean -n dry run before deleting an untracked path, and keeps any change left unanswered.",
+      "files": [],
+      "expectations": [
+        "Asks keep or discard for each change rather than discarding in bulk on its own initiative.",
+        "Warns that discarding a staged new file deletes it because it is not in HEAD.",
+        "Runs git clean -n on a specific path before git clean -f on that path, and never runs bare git clean -fd.",
+        "Offers to keep work as a commit on a new branch by default rather than on main."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "gitignore-update",
+      "kind": "happy-path",
+      "prompt": "Tidy this project up: node_modules and .DS_Store keep showing up in git status, and I think some build output got committed by mistake.",
+      "expected_output": "Proposes ignore patterns from the artifacts present, checks tracked-but-ignored files with git ls-files -ci --exclude-standard, shows the .gitignore diff, applies and commits it only after approval, and never ignores a kept path.",
+      "files": [],
+      "expectations": [
+        "Proposes patterns only for artifacts actually present, such as node_modules/ and .DS_Store.",
+        "Runs git ls-files -ci --exclude-standard to find tracked files that match an ignore rule.",
+        "Shows the .gitignore diff and waits for approval before applying it, then asks again before committing.",
+        "Explains that git rm --cached removes a tracked artifact from the index but not from disk, and asks first."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "protected-and-unmerged-kept",
+      "kind": "edge",
+      "prompt": "Delete every branch I don't need anymore. There's release/2.1, a develop branch, feat/wip checked out in another worktree, and spike/llm-cache which was never merged.",
+      "expected_output": "Never deletes release/2.1, develop, the current branch, or the worktree-checked-out feat/wip; reports spike/llm-cache as unmerged without deleting it and offers the per-branch drill-down.",
+      "files": [],
+      "expectations": [
+        "Treats release/2.1, develop, the current branch, and feat/wip (checked out in a worktree) as protected and does not delete them.",
+        "Does not delete spike/llm-cache, because no merge signal holds for it.",
+        "Lists unmerged branches with ahead or behind counts and offers Delete, Archive, Open PR, or Keep as a drill-down.",
+        "Does not count the remaining protected or unmerged branches as residue: with a clean main and no merged branch left, the result is PASS."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "negative-commit-and-push",
+      "kind": "negative-trigger",
+      "prompt": "Commit and push everything in my working tree with a good commit message.",
+      "expected_output": "Does not run cleanup-project; this is a stage-commit-push request that belongs to auto-push.",
+      "files": [],
+      "expectations": [
+        "Does not start the cleanup workflow (no uncommitted review, no branch sweep).",
+        "Does not delete any branch or discard any change."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "negative-release",
+      "kind": "negative-trigger",
+      "prompt": "Cut a 2.4.0 release: bump the version, update the changelog, tag it, and publish the GitHub release.",
+      "expected_output": "Does not run cleanup-project; release work belongs to release-manager.",
+      "files": [],
+      "expectations": [
+        "Does not start the cleanup workflow.",
+        "Does not delete branches or modify .gitignore."
+      ]
+    }
+  ]
+}
