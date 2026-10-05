@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.2.5
+  version: 1.2.6
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -73,7 +73,8 @@ anything** — a preflight that clears after the plan is written just moves the 
 ```bash
 asm list -p claude --json | grep -q '"plan-to-issues"' || {
   echo "Missing required skill: plan-to-issues" >&2
-  echo "Install it:      asm install github:luongnv89/skills:skills/plan-to-issues -p claude --yes" >&2
+  echo "Install it:      asm install https://github.com/luongnv89/idd --skill plan-to-issues -p claude --yes" >&2
+  echo "Or the plugin:   claude plugin marketplace add luongnv89/idd && claude plugin install idd@idd" >&2
   echo "No asm yet:      npm install -g agent-skill-manager" >&2
   echo "Verify:          asm list -p claude --json | grep 'plan-to-issues'" >&2
   exit 1
@@ -81,7 +82,9 @@ asm list -p claude --json | grep -q '"plan-to-issues"' || {
 ```
 
 Where `asm` is not on PATH, test the install directly:
-`test -f "$HOME/.claude/skills/plan-to-issues/SKILL.md"`.
+`test -f "$HOME/.claude/skills/plan-to-issues/SKILL.md"`, or confirm `/plan-to-issues` is in the
+session's skill list (the idd Claude Code plugin installs it as `/idd:plan-to-issues`).
+`/plan-to-issues` is maintained in [luongnv89/idd](https://github.com/luongnv89/idd).
 
 `/plan-to-issues` carries its own chain — an authenticated `gh` and the `issue-creator`
 skill. Check them here too, or Phase 4 fails inside someone else's skill:
@@ -89,7 +92,7 @@ skill. Check them here too, or Phase 4 fails inside someone else's skill:
 ```bash
 gh auth status >/dev/null 2>&1 || { echo "✗ gh not authenticated — run: gh auth login" >&2; exit 1; }
 asm list -p claude --json | grep -q '"issue-creator"' || \
-  echo "⚠ issue-creator missing — /plan-to-issues will need it: asm install https://github.com/luongnv89/idd --skill skills/issue-creator -p claude --yes" >&2
+  echo "⚠ issue-creator missing — /plan-to-issues will need it: asm install https://github.com/luongnv89/idd --skill issue-creator -p claude --yes" >&2
 ```
 
 On a miss, **stop before Phase 3**. Phases 1–2 are read-only and may still be reported.

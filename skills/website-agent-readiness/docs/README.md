@@ -57,7 +57,7 @@ Artifacts land in `.agent-ready/` (scan data) and `agent-ready-plan.md` (the pla
 
 - `curl` and `python3` — Phases 1–3.
 - A publicly reachable target. The scanner fetches the site itself, so `localhost`, private IPs, and password-walled staging hosts cannot be scanned.
-- Phase 4 only: a git repo with a GitHub remote, `gh` authenticated (`gh auth status`), and the `plan-to-issues` skill installed.
+- Phase 4 only: a git repo with a GitHub remote, `gh` authenticated (`gh auth status`), and the `plan-to-issues` skill installed (from [luongnv89/idd](https://github.com/luongnv89/idd): `asm install https://github.com/luongnv89/idd --skill plan-to-issues`).
 
 ## Notes
 
