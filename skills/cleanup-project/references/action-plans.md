@@ -73,14 +73,36 @@ Pick the plan matching the user's choice and substitute `<branch>`.
 Say plainly that the commits become unreachable. Offer Archive as the safer option. A
 `stale info` rejection on the lease push means someone pushed since: stop and report it.
 
+### Archive — pick the source tip first (both variants)
+
+The local and remote tips can differ. Archiving the local tip and then deleting `origin/<branch>`
+would lose any commit only the remote has. Compare them before either variant:
+
+```
+l="$(git rev-parse -q --verify refs/heads/<branch>)"                # empty if no local ref
+sha="$(git rev-parse -q --verify refs/remotes/origin/<branch>)"     # the tip the lease guards
+```
+
+| Tips | `<src>` to archive |
+|---|---|
+| equal, or no remote ref | `<branch>` |
+| no local ref, or local is an ancestor of origin (`git merge-base --is-ancestor "$l" "$sha"`) | `origin/<branch>` |
+| origin is an ancestor of local (`git merge-base --is-ancestor "$sha" "$l"`) | `<branch>` (contains every remote commit) |
+| diverged (neither test passes) | stop and ask; or, if the user picks it, archive both: `archive/<branch>` from `<branch>` and `archive/<branch>-remote` from `origin/<branch>` |
+
+**Invariant:** the pushed archive must contain `<sha>`, the exact tip the `--force-with-lease`
+delete guards. Check `git merge-base --is-ancestor "$sha" archive/<branch>` (or
+`archive/<branch>-remote`) before the delete. If it fails, stop and do not delete the remote ref.
+
 ### Archive — tag and delete (preferred)
 
 ```
-1. git tag archive/<branch> <branch>
-2. git push origin archive/<branch>
-3. git rev-parse origin/<branch>           # record <sha>
-4. git branch -D <branch>
-5. git push --force-with-lease=refs/heads/<branch>:<sha> origin :refs/heads/<branch>
+1. pick <src> and record <sha> (above)
+2. git tag archive/<branch> <src>
+3. git push origin archive/<branch>
+4. git merge-base --is-ancestor <sha> archive/<branch>     # invariant; stop if it fails
+5. git branch -D <branch>                                  # if a local ref exists
+6. git push --force-with-lease=refs/heads/<branch>:<sha> origin :refs/heads/<branch>
 Recovery: git switch -c <branch> archive/<branch>
 ```
 
@@ -89,10 +111,12 @@ Ask "tag-and-delete or rename to `archive/<branch>`?" before choosing; do not as
 ### Archive — rename namespace
 
 ```
-1. git rev-parse origin/<branch>           # record <sha>
-2. git branch -m <branch> archive/<branch>
+1. pick <src> and record <sha> (above)
+2. git branch --no-track archive/<branch> <src>            # not `git branch -m`: <src> may be origin/<branch>
 3. git push origin archive/<branch>
-4. git push --force-with-lease=refs/heads/<branch>:<sha> origin :refs/heads/<branch>
+4. git merge-base --is-ancestor <sha> archive/<branch>     # invariant; stop if it fails
+5. git branch -D <branch>                                  # if a local ref exists
+6. git push --force-with-lease=refs/heads/<branch>:<sha> origin :refs/heads/<branch>
 ```
 
 ### Open a PR

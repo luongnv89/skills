@@ -44,7 +44,7 @@ discards (section 4) **before** this commit, so a discard-marked entry is gone f
 git switch -c wip/cleanup-<yyyy-mm-dd>
 git add -- <kept paths>
 git commit -m "chore: keep work in progress from cleanup" -- <kept paths>
-git switch main
+# stay on this branch; Step 3 switches to main after its worktree check
 ```
 
 The pathspec on `git commit` is required. A bare `git commit` commits the whole index, which
@@ -57,7 +57,9 @@ Alternatives, each only when the user picks it:
 - Named stash: `git stash push -u -m "cleanup: <name>" -- <paths>`. The `-u` is required for an
   untracked path; without it git rejects the pathspec. The stash shows up in the final report,
   because it is residue the user chose.
-- Commit on `main`: only with explicit consent, since it lands on the base branch.
+- Commit on `main`: only with explicit consent, since it lands on the base branch. If
+  `git worktree list --porcelain` shows `main` checked out in another worktree, the switch fails;
+  use the new-branch default instead.
 
 ## 4. Discard
 

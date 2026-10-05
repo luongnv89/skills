@@ -246,6 +246,8 @@ A run is correct when all of these hold:
 - **Detached HEAD.** Report the commit, offer to keep it on a new branch, then switch to `main`.
 - **No `origin`.** Local-only run: no fetch, no pull, no remote deletes; say so in the report.
 - **Branch checked out in a worktree.** Protected; tell the user to remove the worktree first.
+- **Archive with differing tips.** Archive the tip that contains `origin/<b>`'s recorded sha, or
+  both tips if they diverged, before the lease delete (`references/action-plans.md`).
 - **`main` checked out in another worktree.** `git switch main` fails; stop at Step 3, show that
   worktree's path, and finish the run there. The end state is then verified in that worktree.
 - **Conflict on switch.** `git switch main` refuses because a kept change would be overwritten:
