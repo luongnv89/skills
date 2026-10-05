@@ -15,7 +15,8 @@ template dump.
 
    These stay tracked despite the rule. Fixing them means `git rm --cached -- <p>`, which removes
    the file from the index (not from disk) and shows up as a deletion for everyone who pulls. Ask
-   before proposing it.
+   before proposing it. Re-run the command after applying the diff: a new rule can match
+   committed files. Commit approved untracks with `action-plans.md` C, untrack variant.
 3. The project's stack (a `package.json`, `pyproject.toml`, `Cargo.toml`, ...) only to name a
    pattern for an artifact you actually saw.
 
@@ -73,7 +74,9 @@ Name the file; never print its contents.
 2. Apply only after approval. Re-run `git status --porcelain` to show the artifacts disappear.
 3. Ask a second time before committing. Default: commit on `main` as
    `chore: ignore <what> artifacts`. The commit is local; offer `git push origin main` as a
-   separate step that needs its own confirmation.
+   separate step that needs its own confirmation. With approved `git rm --cached -- <p>` paths,
+   commit with no pathspec after `git diff --cached --name-only` lists only `.gitignore` and
+   those paths; `git commit -- <p>` would re-add `<p>` (`action-plans.md` C, untrack variant).
 4. Alternative: a `chore/gitignore-cleanup` branch and a PR, ending with `git switch main`
    (`action-plans.md` C). Warn that until it merges, `main` has no such rule, so the artifacts
    stay visible in `git status` on `main` and the result is PARTIAL with the PR ref.

@@ -97,10 +97,10 @@ $ git push origin main
 
 ```
   (local rows tested against main, remote rows against origin/main)
-  branch          where   signal                              remote tip  local        remote
-  feat/login      both    ancestry                            1a2b3c4     branch -d    lease delete
-  feat/filters    both    squash-tree cherry '-' (3 commits)  5d6e7f8     branch -D    lease delete
-  fix/readme      remote  merged PR #57, headRefOid match     9a0b1c2     —            lease delete
+  branch        where   local signal   remote signal                    remote tip  local      remote
+  feat/login    both    ancestry       ancestry                         1a2b3c4     branch -d  lease delete
+  feat/filters  both    squash-tree    squash-tree cherry '-' (3)       5d6e7f8     branch -D  lease delete
+  fix/readme    remote  —              merged PR #57, headRefOid match  9a0b1c2     —          lease delete
   (lease delete = git push --force-with-lease=refs/heads/<b>:<remote tip> origin :refs/heads/<b>)
 Protected, skipped: main, release/2.1
 Delete these 3 branches (5 refs)? [yes/no]

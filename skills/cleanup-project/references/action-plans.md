@@ -9,19 +9,22 @@ and report each outcome.
 
 ```
 Candidates (one confirmation covers this table):
-  branch          where   signal                    remote tip  local cmd        remote cmd
-  feat/login      both    ancestry                  1a2b3c4     git branch -d    lease delete
-  feat/search     both    squash-tree cherry '-'    9e8d7c6     git branch -D    lease delete
-  fix/typo        remote  merged PR #41, OID match  4b5a6f7     —                lease delete
+  branch       where   local signal   remote signal             remote tip  local cmd      remote cmd
+  feat/login   both    ancestry       ancestry                  1a2b3c4     git branch -d  lease delete
+  feat/search  both    squash-tree    squash-tree               9e8d7c6     git branch -D  lease delete
+  fix/typo     remote  —              merged PR #41, OID match  4b5a6f7     —              lease delete
+  feat/cache   both    ancestry       none (unmerged → Step 6)  3c2d1e0     git branch -d  —
   (lease delete = git push --force-with-lease=refs/heads/<b>:<remote tip> origin :refs/heads/<b>)
 
-Delete these 3 branches (5 refs)? [yes/no]
+Delete these 4 branches (6 refs)? [yes/no]
 ```
 
-Each side is tested against its own base (`merged-detection.md`). On yes, for each row: local
-delete, then remote delete, then `git fetch origin --prune`. A `stale info` rejection means the
-remote tip moved: report the row as skipped with that reason. `-D` appears only on rows with
-squash evidence (signal 2 or 3). A reply like "yes except feat/search" removes that row: re-show
+Each side is tested against its own base (`merged-detection.md`): local `<b>` against `main`,
+`origin/<b>` against `origin/main`. A side is deleted only on its own signal; a side with none
+gets `—` and goes to the Step 6 unmerged list. On yes, for each row: local delete if its
+`local cmd` is set, then remote delete if its `remote cmd` is set, then `git fetch origin
+--prune`. A `stale info` rejection means the remote tip moved: report the row as skipped with
+that reason. `-D` appears only when the local signal is squash evidence (signal 2 or 3). A reply like "yes except feat/search" removes that row: re-show
 the edited table with the new counts and take a fresh yes. If a new candidate appears after
 confirmation, it needs its own confirmation.
 
@@ -54,11 +57,28 @@ Commit on main? [yes / branch+PR / no]
 
 Push is a separate question: `Push main to origin now? [yes/no]` → `git push origin main`.
 
+Untrack variant, when the user approved `git rm --cached` for tracked-but-ignored paths (re-run
+`git ls-files -ci --exclude-standard` after step 1; it lists files, so `<p>` is one file each):
+
+```
+1. Apply the diff shown above to .gitignore          [approved]
+2. git rm --cached -- <p>                            [approved untrack; stays on disk]
+3. git add -- .gitignore
+4. git diff --cached --name-only        # expect exactly .gitignore and each <p>
+5. git commit -m "chore: ignore build artifacts"     on main (no pathspec)
+```
+
+No pathspec in 5: `git commit -- <p>` re-stages `<p>` from the working tree, so it stays tracked.
+If 4 lists any other path, do not run 5: run `git commit -m "<msg>" -- .gitignore`, then
+`git restore --staged -- <p>` (undoes the untrack), and list `<p>` under `Next:` as still
+tracked. Never leave a staged `D <p>` behind.
+
 Branch+PR alternative:
 
 ```
 1. git switch -c chore/gitignore-cleanup
 2. git add -- .gitignore && git commit -m "chore: ignore build artifacts" -- .gitignore
+   (untrack variant: run its steps 2–4 before 1, then commit with no pathspec here)
    Push chore/gitignore-cleanup and open PR? [yes/no]     # ask before 3 and 4
 3. git push -u origin chore/gitignore-cleanup
 4. gh pr create --base main --head chore/gitignore-cleanup --title "chore: ignore build artifacts"

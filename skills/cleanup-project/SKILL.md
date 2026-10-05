@@ -162,7 +162,8 @@ Commands per status code, the stash form and the large-tree format:
 4. Show the full `.gitignore` diff and ask to apply it.
 5. If approved, apply it and re-run `git status --porcelain`. Expect every covered path to be
    gone. If one remains, show `git check-ignore -v -- <path>` and fix the pattern.
-6. Ask `Commit on main? [yes / branch+PR / no]` and follow `references/action-plans.md` C. Pushing
+6. Ask `Commit on main? [yes / branch+PR / no]` and follow `references/action-plans.md` C (its
+   untrack variant for approved `git rm --cached -- <p>` paths: no pathspec on the commit). Pushing
    `main`, or pushing the PR branch and opening the PR, each needs its own yes. Branch+PR ends
    with `git switch main`; it and a declined commit make the result PARTIAL.
 7. If a deferred path is not covered by a pattern applied on `main`, ask `commit to wip / stash /
@@ -192,9 +193,10 @@ Signals 2 and 3 are the **squash evidence**. If `gh` is unusable or any `gh pr l
 2. In report-only scope, list a merged current branch as `current, not deletable`, then stop
    and go to the Step 6 list.
 3. Take **one** explicit confirmation for the whole table.
-4. Per row, run `git branch -d <b>` when ancestry holds, or `git branch -D <b>` only with squash
-   evidence, because `-d` refuses a squash-merged branch.
-5. Per row, run `git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>`, where
+4. Each side is deleted only on its own signal (local `<b>` vs `main`, `origin/<b>` vs
+   `origin/main`); a side without one goes to Step 6. Locally, run `git branch -d <b>` when
+   ancestry holds, or `git branch -D <b>` only with squash evidence (`-d` refuses those).
+5. For a proven `origin/<b>`, run `git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>`, where
    `<sha>` is the recorded tip. If `origin/<b>` moved, git rejects it as `stale info`: report the
    row as skipped with that reason.
 6. Run `git fetch origin --prune`.
