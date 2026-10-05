@@ -195,7 +195,8 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**prd-generator**](skills/prd-generator/) | 1.4.3 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.5.1 | max | Technical architecture document from PRD |
 | [**tasks-generator**](skills/tasks-generator/) | 1.4.1 | max | Sprint tasks and plan from PRD |
-| [**plan-to-issues**](skills/plan-to-issues/) | 2.2.0 | high | File any plan file — or a conversation, with no file at all — as labelled GitHub issues under one epic whose body maps each issue to its source task |
+
+> **`plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd)** (idd#502), next to the `issue-creator` it depends on: `asm install https://github.com/luongnv89/idd --skill plan-to-issues`, or the idd Claude Code plugin.
 
 ### Frontend & Design
 
@@ -219,7 +220,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**doc-manager**](skills/doc-manager/) | 2.0.4 | medium | Generate/update docs to match code, cited to path:line, never invented |
 | [**landing-page-generator**](skills/landing-page-generator/) | 1.3.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.3 | high | Technical SEO + AI-bot directives |
-| [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.5 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
+| [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.6 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.3.1 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 2.0.2 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
 
