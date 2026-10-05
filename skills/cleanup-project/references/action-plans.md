@@ -43,7 +43,9 @@ Run this? [yes/no]
 ```
 
 Each row exists only because the user gave that answer for it in the review. Run the
-`git clean -n` dry run before any `git clean -f` and show its output. Discards run before the
+`git clean -n` dry run before any `git clean -f` and show its output; run `-f` only if it lists
+exactly the decided paths, else stop and report. Paths are single-quoted and passed with
+`git --literal-pathspecs` (`uncommitted-review.md` 1), so `$` and `[slug]` stay literal. Discards run before the
 keep commit, and that commit names its paths so no other staged entry is swept into it.
 
 ## C. Ignore-file commit (Step 4)

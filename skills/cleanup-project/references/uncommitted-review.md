@@ -10,8 +10,10 @@ git status --porcelain=v1 -z
 ```
 
 Entries are NUL-separated. A rename or copy (`R`, `C`) carries **two** paths: the new path, then
-the original. Split on NUL, never on spaces or newlines, and quote each path as one argument
-(`-- "<path>"`).
+the original. Split on NUL, never on spaces or newlines, and pass each path as one
+single-quoted argument (`-- '<path>'`, writing an embedded `'` as `'\''`). Never use double
+quotes: the shell expands `$` in them, so `src/routes/$postId/` becomes `src/routes//`. Run
+path-taking git commands as `git --literal-pathspecs ...` so `[slug]`, `*` and `?` stay literal.
 
 Before reviewing, confirm no merge, rebase, cherry-pick, or revert is in progress (see
 Prerequisites in SKILL.md). A `UU`/`AA`/`DD` entry means one is. Stop (`BLOCKED — <operation> in
@@ -111,7 +113,11 @@ Show the exact command and the path before running it:
 | ` D`, `D ` | `git restore --staged --worktree -- <p>` | file restored from `HEAD` |
 | `A ` | `git restore --staged --worktree -- <p>` | **file deleted**: it is not in `HEAD`, so its content is lost. Say so before confirming |
 | `R ` | `git restore --staged --worktree -- <new> <old>` | both paths of the pair, in one command |
-| `??` | `git clean -n -- <p>`, then `git clean -f -- <p>` (add `-d` for a directory) | dry run shows "Would remove <p>"; delete after confirming |
+| `??` | `git --literal-pathspecs clean -n -- '<p>'`, then the same with `-f` (add `-d` for a directory) | dry run shows "Would remove <p>"; delete after confirming |
+
+**Dry-run gate:** run `git clean -f` only if the `-n` output is exactly one `Would remove <p>`
+line per decided path. If it names any other path, or none, do not run `-f`: stop and report
+the mismatch; the file stays on disk and the run is PARTIAL.
 
 Never run bare `git clean -fd`, `git clean -fdx`, `git checkout -- .`, `git reset --hard`, or
 `git stash drop` here. Each would discard changes the user has not decided on.

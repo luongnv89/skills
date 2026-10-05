@@ -122,7 +122,9 @@ If the fetch fails, show the error and ask once: continue local-only, or stop
 6. Show the consolidated plan (`references/action-plans.md` B) and take one yes. Nothing runs
    before that yes.
 7. On yes, run the discards first: `git restore --staged --worktree -- <path>` (tracked), or
-   `git clean -n -- <path>` then `git clean -f -- <path>` (untracked). Never run bare `git clean -fd`.
+   `git clean -n -- <path>` then `git clean -f -- <path>` (untracked), with each path
+   single-quoted and `git --literal-pathspecs`. Run `-f` only if the dry run names exactly the
+   decided paths; otherwise stop and report. Never run bare `git clean -fd`.
 8. Then commit the kept paths: `git switch -c wip/cleanup-<date>`, `git add -- <kept>`,
    `git commit -m "<msg>" -- <kept>` (the pathspec keeps other staged entries out); then run any
    stash. Commit on `main` only if the user
