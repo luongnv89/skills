@@ -25,7 +25,8 @@ Candidates (one confirmation covers this table):
 Delete these 3 branches (5 refs)? [yes/no]
 ```
 
-On yes, for each row: local delete, then remote delete, then `git fetch origin --prune`. A
+Local rows are tested against `main`, remote rows against `origin/main`; a merge that exists
+only on unpushed local `main` does not qualify the remote ref. On yes, for each row: local delete, then remote delete, then `git fetch origin --prune`. A
 `stale info` rejection means the remote tip moved: report the row as skipped with that reason. `-D`
 appears only on rows whose evidence is signal 2 or 3 (see `merged-detection.md`). If a new
 candidate appears after confirmation, it needs its own confirmation.

@@ -94,7 +94,11 @@ Exact commands per status code (`A`, `D`, `R`, `MM`, `??`) are in `references/un
 
 ```bash
 git switch main && git pull --ff-only
+git rev-list --count origin/main..main    # report: N ahead of origin/main
 ```
+
+`--ff-only` also exits 0 when local `main` is only ahead, so report the count. Commits that exist
+only on local `main` (an unpushed local merge) never qualify a remote ref as merged in Step 5.
 
 If the switch would overwrite a kept-but-uncommitted change, stop and return to Step 2. If
 `--ff-only` refuses because local `main` diverged, show `git log --oneline origin/main...main` and
@@ -119,8 +123,10 @@ Candidate patterns and the tracked-but-ignored flow: `references/ignore-patterns
 
 ### 5. Sweep merged branches (local and origin)
 
-Build candidates from local branches and `origin/*`, excluding `origin/HEAD` and `origin/main`. A
-branch is **merged** if any signal holds:
+Build candidates from local branches and `origin/*`, excluding `origin/HEAD` and `origin/main`.
+Test each side against its own base: a local `<b>` against `main`, and `origin/<b>` against
+`origin/main`, so a merge that exists only on unpushed local `main` never deletes a remote ref.
+Below, `main` stands for that base. A branch is **merged** if any signal holds:
 
 1. **Ancestry**: `git merge-base --is-ancestor <b> main` (or `git branch --merged main`).
 2. **Patch equivalence**: `git cherry main <b>` prints only `-` lines, or the squash-tree check
@@ -160,7 +166,7 @@ confirm-then-execute plan in `references/action-plans.md`.
 git branch --show-current                 # expect: main
 git status --porcelain                    # expect: empty
 git branch --merged main                  # expect: only main and protected branches
-git branch -r --merged main               # expect: only origin/main (and origin/HEAD)
+git branch -r --merged origin/main        # expect: only origin/main, origin/HEAD and protected branches
 ```
 
 Re-run the squash signals for any branch the sweep deleted locally but not remotely. Report any

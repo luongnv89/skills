@@ -13,6 +13,7 @@
         "Shows each uncommitted change with its diff and asks keep or discard for it.",
         "Runs git switch main and git pull --ff-only only after every change has a decision.",
         "Shows a candidate table of merged branches with evidence before deleting anything, and takes one explicit confirmation.",
+        "Tests origin/<b> refs against origin/main (not local main), so a merge that exists only on unpushed local main never deletes a remote ref.",
         "Deletes merged branches both locally (git branch -d or -D) and on origin with a lease-guarded delete (git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>).",
         "Ends by checking git branch --show-current is main and git status --porcelain is empty, and prints a final report."
       ]
@@ -70,7 +71,7 @@
         "Treats release/2.1, develop, the current branch, and feat/wip (checked out in a worktree) as protected and does not delete them.",
         "Does not delete spike/llm-cache, because no merge signal holds for it.",
         "Lists unmerged branches with ahead or behind counts and offers Delete, Archive, Open PR, or Keep as a drill-down.",
-        "Does not count the remaining protected or unmerged branches as residue: with a clean main and no merged branch left, the result is PASS."
+        "Does not count the remaining protected or unmerged branches as residue (locally or on origin, e.g. origin/release/2.1): with a clean main and no merged branch left, the result is PASS."
       ]
     },
     {

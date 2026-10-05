@@ -47,6 +47,8 @@ Run this? [yes/no]
 ```
 $ git switch main && git pull --ff-only
 Updating 4f2a91c..8c03d7e  Fast-forward
+$ git rev-list --count origin/main..main
+0                     → main is not ahead of origin/main; no local-only merges
 ```
 
 ## Step 4 — ignore file
@@ -68,6 +70,7 @@ $ git push origin main
 ## Step 5 — merged-branch sweep
 
 ```
+  (local rows tested against main, remote rows against origin/main)
   branch          where   signal                              remote tip  local        remote
   feat/login      both    ancestry                            1a2b3c4     branch -d    lease delete
   feat/filters    both    squash-tree cherry '-' (3 commits)  5d6e7f8     branch -D    lease delete
@@ -86,7 +89,7 @@ To github.com:acme/app.git  - [deleted] feat/login  - [deleted] feat/filters  - 
 ```
   feat/search-v2     6 ahead, 2 behind, last commit 1 day ago
   spike/llm-cache   14 ahead, 210 behind, last commit 143 days ago
-  wip/cleanup-2026-10-05  1 ahead (kept work from Step 2)
+  wip/cleanup-2026-10-05  7 ahead, 2 behind (cut from feat/search-v2, plus the kept commit from Step 2)
 Inspect one before deciding? (Delete / Archive / Open PR / Keep)
 > no
 ```
@@ -97,7 +100,7 @@ Inspect one before deciding? (Delete / Archive / Open PR / Keep)
 $ git branch --show-current     → main
 $ git status --porcelain        → (empty)
 $ git branch --merged main      → * main
-$ git branch -r --merged main   → origin/HEAD -> origin/main, origin/main
+$ git branch -r --merged origin/main   → origin/HEAD -> origin/main, origin/main
 
 ◆ Cleanup Report
 ··································································

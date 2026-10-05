@@ -23,13 +23,20 @@ Pair `feat/x` with `origin/feat/x` so the table shows one row per branch with
 `local` / `remote` / `both`. Test each side on its own ref: a local branch that has new commits
 the remote lacks is not proven merged by the remote's evidence.
 
+**Test each side against its own base.** Local `<b>` uses `main`; `origin/<b>` uses
+`origin/main`. In signals 1 and 2 below, substitute that base for `main`. `git pull --ff-only`
+exits 0 when local `main` is only ahead of `origin/main`, so a branch merged into local `main`
+but not pushed would otherwise pass against local `main` and get its `origin` ref deleted while
+`origin/main` still lacks the work. Local-only merges never qualify a remote ref. Signal 3
+already uses the base on GitHub.
+
 ## Signal 1: ancestry (true merge or fast-forward)
 
 ```bash
-git merge-base --is-ancestor <ref> main && echo merged
+git merge-base --is-ancestor <ref> <base> && echo merged   # <base>: main or origin/main
 # list form:
 git branch --merged main
-git branch -r --merged main
+git branch -r --merged origin/main
 ```
 
 Ancestry proves the branch tip is reachable from `main`. `git branch -d` accepts these.
