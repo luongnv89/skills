@@ -1,16 +1,9 @@
 # Action Plans — Confirm, Then Execute
 
-Every plan below follows **list → explicit confirm → execute**. Show the numbered commands with
-real names substituted, wait for an explicit yes, then run them one by one and report each
-outcome. A "no", or silence, means nothing runs. A failure stops that plan; never retry with
-force.
-
-## Protected branches (apply to every plan)
-
-Never delete, rename, or force-push: `main`, `master`, `develop`, `trunk`, `release/*`, the
-current branch, and any branch listed in `git worktree list --porcelain`. If the user asks to
-delete one, refuse and explain which rule applies. For a worktree branch, tell them to run
-`git worktree remove <path>` themselves first.
+Every plan below follows the SKILL.md **Rules for every destructive step** (list → explicit
+confirm → execute, partial confirmation, no retry with force, protected branches). Show the
+numbered commands with real names substituted, wait for an explicit yes, then run them one by one
+and report each outcome.
 
 ## A. Merged-branch sweep (Step 5)
 
@@ -25,26 +18,30 @@ Candidates (one confirmation covers this table):
 Delete these 3 branches (5 refs)? [yes/no]
 ```
 
-Local rows are tested against `main`, remote rows against `origin/main`; a merge that exists
-only on unpushed local `main` does not qualify the remote ref. On yes, for each row: local delete, then remote delete, then `git fetch origin --prune`. A
-`stale info` rejection means the remote tip moved: report the row as skipped with that reason. `-D`
-appears only on rows whose evidence is signal 2 or 3 (see `merged-detection.md`). If a new
-candidate appears after confirmation, it needs its own confirmation.
+Each side is tested against its own base (`merged-detection.md`). On yes, for each row: local
+delete, then remote delete, then `git fetch origin --prune`. A `stale info` rejection means the
+remote tip moved: report the row as skipped with that reason. `-D` appears only on rows with
+squash evidence (signal 2 or 3). A reply like "yes except feat/search" removes that row: re-show
+the edited table with the new counts and take a fresh yes. If a new candidate appears after
+confirmation, it needs its own confirmation.
 
-## B. Discards (Step 2)
+## B. Consolidated Step 2 plan
 
 ```
-Discard these changes? This cannot be undone.
-  1. src/debug.log      ??   git clean -f -- src/debug.log
-  2. app/config.ts       M   git restore --staged --worktree -- app/config.ts
-  3. notes/draft.md     A    git restore --staged --worktree -- notes/draft.md   (file is deleted)
-[yes/no]
+Plan (runs top to bottom; discards cannot be undone):
+  discard  src/debug.log    ??  git clean -n -- src/debug.log, then git clean -f -- src/debug.log
+  discard  notes/draft.md   A   git restore --staged --worktree -- notes/draft.md   (file is deleted)
+  keep     app/config.ts     M  git switch -c wip/cleanup-<date>; git add -- app/config.ts;
+                                git commit -m "<msg>" -- app/config.ts
+  stash    notes/ideas.md   ??  git stash push -u -m "cleanup: ideas" -- notes/ideas.md
+  ignore   .env             ??  kept on disk; pattern proposed in Step 4   ⚠ secret-like
+  leave    scratch/         ??  untouched (left as is)
+Run this? [yes/no]
 ```
 
-Each row exists only because the user answered "discard" for it in the review. Run the
+Each row exists only because the user gave that answer for it in the review. Run the
 `git clean -n` dry run before any `git clean -f` and show its output. Discards run before the
-keep commit, and that commit names its paths (`git commit -m "<msg>" -- <kept paths>`) so no
-other staged entry is swept into it.
+keep commit, and that commit names its paths so no other staged entry is swept into it.
 
 ## C. Ignore-file commit (Step 4)
 
@@ -52,9 +49,27 @@ other staged entry is swept into it.
 1. Apply the diff shown above to .gitignore          [approved]
 2. git add -- .gitignore
 3. git commit -m "chore: ignore build artifacts" -- .gitignore     on main
-   (alternative: git switch -c chore/gitignore-cleanup, commit, push, gh pr create)
 Commit on main? [yes / branch+PR / no]
 ```
+
+Push is a separate question: `Push main to origin now? [yes/no]` → `git push origin main`.
+
+Branch+PR alternative:
+
+```
+1. git switch -c chore/gitignore-cleanup
+2. git add -- .gitignore && git commit -m "chore: ignore build artifacts" -- .gitignore
+   Push chore/gitignore-cleanup and open PR? [yes/no]     # ask before 3 and 4
+3. git push -u origin chore/gitignore-cleanup
+4. gh pr create --base main --head chore/gitignore-cleanup --title "chore: ignore build artifacts"
+5. git switch main
+```
+
+On "no" to the push question, skip 3 and 4, still run 5, and report the local branch under
+`Next:` (`push chore/gitignore-cleanup and open a PR`).
+
+Until the PR merges, `main` has no such rule, so the result is `PARTIAL — ignore rule pending in
+PR #<n>`.
 
 ## D. Drill-down decisions for one unmerged branch (Step 6)
 
@@ -71,7 +86,8 @@ Pick the plan matching the user's choice and substitute `<branch>`.
 ```
 
 Say plainly that the commits become unreachable. Offer Archive as the safer option. A
-`stale info` rejection on the lease push means someone pushed since: stop and report it.
+`stale info` rejection on the lease push means someone pushed since: stop and report it as
+PARTIAL.
 
 ### Archive — pick the source tip first (both variants)
 

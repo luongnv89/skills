@@ -1,7 +1,7 @@
 # Uncommitted-Change Review
 
 Step 2 procedure. The rule that governs everything here: **nothing is discarded without the
-user's decision.** No answer means keep the change and leave it untouched.
+user's decision.** Until an entry has an answer, it stays untouched.
 
 ## 1. Read the state safely
 
@@ -14,8 +14,8 @@ the original. Split on NUL, never on spaces or newlines, and quote each path as 
 (`-- "<path>"`).
 
 Before reviewing, confirm no merge, rebase, cherry-pick, or revert is in progress (see
-Prerequisites in SKILL.md). A `UU`/`AA`/`DD` entry means one is. Stop and ask the user to finish
-or abort it. `git restore` on a conflicted path exits 0 but leaves `MERGE_HEAD` behind, so
+Prerequisites in SKILL.md). A `UU`/`AA`/`DD` entry means one is. Stop (`BLOCKED — <operation> in
+progress`) and ask the user to finish or abort it. `git restore` on a conflicted path exits 0 but leaves `MERGE_HEAD` behind, so
 "discarding" there only hides the conflict.
 
 ## 2. Present each change
@@ -32,13 +32,54 @@ Group by file. For each, show the status code and the content:
 | `R ` | renamed (new path, old path) | `git diff --cached -M -- <new> <old>` |
 | `??` | untracked | first lines of the file, or the directory listing |
 
-Then ask **keep or discard?** for that change. Accept a group answer ("discard everything under
-`tmp/`") only when the user states it. Never infer a batch decision from a pattern of answers.
+**Secret-like paths** (`.env*`, `*.pem`, `*.key`, `*.p12`, `id_rsa*`, `credentials*`): show only
+the name and size (`wc -c < <p>`), never the content or the diff, whatever the status code. Print
+`⚠ secret-like: <path>` on its own line.
 
-## 3. Keep
+**Large trees** (more than about 20 entries): show a grouped summary first, by top directory and
+status code, for example:
 
-Default: commit the kept changes on a new branch so `main` stays clean. Run the approved
-discards (section 4) **before** this commit, so a discard-marked entry is gone first.
+```
+ 12  ??  node_modules/, dist/          (artifacts)
+  6   M  src/search/                   (+140 -32)
+  3  ??  notes/
+```
+
+Offer one decision per group and a full diff for any group on request. Proposing the groups is
+fine; inferring a decision from them is not. A group answer covers only the entries listed in
+that group.
+
+## 3. Ask, then confirm one plan
+
+Ask for each entry (or group):
+
+`keep (commit to wip/cleanup-<date>) / keep on disk + ignore / stash / leave as is / discard`
+
+| Answer | Consequence |
+|---|---|
+| keep (commit to wip/cleanup-<date>) | committed on a new branch; `main` stays clean |
+| keep on disk + ignore | untracked paths only, and only when Step 4 is in scope: the file stays, Step 4 proposes an ignore pattern for it |
+| stash | `git stash push -u` of that path; listed as residue in the report |
+| leave as is | untouched; listed as residue (`left as is`) |
+| discard | removed after the plan is confirmed; cannot be undone |
+
+Defaults: offer `keep on disk + ignore` only for an untracked path and only when Step 4 is in
+scope. A secret-like or local-config path (`.env*`, `*.local`, editor settings) then defaults to
+`keep on disk + ignore`; when that option is not offered (a tracked path, or Step 4 out of
+scope), it defaults to `leave as is`. Never default-commit a secret-like path; commit one only
+when the user says so for that path. An artifact (`node_modules/`, `dist/`, `__pycache__/`,
+`.venv/`, `.DS_Store`, `*.swp`) is usually `keep on disk + ignore` under the same condition.
+
+After every entry has been asked, list any entry still without an answer and ask once: "leave
+these untouched?". Only an explicit leave or skip makes an entry undecided (`left as is`).
+
+Then show the consolidated plan (`action-plans.md` B) and take one yes. Nothing runs before it.
+A partial yes means re-showing the edited plan for a fresh yes.
+
+## 4. Keep
+
+Run the approved discards (section 5) **before** the keep commit, so a discard-marked entry is
+gone first.
 
 ```bash
 git switch -c wip/cleanup-<yyyy-mm-dd>
@@ -50,20 +91,19 @@ git commit -m "chore: keep work in progress from cleanup" -- <kept paths>
 The pathspec on `git commit` is required. A bare `git commit` commits the whole index, which
 would sweep any undecided staged entry into the wip commit. With the pathspec, only the kept
 paths are committed and every other staged entry stays staged, untouched. For a kept rename,
-pass both paths (`-- <new> <old>`). Verified on a scratch repo (git 2.55.0).
+pass both paths (`-- <new> <old>`).
 
 Alternatives, each only when the user picks it:
 
 - Named stash: `git stash push -u -m "cleanup: <name>" -- <paths>`. The `-u` is required for an
-  untracked path; without it git rejects the pathspec. The stash shows up in the final report,
-  because it is residue the user chose.
+  untracked path; without it git rejects the pathspec.
 - Commit on `main`: only with explicit consent, since it lands on the base branch. If
   `git worktree list --porcelain` shows `main` checked out in another worktree, the switch fails;
   use the new-branch default instead.
 
-## 4. Discard
+## 5. Discard
 
-Show the exact command and the path before running it. Tested behaviour (git 2.55.0, scratch repo):
+Show the exact command and the path before running it:
 
 | Code | Command | Result |
 |---|---|---|
@@ -76,13 +116,8 @@ Show the exact command and the path before running it. Tested behaviour (git 2.5
 Never run bare `git clean -fd`, `git clean -fdx`, `git checkout -- .`, `git reset --hard`, or
 `git stash drop` here. Each would discard changes the user has not decided on.
 
-## 5. Defer artifacts to the ignore step
-
-Build output and editor junk (`node_modules/`, `dist/`, `__pycache__/`, `.venv/`, `.DS_Store`,
-`*.swp`) can be deferred to Step 4 rather than deleted one at a time. If the ignore pattern for a
-deferred path is declined or not applied, that path returns here for a keep or discard decision.
-
 ## 6. Record
 
-Keep a list of `{path, code, decision, command, outcome}` for the final report. A path with no
-decision is listed as `kept (no decision)` and makes the run PARTIAL.
+Keep a list of `{path, code, decision, command, outcome}` for the final report. Count the
+decisions as `kept`, `discarded`, `ignored/deferred` and `left as is`. A `left as is` entry or a
+stash is residue the user chose and makes the run PARTIAL (SKILL.md Results).

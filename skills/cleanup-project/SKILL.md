@@ -1,6 +1,6 @@
 ---
 name: cleanup-project
-description: "Prepare a git repo for new work: review each uncommitted change, update ignore files, delete merged branches locally and on origin, end on clean main. Don't use for commit-and-push (auto-push), OSS prep (oss-ready), or releases (release-manager)."
+description: "Prepare a git repo before new work: review uncommitted changes, fix .gitignore, delete merged branches, end on clean main, or inspect one branch before deciding. Don't use for dead code, commit-and-push, releases, LICENSE files, or git how-tos."
 license: MIT
 effort: high
 metadata:
@@ -10,13 +10,8 @@ metadata:
 
 # Cleanup Project
 
-Get a repository to a clean foundation before starting new work. A complete run reviews every
-uncommitted change with the user, updates the ignore files, deletes the branches already merged
-into `main` (locally and on `origin`), and ends on an up-to-date `main` with nothing uncommitted.
-
-Every destructive step follows the same pattern: **list → explicit confirm → execute**. Nothing
-is discarded, deleted, or pushed without the user's decision. This skill supersedes the older
-single-branch `branch-inspector`; its per-branch inspect flow lives on as an optional drill-down.
+Get a repository to a clean foundation before new work: every uncommitted change decided, ignore
+files updated, merged branches deleted locally and on `origin`, and an up-to-date, clean `main`.
 
 ## When to use
 
@@ -24,147 +19,195 @@ single-branch `branch-inspector`; its per-branch inspect flow lives on as an opt
 - "Delete the branches that are already merged, local and remote."
 - "My working tree is a mess. Help me decide what to keep and get back to main."
 - "Tidy the .gitignore and get rid of stale branches."
+- "Is `spike/llm-cache` worth keeping?" This goes straight to the single-branch drill-down (Step 6).
 
-Don't use it to commit and push everything (`auto-push`), add OSS files such as LICENSE or
-CONTRIBUTING (`oss-ready`), or cut a release or tag (`release-manager`).
+Don't use it to remove dead code or unused imports (`slop-cleanup`), commit and push everything
+(`auto-push`), cut a release or tag (`release-manager`), or add LICENSE, CONTRIBUTING and other OSS
+files (`oss-ready`). For a git how-to question ("`branch -d` vs `-D`?"), answer it directly and run
+no workflow.
 
 ## Inputs
 
 - **Base branch.** `main` by default. If the repo has no `main`, ask once which branch is the base
   (`master`, `develop`, `trunk`) and use that answer everywhere this skill says `main`.
-- **Remote.** `origin` by default. If there is none, the run is local-only (see Edge cases).
-- **Optional scope.** The user may skip a phase ("only the branches"). Report skipped phases as
-  `— skipped by user`, never as PASS.
+- **Remote.** `origin` by default. If `git remote` lists no `origin`, ask once: use another remote
+  (by name), or run local-only. Use that answer everywhere this skill says `origin`. Local-only
+  means no fetch, no pull, no push, and no remote delete; the report says `local-only`.
+- **Scope.** Infer it from the request, then confirm it once in one line
+  (`Scope: sweep (Steps 1, 3, 5, 6, 7). OK?`).
+
+| Scope | Example request | Steps |
+|---|---|---|
+| full (default) | "clean up this repo before the next feature" | 1–7 |
+| review | "help me decide what to keep in my working tree" | 1, 2, 3, 7 |
+| ignore | "fix the .gitignore" | 1, 3, 4, 7 |
+| sweep | "delete the merged branches" | 1, 3, 5, 6, 7 |
+| report-only | "which branches are merged? don't touch anything" | 1, Step 5 up to the table, Step 6 list |
+| drill-down | "is `spike/x` worth keeping?" | 1, then Step 6 drill-down for that branch |
+
+Step 1 always runs. Steps 3 and 7 run in every scope except report-only and drill-down.
+Report-only never switches, pulls, discards, or deletes. Residue left by a phase outside the
+scope is reported `— skipped by user` and does not make the run PARTIAL. Per-scope details:
+`references/scopes-and-results.md`.
 
 ## Prerequisites
 
-Check these before anything else. Stop and tell the user if one fails.
+Check these before Step 1. If one fails, stop and print the report as `BLOCKED — <failed check>`.
 
 - `git rev-parse --git-dir` succeeds (inside a git repository).
 - The base branch resolves: `git rev-parse --verify main` or `origin/main`, or a confirmed base.
-- No operation is in progress: `git rev-parse -q --verify MERGE_HEAD`, `REBASE_HEAD`,
-  `CHERRY_PICK_HEAD`, and `REVERT_HEAD` all fail, and `test -d "$(git rev-parse --git-path rebase-merge)"`
-  and the same for `rebase-apply` both fail. `--git-path` resolves correctly in a linked worktree,
-  where `.git` is a file, so never test a literal `.git/...` path.
-  If one is in progress, stop and ask the user to finish or abort it first. `git restore` on a
-  conflicted path exits 0 but leaves the merge open, so never "clean" through a conflict.
-- `gh` is optional. `gh auth status` decides whether the merged-PR signal is available.
+- No operation is in progress: `git rev-parse -q --verify` fails for `MERGE_HEAD`, `REBASE_HEAD`,
+  `CHERRY_PICK_HEAD` and `REVERT_HEAD`, and `test -d "$(git rev-parse --git-path rebase-merge)"`
+  fails, as does the same for `rebase-apply` (never test a literal `.git/...` path: in a linked
+  worktree `.git` is a file). Never "clean" through a conflict.
 
 ## Repo Sync Before Edits (mandatory)
 
-This skill mutates the repository, so it syncs first, but in a deliberately different order from
-the standard stash → pull → pop pattern:
+This skill syncs first, but not with the usual stash → pull → pop:
 
 ```bash
 git fetch origin --prune        # refresh refs; the working tree is untouched
 ```
 
-Do **not** stash or pull before Step 2. A stash would hide the exact uncommitted state the user
-must review, and a pull into a dirty tree can conflict before anyone has decided what to keep.
-The pull happens in Step 3, after every change has a decision, is deferred to Step 4, or was left
-undecided by the user. If `origin`
-is missing or the fetch fails, say so and continue local-only only with the user's agreement.
+Do **not** stash or pull before Step 2: a stash hides the state the user must review, and a pull
+into a dirty tree can conflict before anything is decided. The pull happens in Step 3.
+If the fetch fails, show the error and ask once: continue local-only, or stop
+(`BLOCKED — fetch failed`). With no `origin`, the Inputs answer applies instead.
+
+## Rules for every destructive step
+
+1. **List → explicit confirm → execute.** Show the exact commands with real names. A "no", or
+   silence, means nothing runs.
+2. If the user confirms only part of a list ("yes except `feat/x`"), re-show the edited list and
+   take a fresh yes.
+3. If a command fails, stop that plan and report the error. Never retry with force or a stronger
+   flag (`-D` for `-d`, `--force`, `--ignore-other-worktrees`).
+4. **Protected branches** are never deleted, renamed, or force-pushed: `main`, `master`,
+   `develop`, `trunk`, `release/*`, the current branch, and any branch in a
+   `branch refs/heads/<b>` line of `git worktree list --porcelain`. If the user asks to delete
+   one, refuse and name the rule. For a worktree branch, tell them to run `git worktree remove
+   <path>` first.
 
 ## Workflow
 
 ### 1. Fetch and snapshot
 
-Run the sync above, then record the starting state: current branch (or detached HEAD), base,
-`git status --porcelain=v1 -z`, `git worktree list --porcelain`, and whether `gh` is usable.
+1. Run the sync above.
+2. Record the current branch (or detached HEAD), base, `git status --porcelain=v1 -z`, and
+   `git worktree list --porcelain`. If `main` is checked out in another worktree and Step 3 is in
+   scope, warn now that the run will stop BLOCKED at Step 3, before any Step 2 plan is confirmed.
+3. Run `gh auth status`. It decides whether the merged-PR signal is available (not a stop
+   condition).
+4. If HEAD is detached, run `git log HEAD --not --branches --remotes --oneline`. If it prints
+   commits, report them and offer `git switch -c <name>` to keep them (in report-only and
+   drill-down, report them only).
 
 ### 2. Review each uncommitted change
 
-Parse `git status --porcelain=v1 -z` (NUL-separated, so paths with spaces and both paths of a
-rename survive). Group entries by file and show each one with its diff (`git diff`, `git diff
---cached`, or the file's head for untracked files). For each change, ask: **keep or discard?**
+1. Parse `git status --porcelain=v1 -z` (NUL-separated, so paths with spaces and both paths of a
+   rename survive).
+2. If there are more than about 20 entries, show a grouped summary (by directory and status) and
+   offer one decision per group. Show full diffs on request. You may propose groups; never infer
+   a decision from them.
+3. Show each entry with its status code and diff. If the path is secret-like (`.env*`, `*.pem`,
+   `*.key`, `*.p12`, `id_rsa*`, `credentials*`), show only its name and size, never its content
+   or diff, and print `⚠ secret-like: <path>`.
+4. Ask: `keep (commit to wip/cleanup-<date>) / keep on disk + ignore / stash / leave as is /
+   discard`. Offer `keep on disk + ignore` only for an untracked path and only when Step 4 is in
+   scope; it defers the path to Step 4. For a secret-like or local-config path, the offered
+   default is `keep on disk + ignore` when that option is offered, and `leave as is` otherwise.
+   Never default-commit a secret-like path.
+5. After every entry has been asked, list the entries still without an answer and ask once:
+   "leave these untouched?". Only an explicit leave or skip makes an entry undecided.
+6. Show the consolidated plan (`references/action-plans.md` B) and take one yes. Nothing runs
+   before that yes.
+7. On yes, run the discards first: `git restore --staged --worktree -- <path>` (tracked), or
+   `git clean -n -- <path>` then `git clean -f -- <path>` (untracked). Never run bare `git clean -fd`.
+8. Then commit the kept paths: `git switch -c wip/cleanup-<date>`, `git add -- <kept>`,
+   `git commit -m "<msg>" -- <kept>` (the pathspec keeps other staged entries out); then run any
+   stash. Commit on `main` only if the user
+   explicitly asks.
 
-- Accept a batch answer ("discard all of `tmp/`") only when the user explicitly gives one.
-- **Keep** → a commit on a new branch (default, e.g. `wip/cleanup-<date>`): `git add -- <kept>`, then
-  `git commit -m "<msg>" -- <kept>` so only kept paths are committed, never the whole index. Or
-  a named stash (`git stash push -u -m "<name>" -- <path>`), or a commit on `main` with explicit consent.
-- **Order.** Approved discards run first, then the keep commit.
-- **Discard** → tracked: `git restore --staged --worktree -- <path>`; untracked: `git clean -n
-  -- <path>` dry run, then delete that one path after the user confirms. Never run bare `git clean -fd`.
-- Artifact-like untracked paths (`node_modules/`, `dist/`, `.DS_Store`, ...) may be deferred to
-  Step 4 instead of being deleted one by one.
-- A change with no answer stays untouched. Nothing is discarded without the user's decision.
-
-Exact commands per status code (`A`, `D`, `R`, `MM`, `??`) are in `references/uncommitted-review.md`.
+Commands per status code, the stash form and the large-tree format:
+`references/uncommitted-review.md`.
 
 ### 3. Switch to an up-to-date main
 
-First check `git worktree list --porcelain`. If a `branch refs/heads/main` line belongs to a
-worktree other than this one, `git switch main` fails with `fatal: 'main' is already used by
-worktree at '<path>'`. Stop, show that path, and tell the user to finish the remaining steps from
-that worktree (or run them there). Never force the switch or pass `--ignore-other-worktrees`.
-
-```bash
-git switch main && git pull --ff-only
-git rev-list --count origin/main..main    # report: N ahead of origin/main
-```
-
-`--ff-only` also exits 0 when local `main` is only ahead, so report the count. Commits that exist
-only on local `main` (an unpushed local merge) never qualify a remote ref as merged in Step 5.
-
-If the switch would overwrite a kept-but-uncommitted change, stop and return to Step 2. If
-`--ff-only` refuses because local `main` diverged, show `git log --oneline origin/main...main` and
-ask; never reset or force.
+1. Check `git worktree list --porcelain`. If a `branch refs/heads/main` line belongs to another
+   worktree, stop and print the report as `BLOCKED — main checked out at <path>; run
+   /cleanup-project there`.
+2. If HEAD is detached, re-run `git log HEAD --not --branches --remotes --oneline`. If it still
+   prints N commits and the user declined a branch, require the explicit answer "abandon these N
+   commits" before switching. Without it, stop: `BLOCKED — N commits on no branch`.
+3. Run `git switch main`. If git refuses because a change would be overwritten, name the path
+   and ask once: commit it to the wip branch, stash it, or discard it. If it stays undecided,
+   stop: `BLOCKED — main not reached: <path> undecided`. Do not loop back to Step 2.
+4. Run `git pull --ff-only`. If it refuses because local `main` diverged, show
+   `git log --oneline origin/main...main` and ask: continue without the pull, or stop
+   (`BLOCKED — main diverged`). Never reset or force.
+5. Run `git rev-list --count origin/main..main` and record `N ahead of origin/main`. Commits only
+   on local `main` never qualify a remote ref as merged in Step 5.
 
 ### 4. Update the ignore files
 
-Propose patterns from evidence only: untracked artifacts seen in Step 2 (`node_modules/`, `dist/`,
-`__pycache__/`, `.venv/`, `.DS_Store`, `*.swp`, `.env*`) and tracked files that already match an
-ignore rule (`git ls-files -ci --exclude-standard`). Show the `.gitignore` diff, apply it only after
-approval, then commit on `main` after a second explicit approval. The commit is local; pushing it
-(`git push origin main`) is a separate choice that needs its own confirmation. Offer a `chore/`
-branch plus PR instead, warning that the artifacts then stay visible on `main` until it merges.
-
-- Never add a pattern that would hide a path the user chose to keep.
-- Warn loudly on secret-like files (`.env*`, `*.pem`, `*.key`, `credentials*`): ignoring them
-  does not remove them from history.
-- Any untracked path not covered by an approved, applied pattern goes back to the Step 2 keep or
-  discard decision.
+1. Collect evidence: untracked artifacts and `keep on disk + ignore` paths from Step 2 (or from
+   the Step 1 snapshot when Step 2 is out of scope; every untracked non-artifact path then counts
+   as kept), plus tracked files that already match a rule (`git ls-files -ci --exclude-standard`).
+2. Test the proposed patterns against every kept path (committed, stashed, or left as is): write
+   them to a temp file and run `git -c core.excludesFile=<tmp> check-ignore --no-index -v --
+   <kept paths>`. If one matches, narrow or drop the pattern. `keep on disk + ignore` paths are
+   exempt.
+3. For each secret-like path, print `⚠ secret-like: <path>` above the diff. If it is tracked, add
+   that ignoring does not remove it from history and the secret should be rotated.
+4. Show the full `.gitignore` diff and ask to apply it.
+5. If approved, apply it and re-run `git status --porcelain`. Expect every covered path to be
+   gone. If one remains, show `git check-ignore -v -- <path>` and fix the pattern.
+6. Ask `Commit on main? [yes / branch+PR / no]` and follow `references/action-plans.md` C. Pushing
+   `main`, or pushing the PR branch and opening the PR, each needs its own yes. Branch+PR ends
+   with `git switch main`; it and a declined commit make the result PARTIAL.
+7. If a deferred path is not covered by a pattern applied on `main`, ask `commit to wip / stash /
+   leave as is / discard` for it here (`references/ignore-patterns.md`). After branch+PR, report
+   those paths under `ignore rule pending in PR #N` instead. Steps 2 and 3 do not repeat.
 
 Candidate patterns and the tracked-but-ignored flow: `references/ignore-patterns.md`.
 
 ### 5. Sweep merged branches (local and origin)
 
-Build candidates from local branches and `origin/*`, excluding `origin/HEAD` and `origin/main`.
-Test each side against its own base: a local `<b>` against `main`, and `origin/<b>` against
-`origin/main`, so a merge that exists only on unpushed local `main` never deletes a remote ref.
-Below, `main` stands for that base. A branch is **merged** if any signal holds:
+Build candidates from local branches and `origin/*`, excluding `origin/HEAD`, `origin/main` and
+protected branches. Test a local `<b>` against `main` and `origin/<b>` against `origin/main`
+(see `references/merged-detection.md`). A branch is **merged** if any signal holds:
 
 1. **Ancestry**: `git merge-base --is-ancestor <b> main` (or `git branch --merged main`).
 2. **Patch equivalence**: `git cherry main <b>` prints only `-` lines, or the squash-tree check
-   (a temporary commit of the branch tree on its merge-base) prints `-`. Plain `git cherry` only
-   catches single-commit and rebase merges; the squash-tree check catches multi-commit squashes.
-3. **Merged PR**: `gh pr list --head <b> --state merged --json number,baseRefName,mergedAt,headRefOid`
-   returns a PR with base `main` whose `headRefOid` equals the branch tip. A tip that moved after
-   the merge means new work, so the branch is unmerged.
+   (a temporary commit of the branch tree on its merge-base) prints `-`.
+3. **Merged PR**: `gh pr list --head <b> --state merged` returns a PR with base `main` whose
+   `headRefOid` equals the branch tip. A tip that moved after the merge means unmerged new work.
 
-Without `gh`, use signals 1 and 2 and say so in the report. Exact commands:
-`references/merged-detection.md`.
+Signals 2 and 3 are the **squash evidence**. If `gh` is unusable or any `gh pr list` call fails
+(including a non-GitHub remote), signal 3 is unavailable for the run: record it under
+`Unverified:` and continue with signals 1 and 2. This is not a Rule 3 stop and not PARTIAL.
 
-**Protected, never deleted:** `main`, `master`, `develop`, `trunk`, `release/*`, the current
-branch, and any branch checked out in a worktree (`git worktree list --porcelain`).
-
-Show the full candidate table (branch, local or remote or both, signal, evidence, the remote tip
-`git rev-parse origin/<b>`, planned command) and take **one** explicit confirmation for the whole
-table. Then run, per branch:
-
-- `git branch -d <b>` when ancestry holds; `git branch -D <b>` only with squash evidence
-  (signal 2 or 3), because `-d` refuses a squash-merged branch.
-- `git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>` for the remote side, where `<sha>` is the recorded tip. If `origin/<b>` moved
-  since the table, git rejects it as `stale info`.
-
-A failed or `stale info` delete is reported as skipped with the reason, never retried with force.
+1. Show the full candidate table (`references/action-plans.md` A). A new candidate found later
+   needs its own confirmation.
+2. In report-only scope, list a merged current branch as `current, not deletable`, then stop
+   and go to the Step 6 list.
+3. Take **one** explicit confirmation for the whole table.
+4. Per row, run `git branch -d <b>` when ancestry holds, or `git branch -D <b>` only with squash
+   evidence, because `-d` refuses a squash-merged branch.
+5. Per row, run `git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>`, where
+   `<sha>` is the recorded tip. If `origin/<b>` moved, git rejects it as `stale info`: report the
+   row as skipped with that reason.
+6. Run `git fetch origin --prune`.
 
 ### 6. Report unmerged branches
 
-List the branches that are not merged with their ahead/behind counts and last commit date. Do not
-delete them. Offer the per-branch drill-down: build the overview from
-`references/overview-fields.md`, then ask Delete / Archive / Open PR / Keep and follow the matching
-confirm-then-execute plan in `references/action-plans.md`.
+List the unmerged branches with ahead/behind counts and last commit date. Do not delete them. In
+report-only scope, offer only the read-only overview (never a plan from `action-plans.md` D),
+then print the report. Otherwise offer the per-branch drill-down:
+build the overview from `references/overview-fields.md`, ask Delete / Archive / Open PR / Keep,
+and follow the matching plan in `references/action-plans.md` D. In drill-down scope, start here
+with the named branch; if it turns out merged, show its signal and offer the Step 5 delete for
+that one row.
 
 ### 7. Verify the end state
 
@@ -175,91 +218,95 @@ git branch --merged main                  # expect: only main and protected bran
 git branch -r --merged origin/main        # expect: only origin/main, origin/HEAD and protected branches
 ```
 
-Re-run the squash signals for any branch the sweep deleted locally but not remotely. Report any
-local commits on `main` not yet on `origin` (an ignore commit, a kept change committed on `main`)
-as `N ahead of origin/main`; push only if the user confirms. Print the final report. If residue remains because the user chose it (a declined discard, a kept stash, an
-unmerged ignore PR), the result is **PARTIAL** with the reason, never PASS.
+1. Run the four checks. If one prints something else, report `× <check>: <observed>`; the result
+   is then not PASS. If that leftover comes from a phase outside the scope, report it
+   `— skipped by user` instead; it does not affect the result.
+2. For each branch deleted locally whose remote delete was skipped, re-run the merge signals
+   (ancestry, then squash evidence) on `origin/<b>` against `origin/main`. Report
+   `re-check origin/<b>: still merged (<signal>)` or `re-check origin/<b>: not merged`. A ref
+   that still qualifies needs a new table row and a new confirmation; one that does not is
+   listed as `remote kept — unproven`.
+3. If `main` is ahead of `origin/main`, report `N ahead of origin/main`. Ask to push only if the
+   user did not already decline it in Step 4; otherwise name it under `Next:`.
+4. Print the final report.
+
+## Results
+
+Each result applies to the steps in scope (`references/scopes-and-results.md`).
+
+- **PASS**, for the checks in scope: on `main`, `git status --porcelain` empty, and no
+  unprotected merged branch left locally or on `origin`. `main` ahead of `origin` with the push
+  declined is allowed and named under `Next:`.
+- **PARTIAL — reason**: residue remains. Residue is anything that keeps the end state from PASS
+  inside the scope: something the user chose (a stash, a change left as is, a declined discard,
+  table row or ignore commit, an unmerged ignore PR) or a skipped or `stale info` delete. Name
+  each item with its reason; join several with `; `.
+- **BLOCKED — stop point**: the run stopped at a prerequisite, at Step 3, or on an error.
+
+A step with nothing to do reports `√ pass (none needed)`.
 
 ## Step Completion Reports
 
-After each step, emit a short block in this shape:
-
-```
-◆ Cleanup (step 5 of 7 — merged-branch sweep)
-··································································
-  Candidates listed:  √ pass (4 local, 3 remote)
-  User confirmation:  √ pass (one confirmation for the table)
-  Deleted:            √ pass (7 refs, 0 failures)
-  Protected skipped:  √ pass (main, release/2.1, worktree feat/wip)
-  ____________________________
-  Result:             PASS
-```
-
-Use `× fail` with the reason for a failed check and `— skipped` for a phase the user skipped.
+After each step, emit a short `◆ Cleanup (step N of 7 — <name>)` block with one line per check:
+`√ pass (<evidence>)`, `× fail (<reason>)`, or `— skipped by user`. The template and the check
+names per step are in `references/scopes-and-results.md`.
 
 ## Expected output
 
-A full run produces, in order: the change-by-change review with a keep or discard decision for
-each; the switch-and-pull result; the proposed `.gitignore` diff and its commit; the merged-branch
-candidate table with evidence; the unmerged list with the drill-down offer; and a final report:
+After the per-step blocks, a run ends with a final report that opens with the result:
 
 ```
 ◆ Cleanup Report
+Result:      PASS
+Verified:    show-current → main; status --porcelain → empty; branch --merged main → main;
+             branch -r --merged origin/main → origin/HEAD, origin/main; 0 ahead of origin/main
+Unverified:  none (merged-PR check available)
+Next:        No approval needed
 ··································································
-  Branch:             main (up to date with origin/main)
-  Working tree:       clean
-  Changes reviewed:   5 (2 kept → wip/cleanup-2026-10-05, 3 discarded)
-  Ignore file:        +3 patterns, committed (chore: ignore build artifacts)
-  Merged deleted:     4 local, 3 remote (1 via squash-tree, 1 via merged PR)
-  Unmerged kept:      feat/search-v2, spike/llm-cache
+  Scope:              full
+  Branch:             main (0 ahead of origin/main)
+  Changes reviewed:   5 (1 kept → wip/cleanup-2026-10-05, 2 discarded, 2 ignored/deferred, 0 left as is)
+  Ignore file:        +2 patterns, committed on main and pushed
+  Merged deleted:     feat/login (ancestry, 1a2b3c4); feat/filters (squash-tree, 5d6e7f8);
+                      fix/readme remote (merged PR #57, 9a0b1c2)
+  Skipped deletes:    none
+  Unmerged kept:      feat/search-v2, spike/llm-cache, wip/cleanup-2026-10-05
   Protected skipped:  release/2.1
-  ____________________________
-  Result:             PASS
 ```
 
-A full worked run is in `references/example-output.md`.
+Field rules (`Unverified:` and `Next:` values): `references/scopes-and-results.md`. A full worked
+run: `references/example-output.md`.
 
 ## Acceptance Criteria
 
 A run is correct when all of these hold:
 
-- `git fetch origin --prune` ran before any ref was read, and nothing was stashed before Step 2.
-- Every uncommitted change was shown and got an explicit keep or discard decision; nothing was
-  discarded without one.
-- The ignore-file diff was shown before it was applied and committed with approval; no kept path
-  was ignored.
+- `git fetch origin --prune` ran before any ref was read; nothing was stashed before Step 2.
+- Every uncommitted change in scope got an explicit decision; no secret-like content was printed
+  or committed by default.
+- The ignore diff was shown before it was applied; no kept path was ignored.
 - Every deleted branch had recorded merge evidence; `-D` was used only with squash evidence.
-- Destructive steps followed list → explicit confirm → execute; protected branches were never
-  deleted.
-- The run ended on `main` with `git status --porcelain` empty and no merged branch left locally or
-  on `origin`, or it reported PARTIAL with the reason.
+- Destructive steps followed the rules above; protected branches were never deleted.
+- The run ended on `main` with `git status --porcelain` empty and no unprotected merged branch
+  left locally or on `origin`, or it reported PARTIAL or BLOCKED with the reason.
+
+The report must also be understandable:
+
+- The first line after the header gives PASS, PARTIAL or BLOCKED and the reason.
+- `Verified:` (checks run and their output) is separate from `Unverified:`.
+- Each deleted ref names its signal and its sha or PR number.
+- `Next:` names the remaining user action or says `No approval needed`.
+
+These are instruction checks. Without reviewer feedback, human understanding of the report stays
+unconfirmed; agent inspection cannot confirm it.
 
 ## Edge Cases
 
-- **No `main`.** Ask once for the base and use it throughout.
-- **No `gh` or not authenticated.** Skip signal 3, state "merged-PR check unavailable", and keep any
-  branch that only `gh` could have proven merged.
-- **Squash-merged branch.** Ancestry fails and `-d` refuses; delete with `-D` only on signal 2 or 3.
-- **PR merged, branch advanced after.** `headRefOid` differs from the tip: treat as unmerged.
-- **Remote-only branch.** Run the signals on `origin/<b>`; delete with the lease-guarded push above.
-- **Local-only branch.** No push; note `remote=no`.
-- **Detached HEAD.** Report the commit, offer to keep it on a new branch, then switch to `main`.
-- **No `origin`.** Local-only run: no fetch, no pull, no remote deletes; say so in the report.
-- **Branch checked out in a worktree.** Protected; tell the user to remove the worktree first.
-- **Archive with differing tips.** Archive the tip that contains `origin/<b>`'s recorded sha, or
-  both tips if they diverged, before the lease delete (`references/action-plans.md`).
-- **`main` checked out in another worktree.** `git switch main` fails; stop at Step 3, show that
-  worktree's path, and finish the run there. The end state is then verified in that worktree.
-- **Conflict on switch.** `git switch main` refuses because a kept change would be overwritten:
-  go back to Step 2 and commit or stash it.
-- **Merge or rebase in progress.** Stop at Prerequisites; never restore through a conflict.
-- **User declines everything.** Change nothing, print the report as PARTIAL, and stop.
-- **Branch identical to `main`.** Merged by ancestry; delete with `-d`.
+- **Local-only branch.** No remote delete; the table shows `local`.
+- **Archive with differing tips.** See `references/action-plans.md` D before the lease delete.
+- **User declines everything.** Change nothing and print the report as PARTIAL.
 
 ## Notes
 
-- **Don't trust branch names.** `fix/typo` is not proof of anything; only the signals count.
-- **One confirmation per table, not per command.** The user sees every ref before confirming, so a
-  single yes is informed; a new candidate discovered later needs a new confirmation.
 - **Context budget.** For a large unmerged branch in the drill-down, summarize the diff with a
   subagent instead of reading it all into the main context.

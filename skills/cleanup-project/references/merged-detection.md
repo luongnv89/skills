@@ -15,9 +15,8 @@ git for-each-ref --format='%(refname:short)' refs/remotes/origin/   # remote
 Drop from both lists before testing:
 
 - `origin/HEAD` (its short name prints as `origin`) and `origin/main`.
-- Protected names: `main`, `master`, `develop`, `trunk`, `release/*`.
-- The current branch (`git branch --show-current`).
-- Any branch in a `branch refs/heads/<b>` line of `git worktree list --porcelain`.
+- Protected branches (SKILL.md, Rules for every destructive step), including the current branch
+  (`git branch --show-current`) and worktree checkouts.
 
 Pair `feat/x` with `origin/feat/x` so the table shows one row per branch with
 `local` / `remote` / `both`. Test each side on its own ref: a local branch that has new commits
@@ -41,6 +40,8 @@ git branch -r --merged origin/main
 
 Ancestry proves the branch tip is reachable from `main`. `git branch -d` accepts these.
 
+Signals 2 and 3 together are the **squash evidence**.
+
 ## Signal 2: patch equivalence (rebase or squash merge)
 
 Per-commit form, which catches single-commit squashes and rebase merges:
@@ -59,9 +60,9 @@ git cherry main "$tmp"     # a single '-' line => the branch's whole diff is on 
 ```
 
 `git commit-tree` writes only a dangling commit object. It creates no ref, does not touch the
-working tree or index, and `git gc` removes the object later. Verified on a scratch repo: a
-2-commit branch squash-merged into `main` prints `+ +` with plain `git cherry` and `-` with the
-squash-tree check; an unmerged branch prints `+` with both.
+working tree or index, and `git gc` removes the object later. A 2-commit branch squash-merged
+into `main` prints `+ +` with plain `git cherry` and `-` with the squash-tree check; an unmerged
+branch prints `+` with both.
 
 Limitation: if `main` changed the same lines after the squash, the patch no longer matches and
 the check reports `+`. That is a false "unmerged", which is the safe direction; use signal 3.
@@ -81,10 +82,13 @@ branch received commits after the merge, or the name was reused. Treat that bran
 This is the load-bearing signal for squash merges that GitHub performed with conflict resolution,
 where signal 2 can miss.
 
-### No `gh`, or not authenticated
+### No `gh`, not authenticated, or a failing `gh pr list`
 
-If `gh auth status` fails, skip signal 3. Use signals 1 and 2 only, and say so in the report:
-`merged-PR check unavailable — squash merges detected by patch equivalence only`. A branch that
+If `gh auth status` fails, or any `gh pr list` call fails (for example on a non-GitHub remote,
+even with auth passing), signal 3 is unavailable for the whole run. Stop calling `gh`, continue
+with signals 1 and 2, and record under `Unverified:`:
+`merged-PR check unavailable — squash merges detected by patch equivalence only`. This applies in
+every scope. It is not a Rule 3 stop and does not make the run PARTIAL by itself. A branch that
 only a merged PR could prove stays in the unmerged list.
 
 ## Choosing the delete command
@@ -92,7 +96,7 @@ only a merged PR could prove stays in the unmerged list.
 | Evidence | Local delete | Why |
 |---|---|---|
 | Signal 1 (ancestry) | `git branch -d <b>` | Git verifies the merge itself |
-| Signal 2 or 3 only | `git branch -D <b>` | `-d` refuses a squash-merged branch (`error: the branch '<b>' is not fully merged`) |
+| Squash evidence only (signal 2 or 3) | `git branch -D <b>` | `-d` refuses a squash-merged branch (`error: the branch '<b>' is not fully merged`) |
 | No signal | none | Unmerged: report it in Step 6 |
 
 Remote side, for any branch with evidence on `origin/<b>`. Record the tip in the candidate table
@@ -104,9 +108,9 @@ git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>
 
 If someone pushed to `<b>` after the table was built, git rejects the delete with
 `! [rejected] (delete) -> <b> (stale info)` and exit 1. Report it as a skipped delete with the
-reason "remote tip moved since the table", and leave the branch. Verified on a scratch repo:
-a matching tip deletes the ref; a moved tip is rejected and the ref survives.
+reason "remote tip moved since the table", and leave the branch. A matching tip deletes the ref;
+a moved tip is rejected and the ref survives.
 
 All deletes run only after the single table confirmation. A failed delete (permissions, branch
-protection, already gone, stale info) is reported and skipped, never retried with force. After the sweep,
-`git fetch origin --prune` again and re-check that no merged ref remains.
+protection, already gone, stale info) is reported and skipped (SKILL.md rules). After the sweep,
+run `git fetch origin --prune`; SKILL.md Step 7 re-checks that no merged ref remains.
