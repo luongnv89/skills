@@ -11,7 +11,7 @@
       "expectations": [
         "Runs git fetch origin --prune before reading refs and does not stash or pull before the uncommitted review.",
         "Shows each uncommitted change with its diff and asks keep or discard for it.",
-        "Runs git switch main and git pull --ff-only only after every change has a decision.",
+        "Runs git switch main and git pull --ff-only only after every change has a decision, is deferred to the ignore step, or was left undecided by the user.",
         "Shows a candidate table of merged branches with evidence before deleting anything, and takes one explicit confirmation.",
         "Tests origin/<b> refs against origin/main (not local main), so a merge that exists only on unpushed local main never deletes a remote ref.",
         "Deletes merged branches both locally (git branch -d or -D) and on origin with a lease-guarded delete (git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>).",

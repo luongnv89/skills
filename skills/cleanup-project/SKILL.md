@@ -61,7 +61,8 @@ git fetch origin --prune        # refresh refs; the working tree is untouched
 
 Do **not** stash or pull before Step 2. A stash would hide the exact uncommitted state the user
 must review, and a pull into a dirty tree can conflict before anyone has decided what to keep.
-The pull happens in Step 3, after every change has a decision and the tree is clean. If `origin`
+The pull happens in Step 3, after every change has a decision, is deferred to Step 4, or was left
+undecided by the user. If `origin`
 is missing or the fetch fails, say so and continue local-only only with the user's agreement.
 
 ## Workflow
@@ -91,6 +92,11 @@ rename survive). Group entries by file and show each one with its diff (`git dif
 Exact commands per status code (`A`, `D`, `R`, `MM`, `??`) are in `references/uncommitted-review.md`.
 
 ### 3. Switch to an up-to-date main
+
+First check `git worktree list --porcelain`. If a `branch refs/heads/main` line belongs to a
+worktree other than this one, `git switch main` fails with `fatal: 'main' is already used by
+worktree at '<path>'`. Stop, show that path, and tell the user to finish the remaining steps from
+that worktree (or run them there). Never force the switch or pass `--ignore-other-worktrees`.
 
 ```bash
 git switch main && git pull --ff-only
@@ -183,7 +189,7 @@ After each step, emit a short block in this shape:
 ··································································
   Candidates listed:  √ pass (4 local, 3 remote)
   User confirmation:  √ pass (one confirmation for the table)
-  Deleted:            √ pass (6 refs, 0 failures)
+  Deleted:            √ pass (7 refs, 0 failures)
   Protected skipped:  √ pass (main, release/2.1, worktree feat/wip)
   ____________________________
   Result:             PASS
@@ -240,6 +246,8 @@ A run is correct when all of these hold:
 - **Detached HEAD.** Report the commit, offer to keep it on a new branch, then switch to `main`.
 - **No `origin`.** Local-only run: no fetch, no pull, no remote deletes; say so in the report.
 - **Branch checked out in a worktree.** Protected; tell the user to remove the worktree first.
+- **`main` checked out in another worktree.** `git switch main` fails; stop at Step 3, show that
+  worktree's path, and finish the run there. The end state is then verified in that worktree.
 - **Conflict on switch.** `git switch main` refuses because a kept change would be overwritten:
   go back to Step 2 and commit or stash it.
 - **Merge or rebase in progress.** Stop at Prerequisites; never restore through a conflict.
