@@ -132,7 +132,7 @@
       "name": "negative-code-cleanup",
       "kind": "negative-trigger",
       "prompt": "Clean up this project: remove dead code and unused imports.",
-      "expected_output": "Does not run cleanup-project; dead-code and unused-import removal is a code refactor that belongs to slop-cleanup.",
+      "expected_output": "Does not run cleanup-project; dead-code and unused-import removal is a code refactor that belongs to code-review (mode:cleanup).",
       "files": [],
       "expectations": [
         "Does not start the cleanup workflow (no git status review, no branch sweep).",

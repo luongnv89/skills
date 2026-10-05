@@ -31,7 +31,7 @@ Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
 
 ## When not to use
 
-- Remove dead code or unused imports: use `slop-cleanup`.
+- Remove dead code or unused imports: use `code-review` (mode:cleanup).
 - Commit and push everything as-is: use `auto-push`.
 - Add LICENSE, CONTRIBUTING, or other open-source files: use `oss-ready`.
 - Bump a version, tag, or publish a release: use `release-manager`.

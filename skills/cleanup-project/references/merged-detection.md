@@ -15,8 +15,10 @@ git for-each-ref --format='%(refname:short)' refs/remotes/origin/   # remote
 Drop from both lists before testing:
 
 - `origin/HEAD` (its short name prints as `origin`) and `origin/main`.
-- Protected branches (SKILL.md, Rules for every destructive step), including the current branch
-  (`git branch --show-current`) and worktree checkouts.
+- Protected branches (SKILL.md, Rules for every destructive step), including worktree checkouts.
+
+The current branch (`git branch --show-current`) is never a delete candidate, but it is still
+tested: in report-only scope a merged one is listed as `current, not deletable` (SKILL.md Step 5).
 
 Pair `feat/x` with `origin/feat/x` so the table shows one row per branch with
 `local` / `remote` / `both`. Test each side on its own ref: a local branch that has new commits

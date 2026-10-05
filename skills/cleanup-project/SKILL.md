@@ -21,8 +21,8 @@ files updated, merged branches deleted locally and on `origin`, and an up-to-dat
 - "Tidy the .gitignore and get rid of stale branches."
 - "Is `spike/llm-cache` worth keeping?" This goes straight to the single-branch drill-down (Step 6).
 
-Don't use it to remove dead code or unused imports (`slop-cleanup`), commit and push everything
-(`auto-push`), cut a release or tag (`release-manager`), or add LICENSE, CONTRIBUTING and other OSS
+Don't use it to remove dead code or unused imports (`code-review` mode:cleanup), commit and
+push everything (`auto-push`), cut a release or tag (`release-manager`), or add LICENSE, CONTRIBUTING and other OSS
 files (`oss-ready`). For a git how-to question ("`branch -d` vs `-D`?"), answer it directly and run
 no workflow.
 
