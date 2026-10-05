@@ -14,6 +14,7 @@
 - Bold aesthetic direction with intentional design choices, not generic AI output
 - Built-in usability principles from "Don't Make Me Think" (scan-friendly, self-evident, low cognitive load)
 - Default style guide (Black/White/Gray/Bright Green) when no preference is provided
+- Default quality bar: every final design is professional, production-ready, elegant, and premium without being asked
 - Supports HTML/CSS/JS, React, Vue, and any modern frontend framework
 
 ## When to Use

@@ -4,7 +4,7 @@ description: "Build production-grade frontend interfaces with distinctive aesthe
 license: MIT
 effort: high
 metadata:
-  version: 1.2.7
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -77,6 +77,14 @@ When the user does **not** provide a specific style preference, color palette, o
 
 If the user provides their own colors, brand kit, or style direction, use those instead of the default palette and aesthetic. An explicit brief overrides only those defaults; preserve accessibility requirements and keep system status colors text-only, not backgrounds or primary UI components.
 
+## Default Quality Bar
+
+Every final design must be professional, production-ready, elegant, and premium, even unasked and regardless of aesthetic direction. The brief sets the style; this bar sets the finish. Premium comes from craft and execution, not from the clichés banned below. Check before delivery:
+- Consistent spacing rhythm and type scale; pixel-aligned edges
+- Intentional palette; coherent radii, borders, and shadows
+- Every interactive state: hover, focus, active, disabled, plus loading/empty/error where relevant
+- No placeholder, lorem ipsum, TODO, or broken asset; nothing looks like a draft
+
 ## Usability Principles — "Don't Make Me Think"
 
 Apply these usability rules derived from Steve Krug's principles to every design, regardless of aesthetic direction. This is the same source the `dont-make-me-think` skill audits against — condensed here for inline use during generation; keep the two in sync if Krug-principle guidance changes.
@@ -146,6 +154,7 @@ A run passes when **all** of the following are true:
 - [ ] Layout is responsive across mobile, tablet, and desktop viewports — verified at 375px, 768px, and 1280px without horizontal overflow.
 - [ ] Accessibility basics covered: semantic HTML, sufficient colour contrast (WCAG AA), keyboard focus states, and `alt`/`aria-label` where applicable.
 - [ ] Default Style Guide colour palette is respected when no user palette was provided (and Bright Green is never used as a background).
+- [ ] Default Quality Bar is met without the user asking: the final design reads as professional, production-ready, elegant, and premium.
 - [ ] Every "Don't Make Me Think" usability rule from the section above is satisfied — the user shouldn't have to guess what is clickable or where they are.
 
 ## Edge Cases

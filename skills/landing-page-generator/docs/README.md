@@ -18,6 +18,7 @@
 - Complete page sections: framework-specific narrative blocks, how it works, social proof, FAQ, and closing CTA
 - README mode: mermaid diagrams, tables over prose, all original content preserved in `<details>`
 - Anti-slop rules to avoid generic AI marketing filler
+- Default quality bar in both modes: professional, production-ready, elegant, and premium output without being asked
 - A/B test ideas and conversion optimization notes with every copy deliverable
 
 ## When to Use

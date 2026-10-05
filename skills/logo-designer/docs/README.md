@@ -14,6 +14,7 @@
 - Analyze project type (CLI, SaaS, Startup, Enterprise, Consumer) for style selection
 - Apply design principles: simplicity, scalability, memorability, versatility
 - Generate 7 SVG variants (full, mark, wordmark, icon, favicon, white, black)
+- Default quality bar: every SVG and the showcase page are professional, production-ready, elegant, and premium without being asked
 - Provide color specs with hex codes and Tailwind config
 
 ## When to Use

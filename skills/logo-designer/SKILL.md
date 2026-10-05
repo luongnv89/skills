@@ -4,7 +4,7 @@ description: "Generate professional SVG logos from project context: 7 brand vari
 license: MIT
 effort: medium
 metadata:
-  version: 1.2.5
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -110,6 +110,10 @@ Pick a style based on the detected project type (Developer/SaaS/Startup/Enterpri
 
 See `references/design-principles.md` for the style table, full visual/color/typography rules, and the Default Style Guide palette with system status colors.
 
+### Default Quality Bar
+
+All 7 SVGs and `brand-showcase.html` must be professional, production-ready, elegant, and premium, even unasked. The chosen style sets direction; this bar sets the finish (craft and restraint, not ornament): optical balance, consistent strokes, clean minimal paths legible at 16px, refined wordmark kerning, and a polished showcase with no placeholders. Pass this bar to `svg-generator`.
+
 ### Phase 3: Deliverables
 
 Generate the canonical mark first, then derive 6 sibling variants from its exact path data so every file shares the same geometry. The `svg-generator` agent must receive the literal `d=""` strings — do not paraphrase shapes.
@@ -184,6 +188,7 @@ Typography: Inter Bold for wordmark
 - [ ] Design rationale (symbol meaning, color choices, typography) is documented in the response
 - [ ] Color specification includes hex codes for all palette roles
 - [ ] Wordmark casing is confirmed with the user before any SVG containing text is generated
+- [ ] Every SVG and the showcase page meet the Default Quality Bar (professional, production-ready, elegant, premium) without the user asking
 
 ## Step Completion Reports
 
