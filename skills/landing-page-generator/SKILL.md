@@ -4,7 +4,7 @@ description: "Generate landing pages with PAS, AIDA, or StoryBrand from a produc
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -32,6 +32,16 @@ unsure which applies, ask.
 AI-generated marketing copy has predictable tells that kill credibility. See `references/anti-slop-rules.md` for banned phrases and structural patterns to avoid.
 
 **Quick test:** read each sentence and ask "does this give the reader information they didn't already have?" If not, cut it.
+
+## Default Quality Bar
+
+In both modes, the final deliverable (Mode A copy and its structure; Mode B README layout) must be professional, production-ready, elegant, and premium, even when the user never asks. The brief or project voice decides the tone; this bar decides the finish:
+- **Professional**: precise and credible; no hype
+- **Production-ready**: ship-ready, every section complete; the only allowed gaps are labeled `[proof needed]` (Mode A) or `[placeholder]` (Mode B) markers
+- **Elegant**: concise, one consistent voice, clean scannable hierarchy
+- **Premium**: confident restraint, specific claims, polished formatting
+
+These are qualities of the output, never words to put in it: do not write "premium", "elegant", or "world-class" into the copy.
 
 ## Prerequisites
 
@@ -195,4 +205,5 @@ Verify before delivering:
 - Every CTA starts with an action verb and states the outcome.
 - Unsupported proof is labeled `[proof needed]`; no fake claims are present.
 - Copy passes `references/anti-slop-rules.md`.
+- Output meets the Default Quality Bar (professional, production-ready, elegant, premium) without the user asking.
 - Final response includes A/B test ideas and conversion tips unless the user asked for a single section.

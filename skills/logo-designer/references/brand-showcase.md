@@ -34,6 +34,7 @@ The showcase page must:
    - Section labels: small, uppercase, letter-spaced, accent-colored
    - Monospace font for filenames and code blocks
    - `max-width: 1100px` container
+   - Meet the Default Quality Bar in `SKILL.md`: consistent spacing and type scale, aligned grid, no placeholder text or broken images
 
 5. **Reference SVGs via relative `src` paths** (e.g., `<img src="logo-full.svg">`), not inline SVG — except for the hero mark which should be inline for the glow/filter effect.
 

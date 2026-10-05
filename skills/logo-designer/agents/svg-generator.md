@@ -146,6 +146,7 @@ For ALL generated SVGs:
 3. **Optimized paths**: Use `<path>` elements. Round coordinates to 2 decimals max.
 4. **Proper structure**: Use `<g>` groups. Add brief comments for sections.
 5. **Correct naming**: Exactly 7 files with the standard names.
+6. **Default quality bar**: Even if the brief never asks, every file must look professional, production-ready, elegant, and premium: optical balance, consistent stroke weights, clean minimal paths, legible at 16px, refined wordmark kerning. Premium means craft and restraint, not ornament.
 
 ### Step 6: Verify Consistency
 

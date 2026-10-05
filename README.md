@@ -202,8 +202,8 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**frontend-design**](skills/frontend-design/) | 1.2.7 | high | Production UIs with usability-first approach |
-| [**logo-designer**](skills/logo-designer/) | 1.2.5 | medium | 7 SVG logo variants from project context |
+| [**frontend-design**](skills/frontend-design/) | 1.3.0 | high | Production UIs with usability-first approach |
+| [**logo-designer**](skills/logo-designer/) | 1.3.0 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.3.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 
 **Diagram generator engines** (install the umbrella or a single engine):
@@ -218,7 +218,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.0.4 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**landing-page-generator**](skills/landing-page-generator/) | 1.3.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
+| [**landing-page-generator**](skills/landing-page-generator/) | 1.4.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.3 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.6 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.3.1 | low | Add OSS files and templates |
