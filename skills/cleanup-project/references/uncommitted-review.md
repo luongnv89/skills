@@ -37,14 +37,20 @@ Then ask **keep or discard?** for that change. Accept a group answer ("discard e
 
 ## 3. Keep
 
-Default: commit the kept changes on a new branch so `main` stays clean.
+Default: commit the kept changes on a new branch so `main` stays clean. Run the approved
+discards (section 4) **before** this commit, so a discard-marked entry is gone first.
 
 ```bash
 git switch -c wip/cleanup-<yyyy-mm-dd>
 git add -- <kept paths>
-git commit -m "chore: keep work in progress from cleanup"
+git commit -m "chore: keep work in progress from cleanup" -- <kept paths>
 git switch main
 ```
+
+The pathspec on `git commit` is required. A bare `git commit` commits the whole index, which
+would sweep any undecided staged entry into the wip commit. With the pathspec, only the kept
+paths are committed and every other staged entry stays staged, untouched. For a kept rename,
+pass both paths (`-- <new> <old>`). Verified on a scratch repo (git 2.55.0).
 
 Alternatives, each only when the user picks it:
 

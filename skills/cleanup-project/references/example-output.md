@@ -32,10 +32,11 @@ Start: branch feat/search-v2, base main, 4 uncommitted entries, gh authenticated
      Keep or discard? Discarding deletes the file; it is not in HEAD.
 > discard
 
-Plan:
-  keep     src/search/index.ts → commit on wip/cleanup-2026-10-05
+Plan (discards first, then the keep commit):
   discard  debug.log           → git clean -n -- debug.log  ("Would remove debug.log"), then git clean -f -- debug.log
   discard  scratch.md          → git restore --staged --worktree -- scratch.md
+  keep     src/search/index.ts → git switch -c wip/cleanup-2026-10-05, git add -- src/search/index.ts,
+                                 git commit -m "chore: keep work in progress from cleanup" -- src/search/index.ts
   deferred node_modules/       → Step 4
 Run this? [yes/no]
 > yes
@@ -67,10 +68,11 @@ $ git push origin main
 ## Step 5 — merged-branch sweep
 
 ```
-  branch          where   signal                         local        remote
-  feat/login      both    ancestry                       branch -d    push --delete
-  feat/filters    both    squash-tree cherry '-' (3 commits)  branch -D    push --delete
-  fix/readme      remote  merged PR #57, headRefOid match    —            push --delete
+  branch          where   signal                              remote tip  local        remote
+  feat/login      both    ancestry                            1a2b3c4     branch -d    lease delete
+  feat/filters    both    squash-tree cherry '-' (3 commits)  5d6e7f8     branch -D    lease delete
+  fix/readme      remote  merged PR #57, headRefOid match     9a0b1c2     —            lease delete
+  (lease delete = git push --force-with-lease=refs/heads/<b>:<remote tip> origin :refs/heads/<b>)
 Protected, skipped: main, release/2.1
 Delete these 3 branches (5 refs)? [yes/no]
 > yes

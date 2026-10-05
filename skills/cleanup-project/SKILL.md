@@ -43,7 +43,9 @@ Check these before anything else. Stop and tell the user if one fails.
 - `git rev-parse --git-dir` succeeds (inside a git repository).
 - The base branch resolves: `git rev-parse --verify main` or `origin/main`, or a confirmed base.
 - No operation is in progress: `git rev-parse -q --verify MERGE_HEAD`, `REBASE_HEAD`,
-  `CHERRY_PICK_HEAD`, and `REVERT_HEAD` all fail, and `.git/rebase-merge`/`.git/rebase-apply` are absent.
+  `CHERRY_PICK_HEAD`, and `REVERT_HEAD` all fail, and `test -d "$(git rev-parse --git-path rebase-merge)"`
+  and the same for `rebase-apply` both fail. `--git-path` resolves correctly in a linked worktree,
+  where `.git` is a file, so never test a literal `.git/...` path.
   If one is in progress, stop and ask the user to finish or abort it first. `git restore` on a
   conflicted path exits 0 but leaves the merge open, so never "clean" through a conflict.
 - `gh` is optional. `gh auth status` decides whether the merged-PR signal is available.
@@ -76,8 +78,10 @@ rename survive). Group entries by file and show each one with its diff (`git dif
 --cached`, or the file's head for untracked files). For each change, ask: **keep or discard?**
 
 - Accept a batch answer ("discard all of `tmp/`") only when the user explicitly gives one.
-- **Keep** → a commit on a new branch (default, e.g. `wip/cleanup-<date>`), a named stash
-  (`git stash push -u -m "<name>" -- <path>`), or a commit on `main` only with explicit consent.
+- **Keep** → a commit on a new branch (default, e.g. `wip/cleanup-<date>`): `git add -- <kept>`, then
+  `git commit -m "<msg>" -- <kept>` so only kept paths are committed, never the whole index. Or
+  a named stash (`git stash push -u -m "<name>" -- <path>`), or a commit on `main` with explicit consent.
+- **Order.** Approved discards run first, then the keep commit.
 - **Discard** → tracked: `git restore --staged --worktree -- <path>`; untracked: `git clean -n
   -- <path>` dry run, then delete that one path after the user confirms. Never run bare `git clean -fd`.
 - Artifact-like untracked paths (`node_modules/`, `dist/`, `.DS_Store`, ...) may be deferred to
@@ -132,14 +136,16 @@ Without `gh`, use signals 1 and 2 and say so in the report. Exact commands:
 **Protected, never deleted:** `main`, `master`, `develop`, `trunk`, `release/*`, the current
 branch, and any branch checked out in a worktree (`git worktree list --porcelain`).
 
-Show the full candidate table (branch, local or remote or both, signal, evidence, planned
-command) and take **one** explicit confirmation for the whole table. Then run, per branch:
+Show the full candidate table (branch, local or remote or both, signal, evidence, the remote tip
+`git rev-parse origin/<b>`, planned command) and take **one** explicit confirmation for the whole
+table. Then run, per branch:
 
 - `git branch -d <b>` when ancestry holds; `git branch -D <b>` only with squash evidence
   (signal 2 or 3), because `-d` refuses a squash-merged branch.
-- `git push origin --delete <b>` for the remote side.
+- `git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>` for the remote side, where `<sha>` is the recorded tip. If `origin/<b>` moved
+  since the table, git rejects it as `stale info`.
 
-A failed delete is reported and skipped, never retried with force.
+A failed or `stale info` delete is reported as skipped with the reason, never retried with force.
 
 ### 6. Report unmerged branches
 
@@ -223,7 +229,7 @@ A run is correct when all of these hold:
   branch that only `gh` could have proven merged.
 - **Squash-merged branch.** Ancestry fails and `-d` refuses; delete with `-D` only on signal 2 or 3.
 - **PR merged, branch advanced after.** `headRefOid` differs from the tip: treat as unmerged.
-- **Remote-only branch.** Run the signals on `origin/<b>`; delete with `git push origin --delete <b>`.
+- **Remote-only branch.** Run the signals on `origin/<b>`; delete with the lease-guarded push above.
 - **Local-only branch.** No push; note `remote=no`.
 - **Detached HEAD.** Report the commit, offer to keep it on a new branch, then switch to `main`.
 - **No `origin`.** Local-only run: no fetch, no pull, no remote deletes; say so in the report.

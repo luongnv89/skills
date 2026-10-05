@@ -13,7 +13,7 @@
         "Shows each uncommitted change with its diff and asks keep or discard for it.",
         "Runs git switch main and git pull --ff-only only after every change has a decision.",
         "Shows a candidate table of merged branches with evidence before deleting anything, and takes one explicit confirmation.",
-        "Deletes merged branches both locally (git branch -d or -D) and on origin (git push origin --delete).",
+        "Deletes merged branches both locally (git branch -d or -D) and on origin with a lease-guarded delete (git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>).",
         "Ends by checking git branch --show-current is main and git status --porcelain is empty, and prints a final report."
       ]
     },
@@ -22,7 +22,7 @@
       "name": "squash-merged-branch",
       "kind": "edge",
       "prompt": "feat/filters was squash-merged into main through a GitHub PR, but git branch --merged doesn't list it. Can you clean up merged branches including that one?",
-      "expected_output": "Detects feat/filters as merged via patch equivalence (squash-tree cherry check) or a merged PR whose headRefOid matches the tip, lists it with that evidence, and deletes it with git branch -D plus git push origin --delete only after confirmation.",
+      "expected_output": "Detects feat/filters as merged via patch equivalence (squash-tree cherry check) or a merged PR whose headRefOid matches the tip, lists it with that evidence, and deletes it with git branch -D plus a lease-guarded remote delete (git push --force-with-lease) only after confirmation.",
       "files": [],
       "expectations": [
         "Does not rely on git branch --merged alone; uses git cherry, the squash-tree check, or gh pr list --state merged.",

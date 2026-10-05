@@ -88,12 +88,18 @@ only a merged PR could prove stays in the unmerged list.
 | Signal 2 or 3 only | `git branch -D <b>` | `-d` refuses a squash-merged branch (`error: the branch '<b>' is not fully merged`) |
 | No signal | none | Unmerged: report it in Step 6 |
 
-Remote side, for any branch with evidence on `origin/<b>`:
+Remote side, for any branch with evidence on `origin/<b>`. Record the tip in the candidate table
+(`sha="$(git rev-parse origin/<b>)"`), then delete with a lease on that exact tip:
 
 ```bash
-git push origin --delete <b>
+git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>
 ```
 
+If someone pushed to `<b>` after the table was built, git rejects the delete with
+`! [rejected] (delete) -> <b> (stale info)` and exit 1. Report it as a skipped delete with the
+reason "remote tip moved since the table", and leave the branch. Verified on a scratch repo:
+a matching tip deletes the ref; a moved tip is rejected and the ref survives.
+
 All deletes run only after the single table confirmation. A failed delete (permissions, branch
-protection, already gone) is reported and skipped, never retried with force. After the sweep,
+protection, already gone, stale info) is reported and skipped, never retried with force. After the sweep,
 `git fetch origin --prune` again and re-check that no merged ref remains.

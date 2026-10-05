@@ -16,15 +16,17 @@ delete one, refuse and explain which rule applies. For a worktree branch, tell t
 
 ```
 Candidates (one confirmation covers this table):
-  branch          where   signal                    local cmd            remote cmd
-  feat/login      both    ancestry                  git branch -d        git push origin --delete
-  feat/search     both    squash-tree cherry '-'    git branch -D        git push origin --delete
-  fix/typo        remote  merged PR #41, OID match  —                    git push origin --delete
+  branch          where   signal                    remote tip  local cmd        remote cmd
+  feat/login      both    ancestry                  1a2b3c4     git branch -d    lease delete
+  feat/search     both    squash-tree cherry '-'    9e8d7c6     git branch -D    lease delete
+  fix/typo        remote  merged PR #41, OID match  4b5a6f7     —                lease delete
+  (lease delete = git push --force-with-lease=refs/heads/<b>:<remote tip> origin :refs/heads/<b>)
 
 Delete these 3 branches (5 refs)? [yes/no]
 ```
 
-On yes, for each row: local delete, then remote delete, then `git fetch origin --prune`. `-D`
+On yes, for each row: local delete, then remote delete, then `git fetch origin --prune`. A
+`stale info` rejection means the remote tip moved: report the row as skipped with that reason. `-D`
 appears only on rows whose evidence is signal 2 or 3 (see `merged-detection.md`). If a new
 candidate appears after confirmation, it needs its own confirmation.
 
@@ -39,14 +41,16 @@ Discard these changes? This cannot be undone.
 ```
 
 Each row exists only because the user answered "discard" for it in the review. Run the
-`git clean -n` dry run before any `git clean -f` and show its output.
+`git clean -n` dry run before any `git clean -f` and show its output. Discards run before the
+keep commit, and that commit names its paths (`git commit -m "<msg>" -- <kept paths>`) so no
+other staged entry is swept into it.
 
 ## C. Ignore-file commit (Step 4)
 
 ```
 1. Apply the diff shown above to .gitignore          [approved]
-2. git add .gitignore
-3. git commit -m "chore: ignore build artifacts"     on main
+2. git add -- .gitignore
+3. git commit -m "chore: ignore build artifacts" -- .gitignore     on main
    (alternative: git switch -c chore/gitignore-cleanup, commit, push, gh pr create)
 Commit on main? [yes / branch+PR / no]
 ```
@@ -59,20 +63,23 @@ Pick the plan matching the user's choice and substitute `<branch>`.
 
 ```
 1. git worktree list --porcelain           # confirm no worktree uses <branch>
-2. git branch -D <branch>                  # force: the branch is not merged
-3. git push origin --delete <branch>       # if it exists on origin
-4. git branch -a --list '*<branch>'        # expect no output
+2. git rev-parse origin/<branch>           # record <sha>, if it exists on origin
+3. git branch -D <branch>                  # force: the branch is not merged
+4. git push --force-with-lease=refs/heads/<branch>:<sha> origin :refs/heads/<branch>
+5. git branch -a --list '*<branch>'        # expect no output
 ```
 
-Say plainly that the commits become unreachable. Offer Archive as the safer option.
+Say plainly that the commits become unreachable. Offer Archive as the safer option. A
+`stale info` rejection on the lease push means someone pushed since: stop and report it.
 
 ### Archive — tag and delete (preferred)
 
 ```
 1. git tag archive/<branch> <branch>
 2. git push origin archive/<branch>
-3. git branch -D <branch>
-4. git push origin --delete <branch>
+3. git rev-parse origin/<branch>           # record <sha>
+4. git branch -D <branch>
+5. git push --force-with-lease=refs/heads/<branch>:<sha> origin :refs/heads/<branch>
 Recovery: git switch -c <branch> archive/<branch>
 ```
 
@@ -81,9 +88,10 @@ Ask "tag-and-delete or rename to `archive/<branch>`?" before choosing; do not as
 ### Archive — rename namespace
 
 ```
-1. git branch -m <branch> archive/<branch>
-2. git push origin archive/<branch>
-3. git push origin --delete <branch>
+1. git rev-parse origin/<branch>           # record <sha>
+2. git branch -m <branch> archive/<branch>
+3. git push origin archive/<branch>
+4. git push --force-with-lease=refs/heads/<branch>:<sha> origin :refs/heads/<branch>
 ```
 
 ### Open a PR
