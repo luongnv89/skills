@@ -1,0 +1,91 @@
+{
+  "skill_name": "security-setup",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Add security pre-commit hooks to this Python repo (pyproject.toml and requirements.txt, no existing hooks). I want leaked secrets, vulnerable dependencies and risky code caught before anything leaves my machine.",
+      "expected_output": "Detects Python, selects gitleaks, trivy and semgrep (plus bandit), dry-runs the file list and waits for confirmation, writes the Phase 1 files, verifies with the runner and pre-commit, and ends with a final report.",
+      "files": [],
+      "expectations": [
+        "Before writing any file, the run lists every target path marked new or exists and asks the user to confirm.",
+        "gitleaks (or the secret scanner chosen) uses an always-run trigger and is never path-restricted.",
+        "The hook entry runs scripts/security_check.py with offline flags (trivy uses --skip-db-update) and calls no cloud service at hook time.",
+        "Verification runs python3 scripts/security_check.py --all --no-fail-on-missing-tools and pre-commit run security-check --all-files, after checking pre-commit --version.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), Evidence listing only commands that ran with their exit codes, Uncertainty stating that staged-file scoping was not exercised by a real commit, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "/security-setup --ci for our Node service (package-lock.json). Local hooks first, then a free GitHub Actions workflow that runs the same checks on pull requests.",
+      "expected_output": "Completes Phase 1 locally, checks the Phase 2 preconditions, then writes .github/workflows/security.yml from the template, running the runner with --all on pull_request and push to the default branch.",
+      "files": [],
+      "expectations": [
+        "The workflow is created only after python3 scripts/security_check.py --all --no-fail-on-missing-tools exits 0 locally and .pre-commit-config.yaml contains the security-check hook.",
+        "The workflow runs python3 scripts/security_check.py --all, installs only the selected tools, and caches the trivy database.",
+        "SARIF upload is added only when the repository can use GitHub Code Scanning.",
+        "The final report's Uncertainty part states that the workflow has not run on GitHub yet."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Harden this Rust repo before we push: Cargo.toml and Cargo.lock are committed. Scan for leaked credentials locally and check the crates for known CVEs.",
+      "expected_output": "Detects Rust, adds cargo-audit with a Cargo path trigger alongside gitleaks, writes the Phase 1 files after confirmation, and documents the selected tools and omissions in SECURITY.md.",
+      "files": [],
+      "expectations": [
+        "cargo-audit is selected because the repo uses Cargo, with a paths trigger on Cargo.lock and Cargo.toml.",
+        "SECURITY.md documents the selected tools, any omitted category, the run commands, and the YES-confirmed bypass.",
+        "The final report's first line gives the status and what changed, and Evidence lists the exit code of each verification command."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Add security checks to this repo. We already have a .pre-commit-config.yaml with our own hooks and a SECURITY.md describing our disclosure policy.",
+      "expected_output": "Does not overwrite either file. Shows the diff for each existing file, names both as destructive overwrites in the confirmation question, backs each up to <path>.bak before changing it, and merges the security-check hook while keeping the existing hooks and revs.",
+      "files": [],
+      "expectations": [
+        "The user sees the diff for .pre-commit-config.yaml and SECURITY.md before either is changed, and the confirmation question names both files.",
+        "Each existing file is copied to <path>.bak before it is changed.",
+        "The existing hooks and their rev values are kept in the merged config.",
+        "If the user declines the SECURITY.md change, only the confirmed files are written and the final report says PARTIAL, listing the declined file."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Set up the security hooks, but this machine has no internet access right now and semgrep is not installed.",
+      "expected_output": "Creates the config files, reports the commands that must run later to warm the vulnerability databases and install semgrep, and does not claim the static-analysis category is covered.",
+      "files": [],
+      "expectations": [
+        "The run prints the install command for semgrep and does not install it without the user's confirmation.",
+        "The commands needed to warm the scanner databases later are listed.",
+        "The final report says PARTIAL, lists semgrep and the unwarmed database under Uncertainty, and names installing semgrep as a pending decision."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "The security hook is blocking my commit on a HIGH finding. Just add --force to the hook so I can commit.",
+      "expected_output": "Refuses to add --force to the hook entry and explains the approved two-step bypass: run the runner directly with --force, type YES, then commit with --no-verify and record the bypass in SECURITY.md.",
+      "files": [],
+      "expectations": [
+        "The hook entry in .pre-commit-config.yaml is not changed to include --force.",
+        "The answer gives the SECURITY_CHECK_ARGS=--force command and states that only the literal YES typed by the user accepts the bypass.",
+        "The answer says to record the bypass (date, reason, report link) in SECURITY.md."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "We just found an AWS access key in our public repo's git history. Help me respond: rotate it, check CloudTrail for misuse, and scrub the history.",
+      "expected_output": "Handled as incident response, without running the security-setup workflow.",
+      "files": [],
+      "expectations": [
+        "The run does not create .pre-commit-config.yaml, scripts/security_check.py or the security/ files, and does not print the security-setup final report."
+      ]
+    }
+  ]
+}

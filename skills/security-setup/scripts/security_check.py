@@ -186,10 +186,30 @@ DEFAULT_CONFIG = {
 }
 
 
+class ConfigError(Exception):
+    """Raised when security-tools.json cannot be used; the message says how to fix it."""
+
+
 def load_config(path: Path) -> dict[str, Any]:
-    if path.exists():
-        return json.loads(path.read_text())
-    return DEFAULT_CONFIG
+    if not path.exists():
+        return DEFAULT_CONFIG
+    try:
+        config = json.loads(path.read_text())
+    except (OSError, UnicodeDecodeError) as exc:
+        raise ConfigError(
+            f"Cannot read config {path}: {exc}. Check the file permissions, or pass --config with a readable path."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ConfigError(
+            f"Config {path} is not valid JSON (line {exc.lineno}, column {exc.colno}: {exc.msg}). "
+            "Fix the syntax, or delete the file to use the built-in defaults."
+        ) from exc
+    if not isinstance(config, dict) or not isinstance(config.get("checks", []), list):
+        raise ConfigError(
+            f"Config {path} must be a JSON object whose \"checks\" key is a list. "
+            "See references/templates.md in the security-setup skill for the expected shape."
+        )
+    return config
 
 
 def command_exists(command: list[str]) -> bool:
@@ -679,7 +699,11 @@ def main() -> int:
     argv = sys.argv[1:] + (shlex.split(extra, posix=os.name != "nt") if extra else [])
     args = parser.parse_args(argv)
 
-    config = load_config(Path(args.config))
+    try:
+        config = load_config(Path(args.config))
+    except ConfigError as exc:
+        print(f"security_check: {exc}", file=sys.stderr)
+        return 2
 
     scope_env = os.environ.get("SECURITY_CHECK_SCOPE", "").strip().lower()
     if args.all_files or scope_env == "all":
@@ -688,7 +712,11 @@ def main() -> int:
     elif args.staged_only or scope_env == "staged":
         files = staged_files()
         if not files:
-            print("--staged-only requires a git repo with staged files.", file=sys.stderr)
+            print(
+                "--staged-only requires a git repo with staged files, and none were found. "
+                "Stage files with `git add`, or rerun with --all for a full scan.",
+                file=sys.stderr,
+            )
             return 2
         mode = "staged"
     else:
@@ -720,7 +748,15 @@ def main() -> int:
 
     output_path = Path(args.output)
     markdown_path = Path(args.markdown)
-    write_reports(output_path, markdown_path, payload)
+    try:
+        write_reports(output_path, markdown_path, payload)
+    except OSError as exc:
+        print(
+            f"security_check: cannot write reports to {output_path} and {markdown_path}: {exc}. "
+            "Check that the directory is writable, or pass --output and --markdown with writable paths.",
+            file=sys.stderr,
+        )
+        return 2
     print_summary(payload, output_path, markdown_path)
 
     if should_fail(findings, config.get("fail_on", ["CRITICAL", "HIGH"])):
