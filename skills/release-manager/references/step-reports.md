@@ -22,9 +22,9 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ```
 ◆ Pre-flight (step 1 of 10 — repo state)
 ··································································
-  Branch clean:             √ pass
-  Tests pass:               √ pass
-  Dependencies resolved:    √ pass (synced with remote)
+  Working tree clean:       √ pass (git status --porcelain empty)
+  Synced with origin:       √ pass (git status -sb not behind)
+  Release tool:             — none detected | <tool> (deferring)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -55,6 +55,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ··································································
   Build success:            √ pass
   Tag created:              √ pass (vX.Y.Z annotated tag)
+  Tag pushed:               √ pass (git ls-remote shows vX.Y.Z)
   Package published:        √ pass (PyPI | npm | skipped)
   GitHub release created:   √ pass (URL: ...)
   ____________________________
