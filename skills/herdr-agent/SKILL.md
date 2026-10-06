@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.1.4
+  version: 3.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -36,6 +36,7 @@ Read only the reference needed by that branch:
 - See `references/delivery-and-waiting.md` for the one-call prompt contract, error codes, wait semantics, reading replies, and the no-agent fallback.
 - See `references/fleet-monitoring.md` for snapshot status, sidebar badges, notifications, and the run report.
 - See `references/context-succession.md` for the main agent's context gate, HANDOFF procedure, and handoff brief template.
+- See `references/final-report.md` for the closing report's status words, required parts, and examples.
 
 ## Answer a Help Request
 
@@ -48,7 +49,7 @@ The full help text is in `references/help-request.md`. For a narrower question s
 ## Check Prerequisites
 
 1. Run `command -v herdr` and `herdr status`. If the server is unavailable, ask the user to start Herdr from a real terminal; never run bare `herdr` from a non-TTY shell.
-2. Confirm `HERDR_ENV=1`. Outside a Herdr pane, do not inspect or control the focused session.
+2. Confirm `HERDR_ENV=1`. Outside a Herdr pane, do not inspect or control the focused session. If check 1 or 2 fails, stop: the run ends `BLOCKED`.
 3. Resolve the root pane, tab, and workspace from `HERDR_PANE_ID`, `HERDR_TAB_ID`, and `HERDR_WORKSPACE_ID`, or from `herdr pane current --current` and list/get commands.
 4. Run agents directly in Herdr panes. Do not nest tmux when agent detection is required.
 5. Treat the installed CLI as authoritative. Check uncertain commands with `herdr <group>` rather than inventing flags. Client and server versions can differ after an update; `herdr status` says whether the server supports what you are about to use.
@@ -75,9 +76,9 @@ herdr status || { echo "Error: Herdr server is unavailable" >&2; exit 1; }
 root_pane="${HERDR_PANE_ID:?}"; root_tab="${HERDR_TAB_ID:?}"; ws="${HERDR_WORKSPACE_ID:?}"
 ```
 
-Resolve `project_dir` from the root pane's cwd, falling back to the current directory. Resolve the skill's `scripts/` directory by probing repo-local installs before global ones.
+Resolve `project_dir` from the root pane's cwd, falling back to the current directory. Set `here` to the skill's `scripts/` directory with the resolver in `references/herdr-recipes.md`, which probes repo-local installs before global ones. Every later script call uses `"$here/…"`.
 
-**Done when:** server status passes and concrete `root_pane`, `root_tab`, `ws`, and `project_dir` values are recorded.
+**Done when:** server status passes and concrete `root_pane`, `root_tab`, `ws`, `project_dir`, and `here` values are recorded.
 
 ## Phase 2 — Spawn and Ready the Fleet
 
@@ -99,11 +100,11 @@ Use the canonical `spawn_sub` workflow in `references/herdr-recipes.md`:
 3. Parse the new pane ID from JSON.
 4. Run `next_grid_split.py --equalize --root-pane "$root_pane"`; abort on any error or non-convergence.
 5. Rename the pane, then start it by running the same command plus `--start <name> --pane <id> --timeout 60000`. Add only what the user named: `--kind`, `--model`, `--thinking`, `--without bypass|flags`, or native flags after `--`. The command runs `herdr agent start` on the profile.
-6. Badge the worker with its job: `python3 scripts/badge.py <name> --title "<job>" --token role=<role>`.
+6. Badge the worker with its job: `python3 "$here/badge.py" <name> --title "<job>" --token role=<role>`.
 
 `agent start` **is** the readiness gate: it returns only once Herdr detects the expected agent and considers it interactive-ready, and returns `agent_not_ready` immediately if the agent booted into a dialog. There is no separate readiness pass. Names must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Never fold the task into argv.
 
-Confirm the fleet with `python3 scripts/fleet_status.py --tab "$root_tab" --fail-on-blocked` before assigning any work.
+Confirm the fleet with `python3 "$here/fleet_status.py" --tab "$root_tab" --fail-on-blocked` before assigning any work.
 
 **Done when:** every worker has a unique name and pane ID in `root_tab`, the layout widths differ by at most one cell, root remains active, the launch-profile summary reached the user, and every start returned success.
 
@@ -111,7 +112,7 @@ Confirm the fleet with `python3 scripts/fleet_status.py --tab "$root_tab" --fail
 
 Run `herdr agent get <name>` or `herdr pane get <pane-id>`. If a name is missing or ambiguous, list agents and ask; never silently retarget. `agent_not_found` means the pane hosts no detected agent — start one, or take the pane-surface fallback in `references/delivery-and-waiting.md`. Record both the name and pane ID and use that same ID for every later mutation.
 
-**Done when:** one existing target resolves uniquely and its status is valid.
+**Done when:** one existing target resolves uniquely, and its name, pane ID, and current status are recorded.
 
 ## Phase 4 — Prompt Safely
 
@@ -138,7 +139,7 @@ herdr agent read "$target" --source recent-unwrapped --lines 80
 
 Accept `idle` or `done` as settled; they differ only in whether the completion has been marked seen. If raising `--lines` reveals no more output, the agent is on the terminal's alternate screen — use the file fallback in `references/delivery-and-waiting.md` rather than a bigger line count.
 
-**Done when:** the requested reply is captured and verified, or blocked/stalled/timeout evidence is reported without further writes.
+**Done when:** the reply delta came from `herdr agent read` after an `idle` or `done` status, or the blocked/stalled/timeout code is reported and nothing more was sent.
 
 ## Phase 6 — Monitor and Report
 
@@ -150,7 +151,7 @@ One `herdr api snapshot` call renders every agent's status, badge and title, sor
 
 Keep the human oriented without making them read panes:
 
-- **Badge** each worker as its job changes: `python3 scripts/badge.py <name> --token phase=<phase>`. Display-only, so it never perturbs waits or rollups.
+- **Badge** each worker as its job changes: `python3 "$here/badge.py" <name> --token phase=<phase>`. Display-only, so it never perturbs waits or rollups.
 - **Notify** only for events that need them: `herdr notification show "Agent blocked" --body "<name> needs input" --sound request`, and once at run completion with `--sound done`.
 
 See `references/fleet-monitoring.md` for field caps, token semantics, and workspace-level rollups.
@@ -159,21 +160,15 @@ See `references/fleet-monitoring.md` for field caps, token semantics, and worksp
 
 ## Phase 7 — Broadcast, Steer, or Tear Down
 
-- **Broadcast:** run `scripts/broadcast.sh "<task>" <targets...>`. It resolves all targets from one `agent list`, dedupes, refuses unsafe ones, dispatches `agent prompt --wait` concurrently, and maps every error code to a reason. `HAC_BADGE=1` badges each row with its phase.
+- **Broadcast:** run `"$here/broadcast.sh" "<task>" <targets...>`. It resolves all targets from one `agent list`, dedupes, refuses unsafe ones, dispatches `agent prompt --wait` concurrently, and maps every error code to a reason. `HAC_BADGE=1` badges each row with its phase.
 - **Steer:** focus with `herdr agent focus <name>`, which also marks that agent's completion seen. For follow-ups, repeat Phases 4–5.
-- **Tear down:** after explicit confirmation, close only worker panes created by this run. Close the root tab, workspace, or server only when explicitly requested. Never run `herdr server stop` from an active session unless the user intends to stop every pane process.
+- **Tear down:** after explicit confirmation, close only worker panes created by this run. If the user declines or does not answer, close nothing and record the teardown as skipped. Close the root tab, workspace, or server only when explicitly requested. Never run `herdr server stop` from an active session unless the user intends to stop every pane process.
 
 **Done when:** every requested target has a recorded outcome and destructive actions match the user's confirmed scope.
 
 ## Phase 8 — Hand Off the Orchestrator Role
 
-Long fleet runs outlive one context window. Self-check your own usage at three gate points — before a spawn wave, before a broadcast, and after each relayed reply — never mid-cycle between a dispatch and its wait.
-
-| Self-reported usage | Action |
-|---|---|
-| `P >= threshold` (default 50, overridable in conversation) | HANDOFF |
-| `P < threshold` | Continue as main |
-| UNKNOWN or unavailable | Count relayed reads and spawn waves; HANDOFF at 20 reads or 4 spawn waves |
+Long fleet runs outlive one context window. Self-check your own usage at three gate points — before a spawn wave, before a broadcast, and after each relayed reply — never mid-cycle between a dispatch and its wait. HANDOFF when self-reported usage is at or above the threshold (default 50%); when usage is UNKNOWN, apply the counter fallback in the reference below.
 
 HANDOFF spawns a successor with the same Phase 2 machinery — `main-g<N>` in the root tab, equalized, started on the inherited launch profile so it runs your harness, model, and thinking level — then delivers a compact handoff brief through the Phase 4 cycle and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that pane is the orchestrator; this pane goes read-only and announces the new one with `herdr agent focus main-g<N>`. A successor that fails to start or never acks means the HANDOFF failed: stay main, report the orphan pane, and ask before closing it.
 
@@ -183,15 +178,16 @@ Read `references/context-succession.md` for the gate-point table, UNKNOWN fallba
 
 ## Verify Expected Output
 
-Expected output for a successful fleet operation:
+Expected final report for a successful fleet operation:
 
 ```text
-Fleet: PASS
-Root kept: w26:p1
-Profile: claude · claude-opus-5[1m] · thinking max (inherited)
-Workers: reviewer=settled, tests=settled
-Layout: 3 equal-width columns
-Replies: 2 captured, 0 blocked, 0 timed out
+Result: COMPLETE — spawned reviewer and tests; both replied
+Evidence:
+  herdr status: ok · root kept w26:p1 · 3 equal-width columns
+  Profile: claude · claude-opus-5[1m] · thinking max (inherited)
+  fleet_status.py: reviewer=done, tests=idle · 2 replies captured, 0 blocked, 0 timed out
+Uncertainty: reply content relayed as written, not checked against the task
+Decision: No approval needed.
 ```
 
 Acceptance criteria:
@@ -206,19 +202,11 @@ Acceptance criteria:
 - The closing status came from `fleet_status.py`, not from recollection.
 - Errors and destructive confirmations are surfaced explicitly.
 - The context gate is evaluated at each gate point, and any HANDOFF ends with exactly one acked orchestrator.
+- Every run except `help` ends with the final report, which passes its four reader checks: result on the first line, facts separated from assumptions, every claim traced to evidence, next decision named. Without user feedback, human understanding stays unconfirmed.
 
 ## Handle Edge Cases
 
-- `blocked`: focus the pane, notify, and request human action.
-- `agent_not_found`: no detected agent in that pane — `agent start` it, or drop to the pane-surface fallback.
-- `unknown` status: `herdr integration status`, then `herdr agent explain <target> --json` to see which rule matched.
-- Name collision: suffix the requested name; never reuse an existing agent accidentally.
-- More than four panes: warn that columns become cramped; change layout only with user approval.
-- Unequal grid: rerun the equalizer and abort worker launch if it still fails.
-- Wrong workspace or accidental tab: stop, preserve work, and ask before moving or closing panes.
-- Successor never acks: HANDOFF failed — stay main, keep the fleet, and report the orphan pane before asking to close it.
-- Root process-info has only `argv0`, no full `argv`: abort before splitting or starting; update/restart Herdr, or use `--without flags` only when reduced inheritance is intentional.
-- A start times out after inheriting a flag: the CLI rejected it; read the pane for its message before retrying.
+Read `references/edge-cases.md` when a target is `blocked`, `agent_not_found`, or `unknown`; a name collides; the grid passes four panes or will not equalize; the workspace or tab is wrong; a successor never acks; root process-info lacks full `argv`; or a start times out after inheriting a flag.
 
 ## Emit the Step Completion Report
 
@@ -237,3 +225,7 @@ Acceptance criteria:
   Destructive action:  — none (or confirmed scope)
   Result:              PASS | FAIL | PARTIAL
 ```
+
+## Write the Final Report
+
+After the Step Completion Report, print the final report from `references/final-report.md`: `Result:` (`COMPLETE`, `PARTIAL — <reason>`, or `BLOCKED — <reason>`), `Evidence:` (only checks that ran), `Uncertainty:`, then `Decision:` (the approval needed, or `No approval needed.`). A `help` request skips it.
