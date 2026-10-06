@@ -1,0 +1,122 @@
+{
+  "skill_name": "diagram-generator",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Make me a C4 container diagram of our order system in draw.io: Web App, API Gateway, Order Service, Payment Service and a PostgreSQL database. I'll edit it in Confluence afterwards.",
+      "expected_output": "Routes to drawio-generator without asking the routing question, runs its workflow, and closes with drawio-generator's Final Report relayed unchanged.",
+      "files": [],
+      "expectations": [
+        "Printed a 'Routing to drawio-generator' line that cites the user naming draw.io",
+        "Did not ask 'Precise and editable (draw.io) or hand-drawn sketch (Excalidraw)?'",
+        "Ran the Dependency Preflight for drawio-generator only and did not acquire or check excalidraw-generator",
+        "Wrote a kebab-case .drawio file and no .excalidraw file",
+        "The closing output is drawio-generator's Final Report: it opens with a Result: line and has Evidence:, Uncertainty: and Decision: lines, with no re-graded status or restated summary added by the umbrella"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Sketch a hand-drawn wireframe of a mobile onboarding screen: logo, three swipeable cards, and a Get started button.",
+      "expected_output": "Routes to excalidraw-generator on the hand-drawn wireframe signal, runs its workflow, and closes with excalidraw-generator's Final Report relayed unchanged.",
+      "files": [],
+      "expectations": [
+        "Printed a 'Routing to excalidraw-generator' line that cites the hand-drawn wireframe request",
+        "Did not ask the routing question",
+        "Ran the Dependency Preflight for excalidraw-generator only",
+        "Wrote a kebab-case .excalidraw file and no .drawio file",
+        "The closing output is excalidraw-generator's Final Report, opening with a Result: line, unchanged by the umbrella"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Add a Refund Service between Payment Service and the database in docs/architecture.drawio.",
+      "expected_output": "Routes to drawio-generator by the existing file's .drawio extension and lets the engine handle the update and its overwrite confirmation.",
+      "files": [],
+      "expectations": [
+        "Routed to drawio-generator and cited the .drawio extension of the existing file",
+        "Did not ask the routing question",
+        "Did not overwrite docs/architecture.drawio outside drawio-generator's own confirmation step",
+        "The closing output is drawio-generator's Final Report, unchanged by the umbrella"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Draw a flowchart of our password reset process.",
+      "expected_output": "No format signal: asks the single routing question and waits; no engine runs and no file is written until the user answers.",
+      "files": [],
+      "expectations": [
+        "Asked 'Precise and editable (draw.io) or hand-drawn sketch (Excalidraw)?' before routing",
+        "Did not pick an engine without an answer or an explicit delegation such as 'just pick'",
+        "Did not run the Dependency Preflight before the answer",
+        "Wrote no .drawio or .excalidraw file before the answer"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "I want a whiteboard-sketch look, but it has to be a draw.io file so my team can open it in diagrams.net. It's a three-step deployment pipeline: build, test, deploy.",
+      "expected_output": "The named tool wins over the aesthetic words (rule 3): routes to drawio-generator.",
+      "files": [],
+      "expectations": [
+        "Routed to drawio-generator, citing the named tool rather than the sketch aesthetic",
+        "Did not ask the routing question",
+        "Did not run excalidraw-generator",
+        "The closing output is drawio-generator's Final Report, unchanged by the umbrella"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Make an Excalidraw sketch of our three-tier web architecture: browser, app server, database. (Assume excalidraw-generator is not installed and asm deps acquire excalidraw-generator fails.)",
+      "expected_output": "The preflight stops the run with the install command and the missing-engine BLOCKED report; it does not fall back to drawio-generator.",
+      "files": [],
+      "expectations": [
+        "Printed 'Missing skill: excalidraw-generator' with the asm install command",
+        "Did not run drawio-generator and wrote no .drawio or .excalidraw file",
+        "Did not imitate the engine by writing Excalidraw JSON inline",
+        "The report opens with 'Result: BLOCKED' and has Evidence:, Uncertainty: and Decision: lines; Evidence names the routing rule and the failed preflight, and Decision names installing the engine as the next action",
+        "Ran asm deps release for the recorded session if an acquire was attempted"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "edge",
+      "prompt": "Give me the login flow both as a draw.io file and as an Excalidraw sketch: user enters credentials, server validates, success goes to the dashboard, failure shows an error.",
+      "expected_output": "Both formats: runs drawio-generator first, relays its Final Report, then runs excalidraw-generator under the same session without asking again.",
+      "files": [],
+      "expectations": [
+        "Ran drawio-generator first, because the request names it first",
+        "Relayed drawio-generator's Final Report before excalidraw-generator started",
+        "Did not ask again whether to produce the Excalidraw version, unless drawio-generator ended BLOCKED",
+        "Wrote one .drawio file and one .excalidraw file",
+        "Reused the same dg_session value for any second acquire"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Write a Mermaid sequence diagram for the checkout flow that I can paste into our README.",
+      "expected_output": "The skill does not trigger: Mermaid output is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not run drawio-generator or excalidraw-generator",
+        "Did not write a .drawio or .excalidraw file"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "negative-trigger",
+      "prompt": "Build me a 10-slide pitch deck for our seed round with a market-size chart on slide 4.",
+      "expected_output": "The skill does not trigger: slide decks are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not route to a diagram engine",
+        "Did not write a .drawio or .excalidraw file"
+      ]
+    }
+  ]
+}
