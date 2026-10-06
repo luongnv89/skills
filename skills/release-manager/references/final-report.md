@@ -7,7 +7,7 @@ Print this report at the end of every run, including runs that stop early. It co
 1. `Result:` with one status at the start of the line:
    - `COMPLETE` — every planned step ran.
    - `PARTIAL — <reason>` — the user declined or skipped a step, such as the push, the GitHub release, or publishing.
-   - `BLOCKED — <reason>` — a check failed, such as a dirty tree the user chose not to resolve, a failed build, or a publish error.
+   - `BLOCKED — <reason>` — a check failed, such as a dirty tree the user chose not to resolve, a failed build, a tag that `git ls-remote` does not find on origin after the push, or a publish error.
 2. `Evidence:` only the checks that actually ran, each with its observed result: files changed, `git ls-remote` output, the release URL, registry verification.
 3. `Uncertainty:` what was not verified, such as a clean install from the registry or a skipped reviewer pass.
 4. `Decision:` the action still waiting on the user, or "No approval needed."
@@ -50,6 +50,22 @@ Uncertainty:
 - GitHub release and npm publish not attempted
 
 Decision: Push the tag when ready: git push origin main && git push origin v2.4.0
+```
+
+A run where the push was confirmed but `git ls-remote` found no tag on origin stops before the GitHub release and publishing:
+
+```
+Result: BLOCKED — tag v2.4.0 not on origin
+
+Evidence:
+- Version bumped: package.json (1.3.1 → 2.4.0)
+- Git tag: v2.4.0 (annotated), local
+- git ls-remote --tags origin "refs/tags/v2.4.0": no output
+
+Uncertainty:
+- Why the tag push did not reach origin
+
+Decision: Push the tag (git push origin v2.4.0), confirm it with git ls-remote, then resume at Step 9 (GitHub release, then publishing).
 ```
 
 ## Reader checks

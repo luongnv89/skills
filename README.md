@@ -210,7 +210,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**cleanup-project**](skills/cleanup-project/) | 1.0.1 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.2.2 | medium | Pre-commit + GitHub Actions quality gates |
 | [**security-setup**](skills/security-setup/) | 1.4.2 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
-| [**release-manager**](skills/release-manager/) | 2.7.0 | max | Bump, changelog, tag, GitHub release, publish |
+| [**release-manager**](skills/release-manager/) | 2.7.1 | max | Bump, changelog, tag, GitHub release, publish |
 
 ### Product Planning
 

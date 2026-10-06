@@ -4,7 +4,7 @@ description: "Manage software releases end-to-end: bump version, generate change
 license: MIT
 effort: max
 metadata:
-  version: 2.7.0
+  version: 2.7.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -137,7 +137,7 @@ git push origin vX.Y.Z
 git ls-remote --tags origin "refs/tags/vX.Y.Z"
 ```
 
-If `git ls-remote` prints nothing, report the tag as not pushed and do not start Step 9.
+If `git ls-remote` prints nothing, stop, skip Steps 9-10, report `BLOCKED — tag vX.Y.Z not on origin` (recovery: `references/final-report.md`).
 
 ---
 
