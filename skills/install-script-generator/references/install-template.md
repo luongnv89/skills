@@ -104,7 +104,7 @@ install_<tool>() {
 verify_installation() {
     info "Verifying installation..."
     if command -v "$TOOL_NAME" &>/dev/null; then
-        ok "$TOOL_NAME $(${TOOL_NAME} --version 2>/dev/null || echo '') installed"
+        ok "$TOOL_NAME $("$TOOL_NAME" --version 2>/dev/null | head -n 1 || true) installed"
     else
         die "$TOOL_NAME installation could not be verified"
     fi
@@ -116,6 +116,9 @@ main() {
     os="$(detect_os)"; arch="$(detect_arch)"
     pm="$(detect_package_manager)"; sudo_cmd="$(need_sudo)"
     info "OS: $os | Arch: $arch | Package Manager: $pm"
+    if [ "$os" = "windows" ]; then
+        warn "MSYS/Cygwin detected. For native Windows, use install.ps1."
+    fi
     # install_deps "$pm" "$sudo_cmd" dep1 dep2
     install_<tool>
     verify_installation

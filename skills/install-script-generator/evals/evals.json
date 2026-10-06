@@ -1,0 +1,74 @@
+{
+  "skill_name": "install-script-generator",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Create an install script for this Go CLI so people can install it with one curl command. The repo is github.com/acme/linkcheck and the default branch is main.",
+      "expected_output": "Runs Repo Sync, records the go.mod build as the install method, probes the environment, generates and dry-runs installation_plan.yaml, writes install.sh from the template, runs bash -n, the placeholder grep and shellcheck when present, adds the curl one-liner to the README, writes USAGE_GUIDE.md, and ends with the four-part final report.",
+      "files": [],
+      "expectations": [
+        "install.sh starts with #!/usr/bin/env bash and set -euo pipefail, and detects OS, architecture and package manager.",
+        "The README one-liner points at https://raw.githubusercontent.com/acme/linkcheck/main/install.sh.",
+        "install.sh is not executed on the user's machine without the user asking for a local run or approving a container.",
+        "The final report starts with Result: and a status word (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran with their results, Uncertainty that says install.sh was not executed when it was not, and Decision naming the approval needed or 'No approval needed.' plus the push and working-file cleanup actions."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Make my Python package installable on Linux and macOS with a single command, and give me the wget variant too.",
+      "expected_output": "Reads the Python build file to set the install method, generates install.sh with apt/dnf/yum/pacman/brew/zypper handling, adds both curl and wget one-liners to the README, and reports the result with the status rules.",
+      "files": [],
+      "expectations": [
+        "The README contains both a curl -sSL ... | bash and a wget -qO- ... | bash one-liner with real owner, repo and branch values.",
+        "Evidence lists the bash -n exit code and the placeholder grep result.",
+        "The report does not call the raw URL live unless curl -fsSI returned HTTP 200."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Write an install.sh for this repo. It has no git remote configured yet and I'm not sure what the GitHub name will be.",
+      "expected_output": "Phase 1 cannot read <owner>/<repo>, so the skill asks the user for it. If the user gives no answer, it stops before writing install.sh and reports BLOCKED with the missing value as the reason.",
+      "files": [],
+      "expectations": [
+        "The skill asks for the repository owner and name instead of guessing them.",
+        "If no value is given, no install.sh is written and the final report starts with Result: BLOCKED and names the missing owner/repo."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Generate a curl | bash installer for my tool. Note: this machine has no python3 installed.",
+      "expected_output": "The helper scripts cannot run, so env_explorer.py, plan_generator.py, executor.py and doc_generator.py are recorded as not run. install.sh is still generated and statically checked, and the run ends PARTIAL because the dry run and USAGE_GUIDE.md did not run.",
+      "files": [],
+      "expectations": [
+        "Each helper-script step is recorded as 'not run (python3 not found)' rather than reported as passed.",
+        "The final report status is PARTIAL, and Uncertainty names the helper scripts that did not run."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Create an install script for mytool. It is not published to Homebrew or apt; it builds from source with make install.",
+      "expected_output": "plan_generator.py emits a package-manager install step that does not apply, so the skill edits the Install mytool step to the make-based commands, removes every # TODO placeholder, reruns the dry run until no placeholder warning appears, and writes install_mytool from the Makefile.",
+      "files": [],
+      "expectations": [
+        "installation_plan.yaml has no '# TODO' placeholder and its Install mytool step uses the build-from-source commands.",
+        "The executor.py --dry-run output printed in Evidence starts with 'DRY RUN:' and the report mentions no placeholder warning.",
+        "If the placeholder warning is still present at the end, the status is PARTIAL, not COMPLETE."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Write a Dockerfile that builds and runs my Node API.",
+      "expected_output": "install-script-generator does not trigger: Dockerfiles are excluded by the description. No install.sh, installation plan or one-liner is produced.",
+      "files": [],
+      "expectations": [
+        "The response does not generate install.sh or run the install-script-generator phases."
+      ]
+    }
+  ]
+}

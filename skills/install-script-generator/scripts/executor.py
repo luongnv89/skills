@@ -262,7 +262,12 @@ def execute_plan(plan, dry_run=False):
     report["completed_at"] = datetime.now().isoformat()
 
     print(f"\n{'=' * 60}")
-    if report["success"]:
+    if dry_run:
+        print(
+            f"DRY RUN: {len(report['steps'])} step(s) listed for {plan.get('target')}; "
+            "nothing was executed."
+        )
+    elif report["success"]:
         print(f"SUCCESS: {plan.get('target')} installed successfully!")
     else:
         print(f"FAILED: Installation failed at step {report['failed_step']}")
@@ -279,7 +284,7 @@ def generate_report_markdown(report):
         f"**Platform:** {report['platform']}",
         f"**Started:** {report['started_at']}",
         f"**Completed:** {report.get('completed_at', 'N/A')}",
-        f"**Status:** {'SUCCESS' if report['success'] else 'FAILED'}",
+        f"**Status:** {'DRY RUN' if report.get('dry_run') else ('SUCCESS' if report['success'] else 'FAILED')}",
         "",
     ]
 
@@ -349,23 +354,59 @@ def main():
         )
         return 1
 
-    with open(plan_file) as f:
-        plan = yaml_load(f.read())
+    try:
+        with open(plan_file) as f:
+            plan = yaml_load(f.read())
+    except Exception as e:
+        print(f"Error: could not parse plan file {plan_file}: {e}", file=sys.stderr)
+        print(
+            "Regenerate it with plan_generator.py, or fix the YAML syntax and rerun.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not isinstance(plan, dict) or not isinstance(plan.get("steps"), list):
+        print(
+            f"Error: plan file {plan_file} has no 'steps' list at the top level.",
+            file=sys.stderr,
+        )
+        print(
+            "Expected the mapping plan_generator.py writes (target, platform, steps: [...]). "
+            "Regenerate it with plan_generator.py.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if args.dry_run:
+        for step in plan["steps"]:
+            command = str(step.get("command") or "") if isinstance(step, dict) else ""
+            if command.startswith("#"):
+                print(
+                    f"Warning: step {step.get('step', '?')} ({step.get('name', 'unnamed')}) "
+                    f"has a placeholder command: {command}. "
+                    "Replace it with the real command before running the plan.",
+                    file=sys.stderr,
+                )
 
     # Execute plan
     report = execute_plan(plan, dry_run=args.dry_run)
 
     # Write report
     output_file = Path(args.output)
-    if args.json:
-        with open(output_file.with_suffix('.json'), "w") as f:
-            json.dump(report, f, indent=2)
-        print(f"Report saved to: {output_file.with_suffix('.json')}")
-    else:
-        markdown = generate_report_markdown(report)
-        with open(output_file, "w") as f:
-            f.write(markdown)
-        print(f"Report saved to: {output_file}")
+    try:
+        if args.json:
+            with open(output_file.with_suffix('.json'), "w") as f:
+                json.dump(report, f, indent=2)
+            print(f"Report saved to: {output_file.with_suffix('.json')}")
+        else:
+            markdown = generate_report_markdown(report)
+            with open(output_file, "w") as f:
+                f.write(markdown)
+            print(f"Report saved to: {output_file}")
+    except OSError as e:
+        print(f"Error: could not write report to {output_file}: {e}", file=sys.stderr)
+        print("Pass a writable path with --output.", file=sys.stderr)
+        return 1
 
     if not report["success"]:
         print(
