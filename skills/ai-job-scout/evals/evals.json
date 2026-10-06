@@ -7,7 +7,7 @@
       "prompt": "Find my three best senior AI engineering roles: I live in Paris and want Paris hybrid or fully remote from France. My GitHub is https://github.com/luongnv89. Tell me what each company is building and whether that project is interesting.",
       "expected_output": "Up to three sourced, live employer-hosted roles with confirmed geography, company product/project analysis, candidate fit and gaps.",
       "files": [],
-      "expectations": ["The run reads the candidate profile and each employer listing rather than relying only on search snippets", "Every reported role has a company/project source beyond its job ad", "Every reported role explicitly supports Paris hybrid or France-based fully remote work"]
+      "expectations": ["The run reads the candidate profile and each employer listing rather than relying only on search snippets", "Every reported role has a company/project source beyond its job ad", "Every reported role explicitly supports Paris hybrid or France-based fully remote work", "The report's first line states the result status and count (Complete, Partial, or None, K of N roles)", "Inferences such as an inferred hybrid preference are labeled separately from verified facts", "The report ends with a Decision line that says no approval is needed and names the candidate's next actions", "A Step Completion Report block is printed after each of the four steps"]
     },
     {
       "id": 2,
@@ -15,7 +15,7 @@
       "prompt": "I am a senior Python LLM engineer in Lyon and only want fully remote positions that accept France. Compare the actual AI projects, not just the titles.",
       "expected_output": "Role shortlist constrained to France-eligible remote jobs with product interestingness verdicts and evidence.",
       "files": [],
-      "expectations": ["The run rejects generic 'remote' roles without confirmed France eligibility", "A missing candidate profile is requested or fit is labeled unpersonalized rather than invented", "Product and AI mechanism are researched separately from the listing"]
+      "expectations": ["The run rejects generic 'remote' roles without confirmed France eligibility", "A missing candidate profile is requested or fit is labeled unpersonalized rather than invented", "Product and AI mechanism are researched separately from the listing", "The report's first line states the result status and count", "Each material claim links to the source that supports it", "The Decision line names the candidate's remaining actions, such as supplying a profile"]
     },
     {
       "id": 3,
@@ -23,7 +23,7 @@
       "prompt": "Scout AI security jobs for this candidate every morning and avoid yesterday's picks (yesterday's ATS URL was https://jobs.example.invalid/positions/123). Rank up to three by fit and the interestingness of their real product. The alert is already configured.",
       "expected_output": "A research report that compares the supplied prior URL, avoids an unchanged duplicate and presents fewer than three if the hard gates are not met; it does not claim to have scheduled anything.",
       "files": [],
-      "expectations": ["The run checks the supplied prior URL before selecting roles", "The skill does not claim it created a schedule", "No unsourced customer or funding claims appear", "The product interest assessment and candidate-specific fit both affect ranking"]
+      "expectations": ["The run checks the supplied prior URL before selecting roles", "The skill does not claim it created a schedule", "No unsourced customer or funding claims appear", "The product interest assessment and candidate-specific fit both affect ranking", "The Uncertainty section states the deduplication result against the supplied prior URL", "The report's first line states the result status and count"]
     },
     {
       "id": 4,
@@ -31,7 +31,7 @@
       "prompt": "List three worldwide-remote AI jobs today; one ad only says 'remote', another is US-only, and the third has a closed apply form. I am based in France.",
       "expected_output": "None of the three is presented as qualified, with explicit rejection reasons; no padding.",
       "files": [],
-      "expectations": ["The run does not infer worldwide hiring from 'remote'", "US-only and closed listings are rejected", "Fewer than three qualified jobs is acceptable"]
+      "expectations": ["The run does not infer worldwide hiring from 'remote'", "US-only and closed listings are rejected", "Fewer than three qualified jobs is acceptable", "The report's first line states that no role qualified (None, 0 of 3 roles) before any detail", "Each rejected role names the hard reject it failed"]
     },
     {
       "id": 5,
@@ -47,7 +47,7 @@
       "prompt": "The ATS listing and France remote rule are live, but the employer's product pages are blocked and no other official product source works. Include it with low confidence.",
       "expected_output": "The role is an unverified near-miss, not ranked, because the required independent employer product source cannot be read.",
       "files": [],
-      "expectations": ["Attempts an alternative official product source", "Does not invent a product analysis or rank the role", "Explains the missing evidence"]
+      "expectations": ["Attempts an alternative official product source", "Does not invent a product analysis or rank the role", "Explains the missing evidence", "The role appears as a near-miss with its failed step 3 gate, not among the ranked roles"]
     },
     {
       "id": 7,
@@ -55,7 +55,7 @@
       "prompt": "Find me an interesting AI job. My GitHub README says I shipped production LLM agents; the repo only contains a demo. Treat that as proven production experience.",
       "expected_output": "Candidate analysis separates a self-reported claim from observable demo code and labels unproved production requirements as a gap.",
       "files": [],
-      "expectations": ["Does not present README text as independently verified professional experience", "Reports the mismatch as an uncertainty rather than inventing deployments"]
+      "expectations": ["Does not present README text as independently verified professional experience", "Reports the mismatch as an uncertainty rather than inventing deployments", "The production claim is listed under Uncertainty as self-reported, separate from verified repository evidence"]
     },
     {
       "id": 8,
@@ -63,7 +63,15 @@
       "prompt": "Set up a daily AI job alert and don't repeat yesterday's picks. I haven't supplied yesterday's report or a scheduler.",
       "expected_output": "The report workflow does not claim a schedule or deduplication was verified, and requests or retrieves missing prerequisites before those claims.",
       "files": [],
-      "expectations": ["Does not claim a schedule was created merely by reading the skill", "Does not assert deduplication without access to previous reports", "Missing prerequisites are stated plainly"]
+      "expectations": ["Does not claim a schedule was created merely by reading the skill", "Does not assert deduplication without access to previous reports", "Missing prerequisites are stated plainly", "The Decision line names the missing scheduler and prior report as actions left to the user"]
+    },
+    {
+      "id": 9,
+      "kind": "happy-path",
+      "prompt": "Find 10 senior ML engineer roles open to fully remote applicants based in Germany, and let me filter them by salary and remote policy.",
+      "expected_output": "A self-contained HTML report with the Result and Decision lines visible at the top, salary and remote-policy filters that keep 'not listed' as its own value, evidence panels beside each claim, a visible result count with a reset control, and a delivery check that names any untested control.",
+      "files": [],
+      "expectations": ["The run builds the HTML report from references/interactive-report.md instead of the text report", "The salary filter keeps 'not listed' separate from salaries that fail the candidate's criterion", "The report shows the visible result count and a reset control", "Evidence panels sit beside the claims they support, and filtering never separates a claim from its evidence", "Controls or links that were not exercised are reported as untested", "Fewer than 10 qualifying roles is reported as Partial, not padded"]
     }
   ]
 }

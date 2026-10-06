@@ -13,16 +13,17 @@
 - Checks employer-hosted listings and application links rather than trusting aggregator snippets.
 - Enforces the candidate's precise hybrid/remote geography and seniority requirements.
 - Explains what each company builds, how AI contributes, and why the project may be interesting.
-- Ranks up to three roles with cited fit, gaps, salary where stated, and direct application links.
-- Reports fewer results when eligibility cannot be verified; never applies automatically.
+- Ranks up to three roles by default, with cited fit, gaps, salary where stated, and direct application links; reports fewer rather than padding.
+- Opens with a one-line result and ends with uncertainties and your next steps; searches for more than five roles, or ones you want to filter, get an HTML report. Never applies automatically.
 
 ## When to Use
 
 | Say this... | Skill will... |
 | --- | --- |
 | “Find AI roles for my GitHub profile” | Build a sourced candidate brief and search current roles |
-| “Send a daily AI job alert” | Avoid recently reported roles and rank new open positions |
+| “Run the research for my daily AI job alert” | Compare against prior reports you supply and rank new open roles; it doesn't schedule or send the alert |
 | “Is this company's AI project worth joining?” | Research the product and link the project to the role |
+| “Find 10 remote ML roles I can filter by salary” | Build a filterable HTML report with evidence beside each claim |
 
 ## How It Works
 
@@ -37,8 +38,19 @@ graph TD
 
 ## Usage
 
-`/ai-job-scout` with your GitHub/profile URL and location or remote-work preference. For a recurring alert, pass prior reports as context and schedule the invocation in your agent's task scheduler.
+```
+/ai-job-scout <GitHub or profile URL> <location or remote-work preference>
+```
+
+For a recurring alert, pass prior reports as context and schedule the invocation in your agent's task scheduler.
+
+## Resources
+
+| Path | Description |
+| --- | --- |
+| `references/report-format.md` | Report order, per-role fields, and a full example |
+| `references/interactive-report.md` | Filters, evidence panels, and delivery checks for the HTML report |
 
 ## Output
 
-A cited report of up to three verified roles, each covering the company, product/project, AI work, geography, direct application, fit, and uncertainties. No applications are sent.
+A cited report that opens with a one-line result (complete, partial, or none), then the search evidence, up to three verified roles (company, product/project, AI work, geography, direct application, fit), the uncertainties, and your next steps. Searches for more than five roles, or ones you want to filter, get a filterable HTML report. No applications are sent.
