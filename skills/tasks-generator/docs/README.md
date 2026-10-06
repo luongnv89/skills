@@ -33,8 +33,9 @@ graph TD
     C --> D["Plan Sprints"]
     D --> E["Analyze Dependencies"]
     E --> F["Generate tasks.md"]
+    F --> G["Verify, commit, Final Report"]
     style A fill:#4CAF50,color:#fff
-    style F fill:#2196F3,color:#fff
+    style G fill:#2196F3,color:#fff
 ```
 
 ## Installation
@@ -54,8 +55,10 @@ asm install github:luongnv89/skills:skills/tasks-generator
 ## Usage
 
 ```
-/tasks-generator
+/tasks-generator path/to/prd.md
 ```
+
+With no argument, the skill looks in the last project folder or under `IDEAS_ROOT`, and asks when more than one folder has a `prd.md`.
 
 ## Resources
 
@@ -66,7 +69,17 @@ asm install github:luongnv89/skills:skills/tasks-generator
 | `agents/sprint-worker.md` | Generate tasks for a single sprint (runs in parallel, one per sprint) |
 | `agents/dependency-resolver.md` | Wire cross-sprint dependencies and produce final tasks.md |
 | `references/tasks-template.md` | Task format template and sprint structure |
+| `references/dependency-analysis.md` | Graph schema, CLI and output schema of the dependency script |
+| `references/self-test.md` | Checks run against `tasks.md` before reporting, plus a contract fixture |
+| `references/step-completion-reports.md` | Check names and examples for each phase's status report |
+| `references/final-report.md` | Filled Final Report examples, fill rules and reader checks |
+| `references/edge-cases.md` | Required behavior and final status for each edge case |
+| `scripts/analyze_dependencies.py` | Validates the task graph and computes the critical path and bottlenecks (stdlib only) |
+| `tests/test_analyze_dependencies.py` | Unit tests for the dependency script (`python3 -m unittest discover -s skills/tasks-generator/tests`) |
+| `evals/evals.json` | Scenario evals: happy path, edge cases and negative triggers |
 
 ## Output
 
-`tasks.md` with sprint-organized tasks, each including title, description, acceptance criteria, dependencies, and PRD reference. Includes dependency analysis with waves, critical path, and bottleneck identification.
+`tasks.md` next to the PRD, with sprint-organized tasks, each including title, description, acceptance criteria, effort, dependencies, and PRD reference. Includes a dependency table, waves, the critical path and bottlenecks computed by the script, and flagged ambiguities. An existing `tasks.md` is first backed up as `tasks_backup_YYYY_MM_DD_HHMMSS.md`.
+
+The run ends with a Final Report in chat: `Result:` (COMPLETE, PARTIAL or BLOCKED), `Evidence:` (checks, critical path, commit hash, GitHub links on the current branch), `Uncertainty:`, `Decision:` and `Next step:`. Pushing asks for confirmation first.
