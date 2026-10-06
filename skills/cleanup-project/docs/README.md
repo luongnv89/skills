@@ -9,7 +9,7 @@
 
 > Get a repo to a clean foundation before the next feature: every uncommitted change decided, ignore files updated, merged branches gone locally and on the remote, and you back on an up-to-date `main`.
 
-Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.0.1** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
