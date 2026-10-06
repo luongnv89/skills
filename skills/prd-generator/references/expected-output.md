@@ -63,12 +63,6 @@ flowchart TD
 - Revision history: v1.0 — initial PRD (<YYYY-MM-DD>)
 ```
 
-## Expected console summary
+## Chat summary
 
-```
-prd.md written: /path/to/project/prd.md (XX KB, NN sections)
-Sections: 10/10  ✓
-Acceptance checklist: 13/13 ✓
-Backup: prd.backup.20260101_120000.md (or skipped — no prior file)
-Next: review §3 Feature Requirements with stakeholders
-```
+The chat output is the Final Report (`Result:`, `Evidence:`, `Uncertainty:`, `Decision:`, `Next step:`). Its status rules live in SKILL.md → *Final Report*; filled examples and fill rules live in `references/final-report.md`.

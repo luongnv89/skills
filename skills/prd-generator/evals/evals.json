@@ -1,0 +1,114 @@
+{
+  "skill_name": "prd-generator",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Write a PRD for my idea in ~/ideas/2026_10_06_habit_tracker_for_nurses. (The folder has idea.md naming a React Native stack and validate.md with verdict 'Build it'; it sits in an ideas git repo with origin and scripts/update_readme_ideas_index.py; no prd.md exists; the user confirms the push.)",
+      "expected_output": "Runs Phase 1 (with Repo Sync) through Phase 7 in create mode, writes prd.md with the 10 sections, runs the verification checks, updates the README index via the script, commits only the files it wrote, pushes after confirmation, and ends with a COMPLETE Final Report.",
+      "files": [],
+      "expectations": [
+        "Skipped Phase 3 questions that idea.md or validate.md already answer (for example the stack)",
+        "prd.md has at least 10 '## ' headings, at least one ```mermaid block, and Given/When/Then criteria for Must/Should features",
+        "Success Metrics lists at least 3 metrics with a number, a unit and a timeframe",
+        "Ran scripts/update_readme_ideas_index.py from the repo root",
+        "Staged files by path and did not run git add -A",
+        "Asked before pushing",
+        "The Final Report opens with a Result: line carrying COMPLETE, the run mode and the prd.md path",
+        "Evidence: cites the verification counts and the commit hash, and the GitHub links use the current branch",
+        "Uncertainty: lists every TBD placeholder or says none within the checks run",
+        "Decision: says No approval needed."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Update the PRD in ~/ideas/2026_09_01_recipe_swap: move offline mode from Could to Must and push the MVP date to Q2. (prd.md, idea.md and validate.md all exist; ideas git repo; the user confirms the push.)",
+      "expected_output": "Chooses modify mode, writes a non-empty prd.backup.YYYYMMDD_HHMMSS.md before any change, applies only the requested edits while keeping the 10-section structure, adds a revision-history row, re-runs verification, commits and pushes, and ends with a COMPLETE Final Report naming the backup.",
+      "files": [],
+      "expectations": [
+        "Wrote prd.backup.YYYYMMDD_HHMMSS.md before changing prd.md and checked it is non-empty",
+        "Did not run Phases 2-4; went through Modification Mode and rejoined at Phase 5",
+        "Offline mode is labeled Must and the MVP target date reads Q2",
+        "§10 revision history has a new row with the date and a one-line summary",
+        "The commit includes the backup file and prd.md, staged by path",
+        "The Final Report Result: line says COMPLETE and modify mode, and Evidence: names the backup file"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Generate a PRD from ~/ideas/2026_10_06_ai_meal_planner. (validate.md's Quick Verdict is 'Skip it'; the user does not confirm when asked.)",
+      "expected_output": "Stops in Phase 1 step 5 after showing the Skip it verdict and asking whether to continue. No prd.md is written. The Final Report is BLOCKED and its Decision: line names the pending question.",
+      "files": [],
+      "expectations": [
+        "Showed the Skip it verdict and asked before generating anything",
+        "Did not write prd.md or a backup file",
+        "Final Result: line is BLOCKED and names Phase 1 step 5",
+        "Decision: names the question about generating a PRD despite the verdict"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Create a PRD for the project in ~/scratch/todo_app. (idea.md exists, validate.md does not; the user says 'no' when asked whether to continue with idea.md only.)",
+      "expected_output": "Asks whether to continue without validate.md. The user declines, so the run stops with BLOCKED and writes no prd.md.",
+      "files": [],
+      "expectations": [
+        "Asked whether to continue with idea.md only",
+        "Did not write prd.md",
+        "Final Result: line is BLOCKED and names the missing validate.md"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Write the PRD for ~/Desktop/side_project. (idea.md and validate.md exist with verdict 'Build it'; the folder is not inside any git repository; idea.md names no tech stack and no compliance needs, and the user leaves the compliance question unanswered.)",
+      "expected_output": "Skips Repo Sync, Phase 6 and Phase 7 because the folder is not a git repository. Writes prd.md with TBD placeholders in §6 instead of an invented stack, records compliance as TBD in §9, and ends COMPLETE with the skipped phases and TBD values on the Uncertainty: line.",
+      "files": [],
+      "expectations": [
+        "Did not run git fetch, git commit or git push",
+        "§6 Technical Specifications uses TBD instead of naming a stack",
+        "The unanswered compliance question appears as TBD in §9",
+        "Did not assume GDPR, HIPAA or SOC2 applies",
+        "Uncertainty: lists the TBD placeholders and the skipped Phases 6-7",
+        "Evidence: omits the commit hash and GitHub links and says why"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Make a PRD for ~/ideas/2026_08_15_pet_sitter_marketplace. (ideas git repo; verdict 'Maybe'; at the push confirmation the user says 'don't push yet'.)",
+      "expected_output": "Writes prd.md, commits it, does not push, and ends PARTIAL with the hash marked local only and no GitHub links.",
+      "files": [],
+      "expectations": [
+        "Asked before pushing and did not push after the user declined",
+        "Did not force-push or reset",
+        "Final Result: line is PARTIAL and names Phase 7",
+        "Evidence: marks the commit hash local only and omits GitHub links"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Turn my prd.md into a technical architecture document with the database schema and deployment diagram.",
+      "expected_output": "The skill does not trigger: a TAD is named in the negative-trigger clause (tad-generator owns it).",
+      "files": [],
+      "expectations": [
+        "Did not create or modify prd.md",
+        "Did not write a prd.backup file"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Break this PRD into two-week sprint tasks with story points.",
+      "expected_output": "The skill does not trigger: sprint tasks are named in the negative-trigger clause (tasks-generator owns them).",
+      "files": [],
+      "expectations": [
+        "Did not create or modify prd.md",
+        "Did not produce a PRD Final Report"
+      ]
+    }
+  ]
+}
