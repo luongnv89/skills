@@ -45,8 +45,28 @@ asm install github:luongnv89/skills:skills/diagram-generator/excalidraw-generato
 /diagram-generator
 ```
 
-Then the router picks the engine (or asks precise-vs-sketch) and hands off to `/drawio-generator`
-or `/excalidraw-generator`.
+Then the router picks the engine and hands off to `/drawio-generator` or `/excalidraw-generator`.
+Routing goes in order: an existing file's extension (`.drawio` or `.excalidraw`), then a named tool
+or editing target (draw.io, diagrams.net, Confluence, Excalidraw), then a hand-drawn, sketch or
+wireframe look. With no signal it asks one question, precise and editable (draw.io) or hand-drawn
+sketch (Excalidraw), and waits for the answer. A missing engine stops the run with its install
+command; the router never switches to the other engine on its own.
+
+## Output
+
+The routed engine writes the diagram file (kebab-case `.drawio` or `.excalidraw`) and ends with its
+four-line Final Report (`Result:`, `Evidence:`, `Uncertainty:`, `Decision:`). The router relays that
+report unchanged. When the router stops before any engine runs (out of scope, no answer to the
+routing question, missing engine), it writes its own `BLOCKED` report in the same four lines.
+
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/final-report.md` | How the engine's Final Report is relayed, the router's three `BLOCKED` templates, fill rules, and reader checks |
+| `evals/evals.json` | Routing evals: one case per engine, an existing-file update, no format signal, a named tool against a sketch look, a missing engine, both formats, and two negative triggers (Mermaid, slides) |
+| `drawio-generator/` | The draw.io engine, a nested skill with its own SKILL.md, references, agents, and evals |
+| `excalidraw-generator/` | The Excalidraw engine, a nested skill with its own SKILL.md, references, agents, and evals |
 
 ## Out of scope
 
