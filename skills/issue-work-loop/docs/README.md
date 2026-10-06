@@ -1,24 +1,13 @@
 <!--
   DO NOT READ THIS FILE — This README.md is for human catalog browsing only.
   It ships inside the .skill package but is NEVER auto-loaded into agent context.
-  The runtime loader only reads SKILL.md + references/ when the skill triggers.
-  If you're an AI agent, read SKILL.md instead.
+  The runtime loader only reads SKILL.md + references/ + scripts/ + agents/ when the skill triggers.
+  If you're an AI agent, read the SKILL.md file instead for skill instructions.
 -->
 
 # Issue Work Loop
 
 > Run an independent Herdr review/fix loop for either one open issue or one existing open PR. You own the merge.
-
-## Two Modes
-
-| Request | Mode | Worker order |
-|---|---|---|
-| `/issue-work-loop 42` | ISSUE | implementer resolves → reviewer → implementer fixes |
-| `/issue-work-loop --pr 88` | PR | reviewer first → lazy FIXER only on FINDINGS |
-| `/issue-work-loop pr 88` | PR | same existing-PR flow |
-| “Review and fix existing PR #88 until clean” | PR | natural-language existing-PR route |
-
-A bare number always means an issue. If both issue and PR are supplied, the PR must link the issue or the loop stops and asks you to correct the mismatch.
 
 ## Highlights
 
@@ -30,15 +19,27 @@ A bare number always means an issue. If both issue and PR are supplied, the PR m
 - Notes and partials count as FINDINGS.
 - Every review verifies the current PR head SHA.
 - Every reviewer and fixer runs autonomously; pi is autonomous by default, while Claude Code (Shift+Tab) and opencode (Build agent) are switched after boot — never with skip-permissions flags.
+- Dependencies (`herdr-agent`, `issue-pr-review`, and `issue-resolver` in ISSUE mode) are acquired with `asm deps` before the first change and released at the end of every run.
 - SWEEP closes only spawned panes and removes only loop-created worktrees.
 - No second PR, force-push, merge, or auto-merge.
 
 **Don't use for:** plain issue resolution without review, review-only/no-fix PR requests, backlog automation, or merging.
 
-## Flow
+## When to Use
+
+| Say this... | Skill will... |
+|---|---|
+| `/issue-work-loop 42` | ISSUE mode: implementer resolves → reviewer → implementer fixes |
+| `/issue-work-loop --pr 88` | PR mode: reviewer first → lazy FIXER only on FINDINGS |
+| `/issue-work-loop pr 88` | PR mode: same existing-PR flow |
+| “Review and fix existing PR #88 until clean” | PR mode: natural-language existing-PR route |
+
+A bare number always means an issue. If both issue and PR are supplied, the PR must link the issue or the loop stops and asks you to correct the mismatch.
+
+## How It Works
 
 ```mermaid
-flowchart TD
+graph TD
     S{Mode}
     S -->|ISSUE N| I[Validate open issue]
     I --> L{Linked open PRs?}
@@ -62,6 +63,8 @@ flowchart TD
     C --> W[SWEEP]
     B --> W
     W --> U[USER-MERGE handoff]
+    style S fill:#4CAF50,color:#fff
+    style U fill:#2196F3,color:#fff
 ```
 
 ## Usage
@@ -92,15 +95,6 @@ Each worker is launched bare (no invented auto-mode startup flags), then passes 
 
 PR mode captures the existing PR's source branch, head SHA, owner/repository, cross-repository status, and maintainer-edit facts. Older `gh` versions may lack optional JSON fields; review can continue via fallback queries, but unknown push facts block FIXER creation. A fork PR is never used as a permission experiment after edits.
 
-## Outputs
-
-- Mode-specific preflight and ROUND reports
-- Current reviewed/pushed head SHA each ROUND
-- All linked issue numbers, or `none`
-- Remaining FINDINGS on blocked/max-round exits
-- Spawned-role and SWEEP accounting
-- Open PR URL for USER-MERGE
-
 ## Resources
 
 | Path | Description |
@@ -109,6 +103,20 @@ PR mode captures the existing PR's source branch, head SHA, owner/repository, cr
 | `references/loop-protocol.md` | Link evidence, PR identity, push safety, ROUND rules |
 | `references/agent-prompts.md` | Implementer, reviewer, and PR FIXER prompts |
 | `references/context-gate.md` | Role-specific FRESHEN rules |
-| `references/cleanup.md` | Mode-aware SWEEP |
-| `references/output-format.md` | Step Completion Reports and handoffs |
+| `references/cleanup.md` | Mode-aware SWEEP and lease release |
+| `references/output-format.md` | Step Completion Reports, final report contract, handoffs |
+| `references/edge-cases.md` | Situation → response table |
+| `references/vocabulary-and-config.md` | Leading words and `work_loop.*` config keys |
 | `references/error-messages.md` | Exact stop/recovery messages |
+| `evals/evals.json` | Trigger and behavior eval cases |
+| `tests/` | Regression tests pinning the transport, launch-profile, and dependency contracts |
+
+## Output
+
+- Mode-specific preflight and ROUND reports
+- A final report that opens with `Result:` (COMPLETE, PARTIAL, or BLOCKED), then `Evidence:`, `Uncertainty:`, and `Decision:`
+- Current reviewed/pushed head SHA each ROUND
+- All linked issue numbers, or `none`
+- Remaining FINDINGS on blocked/max-round exits
+- Spawned-role and SWEEP accounting
+- Open PR URL for USER-MERGE
