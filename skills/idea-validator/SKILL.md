@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.5.1
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -22,18 +22,27 @@ Trigger this skill when the user asks to:
 
 ## Instructions
 
-Follow the 5-phase pipeline in order: Clarify → Technical Context → Competitive Landscape Research → Critical Evaluation → Improvements. Do not skip phases or reorder them. One conditional branch applies on top of the pipeline: if the working directory is the root of an `ideas` repo, also do the README Maintenance step below after each file update — see that section for the detection rule.
+Run the steps in this order: Setup → Phase 1 Clarify → Phase 2 Technical Context → Phase 3 Competitive Landscape → Phase 4 Evaluate → Phase 5 Improve → Commit and Push → Final Report. Do not skip or reorder a step, except where an Edge Cases row says to stop. A stop after Setup step 4 still runs Commit and Push on the files written so far, then the Final Report. If the ideas root is the root of an `ideas` repo, also run README Maintenance after each file update (detection rule in that section).
+
+Terms used throughout:
+- **Ideas root** — the directory that holds every idea folder (resolved in Setup step 2).
+- **Project folder** — `<ideas root>/YYYY_MM_DD_<short_snake_case_name>/`, holding this idea's `idea.md` and `validate.md`.
+- **Status** — the run outcome, `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in Final Report.
 
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+
+Run this in the ideas root, before Setup step 3 creates or changes any file. Skip it when the ideas root is not inside a git repository (`git -C <ideas root> rev-parse --git-dir` fails), and record that skip for the Final Report.
+
+If `git status --porcelain` prints nothing, sync directly:
 
 ```bash
+cd "<ideas root>"
 branch="$(git rev-parse --abbrev-ref HEAD)"
 git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
+If it prints anything, stash first, sync, then restore:
 
 ```bash
 git stash push -u -m "pre-sync"
@@ -42,51 +51,52 @@ git fetch origin && git pull --rebase origin "$branch"
 git stash pop
 ```
 
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+If `origin` is missing, the pull fails, or the rebase or stash pop conflicts, stop and ask the user before continuing.
 
 ## Setup
 
-0. **Resolve storage location (tool-agnostic, ask once per environment)**
-   - Prefer env var `IDEAS_ROOT` if set.
-   - Else use shared marker file: `~/.config/ideas-root.txt`.
-   - Backward compatibility: if shared marker is missing but legacy `~/.openclaw/ideas-root.txt` exists, reuse its value and write it into `~/.config/ideas-root.txt`.
-   - If no marker exists (new environment), ask user once where to store generated docs.
-   - Suggested default: `~/workspace/ideas`.
-   - Save chosen root to `~/.config/ideas-root.txt`.
-   - Only ask again if the user explicitly asks to change location.
+1. **Get the idea.** Use the idea in `$ARGUMENTS`. If `$ARGUMENTS` is empty, ask the user to describe the concept. If no description arrives, stop with status `BLOCKED`.
+2. **Resolve the ideas root** (tool-agnostic; ask once per environment). Take the first that applies:
+   1. The env var `IDEAS_ROOT`, if set.
+   2. The path in `~/.config/ideas-root.txt`, if that file exists.
+   3. The path in legacy `~/.openclaw/ideas-root.txt`, if that file exists. Copy the value into `~/.config/ideas-root.txt`.
+   4. Otherwise, ask the user where to store generated docs. Suggest `~/workspace/ideas`. Save the answer to `~/.config/ideas-root.txt`.
 
-1. **Create project folder** under resolved root: `YYYY_MM_DD_<short_snake_case_name>/`
-2. **Create `idea.md`**: Document the idea and clarifications
-3. **Create `validate.md`**: Document evaluation and recommendations
-4. **Echo the absolute project folder path** in your response so downstream skills can auto-pick it.
+   Ask again only when the user asks to change the location.
+3. **Create the project folder** under the ideas root. If a folder with the same date and name already exists, reuse it and update its files instead of creating a second one.
+4. **Create `idea.md`** with the idea and the clarifications.
+5. **Create `validate.md`** for the evaluation and recommendations.
+6. **Echo the absolute project folder path** in your response, so downstream skills can pick it up.
 
-If no idea provided in `$ARGUMENTS`, ask user to describe their concept.
+If the ideas root cannot be created or written, stop with status `BLOCKED` and name the path.
+
+Read `references/file-templates.md` when creating either file or updating a section named in Phases 1-5. That file owns header names and order; the phase instructions own the content.
 
 ## Phase 1: Clarify the Idea
 
-Ask user (via AskUserQuestion):
+Ask the user these questions with the question tool (`AskUserQuestion` or equivalent). If no question tool exists, ask in plain chat. Skip a question that the idea description from Setup step 1 already answers.
 - What problem does this solve? Who has this pain?
 - Who is your target user? Be specific.
 - What makes this different from existing solutions?
 - What does success look like in 6-12 months?
 
-Update `idea.md` with responses.
+Update `idea.md` with the responses. Write `unknown` for each question the user declines or cannot answer, and list it under Uncertainty in the Final Report. The target-user question is the exception: see Edge Cases.
 
 ## Phase 2: Gather Technical Context
 
-Ask user:
+Ask the user, with the same tool and skip rule as Phase 1:
 - Preferred tech stack?
 - Timeline and team size?
 - Budget situation (bootstrapped/funded/side project)?
 - Existing assets (code, designs, research)?
 
-Update `idea.md` technical section.
+Update the `idea.md` Technical Context section. Write `unknown` for each unanswered item.
 
 ## Phase 3: Competitive Landscape Research
 
-Before evaluating the idea, perform live web research to find what already exists in the space. Do not rely on memory or training data for market, pricing, traction, competitor, or open-source claims — web search is mandatory so the report reflects the most up-to-date information.
+Before evaluating the idea, perform live web research to find what already exists in the space. Do not rely on memory or training data for market, pricing, traction, competitor, or open-source claims — web search is mandatory so the report reflects current information.
 
-Use the available web search tool (`WebSearch`, `web_search`, or equivalent) to run at least 4-6 varied queries covering:
+Use the available web search tool (`WebSearch`, `web_search`, or equivalent) to run at least 4 varied queries covering:
 
 **Commercial tools/services** — SaaS products, mobile apps, enterprise platforms, paid APIs, agencies, marketplaces, and other commercial offerings solving the same or adjacent problem. Search the core problem statement plus keywords like "app", "tool", "platform", "SaaS", "startup", "pricing", "alternative", and audience-specific terms.
 
@@ -94,7 +104,7 @@ Use the available web search tool (`WebSearch`, `web_search`, or equivalent) to 
 
 **Adjacent solutions** — products or projects that solve a related problem or serve the same audience differently. These reveal how users currently cope without the proposed solution.
 
-**Failed attempts** — startups, products, or OSS projects that tried something similar and stalled, shut down, or were abandoned. Search for "[concept] startup failed", "[concept] post-mortem", "[concept] abandoned GitHub", or check product directories. Understanding why predecessors failed is often more valuable than knowing who succeeded.
+**Failed attempts** — startups, products, or OSS projects that tried something similar and stalled, shut down, or were abandoned. Search for "[concept] startup failed", "[concept] post-mortem", "[concept] abandoned GitHub", or check product directories.
 
 For each competitor or OSS project found, capture:
 - **Name and URL**
@@ -105,9 +115,9 @@ For each competitor or OSS project found, capture:
 - **Key weakness or gap** the user's idea could exploit
 - **Reuse/build-on potential** for open-source options (fork, plugin, library dependency, contribution path, or not suitable)
 
-Aim for 3-8 total competitors and at least one commercial and one open-source search path. If fewer than 3 credible results are found, that's a signal — either the market is niche, the terms need refining, or the idea may be framed in unfamiliar language.
+Aim for 3-8 total competitors, with at least one commercial and one open-source search path. If fewer than 3 credible results are found, record that in validate.md as a signal: the market is niche, the terms need refining, or the idea is framed in unfamiliar language.
 
-When an open-source solution already solves a meaningful part of the idea, evaluate more carefully before recommending a greenfield build. Compare license fit, maintenance health, architecture, extensibility, deployment burden, community, and whether the user should build on it, fork it, contribute to it, or differentiate sharply instead of redoing it.
+When an open-source solution already solves a meaningful part of the idea, compare license fit, maintenance health, architecture, extensibility, deployment burden, and community before recommending a greenfield build. Decide whether the user should build on it, fork it, contribute to it, or differentiate sharply.
 
 Update `validate.md` with a **## Competitive Landscape** section containing:
 1. A summary table of commercial and open-source competitors found
@@ -116,7 +126,7 @@ Update `validate.md` with a **## Competitive Landscape** section containing:
 4. Honest assessment: is the user's differentiation real or imagined given what exists?
 5. A build-vs-base recommendation when OSS foundations exist
 
-If web search is unavailable or blocked, stop and ask the user before proceeding. Do not silently replace live research with general knowledge.
+If web search is unavailable or blocked, stop and ask the user whether to continue without it. If the user says yes, label the Competitive Landscape section `Not verified by live search` and set the status to `PARTIAL`. If the user says no, stop with status `BLOCKED`. Never silently replace live research with general knowledge.
 
 ## Phase 4: Critical Evaluation
 
@@ -150,125 +160,101 @@ Evaluate honestly and update `validate.md`:
 - Is the idea mostly a reimplementation of an existing commercial or OSS solution?
 - Is there a credible build-on, plugin, fork, or contribution path that would reduce risk?
 
-**Verdict:** `Build it` / `Maybe` / `Skip it`
+**Ratings (1-10):** Creativity, Feasibility, Market Impact, Technical Execution. Give each score a one-line reason.
 
-**Ratings (1-10):**
-- Creativity
-- Feasibility
-- Market Impact
-- Technical Execution
+**Verdict.** Take the first rule that matches:
+1. `Skip it` — Phase 3 found a near-identical product and the user named no genuine differentiator, or a hard blocker exists that the stated team and budget cannot remove.
+2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, demand or willingness to pay with no evidence, or a Feasibility score below 6.
+3. `Build it` — none of the above.
+
+Write the verdict with the rule that produced it and a 2-3 sentence rationale.
 
 ## Phase 5: Improvements
 
 Update `validate.md` with:
 
-- **How to Strengthen**: Specific, actionable improvements
+- **How to Strengthen**: Specific, actionable improvements, each tied to a concern from Phase 4
 - **Enhanced Version**: Reworked, optimized concept
 - **Implementation Roadmap**: Phased approach (if applicable)
 
-## Expected Output
-
-After all phases complete, the output includes:
-
-```
-## Quick Verdict
-**Build it**
-
-## Ratings
-| Dimension         | Score |
-|-------------------|-------|
-| Creativity        | 7/10  |
-| Feasibility       | 8/10  |
-| Market Impact     | 6/10  |
-| Technical Execution | 8/10 |
-
-## Top Concerns
-1. Three direct competitors already exist with significant traction
-2. Monetization path unclear — target users expect free tools
-3. MVP scope likely exceeds 2-4 week estimate
-```
-
 ## Edge Cases
 
-- **No clear target user**: If the idea is too broad (e.g., "an app for everyone"), push back in Phase 1 — ask the user to name one specific person who has this pain today. Do not proceed to evaluation without a defined user segment.
-- **Duplicate idea already exists**: If Phase 3 research finds a near-identical product, surface it immediately with evidence (URL, feature comparison) and ask whether the user still wants to proceed. Evaluation continues only if the user identifies a genuine differentiator.
-- **Open-source solution already exists**: If Phase 3 finds a maintained OSS project that covers much of the idea, treat "build from scratch" as a higher-risk recommendation. Analyze whether to build on, fork, contribute to, or differentiate from the project before giving a `Build it` verdict.
-- **Technical feasibility unclear**: If the idea requires unproven technology, undisclosed APIs, or capabilities the stated team cannot build, flag it as a hard blocker in Phase 4 and lower the Feasibility score accordingly. Do not give a `Build it` verdict when fundamental technical risk is unresolved.
-
-## Acceptance Criteria
-
-- [ ] All 5 phases are completed in order (Clarify → Technical Context → Competitive Landscape → Evaluation → Improvements)
-- [ ] Competitive landscape research is performed via live web search with at least 4 varied queries
-- [ ] Commercial tools/services and open-source solutions are both checked; if no credible OSS option is found, the attempted OSS queries are documented
-- [ ] Competitors table and Open-source Alternatives & Reuse Potential analysis are populated in `validate.md`
-- [ ] A clear verdict (`Build it` / `Maybe` / `Skip it`) is given with a supporting rationale
-- [ ] All four ratings (Creativity, Feasibility, Market Impact, Technical Execution) are provided as scores out of 10
-- [ ] `idea.md` and `validate.md` are committed and pushed to the remote repository
-- [ ] GitHub links to both files are reported in the completion message
+- **No clear target user**: If the idea is too broad (e.g., "an app for everyone"), push back in Phase 1: ask the user to name one specific person who has this pain today. Do not start Phase 3 until a user segment is defined. If the user still names none, stop with status `PARTIAL` and save `idea.md`.
+- **Duplicate idea already exists**: If Phase 3 finds a near-identical product, show it immediately with evidence (URL, feature comparison) and ask whether the user wants to proceed. Continue only if the user names a genuine differentiator. If the user stops, run Phase 4 with the verdict `Skip it` (rule 1), skip Phase 5, and set the status to `PARTIAL`.
+- **Open-source solution already exists**: If Phase 3 finds a maintained OSS project that covers much of the idea, treat "build from scratch" as a higher-risk recommendation. Decide whether to build on, fork, contribute to, or differentiate from the project before giving a `Build it` verdict.
+- **Technical feasibility unclear**: If the idea needs unproven technology, undisclosed APIs, or capabilities the stated team cannot build, flag it as a hard blocker in Phase 4 and lower the Feasibility score. The verdict rules then exclude `Build it`.
+- **Web search unavailable**: follow the last paragraph of Phase 3.
+- **Ideas root is not a git repository**: write the files, skip Repo Sync and Commit and Push, and set the status to `PARTIAL`. Do not run `git init` unless the user asks.
+- **Push still fails after one retry**: stop and ask the user (Commit and Push). Report the commit hash and set the status to `PARTIAL`.
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After completing each step from Setup through Phase 5, output a status report in this format:
 
 ```
-◆ [Step Name] ([step N of M] — [context])
+◆ [Step Name] ([step N of 6] — [idea name])
 ··································································
   [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
-  [Criteria]:         √ N/M met
+  [Check 2]:          × fail — [reason]
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-Per-phase check blocks (Setup, Phase 1-5) live in `references/step-completion-reports.md` — read the block matching the phase you just completed.
+Use `√` for pass, `×` for fail, and `—` to add brief context. The per-phase check blocks live in `references/step-completion-reports.md`; read the block matching the step you just completed.
 
 ## Tone
 
-- **Brutally honest**: Don't sugarcoat fatal flaws
-- **Constructive**: Every criticism includes a suggestion
-- **Specific**: Concrete examples, not vague feedback
-- **Balanced**: Acknowledge strengths alongside weaknesses
+- **Brutally honest**: Name each fatal flaw plainly in Concerns
+- **Constructive**: Pair every criticism with a suggestion
+- **Specific**: Back each claim with a competitor, number, or quoted user answer
+- **Balanced**: List strengths alongside weaknesses
 
 ## README Maintenance (when running inside ideas repo)
 
-If the current working directory looks like the root of an `ideas` repo (contains `README.md` + multiple `YYYY_MM_DD_*` idea folders):
-- After creating/updating `idea.md` + `validate.md`, update `README.md` by inserting/updating an `## Ideas index` table with:
-- link to each `idea.md`
-- PRD/tasks status
-- verdict link to `validate.md`
+Run this when the ideas root contains a `README.md` and at least two `YYYY_MM_DD_*` idea folders. After each update to `idea.md` or `validate.md`, insert or update an `## Ideas index` table in that `README.md` with one row per idea:
+- link to the idea's `idea.md`
+- PRD/tasks status: `PRD` if a `prd.md` exists in the folder, `tasks` if a `tasks.md` exists, else `none`
+- verdict, linked to the idea's `validate.md`
 
-## Commit and push (mandatory)
+## Commit and Push (mandatory)
 
-After file updates are complete:
-- Commit immediately with a clear message.
-- Push immediately to remote.
-- If push is rejected, rebase onto the current branch's upstream and retry: `branch="$(git rev-parse --abbrev-ref HEAD)" && git fetch origin && git rebase "origin/$branch" && git push`.
-- If the push still fails after the retry (`origin` missing, rebase conflict, repeated rejection), stop and ask the user before continuing — the same guard as Repo Sync above.
+Skip this step when the ideas root is not a git repository (see Edge Cases). Otherwise, run it after Phase 5, or at an earlier stop (see Instructions):
 
-Do not ask for additional push permission once this skill is invoked.
+1. Stage only the files this run wrote: `git add <project folder>/idea.md <project folder>/validate.md`, plus `README.md` when README Maintenance changed it. Never run `git add -A`.
+2. Run `git diff --cached --name-only` to confirm that only those files are staged. If another file is staged, unstage it with `git restore --staged <file>`.
+3. Commit with the message `docs(ideas): validate <short_snake_case_name>`.
+4. Push to the current branch.
+5. If the push is rejected, rebase and retry once: `branch="$(git rev-parse --abbrev-ref HEAD)" && git fetch origin && git rebase "origin/$branch" && git push`.
+6. If the push still fails (`origin` missing, rebase conflict, repeated rejection), stop and ask the user before continuing.
 
-## Reporting with GitHub links (mandatory)
-When reporting completion, include:
-- GitHub link to `idea.md`
-- GitHub link to `validate.md`
-- GitHub link to `README.md` when it was updated
-- Commit hash
+Invoking this skill authorizes the commit and push. Do not ask for push permission again. Never force-push or run `git reset` in the ideas repo; resolve a rebase conflict only after the user's confirmation.
 
-Link format (derive `<owner>/<repo>` from `git remote get-url origin`):
-- `https://github.com/<owner>/<repo>/blob/main/<relative-path>`
+## Final Report
 
-## Output Summary
+The expected output of every run, stops included, is one summary in concise chat text: the main result stays visible without opening a file, and the full detail lives in `validate.md`. Honor a different format only if the user asks for one. Take the status from the first rule that matches:
 
-After all phases:
-1. Confirm folder/files created
-2. State verdict and key ratings
-3. Top 3 strengths, top 3 concerns
-4. Single most important next step
+1. `BLOCKED` — no idea description, the ideas root cannot be written, or the user declined to continue without web search.
+2. `PARTIAL` — a step was skipped or stopped early, Phase 3 ran without live search, or the files were not committed and pushed.
+3. `COMPLETE` — Setup through Commit and Push all finished.
 
-## File Templates
+The summary carries these lines, in order:
+- `Result:` the status, then the verdict and the four ratings when Phase 4 ran; for `PARTIAL` or `BLOCKED`, the step where the run stopped and why.
+- `Evidence:` the project folder path; the GitHub links to `idea.md`, `validate.md` and, when changed, `README.md`; the commit hash; the number of live queries run and competitors found. Cite only checks that ran.
+- `Strengths:` and `Concerns:` the top 3 of each.
+- `Uncertainty:` each `unknown` answer, each claim that rests on an assumption instead of a source, and each skipped check. Write `none within the checks run` when there are none.
+- `Decision:` `No approval needed.` (commit and push are authorized by invocation), or the question the run stopped on.
+- `Next step:` the single most important action for the user.
 
-The canonical `idea.md` and `validate.md` header structure lives in `references/file-templates.md`. Read it when creating either file (Setup step 2/3) or updating a section named in Phases 1-5 above — that file owns header names and order; phase instructions above own what content goes in them.
+Build each GitHub link from `git remote get-url origin` and the current branch: `https://github.com/<owner>/<repo>/blob/<branch>/<relative-path>`. The example summary and the fill rules live in `references/final-report.md`.
+
+## Acceptance Criteria
+
+- [ ] Setup, Phases 1-5, and Commit and Push run in order, or the run stops on an Edge Cases row with the matching status
+- [ ] Competitive landscape research is performed via live web search with at least 4 varied queries
+- [ ] Commercial tools/services and open-source solutions are both checked; if no credible OSS option is found, the attempted OSS queries are documented
+- [ ] Competitors table and Open-source Alternatives & Reuse Potential analysis are populated in `validate.md`
+- [ ] The verdict (`Build it` / `Maybe` / `Skip it`) names the verdict rule that produced it and a rationale
+- [ ] All four ratings (Creativity, Feasibility, Market Impact, Technical Execution) are provided as scores out of 10
+- [ ] Only the files this run wrote are committed, and the commit is pushed (or the status is `PARTIAL`)
+- [ ] The Final Report opens with `Result:` and the status, and carries `Evidence:`, `Uncertainty:` and `Decision:` lines
+- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear (`references/final-report.md` → *Reader checks*; scenario cases in `evals/evals.json`)
