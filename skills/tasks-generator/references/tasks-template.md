@@ -77,16 +77,7 @@ single feature that proves the product hypothesis.
 
 ## Final Agent Message
 
-The agent's final message after a successful run should look like:
-
-```
-✅ tasks.md generated at <path>
-Sprints: 4 | Tasks: 26 | Critical path: 5 tasks (~12 days)
-GitHub: https://github.com/<owner>/<repo>/blob/main/<dir>/tasks.md
-README updated: https://github.com/<owner>/<repo>/blob/main/README.md
-Commit: <sha>
-Next: review Sprint 1 / Wave 1 tasks before kickoff.
-```
+The agent's final message is the Final Report (SKILL.md → *Final Report*), with `Result:`, `Evidence:`, `Uncertainty:`, `Decision:` and `Next step:` lines. GitHub links use the current branch, not a hardcoded `main`. Filled examples live in [final-report.md](final-report.md).
 
 ---
 

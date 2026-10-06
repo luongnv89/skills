@@ -1,0 +1,119 @@
+{
+  "skill_name": "tasks-generator",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Break down ~/ideas/2026_10_06_habit_tracker_for_nurses/prd.md into sprint tasks. (The PRD has 2,000 words and 9 features; tad.md is in the same folder; the folder sits in an ideas git repo with origin and scripts/update_readme_ideas_index.py; no tasks.md exists; the user confirms the push.)",
+      "expected_output": "Runs Phases 1-9: Repo Sync with git -C, requirements-extractor, sprint-planner, one sprint-worker per sprint in parallel, dependency-resolver calling scripts/analyze_dependencies.py, the self-test checks, the README index script, a commit of only the files it wrote, a push after confirmation, and a COMPLETE Final Report.",
+      "files": [],
+      "expectations": [
+        "Wrote intermediate JSON files to a mktemp WORK_DIR outside the repository and did not commit them",
+        "Spawned one sprint-worker per sprint before running the dependency-resolver",
+        "Took the critical path and bottlenecks from analyze_dependencies.py output instead of computing them in prose",
+        "tasks.md has at least 3 sprints and between 15 and 80 '### Task <sprint>.<index>:' headings",
+        "Staged tasks.md and README.md by path, did not run git add -A, and asked before pushing",
+        "The Final Report opens with a Result: line carrying COMPLETE, the tasks.md path, and the sprint and task counts",
+        "Evidence: cites the self-test counts, the critical path, the commit hash, and GitHub links built from the current branch",
+        "Uncertainty: lists each flagged PRD ambiguity or says none within the checks run",
+        "Decision: says No approval needed."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "The PRD changed, regenerate the tasks for ~/ideas/2026_10_06_habit_tracker_for_nurses/prd.md. (tasks.md already exists; the user confirms the push.)",
+      "expected_output": "Backs up the old file as a non-empty tasks_backup_YYYY_MM_DD_HHMMSS.md before writing, regenerates tasks.md, commits tasks.md and the backup by path with 'docs: update tasks for <product name>', and ends with a COMPLETE Final Report naming the backup.",
+      "files": [],
+      "expectations": [
+        "Wrote tasks_backup_<YYYY_MM_DD_HHMMSS>.md and checked it is non-empty before changing tasks.md",
+        "Commit message is 'docs: update tasks for <product name>'",
+        "The Final Report Evidence: line names the backup file"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Create tasks for ~/ideas/2026_10_06_ai_meal_planner/prd.md. (The folder has idea.md and validate.md but no prd.md.)",
+      "expected_output": "Stops in Phase 1 without writing anything. The Final Report is BLOCKED and the Next step: line suggests running prd-generator first.",
+      "files": [],
+      "expectations": [
+        "Did not write tasks.md or invent requirements",
+        "Final Result: line is BLOCKED and names the missing prd.md",
+        "Next step: suggests prd-generator"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Generate the sprint plan. (No path given; IDEAS_ROOT has three subfolders with a prd.md, and nothing was used earlier in the session.)",
+      "expected_output": "Lists the three candidate folders and asks the user to choose. It does not pick one or write any file before the answer.",
+      "files": [],
+      "expectations": [
+        "Listed every candidate folder that contains prd.md",
+        "Asked the user to choose instead of picking one",
+        "Wrote no tasks.md before the user answered"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Turn ~/scratch/cli_tool/prd.md into tasks. (~/scratch is not a git repository; the PRD is complete.)",
+      "expected_output": "Skips Repo Sync, README maintenance and the commit and push phases, writes tasks.md, runs the checks, and reports COMPLETE with the skipped phases on the Uncertainty: line and no commit hash or links.",
+      "files": [],
+      "expectations": [
+        "Ran no git commit or git push",
+        "Did not create scripts/update_readme_ideas_index.py",
+        "Uncertainty: names the skipped Repo Sync, README and commit phases",
+        "Evidence: has no invented commit hash or GitHub link"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Create tasks from ~/ideas/2026_10_06_photo_journal/prd.md. (The sprint 2 worker output makes task 2.3 depend on 2.5 and 2.5 depend on 2.3; the corrected retry still has the same cycle.)",
+      "expected_output": "analyze_dependencies.py exits 2 with 'error[graph-input]: directed cycle: ...'. The resolver corrects the records once, the script rejects the graph again, and the run stops before rendering tasks.md with a BLOCKED Final Report.",
+      "files": [],
+      "expectations": [
+        "Did not render or commit tasks.md after the script exited 2",
+        "Did not override or hand-compute the script's result",
+        "Evidence: quotes the error[graph-input] line",
+        "Final Result: line is BLOCKED and names Phase 5"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "edge",
+      "prompt": "Make tasks for ~/ideas/2026_10_06_habit_tracker_for_nurses/prd.md, but don't push anything. (Ideas repo with origin.)",
+      "expected_output": "Writes and commits tasks.md, skips the push, and reports PARTIAL with the commit hash marked local only and no GitHub links.",
+      "files": [],
+      "expectations": [
+        "Ran no git push",
+        "Final Result: line is PARTIAL and names the declined push",
+        "Evidence: marks the commit hash local only and omits GitHub links"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Write a PRD for my habit tracker idea in ~/ideas/2026_10_06_habit_tracker_for_nurses.",
+      "expected_output": "Does not trigger tasks-generator; the request is PRD authoring, which prd-generator owns.",
+      "files": [],
+      "expectations": [
+        "Did not write tasks.md",
+        "Pointed to prd-generator or handled the request as PRD authoring"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "negative-trigger",
+      "prompt": "Start working on Task 1.1 from tasks.md and implement the ranking algorithm.",
+      "expected_output": "Does not trigger tasks-generator; the request is task execution, not task generation.",
+      "files": [],
+      "expectations": [
+        "Did not regenerate or back up tasks.md",
+        "Treated the request as implementation work"
+      ]
+    }
+  ]
+}
