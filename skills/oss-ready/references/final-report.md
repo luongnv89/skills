@@ -31,8 +31,8 @@ Apply the first rule that matches. SKILL.md *Final Report* carries the same thre
 
 | Order | Status | When |
 |-------|--------|------|
-| 1 | `BLOCKED — <reason>` | No file in the target repo was created or changed. |
-| 2 | `PARTIAL — <reason>` | At least one file was created or changed, and at least one of these holds: an applicable Acceptance Criteria check failed or did not run; the placeholder `grep` found a match; a step reported `Result: FAIL` or `Result: PARTIAL`; the run stopped before Step 7 finished. |
+| 1 | `BLOCKED — <reason>` | The run stopped before Step 7, and no file in the target repo was created or changed. |
+| 2 | `PARTIAL — <reason>` | At least one of these holds: an applicable Acceptance Criteria check failed or did not run; the placeholder `grep` found a match; a step reported `Result: FAIL` or `Result: PARTIAL`; the run stopped before Step 7 finished. |
 | 3 | `COMPLETE` | Every applicable Acceptance Criteria check passed, the placeholder `grep` found no match, and every step from 1 to 7 reported `Result: PASS`. |
 
 **Not applicable** is allowed only for these reasons. Any other skipped check counts as "did not run".
@@ -64,8 +64,9 @@ An existing non-MIT `LICENSE` is not a skip. Its check is "the file is unchanged
 | Existing Apache-2.0 `LICENSE` kept unchanged; every other check passes | `COMPLETE` |
 | `gh` unavailable, so visibility is unknown; every other check passes | `COMPLETE` (list it under `Uncertainty:`) |
 | `docs/DEPLOYMENT.md` skipped because the repo has no deploy or publish step; every other check passes | `COMPLETE` (list it under `Manual review`) |
+| The repo already has every file, section, field and pattern, so Steps 2-6 write nothing; every check passes | `COMPLETE` (write `No file created or changed.` under `Evidence:`) |
 
-Map a step report to the status. A step `Result: PASS` does not by itself make the run `COMPLETE`. A step `Result: FAIL` or `Result: PARTIAL` gives `BLOCKED` when no file was written yet, otherwise `PARTIAL`.
+Map a step report to the status. A step `Result: PASS` does not by itself make the run `COMPLETE`. A step `Result: FAIL` or `Result: PARTIAL` gives `BLOCKED` when the run stops there before any file was written, otherwise `PARTIAL`.
 
 ## Example: a partial run
 
@@ -107,7 +108,7 @@ Decision: No approval needed.
 
 ## Example: a Step Completion Report
 
-Each of Steps 1-7 prints one before the final report:
+Each of Steps 1-7 prints one before the final report. Use `√` for pass, `×` for fail, and `—` to add brief context. The `[Criteria]` line counts the step's acceptance criteria met; the `Result:` line is the step's overall verdict:
 
 ```text
 ◆ Analysis (step 1 of 7 — project profiling)

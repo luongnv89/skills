@@ -101,7 +101,7 @@ After each of Steps 1-7, print a report in this format (example: `references/fin
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Name each check after what the step validates. Step 0 gets no report. If Step 0 or 1 fails, stop with `BLOCKED`. If one of Steps 2-6 reports `FAIL` or `PARTIAL`, continue; the run ends `PARTIAL`. Step 7 runs whenever a file was written.
+Name each check after what the step validates. Step 0 gets no report. If Step 0 or 1 fails, stop with `BLOCKED`. If one of Steps 2-6 reports `FAIL` or `PARTIAL`, continue; the run ends `PARTIAL`. Step 7 runs whenever Step 2 started.
 
 ## Final Report
 
@@ -114,8 +114,8 @@ Print one final report in the chat after the last step report; write a file only
 
 Apply the first status rule that matches:
 
-1. **`BLOCKED`**: no file in the target repo was created or changed.
-2. **`PARTIAL`**: a file was created or changed, and an applicable check failed or did not run, a placeholder remains, a step reported `FAIL` or `PARTIAL`, or the run stopped before Step 7 finished.
+1. **`BLOCKED`**: the run stopped before Step 7 and no file in the target repo was created or changed.
+2. **`PARTIAL`**: an applicable check failed or did not run, a placeholder remains, a step reported `FAIL` or `PARTIAL`, or the run stopped before Step 7 finished.
 3. **`COMPLETE`**: every applicable check passed, the placeholder `grep` found no match, and Steps 1-7 each reported `PASS`.
 
 `not applicable` is allowed only for a reason listed in `references/final-report.md`, with the outcome table, examples and reader checks. Any other skipped check counts as not run.

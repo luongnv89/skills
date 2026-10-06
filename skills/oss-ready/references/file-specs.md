@@ -12,6 +12,7 @@ Record each value. Steps 2-6 use them.
 | Value | How to find it |
 |-------|----------------|
 | Stack | The manifests at the repo root: `package.json` is Node.js, `pyproject.toml` or `setup.py` is Python, `Cargo.toml` is Rust, `go.mod` is Go. More than one manifest, or manifests in subdirectories, is a monorepo |
+| Package manager | The lockfile at the repo root: `package-lock.json` npm, `pnpm-lock.yaml` pnpm, `yarn.lock` yarn, `bun.lockb` or `bun.lock` bun, `uv.lock` uv, `poetry.lock` Poetry, `Cargo.lock` cargo. With no lockfile: npm for Node.js, pip for Python, cargo for Rust, `go` for Go. Steps 2 and 4 write install and run commands with it |
 | Purpose | The first paragraph of the existing README, else the manifest `description`. If neither exists, ask the user |
 | Existing files | `ls -a` and `ls .github docs` for `LICENSE*`, `README*`, `CONTRIBUTING*`, `CODE_OF_CONDUCT*`, `SECURITY*`, `.github/`, `docs/`, `CHANGELOG*`, `.gitignore`. Each one found gets an additive edit only |
 | License | The first line of an existing `LICENSE` |
@@ -38,7 +39,7 @@ Write each section from the Step 1 analysis. When the README exists, apply an ad
 
 - Project overview and motivation: from the existing README or the manifest `description`
 - Key features list: from the code's entry points, commands or exported modules
-- Quick start: the shortest install-then-run command sequence found in the manifest scripts, `Makefile` or CLI help
+- Quick start (under 5 minutes of setup): the shortest install-then-run command sequence found in the manifest scripts, `Makefile` or CLI help
 - Prerequisites and installation: runtime and version from the manifest (`engines`, `requires-python`, `rust-version`, the `go` directive)
 - Usage examples with code: copied from existing code, tests, scripts or `--help` output. Never invent a command
 - Project structure: the top-level directories with one line each
@@ -91,7 +92,7 @@ Add each missing field. Never overwrite a field that has a value. Take `reposito
 
 | Stack | File | Fields |
 |-------|------|--------|
-| Node.js | `package.json` | `license`, `description`, `repository`, `keywords` |
+| Node.js | `package.json` | `name`, `license`, `description`, `repository`, `keywords` |
 | Python | `pyproject.toml` (`[project]` table) or `setup.py` | `license`, `description`, the repository URL under `[project.urls]` or `url=` |
 | Rust | `Cargo.toml` (`[package]` table) | `license`, `description`, `repository` |
 | Go | `go.mod` | None: the format has no such fields. Add the license badge to README.md instead. The metadata check is not applicable |
