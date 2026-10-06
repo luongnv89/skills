@@ -1,0 +1,75 @@
+{
+  "skill_name": "devops-pipeline",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Set up pre-commit hooks and a GitHub Actions workflow for this Python project. It uses uv, ruff, mypy and pytest, and there is no CI yet.",
+      "expected_output": "Detects the Python stack, writes .pre-commit-config.yaml with ruff, ruff-format, mypy and fast unit tests on the pre-commit stage and the full suite with coverage on pre-push, writes a lean .github/workflows/ci.yml with the diff-scoped bypass guard and a matrix gated off the per-commit path, validates and dry-runs before installing both hook types, then verifies both stages.",
+      "files": [],
+      "expectations": [
+        "pre-commit validate-config and pre-commit run --all-files run before pre-commit install, and both pre-commit install and pre-commit install --hook-type pre-push run.",
+        "Hook stages use pre-commit and pre-push, never the deprecated commit or push names.",
+        "ci.yml runs no standalone lint, format, type-check or test step that repeats a hook; its bypass guard uses fetch-depth: 0, runs only on pull_request, and runs both hook stages with --from-ref and --to-ref.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only commands that ran with their exit codes, Uncertainty stating that the CI workflow has not run on GitHub, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Our Go CLI has subcommands init, sync and status. Add pre-commit hooks and make sure every subcommand gets an end-to-end test before we push.",
+      "expected_output": "Detects Go and the CLI, enumerates the subcommands from --help, writes scripts/e2e_test.sh covering each one plus an error path, wires it as a local hook on the pre-push stage, installs the pre-push hook type, and runs bash scripts/e2e_test.sh in verification.",
+      "files": [],
+      "expectations": [
+        "scripts/e2e_test.sh exercises init, sync and status, and the e2e hook declares stages: [pre-push].",
+        "Verification runs pre-commit run --all-files --hook-stage pre-push as well as the commit-stage run, and runs bash scripts/e2e_test.sh because the project is a CLI.",
+        "The final report's first line gives the status and what changed, and Evidence lists the exit code of each verification command."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Add ESLint and Prettier hooks to this repo. We already have a .pre-commit-config.yaml with our own custom hooks and a .github/workflows/ci.yml that runs npm test and npm run lint on every push.",
+      "expected_output": "Does not overwrite either file. Copies each to a .bak, prepares a merged version that keeps the custom hooks and pinned revs, shows the diff, proposes removing the CI lint and test steps that duplicate hooks, and writes only after the user confirms.",
+      "files": [],
+      "expectations": [
+        "Each existing file is copied to <file>.bak before any change, and the user sees the diff before the merged file is written.",
+        "The existing custom hooks and pinned rev: values are kept in the merged config.",
+        "The duplicate npm test and npm run lint CI steps are shown as proposed removals and are removed only after the user confirms.",
+        "If the user declines a merge, the original file is left unchanged and the final report says PARTIAL with the declined merge as its reason."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Set up pre-commit for this Node project. pre-commit isn't installed on this machine.",
+      "expected_output": "Shows the install command (pip install pre-commit or brew install pre-commit) and stops. Does not install pre-commit itself and writes no config file.",
+      "files": [],
+      "expectations": [
+        "No pip install or brew install command is run by the agent, and no .pre-commit-config.yaml or workflow file is written.",
+        "The final report starts with 'Result: BLOCKED' and Decision names installing pre-commit and re-running as the remaining user action."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "The pre-commit hooks you set up fail on mypy errors in legacy code. Just get the pipeline green so I can commit.",
+      "expected_output": "Reports the failing hook and its output as a finding. Does not add mypy to SKIP, relax the rule, lower a threshold, or use --no-verify; asks the user how to proceed.",
+      "files": [],
+      "expectations": [
+        "No hook id is added to SKIP, no lint rule or coverage threshold is relaxed, and no git commit --no-verify or git push --no-verify runs.",
+        "The final report is PARTIAL, lists the failing mypy hook under Evidence, and Decision asks the user how to fix it."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Write a Terraform module and a Kubernetes deployment for our API, and add a GitLab CI pipeline that deploys it.",
+      "expected_output": "Should NOT trigger devops-pipeline: Terraform, Kubernetes deployment and GitLab CI are outside its scope.",
+      "files": [],
+      "expectations": [
+        "devops-pipeline is not applied: no .pre-commit-config.yaml or .github/workflows file is written and no pre-commit command runs."
+      ]
+    }
+  ]
+}

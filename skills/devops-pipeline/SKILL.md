@@ -4,7 +4,7 @@ description: "Configure pre-commit hooks and lean GitHub Actions for shift-left 
 license: MIT
 effort: medium
 metadata:
-  version: 2.2.2
+  version: 2.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -52,9 +52,15 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 
 This skill writes config into someone else's repository and installs git hooks. Observe all of these:
 
-- **Never overwrite an existing `.pre-commit-config.yaml` or `.github/workflows/*.yml`.** Write a `<file>.bak` backup first, merge the new hooks into the existing file, show the user the diff, and ask them to confirm before writing. Preserve user-defined hooks and pinned `rev:` values, and leave the backup in place until the user confirms the merge.
-- **Do a dry run before you write.** Validate the proposed config with `pre-commit validate-config`, and run `pre-commit run --all-files` *before* installing the hooks — findings surface without any commit being blocked. Show the generated workflow as a diff; never land a file the user has not seen.
-- **Check for an existing git hook before installing.** `pre-commit install` preserves a foreign hook by moving it to `.git/hooks/pre-commit.legacy` and running in migration mode. Never pass `-f`/`--overwrite`, which removes that hook silently — if the user wants it gone, have them confirm the deletion explicitly.
+- **Never overwrite an existing `.pre-commit-config.yaml` or `.github/workflows/*.yml`.** If the target file exists, follow this merge procedure:
+  1. Copy the file to `<file>.bak`.
+  2. Prepare the merged content. Keep user-defined hooks, jobs, and pinned `rev:` values.
+  3. Show the user the diff between `<file>.bak` and the merged content.
+  4. If the user confirms, write the merged file. If the user declines, leave the original file unchanged and record the merge as declined.
+  5. Keep `<file>.bak` until the user confirms the written result.
+- **Show every new file before writing it.** Present a new `.pre-commit-config.yaml` or workflow as a diff. Never write a file the user has not seen.
+- **Validate and dry-run before installing hooks.** Step 2 runs `pre-commit validate-config` and `pre-commit run --all-files` before `pre-commit install`, so findings surface without blocking any commit.
+- **Check for an existing git hook before installing.** `pre-commit install` preserves a foreign hook by moving it to `.git/hooks/<hook>.legacy` and running in migration mode. Never pass `-f`/`--overwrite`, which removes that hook silently. If the user wants the foreign hook deleted, get explicit confirmation first.
 - **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf.** A failing hook is a finding to report, not an obstacle to route around.
 - **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, or lower a coverage threshold to turn a run green. Report the failure and let the user decide.
 - **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Edge Cases for each.
@@ -79,6 +85,8 @@ Identify:
 - **Existing tooling**: Linters, formatters, type checkers already configured
 - **Is this a CLI tool?** — if yes, enumerate all commands/subcommands (check README, `--help`, `click`/`argparse`/`cobra` source) to build an E2E test suite
 
+If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the language, build system, existing tooling, existing config files, and CLI status (with its command list) are recorded.
+
 ### 2. Configure Pre-commit Hooks (maximize local coverage)
 
 If `pre-commit` is absent, show the install command and stop — see [Edge Cases](#edge-cases). Do not install it automatically.
@@ -87,7 +95,7 @@ If `pre-commit` is absent, show the install command and stop — see [Edge Cases
 pip install pre-commit  # or brew install pre-commit
 ```
 
-When `pre-commit` is available, create `.pre-commit-config.yaml` based on detected stack. See [references/precommit-configs.md](references/precommit-configs.md) for language-specific configurations.
+When `pre-commit` is available, write `.pre-commit-config.yaml` for the detected stack. If the file exists, use the Safety Rails merge procedure. See [references/precommit-configs.md](references/precommit-configs.md) for language-specific configurations.
 
 **`pre-commit` stage — every commit, under 10 seconds on changed files:**
 - Format checks (Prettier, Black/Ruff, gofmt, rustfmt)
@@ -118,19 +126,19 @@ If the project is a CLI tool, create `scripts/e2e_test.sh` that exercises every 
 
 See [references/cli-e2e.md](references/cli-e2e.md) for command discovery patterns, the script template, and the pre-commit hook snippet.
 
-Install hooks:
+Validate the config, dry-run it, then install the hooks, in this order:
 
-```bash
-pre-commit install
-pre-commit install --hook-type pre-push  # pre-push hooks are NOT installed by default
-pre-commit run --all-files  # test commit-stage hooks against existing code
-```
+1. Run `pre-commit validate-config .pre-commit-config.yaml`. If it exits non-zero, report the error and stop before installing any hook.
+2. Run `pre-commit run --all-files`. This dry run executes the commit-stage hooks without installing them. Record each failing hook id as a finding.
+3. Check `.git/hooks/pre-commit` and `.git/hooks/pre-push`. If either exists and does not contain `File generated by pre-commit`, tell the user it will move to `<hook>.legacy`.
+4. Run `pre-commit install`.
+5. Run `pre-commit install --hook-type pre-push`. `pre-commit install` alone does not install pre-push hooks.
 
 `git commit --no-verify` and `git push --no-verify` skip every hook, and nothing local can prevent that. The CI bypass guard in step 3 is what keeps these gates enforceable — do not drop it when trimming CI.
 
 ### 3. Create GitHub Actions Workflows (lean CI)
 
-Create `.github/workflows/ci.yml`. Keep it thin: the hooks already ran everything that runs locally, so CI covers the third lane of the routing table plus one guard. See [references/github-actions.md](references/github-actions.md) for workflow templates.
+If no workflow exists, write `.github/workflows/ci.yml`. If one exists, use the Safety Rails merge procedure, and list each existing step that duplicates a hook as a proposed removal in the diff. Remove a step only after the user confirms. Keep CI thin: the hooks already ran everything that runs locally, so CI covers the third lane of the routing table plus one guard. See [references/github-actions.md](references/github-actions.md) for workflow templates.
 
 CI runs exactly four kinds of thing:
 
@@ -170,18 +178,16 @@ Keep the matrix off the hot path: gate it on `push` to the default branch or on 
 
 ### 4. Verify Pipeline
 
-```bash
-# Commit-stage hooks
-pre-commit run --all-files
+1. Run `pre-commit run --all-files`. Expected: exit 0.
+2. Run `pre-commit run --all-files --hook-stage pre-push`. Expected: exit 0. The first command does not run push-stage hooks (full suite, E2E).
+3. If the project is a CLI tool, run `bash scripts/e2e_test.sh`. Expected: exit 0.
+4. If a command exits non-zero, record the failing hook id and its output as a finding. Do not edit the config, add `SKIP`, or lower a threshold to make it pass.
 
-# Push-stage hooks (full suite, includes E2E) — not covered by the line above
-pre-commit run --all-files --hook-stage pre-push
+Step 4 is done when each command has a recorded exit code. The workflow from step 3 is not run here; it first runs on GitHub with the next pull request.
 
-# Verify the CLI E2E script directly
-bash scripts/e2e_test.sh
-```
+## Write the Final Report
 
-If all local checks pass, GitHub Actions becomes a thin verification layer, not the primary quality gate.
+After the last Step Completion Report, print the final report from [references/final-report.md](references/final-report.md): `Result:` first (`COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason`), then `Evidence:` (only commands that ran, with exit codes), `Uncertainty:` (always the unrun CI workflow), and `Decision:` (the pending approval, or `No approval needed.`). An audit-only run uses the same report.
 
 ## Tool Selection by Language
 
@@ -202,6 +208,7 @@ After running the skill, the repository contains:
 1. **`.pre-commit-config.yaml`** — formatting, linting, type-checking, and fast unit tests on the `pre-commit` stage; full test suite, coverage threshold, and E2E tests on the `pre-push` stage.
 2. **`.github/workflows/ci.yml`** — CI carrying only the four responsibilities from step 3: diff-scoped bypass guard, version matrix, secrets-dependent work, deploy. No standalone lint, format, type-check, or test steps duplicating a hook.
 3. **`scripts/e2e_test.sh`** (CLI projects only) — executable script exercising every CLI command/subcommand.
+4. **A final report** in the shape of [references/final-report.md](references/final-report.md).
 
 Example `.pre-commit-config.yaml` snippet for a Python project:
 ```yaml
@@ -244,6 +251,7 @@ A run passes when **all** of the following are true:
 - [ ] CI's sole overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).
 - [ ] For CLI projects, the E2E script is wired to the `pre-push` stage per the language reference files.
+- [ ] The final report passes the four reader checks in [references/final-report.md](references/final-report.md): the result is in the first line, verified facts are separate from assumptions, each claim names its command or file, and the next decision is named. Without user feedback, human understanding stays unconfirmed.
 
 ## Edge Cases
 
@@ -290,3 +298,4 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 - [references/precommit-configs.md](references/precommit-configs.md) — pre-commit configs by language, with `pre-push` tests and E2E hooks
 - [references/github-actions.md](references/github-actions.md) — GitHub Actions templates: bypass guard, matrix, deploy
 - [references/cli-e2e.md](references/cli-e2e.md) — CLI command discovery, the E2E script template, and its `pre-push` hook
+- [references/final-report.md](references/final-report.md) — final report parts, status rules, examples, and reader checks
