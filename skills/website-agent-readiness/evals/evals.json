@@ -130,6 +130,21 @@
         "Routes straight to /plan-to-issues ROADMAP.md",
         "Does not scan a website or render a new plan"
       ]
+    },
+    {
+      "id": 11,
+      "name": "orchestrated-scan-reuse",
+      "kind": "edge",
+      "prompt": "/website-agent-readiness https://example.com\norchestrated-by: search-optimizer\nevidence-dir: /tmp/run/evidence\noutput-dir: /tmp/run/reports\n\n(/tmp/run/evidence/agent-readiness/scan.json holds a scan of https://example.com taken 2 hours ago.)",
+      "expected_output": "Checks the reused scan.json's own url/targetUrl and scannedAt before reusing it; Reuses the sibling scan without calling scan_site.sh and without presenting gate G1; Still stops at gate G2 before triage and never answers a gate on the user's behalf; Writes .agent-ready/ and agent-ready-plan.md under the given output-dir, not the project root; Names search-optimizer in the step reports and does not file issues without gate G4.",
+      "files": [],
+      "expectations": [
+        "Checks the reused scan.json's own url/targetUrl and scannedAt before reusing it",
+        "Reuses the sibling scan without calling scan_site.sh and without presenting gate G1",
+        "Still stops at gate G2 before triage and never answers a gate on the user's behalf",
+        "Writes .agent-ready/ and agent-ready-plan.md under the given output-dir, not the project root",
+        "Names search-optimizer in the step reports and does not file issues without gate G4"
+      ]
     }
   ]
 }

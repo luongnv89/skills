@@ -1,0 +1,15 @@
+{
+  "url": "https://orchestrated-fixture.invalid/",
+  "captured_at": "2026-10-06T08:00:00Z",
+  "files": {
+    "page.html": "captured: rendered HTML of the home page (synthetic fixture)",
+    "head.json": "not captured: fixture keeps head tags inside page.html",
+    "screenshots/": "not captured: no graphical browser was available",
+    "robots.txt": "not found: HTTP 404 at capture time",
+    "sitemap.xml": "not captured: fetch skipped by the fixture",
+    "llms.txt": "not found: HTTP 404 at capture time"
+  },
+  "owners": {
+    "clarity": "dont-make-me-think"
+  }
+}

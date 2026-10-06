@@ -104,7 +104,9 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Scan completed:                       √ pass (score N/5)
   agent-ready-plan.md written:          √ pass
   ____________________________
-  Result:             PASS | SKIPPED | FAIL
+  Result:             PASS | REUSED | SKIPPED | FAIL
 ```
+`REUSED` applies only to an orchestrated run: replace the four check lines with
+`Reused scan (evidence-dir):  √ pass (score N/5, scannedAt …)`.
 A `SKIPPED` result is a valid outcome — name the unmet condition (no live URL, no
 approval, or the preflight miss) on the line that reports it.
