@@ -1,0 +1,79 @@
+{
+  "skill_name": "oss-ready",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Make this TypeScript CLI repo open source. It only has a short README.md and a package.json. Use MIT. Security reports go to the form at https://acme.dev/security and conduct reports to https://acme.dev/conduct.",
+      "expected_output": "Runs Repo Sync, creates feat/oss-ready, analyzes the package.json stack, creates LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, the three .github templates and the docs/ files, adds the missing README sections, package.json fields and .gitignore patterns, runs every Acceptance Criteria check plus the placeholder grep and the deletion check, and ends with a COMPLETE four-part final report.",
+      "files": [],
+      "expectations": [
+        "LICENSE contains 'MIT License' with the current year and a copyright holder, and no [YEAR] or [COPYRIGHT HOLDER] token remains.",
+        "SECURITY.md contains https://acme.dev/security and CODE_OF_CONDUCT.md contains https://acme.dev/conduct; neither keeps an [INSERT ...] token.",
+        "The existing README.md content is preserved; only missing sections are added, and every usage command comes from package.json scripts or the code.",
+        "Nothing is committed or pushed.",
+        "The final report starts with 'Result: COMPLETE', lists only checks that ran under Evidence, says under Uncertainty that README commands were not executed, and ends with Decision 'No approval needed.' plus the review-and-commit action."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Get this Python package (pyproject.toml, no LICENSE) ready for open source. Use the form at https://example.org/report for both security and conduct reports.",
+      "expected_output": "Detects Python from pyproject.toml, adds license, description and the repository URL to the [project] table without overwriting existing values, confirms the file parses, appends the Python .gitignore patterns that are missing, and ends with a four-part final report.",
+      "files": [],
+      "expectations": [
+        "pyproject.toml gains only missing license, description and repository URL fields, and the run reports a parse check of the file.",
+        ".gitignore contains __pycache__/, *.pyc, .venv/, .env and .DS_Store, and no existing line was removed.",
+        "The final report starts with Result and a status word (COMPLETE, PARTIAL or BLOCKED); the status is COMPLETE only if every applicable check passed and the placeholder grep found no match."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Add the standard open-source files to this Go repo. It already has an Apache-2.0 LICENSE. Conduct reports go to https://example.org/conduct; I don't have a security contact yet.",
+      "expected_output": "Keeps the Apache-2.0 LICENSE unchanged, marks the metadata check not applicable because go.mod has no license field, copies SECURITY.md with the [INSERT SECURITY EMAIL] placeholder left, and reports PARTIAL with the placeholder location and the value it needs.",
+      "files": [],
+      "expectations": [
+        "LICENSE is unchanged (git diff --quiet -- LICENSE exits 0) and is not replaced with MIT.",
+        "No security address is invented.",
+        "The metadata check is reported as not applicable because go.mod has no license, description or repository field.",
+        "The final report starts with 'Result: PARTIAL', names the SECURITY.md placeholder line under Evidence and Uncertainty, and lists replacing it as a remaining action under Decision."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Make /work/notes open source. It's just a folder of markdown files, I never ran git init.",
+      "expected_output": "The Repo Sync block stops at the git repository check, no file is created, and the final report is BLOCKED with the git rev-parse evidence and the remaining action to run git init or point at the repository root.",
+      "files": [],
+      "expectations": [
+        "No file is created or changed in /work/notes.",
+        "The agent does not run git init on its own.",
+        "The final report starts with 'Result: BLOCKED', cites the failed git rev-parse --git-dir check under Evidence, and names running git init or choosing the repository root under Decision."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "This is our private internal monorepo with several package.json files and a README in French. Prepare it with the open-source community files, but we don't want a SECURITY.md or issue templates since it's internal.",
+      "expected_output": "Edits only the root package.json, keeps the README in French while adding missing sections in French, skips SECURITY.md and the .github templates as not applicable because the user declined them for a private repo, and reports the declined files under Evidence.",
+      "files": [],
+      "expectations": [
+        "Only the root package.json is edited; no sub-package manifest changes.",
+        "README.md stays in French; no existing text is translated or removed.",
+        "SECURITY.md and the .github templates are not created, and the final report lists them as not applicable with the reason 'declined for a private repository'.",
+        "The final report opens with Result and a status word, separates verified checks under Evidence from untested behavior under Uncertainty, and states the next decision."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Rewrite all the docs in docs/ for clarity and generate an API reference from the code.",
+      "expected_output": "The skill does not trigger: this is a documentation overhaul, not adding open-source community files.",
+      "files": [],
+      "expectations": [
+        "oss-ready is not invoked; no LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md or .github template is created."
+      ]
+    }
+  ]
+}
