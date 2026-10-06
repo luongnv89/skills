@@ -124,7 +124,7 @@ A shell init file reaches only an `ollama serve` started from that shell. Find h
 |---|---|---|---|
 | `ollama serve` from a terminal (macOS, Linux) | the shell init file that `$SHELL` uses | `cp "$RC" "$RC.ollama-bak"` | `cp "$RC.ollama-bak" "$RC"` |
 | `Ollama.app` (macOS) | `launchctl setenv VAR value`, then quit and reopen the app; the value does not survive a reboot, so list that under `Uncertainty:` | record `launchctl getenv VAR` | `launchctl unsetenv VAR` for each var, chained on one line |
-| systemd service (Linux) | `Environment=` lines in `sudo systemctl edit ollama` | `systemctl cat ollama > ~/ollama.service.bak` | `sudo systemctl revert ollama && sudo systemctl restart ollama` |
+| systemd service (Linux) | `Environment=` lines in a dedicated drop-in, `/etc/systemd/system/ollama.service.d/zz-ollama-optimizer.conf`, written with `sudo tee`; never `systemctl revert`, which deletes the user's own drop-ins too | `systemctl cat ollama > ~/ollama.service.bak` | `sudo rm /etc/systemd/system/ollama.service.d/zz-ollama-optimizer.conf && sudo systemctl daemon-reload && sudo systemctl restart ollama` |
 | Windows | user env vars via `SetEnvironmentVariable(..., "User")` | record the current value | set each var to `$null` at `"User"` scope, chained on one line |
 | Docker | `-e` flags or the compose `environment:` list | copy the compose file | restore the copy and recreate the container |
 
@@ -136,7 +136,7 @@ Provide copy-paste commands in order. Run a command only after the user approves
    cp "$RC" "$RC.ollama-bak"
    printf '\n# ollama-optimizer start\nexport OLLAMA_FLASH_ATTENTION=1\n<KV cache + other export lines from section 3, per tier>\n# ollama-optimizer end\n' >> "$RC"
    ```
-2. Restart Ollama the way the step 4 row runs it: restart `ollama serve`, quit and reopen Ollama.app, run `sudo systemctl restart ollama`, or recreate the container
+2. Restart Ollama the way the step 4 row runs it: restart `ollama serve`, quit and reopen Ollama.app, run `sudo systemctl daemon-reload && sudo systemctl restart ollama`, quit and reopen Ollama from the Windows taskbar, or recreate the container
 3. Pull recommended models
 4. Test with `ollama run <model> --verbose`
 5. Rollback (one command, same location as step 1): for the shell init file, `cp "$RC.ollama-bak" "$RC"` — then restart Ollama. Other locations use the rollback column in step 4.
@@ -192,7 +192,7 @@ Guide: <saved path, or "printed inline">
 Choose the status with the first rule that matches:
 
 1. **BLOCKED** — no guide was delivered: `detect_system.py` exited 1 twice, or the user stopped the run before the guide was delivered.
-2. **PARTIAL** — the guide was delivered, and at least one of these holds: Phase 4 was skipped because Ollama or a model was missing, a recommended change was not applied because the user declined it or stopped the run, an approved command failed, or Phase 4 ran and failed.
+2. **PARTIAL** — the guide was delivered, and at least one of these holds: Phase 4 was skipped because Ollama or a model was missing or the user stopped the run before it, a recommended change was not applied because the user declined it or stopped the run, an approved command failed, or Phase 4 ran and failed.
 3. **COMPLETE** — the guide was delivered, and every applied change the user approved succeeded and was verified in Phase 4. A recommendations-only run and a nothing-to-change run are COMPLETE.
 
 A user declining a change never produces BLOCKED.

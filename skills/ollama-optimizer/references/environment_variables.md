@@ -134,18 +134,24 @@ launchctl unsetenv OLLAMA_FLASH_ATTENTION   # rollback
 Quit and reopen Ollama.app after each change. `launchctl setenv` values do not survive a reboot.
 
 ### Linux (systemd service)
-Run `sudo systemctl edit ollama` to create a drop-in override (back up first with `systemctl cat ollama > ~/ollama.service.bak`; roll back with `sudo systemctl revert ollama`), or edit `/etc/systemd/system/ollama.service`:
+Write the variables to a dedicated drop-in file instead of editing `/etc/systemd/system/ollama.service`. The `zz-` prefix makes it load after an existing `override.conf`, so its values win, and the rollback removes only this file. Do not roll back with `sudo systemctl revert ollama`: it deletes every drop-in for the unit, including ones the user created earlier (for example `OLLAMA_MODELS`). `sudo systemctl edit ollama` opens an interactive editor, so an agent cannot run it.
 
-```ini
-[Service]
-Environment="OLLAMA_FLASH_ATTENTION=1"
-Environment="OLLAMA_KV_CACHE_TYPE=q8_0"
+```bash
+systemctl cat ollama > ~/ollama.service.bak   # backup: records the unit and its current drop-ins
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+printf '[Service]\nEnvironment="OLLAMA_FLASH_ATTENTION=1"\nEnvironment="OLLAMA_KV_CACHE_TYPE=q8_0"\n' \
+  | sudo tee /etc/systemd/system/ollama.service.d/zz-ollama-optimizer.conf >/dev/null
 ```
 
 Then reload:
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl restart ollama
+```
+
+Rollback:
+```bash
+sudo rm /etc/systemd/system/ollama.service.d/zz-ollama-optimizer.conf && sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
 ### Windows (System Environment Variables)

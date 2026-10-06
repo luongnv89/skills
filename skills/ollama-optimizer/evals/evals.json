@@ -23,14 +23,14 @@
       "id": 2,
       "kind": "happy-path",
       "prompt": "Tune Ollama on my Ubuntu server with an RTX 3060 8GB. It runs as the systemd service.",
-      "expected_output": "Tier entry (8GB VRAM). Recommends flash attention and KV cache q8_0 as Environment= lines in a systemd override (sudo systemctl edit ollama), backs up with systemctl cat, gives sudo systemctl revert ollama as rollback, and runs no sudo command without approval.",
+      "expected_output": "Tier entry (8GB VRAM). Recommends flash attention and KV cache q8_0 as Environment= lines in a dedicated systemd drop-in (/etc/systemd/system/ollama.service.d/zz-ollama-optimizer.conf), backs up with systemctl cat, gives removing that drop-in plus daemon-reload and restart as the one-command rollback, and runs no sudo command without approval.",
       "files": [],
       "expectations": [
         "Stated the tier as entry",
         "Recommended OLLAMA_KV_CACHE_TYPE=q8_0 together with OLLAMA_FLASH_ATTENTION=1",
-        "Put the env vars in a systemd override, not in a shell init file",
+        "Put the env vars in a systemd drop-in, not in a shell init file",
         "Ran no sudo command without the user's explicit yes for that command",
-        "Gave 'sudo systemctl revert ollama' (or an equivalent single command) as the rollback",
+        "Gave a single rollback command that removes only the skill's drop-in, not 'sudo systemctl revert ollama', which also deletes the user's other drop-ins",
         "Did not set OLLAMA_HOST=0.0.0.0"
       ]
     },
