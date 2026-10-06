@@ -4,7 +4,7 @@ description: "Prepare a git repo before new work: review uncommitted changes, fi
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -106,7 +106,7 @@ If the fetch fails, show the error and ask once: continue local-only, or stop
 
 1. Parse `git status --porcelain=v1 -z` (NUL-separated, so paths with spaces and both paths of a
    rename survive).
-2. If there are more than about 20 entries, show a grouped summary (by directory and status) and
+2. If there are more than 20 entries, show a grouped summary (by directory and status) and
    offer one decision per group. Show full diffs on request. You may propose groups; never infer
    a decision from them.
 3. Show each entry with its status code and diff. If the path is secret-like (`.env*`, `*.pem`,
@@ -205,13 +205,15 @@ Signals 2 and 3 are the **squash evidence**. If `gh` is unusable or any `gh pr l
 
 ### 6. Report unmerged branches
 
-List the unmerged branches with ahead/behind counts and last commit date. Do not delete them. In
-report-only scope, offer only the read-only overview (never a plan from `action-plans.md` D),
-then print the report. Otherwise offer the per-branch drill-down:
-build the overview from `references/overview-fields.md`, ask Delete / Archive / Open PR / Keep,
-and follow the matching plan in `references/action-plans.md` D. In drill-down scope, start here
-with the named branch; if it turns out merged, show its signal and offer the Step 5 delete for
-that one row.
+1. List the unmerged branches with ahead/behind counts and last commit date. Do not delete them.
+2. In report-only scope, offer only the read-only overview (never a plan from `action-plans.md`
+   D), then print the report.
+3. In every other scope, offer the per-branch drill-down. For a branch the user picks, build the
+   overview from `references/overview-fields.md`.
+4. Ask Delete / Archive / Open PR / Keep, then follow the matching plan in
+   `references/action-plans.md` D.
+5. In drill-down scope, skip items 1 and 2. If the named branch is merged, show its signal and
+   offer the Step 5 delete for that one row. Otherwise run items 3 and 4 for it.
 
 ### 7. Verify the end state
 
@@ -312,5 +314,6 @@ unconfirmed; agent inspection cannot confirm it.
 
 ## Notes
 
-- **Context budget.** For a large unmerged branch in the drill-down, summarize the diff with a
-  subagent instead of reading it all into the main context.
+- **Context budget.** In the drill-down, if `git diff --shortstat main...<b>` reports more than
+  1000 changed lines, summarize the diff with a subagent instead of reading it into the main
+  context (`references/overview-fields.md`).

@@ -33,7 +33,7 @@ Go beyond mechanical stats. Read enough of the diff and commit messages to expla
 - Identify the **intent**: feature, refactor, bugfix, experiment, spike, abandoned WIP. Signals: TODO/FIXME density, presence of tests, commit message quality, whether commits look polished or scratch.
 - Note unfinished signals: failing-looking commit messages ("WIP", "broken", "trying X"), commented-out code, dangling debug prints.
 
-If the diff is too large to read in full, spawn an Explore subagent to summarize the implementation rather than skimming superficially. A weak summary is worse than admitting the diff is too large.
+If `git diff --shortstat main...<branch>` reports more than 1000 changed lines (insertions plus deletions), spawn an Explore subagent to summarize the implementation instead of reading the diff in the main context. If no subagent is available, read it in the prioritized chunks above and say in the overview which files were not read. A weak summary is worse than admitting the diff was only partly read.
 
 ## Staleness signals
 

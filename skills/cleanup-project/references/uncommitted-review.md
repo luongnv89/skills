@@ -38,7 +38,7 @@ Group by file. For each, show the status code and the content:
 the name and size (`wc -c < <p>`), never the content or the diff, whatever the status code. Print
 `⚠ secret-like: <path>` on its own line.
 
-**Large trees** (more than about 20 entries): show a grouped summary first, by top directory and
+**Large trees** (more than 20 entries): show a grouped summary first, by top directory and
 status code, for example:
 
 ```
