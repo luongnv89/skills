@@ -1,0 +1,114 @@
+{
+  "skill_name": "frontend-design",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Build a landing page for Ledgerly, a bookkeeping app for freelance designers. Single self-contained HTML file. No brand guidelines yet, use whatever looks good.",
+      "expected_output": "An aesthetic direction proposed under the Default Style Guide and awaiting approval, then (after approval) a single index.html using only the four default colors, followed by an Implementation step report and a Final Report.",
+      "files": [],
+      "expectations": [
+        "Proposed an aesthetic direction and waited for approval before writing any code",
+        "The Design Thinking step report names the Default Style Guide as the style source, because the user gave no explicit brief",
+        "After approval, wrote one HTML file whose colors are limited to #000000, #FFFFFF, #6B7280 and #22C55E, plus status colors on text only",
+        "Bright Green #22C55E is never used as a background color",
+        "Does not use Inter, Roboto, Arial or a system font stack, a purple gradient on white, or pill-shaped buttons",
+        "The Final Report opens with a Result: line carrying COMPLETE or PARTIAL and the file name",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence names the contrast check result, and Uncertainty records responsive rendering as untested when no browser was used"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Our brand colors are navy #0B1F3A and coral #FF6F59, with Fraunces for headings. Design a pricing section with three plans as a React component for our Next.js marketing site. Just build it, no need to check the direction with me first.",
+      "expected_output": "The direction stated in one line without waiting, then a React pricing component using the brand palette and Fraunces, followed by an Implementation step report and a Final Report.",
+      "files": [],
+      "expectations": [
+        "Stated the aesthetic direction in one line and did not wait for approval, because the user said to just build it",
+        "Uses the navy and coral brand colors instead of the Default Style Guide palette",
+        "Uses Fraunces for headings",
+        "Delivers a React component (JSX or TSX), not plain HTML",
+        "Each plan has a CTA button with hover, focus and active states",
+        "Every text and background pair meets 4.5:1 contrast, or the Final Report lists the failing pair with its ratio",
+        "The Final Report opens with Result: and its status, and its Decision: line names the pending choice or says No approval needed"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Create an admin dashboard page for a small warehouse team: stock levels table, low-stock alerts, and a shipments-today counter. Plain HTML/CSS/JS is fine.",
+      "expected_output": "An aesthetic direction awaiting approval, then a dashboard with a table, alerts and counter using the default palette, status colors on text only, followed by step reports and a Final Report.",
+      "files": [],
+      "expectations": [
+        "Proposed an aesthetic direction and waited for approval before writing any code",
+        "Low-stock alerts use the Warning or Danger color only on text, never as a background",
+        "The stock table has an empty state with a recovery message",
+        "Visual depth uses cards, lines, borders or subtle shadows",
+        "The Implementation step report lists the responsive, contrast, quality and build checks with their results",
+        "The Final Report opens with a Result: line carrying the status and the files written, and has Evidence:, Uncertainty: and Decision: lines"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Make me a page.",
+      "expected_output": "The skill asks for the page's purpose and target audience (and any brand or style constraints) and writes no code.",
+      "files": [],
+      "expectations": [
+        "Asked for the purpose and the target audience before proposing a direction",
+        "Wrote no code and no file",
+        "If the run ends without an answer, the Final Report status is BLOCKED and the Decision: line names the missing information"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Build a super minimalist portfolio homepage for a photographer, but with lots of flashy animations everywhere.",
+      "expected_output": "The skill names the conflict between minimalism and heavy animation and asks which takes priority before writing code.",
+      "files": [],
+      "expectations": [
+        "Named the conflict between the minimalist direction and the request for many animations",
+        "Asked which constraint takes priority instead of picking one silently",
+        "Wrote no code before the user answered"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Add a React settings page to the app in evals/files/vue-repo with a profile form and a notifications toggle.",
+      "expected_output": "The skill reads the repo first, sees it is a Vue project, and confirms the framework before generating code instead of writing React JSX into it.",
+      "files": [
+        "evals/files/vue-repo/package.json",
+        "evals/files/vue-repo/src/App.vue"
+      ],
+      "expectations": [
+        "Read package.json or App.vue and noticed the project uses Vue, not React",
+        "Asked the user to confirm the framework before generating code",
+        "Wrote no React JSX into the Vue project",
+        "The proposal lists the files it would create or modify"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Write a REST API in Express for creating and listing invoices, with Postgres persistence and input validation.",
+      "expected_output": "The skill does not trigger: backend/API work is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "frontend-design did not trigger",
+        "No aesthetic direction was proposed"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Audit the usability of our checkout page against Steve Krug's Don't Make Me Think principles and give me a scored report. Don't change any code.",
+      "expected_output": "The skill does not trigger: a usability-only audit is named in the negative-trigger clause (dont-make-me-think owns it).",
+      "files": [],
+      "expectations": [
+        "frontend-design did not trigger",
+        "No frontend code was written"
+      ]
+    }
+  ]
+}
