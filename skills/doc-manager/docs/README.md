@@ -62,9 +62,16 @@ asm install github:luongnv89/skills:skills/doc-manager
 /doc-manager
 ```
 
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/runbook-validation.md` | Check-only contract, script template, and fix-then-document loop for runbook docs |
+| `references/change-summary.md` | Final change summary: result status, evidence, uncertainty, decision, per-doc table, reader checks |
+
 ## Output
 
 - Root `README.md` and `docs/*.md` reconciled to the code, each non-obvious claim cited to `path:line`
 - `docs/DECISIONS.md` — append-only log of ambiguities resolved with you
 - For runbook sections: a check-only validation script (`scripts/validate-<name>.sh`) linked from the section, plus `docs/troubleshooting.md` updated with any fix found during validation
-- A change summary listing per-doc status and any open flags
+- A change summary that opens with `COMPLETE`, `PARTIAL`, or `BLOCKED`, then lists the checks run, open flags and untested items, the decision you need to make, and per-doc status
