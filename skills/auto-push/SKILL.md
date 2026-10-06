@@ -4,7 +4,7 @@ description: "Generate a commit message, stage all changes, and push to remote a
 license: MIT
 effort: low
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -86,7 +86,10 @@ Each match in the first list above is also a finding. A safety check fails when 
 
 1. Print the dry-run preview below. If a safety check failed, end it with the findings instead of the `Proceeding now` line.
 2. If every safety check passed, continue to Step 4. Do not ask a yes/no question.
-3. If any safety check failed, list each finding and stop. Continue only after the user explicitly confirms every finding. Never bypass a failed safety check without that confirmation.
+3. If any safety check failed, list each finding and stop. Continue only after the user explicitly confirms every non-blocking finding and item 4 clears every blocking one. Never bypass a failed safety check without that confirmation.
+4. Confirmation does not clear a blocking finding:
+   - **Secret** (a secret-file match or a real API-key value): continue only when the user states that the match is a false positive, such as a placeholder, test fixture, or example value. For a real secret, stop and tell the user to remove it from the change and rotate it, then re-run `/auto-push`.
+   - **Large file** (>10 MB without Git LFS): stop. Continue only after a re-run of Step 2 no longer finds the file, because it is tracked with Git LFS, deleted, or listed in `.gitignore`.
 ```
 📊 Changes Summary:
 - X files modified, Y added, Z deleted
@@ -100,7 +103,7 @@ Proceeding now: git add . → commit → push
 
 ### Step 4: Stage Files
 
-Run sequentially:
+Run this step only when no blocking finding from Step 3 remains, so `git add .` never stages a secret or a large file. Run sequentially:
 ```bash
 git add .
 git status --porcelain
@@ -152,7 +155,7 @@ git log -1 --oneline --decorate
 Print the report shown in Expected Output. It opens with the status, then:
 
 - **Evidence:** the checks that ran and what they observed (safety scan, push exit code, `git log` verification).
-- **Uncertainty:** what was not checked. CI and remote hooks never run locally. The placeholder test for API keys is a pattern match, not proof. List every finding the user confirmed in Step 3.
+- **Uncertainty:** what was not checked. CI and remote hooks never run locally. The placeholder test for API keys is a pattern match, not proof. List every finding the user confirmed or called a false positive in Step 3.
 - **Decision:** "No approval needed." after a successful push. When blocked, name the user action needed.
 
 ## Expected Output
@@ -180,8 +183,8 @@ When a safety check fails:
   .env: OPENAI_API_KEY=sk-proj-xxxxx (real key)
 
 Evidence: safety scan 1 finding; nothing staged, committed, or pushed
-Uncertainty: API-key check is pattern-based; other findings may be false positives
-Decision: Remove or rotate the key, then re-run /auto-push, or confirm the finding to continue.
+Uncertainty: API-key check is pattern-based; if this value is a placeholder or test fixture, say it is a false positive to continue
+Decision: Remove the key from the change and rotate it, then re-run /auto-push. A real secret cannot be confirmed to continue.
 ```
 
 ## Acceptance Criteria
@@ -189,7 +192,7 @@ Decision: Remove or rotate the key, then re-run /auto-push, or confirm the findi
 The skill run is successful when all of the following hold:
 
 - [ ] Working tree synced with origin (`git fetch` ran; rebase clean or stash/pop completed without conflicts)
-- [ ] Safety scan reported no secrets, no real API keys, and no large binaries — or the user explicitly confirmed each finding
+- [ ] Safety scan reported no secrets, no real API keys, and no large binaries — or the user called each secret finding a false positive and explicitly confirmed every other non-blocking finding
 - [ ] Branch is correct (warned and confirmed if `main`/`master`)
 - [ ] Commit message follows the conventional format from Step 5
 - [ ] `git push` exited 0 and `git log -1` shows the new commit on the remote-tracking ref
