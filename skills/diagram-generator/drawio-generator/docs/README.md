@@ -73,6 +73,7 @@ asm install github:luongnv89/skills:skills/diagram-generator/drawio-generator
 | `references/xml-authoring.md` | Shape, edge and container syntax, sizing rules, multi-page structure, and file naming |
 | `references/validation-checks.md` | The 9 Phase 4 checks, their fix patterns, and the validation report |
 | `references/final-report.md` | Final Report examples (COMPLETE, PARTIAL, BLOCKED), fill rules, and reader checks |
+| `references/step-reports.md` | Per-phase step completion report template and the checks each phase reports |
 
 ## Output
 
