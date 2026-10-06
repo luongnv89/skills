@@ -17,6 +17,8 @@
 - Support both `curl` and `wget` one-liners
 - Optional Windows PowerShell `install.ps1` with `irm | iex` one-liner
 - Produce README install sections and usage documentation
+- Check the generated script with `bash -n`, a placeholder scan and `shellcheck` (when installed), without running it on your machine unless you ask
+- End with a short final report: status (COMPLETE, PARTIAL or BLOCKED), the checks that ran, what is still untested, and what you need to do next
 
 ## When to Use
 
@@ -35,10 +37,13 @@ graph TD
     B --> C["Generate install.sh"]
     C --> D["Generate One-Liner Command"]
     D --> E["Update README / Docs"]
+    E --> F["Final Report"]
     style A fill:#4CAF50,color:#fff
     style C fill:#FF9800,color:#fff
     style D fill:#2196F3,color:#fff
 ```
+
+The plan is dry-run before generation, so its step order and rollback commands are checked without installing anything. The generated `install.sh` is checked statically; it runs only when you ask for a local run or approve a disposable container. A `COMPLETE` status therefore means "generated and checked", not "installed".
 
 ## Installation
 
@@ -70,13 +75,18 @@ curl -sSL https://raw.githubusercontent.com/user/repo/main/install.sh | bash
 wget -qO- https://raw.githubusercontent.com/user/repo/main/install.sh | bash
 
 # Custom install prefix
-INSTALL_PREFIX=~/.local curl -sSL https://raw.githubusercontent.com/user/repo/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/user/repo/main/install.sh | INSTALL_PREFIX=~/.local bash
 ```
 
 ## Resources
 
 | Path | Description |
 |---|---|
+| `references/install-template.md` | Bash template for `install.sh`: colour helpers, OS/arch/package-manager detection, dependency installer, `main` |
+| `references/readme-snippet.md` | README install block (curl, wget, custom prefix, Windows) and raw URL format |
+| `references/edge-cases.md` | Step report format and per-phase checks, edge cases, platform notes, error-handling guarantees |
+| `references/final-report.md` | Final report parts, status rules, outcome table, examples, reader checks |
+| `evals/evals.json` | Test prompts with expected behavior, including edge and negative-trigger cases |
 | `scripts/env_explorer.py` | Environment detection for local testing |
 | `scripts/plan_generator.py` | Installation step planner |
 | `scripts/executor.py` | Plan executor with rollback |
@@ -88,6 +98,9 @@ INSTALL_PREFIX=~/.local curl -sSL https://raw.githubusercontent.com/user/repo/ma
 |---|---|
 | `install.sh` | **Primary** — standalone installer for `curl \| bash` |
 | `install.ps1` | *(Optional)* Windows PowerShell installer |
-| `env_info.json` | System environment analysis |
-| `installation_plan.yaml` | Ordered installation steps |
 | `USAGE_GUIDE.md` | Quick start, examples, and troubleshooting |
+| `env_info.json` | System environment analysis (working file) |
+| `installation_plan.yaml` | Ordered installation steps (working file) |
+| `install_report.md` | Dry-run report of the plan (working file) |
+
+The three working files contain your machine's home path and `PATH`, so they are not meant to be committed. The run ends with a final report in the chat that starts with `Result:` and a status, then lists `Evidence:`, `Uncertainty:` and `Decision:`.

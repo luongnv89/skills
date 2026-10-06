@@ -264,8 +264,13 @@ def main():
 
     # Output to file
     output_file = Path("env_info.json")
-    with open(output_file, "w") as f:
-        json.dump(env_info, f, indent=2)
+    try:
+        with open(output_file, "w") as f:
+            json.dump(env_info, f, indent=2)
+    except OSError as e:
+        print(f"Error: could not write {output_file.resolve()}: {e}", file=sys.stderr)
+        print("Run env_explorer.py from a writable directory.", file=sys.stderr)
+        return 1
 
     print(f"Environment info saved to: {output_file}", file=sys.stderr)
     print(json.dumps(env_info, indent=2))

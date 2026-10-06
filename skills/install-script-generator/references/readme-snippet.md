@@ -8,23 +8,23 @@ Drop this block into the project README after `install.sh` is generated.
 ### Quick Install (one command)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh | bash
 ```
 
 Or with wget:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh | bash
 ```
 
 ### Advanced Options
 
 ```bash
 # Install to a custom prefix
-curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | INSTALL_PREFIX=~/.local bash
+curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh | INSTALL_PREFIX=~/.local bash
 
 # Download and inspect before running
-curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh -o install.sh
+curl -sSL https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.sh -o install.sh
 less install.sh   # review the script
 bash install.sh
 ```
@@ -33,7 +33,7 @@ bash install.sh
 ## Windows one-liner
 
 ```powershell
-irm https://raw.githubusercontent.com/<owner>/<repo>/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/<owner>/<repo>/<branch>/install.ps1 | iex
 ```
 
 ## Raw URL format

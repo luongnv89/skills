@@ -290,21 +290,50 @@ def main():
 
     plan_file = Path(args.plan)
     if plan_file.exists():
-        with open(plan_file) as f:
-            plan = yaml_load(f.read())
+        try:
+            with open(plan_file) as f:
+                plan = yaml_load(f.read())
+        except Exception as e:
+            print(f"Error: could not parse plan file {plan_file}: {e}", file=sys.stderr)
+            print("Regenerate it with plan_generator.py, or fix the YAML syntax and rerun.", file=sys.stderr)
+            return 1
+        if not isinstance(plan, dict):
+            print(f"Error: plan file {plan_file} must hold a YAML mapping.", file=sys.stderr)
+            print("Regenerate it with plan_generator.py.", file=sys.stderr)
+            return 1
+    else:
+        print(
+            f"Warning: plan file {plan_file} not found; the guide omits platform, "
+            "package-manager, reinstall and uninstall details. Pass --plan to include them.",
+            file=sys.stderr,
+        )
 
     env_file = Path(args.env_file)
     if env_file.exists():
-        with open(env_file) as f:
-            env_info = json.load(f)
+        try:
+            with open(env_file) as f:
+                env_info = json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"Error: Environment file {env_file} is not valid JSON: {e}", file=sys.stderr)
+            print("Rerun env_explorer.py to regenerate it.", file=sys.stderr)
+            return 1
+        if not isinstance(env_info, dict):
+            print(f"Error: Environment file {env_file} must hold a JSON object.", file=sys.stderr)
+            print("Rerun env_explorer.py to regenerate it.", file=sys.stderr)
+            return 1
 
     # Generate documentation
     doc = generate_usage_guide(args.target, plan, env_info, report)
 
     # Write output
     output_file = Path(args.output)
-    with open(output_file, "w") as f:
-        f.write(doc)
+    try:
+        with open(output_file, "w") as f:
+            f.write(doc)
+    except OSError as e:
+        print(f"Error: could not write guide to {output_file}: {e}", file=sys.stderr)
+        print("Pass a writable path with --output.", file=sys.stderr)
+        return 1
 
     print(f"Usage guide saved to: {output_file}", file=sys.stderr)
     print(doc)

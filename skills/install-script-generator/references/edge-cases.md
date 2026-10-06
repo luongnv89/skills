@@ -19,20 +19,22 @@ Use `√` for pass, `×` for fail, `—` for context. The "Criteria" line summar
 
 ### Phase-specific check templates
 
-Phase 1 (Exploration): target identified, dependencies mapped, OS compatibility checked.
+Phase 1 (Exploration): target identified, install method recorded, dependencies listed, `<owner>/<repo>` and default branch read, `env_info.json` written (or `not run`).
 
-Phase 2 (Planning): install order defined, rollback planned.
+Phase 2 (Planning): `installation_plan.yaml` written, no `# TODO` left, dry run exited 0 and printed its `DRY RUN:` line with no placeholder warning, every `Install ...` step has a rollback.
 
-Phase 3 (Generation): script created, cross-platform tested.
+Phase 3 (Generation): `install.sh` written, `bash -n` exit 0, placeholder `grep` empty, `shellcheck -S error` exit 0 (or `not run`), `install.sh` executed (`yes` only after an approved run, else `no`).
 
-Phase 4 (Documentation): README updated, one-liner verified.
+Phase 4 (Documentation): README one-liner found by `grep`, `USAGE_GUIDE.md` written, raw URL status recorded (HTTP status or `not live until pushed`).
+
+A phase's `Result:` is `PASS` when every check passed, `PARTIAL` when a check is `not run`, and `FAIL` when a check failed. The run's status comes from the rules in `final-report.md`, not from the phase results alone.
 
 ## Edge cases the install.sh must handle
 
 - **Unsupported OS** — `die "Unsupported operating system: $os"`; exits non-zero, tells user which OS was detected.
-- **Missing package manager** — `detect_package_manager` returns `unknown`; `install_deps` calls `die` listing the missing manager.
-- **No sudo access** — `need_sudo` checks `id -u` and `sudo`; if neither root nor sudo is available, exit with "Please run as root or install sudo."
-- **Windows without PowerShell** — `install.sh` detects MSYS/Cygwin and warns; an `install.ps1` is generated separately for native Windows.
+- **Missing package manager** — `detect_package_manager` returns `unknown`; `install_deps` calls `die "Unsupported package manager 'unknown'"`.
+- **No sudo access** — `need_sudo` checks `id -u` and `sudo`; if neither root nor sudo is available, exit with "Requires root. Run as root or install sudo."
+- **Windows without PowerShell** — `main` in `install.sh` detects MSYS/Cygwin and calls `warn`; an `install.ps1` is generated separately for native Windows.
 - **Non-standard repo structure** — adjust the URL path and document it in the README snippet.
 
 ## Platform-specific notes

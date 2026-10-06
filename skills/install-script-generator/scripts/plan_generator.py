@@ -184,6 +184,14 @@ def generate_plan(target, env_info, dependencies=None):
                     "rollback": cmds.get("rollback"),
                     "critical": True,
                 })
+            else:
+                step_num -= 1
+                print(
+                    f"Warning: no install command for dependency '{dep}' on "
+                    f"{system or 'unknown OS'} with package manager {pm or 'none'}; "
+                    "it was left out of the plan. Add its step to the plan by hand.",
+                    file=sys.stderr,
+                )
 
     # Step: Install main target
     step_num += 1
@@ -254,16 +262,35 @@ def main():
         print("Run env_explorer.py first to generate environment info.", file=sys.stderr)
         return 1
 
-    with open(env_file) as f:
-        env_info = json.load(f)
+    try:
+        with open(env_file) as f:
+            env_info = json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"Error: Environment file {env_file} is not valid JSON: {e}", file=sys.stderr)
+        print("Rerun env_explorer.py to regenerate it.", file=sys.stderr)
+        return 1
+
+    if not isinstance(env_info, dict):
+        print(
+            f"Error: Environment file {env_file} must hold a JSON object, "
+            f"got {type(env_info).__name__}.",
+            file=sys.stderr,
+        )
+        print("Rerun env_explorer.py to regenerate it.", file=sys.stderr)
+        return 1
 
     # Generate plan
     plan = generate_plan(args.target, env_info, args.deps)
 
     # Write plan
     output_file = Path(args.output)
-    with open(output_file, "w") as f:
-        f.write(yaml_dump(plan))
+    try:
+        with open(output_file, "w") as f:
+            f.write(yaml_dump(plan))
+    except OSError as e:
+        print(f"Error: could not write plan to {output_file}: {e}", file=sys.stderr)
+        print("Pass a writable path with --output.", file=sys.stderr)
+        return 1
 
     print(f"Installation plan saved to: {output_file}", file=sys.stderr)
     print(yaml_dump(plan))
