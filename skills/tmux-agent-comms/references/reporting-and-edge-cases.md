@@ -37,7 +37,7 @@ After each operation, emit only the applicable rows — never a row for a gate t
 | Teardown | `Confirmed`, `Session killed` |
 | HANDOFF | `Context gate`, `Successor ready`, `Brief delivered`, `Ack received` |
 
-The report is part of the expected output: the requested reply or status **plus** this block — never raw unbounded scrollback.
+The report is part of the expected output: the requested reply or status, then this block, then the final report (`references/final-report.md`) — never raw unbounded scrollback.
 
 ## Edge cases
 

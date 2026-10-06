@@ -277,7 +277,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**opencode-runner**](skills/opencode-runner/) | 1.5.1 | medium | Delegate work to opencode free cloud models |
 | [**herdr-agent**](skills/herdr-agent/) | 3.2.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.6.0 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
-| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.3.2 | medium | Spawn, message, read CLI agents in tmux |
+| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.4.0 | medium | Spawn, message, read CLI agents in tmux |
 | [**dev-machine-setup**](skills/dev-machine-setup/) | 0.9.3 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
 
 ---
