@@ -15,6 +15,8 @@
 - Create 10-section PRD with MoSCoW feature prioritization
 - Include Mermaid diagrams for architecture and user flows
 - Support modification mode with timestamped backups
+- Verify the written PRD with grep-backed checks before reporting
+- End every run with one short summary: status, evidence, open questions, and the next decision
 
 ## When to Use
 
@@ -60,8 +62,14 @@ asm install github:luongnv89/skills:skills/prd-generator
 
 | Path | Description |
 |---|---|
-| `references/` | PRD section templates and examples |
+| `references/prd-template.md` | Full 10-section PRD template |
+| `references/expected-output.md` | Fixed `prd.md` skeleton reviewers can scan |
+| `references/verification-steps.md` | Shell checks run after writing `prd.md` |
+| `references/step-reports.md` | Per-phase Step Completion Report check names |
+| `references/edge-cases.md` | Required behavior and final status for each edge case |
+| `references/final-report.md` | Final Report examples, fill rules, and reader checks |
+| `evals/evals.json` | 8 scenario cases (2 happy-path, 4 edge, 2 negative-trigger) |
 
 ## Output
 
-`prd.md` with Product Overview, User Personas, Feature Requirements, User Flows, Technical Specs, Analytics, Release Planning, Risks, and Appendix. Includes GitHub links to all changed files.
+`prd.md` with Product Overview, User Personas, Feature Requirements, User Flows, Non-Functional Requirements, Technical Specs, Analytics, Release Planning, Risks, and Appendix. In an ideas repo the skill also updates the README ideas index, commits by path, and pushes after you confirm. Every run ends with a Final Report: a `COMPLETE`, `PARTIAL` or `BLOCKED` status, the verification evidence and GitHub links, open questions and `TBD` values, and the decision waiting on you.

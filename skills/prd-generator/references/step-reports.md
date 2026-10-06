@@ -3,9 +3,10 @@
 The generic report format and its `√` / `×` / `—` legend stay in `SKILL.md` under
 `## Step Completion Reports`; this file holds the phase-specific check names.
 
-Emit one block after each of the seven workflow phases. The `step N of 7` label is fixed —
-the workflow has seven phases, and a run that stops after Phase 5 has skipped README
-maintenance and commit/push.
+Emit one block after each workflow phase that ran. The `step N of 7` label is fixed:
+the workflow has seven phases. A `modify` run emits no blocks for Phases 2-4 (Modification
+Mode replaces them) and reports its changes in the Phase 5 block. A run outside an ideas
+repo emits Phases 6-7 as `— skipped` lines with the reason.
 
 ### Phase-specific checks
 
@@ -15,7 +16,10 @@ maintenance and commit/push.
 ··································································
   Input files found:        √ pass
   Dependencies resolved:    √ pass (PROJECT_DIR confirmed)
-  Backup created:           √ pass | — skipped (no existing prd.md)
+  Repo synced:              √ pass | — skipped (not a git repository)
+  Verdict checked:          √ pass (verdict: <token>) | × fail — user did not confirm
+  Run mode:                 √ create | √ modify
+  Backup created:           √ pass (non-empty) | — skipped (no existing prd.md)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -35,9 +39,9 @@ maintenance and commit/push.
 ```
 ◆ Clarify Requirements (step 3 of 7 — requirements gathering)
 ··································································
-  Questions answered:       √ pass
-  Scope defined:            √ pass (MVP timeframe confirmed)
-  Stakeholders identified:  √ pass (team size, compliance noted)
+  Questions asked:          √ pass (N asked, M skipped as answered by inputs)
+  Unanswered recorded:      √ pass (K recorded as TBD in §9) | — none
+  Compliance stated:        √ pass (named by user or inputs) | — TBD
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -53,13 +57,13 @@ maintenance and commit/push.
   Result:             PASS | FAIL | PARTIAL
 ```
 
-**Phase 5 — Output**
+**Phase 5 — Verify and Output**
 ```
-◆ Output (step 5 of 7 — delivery)
+◆ Verify and Output (step 5 of 7 — verification)
 ··································································
   File written:             √ pass
-  Summary presented:        √ pass
-  Next steps suggested:     √ pass
+  Verification checks:      √ N/N passed | × fail — <check> after one regeneration
+  Modifications applied:    √ pass (modify mode) | — n/a (create mode)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -78,10 +82,10 @@ maintenance and commit/push.
 ```
 ◆ Commit and push (step 7 of 7 — delivery to remote)
 ··································································
-  Changes committed:        √ pass
-  Push confirmed by user:   √ pass
-  Push succeeded:           √ pass (rebased on origin/main if rejected)
-  GitHub links reported:    √ pass (prd.md, README.md, commit hash)
+  Staged by path:           √ pass (git diff --cached --name-only matches)
+  Changes committed:        √ pass (<hash>)
+  Push confirmed by user:   √ pass | × fail — user declined
+  Push succeeded:           √ pass (rebased on origin/<branch> if rejected) | × fail — rejected twice
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
