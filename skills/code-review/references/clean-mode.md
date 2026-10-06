@@ -19,7 +19,7 @@ Do **not** auto-trigger on general coding, bug-fixing, feature work, performance
 1. **Findings** grouped by cheat-sheet category, each citing `file:line` and a principle/smell label.
 2. **A phased implementation plan** split by priority — Phase 1 (Critical) → Phase 2 (Major) → Phase 3 (Minor) — where every task has an ID, a target `file:line`, the principle it fixes, an effort estimate, and an acceptance check.
 
-**Optional `CLEAN_CODE_AUDIT.html`** — a single self-contained, offline-safe visual report (dark-IDE theme: metric tiles, a severity donut, effort-by-phase bars, collapsible findings, and an interactive phased plan with progress tracking). Offer it after writing the `.md`; build it from `references/report-template.html` following `references/html-report-guide.md`. Same data as the `.md`, visual form — keep counts consistent between the two.
+**Optional `CLEAN_CODE_AUDIT.html`** — a single self-contained, offline-safe visual report (dark-IDE theme: metric tiles, a severity donut, effort-by-phase bars, collapsible findings with a severity filter, visible count, and reset, and an interactive phased plan with progress tracking). Offer it after writing the `.md`; build it from `references/report-template.html` following `references/html-report-guide.md`. Same data as the `.md`, visual form — keep counts consistent between the two.
 
 This skill **does not edit source code.** It audits and plans; a human (or a follow-up skill like `code-review`/`test-coverage`) executes the tasks.
 

@@ -4,7 +4,7 @@ description: "Review or improve code — one skill, four modes: bug/security rev
 license: MIT
 effort: high
 metadata:
-  version: 2.1.3
+  version: 2.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
 ---
@@ -33,8 +33,8 @@ mode you need — this protects the agent's context budget.
    - "clean code audit" (or "clean-code audit"), "clean code review", "check this against clean code" → **clean**
      (user-invoked only — a bare "readability" or "audit against standards" ask is ambiguous: use step 3)
    - "remove slop", "clean up the codebase", "refactor out cruft / dead code / duplication" → **cleanup**
-3. **Ambiguous?** Ask which mode, naming the options. Fall back to **review** only when the intent is
-   clearly "review this" with no other signal.
+3. **No match, or phrases from more than one mode?** Ask which mode, naming the four options. Use
+   **review** without asking only when the request contains a review phrase and no other mode's phrase.
 
 ## Safety: cleanup writes code — the other three do not
 
@@ -53,13 +53,22 @@ they must not otherwise mutate the index, refs, stash, branch, worktree, or remo
   approved mutation workflow owns its own freshness and stash-first sync contract.
 - **Confirm before the first write** in `cleanup`, and follow that mode's own gating.
 
-## Repo Sync Before Edits
+## Repo Sync Before Edits (mandatory)
 
-The router itself is read-only. The two modes that touch a git repo carry the mandatory
-sync-before-edits step in their own workflow: `cleanup` (writes source) in `references/cleanup-mode.md`
-and `clean` (writes `CLEAN_CODE_AUDIT.md`) in `references/clean-mode.md`. Before either mode edits,
-follow that reference's Repo Sync step — sync with remote (stash-first if the tree is dirty) so writes
-land on top of the latest base.
+Applies to `clean` (writes `CLEAN_CODE_AUDIT.md`) and `cleanup` (writes source) only. `review` and
+`perf` never sync (see the Safety section). Before the first write in either mode:
+
+```bash
+branch="$(git rev-parse --abbrev-ref HEAD)"
+git fetch origin && git pull --rebase origin "$branch"
+```
+
+- If the working tree is dirty in `clean`, stash first, sync, then pop the stash.
+- If the working tree is dirty in `cleanup`, stop and ask the user to commit or stash first.
+- If `origin` is missing, or the pull or stash pop conflicts, stop and ask the user. Do not write any file.
+- If the target is not a git repo, `clean` skips the sync and notes that in its report.
+
+The full step, with recovery commands, is in `references/clean-mode.md` and `references/cleanup-mode.md`.
 
 ## Run the mode's workflow
 
@@ -85,10 +94,10 @@ the user before switching into the code-writing `cleanup` mode.
 
 ## Prerequisites
 
-- Require a readable target diff, PR, file set, or repository; ask for scope when none is provided.
-- Check that every reference and agent required by the selected mode is available before starting.
-- For `clean` or `cleanup`, validate repository state and follow that mode's sync, backup, dry-run,
-  confirmation, and rollback instructions. Stop on sync errors or failed safety checks.
+- If no target diff, PR, file set, or repository is named, ask for the scope before starting.
+- If a reference or agent file listed for the selected mode is missing, stop and name the missing path.
+- For `clean` or `cleanup`, follow that mode's sync, backup, dry-run, confirmation, and rollback steps
+  in order. If a sync or safety check fails, stop before the first write.
 
 ## Acceptance Criteria
 
@@ -101,16 +110,30 @@ criteria:
 - Tests or validation commands required by the selected mode completed with their expected result.
 - Edge cases, limitations, skipped files, and degraded subagent coverage are disclosed.
 
+Also check that a reader can use the final response:
+
+- **Result is findable:** the first line after `Mode:` states the result and PASS, PARTIAL, or FAIL.
+- **Facts and assumptions are separate:** verified claims name the check that was run; inferences,
+  skipped scope, and untested behavior are labeled under `Uncertainty`.
+- **Claims are traceable:** each finding points to a `file:line`, a command output, or a report section.
+  An intermediate step passing does not count as the whole run passing.
+- **Next decision is clear:** `Decision` names the approval needed (for example, starting `cleanup`),
+  or says "No approval needed", and lists any remaining user action.
+
+Agent inspection cannot confirm that a human understood the output. If no human feedback was given,
+report human understanding as unconfirmed; do not count it as a failure or a pass.
+
 ## Expected Output
 
-Example response after a read-only review:
+Every mode's final response carries these five items, in this order. Keep each item to one or two
+lines; the mode's report artifact holds the detail.
 
 ```text
 Mode: review
-Result: PASS
-Findings: 1 critical, 2 major, 0 minor
-Output: CODE_REVIEW.md
-Validation: reviewer pass complete; no source files changed
+Result: PARTIAL — 1 critical, 2 major, 0 minor findings; reviewer pass incomplete for 3 files
+Evidence: CODE_REVIEW.md written; reviewer agent validated 41/44 files; `git diff --stat -- src/` empty
+Uncertainty: 3 generated files skipped (listed in CODE_REVIEW.md); no tests were run
+Decision: No approval needed. To apply fixes, ask for a separate `cleanup` run.
 ```
 
 ## Step Completion Reports

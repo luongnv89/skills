@@ -48,13 +48,13 @@ Per `finding` inside the group:
 
 | Placeholder | Fill |
 | --- | --- |
-| `{{SEV_CLASS}}` / `{{SEV_LABEL}}` | Same as the group (used by the badge). |
+| `{{SEV_CLASS}}` / `{{SEV_LABEL}}` | Same as the group (used by the badge and the severity filter's `data-sev`). |
 | `{{FINDING_TITLE}}` | Short title, e.g. `UserService does too much`. |
-| `{{FILE_LINE}}` | `path/to/file.ext:line`. For consolidated findings, the primary site. |
+| `{{FILE_LINE}}` | `path/to/file.ext:line`. For consolidated findings, the primary site. If the repo has a web remote, wrap it in `<a href="…/blob/<sha>/path#Lline">`; otherwise leave it as plain text. |
 | `{{PRINCIPLE}}` | Named principle/smell, e.g. `Single Responsibility Principle`. |
 | `{{DESCRIPTION}}` | One-sentence violation description. |
 | `{{FIX_DIRECTION}}` | One-sentence fix (the `Fix →` line). |
-| `{{CODE_SNIPPET}}` | Optional. A short before/after or offending snippet. **Delete the whole `<pre class="snippet">…</pre>` if none.** Escape `<`,`>`,`&` as `&lt;`,`&gt;`,`&amp;`. |
+| `{{CODE_SNIPPET}}` | Optional. A short before/after or offending snippet. **If none was captured, replace the whole `<pre class="snippet">…</pre>` with `<p class="principle">Snippet: unavailable</p>`**, so missing evidence is not mistaken for a clean site. Escape `<`,`>`,`&` as `&lt;`,`&gt;`,`&amp;`. |
 | `{{SITE_LIST}}` | Optional. Comma-separated extra `file:line` sites for a consolidated finding. **Delete the whole `<p class="sites">…</p>` for single-site findings.** |
 
 For Minor/Info themed groups (where the `.md` uses bullet groups), make each themed group one `finding` with the theme as the title and the sites in `{{SITE_LIST}}`.
@@ -95,5 +95,7 @@ One `.note` per methodology/caveat line. `{{NOTE_HTML}}` may contain inline `<co
 - `grep -c '{{' CLEAN_CODE_AUDIT.html` → `0`.
 - Open the file: donut renders, bars animate, severity counts match across tiles/legend/`.md`.
 - Checkboxes toggle and the phase counter updates.
+- Each severity filter button shows only that severity, hides groups left empty, and updates `Showing N of M findings`; `Reset` and `All` restore every finding. `M` equals the number of `article.finding` blocks in the file.
+- Every `file:line` link opens the cited line. If a link cannot be opened (no network, private remote), report it as untested.
 - Responsive: no horizontal overflow at 375px (the grids collapse via the media queries already in the template).
 - All four severity colors appear only on text/borders — never as a fill behind text (per the design's status-color rule).
