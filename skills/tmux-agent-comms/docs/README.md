@@ -15,7 +15,7 @@
 - **Start non-blocking by default** — open a visible app tab when available, then continue readiness checks; use `TAC_STARTUP_MODE` or a per-launch request to opt into interactive-only startup when needed.
 - **Message any agent** — fail-closed preflight (busy/blocked), escaped `send-keys` + separate Enter, delivery check vs pre-send baseline.
 - **Read replies reliably** — `wait_for_idle.py` with optional `--baseline-file`, `--completion-marker`, and `--ready` (not a fixed `sleep`).
-- **Broadcast & collect** — preflight + baselines + split markers + concurrent waits; periodic fleet status during long-running work.
+- **Broadcast & collect** — preflight + baselines + split markers + concurrent waits; a fleet status table whenever a session changes state during long-running work.
 - **Status & inspect** — list every managed agent in a table, inspect one agent, and get the exact attach command for a human terminal.
 - **Keep agents visible** — new sessions attach to a fresh terminal tab in the current app by default; detached mode remains available for background fleets or environments without a terminal-tab facility.
 - **Context handoff** — when the main agent's own window passes 50%, it spawns a successor orchestrator session (`<folder>-main-g2`), hands over a compact fleet brief, and goes read-only so a long run never dies of a full context.
@@ -43,8 +43,8 @@ graph TD
     C --> D["Wait with marker (wait_for_idle.py)"]
     D --> E["Capture & relay reply"]
     E --> F["Continue, report fleet status, or tear down (confirmed)"]
-    style A fill:#2E7D32,color:#fff
-    style F fill:#1565C0,color:#fff
+    style A fill:#4CAF50,color:#fff
+    style F fill:#2196F3,color:#fff
 ```
 
 ## Usage
@@ -87,7 +87,7 @@ Send the same message to every agent and collect all the replies together — th
 /tmux-agent-comms tell all my running agents to pull the latest main and report status
 ```
 
-You get one labeled block per agent with its reply and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), so you can see at a glance which agents are done and which need attention. Status uses the same meaning in scan-friendly words: `idle` maps to `done`, `BLOCKED` maps to `blocked`, and `TIMEOUT` maps to `unknown` unless a fresh capture is still changing (`in-progress`). For long runs, the orchestrator also reports fleet status about every 5 minutes without interrupting working panes.
+You get one labeled block per agent with its reply and a state tag (`idle` / `TIMEOUT` / `BLOCKED`), so you can see at a glance which agents are done and which need attention. Status uses the same meaning in scan-friendly words: `idle` maps to `done`, `BLOCKED` maps to `blocked`, and `TIMEOUT` maps to `unknown` unless a fresh capture is still changing (`in-progress`). For long runs, the orchestrator also reports fleet status whenever a session changes state (done, blocked, stalled) and at each context gate point, without interrupting working panes.
 
 ### 3b. Check or inspect running agents
 
@@ -135,14 +135,18 @@ The skill confirms the target with you, then `kill-session`. (A full reset of ev
 
 | Path | Description |
 |---|---|
+| `references/delivery-and-waiting.md` | The send/wait contract: the exit-code table for every helper, fail-closed preflight, baseline and split completion marker, delivery recovery, and the anti-deadloop budget |
 | `references/context-succession.md` | The main agent's own context gate (default 50%), HANDOFF procedure, successor naming, and the compact handoff brief template |
-| `references/tmux-recipes.md` | Broadcast patterns, periodic fleet status, status/inspect behavior, multi-line/code message sending, pane splitting, scrollback, chrome-stripping, and a troubleshooting table |
+| `references/tmux-recipes.md` | Script resolution (`$here`), broadcast patterns, fleet status on state changes, status/inspect behavior, multi-line/code message sending, pane splitting, scrollback, chrome-stripping, and a troubleshooting table |
+| `references/reporting-and-edge-cases.md` | The Step Completion Report layout, per-operation rows, and the edge-case handling table |
+| `references/final-report.md` | The closing report: Result, Evidence, Uncertainty, Decision, the status rules, and the reader checks |
+| `scripts/preflight_send.py` | Fail-closed check run before every send: exit 0 idle, 2 busy, 3 blocked on a dialog, 4 unverifiable target |
 | `scripts/wait_for_idle.py` | Polls a pane until idle; prints just the reply delta (token-lean) and reports idle / blocked-on-prompt / timeout via exit codes 0/3/2 |
 | `scripts/broadcast.sh` | Sends one message to a fleet and collects every reply concurrently, one labeled block per agent |
 
 ## Output
 
-No files are produced. The skill runs tmux commands and relays the captured agent replies back to you in the conversation, with a step-completion report summarizing each operation (target resolved, message sent, reply settled/captured, any destructive action confirmed).
+No files are produced. The skill runs tmux commands and relays the captured agent replies back to you in the conversation, with a step-completion report summarizing each operation (target resolved, message sent, reply settled/captured, any destructive action confirmed). Every operation then ends with a short final report: `Result:` (`COMPLETE`, `PARTIAL`, or `BLOCKED`), `Evidence:` (the commands that ran and their exit codes), `Uncertainty:` (what was not checked), and `Decision:` (what you need to approve, or `No approval needed.`).
 
 ## Credits
 

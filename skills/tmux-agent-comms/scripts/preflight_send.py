@@ -44,11 +44,19 @@ from wait_for_idle import (  # noqa: E402
 
 def main(argv: list[str]) -> int:
     if len(argv) != 1:
-        print("usage: preflight_send.py <target>", file=sys.stderr)
+        print(
+            f"Error: expected exactly one tmux target, got {len(argv)} argument(s). "
+            "Usage: preflight_send.py <session[:window.pane]>",
+            file=sys.stderr,
+        )
         return 1
     target = argv[0]
     if not shutil.which("tmux"):
-        print("Error: tmux not on PATH", file=sys.stderr)
+        print(
+            "Error: tmux is not installed or not on PATH. "
+            "Install it (brew install tmux / apt install tmux), then re-run.",
+            file=sys.stderr,
+        )
         return 1
 
     has = subprocess.run(
@@ -74,7 +82,8 @@ def main(argv: list[str]) -> int:
     if cap.returncode != 0:
         print(
             f"Error: cannot capture '{target}' (lookup failed) — refusing to "
-            f"send into an unverifiable pane.",
+            f"send into an unverifiable pane. Check the target with: "
+            f"tmux has-session -t {target}",
             file=sys.stderr,
         )
         return 4

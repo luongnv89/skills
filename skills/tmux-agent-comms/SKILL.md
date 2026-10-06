@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires `tmux` on PATH. Optional Python 3 for wait/preflight/broadcast helpers."
 effort: medium
 metadata:
-  version: 2.3.2
+  version: 2.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -32,9 +32,9 @@ Route directly to the required mode; do not read unrelated references.
 
 ## Prerequisites
 
-1. Run `command -v tmux`; stop with installation guidance if it fails.
-2. Resolve helper scripts using `references/tmux-recipes.md` when messaging, waiting, or broadcasting.
-3. Confirm the exact session and inspect its pane before writing to it.
+1. Run `command -v tmux`. If it prints nothing, stop and report `BLOCKED` with the install command (`brew install tmux` or `apt install tmux`).
+2. Before any spawn, send, wait, or broadcast, set `$here` to this skill's `scripts/` directory with the resolver in `references/tmux-recipes.md` (*Resolve scripts/*). Every helper call below runs from `$here`.
+3. Before writing to a session, confirm its exact name (Phase 2) and capture its pane once.
 
 ## Critical Rules
 
@@ -78,7 +78,7 @@ Read the result off *the exit-code table* in `references/delivery-and-waiting.md
 tmux has-session -t "$target" 2>/dev/null
 ```
 
-If missing, list sessions and ask on ambiguity; never guess. Use `session:window.pane` for a specific pane.
+If `has-session` fails, run `tmux list-sessions`. If exactly one listed session name contains the requested name (for example, `myrepo-reviewer` for `reviewer`), use that exact name. If none or several match, ask the user which session to use; never guess. To target one pane, use `session:window.pane`.
 
 **Complete when:** one existing tmux target is confirmed.
 
@@ -126,14 +126,14 @@ For **status**, remain read-only and report: agent ID, exact session, state (`in
 
 Read `references/tmux-recipes.md` for classification commands, periodic fleet status, scrollback, and troubleshooting.
 
-**Complete when:** the requested reply or status is concise, target-specific, and not truncated.
+**Complete when:** the relayed text comes from the confirmed target only, starts at a sentence or prompt boundary rather than mid-sentence, and contains no TUI chrome or earlier turns; a status table has one row per managed session.
 
 ### Phase 6 — Continue, Broadcast, or Tear Down
 
 - **Continue:** restart Phase 3 with a fresh baseline and marker.
 - **Broadcast:** run `"$here/broadcast.sh" "<message>" <session...>`; it preflights, sends first, then waits concurrently. Do not serialize send/wait by agent.
 - **Long fleet run:** emit a read-only status table when existing bounded observation detects a session state change (done, blocked, stalled) and at each Phase 7 gate point, within the same overall wait budget.
-- **Tear down:** after explicit confirmation, prefer `tmux kill-session -t <name>` over `tmux kill-server`.
+- **Tear down:** after explicit confirmation, prefer `tmux kill-session -t <name>` over `tmux kill-server`. If the user declines or does not answer, kill nothing and record the teardown as skipped.
 
 **Complete when:** every follow-up has an independent proof cycle, broadcast failures are reported per target, or confirmed teardown affects only named sessions.
 
@@ -160,7 +160,8 @@ Read `references/context-succession.md` for the gate-point table, UNKNOWN fallba
 - No blocked dialog receives task text; no destructive command runs without confirmation.
 - Fleet sends and readiness checks run concurrently, with partial failures identified by session.
 - The context gate is evaluated at each gate point, and any HANDOFF ends with exactly one acked orchestrator.
-- The expected output is the requested reply/status plus the adapted Step Completion Report below—not raw unbounded scrollback.
+- The expected output is the requested reply/status, then the adapted Step Completion Report, then the final report below—not raw unbounded scrollback.
+- The final report passes its four reader checks (`references/final-report.md`): result and status on the first line, facts separated from assumptions, every claim traced to a command or capture, next decision named. Without user feedback, human understanding stays unconfirmed.
 
 ## Example
 
@@ -171,7 +172,17 @@ tmux has-session -t "$target" 2>/dev/null || { echo "Error: missing $target" >&2
 # baseline → preflight → send → delivery → wait → verify cycle.
 ```
 
-Expected result: the agent's new reply is relayed, the joined marker proves this turn completed, and the report records each gate.
+Expected result: the agent's new reply is relayed, the joined marker proves this turn completed, the step report records each gate, and the final report reads:
+
+```text
+Result: COMPLETE — reviewer replied to "summarize the open PRs"
+Evidence:
+  tmux has-session -t reviewer: exit 0
+  preflight_send.py reviewer: exit 0 (idle) · delivery: pane changed vs baseline
+  wait_for_idle.py: exit 0 · TAC_DONE_<suffix> found · two capped-tail reads matched
+Uncertainty: reply relayed as written, not checked against the open PR list
+Decision: No approval needed.
+```
 
 ## Edge Cases
 
@@ -179,7 +190,11 @@ Eight named conditions — duplicate session name, trust/auth prompt, an undeliv
 
 ## Step Completion Report
 
-Every operation closes with the Step Completion Report block — the requested reply or status **plus** that block, never raw unbounded scrollback. Emit only the rows the operation actually ran. The block layout, the `√ × — ⚠` legend, and the per-operation row table are in `references/reporting-and-edge-cases.md`.
+Every operation prints the requested reply or status, then the Step Completion Report block, then the final report — never raw unbounded scrollback. Emit only the rows the operation actually ran. The block layout, the `√ × — ⚠` legend, and the per-operation row table are in `references/reporting-and-edge-cases.md`.
+
+## Final Report
+
+After the Step Completion Report, print the final report from `references/final-report.md`: `Result:` (`COMPLETE`, `PARTIAL — <reason>`, or `BLOCKED — <reason>`), `Evidence:` (only checks that ran), `Uncertainty:`, then `Decision:` (the approval needed, or `No approval needed.`).
 
 ## References
 
@@ -187,6 +202,7 @@ Every operation closes with the Step Completion Report block — the requested r
 - `references/context-succession.md` — read at the context gate for the HANDOFF procedure and brief template.
 - `references/tmux-recipes.md` — read only for script resolution, spawn modes, fleets, status/inspect, multiline sends, attach, scrollback, or troubleshooting.
 - `references/reporting-and-edge-cases.md` — read for the Step Completion Report layout and when an edge case fires.
+- `references/final-report.md` — read before printing the final report: status rules, the four parts, a `BLOCKED` example, and the reader checks.
 - `scripts/preflight_send.py` — fail-closed check before every send or recovery Enter.
 - `scripts/wait_for_idle.py` — readiness and settled-reply waiter.
 - `scripts/broadcast.sh` — safe concurrent fleet broadcast.

@@ -302,7 +302,8 @@ def main():
         if current is None:
             print(
                 f"Error: tmux capture-pane failed for target '{args.target}' "
-                f"(session gone mid-wait?).",
+                f"(session gone mid-wait?). Check it with: tmux has-session -t "
+                f"{args.target}, then re-run the wait.",
                 file=sys.stderr,
             )
             return 1
