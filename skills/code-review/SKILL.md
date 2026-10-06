@@ -4,7 +4,7 @@ description: "Review or improve code — one skill, four modes: bug/security rev
 license: MIT
 effort: high
 metadata:
-  version: 2.2.0
+  version: 2.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
 ---
@@ -27,14 +27,17 @@ mode you need — this protects the agent's context budget.
 ## Selecting the mode
 
 1. **Explicit wins.** If the request carries `mode:review|perf|clean|cleanup` (or `--mode <name>`), use it.
-2. **Otherwise infer** from the request:
+2. **Otherwise infer** from the request. The longest matching phrase wins: a phrase that sits inside
+   a longer matched phrase does not count, so "clean code review" is a **clean** phrase only, not
+   also a **review** phrase.
    - "review", "find bugs", "security", "is this correct", "look for vulnerabilities" → **review**
    - "slow", "faster", "optimize", "bottleneck", "memory leak", "performance" → **perf**
    - "clean code audit" (or "clean-code audit"), "clean code review", "check this against clean code" → **clean**
      (user-invoked only — a bare "readability" or "audit against standards" ask is ambiguous: use step 3)
    - "remove slop", "clean up the codebase", "refactor out cruft / dead code / duplication" → **cleanup**
-3. **No match, or phrases from more than one mode?** Ask which mode, naming the four options. Use
-   **review** without asking only when the request contains a review phrase and no other mode's phrase.
+3. **No match, or phrases from more than one mode?** Ask which mode, naming the four options. For
+   example, "review and optimize" matches **review** and **perf**, so ask. Use **review** without
+   asking only when the request contains a review phrase and no other mode's phrase.
 
 ## Safety: cleanup writes code — the other three do not
 
