@@ -35,7 +35,7 @@ Use a single member instead for one lens: `dont-make-me-think` (Krug review), `u
 graph TD
     A[Scope and preflight] --> B[Intake once: evidence dir]
     B --> C[website-agent-readiness scan, if consented]
-    C --> D[ux-ax-review, dont-make-me-think, viral-product-evaluator with skip-checks]
+    C --> D[ux-ax-review with skip-checks, dont-make-me-think, viral-product-evaluator]
     D --> E[Merge: design-optimization.md]
     E --> F[Apply on explicit opt-in]
     style A fill:#4CAF50,color:#fff

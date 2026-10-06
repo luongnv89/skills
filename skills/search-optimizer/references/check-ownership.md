@@ -1,7 +1,8 @@
 # Check Ownership — search-optimizer
 
-Every canonical check ID has exactly one owner per run. Non-owners receive it in `skip-checks`
-and list it as `skipped — owned by <owner>`. The map is written to `evidence/manifest.json` →
+Every canonical check ID has exactly one owner per run. Non-owners that support `skip-checks`
+receive it and list it as `skipped — owned by <owner>` (see the per-member table); other
+overlaps are merged at merge time. The map is written to `evidence/manifest.json` →
 `owners` and is **final before seo-ai-optimizer runs**.
 
 ## The orchestrated-run block

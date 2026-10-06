@@ -17,8 +17,8 @@ origin="$(python3 -I -c 'import sys,urllib.parse as u;p=u.urlsplit(sys.argv[1]);
 for f in robots.txt sitemap.xml llms.txt; do fetch "$origin/$f" "$ev/$f"; done
 ```
 
-- A non-200 response is **not found**: delete the body file and record
-  `"<file>": {"status": 404, "reason": "not found"}` in `manifest.files`.
+- A 404/410 response is **not found**: delete the body file and record
+  `"<file>": {"status": <actual status>, "reason": "not found"}` in `manifest.files`.
 - 401/403/blocked is recorded as `blocked`, never as absent.
 - Fetch the root files at the **origin**, not under the page path.
 
