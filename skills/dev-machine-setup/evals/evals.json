@@ -65,7 +65,10 @@
         "Printed a self-skip line for phase 3 and for phase 4 instead of reinstalling",
         "Did not upgrade or reinstall any already-present tool",
         "Printed the FINAL REPORT with a Result of READY",
-        "Any findings were reported, not silently fixed"
+        "Any findings were reported, not silently fixed",
+        "The FINAL REPORT's first line under the header is 'Result: READY'",
+        "Evidence names the phase 5 detect_env.py re-run and its remaining-high count; no check that did not run is listed",
+        "Decision says 'No approval needed.' and each remaining user action has its own line"
       ]
     },
     {
@@ -132,7 +135,37 @@
         "Summarized what is done, approved-but-not-run, and declined",
         "Emitted one paste-once block containing only already-approved commands, in approval order",
         "Did not leave a partially applied rc-file edit behind",
-        "Said that re-triggering the skill resumes, with no arguments needed"
+        "Said that re-triggering the skill resumes, with no arguments needed",
+        "The pause output opens with 'Result: PARTIAL — paused before phase N' and no FINAL REPORT is printed"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "edge-case",
+      "prompt": "Set up this machine, but leave Python alone — I don't want uv.  (Run against a Linux machine whose findings include python-externally-managed at high severity; every other gap gets approved and installs.)",
+      "expected_output": "The python-externally-managed fix is recorded as declined. The FINAL REPORT opens with 'Result: PARTIAL — high finding python-externally-managed declined', shows the declined item with ○ and the user's reason, and closes with Evidence, Uncertainty and Decision lines.",
+      "files": [],
+      "expectations": [
+        "Recorded python-externally-managed as declined and did not install uv",
+        "The Result is PARTIAL with a reason naming the declined high finding, not READY and not BLOCKED",
+        "The declined finding prints with ○ and the user's reason in the Phase 5 line",
+        "Evidence lists only checks that ran, each with its observed result (version checks, the detect_env.py re-run)",
+        "Uncertainty lists what is unconfirmed (for example an agent CLI not yet logged in, deep checks not run), separately from Evidence",
+        "Decision says 'No approval needed.' or names the pending approval, and lists each remaining user action on its own line"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "edge-case",
+      "prompt": "Optimize my setup, nothing new please.  (Run against a macOS machine where detect_env.py finds nothing to fix and every tool is present.)",
+      "expected_output": "Mode tune; phase 5 has no findings to present. The FINAL REPORT opens with 'Result: READY' — not BLOCKED, even though nothing needed changing — and Decision is 'No approval needed.'",
+      "files": [],
+      "expectations": [
+        "Selected mode 'tune' and proposed no install",
+        "The Result is READY, not BLOCKED or PARTIAL, because nothing needed changing",
+        "Every skipped phase prints a skip line with its reason instead of being omitted",
+        "Uncertainty is 'none' or names only checks that did not run (for example deep checks not run)",
+        "Decision says 'No approval needed.'"
       ]
     }
   ]

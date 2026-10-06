@@ -278,7 +278,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**herdr-agent**](skills/herdr-agent/) | 3.2.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.6.0 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.4.0 | medium | Spawn, message, read CLI agents in tmux |
-| [**dev-machine-setup**](skills/dev-machine-setup/) | 0.9.3 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
+| [**dev-machine-setup**](skills/dev-machine-setup/) | 0.10.0 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
 
 ---
 

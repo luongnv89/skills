@@ -130,8 +130,10 @@ Deep checks (`brew outdated`, `winget upgrade`, `npm outdated -g`) need network 
 
 ## 6. Final report
 
-Nothing executes. Assemble the report from the session file (`references/report-template.md`), then set its
-`status` to `complete` so the next run starts clean instead of offering a resume.
+Nothing executes. Assemble the report from the session file (`references/report-template.md`). Pick the
+`Result` with the first matching status rule in that file. Then set the session file's `status` to `complete`
+so the next run starts clean instead of offering a resume.
 
-**Phase 6 done when:** the report is printed with a `Result` line, every gap and finding is accounted for as
-fixed, declined, or deferred, and the session file is marked `complete`.
+**Phase 6 done when:** the report is printed with the `Result` line first and the `Evidence`, `Uncertainty`
+and `Decision` lines filled, every gap and finding is accounted for as fixed, declined, or deferred, and the
+session file is marked `complete`.

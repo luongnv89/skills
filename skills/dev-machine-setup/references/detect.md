@@ -21,6 +21,11 @@ On Windows PowerShell, if `python3` is missing:
 py -3 "$HOME\.claude\skills\dev-machine-setup\scripts\detect_env.py"
 ```
 
+Exit codes: `0` with JSON on stdout is the gap report. `1` with a `detect_env.py:` message on stderr means
+there is no usable report: Python older than 3.9, or an unexpected error. Discard any partial stdout, re-run
+once, then use the fallbacks below. The final report lists `gap report built from detect.md fallbacks` under
+`Uncertainty:`.
+
 ## Fallback one-liners
 
 **Unix**

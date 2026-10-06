@@ -88,8 +88,11 @@ shell is `needs-new-shell`, not `done`, until a fresh shell confirms it.
 
 ## Pausing
 
-On "pause", "stop here", or "I'll finish later", output exactly three things:
+On "pause", "stop here", or "I'll finish later", first rewrite the session file (status stays `in-progress`),
+then output a status line and exactly three things:
 
+0. `Result: PARTIAL — paused before phase N; session saved`, where N is the next phase that has not finished.
+   A pause never produces a FINAL REPORT; triggering the skill again resumes with no arguments needed.
 1. The session file path.
 2. What is left: counts by state, and the `next` sentence.
 3. A paste-once block of the `command` of every item still in state `approved`, in approval order — so the
