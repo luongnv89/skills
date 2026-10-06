@@ -1,6 +1,6 @@
 # Phase 4 Validation Checks
 
-After generating the XML but **before writing the file**, run every check below. Fix any failures and re-check until all pass.
+After generating the XML but **before writing the file**, run every check below. Fix any failures and re-run all checks, for at most 3 fix cycles. SKILL.md → *Phase 4* decides what happens when a check still fails after cycle 3 (`PARTIAL` or `BLOCKED`).
 
 ## Check 1: Valid XML structure
 - The XML parses without error
@@ -53,11 +53,11 @@ Every entity, relationship, or concept from the user's request is represented.
 
 ## Validation report
 
-After all checks pass:
+Print this after the last check run, then give the Final Report (`references/final-report.md`). Write `N/9` with the real count, and list each failed check by number:
 ```
-Validation: 9/9 checks passed
+Validation: N/9 checks passed (cycle C of 3)
 - Pages: N
 - Elements: X shapes, Y edges
 - Containers: Z
-- All IDs unique, all edges bound, no overlaps
+- Failed: none | 6 (node-a overlaps node-b by 24px), 9 (...)
 ```

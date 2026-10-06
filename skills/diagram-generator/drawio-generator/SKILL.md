@@ -4,7 +4,7 @@ description: "Generate professional diagrams as valid draw.io XML — flowcharts
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -16,24 +16,20 @@ Generate professional diagrams as valid draw.io XML. Every request flows through
 
 ## Environment Check
 
-If the Agent tool is available, use subagents per the **Subagent Architecture** section. This provides fresh-context validation loops and avoids single-pass context overflow on large diagrams.
-
-If the Agent tool is unavailable (e.g., Claude.ai), execute each phase inline:
-- Phase 1 & 2: Gather requirements directly in conversation
-- Phase 3: Generate the XML in this context
-- Phase 4: Self-review against the 9 checks (less rigorous, but functional)
+If the Agent tool is available, use subagents per *Subagent Architecture* for large diagrams; fresh-context validation avoids single-pass context overflow. Without it (e.g., Claude.ai), run every phase inline and self-review against the 9 checks.
 
 ## Repo Sync Before Edits (mandatory)
 
-The `.drawio` file is written at the end of the workflow. When that output path lives inside a git worktree, sync before the write to avoid clobbering remote work:
+Run this once: before reading an existing `.drawio` file (*Iteration*), otherwise before the Phase 4 write. The sync target is the output file's directory.
 
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
+1. Run `repo="$(git -C "<output dir>" rev-parse --show-toplevel)"`. If it fails, skip the sync and record `sync: skipped (not a git repo)`.
+2. Run `git -C "$repo" remote get-url origin`. If it fails, skip steps 3–6 and record `sync: skipped (no origin)`.
+3. Run `branch="$(git -C "$repo" rev-parse --abbrev-ref HEAD)"`. If it prints `HEAD`, skip steps 4–6 and record `sync: skipped (detached HEAD)`.
+4. Run `git -C "$repo" status --porcelain`. If the output is empty, run `git -C "$repo" fetch origin && git -C "$repo" pull --rebase origin "$branch"`.
+5. If the output is not empty, run `git -C "$repo" stash push -u -m "drawio-generator pre-sync"`, then the same fetch and pull, then `git -C "$repo" stash pop`.
+6. If the rebase conflicts, run `git -C "$repo" rebase --abort`, then `git -C "$repo" stash pop` when step 5 stashed. If the stash pop conflicts, leave the stash in place. In both cases do not write the file; stop and ask the user how to continue. With no answer, the status is `BLOCKED`.
 
-If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section only when the output path is outside any git repository.
+This skill writes one file and commits nothing.
 
 ## Core Workflow
 
@@ -52,7 +48,10 @@ Confirm what to draw before generating anything.
 
 ### Phase 2: Propose
 
-Present a numbered plan and wait for confirmation. For straightforward requests, use sensible defaults and proceed.
+Present the numbered plan below.
+
+- If the request names the diagram type and every element, state the defaults you chose in one line and proceed to Phase 3.
+- Otherwise, wait for the user to confirm or change the plan. Do not generate XML before the user answers.
 
 1. **Diagram type** (offer alternatives if multiple fit)
 2. **Key elements** — list nodes/shapes
@@ -63,7 +62,9 @@ Present a numbered plan and wait for confirmation. For straightforward requests,
 
 ### Phase 3: Generate
 
-Generate the draw.io XML and write a `.drawio` file (raw XML).
+Generate the draw.io XML in memory. Phase 4 writes the file.
+
+Output path: use the path the user gave. Otherwise use a descriptive kebab-case name ending in `.drawio` (`auth-flow.drawio`) in the current working directory. If that file exists and the user did not ask to update it, confirm with the user before you overwrite it; to update it, follow *Iteration*.
 
 Read `references/xml-authoring.md` for shape/edge/container syntax, sizing rules, multi-page structure, and file naming. Read `references/drawio-format.md` for the full XML schema and color palettes.
 
@@ -75,76 +76,48 @@ Critical rules every shape must follow:
 
 ### Phase 4: Validate
 
-Run all 9 checks before writing the file. Fix and re-check until every check passes. See `references/validation-checks.md` for the full check list, fix patterns, and the validation-report template.
+Run all 9 checks before writing the file. See `references/validation-checks.md` for the full check list and fix patterns.
 
-Summary of checks:
+1. Run the 9 checks. If all pass, run *Repo Sync*, write the file, and give the *Final Report* with status `COMPLETE`.
+2. If a check fails, fix it and re-run all 9 checks. A failure of check 1 or 8 needs a Phase 3 regeneration, not a patch. Stop after 3 fix cycles.
+3. If checks 1–5 pass but a check from 6–9 still fails after cycle 3, run *Repo Sync*, write the file, and report `PARTIAL` with the failed check numbers.
+4. If check 1–5 still fails after cycle 3, do not write the file. Report `BLOCKED` with the failed checks.
 
-1. Valid XML structure (mxfile → diagram → mxGraphModel → root, system cells present)
-2. All shapes have required attributes (`html=1;whiteSpace=wrap;` mandatory)
-3. Unique IDs per page
-4. Edge `source`/`target` reference existing vertices
-5. Every edge has `<mxGeometry relative="1" as="geometry"/>`
-6. No overlapping shapes (>10px)
-7. Container hierarchy valid; child coordinates relative to container
-8. Semantic completeness — every requested entity/relationship is represented
-9. Text readable: `fontSize` ≥ 11, shapes sized to fit `value`
+The 9 checks: (1) XML structure and system cells, (2) required shape attributes, (3) unique IDs per page, (4) edge bindings, (5) edge geometry, (6) no overlaps >10px, (7) container hierarchy, (8) semantic completeness, (9) readable text and fitted shapes.
 
 ---
 
 ## Expected Output
 
-A valid `.drawio` file written to disk (raw XML). Minimal example:
+A valid `.drawio` file written to disk (raw XML), then the *Final Report*. A minimal complete file is in `references/xml-authoring.md` → *Minimal complete file*.
 
-```xml
-<mxfile>
-  <diagram name="Flow" id="page-1">
-    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" page="1" pageWidth="1169" pageHeight="827">
-      <root>
-        <mxCell id="0"/>
-        <mxCell id="1" parent="0"/>
-        <mxCell id="node-start" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="100" y="80" width="120" height="50" as="geometry"/>
-        </mxCell>
-        <mxCell id="node-process" value="Process Request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="100" y="200" width="160" height="60" as="geometry"/>
-        </mxCell>
-        <mxCell id="edge-start-process" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="node-start" target="node-process">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-</mxfile>
-```
+## Final Report
 
-After file write, the skill reports:
+End every run, stops included, with this compact text block. A Phase 1–2 question that awaits the user's answer does not end the run; if the user ends the run without answering, report `BLOCKED`. Status is `COMPLETE` (file written, 9/9 checks pass), `PARTIAL` (file written, a check from 6–9 failed), or `BLOCKED` (no file written). Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
+
 ```
-Validation: 9/9 checks passed
-- Pages: 1
-- Elements: 2 shapes, 1 edge
-- Containers: 0
-- All IDs unique, all edges bound, no overlaps
-File written: flow.drawio
+Result: COMPLETE. Wrote flow.drawio (1 page, 2 shapes, 1 edge, 0 containers).
+Evidence: /abs/path/flow.drawio. Validation 9/9 checks passed (inline, 1 cycle). sync: skipped (not a git repo)
+Uncertainty: Rendering in draw.io untested. Assumed top-to-bottom flow; the request gave no direction.
+Decision: No approval needed.
 ```
 
 ## Acceptance Criteria
 
 Verify these for every run:
 
-- [ ] A `.drawio` file is written to disk with valid XML (parses without error).
-- [ ] Every page contains system cells `id="0"` and `id="1" parent="0"`.
-- [ ] Every shape style includes `html=1;whiteSpace=wrap;` and every edge has `<mxGeometry relative="1" as="geometry"/>`.
-- [ ] Edge `source`/`target` attributes resolve to existing vertex IDs in the same page.
-- [ ] No two vertex bounding boxes overlap by >10px (containers excluded).
-- [ ] All `fontSize` values ≥ 11; shapes are sized so labels fit without overflow.
-- [ ] The validation report prints `9/9 checks passed`. Given the user's request, then every entity and relationship described is represented in the output.
+- [ ] A `.drawio` file is written to disk and its XML parses, unless the status is `BLOCKED`.
+- [ ] Checks 1–7 and 9 in `references/validation-checks.md` pass on every page, or the Final Report lists each failed check.
+- [ ] Every entity and relationship in the user's request is represented in the output (check 8).
+- [ ] The Final Report opens with `Result:` and its status, and has `Evidence:`, `Uncertainty:` and `Decision:` lines. `Evidence:` cites only checks that ran; `9/9` appears only when all 9 passed.
+- [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear). Without a human reviewer's answer, human understanding is unconfirmed.
 
 ## Edge Cases
 
 - **Empty or vague input** ("make a diagram"): ask targeted clarifying questions before generating — never produce a placeholder.
 - **Very large diagram (>50 elements)**: warn that one page will be crowded; offer multi-page or hierarchical C4.
 - **Unsupported diagram type** (e.g., Gantt with real date-axis ticks): explain the limitation and propose the closest supported alternative (e.g., swimlane timeline).
-- **Existing `.drawio` file extension**: read it first, preserve existing cell IDs, append new elements — never regenerate from scratch.
+- **User supplies an existing `.drawio` file**: read it first, preserve existing cell IDs, append new elements — never regenerate from scratch.
 - **Conflicting layout constraints**: surface the conflict and ask which takes priority.
 - **Cross-page ID collision**: each `<diagram>` has its own ID namespace; system cells `id="0"` and `id="1"` must be present on every page independently.
 - **Text exceeds shape capacity**: auto-grow shape height ~20px per extra line rather than letting text overflow silently.
@@ -153,56 +126,21 @@ Verify these for every run:
 
 ## Step Completion Reports
 
-After completing each major step, output a status report:
+After each phase, print a short status report with that phase's checks; the template and per-phase checks are in `references/step-reports.md`. The Validate report precedes the *Final Report*; it does not replace it.
 
-```
-◆ [Step Name] ([step N of M] — [context])
-··································································
-  [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Criteria]:         √ N/M met
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
+## Styles and Diagram Types
 
-Per-phase checks:
-- **Understand** — `Requirements gathered`, `Scope confirmed`
-- **Propose** — `Proposal approved`, `User confirmed`
-- **Generate** — `XML valid`, `Layout correct`, `Requirements covered`
-- **Validate** — `XML valid`, `Layout correct`, `Quality checks 9/9`
-
-## Style Guidelines
-
-- **Professional (default)** — Helvetica, fontSize 14 for labels / 11 for descriptions, draw.io Professional palette, `orthogonalEdgeStyle` with `rounded=1`.
-- **C4** — official C4 colors, white text on dark fills, bold titles, dashed boundaries.
-- **Color assignment** — flowcharts: blue=process, green=start/end, orange=decision, red=error. Architecture: color by layer (frontend/backend/data/external). C4: depth-by-blue.
-
-Full palettes and tokens: `references/drawio-format.md`.
-
----
-
-## Supported Diagram Types
-
-| Category | Types |
-|---|---|
-| Flow & Process | Flowchart, sequence, swimlane, state machine, activity, BPMN |
-| Architecture | System, microservices, network, cloud, C4, deployment |
-| Data & Relationships | ER, class, dependency graph, mind map, tree, org chart |
-| Planning | Gantt, roadmap, timeline, Kanban |
-| Comparison | Quadrant, SWOT, comparison matrix, Venn |
-| UX/Design | Wireframe, user flow, sitemap |
-| Custom | Any freeform diagram |
+Default style is Professional; C4 requests use the official C4 palette. Color rules and the supported diagram types: `references/xml-authoring.md` → *Style guidelines* and *Supported diagram types*.
 
 ## Iteration
 
-When iterating on an existing diagram, read the file, modify the XML in place, and rewrite. Preserve element IDs that haven't changed. Common requests: add/remove elements, change layout, adjust style, add a page.
+When iterating on an existing diagram, read the file and modify the XML in memory. Preserve element IDs that haven't changed. Run Phase 4 on the result before rewriting the file; a `BLOCKED` result leaves the original file untouched.
 
 ---
 
 ## Subagent Architecture
 
-When a diagram exceeds 30 elements, spawn a review loop to avoid single-context degradation. Use the complexity estimate from Phase 2 step 6: large (30+) spawns the subagent review loop below; small/medium proceed inline.
+Use the Phase 2 complexity estimate: large (30+ elements) runs this subagent loop; small and medium run inline.
 
 **Phase 3 — `agents/xml-generator.md`**
 - Receives: diagram type, elements, edges, style, complexity
@@ -213,7 +151,5 @@ When a diagram exceeds 30 elements, spawn a review loop to avoid single-context 
 
 1. **Validate** — spawn `agents/xml-validator.md`. Outputs PASS/FAIL for all 9 checks.
 2. **Fix** — if NEEDS_FIX, spawn `agents/xml-fixer.md` with the report. Patches XML; never regenerates. Skips semantic/structure issues (those require generator revision).
-3. **Re-validate** with cycle++ until PASS or cycle == 3.
-4. Return to main agent for file write or user review.
-
-**Fallback** — without the Agent tool, validate inline using `references/validation-checks.md`. Less rigorous but functional.
+3. **Re-validate** with cycle++ until PASS or cycle == 3. If the fixer returns `ready_for_validation: false` (check 1 or 8), re-spawn `agents/xml-generator.md` with the validator report; that counts as a cycle.
+4. Return the XML and the last validator report to the main agent, which applies Phase 4 steps 1–4 (write, `PARTIAL`, or `BLOCKED`).

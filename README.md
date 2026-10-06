@@ -245,7 +245,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Engine | Version | What it does |
 |---|---|---|
-| drawio-generator | 1.3.0 | draw.io XML — precise, editable, C4, swimlanes |
+| drawio-generator | 1.4.0 | draw.io XML — precise, editable, C4, swimlanes |
 | excalidraw-generator | 1.4.0 | Excalidraw JSON — hand-drawn, sketch, wireframes |
 
 ### Documentation

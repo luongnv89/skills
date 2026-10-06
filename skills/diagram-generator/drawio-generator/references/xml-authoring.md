@@ -80,3 +80,49 @@ Each page has its own independent cell IDs and system cells (`id="0"`, `id="1"`)
 ## File naming
 
 Use descriptive kebab-case names: `auth-flow.drawio`, `system-architecture.drawio`. If the user specifies a path, use that instead.
+
+## Minimal complete file
+
+One page, two shapes, one edge:
+
+```xml
+<mxfile>
+  <diagram name="Flow" id="page-1">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" page="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="node-start" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="100" y="80" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="node-process" value="Process Request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="100" y="200" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-start-process" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="node-start" target="node-process">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+```
+
+## Style guidelines
+
+- **Professional (default)** — Helvetica, fontSize 14 for labels / 11 for descriptions, draw.io Professional palette, `orthogonalEdgeStyle` with `rounded=1`.
+- **C4** — official C4 colors, white text on dark fills, bold titles, dashed boundaries.
+- **Color assignment** — flowcharts: blue=process, green=start/end, orange=decision, red=error. Architecture: color by layer (frontend/backend/data/external). C4: depth-by-blue.
+
+Full palettes and tokens: `drawio-format.md`.
+
+## Supported diagram types
+
+| Category | Types |
+|---|---|
+| Flow & Process | Flowchart, sequence, swimlane, state machine, activity, BPMN |
+| Architecture | System, microservices, network, cloud, C4, deployment |
+| Data & Relationships | ER, class, dependency graph, mind map, tree, org chart |
+| Planning | Gantt, roadmap, timeline, Kanban |
+| Comparison | Quadrant, SWOT, comparison matrix, Venn |
+| UX/Design | Wireframe, user flow, sitemap |
+| Custom | Any freeform diagram |
