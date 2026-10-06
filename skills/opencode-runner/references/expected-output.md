@@ -33,17 +33,18 @@ Confirm to proceed, or tell me what to change.
 ```
 opencode started: run=/tmp/opencode-run-1234567890 pid=48211
 Poll 1 (t+30s):  running, 1.1 KB,  last: "Reading utils/http.py …"
-Poll 2 (t+90s):  running, 4.2 KB,  last: "Editing utils/http.py …"
-Poll 3 (t+150s): done,    7.8 KB,  last: "Done. 3 files changed, 147 lines added."
+Poll 2 (t+60s):  running, 4.2 KB,  last: "Editing utils/http.py …"
+Poll 3 (t+150s): done, exit 0, 7.8 KB,  last: "Done. 3 files changed, 147 lines added."
 ```
 
 ## Phase 6 — Cleanup confirmation
 
 ```
-Cleanup complete — all opencode processes from this task have been terminated.
+cleanup=complete
+Cleanup complete — no opencode run process remains.
 ```
 
-If the task fails or times out, the output instead shows which model was tried, the error message from opencode, a recommendation to retry with the next free model, and the cleanup confirmation.
+If the task fails or times out, the output instead shows which model was tried, the exit code and error message from opencode, a recommendation to retry with the next free model, and the cleanup confirmation. Every run then ends with the final report (`references/final-report.md`).
 
 ---
 
@@ -107,7 +108,8 @@ If the task fails or times out, the output instead shows which model was tried, 
   Cadence respected:      √ pass — ≥30s between polls
   Stall detected:         × n/a  — output grew every poll
   Tail-only summary:      √ pass — last 40 lines read on done
-  [Criteria]:             √ 3/3 met
+  Exit code read:         √ pass — exit=0
+  [Criteria]:             √ 4/4 met
   ____________________________
   Result:                 PASS
 ```
@@ -117,9 +119,10 @@ If the task fails or times out, the output instead shows which model was tried, 
 ```
 ◆ Cleanup (phase 6 of 6 — process termination)
 ··································································
-  Processes killed:       √ pass — pidfile-owned process terminated
-  Temp files cleaned:     √ pass — "$RUN.log" and "$RUN.pid" removed
-  [Criteria]:             √ 2/2 met
+  Processes killed:       √ pass — pidfile-owned wrapper and its opencode child terminated
+  Temp files cleaned:     √ pass — "$RUN.log", "$RUN.pid" and "$RUN.exit" removed
+  No run process left:    √ pass — cleanup=complete
+  [Criteria]:             √ 3/3 met
   ____________________________
   Result:                 PASS
 ```
