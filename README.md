@@ -217,7 +217,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**product-planner**](skills/product-planner/) | 1.0.0 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
-| [**idea-validator**](skills/idea-validator/) | 1.5.1 | max | Market, feasibility, competitor checks for ideas |
+| [**idea-validator**](skills/idea-validator/) | 1.6.0 | max | Market, feasibility, competitor checks for ideas |
 | [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.6.0 | high | Score codebase + landing page vs 32 viral principles |
 | [**brand-name-checker**](skills/brand-name-checker/) | 1.4.2 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.4.3 | max | Structured PRD from idea or validate notes |

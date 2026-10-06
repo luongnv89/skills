@@ -54,6 +54,7 @@ Read this file when emitting the Step Completion Report for a given phase (see S
 ··································································
   Feasibility scored: √ pass ([score]/10)
   Market assessed:    √ pass | × fail — [gaps in analysis]
+  Verdict rule:       √ pass ([verdict], rule [1-3])
   validate.md updated:√ pass | × fail — [missing sections]
   ____________________________
   Result:             PASS | FAIL | PARTIAL

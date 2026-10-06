@@ -1,0 +1,110 @@
+{
+  "skill_name": "idea-validator",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Validate my idea: a habit tracker built for night-shift nurses that adapts reminders to rotating shift schedules. I'm a solo developer, side project, React Native. (Run in an ideas git repo with origin and live web search available.)",
+      "expected_output": "Runs Setup, Phases 1-5 and Commit and Push in order, runs at least 4 live web queries covering commercial and open-source options, writes idea.md and validate.md, commits only those files (plus README.md when README Maintenance changed it), pushes, and ends with a COMPLETE Final Report.",
+      "files": [],
+      "expectations": [
+        "Skipped the Phase 1 and Phase 2 questions that the prompt already answers (stack, team size, budget)",
+        "Ran at least 4 live web search queries before Phase 4, including at least one open-source query",
+        "validate.md has a Competitive Landscape table and an Open-source Alternatives & Reuse Potential section",
+        "The verdict names the verdict rule (1, 2 or 3) that produced it",
+        "Staged files by path and did not run git add -A",
+        "The GitHub links use the current branch name",
+        "The Final Report opens with a Result: line carrying COMPLETE and the verdict",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines, and Evidence cites only checks that ran",
+        "Decision: says No approval needed."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Is a self-hosted password manager for small teams worth building? Score it. (Run where a maintained OSS project such as Vaultwarden covers most of the idea.)",
+      "expected_output": "Phase 3 finds the maintained OSS project, compares license, health and extensibility, and gives a build-on/fork/contribute recommendation. The verdict is not Build it unless a build-on path was chosen.",
+      "files": [],
+      "expectations": [
+        "Listed at least one maintained open-source project with its license and a health signal",
+        "validate.md has a Build vs. Base Recommendation",
+        "Did not give Build it while the OSS project covers most of the idea with no chosen build-on path",
+        "Each rating has a one-line reason"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Evaluate my idea: an app for everyone to be more productive. (The user answers 'everyone' to the target-user question twice.)",
+      "expected_output": "Pushes back in Phase 1 and asks for one specific person who has this pain. When no segment is named, saves idea.md, does not start Phase 3, and reports PARTIAL.",
+      "files": [],
+      "expectations": [
+        "Asked the user to name one specific person who has the pain",
+        "Did not run Phase 3 web searches",
+        "Final Result: line is PARTIAL and names Phase 1 as the stop point",
+        "Uncertainty: lists the missing target user"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Validate this startup idea: AI meal planning for diabetics. (Run where no web search tool is available, and the user declines to continue without it.)",
+      "expected_output": "Stops at Phase 3 and asks whether to continue without live search. The user declines, so the run stops with BLOCKED and no verdict from general knowledge.",
+      "files": [],
+      "expectations": [
+        "Asked the user before continuing without web search",
+        "Did not fill the Competitive Landscape from memory",
+        "Final Result: line is BLOCKED with no verdict",
+        "Decision: names the question the run stopped on"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Validate my idea: a browser extension that summarizes long GitHub issues. (The ideas root is a plain directory, not a git repository.)",
+      "expected_output": "Writes idea.md and validate.md, skips Repo Sync and Commit and Push, does not run git init, and reports PARTIAL with no GitHub links.",
+      "files": [],
+      "expectations": [
+        "Did not run git init",
+        "Wrote both idea.md and validate.md in the project folder",
+        "Final Result: line is PARTIAL and says the files were not committed",
+        "Evidence: gives the absolute project folder path and says why there are no GitHub links or commit hash"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Should I build a note-taking app with Markdown and backlinks? (Phase 3 finds Obsidian and Logseq; the user names no differentiator and stops.)",
+      "expected_output": "Shows the near-identical products with URLs and a feature comparison, asks whether to proceed, and when the user stops sets the verdict to Skip it, skips Phase 5, and reports PARTIAL.",
+      "files": [],
+      "expectations": [
+        "Showed the near-identical products with URLs before Phase 4",
+        "Asked whether the user wants to proceed",
+        "The verdict is Skip it and cites verdict rule 1",
+        "Final Result: line is PARTIAL"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Write a PRD for my habit tracker app with user stories and acceptance criteria.",
+      "expected_output": "The skill does not trigger: writing a PRD is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not create a validate.md",
+        "Did not run competitive landscape web searches as part of an idea validation"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Build me a 12-slide investor pitch deck for my seed round.",
+      "expected_output": "The skill does not trigger: investor decks are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not create idea.md or validate.md",
+        "Did not give a Build it / Maybe / Skip it verdict"
+      ]
+    }
+  ]
+}
