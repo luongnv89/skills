@@ -4,7 +4,7 @@ description: "Run coding tasks via opencode using free cloud models. Use when as
 license: MIT
 effort: medium
 metadata:
-  version: 1.5.1
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -75,15 +75,14 @@ If `opencode` is not found, tell the user:
 > brew install opencode
 > ```
 
-Then **stop completely** — do not proceed to any other phase, do not attempt the task yourself, do not edit any files. Wait for the user to install opencode and re-invoke this skill.
+Then **stop completely** with `BLOCKED — opencode is not installed` (*Final Report*) — do not proceed to any other phase, do not attempt the task yourself, do not edit any files. Wait for the user to install opencode and re-invoke this skill.
 
 ### Step 2: Check for updates
 
-```bash
-opencode upgrade
-```
-
-This will upgrade to the latest version if one is available, or confirm already up to date. If the upgrade fails, inform the user of the error and suggest running the command manually. If the upgrade itself breaks opencode, stop and report — do not continue.
+1. Run `opencode upgrade`. It upgrades to the latest version, or confirms the installed one is current.
+2. If `opencode upgrade` exits non-zero, tell the user its error and suggest running `opencode upgrade` manually. Then continue to item 3.
+3. Run `opencode --version` again.
+4. If `opencode --version` exits non-zero, stop with `BLOCKED — opencode does not start after the upgrade`. Do not continue to Phase 2.
 
 ## Phase 2: Discover Free Models & Let User Pick
 
@@ -101,15 +100,15 @@ opencode models 2>/dev/null
 | 2 | `opencode/minimax-m2.5-free` | MiniMax free tier — good general-purpose |
 | 3 | `opencode/nemotron-3-super-free` | NVIDIA Nemotron free tier |
 | 4 | `opencode/big-pickle` | Free fallback |
-| 5 | `opencode/gpt-5-nano` | Small, low-cost fallback (verify pricing) |
+| 5 | `opencode/gpt-5-nano` | Small fallback; free only when `opencode models` prices it at $0 |
 
-Model IDs evolve. When parsing `opencode models` output, treat any `opencode/*` model whose ID ends in `-free` (or is explicitly priced $0) as free-tier eligible. Match by suffix, not by exact ID.
+Model IDs evolve. A model is **free-tier eligible** when its ID is in the `opencode/*` namespace and one of these holds: the ID ends in `-free`, the ID is `opencode/big-pickle`, or the `opencode models` output prices it at $0. Match by suffix, not by exact ID. Without a $0 price in the output, leave `opencode/gpt-5-nano` out.
 
 ### Selection logic
 
 1. Run `opencode models` and collect all entries.
 2. **Filter out all non-`opencode/*` models** — ignore anything from `ollama/*`, `lmstudio/*`, `nvidia/*`, or any other namespace. Only cloud-hosted `opencode/*` models qualify.
-3. Among the remaining list, identify the free candidates (suffix `-free` or known-free IDs from the priority list).
+3. Among the remaining list, keep only the free-tier eligible models.
 4. **Present the free models to the user as numbered options**, in priority order, with priority 1 marked as the default. Use the `<options>` format if possible. Example:
 
    > I found these free cloud models available via opencode. Pick one, or accept the default.
@@ -120,7 +119,7 @@ Model IDs evolve. When parsing `opencode models` output, treat any `opencode/*` 
    > 4. `opencode/big-pickle`
 
 5. If the user names a model, use that one. If the user says "default", "you pick", "any", or doesn't specify, use priority 1 (the highest-priority available free model).
-6. If no free cloud models exist at all, inform the user and **stop** — do not fall back to local models, paid models, or doing the task yourself.
+6. If no free-tier eligible model remains, **stop** with `BLOCKED — no free cloud model available` — do not fall back to local models, paid models, or doing the task yourself.
 
 **Privacy note** (always show this with the model list): Free models on OpenCode Zen may use collected data for model improvement.
 
@@ -142,7 +141,7 @@ Present this block:
 
 Then offer the user two `<options>`: "Proceed" and "Change something". Wait for confirmation. Do **not** invoke `opencode run` until the user confirms.
 
-If the user asks to change anything (different model, edit prompt, add/remove context files), loop back: update the field, re-show the summary, and ask again.
+If the user asks to change anything (different model, edit prompt, add/remove context files), loop back: update the field, re-show the summary, and ask again. If the user cancels instead, stop with `BLOCKED — the user cancelled before the run`.
 
 ## Phase 4: Execute the Task
 
@@ -150,12 +149,12 @@ Run the coding task with the confirmed model. **Always run in the background wit
 
 ```bash
 RUN=/tmp/opencode-run-$(date +%s)
-opencode run -m "[confirmed-model-id]" "[confirmed prompt]" > "$RUN.log" 2>&1 &
+( opencode run -m "[confirmed-model-id]" "[confirmed prompt]" > "$RUN.log" 2>&1; echo $? > "$RUN.exit" ) &
 echo $! > "$RUN.pid"
 echo "opencode started: run=$RUN pid=$(cat "$RUN.pid")"
 ```
 
-**Record the `run=` value this prints and substitute it literally in every later Phase 5 and Phase 6 shell.** Each Bash call starts fresh, so rebind `RUN` to that recorded prefix before reading `"$RUN.log"` or `"$RUN.pid"`; the `.pid` file is the ownership record for the launched process and carries its process id between calls.
+**Record the `run=` value this prints and substitute it literally in every later Phase 5 and Phase 6 shell.** Each Bash call starts fresh, so rebind `RUN` to that recorded prefix before reading `"$RUN.log"`, `"$RUN.pid"` or `"$RUN.exit"`. The `.pid` file is the ownership record: it holds the id of the wrapper subshell, whose child is `opencode run`. The wrapper writes opencode's exit code to `.exit` when opencode finishes, because a later shell cannot `wait` on it.
 
 ### Handling multi-line or complex prompts
 
@@ -163,7 +162,7 @@ For tasks that reference files or need detailed context, use the `--file` flag:
 
 ```bash
 RUN=/tmp/opencode-run-$(date +%s)
-opencode run -m "[confirmed-model-id]" --file path/to/relevant-file.py "[task description]" > "$RUN.log" 2>&1 &
+( opencode run -m "[confirmed-model-id]" --file path/to/relevant-file.py "[task description]" > "$RUN.log" 2>&1; echo $? > "$RUN.exit" ) &
 echo $! > "$RUN.pid"
 echo "opencode started: run=$RUN pid=$(cat "$RUN.pid")"
 ```
@@ -183,9 +182,10 @@ RUN=/tmp/opencode-run-1234567890   # paste the run= value Phase 4 printed
 status() {
   pid=$(cat "$RUN.pid" 2>/dev/null)
   if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then s=running; else s=done; fi
+  ec=$(cat "$RUN.exit" 2>/dev/null)
   bytes=$(wc -c < "$RUN.log" 2>/dev/null || echo 0)
   last=$(tail -n 1 "$RUN.log" 2>/dev/null | tr -d '\r' | cut -c1-160)
-  printf 'status=%s pid=%s bytes=%s last=%q\n' "$s" "${pid:-none}" "$bytes" "$last"
+  printf 'status=%s pid=%s exit=%s bytes=%s last=%q\n' "$s" "${pid:-none}" "${ec:-none}" "$bytes" "$last"
 }
 status
 ```
@@ -194,10 +194,9 @@ That single line is your full progress sample. Do not `tail -n 50`, do not `cat 
 
 ### Cadence (mandatory)
 
-- Wait **at least 30 seconds between polls** for short tasks, **60–120s** for longer ones.
-- Hard cap: **6 polls total** per run. If still running after that, ask the user whether to keep waiting or kill the process. Do not silently loop.
-- Detect stalls: if `bytes=` is unchanged for **two consecutive polls** (i.e., ≥60s of no output growth), treat the run as stalled — confirm with the user before killing.
-- Detect timeout: if no completion after ~5 minutes with no `bytes` growth, kill and report (then run Phase 6).
+- Wait **30 seconds** before polls 1 and 2. Wait **60–120 seconds** before each later poll.
+- Hard cap: **6 polls total** per run. If poll 6 still shows `status=running`, ask the user whether to keep waiting or kill the process. Do not poll again until the user answers. If the user says keep waiting, allow up to 6 more polls under the same rules.
+- A run is **stalled** when `bytes=` is the same in two consecutive polls. A run has **timed out** when 5 minutes pass with no `bytes=` growth. On a stall or a timeout, ask the user whether to keep waiting or kill the process. Kill it only when the user approves, then follow *On error, stall, or timeout*.
 
 ### What to report between polls
 
@@ -212,10 +211,12 @@ Do not paste the raw log. Do not summarize what opencode is "thinking" — you c
 When `status=done`:
 
 1. **Read the tail only**, not the whole log: `tail -n 40 "$RUN.log"`. That's the summary opencode prints at the end (files changed, tokens used, errors).
-2. Report: final status (success/fail), files mentioned in the tail, and token count if opencode printed one.
-3. If the user wants the full output, point them to `"$RUN.log"` — do not paste it.
-4. If the task failed, suggest retrying with the next free model from the Phase 2 list.
-5. **Run Phase 6 cleanup** — mandatory, even on success.
+2. Classify the run. `exit=0` is a success. Any other `exit=` value is a failure. `exit=none` means the wrapper was killed before opencode finished: treat it as a failure.
+3. If the working directory is a git repository, run `git status --porcelain` to list the files that changed. This is a read only: never edit, stage, or revert those files.
+4. Do not paste the full log. If the user asks to keep it, skip deleting `"$RUN.log"` in Phase 6 Step 3 and give its path in the final report.
+5. If the task failed, suggest retrying with the next free model from the Phase 2 list.
+6. **Run Phase 6 cleanup** — mandatory, even on success.
+7. Print the final report (*Final Report*).
 
 ### On error, stall, or timeout
 
@@ -224,6 +225,7 @@ When `status=done`:
 3. If all free models have been tried, suggest the user run `opencode auth list` to check provider auth.
 4. **Never** attempt the task yourself as a fallback.
 5. **Run Phase 6 cleanup** — always.
+6. Print the final report (*Final Report*).
 
 ## Phase 6: Cleanup (mandatory)
 
@@ -236,65 +238,49 @@ If you launched opencode in the background, use the pidfile for the recorded run
 ```bash
 RUN=/tmp/opencode-run-1234567890   # paste the run= value Phase 4 printed
 pid=$(cat "$RUN.pid" 2>/dev/null)
-# Kill the main process and its children
-[ -n "$pid" ] && kill "$pid" 2>/dev/null
-# Wait briefly for graceful shutdown
-sleep 2
-# Force kill if still running
-[ -n "$pid" ] && kill -9 "$pid" 2>/dev/null
+if [ -n "$pid" ]; then
+  pkill -TERM -P "$pid" 2>/dev/null   # opencode runs as a child of the wrapper subshell
+  kill "$pid" 2>/dev/null
+  sleep 2
+  pkill -KILL -P "$pid" 2>/dev/null
+  kill -9 "$pid" 2>/dev/null
+fi
 ```
 
 ### Step 2: Find and kill orphaned opencode processes
 
-After the task completes, scan for any lingering opencode processes from this session:
+1. Run `pgrep -fl "opencode run"` to list lingering `opencode run` processes.
+2. If it lists any process, run `pkill -f "opencode run"`.
 
-```bash
-# List any remaining opencode processes
-ps aux | grep '[o]pencode' | grep -v grep
-```
-
-If orphaned processes are found, kill them:
-
-```bash
-# Kill all opencode run processes (be specific to avoid killing the user's TUI)
-pkill -f "opencode run" 2>/dev/null
-```
-
-Be careful to only kill `opencode run` processes, not the user's interactive TUI session (`opencode` without subcommand). If the user has an interactive opencode session open, leave it alone.
+This pattern never matches the user's interactive TUI session (`opencode` without a subcommand). Leave that session alone.
 
 ### Step 3: Clean up temp files
 
 ```bash
-rm -f "$RUN.log" "$RUN.pid" 2>/dev/null
+rm -f "$RUN.log" "$RUN.pid" "$RUN.exit" 2>/dev/null
 ```
+
+If the user asked to keep the log (Phase 5, *On completion* item 4), drop `"$RUN.log"` from this command.
 
 ### Step 4: Confirm cleanup
 
-Report to the user:
+1. Run `pgrep -f "opencode run" >/dev/null && echo cleanup=incomplete || echo cleanup=complete`.
+2. If it prints `cleanup=complete`, report: **Cleanup complete** — no `opencode run` process remains.
+3. If it prints `cleanup=incomplete`, warn: **Warning:** some `opencode run` processes are still running. Run `pkill -f "opencode run"` manually to clean up.
 
-> **Cleanup complete** — all opencode processes from this task have been terminated.
+## Final Report
 
-If you couldn't kill some processes (permission denied, etc.), warn the user:
-
-> **Warning:** Some opencode processes may still be running. Run `pkill -f "opencode run"` manually to clean up.
+After Phase 6, print one final report in concise text, in this order: `Result:` (`COMPLETE`, `PARTIAL — <reason>`, or `BLOCKED — <reason>`), `Evidence:` (only checks that ran), `Uncertainty:`, then `Decision:` (the approval needed, or `No approval needed.`). A stop before `opencode run` starts skips Phases 4–6 and prints the report directly. Status rules, examples and the reader checks: `references/final-report.md`.
 
 ## Expected Output
 
-See `references/expected-output.md` for the full set of example blocks the user should see at each phase (model picker, confirmation summary, low-token progress polls, cleanup confirmation). On error or timeout, the cleanup confirmation still runs.
+See `references/expected-output.md` for the full set of example blocks the user should see at each phase (model picker, confirmation summary, low-token progress polls, cleanup confirmation). On error or timeout, the cleanup confirmation still runs. Final report examples: `references/final-report.md`.
 
 ---
 
 ## Edge Cases
 
-- **opencode not installed** — see Phase 1, Step 1 (install instructions, then stop).
-- **opencode upgrade fails** — see Phase 1, Step 2 (report and stop, don't continue on a broken binary).
-- **No free cloud models available** — see Phase 2, Selection logic step 6 (inform user, stop; no fallback to local/paid models).
-- **All priority free models tried and all fail** — see Phase 5, "On error, stall, or timeout" (suggest `opencode auth list`, stop).
-- **Task timeout (>5 minutes with no output growth)** — see Phase 5, Cadence and "On error, stall, or timeout" (confirm, kill, retry suggestion, Phase 6 cleanup).
-- **User rejects the Phase 3 confirmation** — see Phase 3, final paragraph (loop back to Phase 2 or 3; never invoke `opencode run` unconfirmed).
-- **User has an interactive opencode TUI session open** — see Phase 6, Step 2 (kill only `opencode run` children, leave the TUI alone).
-- **Task prompt contains multi-line content or file references** — see Phase 4, "Handling multi-line or complex prompts" (use `--file`).
-- **opencode produces output but exits non-zero** — Report the exit code and last lines of output to the user, run cleanup, and suggest verifying the task result manually before relying on it.
+When an edge case fires, read `references/edge-cases.md`: opencode missing, a failed upgrade, no free model, every model failing, a stall or timeout, a rejected confirmation, an open TUI session, multi-line prompts, a non-zero exit, or a killed wrapper. It also holds the opencode command reference.
 
 ---
 
@@ -308,11 +294,12 @@ The skill run is considered successful when all of the following are verifiable:
 - [ ] **Confirmation captured before execution** — Phase 3 shows model + cwd + context files + prompt, and waits for explicit user confirmation before invoking `opencode run`.
 - [ ] **Task delegated to opencode** — The coding task is executed via `opencode run`, not by the skill editing files directly or writing code itself.
 - [ ] **Low-token monitoring used** — Phase 5 polls via the single-line `status()` helper. The raw log is never streamed back; only the last line, byte count, and status are reported per poll. Max 6 polls per run.
-- [ ] **Stall/timeout handled** — No byte growth across two consecutive polls or no completion after ~5 min triggers a confirmation with the user and (if approved) a kill + cleanup.
-- [ ] **Completion summary delivered** — On `status=done`, the skill reads only `tail -n 40 "$RUN.log"` and summarizes files changed and token usage.
-- [ ] **Cleanup runs on every exit path** — Phase 6 runs whether the task succeeded, failed, errored, stalled, or timed out. No orphaned `opencode run` processes remain.
-- [ ] **Temp files removed** — `"$RUN.log"` and `"$RUN.pid"` (and any other temp files created) are deleted during cleanup.
+- [ ] **Stall/timeout handled** — No byte growth across two consecutive polls, or 5 minutes with no byte growth, triggers a confirmation with the user and (if approved) a kill + cleanup.
+- [ ] **Completion summary delivered** — On `status=done`, the skill reads only `tail -n 40 "$RUN.log"`, classifies the run by its `exit=` value, and summarizes files changed and token usage.
+- [ ] **Cleanup runs on every exit path** — Phase 6 runs whether the task succeeded, failed, errored, stalled, or timed out, and Step 4 prints `cleanup=complete` before the report claims cleanup.
+- [ ] **Temp files removed** — `"$RUN.log"`, `"$RUN.pid"` and `"$RUN.exit"` are deleted during cleanup, unless the user asked to keep the log.
 - [ ] **No fallback to self** — If opencode is unavailable, the user rejects the confirmation, or all free models fail, the skill stops. It never falls back to editing files or writing code itself.
+- [ ] **Final report delivered** — every run, stops included, ends with `Result:`, `Evidence:`, `Uncertainty:` and `Decision:`, and passes the four reader checks in `references/final-report.md`: the result is findable in the first line, facts are separated from assumptions, each claim traces to a check that ran, and the next decision is named. Human understanding stays unconfirmed until a user answers those checks.
 
 ---
 
@@ -331,16 +318,3 @@ After each phase, emit a compact status block so pass/fail is scannable:
 ```
 
 Use `√` for pass, `×` for fail, and `—` to add brief context. Per-phase example blocks (Installation, Model Discovery, Confirmation, Execution, Monitor, Cleanup) are in `references/expected-output.md`.
-
-## Quick Reference
-
-| Command | Purpose |
-|---------|---------|
-| `opencode --version` | Check installed version |
-| `opencode upgrade` | Update to latest |
-| `opencode models` | List available models |
-| `opencode run -m MODEL "prompt"` | Run task with specific model |
-| `opencode stats` | View usage statistics |
-| `opencode auth list` | Check authenticated providers |
-| `pkill -f "opencode run"` | Kill orphaned run processes |
-| `ps aux \| grep opencode` | Find running opencode processes |

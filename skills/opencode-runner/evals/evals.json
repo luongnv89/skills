@@ -4,23 +4,44 @@
     {
       "id": 1,
       "prompt": "use opencode to add error handling to this Python script: calculator.py - it should handle division by zero, invalid input, and missing operators",
-      "expected_output": "Opencode runs with the best free model (minimax-m2.5-free), adds try/except blocks for ZeroDivisionError, ValueError, and IndexError to calculator.py",
+      "expected_output": "Opencode runs with the user's chosen free model (default: the highest-priority available free model, opencode/deepseek-v4-flash-free), adds try/except blocks for ZeroDivisionError, ValueError, and IndexError to calculator.py",
       "files": ["test-files/calculator.py"],
-      "expectations": []
+      "expectations": [
+        "Only free-tier eligible opencode/* models are offered; no ollama/*, lmstudio/* or other local model appears in the list.",
+        "The model, working directory, context files and prompt are shown and confirmed before `opencode run` starts.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran with their commands or observed values, Uncertainty stating that opencode's changes were not reviewed or tested, and Decision naming the approval needed or 'No approval needed.'"
+      ]
     },
     {
       "id": 2,
       "prompt": "delegate to opencode: write unit tests for calculator.py using pytest",
       "expected_output": "Opencode runs with a free model and produces a test_calculator.py file with pytest tests covering add, divide, and parse_input functions",
       "files": ["test-files/calculator.py"],
-      "expectations": []
+      "expectations": [
+        "opencode runs in the background with its exit code written to the run's .exit file, and each poll reports one status line instead of the log.",
+        "The skill does not write test_calculator.py itself; opencode does the work.",
+        "Cleanup reports cleanup=complete from a pgrep check before the final report claims cleanup."
+      ]
     },
     {
       "id": 3,
       "prompt": "run with opencode using a free model: add a subtract and multiply function to calculator.py and update parse_input to support them",
       "expected_output": "Opencode adds subtract and multiply functions, updates the parse_input function to handle - and * operators",
       "files": ["test-files/calculator.py"],
-      "expectations": []
+      "expectations": [
+        "The run is classified by its exit= value: exit=0 is a success, any other value or exit=none is a failure that ends PARTIAL.",
+        "The final report's first line gives the status and what happened, and its Decision line names the next user action, such as reviewing the diff before committing."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "negative-trigger",
+      "prompt": "Run this refactor of calculator.py with my local Ollama llama3 model.",
+      "expected_output": "Should NOT trigger opencode-runner: the user asked for a local model, which the skill never selects.",
+      "files": [],
+      "expectations": [
+        "opencode-runner is not applied: no opencode command runs and no opencode/* model is offered."
+      ]
     }
   ]
 }

@@ -274,7 +274,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**cli-builder**](skills/cli-builder/) | 1.1.0 | high | 5-step CLI tool builder with approval gates |
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.2.1 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.2.4 | high | Cross-platform install.sh with env detection |
-| [**opencode-runner**](skills/opencode-runner/) | 1.5.1 | medium | Delegate work to opencode free cloud models |
+| [**opencode-runner**](skills/opencode-runner/) | 1.6.0 | medium | Delegate work to opencode free cloud models |
 | [**herdr-agent**](skills/herdr-agent/) | 3.2.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.6.0 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.4.0 | medium | Spawn, message, read CLI agents in tmux |
