@@ -15,6 +15,7 @@
 - Target untested branches, error paths, and boundary values
 - Adapt to any testing framework (Jest, Vitest, pytest, Go, Rust)
 - Create feature branch automatically before adding tests
+- Final report states the result, the commands that ran, what was not checked, and any action left to you
 
 ## When to Use
 
@@ -58,4 +59,4 @@ asm install github:luongnv89/skills:skills/test-coverage
 
 ## Output
 
-New test cases added to the project's existing test suite, following current patterns and naming conventions. Tests target error handling, boundary values, null/empty inputs, and async edge cases with measurably improved coverage.
+New test cases added to the project's existing test suite, following current patterns and naming conventions. Tests target error handling, boundary values, null/empty inputs, and async edge cases, and must raise total coverage above the baseline. The run ends with a report that opens with `COMPLETE`, `PARTIAL`, or `BLOCKED`, followed by Evidence, Uncertainty, and Decision lines.
