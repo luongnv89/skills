@@ -4,7 +4,7 @@ description: "Generate or update docs to match the code, citing each claim to pa
 license: MIT
 effort: medium
 metadata:
-  version: 2.0.4
+  version: 2.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -52,7 +52,7 @@ A single run usually mixes A and B across the inventory. C is additive — it la
 
 1. If already on a task feature branch, skip.
 2. Detect convention: `git branch -r | head -20` (`feat/`, `feature/`, …).
-3. Create `feat/doc-manager` (or the repo's convention).
+3. Create `feat/doc-manager` (or the repo's convention). If that branch already exists, ask the user whether to reuse it or create `feat/doc-manager-<YYYYMMDD>`.
 
 ### 1. Inventory + scope
 
@@ -62,7 +62,7 @@ Read the codebase to establish ground truth, then build the doc inventory.
 - **Existing docs**: every `README.md`, `docs/*.md`, per-component README.
 - **Inventory table** — for each doc: `path | purpose | status(unknown) | is-runbook?`. Also list **needed-but-missing** docs implied by the code (e.g. code has a `deploy/` dir but no `docs/deployment.md`).
 
-Present the inventory to the user and confirm scope before editing. **Do not silently expand** beyond confirmed scope.
+Present the inventory and ask the user to confirm the scope. If the user narrows it, use the narrowed scope. If the user declines or does not answer, stop before editing and report `BLOCKED — scope not confirmed`. **Do not silently expand** beyond confirmed scope.
 
 ### 2. Per-doc pass
 
@@ -107,32 +107,33 @@ For any deploy/release/setup/operational doc, produce a **check-only** validatio
 
 ### 4. Validate the run
 
-1. **Citations**: no non-obvious claim is unsourced or unresolved-`FLAG`. Grep for stray `FLAG:` markers — none may remain unaddressed.
+1. **Citations**: no non-obvious claim is unsourced. Grep for `FLAG:` markers. Each marker that remains is an **open FLAG**: it was raised with the user and is listed in the change summary.
 2. **Links**: every internal `[text](path)` resolves.
 3. **Orphans**: every `docs/*.md` is reachable from `README.md` or another doc within one hop.
 4. **Inventory closed**: every doc is `updated`, `verified-current`, or `flagged` (with the flag surfaced to the user). None left `unknown`.
-5. **Runbook**: each runbook section links a well-formed check-only `validate-<name>.sh` (run `--check` to confirm — on a writable tree it's committed; on a read-only tree it's emitted inline and run once). Agent-satisfiable local/static checks must pass; env/tool/network gaps that only an operator can close are documented as prereqs/`MANUAL:` rather than forced to exit 0. `docs/troubleshooting.md` reflects any real fix applied.
+5. **Runbook**: each runbook section links a **well-formed** check-only `validate-<name>.sh`: `bash -n` passes, `--help` exits 0, and with no arguments it defaults to check mode (`MODE="check"`). Run `--check`. Agent-satisfiable local/static checks must pass; env/tool/network gaps that only an operator can close are documented as prereqs/`MANUAL:` rather than forced to exit 0. `docs/troubleshooting.md` reflects any real fix applied.
 6. **Diagrams** (if any): Mermaid renders without error (`mmdc` if available).
 
-Present a change summary. **Do not commit unless the user explicitly asks.**
+Present the **change summary** defined in `references/change-summary.md`. It opens with `Result: COMPLETE | PARTIAL | BLOCKED`, then `Evidence:`, `Uncertainty:`, `Decision:`, and a per-doc table. A run that stops early still ends with it. **Do not commit unless the user explicitly asks.**
 
 ## Expected output
 
 - Root `README.md` and `docs/*.md` reconciled to the code, each non-obvious claim cited to `path:line`.
 - `docs/DECISIONS.md` — append-only log of every ambiguity resolved with the user.
 - For runbook sections: `scripts/validate-<name>.sh` (check-only) linked from the section, plus `docs/troubleshooting.md` updated with fixes found during validation.
-- A change summary listing per-doc status and any open `FLAG`s.
+- The change summary (`references/change-summary.md`).
 
 ## Acceptance criteria
 
 A run passes when **all** hold:
 
-- [ ] **No invented facts.** Every non-obvious claim in every touched doc is either cited to `path:line` or marked `FLAG` and raised with the user. Zero unresolved `FLAG` markers at close.
+- [ ] **No invented facts.** Every non-obvious claim in every touched doc is either cited to `path:line` or marked `FLAG` and raised with the user. Every `FLAG` left at close is an open FLAG listed in the change summary.
 - [ ] **Inventory closed.** Every doc in scope ends `updated`, `verified-current`, or `flagged`; none left `unknown` or known-stale-and-untouched.
 - [ ] **Decisions logged.** Every user-resolved ambiguity is appended to `docs/DECISIONS.md` with the resolution and (where applicable) source.
-- [ ] **Runbook validated.** Each deploy/process/setup section has a check-only `validate-<name>.sh` that is linked, well-formed, and gates every destructive step (run `--check` to confirm). Acceptance is **not** "exit 0 at all costs": agent-satisfiable local/static checks must pass; genuine operator prerequisites (missing env vars, tools, remote health outside this environment) may leave `--check` non-zero when documented as prereqs or `MANUAL:` steps — never invent a green path by dropping real checks. On a read-only tree the script is emitted inline and its `--check` outcome reported instead of committed. `docs/troubleshooting.md` records any real fix applied.
+- [ ] **Runbook validated.** Each deploy/process/setup section links a check-only, well-formed (Step 4.5) `validate-<name>.sh` that gates every destructive step, and its `--check` outcome is reported. Not "exit 0 at all costs": a non-zero exit is acceptable only when every failure is a documented operator prerequisite — never invent a green path by dropping real checks. `docs/troubleshooting.md` records any real fix applied.
 - [ ] **Links + orphans.** Every internal link resolves; no `docs/*.md` is orphaned.
 - [ ] **Branch discipline.** No commits on `main`/`master`; all changes on a feature branch. No commit without an explicit user request.
+- [ ] **Summary readable.** The change summary meets the four reader checks in `references/change-summary.md`. Without user feedback on them, report human understanding as unconfirmed.
 
 ## Edge cases
 
@@ -162,7 +163,7 @@ Use `√` pass, `×` fail, `—` for context. Per-phase checks:
 - **Inventory + scope** — `Ground-truth read`, `Inventory built`, `Scope confirmed`
 - **Per-doc pass** — `Claims cited`, `Conflicts flagged`, `Decisions logged`
 - **Runbook add-on** — `Validate script check-only`, `Destructive steps gated`, `Troubleshooting updated`
-- **Validate the run** — `No unresolved FLAGs`, `Links resolve`, `Inventory closed`, `Runbook script well-formed`
+- **Validate the run** — `Open FLAGs listed`, `Links resolve`, `Inventory closed`, `Runbook script well-formed`
 
 ## Guidelines
 
