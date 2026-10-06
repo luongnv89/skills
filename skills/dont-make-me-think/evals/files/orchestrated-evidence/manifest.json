@@ -1,0 +1,11 @@
+{
+  "url": "https://orchestrated-fixture.invalid/pricing",
+  "captured_at": "2026-10-06T08:00:00Z",
+  "files": {
+    "page.html": "captured: rendered HTML of the pricing page (synthetic fixture)",
+    "screenshots/": "not captured: no graphical browser was available"
+  },
+  "owners": {
+    "clarity": "dont-make-me-think"
+  }
+}

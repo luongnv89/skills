@@ -27,9 +27,17 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
-import cv2
-import numpy as np
-from PIL import Image
+try:
+    import cv2
+    import numpy as np
+    from PIL import Image
+except ImportError as exc:
+    print(
+        f"✗ Missing Python package: {exc.name or exc}. "
+        "Install the dependencies with: python3 -m pip install pillow opencv-python numpy",
+        file=sys.stderr,
+    )
+    sys.exit(2)
 
 
 # ── Supported formats ────────────────────────────────────────────────

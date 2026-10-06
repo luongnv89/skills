@@ -3,8 +3,10 @@ name: dont-make-me-think
 description: "Review UI usability using Steve Krug's principles and produce a scannable report. Use for UX audits of screenshots, URLs, or code. Don't use for brand critique, WCAG audits, or backend/API review."
 license: MIT
 effort: medium
+dependencies:
+  - browse
 metadata:
-  version: 1.5.0
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -14,95 +16,81 @@ Evaluate and improve UIs through Steve Krug's "Don't Make Me Think" principles. 
 
 ## When to Use
 
-Trigger this skill when the user asks for a usability audit, UX review, or UI feedback on a screenshot, live URL, or HTML/CSS code. Do not use for visual/brand critique, WCAG accessibility audits, or backend/API review — route those elsewhere. An orchestrator may add optional run lines (see Orchestrated Runs).
+Trigger this skill when the user asks for a usability audit, UX review, or UI feedback on a screenshot, live URL, or HTML/CSS code. Do not use for visual/brand critique, WCAG accessibility audits, or backend/API review — route those elsewhere.
 
 ## Dependency Preflight (mandatory)
 
-This skill invokes `/browse`, and only on the **live URL** path — screenshot, code, wireframe,
-and description inputs need nothing installed. Resolve it before navigating anything:
+This skill invokes `/browse` (frontmatter `dependencies`) only on the **live URL** path. Run this
+once, before the first navigation:
 
 ```bash
-test -d "$HOME/.claude/skills/browse" || asm list -p claude --json | grep -q '"browse"' || {
-  echo "Missing required skill: browse" >&2
-  echo "Install it:      asm install github:garrytan/gstack:browse -p claude -s global --yes" >&2
-  echo "No asm yet:      npm install -g agent-skill-manager" >&2
-  echo "Verify:          asm list -p claude --json | grep 'browse'" >&2
-}
+if test -f "$HOME/.claude/skills/browse/SKILL.md"; then
+  echo "browse_mode=installed browse_skill=$HOME/.claude/skills/browse/SKILL.md"
+elif test -f "$HOME/.agents/skills/browse/SKILL.md"; then
+  echo "browse_mode=installed browse_skill=$HOME/.agents/skills/browse/SKILL.md"
+elif command -v asm >/dev/null && asm deps --help >/dev/null 2>&1; then
+  asm deps discover dont-make-me-think --json || echo "discover failed; acquire still runs" >&2
+  echo "browse_mode=lease"
+else
+  echo "Missing skill: browse. Install: asm install github:garrytan/gstack:browse -p claude -s global --yes" >&2
+  echo "No asm yet: npm install -g agent-skill-manager@latest" >&2
+  echo "browse_mode=none"
+fi
+printf 'dmmt_session=%s\n' "dont-make-me-think-$(date +%s)-$$"   # record it; reuse it verbatim
 ```
 
-The install-path test runs first on purpose: `/browse` ships in gstack and may be present without
-`asm` knowing about it, so an `asm list` check alone would nag on every live-URL review.
+The install-path tests run first because gstack may install `/browse` without `asm` knowing.
 
-`-p claude` is not decoration: `asm install` refuses to guess a provider non-interactively and
-`--yes` does not cover that choice. Naming the same provider in the verification stops an install
-under a different tool from reporting success. `-s global` is what makes the install agree with the
-detection: scope otherwise defaults to a prompt, and a project-scoped install lands in
-`.claude/skills/`, where the `$HOME` test above will never find it.
-
-A missing `/browse` is **fail-soft**, not fatal — take the `/browse` row in Error Handling below.
-Never review a URL you could not load.
+1. `browse_mode=installed`: read the recorded `browse_skill` path.
+2. `browse_mode=lease`: run `asm deps acquire browse --session <dmmt_session> --json`; read the
+   returned `skillMdPath` directly.
+3. `browse_mode=none`, or step 2 failed: take the *No reviewable input* row in Error Handling (fail-soft).
+   Never review a URL you could not load.
+4. **Release in `finally`.** If step 2 ran, run `asm deps release --session <dmmt_session> --json`
+   once at every terminal outcome, stops included.
 
 ## Repo Sync Before Edits (mandatory)
 
-Steps 1-4 below are read-only and need no sync. **Redesign Mode (step 5) writes to UI source files
-in a git repo** — sync the branch with the remote before its first edit, so fixes land on the
-latest base:
-
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
-
-If the tree is dirty, `git stash`, sync, `git stash pop`. If `origin` is missing or the pull
-conflicts, **stop and ask the user** — never skip or force the sync.
+Steps 1-4 below are read-only. **Redesign Mode (step 5) writes to UI source files**: once the user
+confirms the dry-run diff, run the seven *Repo Sync steps* in `references/redesign-mode.md`
+(`git -C "$repo"`, stash-first, skips recorded) before the first edit. On a rebase conflict, run
+`git -C "$repo" rebase --abort`, write no file, and stop and ask the user. Never force the sync. This skill commits nothing.
 
 ## Instructions
 
-Follow this workflow to keep the agent's context budget tight:
+Follow this workflow to keep the agent's context budget tight. After each step, print its Step Completion Report.
 
-1. **Check Prerequisites** — confirm input type and access (see below).
-2. **Process Input** — handle per the Input Handling table.
-3. **Evaluate** — apply applicable lenses from The Ten Lenses (see `references/krug-principles.md` for token-efficient deep dives).
-4. **Generate Report** — use the Report Format template verbatim; with `output-dir`, also write it to `<output-dir>/usability-review.md`.
-5. **Redesign (optional)** — only if user requests fixes; always confirm before destructive edits.
+1. **Check Prerequisites** — identify the input type from the Input Handling table.
+   - If no input was given, take the *No reviewable input* row in Error Handling.
+   - If the review will load a live URL (no `evidence-dir`, or one that falls back to the live URL per `references/orchestrated-runs.md`), run the Dependency Preflight.
+2. **Process Input** — take the Input Handling action for that type.
+3. **Evaluate** — score each applicable lens from The Ten Lenses 0-10 and give each issue a severity (Report Format). If the evidence cannot support a lens, mark it not assessed instead of guessing.
+4. **Generate Report** — fill the template in `references/report-format.md` and print it. With `output-dir`, also write it to `<output-dir>/usability-review.md`.
+5. **Redesign (optional)** — only when the user asks for fixes, run Redesign Mode.
 
 ## Prerequisites
 
-- **Browser access** (live URL input only): `/browse`, per the Dependency Preflight above
-- **Input available**: one of — live URL, screenshot/image, HTML/CSS code, wireframe, or verbal description
-- **Code editor access** (Redesign Mode only): write permission to the UI source files being modified
+Requires one reviewable input; `/browse` for live URLs only; write access to the UI files for Redesign Mode only.
 
-## Screenshot Pre-processing
-
-When the input is a screenshot, choose the analysis path based on available image capability and
-evidence needs. If the image input can be inspected directly, review it directly. Use the
-pre-processing script when exact numeric palette, dimensions, or density evidence, or consistent
-multi-image summaries, are needed:
-
-```bash
-python3 scripts/process_screenshots.py <image_path> [--recursive]
-```
-
-When run, it produces both outputs: JSON on stdout — metadata, color palette, layout regions, visual
-density, quality score, warnings — and a human-readable markdown report on stderr. Populate numeric
-claims from the JSON and read the markdown for a quick sanity check. Disclose unavailable measurements
-and never fabricate precise numbers through direct inspection. If the script fails or the image is
-invalid, use direct visual analysis when available and disclose the failure.
-
-Read `references/screenshot-processing.md` for the full flag set, every extracted field, and how to
-use the output in the review.
-
-### Input Handling
+## Input Handling
 
 | Input type | Action |
 |---|---|
-| Screenshot/image | Review directly when image capability is available; use `scripts/process_screenshots.py` for exact numeric or consistent multi-image evidence; disclose failures |
-| Live URL | Use `/browse` to navigate, screenshot, interact |
+| Screenshot/image | Review directly. For exact palette, dimension or density numbers, or several images, run `python3 scripts/process_screenshots.py <image_path> [--recursive]` (`references/screenshot-processing.md`) |
+| Live URL | Use `/browse` per Working With Live Sites |
 | Orchestrator `evidence-dir` | Review its `page.html` + `screenshots/` instead of `/browse`; disclose untested interactions |
 | HTML/CSS/JS code | Read code, focus on user experience |
 | Wireframe/mockup | Focus on information architecture, not polish |
 | Verbal description | Ask clarifying questions first |
+
+Use the script's stdout JSON for every numeric claim. Never present a visual estimate as a measurement.
+
+## Working With Live Sites
+
+1. Navigate to the page with `/browse` and take a full-page screenshot at 1280 px wide.
+2. Click or hover the primary call to action, the main navigation, and one form field when present. Record what each one does.
+3. Load the page at 375 px wide and take a screenshot. If the width cannot be set, mark lens 9 (Mobile) as not assessed.
+4. Review from these screenshots and interactions; list each one not exercised under **Not tested**.
 
 ## Orchestrated Runs
 
@@ -112,7 +100,7 @@ explicit confirmation.
 
 ## The Ten Lenses
 
-Evaluate through whichever lenses apply. Read `references/krug-principles.md` for deep detail on any principle.
+Read `references/krug-principles.md` for deep detail on any lens. Evaluate through whichever lenses apply.
 
 | # | Lens | Core question |
 |---|---|---|
@@ -129,187 +117,61 @@ Evaluate through whichever lenses apply. Read `references/krug-principles.md` fo
 
 ## Report Format
 
-The review output must be **concise, visual, and skimmable**. Think bullet points, tables, and diagrams — not paragraphs. The report serves two audiences simultaneously: a human who wants to skim in 30 seconds, and an AI agent who needs enough context to implement fixes.
+Use the template and report rules in `references/report-format.md` (no paragraphs, one line per finding, a selector per issue, honest scores). It also holds the variants, the `BLOCKED` block, and the reader checks. Example inline summary line, printed with `output-dir` before the top issues:
 
-Use this exact template:
-
-~~~markdown
-# Usability Review: [Page/Screen Name]
-
-## Thinking Cost: [LOW | MODERATE | HIGH]
-
-> [One sentence: what's the single biggest usability problem on this page]
-
-## Scorecard
-
-Rate each applicable lens 0-10. Use a mermaid chart to visualize.
-
-```mermaid
-xychart-beta
-  title "Usability Scores"
-  x-axis ["Self-evident", "Scanning", "Hierarchy", "Words", "Navigation", "Trunk test", "Landing", "Affordances", "Mobile", "Goodwill"]
-  y-axis "Score" 0 --> 10
-  bar [8, 6, 5, 4, 7, 8, 9, 6, 7, 5]
+```
+Thinking Cost: HIGH — 3 critical issues found (disabled button, missing nav labels, no landing clarity)
 ```
 
-| Lens | Score | Why |
-|---|---|---|
-| Self-evidence | 8/10 | Labels are clear, one ambiguous nav item |
-| ... | ... | ... |
+**Status** (first word of the `**Result:**` line under the title):
 
-## Issues
+| Status | When |
+|---|---|
+| `COMPLETE` | Report written; every applicable lens scored. |
+| `PARTIAL` | Report written; at least one applicable lens marked not assessed. |
+| `BLOCKED` | No report is written: no reviewable input. Print the four-line `BLOCKED` block instead. |
 
-Use severity icons: 🔴 Critical, 🟡 Moderate, 🟢 Minor
+**Severity:** 🔴 Critical — blocks the page's main task, or likely causes an error or exit. 🟡 Moderate — the user finishes but pauses, rereads, or backtracks. 🟢 Minor — polish, no expected slowdown.
 
-### 🔴 [Short issue title]
-- **Problem:** [one line — what the user experiences]
-- **Impact:** [one line — what happens because of this]
-- **Fix:** [one line — specific, actionable, concrete]
-- **Where:** [element/section/selector if applicable]
-
-### 🟡 [Short issue title]
-...
-
-### 🟢 [Short issue title]
-...
-
-## Issue Map
-
-Show where issues cluster on the page using a mermaid diagram.
-
-```mermaid
-graph TD
-  subgraph Header/Nav
-    I1["🔴 Duplicate 'macOS' label"]
-  end
-  subgraph Hero
-    OK1["✅ Clear tagline"]
-  end
-  subgraph Mid-page
-    I2["🟡 Tab selector too subtle"]
-    I3["🟡 23 carousel images"]
-  end
-  subgraph Bottom
-    I4["🔴 Disabled buttons, no explanation"]
-    I5["🟡 No pricing shown"]
-  end
-  style I1 fill:#ff4444,color:#fff
-  style I4 fill:#ff4444,color:#fff
-  style I2 fill:#ffbb33,color:#000
-  style I3 fill:#ffbb33,color:#000
-  style I5 fill:#ffbb33,color:#000
-  style OK1 fill:#00C851,color:#fff
-```
-
-## Page Flow Analysis
-
-When relevant, show the user's journey and where friction occurs.
-
-```mermaid
-graph LR
-  A["Land on page"] --> B["Read hero ✅"]
-  B --> C["Scroll features ✅"]
-  C --> D["See carousel 🟡"]
-  D --> E["Reach CTA"]
-  E --> F["Button disabled 🔴"]
-  F --> G["Abandon ❌"]
-  style F fill:#ff4444,color:#fff
-  style G fill:#ff4444,color:#fff
-  style B fill:#00C851,color:#fff
-  style C fill:#00C851,color:#fff
-```
-
-## What Works
-
-Bullet list — protect these during redesign:
-- ✅ [Good thing 1]
-- ✅ [Good thing 2]
-
-## Fix Priority
-
-| Priority | Issue | Effort | Impact |
-|---|---|---|---|
-| 1 | [issue] | Low | High |
-| 2 | [issue] | Medium | High |
-| 3 | [issue] | Low | Medium |
-~~~
-
-### Report Rules
-
-- **No paragraphs.** Use bullet points, tables, and mermaid diagrams.
-- **One line per finding.** Problem, impact, fix — each one line max.
-- **Be specific.** "Move price next to download button" not "improve transparency."
-- **Include selectors/locations.** An AI agent reading this should know exactly where to look.
-- **Diagrams over descriptions.** If you can show it in a mermaid chart or flowchart, do that instead of writing about it.
-- **Severity is visual.** 🔴🟡🟢 — no walls of text explaining severity levels.
-- **Scores are honest.** A 10/10 means flawless. Most things are 5-8. Don't grade inflate.
+**Thinking Cost:** `HIGH` with any 🔴 issue; `MODERATE` with no 🔴 and any 🟡; `LOW` otherwise.
 
 ## Redesign Mode
 
-When the user wants fixes applied (not just reported), every destructive edit requires an explicit dry-run preview and user confirmation before writing:
+When the user wants fixes applied (not just reported), follow `references/redesign-mode.md`. Its binding rules:
 
-1. Produce the review first (same format above).
-2. **Dry-run first** — show the planned diff (file path, selector, before/after) and wait for explicit user confirmation. Treat unconfirmed edits as a backup safety check; never write without an approval.
-3. Fix critical (🔴) issues first, then moderate (🟡).
-4. Change the minimum necessary — surgical, not a rewrite.
-5. Preserve brand/aesthetic — make it more intuitive, not different.
-6. After each fix, show before/after; if a write fails, rollback by reverting the file from git.
-
-If working with code, edit files directly only after confirmation. For screenshots, provide specs an AI agent or developer can implement without guessing.
+- Produce the review first, then show a dry-run diff (file path, selector, before/after) for each fix, 🔴 issues first.
+- Write nothing until the user explicitly confirms. An orchestrator never confirms on the user's behalf.
+- Change the minimum necessary and preserve the brand. Before each edit, record the file's content; if a write fails, restore that content.
+- Never roll back with `git checkout` or `git restore`: they discard the user's other edits.
+- End with the Redesign summary (`Result:`, `Evidence:`, `Uncertainty:`, `Decision:`).
 
 ## Error Handling
 
 | Situation | Action |
 |---|---|
-| `/browse` fails or URL is unreachable | Ask user for a screenshot or HTML export; do not proceed with assumptions |
-| Screenshot pre-processing fails | Fall back to visual analysis; note the failure in the review |
-| Screenshot cannot be loaded or parsed | Ask user to re-share as PNG/JPEG or paste the relevant HTML |
-| HTML/CSS code is incomplete | Note missing sections in the review; evaluate only what is present |
-| No input provided | Ask for one of: URL, screenshot, code snippet, or verbal description before starting |
-| Redesign Mode — file not writable | Report the permission issue; provide specs as code comments instead |
-
-## Expected Output
-
-A completed usability review delivers a structured `Usability Review` markdown report containing:
-- **Thinking Cost** rating (LOW / MODERATE / HIGH)
-- **Scorecard** table with 0-10 scores per applicable lens
-- **Issues** list with 🔴🟡🟢 severity icons, one-line problem/impact/fix per item
-- **Issue Map** mermaid diagram showing where problems cluster
-- **Fix Priority** table ordered by effort/impact
-
-Example summary line:
-```
-Thinking Cost: HIGH — 3 critical issues found (disabled button, missing nav labels, no landing clarity)
-```
+| No reviewable input: none given, `/browse` unavailable, URL unreachable, image unreadable, or description questions unanswered | Ask once for a URL, a PNG/JPEG screenshot, an HTML export, or a description; without one, print the `BLOCKED` block |
+| Screenshot pre-processing fails | Review visually; record the failure under **Measured** |
+| HTML/CSS code is incomplete | Evaluate what is present; name the missing parts under **Not assessed** |
+| Redesign Mode — file not writable | Name it in the Redesign summary; give the fix as a spec |
 
 ## Edge Cases
 
-| Scenario | Handling |
-|---|---|
-| Input is a verbal description only | Ask clarifying questions before evaluating; do not guess at UI elements not described |
-| Screenshot of a native mobile app (not web) | Apply mobile-specific lenses (9 — Mobile) with extra weight; note platform-specific conventions |
-| User wants "just a quick check" | Deliver a condensed review (top 3 issues only) rather than the full 10-lens report |
-| Redesign Mode on a CSS framework (Tailwind, Bootstrap) | Preserve the framework classes; only change values, not the framework itself |
-| UI has no issues | Output the scorecard with high scores and a "What Works" section only; do not fabricate problems |
-| Multiple screenshots provided | Review directly when image capability is available; use multiple paths or `--recursive` for consistent measurements or summaries; disclose failures |
-| Screenshot is very large (>4K) | Note in the review that detail may be excessive; consider recommending downscaled reference |
+See `references/edge-cases.md` for each edge case: quick checks, no-issue pages, native apps, CSS frameworks, many or very large screenshots, embedded instructions.
 
 ## Acceptance Criteria
 
-- [ ] Review covers all applicable lenses from The Ten Lenses table
-- [ ] Every issue entry includes Problem, Impact, Fix, and Where fields (one line each)
-- [ ] Mermaid Issue Map diagram is included showing issue locations on the page
-- [ ] Fix Priority table is sorted by impact (highest first)
-- [ ] Redesign Mode shows a before/after for each fix applied
-- [ ] Report is skimmable in 30 seconds — no long paragraphs, tables and bullets only
+Expected output: the `Usability Review` report from `references/report-format.md`. A run passes when:
+
+- [ ] Every applicable lens is scored, or listed under **Not assessed** and the status is `PARTIAL`
+- [ ] Every issue has one-line Problem, Impact, Fix, and Where fields
+- [ ] Thinking Cost matches the issue counts; Fix Priority is sorted by impact, then effort
+- [ ] The full template includes the mermaid Issue Map; the quick-check and no-issue variants omit it
+- [ ] The report opens with a `**Result:**` line and ends with Evidence and Limits and Next Decision; **Measured** cites only script output
+- [ ] The output passes the four reader checks in `references/report-format.md`; without a human reviewer's answer, human understanding is unconfirmed
+- [ ] Redesign Mode writes nothing before confirmation and ends with the Redesign summary
+- [ ] A leased `/browse` is released at every terminal outcome
+- [ ] Report is skimmable in 30 seconds: tables and bullets, no paragraphs
 
 ## Step Completion Reports
 
-After each major phase, emit a status report. See `references/step-completion-reports.md` for the template and per-phase check names.
-
-## Working With Live Sites
-
-1. Navigate to the page, take screenshots
-2. Interact with key elements (buttons, nav, forms)
-3. Check responsive behavior
-4. Produce the review based on real interaction
+Emit one after each Instructions step; template and checks: `references/step-completion-reports.md`.

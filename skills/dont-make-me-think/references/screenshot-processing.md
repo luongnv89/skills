@@ -94,4 +94,4 @@ These dependencies are required only when running the helper:
 - OpenCV 4.x
 - NumPy
 
-Direct visual review does not require these libraries. The helper uses no external APIs or OCR engines.
+If one is missing, the helper names the package on stderr, prints the `pip install` command, and exits 2. Direct visual review does not require these libraries. The helper uses no external APIs or OCR engines.
