@@ -26,6 +26,8 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Purpose understood:       √ pass (problem and audience identified)
   Tone identified:          √ pass ([aesthetic direction] chosen)
   Differentiation clear:    √ pass | × fail — [what's missing]
+  Style source:             √ explicit brief | √ Default Style Guide
+  Files listed:             √ pass ([N] files) | — not applicable (new project)
   ____________________________
   Result:                   PASS | FAIL | PARTIAL
 ```
@@ -36,8 +38,12 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ◆ Implementation (step 2 of 2 — [component/page type])
 ··································································
   Style guide applied:      √ pass | × fail — [deviations noted]
-  Usability principles met: √ pass | × fail — [which principle failed]
-  Aesthetics polished:      √ pass | × fail — [what needs refinement]
+  Responsive check:         √ pass (375/768/1280 px) | × fail — [width, element] | — untested (no browser)
+  Contrast check:           √ pass (lowest [ratio]) | × fail — [pair, ratio, file:line]
+  Quality + usability:      √ pass | × fail — [which item failed]
+  Build:                    √ pass ([command]) | × fail — [first error line] | — not run (no command)
   ____________________________
   Result:                   PASS | FAIL | PARTIAL
 ```
+
+`Result: PASS` when no check failed, `PARTIAL` when a check still fails after the second fix cycle, `FAIL` when no code was written. The Final Report (`references/final-report.md`) follows this report and closes the run.

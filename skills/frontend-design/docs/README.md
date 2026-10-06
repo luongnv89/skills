@@ -30,10 +30,10 @@
 
 ```mermaid
 graph TD
-    A["Understand Context"] --> B["Choose Aesthetic Direction"]
-    B --> C["Apply Style & Usability Rules"]
-    C --> D["Implement Production Code"]
-    D --> E["Self-Test & Refine"]
+    A["Record Brief & Context"] --> B["Propose Direction & Get Approval"]
+    B --> C["Implement Production Code"]
+    C --> D["Verify: Responsive, Contrast, Quality, Build"]
+    D --> E["Final Report"]
     style A fill:#4CAF50,color:#fff
     style E fill:#2196F3,color:#fff
 ```
@@ -62,12 +62,18 @@ asm install github:luongnv89/skills:skills/frontend-design
 
 | Path | Description |
 |---|---|
-| `references/usability-guide.md` | Full "Don't Make Me Think" step-by-step guideline with checklist |
+| `references/aesthetics-guide.md` | Typography, color, motion, composition and background guidance, plus the generated-look defaults to avoid |
+| `references/usability-guide.md` | Six "Don't Make Me Think" Quick rules applied to every design, then the full step-by-step guideline |
 | `references/step-reports.md` | Step-completion report template, symbol legend, and per-phase checks |
+| `references/final-report.md` | Final Report status rules, PARTIAL and BLOCKED examples, fill rules, and reader checks |
+| `evals/evals.json` | Trigger and behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
+| `evals/files/vue-repo/` | Small Vue fixture for the framework-mismatch eval |
 
 ## Output
 
-Production-ready frontend code (HTML/CSS/JS or framework components) with distinctive typography, cohesive color theming, animations, and visual depth — usability-tested and ready to ship.
+Production-ready frontend code (HTML/CSS/JS or framework components) with distinctive typography, cohesive color theming, animations, and visual depth. No code is written until you approve the aesthetic direction (or say "just build it").
+
+Every run ends with a four-line Final Report: `Result:` (COMPLETE, PARTIAL or BLOCKED, and the files written), `Evidence:` (the responsive, contrast, quality and build checks that ran), `Uncertainty:` (checks that could not run and assumptions), and `Decision:` (what you need to do next, or "No approval needed").
 
 ## Acknowledgement
 
