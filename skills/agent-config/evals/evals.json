@@ -18,7 +18,8 @@
         "'## Token Efficiency' appears exactly once in AGENTS.md",
         "AGENTS.md is under 200 lines",
         "The run performed the shadow check (looked for CLAUDE.md, .claude/CLAUDE.md, CLAUDE.local.md at or above the repo) before writing",
-        "The response includes a Step Completion Report ending in a Result line"
+        "The response includes a Step Completion Report ending in a Result line",
+        "The response ends with a final report whose first line is Result: COMPLETE, PARTIAL, or BLOCKED, followed by Evidence (checks that ran, with observed results), Uncertainty (at least the unobserved client load), and Decision (the pending user action, or No approval needed)"
       ]
     },
     {
@@ -37,7 +38,8 @@
         "'## Token Efficiency' appears exactly once across both files, in AGENTS.md",
         "AGENTS.md contains no Claude-only terms (plan mode, /release)",
         "The response shows a diff or before/after of CLAUDE.md",
-        "The response names the migrate branch or explains that shared rules moved to AGENTS.md so Claude still loads them"
+        "The response names the migrate branch or explains that shared rules moved to AGENTS.md so Claude still loads them",
+        "The response ends with a final report whose first line is Result: COMPLETE, PARTIAL, or BLOCKED, followed by Evidence (checks that ran, with observed results), Uncertainty (at least the unobserved client load), and Decision (the pending user action, or No approval needed)"
       ]
     },
     {
@@ -70,7 +72,8 @@
         "The report flags the rule duplicated in both files (pnpm, not npm)",
         "The report flags the source-layout line as inferable content",
         "The report gives pass, fail, or N/A per checklist section",
-        "The report suggests /memory, /context, or /doctor prompt-audit to confirm what loads"
+        "The report suggests /memory, /context, or /doctor prompt-audit to confirm what loads",
+        "The response ends with a final report whose first line is Result: COMPLETE, PARTIAL, or BLOCKED, keeps the audit verdict on the files separate from that run status, lists only checks that ran under Evidence, and names under Decision which fixes the user must approve"
       ]
     },
     {

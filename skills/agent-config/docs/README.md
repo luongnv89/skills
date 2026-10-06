@@ -73,6 +73,7 @@ asm install github:luongnv89/skills:skills/agent-config
 - **migrate / wrapper**: the same `AGENTS.md`, plus a `CLAUDE.md` that opens with `@AGENTS.md` and holds only Claude-only lines.
 - **claude-only**: a standalone `CLAUDE.md`, written only when you ask for one and no `AGENTS.md` exists.
 - **audit**: a checklist report with routing recommendations. No files are changed.
+- **Every run** ends with a short final report: `Result:` (complete, partial, or blocked), the checks that ran, what was not verified, and any decision waiting on you.
 
 ## Resources
 
@@ -85,3 +86,4 @@ asm install github:luongnv89/skills:skills/agent-config
 | `references/anti-patterns.md` | Content and structural failure modes |
 | `references/token-efficiency-block.md` | The block injected into every file |
 | `references/optional-blocks.md` | Opt-in orchestration and coding-discipline blocks |
+| `references/final-report.md` | The end-of-run report: statuses, examples, reader checks |
