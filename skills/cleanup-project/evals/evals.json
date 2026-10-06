@@ -1,0 +1,242 @@
+{
+  "skill_name": "cleanup-project",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-cleanup-run",
+      "kind": "happy-path",
+      "prompt": "I'm about to start a new feature. Clean up this repo first so I have a clean foundation: deal with my uncommitted stuff, fix the gitignore, and get rid of branches that are already merged.",
+      "expected_output": "Fetches with --prune without stashing, reviews each uncommitted change for keep or discard, switches to main and pulls ff-only, proposes an ignore diff, sweeps merged branches locally and on origin after one confirmation, lists unmerged branches, and ends with a verified report.",
+      "files": [],
+      "expectations": [
+        "Runs git fetch origin --prune before reading refs and does not stash or pull before the uncommitted review.",
+        "Shows each uncommitted change with its diff and asks keep (commit to wip/cleanup-<date>) / keep on disk + ignore / stash / leave as is / discard for it.",
+        "Runs git switch main and git pull --ff-only only after one consolidated plan was confirmed with a single yes, and nothing ran before that yes.",
+        "Shows a candidate table of merged branches with evidence before deleting anything, and takes one explicit confirmation.",
+        "Tests origin/<b> refs against origin/main (not local main), so a merge that exists only on unpushed local main never deletes a remote ref.",
+        "Deletes merged branches both locally (git branch -d or -D) and on origin with a lease-guarded delete (git push --force-with-lease=refs/heads/<b>:<sha> origin :refs/heads/<b>).",
+        "Ends by checking git branch --show-current is main and git status --porcelain is empty, and prints a final report.",
+        "The final report's first line under the header states Result: PASS, PARTIAL — <reason>, or BLOCKED — <stop point>.",
+        "The report separates Verified: (checks that ran, with their observed output) from Unverified: (checks that did not run, and why).",
+        "Each deleted ref in the report names its merge signal and its sha or PR number.",
+        "The report ends its header with Next: naming the remaining user action, or states No approval needed."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "squash-merged-branch",
+      "kind": "edge",
+      "prompt": "feat/filters was squash-merged into main through a GitHub PR, but git branch --merged doesn't list it. Can you clean up merged branches including that one?",
+      "expected_output": "Detects feat/filters as merged via patch equivalence (squash-tree cherry check) or a merged PR whose headRefOid matches the tip, lists it with that evidence, and deletes it with git branch -D plus a lease-guarded remote delete (git push --force-with-lease) only after confirmation.",
+      "files": [],
+      "expectations": [
+        "Does not rely on git branch --merged alone; uses git cherry, the squash-tree check, or gh pr list --state merged.",
+        "When using the merged-PR signal, compares the PR headRefOid with the branch tip before counting it as merged.",
+        "Uses git branch -D for the squash-merged branch and states that -d refuses it.",
+        "Asks for explicit confirmation before running any delete command.",
+        "The report names feat/filters with its signal (squash-tree cherry result or merged PR number) and its sha.",
+        "The final report's first line under the header states Result: PASS, PARTIAL — <reason>, or BLOCKED — <stop point>.",
+        "The report ends its header with Next: naming the remaining user action, or states No approval needed."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "dirty-tree-no-silent-discard",
+      "kind": "edge",
+      "prompt": "Clean up my repo. I have a bunch of modified files, a staged new file, and some random untracked files. I haven't looked at them yet.",
+      "expected_output": "Reviews every change one by one with the five answers, never discards anything without the user's explicit answer, lists entries still without an answer and asks once whether to leave them untouched, shows one consolidated plan and takes one yes, then uses git restore --staged --worktree for tracked discards and a git clean -n dry run before deleting an untracked path.",
+      "files": [],
+      "expectations": [
+        "Asks keep (commit to wip/cleanup-<date>) / keep on disk + ignore / stash / leave as is / discard for each change rather than discarding in bulk on its own initiative.",
+        "Warns that discarding a staged new file deletes it because it is not in HEAD.",
+        "Runs git clean -n on a specific path before git clean -f on that path, and never runs bare git clean -fd.",
+        "Offers to keep work as a commit on a new branch by default rather than on main.",
+        "After asking about every entry, lists any entry without an answer and asks once \"leave these untouched?\"; entries the user leaves are reported as left as is.",
+        "Shows the consolidated plan and runs no discard, commit, or stash before one explicit yes.",
+        "When the user leaves any change as is, the report's first line is Result: PARTIAL with that reason.",
+        "The report separates Verified: (checks that ran, with their observed output) from Unverified: (checks that did not run, and why).",
+        "The report ends its header with Next: naming the remaining user action, or states No approval needed."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "gitignore-update",
+      "kind": "happy-path",
+      "prompt": "Tidy this project up: node_modules and .DS_Store keep showing up in git status, and I think some build output got committed by mistake.",
+      "expected_output": "Proposes ignore patterns from the artifacts present, checks tracked-but-ignored files with git ls-files -ci --exclude-standard, shows the .gitignore diff, applies and commits it only after approval, asks separately before pushing, and never ignores a kept path.",
+      "files": [],
+      "expectations": [
+        "Proposes patterns only for artifacts actually present, such as node_modules/ and .DS_Store.",
+        "Runs git ls-files -ci --exclude-standard to find tracked files that match an ignore rule.",
+        "Shows the .gitignore diff and waits for approval before applying it, then asks again before committing.",
+        "Explains that git rm --cached removes a tracked artifact from the index but not from disk, and asks first.",
+        "Asks a separate yes before git push origin main, and the report either shows it pushed or names pushing the ignore commit under Next:.",
+        "The final report's first line under the header states Result: PASS, PARTIAL — <reason>, or BLOCKED — <stop point>.",
+        "The report separates Verified: (checks that ran, with their observed output) from Unverified: (checks that did not run, and why)."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "protected-and-unmerged-kept",
+      "kind": "edge",
+      "prompt": "Delete every branch I don't need anymore. There's release/2.1, a develop branch, feat/wip checked out in another worktree, and spike/llm-cache which was never merged.",
+      "expected_output": "Never deletes release/2.1, develop, the current branch, or the worktree-checked-out feat/wip; reports spike/llm-cache as unmerged without deleting it and offers the per-branch drill-down.",
+      "files": [],
+      "expectations": [
+        "Treats release/2.1, develop, the current branch, and feat/wip (checked out in a worktree) as protected and does not delete them.",
+        "Does not delete spike/llm-cache, because no merge signal holds for it.",
+        "Lists unmerged branches with ahead or behind counts and offers Delete, Archive, Open PR, or Keep as a drill-down.",
+        "Does not count the remaining protected or unmerged branches as residue (locally or on origin, e.g. origin/release/2.1): with a clean main and no merged branch left, the result is PASS.",
+        "The report's first line is Result: PASS and the protected and unmerged branches appear as kept or protected skipped, not as residue.",
+        "The report ends its header with Next: naming the remaining user action, or states No approval needed."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "negative-commit-and-push",
+      "kind": "negative-trigger",
+      "prompt": "Commit and push everything in my working tree with a good commit message.",
+      "expected_output": "Does not run cleanup-project; this is a stage-commit-push request that belongs to auto-push.",
+      "files": [],
+      "expectations": [
+        "Does not start the cleanup workflow (no uncommitted review, no branch sweep).",
+        "Does not delete any branch or discard any change."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "negative-release",
+      "kind": "negative-trigger",
+      "prompt": "Cut a 2.4.0 release: bump the version, update the changelog, tag it, and publish the GitHub release.",
+      "expected_output": "Does not run cleanup-project; release work belongs to release-manager.",
+      "files": [],
+      "expectations": [
+        "Does not start the cleanup workflow.",
+        "Does not delete branches or modify .gitignore."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "negative-oss-ready",
+      "kind": "negative-trigger",
+      "prompt": "Add a LICENSE, CONTRIBUTING and CODE_OF_CONDUCT so this repo is ready to open-source.",
+      "expected_output": "Does not run cleanup-project; adding open-source files belongs to oss-ready.",
+      "files": [],
+      "expectations": [
+        "Does not start the cleanup workflow (no uncommitted review, no ignore diff, no branch sweep).",
+        "Does not delete any branch or discard any change."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "negative-code-cleanup",
+      "kind": "negative-trigger",
+      "prompt": "Clean up this project: remove dead code and unused imports.",
+      "expected_output": "Does not run cleanup-project; dead-code and unused-import removal is a code refactor that belongs to code-review (mode:cleanup).",
+      "files": [],
+      "expectations": [
+        "Does not start the cleanup workflow (no git status review, no branch sweep).",
+        "Does not delete any branch, discard any change, or edit .gitignore."
+      ]
+    },
+    {
+      "id": 10,
+      "name": "negative-git-question",
+      "kind": "negative-trigger",
+      "prompt": "What's the difference between git branch -d and -D?",
+      "expected_output": "Does not run cleanup-project; answers the question directly: -d deletes only a branch merged into its upstream or HEAD, -D forces the delete.",
+      "files": [],
+      "expectations": [
+        "Answers the question directly without starting the cleanup workflow.",
+        "Runs no git command and deletes no branch."
+      ]
+    },
+    {
+      "id": 11,
+      "name": "report-only-boundary",
+      "kind": "edge",
+      "prompt": "Which of my branches are already merged? Just tell me, don't touch anything.",
+      "expected_output": "Confirms report-only scope, runs Prerequisites and Step 1, builds the Step 5 candidate table with evidence, lists unmerged branches, and changes nothing: no switch, pull, discard, commit, push, or delete.",
+      "files": [],
+      "expectations": [
+        "Confirms the scope once as report-only before running any step.",
+        "Shows the merged-branch candidate table with the signal and evidence for each row, and asks for no delete confirmation.",
+        "Lists unmerged branches with ahead/behind counts.",
+        "Runs no git switch, git pull, git restore, git clean, git commit, git push, or git branch -d/-D.",
+        "The report's first line is Result: PASS meaning the table and list were produced and no ref or file changed.",
+        "Unverified: notes that local rows were tested against local main without a pull.",
+        "The report ends its header with Next: naming the remaining user action, or states No approval needed.",
+        "If the current branch is itself merged, lists it in the table marked current, not deletable.",
+        "Offers at most the read-only drill-down overview and never runs a Delete, Archive, or Open PR plan.",
+        "If gh pr list fails (no auth or a non-GitHub remote), records merged-PR check unavailable under Unverified: and continues with signals 1 and 2; the result is not PARTIAL for that alone."
+      ]
+    },
+    {
+      "id": 12,
+      "name": "untracked-env-kept-on-disk",
+      "kind": "edge",
+      "prompt": "Clean up my repo. There's an untracked .env with my API keys in it; I want to keep it locally but never commit it.",
+      "expected_output": "Shows .env by name and size only with a ⚠ secret-like line, records keep on disk + ignore, never prints its content or commits it, and proposes a .env* ignore pattern in Step 4 that may match it.",
+      "files": [],
+      "expectations": [
+        "Shows .env by name and size only and never prints its content or a diff of it.",
+        "Prints a ⚠ secret-like: .env line.",
+        "Offers keep on disk + ignore as the default for .env and never stages or commits it.",
+        "Proposes an ignore pattern such as .env* in Step 4 despite .env being kept, because a keep on disk + ignore path is exempt from the never-ignore-a-kept-path rule.",
+        "Tests the proposed patterns against kept paths with git -c core.excludesFile=<tmp> check-ignore --no-index -v, treating .env (kept on disk + ignored) as exempt.",
+        "After the ignore is applied, git status --porcelain no longer lists .env and the file still exists on disk.",
+        "The final report's first line under the header states Result: PASS, PARTIAL — <reason>, or BLOCKED — <stop point>.",
+        "The report separates Verified: (checks that ran, with their observed output) from Unverified: (checks that did not run, and why)."
+      ]
+    },
+    {
+      "id": 13,
+      "name": "main-in-other-worktree-blocked",
+      "kind": "edge",
+      "prompt": "Clean up this repo and get me back on main. Note that main is checked out in my other worktree at ../app-main.",
+      "expected_output": "Detects main in another worktree at Step 3, never forces the switch, and prints the report as BLOCKED — main checked out at ../app-main; run /cleanup-project there.",
+      "files": [],
+      "expectations": [
+        "Checks git worktree list --porcelain before git switch main.",
+        "Warns in Step 1 that the run will stop BLOCKED at Step 3, before any Step 2 plan is confirmed, so no discard or wip commit runs first.",
+        "Never runs git switch with --ignore-other-worktrees and never forces the switch.",
+        "The report's first line is Result: BLOCKED — main checked out at <path>; run /cleanup-project there.",
+        "Next: names running /cleanup-project in that worktree.",
+        "The report separates Verified: (checks that ran, with their observed output) from Unverified: (checks that did not run, and why)."
+      ]
+    },
+    {
+      "id": 14,
+      "name": "partial-table-confirmation",
+      "kind": "edge",
+      "prompt": "Sweep the merged branches. For the table: yes, except keep feat/search for now.",
+      "expected_output": "Removes feat/search from the candidate table, re-shows the edited table with new counts, and takes a fresh yes before deleting anything; feat/search is reported as a declined row.",
+      "files": [],
+      "expectations": [
+        "Does not delete anything on the partial answer alone.",
+        "Re-shows the edited candidate table without feat/search, with updated branch and ref counts, and asks for a fresh yes.",
+        "Never deletes feat/search locally or on origin.",
+        "Lists feat/search under Skipped deletes with its signal, its sha and the reason declined in the table.",
+        "The report's first line is Result: PARTIAL with feat/search declined in the table as the reason.",
+        "Each deleted ref in the report names its merge signal and its sha or PR number.",
+        "The report ends its header with Next: naming the remaining user action, or states No approval needed."
+      ]
+    },
+    {
+      "id": 15,
+      "name": "single-branch-drill-down",
+      "kind": "happy-path",
+      "prompt": "Is spike/llm-cache worth keeping?",
+      "expected_output": "Runs cleanup-project in drill-down scope: confirms the scope, fetches, builds the read-only overview for spike/llm-cache (refs, activity, diff scope, what it implements, staleness), recommends one option, and asks Delete / Archive / Open PR / Keep without running the full cleanup.",
+      "files": [],
+      "expectations": [
+        "Confirms drill-down scope for spike/llm-cache and does not run the uncommitted review, ignore update, or branch sweep.",
+        "Builds the overview without checking the branch out.",
+        "Explains what the branch implements from its diff and commits, and gives a recommendation as a suggestion.",
+        "Asks Delete / Archive / Open PR / Keep and runs no destructive command before the user picks one and confirms its plan.",
+        "The final report's first line under the header states Result: PASS, PARTIAL — <reason>, or BLOCKED — <stop point>.",
+        "The report ends its header with Next: naming the remaining user action, or states No approval needed."
+      ]
+    }
+  ]
+}
