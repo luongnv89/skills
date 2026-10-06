@@ -6,7 +6,7 @@ Print the final report once per run, after the Step Completion Report. The step 
 
 1. **`Result:`** — the status word first, then one line on what changed or was found.
    - `COMPLETE` — every requested operation met its phase's **Done when** line, and every target ended settled (`idle` or `done`).
-   - `PARTIAL — <reason>` — the run made at least one fleet write, and at least one target ended blocked, stalled, timed out, failed, or skipped, or a HANDOFF failed, or the user declined a teardown.
+   - `PARTIAL — <reason>` — the run made at least one fleet write, and after it one of these happened: a target ended blocked, stalled, timed out, failed, or skipped; a HANDOFF failed; or the user declined a teardown.
    - `BLOCKED — <reason>` — the run stopped before its first fleet write: a failed prerequisite, a missing or ambiguous target, an aborted launch profile, a refused preflight on the only target, or a destructive action the user did not confirm.
 2. **`Evidence:`** — only checks that ran, each with its command or source and the observed result: `herdr status`, the root pane ID, the launch-profile summary line, each target's outcome or error code, and the `fleet_status.py` snapshot. Never list a check that did not run.
 3. **`Uncertainty:`** — what is unknown or untested, labeled apart from verified facts. Always list each `UNKNOWN` model or thinking value, and any inherited permission bypass. A settled status proves the agent stopped, not that its reply is correct; say so when a relayed reply was not checked against the task. Write `none` only when nothing applies.
