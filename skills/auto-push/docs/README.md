@@ -13,7 +13,7 @@
 
 - Detect secrets, API keys, large files, and build artifacts before pushing
 - Generate conventional commit messages (feat, fix, docs, etc.) automatically
-- Dry-run change summary; asks for confirmation only when a safety check fails
+- Dry-run change summary; asks for confirmation only when a safety check fails, and never pushes a real secret or a file over 10 MB on confirmation alone
 - Handle non-fast-forward pushes with fallback strategies
 - Final report states the result, the checks that ran, what was not checked, and any action left to you
 
