@@ -102,20 +102,19 @@ How each run outcome maps:
 A user declining a change never produces `BLOCKED` by itself. A phase Step Completion Report of `FAIL` gives
 `BLOCKED` only when it matches rule 1; otherwise it gives `PARTIAL`.
 
-## Example: a partial setup run
+## Example: a partial tune run
 
 ```
 ◆ Dev machine setup — FINAL REPORT
-  Result:    PARTIAL — high finding python-externally-managed declined
-  Machine:   linux / x86_64 / Ubuntu 24.04   Mode: setup
+  Result:    PARTIAL — high finding npm-global-bin-not-on-path declined
+  Machine:   linux / x86_64 / Ubuntu 24.04   Mode: tune
   Manager:   apt
   ...
-  Evidence:     detect_env.py re-run in a fresh login shell: 1 high remaining
-                node v22.14 · uv 0.11 version checks passed; ~/.zshrc backed up to ~/.zshrc.bak.20260820094533
-  Uncertainty:  claude installed, not logged in; deep checks not run
+  Evidence:     detect_env.py re-run in a fresh login shell: 1 high remaining (npm-global-bin-not-on-path, declined)
+                path-duplicates gone from findings; ~/.zshrc backed up to ~/.zshrc.bak.20260820094533
+  Uncertainty:  deep checks not run
   Decision:     No approval needed.
-    Remaining action: run `claude` to log in
-    Remaining action: re-trigger the skill if you want python-externally-managed fixed with uv
+    Remaining action: re-trigger the skill if you want npm-global-bin-not-on-path fixed
   Session:   ~/.dev-machine-setup/session.json (complete)
 ```
 

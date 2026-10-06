@@ -142,15 +142,15 @@
     {
       "id": 11,
       "kind": "edge-case",
-      "prompt": "Set up this machine, but leave Python alone — I don't want uv.  (Run against a Linux machine whose findings include python-externally-managed at high severity; every other gap gets approved and installs.)",
-      "expected_output": "The python-externally-managed fix is recorded as declined. The FINAL REPORT opens with 'Result: PARTIAL — high finding python-externally-managed declined', shows the declined item with ○ and the user's reason, and closes with Evidence, Uncertainty and Decision lines.",
+      "prompt": "Just optimize what's already on this machine, nothing new, and don't touch my PATH.  (Run against a Linux machine where detect_env.py reports npm-global-bin-not-on-path at high severity; the user declines that fix and approves every other finding.)",
+      "expected_output": "Mode tune. The npm-global-bin-not-on-path fix is recorded as declined. The FINAL REPORT opens with 'Result: PARTIAL — high finding npm-global-bin-not-on-path declined', shows the declined item with ○ and the user's reason, and closes with Evidence, Uncertainty and Decision lines.",
       "files": [],
       "expectations": [
-        "Recorded python-externally-managed as declined and did not install uv",
+        "Recorded npm-global-bin-not-on-path as declined and made no PATH or rc-file edit for it",
         "The Result is PARTIAL with a reason naming the declined high finding, not READY and not BLOCKED",
         "The declined finding prints with ○ and the user's reason in the Phase 5 line",
-        "Evidence lists only checks that ran, each with its observed result (version checks, the detect_env.py re-run)",
-        "Uncertainty lists what is unconfirmed (for example an agent CLI not yet logged in, deep checks not run), separately from Evidence",
+        "Evidence lists only checks that ran, each with its observed result (the detect_env.py re-run and its remaining-high count)",
+        "Uncertainty lists what is unconfirmed (for example deep checks not run), separately from Evidence",
         "Decision says 'No approval needed.' or names the pending approval, and lists each remaining user action on its own line"
       ]
     },
