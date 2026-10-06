@@ -151,7 +151,7 @@ Before the first file write, apply the Branch-First Safety Rule. Then, for each 
 
 At the end of each phase:
 
-5. Run the demo: the `--help` command plus at least one approved example invocation, and show their output.
+5. Run the demo (`--help` plus at least one approved example invocation) and show the output. A demo that exits non-zero is a failing test (item 3).
 6. In a git repository, stage only the files this phase created or modified, then commit them with a descriptive message.
 
 If a task needs a change to the approved design (a command, option, or output format differs), stop Step 4. Present the proposed change and wait for explicit approval before you continue.
@@ -172,8 +172,8 @@ After the four parts, print the usage quick-start (install command and 3-5 examp
 **Status rules** — apply the first rule that matches:
 
 1. `BLOCKED` — the run stopped before the first file write, for example because the design or plan was not approved, there was no module to wrap and the user gave no answer, or Repo Sync hit a conflict or a missing `origin` the user did not approve working around.
-2. `PARTIAL` — at least one file was written, and then any of these happened: a test still fails, a test command could not run, the user stopped Step 4 early, an approved task is not done, or a design change awaits approval.
-3. `COMPLETE` — every task in the approved plan is done, and every test command ran and passed. A Phase 3 the user declined does not make the run partial.
+2. `PARTIAL` — at least one file was written, and then any of these happened: a test or demo still fails, a test command could not run, the user stopped Step 4 early, an approved task is not done, or a design change awaits approval.
+3. `COMPLETE` — every task in the approved plan is done, and every test command and demo ran and passed. A Phase 3 the user declined does not make the run partial.
 
 ## Expected Output
 

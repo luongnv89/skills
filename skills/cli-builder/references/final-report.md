@@ -37,8 +37,8 @@ Apply the first rule that matches. SKILL.md Step 5 carries the same three rules.
 | Order | Status | When |
 |-------|--------|------|
 | 1 | `BLOCKED — <reason>` | The run stopped before the first file write. |
-| 2 | `PARTIAL — <reason>` | At least one file was written, and the run did not reach every approved task with every test command run and passing. |
-| 3 | `COMPLETE` | Every task in the approved plan is done, and every test command ran and passed. |
+| 2 | `PARTIAL — <reason>` | At least one file was written, and the run did not reach every approved task with every test command run and passing and every demo exiting 0. |
+| 3 | `COMPLETE` | Every task in the approved plan is done, every test command ran and passed, and every demo exited 0. |
 
 How each run outcome maps. Order 1 wins: any outcome reached before the first file write is `BLOCKED`, even when the table lists it as `PARTIAL`.
 
@@ -48,6 +48,7 @@ How each run outcome maps. Order 1 wins: any outcome reached before the first fi
 | No module to wrap and the user gives no answer | `BLOCKED` |
 | Repo Sync conflict, or missing `origin` the user did not approve working around | `BLOCKED` |
 | A test still fails after 3 fix attempts and the user stops | `PARTIAL` |
+| A demo command still exits non-zero after 3 fix attempts and the user stops | `PARTIAL` |
 | A test command could not run and the user approved continuing | `PARTIAL` |
 | The user stops Step 4 before the last approved task | `PARTIAL` |
 | A design change found in Step 4 awaits approval | `PARTIAL` |
