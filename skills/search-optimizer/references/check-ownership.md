@@ -15,6 +15,10 @@ skip-checks: agent-readiness-scan
 output-dir: /abs/output/reports/seo-ai-optimizer
 ```
 
+URL only, no codebase: omit the repo path (`/seo-ai-optimizer` alone on the first line). With
+`evidence-dir` set, seo-ai-optimizer runs live-evidence-only, so it audits the evidence dir and
+lists fixes as "needs source repo".
+
 Members never skip their own gates because of this block. Never pass `skip-checks` to
 website-agent-readiness (its scan is atomic) or to dont-make-me-think. `aso-marketing` is not a
 contract member: invoke it normally, without the block.
