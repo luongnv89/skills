@@ -4,7 +4,7 @@ description: "Generate unit tests for untested branches and edge cases. Use when
 license: MIT
 effort: low
 metadata:
-  version: 1.3.2
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -57,13 +57,13 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 ### 0. Create Feature Branch
 
 Before making any changes:
-1. Check the current branch - if already on a feature branch for this task, skip
-2. Check the repo for branch naming conventions (e.g., `feat/`, `feature/`, etc.)
-3. Create and switch to a new branch following the repo's convention, or fallback to: `feat/test-coverage`
+1. Run `git rev-parse --abbrev-ref HEAD`. If it prints a branch other than `main` or `master` that was created for this task, skip to Step 1.
+2. Run `git branch -a` and note the prefix most existing branches use (e.g., `feat/`, `feature/`, `test/`).
+3. Create and switch to a new branch with that prefix. If no prefix is in use, name it `feat/test-coverage`.
 
 ### 1. Analyze Coverage
 
-Run the coverage command for the detected [Stack](#stack-detect-before-step-1-of-workflow) above.
+Run the coverage command for the detected [Stack](#stack-detect-before-step-1-of-workflow) above. Record the total coverage percentage and the pass/fail counts as the baseline. If any test fails, stop here (see [Edge Cases](#edge-cases)).
 
 From the report, identify:
 - Untested branches and code paths
@@ -91,25 +91,31 @@ Target scenarios:
 
 ### 4. Verify Improvement
 
-Run coverage again and confirm measurable increase. Report:
-- Before/after coverage percentages
-- Number of new test cases added
-- Files with the biggest coverage gains
+1. Run the full test suite. If a new test fails, fix or remove it, then rerun. If a previously passing test now fails, report PARTIAL and name it.
+2. Run the same coverage command as Step 1.
+3. Compare the new total with the Step 1 baseline. If it is not strictly higher, report PARTIAL and list the Step 2 gaps that are still untested.
+4. If the full suite passed in item 1, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered.
+5. Print the final report. It opens with `Result:` — `COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason` — followed by:
+   - `Evidence:` the commands that ran, with before/after totals and pass/fail counts
+   - `Uncertainty:` what was not checked (e.g., excluded paths, CI not run, covered lines without output assertions)
+   - `Decision:` the action that needs approval, or `No approval needed`, then any remaining user action (e.g., push the branch, open a PR)
+   - The number of new test cases and the files with the biggest coverage gains
 
 ## Expected Output
 
 After a successful run on a Python project, the final verification report shows:
 
 ```
-Coverage before: 61% (47/77 statements)
-Coverage after:  84% (65/77 statements)
+Result:       COMPLETE — coverage 61% → 84%, all tests pass
+Evidence:     pytest --cov=. --cov-report=term-missing (before): 61% (47/77 statements), 47 passed
+              same command (after): 84% (65/77 statements), 56 passed, 0 failed
+Uncertainty:  CI not run; src/vendor/ excluded from coverage
+Decision:     No approval needed. Next: push feat/test-coverage and open a PR.
 
 New tests added: 9
 Files improved:
   - src/parser.py        52% → 91%  (+7 tests: null input, empty string, unicode overflow)
   - src/auth.py          71% → 88%  (+2 tests: expired token, missing header)
-
-All 56 tests passing. No regressions.
 ```
 
 ## Acceptance Criteria
@@ -117,19 +123,30 @@ All 56 tests passing. No regressions.
 A run passes when **all** of the following are true:
 
 - [ ] Coverage report exists from a runnable command for the detected stack (e.g., `jest --coverage`, `pytest --cov`, `go test -cover`).
-- [ ] Post-run total coverage is strictly higher than the pre-run baseline — no test additions that fail to move the metric.
+- [ ] Post-run total coverage is strictly higher than the pre-run baseline — no test additions that fail to move the metric. A 100% baseline is the one exception (see Edge Cases).
 - [ ] New tests target previously-untested branches, error paths, or boundary values — not duplicates of existing assertions.
 - [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.).
 - [ ] All new tests live on a feature branch (e.g., `feat/test-coverage`), never on `main`/`master`.
 - [ ] Commit message records the before/after coverage percentages and the files newly covered.
 
+If any item fails, the final report says `PARTIAL` or `BLOCKED` and names the reason.
+
+The final report must also be understandable:
+
+- The first line gives `COMPLETE`, `PARTIAL` or `BLOCKED` and the reason.
+- `Evidence:` (commands run and their observed totals) is separate from `Uncertainty:` (assumptions and unchecked behavior).
+- Each coverage number traces to a command output: the before/after totals and the per-file percentages.
+- `Decision:` names the approval needed or says `No approval needed`, and names any remaining user action.
+
+These are instruction checks. Without reviewer feedback, human understanding of the report stays unconfirmed; agent inspection cannot confirm it.
+
 ## Edge Cases
 
 - **No test framework detected**: Skill checks `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` for test dependencies; if none found, asks the user which framework to use before writing any tests.
-- **Coverage tool not installed**: Installs the appropriate tool (`pytest-cov`, `nyc`, `cargo tarpaulin`, etc.) and retries rather than failing silently.
-- **Existing tests are already failing**: Does not add new tests until existing failures are resolved; reports the failing tests to the user first.
-- **100% coverage already reached**: Reports this to the user and exits — no tests are added unnecessarily.
-- **Generated code or vendored files in coverage report**: Excludes auto-generated and third-party directories from analysis to avoid writing tests for code the project does not own.
+- **Coverage tool not installed**: If the coverage command fails because the tool is missing, install it as a dev dependency (`pytest-cov`, `nyc`, `cargo tarpaulin`, etc.) and rerun the command once. If it fails again, stop and report `BLOCKED` with the error output.
+- **Existing tests are already failing**: If the Step 1 baseline run reports failing tests, do not write new tests. Stop and report `BLOCKED` with the names of the failing tests.
+- **100% coverage already reached**: If the Step 1 baseline is 100%, add no tests. Report `COMPLETE` with the baseline as evidence and stop.
+- **Generated code or vendored files in coverage report**: Leave auto-generated and third-party paths (e.g., `node_modules/`, `vendor/`, `dist/`, `build/`, files with a generated-code header) out of the Step 2 gap list, and list them under `Uncertainty:`.
 - **Async / concurrent code paths**: Uses framework-appropriate async test utilities (e.g., `pytest-asyncio`, `jest fakeTimers`) rather than bare sync wrappers.
 
 ## Step Completion Reports
