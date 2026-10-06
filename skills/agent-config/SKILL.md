@@ -4,7 +4,7 @@ description: "Create, update, or audit AGENTS.md (default) or CLAUDE.md agent in
 license: MIT
 effort: medium
 metadata:
-  version: 2.0.2
+  version: 2.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -46,10 +46,10 @@ Before a write run changes anything, sync with the remote. `audit` skips this. `
 branch="$(git rev-parse --abbrev-ref HEAD)"
 git fetch origin                       # dry-run: read-only preview
 git status                             # validate clean tree
-git pull --rebase origin "$branch"     # only after confirmation
+git pull --rebase origin "$branch"     # only once the tree is clean
 ```
 
-If the tree is dirty, back it up with `git stash push -u -m "pre-sync-backup"`, sync, then run `git stash pop`. **Stop and confirm** with the user if any of these happen: the directory isn't a git repo, `origin` is missing, the HEAD is detached, the branch has no upstream, the pull or rebase fails, or the pop fails. Never overwrite an existing agent file without reading it and showing a diff.
+If the tree is dirty, back it up with `git stash push -u -m "pre-sync-backup"`, sync, then run `git stash pop`. **Stop and ask the user to confirm** whether to skip the sync if any of these happen: the directory isn't a git repo, `origin` is missing, the HEAD is detached, the branch has no upstream, the pull or rebase fails, or the pop fails. If the user does not authorise skipping the sync, write nothing and end with the final report as `BLOCKED`. Never overwrite an existing agent file without reading it and showing a diff.
 
 ## Step 1: Resolve the target (every mode)
 
@@ -112,8 +112,8 @@ Done when every remaining line is a command, a pin, a constraint, or a pointer.
 
 ## Step 4: Write and verify
 
-- **Show before writing.** For a new file, show the draft. For an existing file, show the diff. Write once the user approves, or right away if the request already said to apply the change.
-- **Verify**:
+- **Show before writing.** For a new file, show the draft. For an existing file, show the diff. Write once the user approves, or right away if the request already said to apply the change. If the user declines, write nothing and end with the final report as `BLOCKED`.
+- **Verify**. If a check fails, fix the file and re-run that check once. If it still fails, end Step 4 with `Result: FAIL` and name the check:
   - `wc -l` is under 200 for each file.
   - `grep -c '^## Token Efficiency'` returns 1 in the source of truth and 0 everywhere else.
   - Each wrapper's first line is the `AGENTS.md` import.
@@ -130,7 +130,7 @@ Done when every remaining line is a command, a pin, a constraint, or a pointer.
 2. Walk `references/agents-md-checklist.md`, and report every item as pass, fail, or N/A with a one-line reason. Its loading section catches CLAUDE files that shadow without importing, prose telling Claude to "read AGENTS.md", a `SessionStart` hook that prints `AGENTS.md`, and an `AGENTS.override.md` that Codex reads instead.
 3. Cross-check `references/anti-patterns.md`.
 4. **Route and enforce.** For every failing line, name its home from `references/knowledge-routing.md`. A rule a machine can check gets its gate **and** loses its prose.
-5. Modify nothing; `git status` must be unchanged. End with the overall verdict. Suggest `/memory` to see what loaded, and `/doctor prompt-audit` (v2.1.283+) for a second pass.
+5. Modify nothing; `git status` must be unchanged. Give the overall verdict (`PASS`, `PARTIAL`, or `FAIL`) as the audit report's `Result:` line. Suggest `/memory` to see what loaded, and `/doctor prompt-audit` (v2.1.283+) for a second pass.
 
 ## Token Efficiency Block (always inject)
 
@@ -152,6 +152,10 @@ After each step, output:
 
 Use `√` for pass and `×` for fail. Adapt the check names to each step.
 
+## Final Report
+
+End every run, including one that stops early, with the final report from `references/final-report.md`: `Result:` first (`COMPLETE`, `PARTIAL`, or `BLOCKED`), then `Evidence:`, `Uncertainty:`, and `Decision:`. The reference defines each status and holds the reader checks.
+
 ## Acceptance Criteria
 
 - [ ] The branch, each CLAUDE file's action, and the shadow-check output are shown.
@@ -162,7 +166,8 @@ Use `√` for pass and `×` for fail. Adapt the check names to each step.
 - [ ] The source-of-truth file is under 200 lines and passes sections 1–3 and 5–7 of `references/agents-md-checklist.md`. Wrappers and rules files pass sections 1–3 and 6.
 - [ ] No rule appears in both `AGENTS.md` and a CLAUDE file.
 - [ ] New content has no anti-pattern from `references/anti-patterns.md`.
-- [ ] Write runs end with `Result: PASS`. Audit runs report every checklist item, give each failing line a routing recommendation, leave `git status` unchanged, and end with the overall verdict.
+- [ ] A write run that wrote files ends Step 4 with `Result: PASS`. Audit runs report every checklist item, give each failing line a routing recommendation, leave `git status` unchanged, and give the overall verdict.
+- [ ] Every run ends with the final report, and it passes the reader checks in `references/final-report.md`. Without user feedback, human understanding of the report stays unconfirmed.
 
 ## Expected Output
 
@@ -171,9 +176,9 @@ Use `√` for pass and `×` for fail. Adapt the check names to each step.
 | agents-only | `AGENTS.md`: Commands, Constraints, Done when, any optional sections, then `## Token Efficiency` |
 | migrate / wrapper | `AGENTS.md` as above, plus each CLAUDE file reduced to the `@AGENTS.md` import and its Claude-only lines |
 | claude-only | `CLAUDE.md` with the full content and the token block |
-| audit | no writes; a checklist report with routing, ending `Result: PASS`, `PARTIAL`, or `FAIL` |
+| audit | no writes; a checklist report with routing and a `Result: PASS`, `PARTIAL`, or `FAIL` verdict |
 
-A sample file is in `references/agents-md-writing.md`. A sample audit report is in `references/agents-md-checklist.md`.
+Every branch then prints the final report. A sample file is in `references/agents-md-writing.md`, a sample audit report is in `references/agents-md-checklist.md`, and sample final reports are in `references/final-report.md`.
 
 ## Edge Cases
 
