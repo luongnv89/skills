@@ -13,9 +13,12 @@ The report every doc-manager run ends with, including a run that stops early. It
 
 ## Status rules
 
-- `COMPLETE` — every doc in scope is `updated` or `verified-current`, no `FLAG` remains, and each runbook script's agent-satisfiable checks pass.
-- `PARTIAL — {reason}` — at least one doc is `flagged`, or a `--check` run is non-zero because of documented operator prerequisites.
-- `BLOCKED — {reason}` — the run stopped before editing: the user did not confirm the scope, the repo sync failed, or a prerequisite failed.
+Every run gets exactly one status. When more than one seems to fit, use the first match in this order: `BLOCKED`, `FAIL`, `PARTIAL`, `COMPLETE`.
+
+- `BLOCKED — {reason}` — the run stopped before Step 2 began, so no file was edited: the user did not confirm the scope, the repo sync failed, or a prerequisite failed.
+- `FAIL — {reason}` — Step 2 began (editing may have started), and then either the run stopped before Step 4 finished (an edit or check errored, a conflict appeared, or the user stopped it), or Step 4 finished with a check the agent could have satisfied still failing (an agent-fixable `--check` failure, a broken internal link, an orphaned doc). `Uncertainty:` lists any files already edited, so the user can review or revert them.
+- `PARTIAL — {reason}` — Step 4 finished with no agent-fixable failure, but at least one doc is `flagged`, or a `--check` run is non-zero only because of documented operator prerequisites.
+- `COMPLETE` — Step 4 finished, every doc in scope is `updated` or `verified-current`, no `FLAG` remains, and each runbook script's agent-satisfiable checks pass.
 
 A `validate-<name>.sh` exit 0 proves only that its listed checks passed, not that the runbook was executed end to end. Say so when a reader could assume more.
 
@@ -24,7 +27,7 @@ A `validate-<name>.sh` exit 0 proves only that its listed checks passed, not tha
 | Doc | Status | Change | Cites added | Open FLAGs |
 |---|---|---|---|---|
 
-`Status` is `updated`, `verified-current`, or `flagged`. Use `—` for an empty cell.
+`Status` is `updated`, `verified-current`, or `flagged`. In a `FAIL` or `BLOCKED` run, a doc the run did not reach is `unknown`. Use `—` for an empty cell.
 
 ## Example
 
@@ -32,8 +35,9 @@ A `validate-<name>.sh` exit 0 proves only that its listed checks passed, not tha
 Result:       PARTIAL — 3 docs reconciled, 1 claim flagged
 Evidence:     FLAG grep: 1 marker (docs/deployment.md:14), listed below
               Links: 23 internal links resolve; orphans: none
-              validate-deploy.sh --check: exit 1 ($DEPLOY_TOKEN unset, operator prereq)
+              validate-deploy.sh --check: exit 1 (operator prereq, see Uncertainty)
 Uncertainty:  The deploy region in docs/deployment.md:14 is not in the code
+              Operator prereq: $DEPLOY_TOKEN unset, so --check exits 1 here
               Mermaid not rendered: mmdc not installed
 Decision:     Confirm the deploy region (eu-west-1 or us-east-1). No commit made.
 

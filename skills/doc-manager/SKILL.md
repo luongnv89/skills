@@ -4,7 +4,7 @@ description: "Generate or update docs to match the code, citing each claim to pa
 license: MIT
 effort: medium
 metadata:
-  version: 2.1.0
+  version: 2.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -114,7 +114,7 @@ For any deploy/release/setup/operational doc, produce a **check-only** validatio
 5. **Runbook**: each runbook section links a **well-formed** check-only `validate-<name>.sh`: `bash -n` passes, `--help` exits 0, and with no arguments it defaults to check mode (`MODE="check"`). Run `--check`. Agent-satisfiable local/static checks must pass; env/tool/network gaps that only an operator can close are documented as prereqs/`MANUAL:` rather than forced to exit 0. `docs/troubleshooting.md` reflects any real fix applied.
 6. **Diagrams** (if any): Mermaid renders without error (`mmdc` if available).
 
-Present the **change summary** defined in `references/change-summary.md`. It opens with `Result: COMPLETE | PARTIAL | BLOCKED`, then `Evidence:`, `Uncertainty:`, `Decision:`, and a per-doc table. A run that stops early still ends with it. **Do not commit unless the user explicitly asks.**
+Present the **change summary** defined in `references/change-summary.md`. It opens with `Result: COMPLETE | PARTIAL | FAIL | BLOCKED`, then `Evidence:`, `Uncertainty:`, `Decision:`, and a per-doc table. A run that stops early still ends with it. **Do not commit unless the user explicitly asks.**
 
 ## Expected output
 
