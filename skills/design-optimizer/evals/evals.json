@@ -1,0 +1,97 @@
+{
+  "skill_name": "design-optimizer",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Optimize the design of https://example.com for both users and AI agents in one go. I'm fine with sending the URL to the agent-readiness scanner. Put the output in /tmp/do-run.",
+      "expected_output": "One run: preflight, a single intake into /tmp/do-run/evidence, website-agent-readiness scans once after G1, owners finalized as case A, ux-ax-review runs with clarity and the three scan-covered AX checks (robots-sitemap, markdown-pages, crawler-access) skipped, then dont-make-me-think and viral-product-evaluator, and one merged design-optimization.md. No repo writes.",
+      "files": [],
+      "expectations": [
+        "Runs the Dependency Preflight for all five members in one pass before intake.",
+        "Captures page.html, head.json, robots.txt, sitemap.xml and llms.txt once into the evidence dir and writes manifest.json.",
+        "Presents website-agent-readiness's G1 third-party-send gate before any scan.",
+        "Finalizes manifest owners after the scan and before ux-ax-review runs.",
+        "Passes ux-ax-review skip-checks of clarity,robots-sitemap,markdown-pages,crawler-access.",
+        "Does not put structured-data, llms-txt or ai-actions in ux-ax-review skip-checks; ux-ax-review keeps them and any scan result for them is cited as corroboration.",
+        "Writes a single design-optimization.md with one row per finding and the owner cited.",
+        "Stops with an apply offer by finding ID and does not edit any source file."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "edge",
+      "name": "dedup-capture-once",
+      "prompt": "Run a full design optimization on https://shop.example.com — usability, UX/AX, virality and agent readiness. Make sure nothing is fetched or scanned twice.",
+      "expected_output": "States that the page is captured once into the evidence dir and every member reads it via evidence-dir; website-agent-readiness scans once and its scan.json is reused; duplicate findings across members are merged into one row under the owner.",
+      "files": [],
+      "expectations": [
+        "Every member invocation carries orchestrated-by: design-optimizer and the same evidence-dir.",
+        "No member re-fetches page.html, robots.txt, sitemap.xml or llms.txt listed in manifest.files.",
+        "website-agent-readiness posts to isitagentready.com at most once.",
+        "A defect reported by two members appears as one row with the other member under 'Also reported by'.",
+        "Every canonical check ID appears exactly once across Findings, Skipped and Not covered."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "name": "g1-declined",
+      "prompt": "Optimize my landing page design at https://example.org but do not send my URL to any third-party scanner.",
+      "expected_output": "Website-agent-readiness G1 is declined (case B): no scan, ux-ax-review keeps all AX checks and skips only clarity; agent-readiness-scan is listed as not covered because the user declined the send.",
+      "files": [],
+      "expectations": [
+        "Does not post the URL to isitagentready.com.",
+        "Passes ux-ax-review skip-checks of clarity only.",
+        "Lists agent-readiness-scan under Not covered with the reason 'user declined third-party send'.",
+        "Still produces one merged design-optimization.md."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "name": "apply-needs-opt-in",
+      "prompt": "Optimize my app's design in ./webapp and make it look great.",
+      "expected_output": "Runs audit mode only and ends with an apply offer by finding ID; does not invoke frontend-design or Redesign Mode until the user explicitly opts in and names findings.",
+      "files": [],
+      "expectations": [
+        "Treats the request as audit mode; no UI source file is modified.",
+        "Ends with an offer to apply chosen finding IDs.",
+        "Describes that each applied finding routes to exactly one of frontend-design or dont-make-me-think Redesign Mode behind that member's confirmation gate."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "negative-trigger",
+      "prompt": "Krug-review this screenshot of my signup form and tell me what's confusing.",
+      "expected_output": "Routes to dont-make-me-think alone; design-optimizer does not trigger, no evidence dir, no multi-member run.",
+      "files": [],
+      "expectations": [
+        "dont-make-me-think handles the request directly.",
+        "No orchestrated multi-member audit or design-optimization.md is produced."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Scan https://example.com with isitagentready and file issues for the gaps.",
+      "expected_output": "Routes to website-agent-readiness alone; design-optimizer does not trigger.",
+      "files": [],
+      "expectations": [
+        "website-agent-readiness handles the request with its own gates.",
+        "No design-optimizer intake or merged report is produced."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Build a React pricing page component with three tiers.",
+      "expected_output": "Routes to frontend-design for a UI build; design-optimizer does not trigger and no audit runs.",
+      "files": [],
+      "expectations": [
+        "No audit, evidence capture or merged report is produced.",
+        "The response is a UI build, not a design optimization run."
+      ]
+    }
+  ]
+}

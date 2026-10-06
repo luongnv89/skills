@@ -21,6 +21,13 @@
       "expected_output": "Asks for / resolves the landing page and codebase inputs. Evaluates all 32 principles, then leads with the prioritized top-fixes list (highest impact x ease first: hero, paywall, headline, proof, single CTA), merging principles that share a root cause into single actionable fixes. Includes the Virality Score and what's already working.",
       "files": [],
       "expectations": []
+    },
+    {
+      "id": 4,
+      "prompt": "/viral-product-evaluator https://example-saas.com\norchestrated-by: search-optimizer\nevidence-dir: /tmp/run/evidence\nskip-checks: meta-tags\noutput-dir: /tmp/run/reports\n\nThe evidence dir already holds page.html and head.json for the landing page; the code is in this repo.",
+      "expected_output": "Uses evidence-dir/page.html and head.json as the landing page instead of calling /browse, and reads the repo for pricing/feature evidence. Still scores all 32 principles via scripts/virality_score.py (principle 5 from head.json). Leaves meta/OG tag fixes out of Top Fixes and lists meta-tags as 'skipped — owned by seo-ai-optimizer' (or the manifest owner). Names search-optimizer in the verdict block and writes viral-evaluation.md to /tmp/run/reports, not the repo root.",
+      "files": [],
+      "expectations": []
     }
   ]
 }

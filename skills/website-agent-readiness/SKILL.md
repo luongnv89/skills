@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires curl and python3. Phase 4 additionally requires git, an authenticated GitHub CLI (`gh auth status`), and the plan-to-issues skill."
 effort: high
 metadata:
-  version: 1.2.6
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "gated pipeline (scan → triage → render plan → delegate filing to /plan-to-issues)"
 ---
@@ -141,12 +141,13 @@ Rules that make the gate real:
 
 ## Phase 1 — Scan
 
-**Input:** the website URL from the user.
+**Input:** the website URL from the user, plus any orchestrated-run lines (see Orchestrated Runs).
 
 1. Resolve the URL. Add `https://` if the user gave a bare host. If they gave several
    sites, confirm which one — this skill scans one site per run.
 2. **Gate G1.** Name the exact URL and state that it is sent to `isitagentready.com`,
-   a third-party service, which will fetch the site.
+   a third-party service, which will fetch the site. In an orchestrated run with a reusable
+   scan, skip G1 and step 3 (see Orchestrated Runs).
 3. Run the scan:
 
    ```bash
@@ -305,6 +306,21 @@ Emit one after each phase:
   Result:             PASS
 ```
 
+## Orchestrated Runs
+
+An orchestrator may append `orchestrated-by`, `evidence-dir`, `skip-checks` and `output-dir`
+lines after the URL. Without them nothing here applies.
+
+- **Reuse:** `<evidence-dir>/agent-readiness/scan.json` with `level` and `checks`, for the
+  same URL, `scannedAt` under 24h → copy it in and skip the scan. G1 is skipped **only**
+  then, since nothing leaves the machine; otherwise scan fresh behind G1.
+- **Share:** after a fresh scan, copy `scan.json` + `fixes.md` into that directory.
+- **Paths:** `output-dir` replaces the project root for `.agent-ready/` and
+  `agent-ready-plan.md` in every command, including the `/plan-to-issues` path.
+- G2–G4, Repo Sync and the Dependency Preflight are unchanged; Phase 4 stays opt-in.
+
+Reuse check, `skip-checks` handling and exact commands: `references/orchestrated-runs.md`.
+
 ## Reference files
 
 | File | Read it when |
@@ -312,6 +328,7 @@ Emit one after each phase:
 | `references/scan-api.md` | you need the API contract, the 22-check inventory, or the category → phase table |
 | `references/plan-format.md` | you are changing the plan's shape, or `/plan-to-issues` failed to parse it |
 | `references/leading-terms.md` | a term in this skill's vocabulary is unclear |
+| `references/orchestrated-runs.md` | the invocation carries `orchestrated-by` or `evidence-dir` |
 
 Script paths are relative to **this skill's directory**, not the user's project. Resolve
 them before running — e.g. `bash "$SKILL_DIR/scripts/scan_site.sh" …`, or invoke with the

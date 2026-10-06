@@ -128,6 +128,8 @@ hosting or infrastructure stay in its plan and are reported, not fixed here.
 ### Verification
 
 - PASS: `agent-ready-plan.md` exists and the 0-5 score is recorded in the final summary.
+- REUSED (orchestrated run): `<evidence-dir>/agent-readiness/scan.json` existed, its score
+  and `scannedAt` are recorded, and `/website-agent-readiness` was not invoked again.
 - SKIPPED: the summary names which precondition was unmet.
 - FAIL: the scan errored — report the error, do not retry silently, and leave Steps 1-7
   results intact.
@@ -177,7 +179,7 @@ After implementation, validation shows: `critical issues: 2 → 0`, `llms.txt cr
 - [ ] Safety Protocol (Diff & Confirm) was followed for all file modifications.
 - [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0.
 - [ ] `llms.txt`, `robots.txt`, and `sitemap.xml` are present (or explicitly justified).
-- [ ] Step 8 either records the live-site agent-readiness score and `agent-ready-plan.md`, or names the precondition that made it skip.
+- [ ] Step 8 either records the live-site agent-readiness score and `agent-ready-plan.md`, records the reused orchestrator scan's score without re-scanning, or names the precondition that made it skip.
 
 ### Edge Cases
 - **robots.txt already exists with custom rules:** Merges AI bot directives without overwriting existing entries; shows diff before writing.

@@ -4,7 +4,7 @@ description: "Review website/app UX for humans and AX for AI/search; produce an 
 license: MIT
 effort: high
 metadata:
-  version: 1.0.3
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -24,6 +24,7 @@ indexing, AI citations, or conversion uplift from an audit.
 | Repository, no reachable deployment | repo | `references/web-evidence.md` (source-only limits) |
 | Saved HTML, screenshots, notes, measurements | evidence-only | `references/evidence-rules.md` |
 | Native mobile/desktop app | native-app | `references/native-app.md` |
+| Orchestrated run with `evidence-dir` | evidence-only (live-web only for files the manifest lacks) | `references/orchestrated-runs.md` |
 
 When inputs overlap, name a primary mode and record each evidence source separately.
 Never infer a companion website from an app name. If no target/evidence is given, ask for
@@ -80,7 +81,7 @@ A DOM-only browser cannot verify visual brand, responsive layout, or computed co
 No tool is required to finish a partial audit; Python 3 is only needed for the validator.
 Report limitations rather than install tooling or invent evidence.
 
-Choose `<output-dir>` supplied by the user, otherwise a fresh `ux-ax-review-<timestamp>`
+Choose `<output-dir>` supplied by the user or the `output-dir` key, otherwise a fresh `ux-ax-review-<timestamp>`
 folder outside the target checkout using the host's workspace/scratch directory. With no
 filesystem, return the same Markdown and JSON inline and label validation not run.
 
@@ -107,6 +108,8 @@ Workers inspect the bundle read-only; parent owns live collection, interactions 
 artifacts. Main agent does not need both long checklists in context on delegated runs.
 Otherwise run the same contracts inline and record why. Never share one browser session
 between workers. Missing delegation is a fallback, not a failed audit.
+
+Aspects in `skip-checks` are not reviewed but stay listed as `not-tested` (Orchestrated Runs).
 
 **Done when:** all 12 aspect ids have an explicit status and rationale, workers or inline
 reviews cite evidence, and gaps are recorded. A missing tool yields `not-tested`, not pass.
@@ -161,6 +164,12 @@ Then ask: **“Would you like me to implement any of these fixes? Choose the fin
 IDs and scope.”** Stop. A later explicit approval permits only those fixes; start a separate
 implementation workflow with repo synchronization, tests, rollback and read-back checks.
 Approval never implies permission to commit, push, deploy or weaken access policy.
+
+## Orchestrated Runs
+
+With `orchestrated-by`, `evidence-dir`, `skip-checks` or `output-dir` lines, follow
+`references/orchestrated-runs.md`; without them nothing changes. Review-first, the
+validator and the closing question still apply.
 
 ## Completion report
 

@@ -1,0 +1,95 @@
+{
+  "skill_name": "search-optimizer",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Optimize https://example.com and its repo in ./site for Google and for AI search bots like GPTBot and ClaudeBot. You can send the URL to the agent-readiness scanner.",
+      "expected_output": "Detects the web branch, captures the site once into the evidence dir, runs website-agent-readiness once after G1, finalizes owners as case A, runs seo-ai-optimizer owning crawler-access with Step 8 reusing scan.json, then viral-product-evaluator with meta-tags skipped, and writes one search-optimization.md.",
+      "files": [],
+      "expectations": [
+        "Detects the web branch and runs the Dependency Preflight with seo-ai-optimizer as required.",
+        "Captures page.html, head.json, robots.txt, sitemap.xml and llms.txt once and writes manifest.json.",
+        "Presents website-agent-readiness's G1 gate before sending the URL to isitagentready.com.",
+        "Keeps crawler-access with seo-ai-optimizer (not in its skip-checks) and cites the scan's crawler findings on seo's row instead of re-fixing them.",
+        "Passes viral-product-evaluator skip-checks meta-tags.",
+        "Lists ai-actions under Not covered with a pointer to /ux-ax-review or /design-optimizer, even though the scan ran (case A).",
+        "Writes a single search-optimization.md with one row per finding and its owner.",
+        "Changes no repo file outside seo-ai-optimizer's diff approval."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "edge",
+      "name": "dedup-scan-once",
+      "prompt": "Do a complete SEO and AI-search optimization of https://docs.example.com and the repo in ./docs-site, including an agent-readiness score. Don't scan or fetch anything twice.",
+      "expected_output": "States the site is captured once and website-agent-readiness scans once; seo-ai-optimizer Step 8 reuses evidence-dir/agent-readiness/scan.json instead of invoking website-agent-readiness again; scan results for robots/sitemap, crawler directives and (when scanned) llms.txt are merged into seo-ai-optimizer's rows.",
+      "files": [],
+      "expectations": [
+        "isitagentready.com receives at most one scan request for the URL.",
+        "seo-ai-optimizer Step 8 records the existing scan.json and does not invoke /website-agent-readiness.",
+        "The same robots.txt or llms.txt defect appears as one row with the scan cited under 'Also reported by'.",
+        "The report notes the scan predates any seo-ai-optimizer fixes."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Help our website https://app.example.com and our iOS app in ./ios (it has fastlane/metadata) rank better in Google and the App Store.",
+      "expected_output": "Detects both branches; runs the web branch then aso-marketing with its plan approval gate; viral-product-evaluator runs once; merged search-optimization.md has web and store sections.",
+      "files": [],
+      "expectations": [
+        "Detects both web and store signals and checks seo-ai-optimizer and aso-marketing as required.",
+        "Invokes aso-marketing without the orchestrated block and keeps its post-Phase-3 approval gate.",
+        "Runs viral-product-evaluator exactly once.",
+        "Merged report contains separate web and store findings sections."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "name": "g1-declined",
+      "prompt": "Optimize https://example.net for SEO and AI crawlers, but don't send my URL to any outside scanning service.",
+      "expected_output": "Case B: no scan; seo-ai-optimizer owns crawler-access and skips agent-readiness-scan so its Step 8 does not ask again; markdown-pages, ai-actions and agent-readiness-scan listed as not covered.",
+      "files": [],
+      "expectations": [
+        "Does not send the URL to isitagentready.com.",
+        "Passes seo-ai-optimizer skip-checks agent-readiness-scan and lets it own crawler-access.",
+        "Lists markdown-pages, ai-actions and agent-readiness-scan under Not covered with the reason."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "negative-trigger",
+      "prompt": "Fix my robots.txt so GPTBot can crawl the blog but not /admin.",
+      "expected_output": "Routes to seo-ai-optimizer alone; search-optimizer does not trigger.",
+      "files": [],
+      "expectations": [
+        "seo-ai-optimizer handles the single fix directly.",
+        "No multi-member run, evidence dir or search-optimization.md is produced."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Write App Store keywords and a subtitle for my habit-tracker app.",
+      "expected_output": "Routes to aso-marketing alone; search-optimizer does not trigger.",
+      "files": [],
+      "expectations": [
+        "aso-marketing handles the request with its own phases and approval gate.",
+        "No search-optimizer intake or merged report is produced."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Set up a Google Ads search campaign for my SaaS.",
+      "expected_output": "Paid search is out of scope; search-optimizer does not trigger.",
+      "files": [],
+      "expectations": [
+        "No search-optimizer workflow runs.",
+        "The response does not produce an SEO or ASO audit."
+      ]
+    }
+  ]
+}

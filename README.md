@@ -136,6 +136,31 @@ Use:
 npx skills add https://github.com/luongnv89/skills --skill <name>
 ```
 
+### Find by Task
+
+One skill to invoke per task. The task skills call the related skills for you. In the two
+web task skills, evidence is captured once, the live scan runs at most once, overlapping checks
+are skipped where the member supports skip-checks, and remaining overlaps are merged into one
+row per defect.
+
+| Task | Invoke | It runs |
+|---|---|---|
+| Optimize a website/app design | [**design-optimizer**](skills/design-optimizer/) | dont-make-me-think · ux-ax-review · viral-product-evaluator · website-agent-readiness, then frontend-design only if you opt in to apply fixes |
+| Optimize for SEO, AI-bot or app-store search | [**search-optimizer**](skills/search-optimizer/) | Web: seo-ai-optimizer · website-agent-readiness · viral-product-evaluator. App store: aso-marketing · viral-product-evaluator |
+| Take an idea to a build plan | [**product-planner**](skills/product-planner/) | idea-validator → prd-generator → (brand-name-checker) → tad-generator → tasks-generator, resuming from the furthest existing artifact |
+| Review or improve code | [**code-review**](skills/code-review/) | One skill, four modes: review, perf, clean, cleanup |
+| Draw a diagram | [**diagram-generator**](skills/diagram-generator/) | Routes to drawio-generator or excalidraw-generator |
+
+These other task areas don't have a task skill. Each skill in them stands alone, so invoke them in this order:
+
+| Task | Skills, in order |
+|---|---|
+| Prepare an app store submission | aso-marketing → appstore-review-checker |
+| Harden and ship a repo | security-setup → devops-pipeline → release-manager (auto-push and cleanup-project for day-to-day work) |
+| Open-source a project | oss-ready → doc-manager → landing-page-generator |
+| Brand and launch | brand-name-checker → logo-designer → landing-page-generator |
+| Run an agent fleet | herdr-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner |
+
 ### Find by Category
 
 | Category | What it covers |
@@ -155,8 +180,8 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 | [**code-review**](skills/code-review/) | 2.1.3 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.3 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.3.2 | low | Target untested branches and edge cases |
-| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.4.3 | medium | Usability review using Krug's principles |
-| [**ux-ax-review**](skills/ux-ax-review/) | 1.0.3 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
+| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.5.0 | medium | Usability review using Krug's principles |
+| [**ux-ax-review**](skills/ux-ax-review/) | 1.1.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
@@ -190,8 +215,9 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
+| [**product-planner**](skills/product-planner/) | 1.0.0 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
 | [**idea-validator**](skills/idea-validator/) | 1.5.1 | max | Market, feasibility, competitor checks for ideas |
-| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.5.0 | high | Score codebase + landing page vs 32 viral principles |
+| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.6.0 | high | Score codebase + landing page vs 32 viral principles |
 | [**brand-name-checker**](skills/brand-name-checker/) | 1.4.2 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.4.3 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.5.1 | max | Technical architecture document from PRD |
@@ -206,6 +232,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**frontend-design**](skills/frontend-design/) | 1.3.0 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.3.0 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.3.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
+| [**design-optimizer**](skills/design-optimizer/) | 1.0.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
 
 **Diagram generator engines** (install the umbrella or a single engine):
 
@@ -220,8 +247,9 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.0.4 | medium | Generate/update docs to match code, cited to path:line, never invented |
 | [**landing-page-generator**](skills/landing-page-generator/) | 1.4.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
-| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.3.3 | high | Technical SEO + AI-bot directives |
-| [**website-agent-readiness**](skills/website-agent-readiness/) | 1.2.6 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
+| [**search-optimizer**](skills/search-optimizer/) | 1.0.0 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.4.0 | high | Technical SEO + AI-bot directives |
+| [**website-agent-readiness**](skills/website-agent-readiness/) | 1.3.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.3.1 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 2.0.2 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
 
@@ -252,6 +280,8 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 Most skills are `skills/<name>/`. Multi-phase products live under a suite folder: umbrella at `skills/<umbrella>/` + phases at `skills/<umbrella>/<phase>/`.
 
 Current suite: [diagram-generator](skills/diagram-generator/) (draw.io + Excalidraw engines behind one router). Install the umbrella or any child. Installers discover both levels.
+
+Task orchestrators ([design-optimizer](skills/design-optimizer/), [search-optimizer](skills/search-optimizer/), [product-planner](skills/product-planner/)) stay flat at `skills/<name>/`. Their members are ordinary top-level skills, and a member can belong to more than one task: viral-product-evaluator and website-agent-readiness serve both design and search. Each orchestrator checks for its members in a Dependency Preflight and tells you how to install any that are missing.
 
 Mirror the layout for your own multi-skill products.
 

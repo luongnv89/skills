@@ -4,7 +4,7 @@ description: "Review a product codebase and landing page against 32 viral princi
 license: MIT
 effort: high
 metadata:
-  version: 1.5.0
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -45,8 +45,8 @@ prioritized plan.
 
 ## Dependency Preflight (mandatory)
 
-This skill invokes `/browse`, and only on the **live URL** path — a local file or an
-auto-detected page needs nothing installed. Resolve it before fetching anything:
+This skill invokes `/browse`, and only on the **live URL** path — a local file, an
+auto-detected page, or an orchestrator's `evidence-dir` needs nothing installed. Resolve it before fetching anything:
 
 ```bash
 test -d "$HOME/.claude/skills/browse" || asm list -p claude --json | grep -q '"browse"' || {
@@ -85,6 +85,7 @@ Accept any combination the user provides; ask only for what's missing and truly 
      headline, CTAs, pricing section, testimonials, nav, and `<head>` meta (`og:image`,
      `twitter:image`, `description`, `<title>`).
    - a **local file** (`index.html`, a JSX/TSX/MDX page, a built `dist/`) → read it directly.
+   - an orchestrator's **`evidence-dir`** → read its `page.html` + `head.json`; no `/browse`.
    - **auto-detect** from the codebase → search for the landing/marketing page (common spots:
      `index.html`, `app/page.tsx`, `pages/index.*`, `src/App.*`, `landing/`, `marketing/`,
      `public/`). Confirm the candidate with the user if ambiguous.
@@ -106,7 +107,7 @@ Run these in sequence. Emit the matching Step Completion Report (see
 
 ### Phase 1 — Resolve inputs & gather evidence
 
-- Resolve the landing page input (URL → `/browse`; file → read; else auto-detect).
+- Resolve the landing page input (`evidence-dir` → saved files; URL → `/browse`; file → read; else auto-detect).
 - Locate the codebase and find **monetization evidence**: billing SDKs (Stripe, Paddle,
   LemonSqueezy, RevenueCat, Chargebee), pricing config/constants, plan & tier definitions,
   paywall/auth gating, trial logic. Grep for `price`, `plan`, `tier`, `checkout`,
@@ -140,8 +141,15 @@ Run these in sequence. Emit the matching Step Completion Report (see
   headline/proof/single-CTA first. Merge principles that share a root cause into one fix. Make
   each fix concrete enough to act on (give the actual proposed headline, the tier to cut, the
   CTA label) — quote what it is **Now** and what to **Change** it to.
-- Always write the report to `viral-evaluation.md` — repo root, or the current working directory
-  when there is no repo — and also print the verdict block + top fixes inline.
+- Always write the report to `viral-evaluation.md` — `output-dir` when given, else repo root, or
+  the current working directory when there is no repo — and also print the verdict block + top
+  fixes inline.
+
+## Orchestrated Runs
+
+With `orchestrated-by`, `evidence-dir`, `skip-checks` or `output-dir` lines, follow
+`references/orchestrated-runs.md`; without them nothing changes. All 32 principles are
+always scored.
 
 ## Honest evaluation
 
@@ -158,7 +166,7 @@ After each phase, emit the report from `references/step-reports.md`. The three p
 - Virality Score and tier come from `scripts/virality_score.py` over all 32 verdicts
   (PASS=1, PARTIAL=0.5, FAIL=0); per-principle verdicts and evidence remain model-owned.
 - Top fixes are concrete, prioritized by impact×ease, with before/after suggestions.
-- Report always written to viral-evaluation.md (repo root, else the current working directory) and
+- Report always written to viral-evaluation.md (`output-dir`, else repo root, else the current working directory) and
   also printed inline; Step Completion Reports emitted per phase.
 - Negative-trigger domains respected (no SEO/ASO/copy/code-review work).
 

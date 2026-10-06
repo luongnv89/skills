@@ -1,0 +1,105 @@
+{
+  "skill_name": "product-planner",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "I have an idea: a Slack bot that nudges remote teams to keep shared habits like daily stand-up notes. Take it all the way from validation to a sprint task list in one go.",
+      "expected_output": "Full chain planned: found-artifacts check, range stages 1-4, preflight of the four chain members, push warning before idea-validator, members invoked in order with file handoffs, one closing summary.",
+      "files": [],
+      "expectations": [
+        "Reports that no project artifacts exist yet and that the run starts at idea-validator.",
+        "Plans stages idea-validator, prd-generator, tad-generator, tasks-generator in that order, ending at tasks.md.",
+        "Runs the Dependency Preflight for exactly those four members (install path, then asm list -p claude --json).",
+        "Warns that idea-validator commits and pushes without asking before invoking it.",
+        "Hands prd-generator and tad-generator the project folder and tasks-generator the prd.md file path.",
+        "Does not answer the members' clarifying questions or push confirmations on the user's behalf.",
+        "Ends with one summary listing every artifact with an absolute path and status."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Just validate this idea and write the PRD, then stop: a marketplace where local bakeries sell day-old bread at a discount.",
+      "expected_output": "Partial range: idea-validator then prd-generator only; tad and tasks marked skipped; preflight covers only the two members in range.",
+      "files": [],
+      "expectations": [
+        "Sets the stop point at prd-generator and states the range before running.",
+        "Preflight checks idea-validator and prd-generator only, not tad-generator or tasks-generator.",
+        "Applies the verdict gate to validate.md before prd-generator runs.",
+        "Does not invoke tad-generator or tasks-generator.",
+        "Closing summary marks tad.md and tasks.md as skipped (outside the range)."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Continue planning the project in evals/files/resume-project. Finish the plan through to tasks.",
+      "expected_output": "Detects idea.md, validate.md, prd.md; shows them with the Build it verdict; resumes at tad-generator; reuses existing files without regenerating them.",
+      "files": [
+        "evals/files/resume-project/idea.md",
+        "evals/files/resume-project/validate.md",
+        "evals/files/resume-project/prd.md"
+      ],
+      "expectations": [
+        "Shows a found-artifacts table listing idea.md, validate.md and prd.md as present and tad.md, tasks.md as missing.",
+        "Names tad-generator as the resume point.",
+        "Does not invoke idea-validator or prd-generator and does not modify idea.md, validate.md or prd.md.",
+        "Preflight checks only tad-generator and tasks-generator.",
+        "Closing summary marks idea.md, validate.md and prd.md as reused."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Plan out the rest of the project in evals/files/skip-verdict-project: write the PRD, architecture and tasks.",
+      "expected_output": "Verdict gate reads Skip it from validate.md and stops the chain before prd-generator, asking whether the user wants to override.",
+      "files": [
+        "evals/files/skip-verdict-project/idea.md",
+        "evals/files/skip-verdict-project/validate.md"
+      ],
+      "expectations": [
+        "Reads the Quick Verdict in validate.md as Skip it.",
+        "Stops before invoking prd-generator and reports the verdict rationale.",
+        "Offers an explicit override instead of continuing on its own.",
+        "Does not write prd.md, tad.md or tasks.md.",
+        "Still emits a closing summary naming why the chain stopped."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "negative-trigger",
+      "prompt": "Write a PRD from the idea.md and validate.md in my project folder ~/ideas/2026_09_30_shiftswap.",
+      "expected_output": "Single-document request routed to prd-generator; the product-planner chain does not run.",
+      "files": [],
+      "expectations": [
+        "Uses prd-generator, not product-planner.",
+        "Does not invoke tad-generator or tasks-generator.",
+        "Does not emit a product-planner found-artifacts table or closing summary."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Is this startup idea viable? An app that rates coffee shops by how good their wifi is.",
+      "expected_output": "Viability-only request routed to idea-validator; no PRD, TAD or tasks chain.",
+      "files": [],
+      "expectations": [
+        "Uses idea-validator, not product-planner.",
+        "Does not invoke prd-generator, tad-generator or tasks-generator.",
+        "Does not emit a product-planner closing summary."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Break down my prd.md into sprint tasks.",
+      "expected_output": "Tasks-only request routed to tasks-generator; no orchestration.",
+      "files": [],
+      "expectations": [
+        "Uses tasks-generator, not product-planner.",
+        "Does not invoke idea-validator, prd-generator or tad-generator."
+      ]
+    }
+  ]
+}

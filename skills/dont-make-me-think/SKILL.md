@@ -4,7 +4,7 @@ description: "Review UI usability using Steve Krug's principles and produce a sc
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.3
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -14,7 +14,7 @@ Evaluate and improve UIs through Steve Krug's "Don't Make Me Think" principles. 
 
 ## When to Use
 
-Trigger this skill when the user asks for a usability audit, UX review, or UI feedback on a screenshot, live URL, or HTML/CSS code. Do not use for visual/brand critique, WCAG accessibility audits, or backend/API review — route those elsewhere.
+Trigger this skill when the user asks for a usability audit, UX review, or UI feedback on a screenshot, live URL, or HTML/CSS code. Do not use for visual/brand critique, WCAG accessibility audits, or backend/API review — route those elsewhere. An orchestrator may add optional run lines (see Orchestrated Runs).
 
 ## Dependency Preflight (mandatory)
 
@@ -64,7 +64,7 @@ Follow this workflow to keep the agent's context budget tight:
 1. **Check Prerequisites** — confirm input type and access (see below).
 2. **Process Input** — handle per the Input Handling table.
 3. **Evaluate** — apply applicable lenses from The Ten Lenses (see `references/krug-principles.md` for token-efficient deep dives).
-4. **Generate Report** — use the Report Format template verbatim.
+4. **Generate Report** — use the Report Format template verbatim; with `output-dir`, also write it to `<output-dir>/usability-review.md`.
 5. **Redesign (optional)** — only if user requests fixes; always confirm before destructive edits.
 
 ## Prerequisites
@@ -99,9 +99,16 @@ use the output in the review.
 |---|---|
 | Screenshot/image | Review directly when image capability is available; use `scripts/process_screenshots.py` for exact numeric or consistent multi-image evidence; disclose failures |
 | Live URL | Use `/browse` to navigate, screenshot, interact |
+| Orchestrator `evidence-dir` | Review its `page.html` + `screenshots/` instead of `/browse`; disclose untested interactions |
 | HTML/CSS/JS code | Read code, focus on user experience |
 | Wireframe/mockup | Focus on information architecture, not polish |
 | Verbal description | Ask clarifying questions first |
+
+## Orchestrated Runs
+
+With `orchestrated-by`, `evidence-dir` or `output-dir` lines, follow
+`references/orchestrated-runs.md`; without them nothing changes. Redesign Mode still needs
+explicit confirmation.
 
 ## The Ten Lenses
 

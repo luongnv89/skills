@@ -9,7 +9,7 @@
 
 > Audit websites and apps for humans and AI/search, then turn supported findings into an approval-gated improvement plan.
 
-Version: **1.0.3** · Author: Luong NGUYEN · License: MIT
+Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
