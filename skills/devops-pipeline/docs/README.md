@@ -46,6 +46,7 @@ graph TD
 | Unit tests (fast) | ✓ | — | — |
 | Full test suite | — | ✓ | ✓ (coverage upload) |
 | CLI end-to-end tests | — | ✓ | — |
+| Bypass guard (both hook stages, PR diff only) | — | — | ✓ |
 | Multi-version matrix | — | — | ✓ |
 | Deploy | — | — | ✓ |
 
@@ -61,10 +62,14 @@ graph TD
 |---|---|
 | `references/precommit-configs.md` | Language-specific pre-commit configs with push-stage tests and E2E hooks |
 | `references/github-actions.md` | Lean CI workflow templates (pre-commit-first approach) |
+| `references/cli-e2e.md` | CLI command discovery, the E2E script template, and its `pre-push` hook |
+| `references/final-report.md` | Final report parts, status rules (`COMPLETE`, `PARTIAL`, `BLOCKED`), examples, and reader checks |
+| `evals/evals.json` | Trigger and behavior test prompts with expectations |
 
 ## Output
 
 - `.pre-commit-config.yaml` with `pre-commit`-stage and `pre-push`-stage hooks
 - `scripts/e2e_test.sh` or `tests/e2e/test_cli.py` (for CLI tools)
-- `.github/workflows/ci.yml` — lean CI that focuses on matrix testing and coverage
+- `.github/workflows/ci.yml` — lean CI: a diff-scoped bypass guard, matrix testing, secrets-dependent work, and deploys
 - Configured and verified local pre-commit environment (both commit and push hooks)
+- A final report: `Result:` (`COMPLETE`, `PARTIAL` or `BLOCKED`), `Evidence:` with the commands that ran and their exit codes, `Uncertainty:` (always the CI workflow that has not run yet), and `Decision:` (the approval needed, or `No approval needed.`)
