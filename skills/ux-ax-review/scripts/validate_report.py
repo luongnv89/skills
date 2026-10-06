@@ -235,7 +235,11 @@ def main(argv=None):
         report = json.loads(args.report.read_text(encoding="utf-8"), parse_constant=reject_constant)
         markdown = args.markdown.read_text(encoding="utf-8") if args.markdown else None
     except (OSError, UnicodeError, ValueError, RecursionError) as error:
-        print(f"report/markdown: cannot read or parse artifact: {error}", file=sys.stderr)
+        print(
+            f"report/markdown: cannot read or parse artifact: {error}. "
+            "Check that the path exists and holds UTF-8 JSON (or Markdown for --markdown), then re-run.",
+            file=sys.stderr,
+        )
         return 1
     errors = validate_report(report, markdown)
     if errors:

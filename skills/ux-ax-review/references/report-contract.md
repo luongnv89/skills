@@ -5,7 +5,8 @@ be scoped to evidence; structural validation does not validate their truth.
 
 ## Markdown sections (exact H2 headings)
 
-1. `Executive Summary`: outcome PASS/PARTIAL, main strengths and top three priorities.
+1. `Executive Summary`: outcome PASS/PARTIAL (rule: `final-report.md`), main strengths and
+   top three priorities.
 2. `Scope and Evidence`: mode, audience/goal, sample, exclusions, tool limits, E records.
 3. `Human UX`: all six human coverage entries with status/rationale and relevant E/F ids.
 4. `AI/Search AX`: all six AX entries, applicability/policy and optional-format caveats.

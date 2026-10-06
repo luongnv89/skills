@@ -9,7 +9,7 @@
 
 > Audit websites and apps for humans and AI/search, then turn supported findings into an approval-gated improvement plan.
 
-Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.2.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -36,10 +36,20 @@ graph TD
     B --> C[Human UX and AI/search AX reviews]
     C --> D[Reconcile and prioritize]
     D --> E[Validated report and improvement plan]
-    E --> F[Stop for implementation approval]
+    E --> F[Result PASS / PARTIAL / BLOCKED, then stop for implementation approval]
     style A fill:#4CAF50,color:#fff
     style F fill:#2196F3,color:#fff
 ```
+
+## Installation
+
+Install via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
+
+```bash
+asm install github:luongnv89/skills:skills/ux-ax-review
+```
+
+No other skill is required. Python 3 is optional and only runs the report validator.
 
 ## Usage
 
@@ -56,7 +66,11 @@ Python 3 is optional for report validation; no packages are needed by the valida
 
 - `UX_AX_REVIEW.md`: scoped 12-aspect coverage, evidence-backed findings and phased plan.
 - `ux-ax-findings.json`: stable evidence/finding/task references and acceptance checks.
-- Completion summary and a choice-of-task-IDs implementation offer. No source edits during audit.
+- A final response that opens with `Result: PASS | PARTIAL | BLOCKED` and a one-line reason,
+  then lists the top priorities, the evidence (artifact paths, validator result), what stayed
+  uncertain or not tested, and a choice-of-task-IDs implementation offer. No source edits during audit.
+- `PARTIAL` means the artifacts were written but some aspect was not tested for missing evidence
+  or tools. `BLOCKED` means nothing was audited, and the response names the input you need to supply.
 
 The validator checks structure, not truth, certification, ranking, citation or conversion outcomes.
 llms.txt and Markdown exports are optional opportunities, not universal search requirements.
@@ -67,11 +81,21 @@ or sent to third-party AI services as an “improvement.”
 
 | Path | Description |
 |---|---|
-| `references/` | Evidence rules, UX/AX checklists, mode limits and report contract |
-| `agents/` | Bounded human and AI/search reviewer contracts |
+| `references/evidence-rules.md` | Aspect ids, coverage statuses and how evidence records are written |
+| `references/human-ux.md` | Checklist for the six human UX aspects |
+| `references/ai-search-ax.md` | Checklist for the six AI/search AX aspects |
+| `references/web-evidence.md` | Live-web and repository evidence limits, and the checkout snapshot |
+| `references/native-app.md` | How human and AX checks apply to native-only apps |
+| `references/report-contract.md` | Markdown headings, JSON fields, triage bands and validator scope |
+| `references/final-report.md` | Status rule (PASS/PARTIAL/BLOCKED), final response shape, step results and understanding criteria |
+| `references/repo-sync.md` | Confirm-first sync steps for an output directory inside a git worktree |
+| `references/orchestrated-runs.md` | The `orchestrated-by`, `evidence-dir`, `skip-checks` and `output-dir` lines an orchestrator such as `design-optimizer` may pass |
+| `agents/human-reviewer.md` | Bounded human UX reviewer contract |
+| `agents/ax-reviewer.md` | Bounded AI/search reviewer contract |
 | `scripts/validate_report.py` | Stdlib-only report coverage/reference validator |
-| `tests/` | Executable validator regression tests |
-| `evals/` | Realistic synthetic audit fixtures and behavioral expectations |
+| `tests/` | Executable validator regression tests and their TDD notes |
+| `evals/evals.json` | Behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
+| `evals/files/` | Synthetic web, repo, native, blocked and orchestrated-run fixtures |
 
 ## Verification
 
