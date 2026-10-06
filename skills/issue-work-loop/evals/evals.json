@@ -12,7 +12,9 @@
         "Requires issue #17 to be open and checks for linked open PRs before spawn",
         "Spawns ISSUE implementer first and instructs it to use /issue-resolver 17 --auto",
         "Uses issue-pr-review --review-only for independent review",
-        "Does not merge and runs mode-aware SWEEP"
+        "Does not merge and runs mode-aware SWEEP",
+        "Acquires herdr-agent, issue-pr-review, and issue-resolver with asm deps acquire under one session before the repo sync, and releases that session after SWEEP",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -25,7 +27,8 @@
         "Uses an implementer role in ISSUE mode",
         "Caps completed review rounds at 3",
         "Fix prompts forbid re-running issue-resolver, opening a second PR, force-pushing, or merging",
-        "Reports remaining findings if the cap is reached"
+        "Reports remaining findings if the cap is reached",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -39,7 +42,9 @@
         "Queries PR identity, title/body, head branch/SHA, repository owner, cross-repo, maintainer-modification, and closing issue facts with graceful fallback",
         "Requires PR state OPEN",
         "Spawns reviewer first and never calls issue-resolver in PR mode",
-        "Does not spawn a FIXER before a FINDINGS verdict"
+        "Does not spawn a FIXER before a FINDINGS verdict",
+        "Acquires only herdr-agent and issue-pr-review in PR mode; never acquires issue-resolver",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -52,7 +57,8 @@
         "Parses `pr 91` as PR mode rather than issue mode",
         "Uses max_rounds 4",
         "Spawns the reviewer before any writer",
-        "Leaves merge to the user"
+        "Leaves merge to the user",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -65,7 +71,8 @@
         "Triggers PR mode from natural language",
         "Reviews current head SHA before any fixer exists",
         "Uses explicit FIXER role only if findings exist and push safety passes",
-        "Never opens a second PR or merges"
+        "Never opens a second PR or merges",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -78,7 +85,8 @@
         "Treats linked issue as optional",
         "Reports exactly issue_context: none",
         "Does not invent an issue from branch names, commits, or arbitrary #number mentions",
-        "Reviewer and potential FIXER prompts support issue_context: none"
+        "Reviewer and potential FIXER prompts support issue_context: none",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -93,7 +101,8 @@
         "Spawns a pane named fix-64 by default with leading role word FIXER",
         "Requires a dedicated non-primary worktree",
         "Uses an ordinary non-force push to PR #64 source branch",
-        "Verifies PR #64 and the same head branch have a new SHA before re-review"
+        "Verifies PR #64 and the same head branch have a new SHA before re-review",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -107,7 +116,8 @@
         "Requires reviewed_head_sha to match the current PR head",
         "Does not spawn a FIXER or create a fixer worktree",
         "SWEEP reports no PR fixer worktree and no issue-resolver worktree",
-        "Does not merge"
+        "Does not merge",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -121,7 +131,8 @@
         "Requires explicit confirmation",
         "On acceptance validates PR #77 and spawns reviewer first without issue-resolver",
         "On decline aborts without spawning workers",
-        "Never creates another PR"
+        "Never creates another PR",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -134,7 +145,9 @@
         "Requires state exactly OPEN",
         "Reports observed CLOSED state",
         "Does not spawn reviewer, FIXER, or implementer",
-        "Does not reopen or replace the PR"
+        "Does not reopen or replace the PR",
+        "Releases the dependency lease even though the run stops in preflight",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -147,7 +160,8 @@
         "Permits reviewer-first review of the fork PR",
         "Treats false or unknown push facts as unsafe",
         "Does not spawn FIXER, edit, or attempt a mutating push",
-        "Reports current SHA, findings, reason, and owner/collaborator handoff"
+        "Reports current SHA, findings, reason, and owner/collaborator handoff",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -160,7 +174,8 @@
         "Checks closing-reference/closing-keyword evidence",
         "Does not silently choose issue or PR mode",
         "Does not spawn any worker",
-        "Reports the PR's actual issue_context without inventing a match"
+        "Reports the PR's actual issue_context without inventing a match",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -173,7 +188,8 @@
         "Retains all linked issue numbers and does not select a canonical issue",
         "Reports issue_context: #4,#9",
         "Treats the note as FINDINGS",
-        "Runs push-safety before any PR FIXER spawn"
+        "Runs push-safety before any PR FIXER spawn",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -186,7 +202,8 @@
         "Refreshes headRefOid every round",
         "Requires reviewed_head_sha to match",
         "Discards stale review/fix state",
-        "Does not spawn or dispatch FIXER from stale findings"
+        "Does not spawn or dispatch FIXER from stale findings",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -198,7 +215,8 @@
       "expectations": [
         "Lists evidence-backed candidate PRs",
         "Does not pick silently",
-        "Does not invoke issue-resolver"
+        "Does not invoke issue-resolver",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
     {
@@ -250,7 +268,8 @@
         "Applies the same autonomous-mode gate before a lazily spawned FIXER receives FINDINGS",
         "Repeats the gate for every FRESHENed session",
         "Never uses --dangerously-skip-permissions or --allow-dangerously-skip-permissions",
-        "Stops before dispatch if autonomous mode cannot be verified"
+        "Stops before dispatch if autonomous mode cannot be verified",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     }
   ]

@@ -2,10 +2,14 @@
 name: issue-work-loop
 description: "Run Herdr loops for one open GitHub issue (resolve→review→fix) or an existing PR (review→lazy fixer) until CLEAN. Don't use for plain resolution without review, review-only/no-fix requests, backlog automation, or merging."
 license: MIT
-compatibility: "Requires herdr, git, gh auth, issue-pr-review and herdr-agent in both modes; issue-resolver is required only in ISSUE mode."
+compatibility: "Requires herdr, git, gh auth and asm; herdr-agent and issue-pr-review in both modes, issue-resolver only in ISSUE mode."
 effort: max
+dependencies:
+  - herdr-agent
+  - issue-pr-review
+  - issue-resolver
 metadata:
-  version: 1.5.3
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -69,39 +73,32 @@ On failure, print the matching block from `references/error-messages.md` and sto
 2. Authenticated GitHub CLI: `which gh && gh auth status`
 3. GitHub remote: `git remote -v`
 4. Running Herdr server: `command -v herdr && herdr status` (never launch bare `herdr` from a non-TTY shell)
-5. Bundled references present: `agent-prompts.md`, `context-gate.md`, `loop-protocol.md`, `cleanup.md`, `error-messages.md`, `output-format.md`
+5. Bundled references present: `agent-prompts.md`, `context-gate.md`, `loop-protocol.md`, `cleanup.md`, `edge-cases.md`, `error-messages.md`, `output-format.md`
 
 ## Dependency Preflight (mandatory)
 
-This skill hands whole phases to other skills: `herdr-agent` (every pane spawn, send, and wait) and `issue-pr-review` (the reviewer role) in **both** modes, plus `issue-resolver` for the ISSUE-mode implementer only. Resolve them before the repo sync below, the first step that changes anything:
+This skill hands whole phases to the skills declared in frontmatter `dependencies`: `herdr-agent` (every pane spawn, send, and wait) and `issue-pr-review` (the reviewer role) in **both** modes, and `issue-resolver` (the implementer) in ISSUE mode only. Run this before the repo sync below, the first step that changes anything. The Mode Selector has already chosen the mode, and every run of a mode reaches all of that mode's dependencies, so acquire them here rather than mid-ROUND. Set `mode` to `issue` or `pr` (lowercase) and `number` to the issue or PR number first.
 
 ```bash
+command -v asm >/dev/null || { echo "Missing installer: npm install -g agent-skill-manager" >&2; exit 1; }
+asm deps discover issue-work-loop --json
+iwl_session="iwl-${mode}-${number}-$(date +%s)"   # mode: issue | pr
 req="herdr-agent issue-pr-review"
-missing=""
+[ "$mode" = issue ] && req="$req issue-resolver"   # PR mode never acquires issue-resolver
+lease_dir="$(mktemp -d)"; failed=""
 for s in $req; do
-  asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
+  asm deps acquire "$s" --session "$iwl_session" --json >"$lease_dir/$s.json" || failed="$failed $s"
 done
-if [ -n "$missing" ]; then
-  for s in $missing; do
-    echo "Missing required skill: $s" >&2
-    case "$s" in
-      issue-*) echo "Install it:      asm install https://github.com/luongnv89/idd --skill skills/$s -p claude --yes" >&2 ;;
-      *)       echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2 ;;
-    esac
-    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
-  done
-  echo "No asm yet:      npm install -g agent-skill-manager" >&2
-  exit 1
+if [ -n "$failed" ]; then
+  asm deps release --session "$iwl_session" --json
+  echo "Missing required skill(s):$failed" >&2; exit 1
 fi
 ```
 
-Resolve `herdr_agent_dir` from the installed `herdr-agent` skill's location,
-not the working repository. Set `here` to its absolute `scripts/` directory;
-stop before sync if that location or `launch_profile.py` cannot be verified.
-
-The mode is already chosen by the Mode Selector above. **In ISSUE mode, add `issue-resolver` to `req` before running this** — PR mode never calls it.
-
-`-p claude` is required: `asm install` refuses to guess a provider non-interactively, `--yes` does not cover that choice, and naming the same provider in the verification stops an install under a different tool from reporting success. All missing skills are reported in one pass, then the run stops before the first mutation — never continue with a partial run.
+1. If any acquisition fails, print the *Missing required skills* block from `references/error-messages.md` and stop. All failures are reported in one pass; never continue with a partial run.
+2. Set `herdr_agent_dir` to the `path` field of `$lease_dir/herdr-agent.json`, never to a repository path. Set `here` to its absolute `scripts/` directory. If either directory or `launch_profile.py` is missing, stop before sync.
+3. Record each acquired `skillMdPath`. Worker prompts in `references/agent-prompts.md` pass it as `{issue_resolver_skill_md}` or `{issue_pr_review_skill_md}` for a worker CLI that lacks the slash command.
+4. **Release in `finally`.** The main agent owns the lease. Once `iwl_session` is set, at every terminal outcome — handoff, stop, error, or `--no-cleanup` — run `asm deps release --session "$iwl_session" --json` once, after SWEEP if SWEEP runs and before the final report. A failed release goes into the final report's `Uncertainty:` line.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -133,11 +130,11 @@ If `origin` is missing or rebase/stash-pop conflicts occur, stop and ask the use
 
 ## Selective Worker Launch Profile (mandatory)
 
-The dependency preflight resolves the installed `herdr-agent` directory and
+The dependency preflight resolves the acquired `herdr-agent` directory and
 its absolute scripts directory as `here`; a missing helper, or a helper whose
 `--help` output does not advertise `--without bypass`, is a fatal preflight
 error. Never assume a repository-relative `skills/herdr-agent/scripts/` path.
-Before **every** Herdr worker launch, use the installed
+Before **every** Herdr worker launch, use the acquired
 `"$here/launch_profile.py"` and pass `--without bypass`:
 
 - the initial ISSUE implementer/resolver;
@@ -218,16 +215,20 @@ Read `references/loop-protocol.md` after selecting the mode; it is authoritative
 
 ## Phase 2 — First Worker
 
-- **ISSUE:** spawn the implementer pane, send the initial issue-resolver prompt, and validate exactly one open linked PR. Then spawn the reviewer.
-- **PR:** spawn the reviewer first. Do not spawn an implementer or FIXER, and never call `issue-resolver`.
+Every spawn below uses `herdr-agent` readiness/send/wait mechanics. A worker receives its role prompt only after it reports ready and passes the **Autonomous Worker Boot Gate**.
 
-Use `herdr-agent` readiness/send/wait mechanics. Boot workers before sending long tasks. After each worker is ready, pass the **Autonomous Worker Boot Gate** before sending role prompts.
+- **ISSUE:**
+  1. Spawn the implementer pane.
+  2. Send the *ISSUE implementer — initial* prompt.
+  3. Validate exactly one open linked PR (`references/loop-protocol.md` → *ISSUE PR creation and validation*). If none, follow its row in `references/edge-cases.md`.
+  4. Spawn the reviewer.
+- **PR:** spawn the reviewer first. Do not spawn an implementer or FIXER, and never call `issue-resolver`.
 
 ## Phase 3 — Review / Fix ROUNDs
 
 Start `round = 1`; a ROUND counts when REVIEW completes.
 
-1. Context-gate the reviewer at every ROUND start: FRESHEN it once its remaining context window drops to `work_loop.context_threshold` percent, because a worker that exhausts its token budget mid-review returns a truncated verdict rather than an error.
+1. Context-gate the reviewer at every ROUND start: if its probed context-window usage is at or above `work_loop.context_threshold` percent, FRESHEN it (`references/context-gate.md`). A worker that exhausts its token budget mid-review returns a truncated verdict rather than an error.
 2. Before review, refresh the PR and require its current `headRefName` and `headRefOid`; send that SHA in the reviewer prompt. Reviewer must report `reviewed_head_sha` matching it.
 3. Normalize verdicts strictly: notes are FINDINGS; contradictory CLEAN plus items becomes FINDINGS; one verdict-only re-prompt is allowed.
 4. On CLEAN, do not dispatch a writer. In PR mode, a FIXER must never have been spawned if every review was CLEAN.
@@ -252,21 +253,25 @@ Continue to handoff even if cleanup is PARTIAL so the PR URL and recovery steps 
 
 ## Phase 5 — USER-MERGE Handoff
 
-Never run `gh pr merge` or enable auto-merge. Print the mode-specific final report with PR URL, branch, verified head SHA, `issue_context`, rounds, verdict, remaining FINDINGS, spawned roles, and cleanup state.
+Never run `gh pr merge` or enable auto-merge.
+
+1. Release the dependency lease (*Dependency Preflight*, step 4).
+2. Print the mode-specific final report from `references/output-format.md`. It opens with `Result:` (`COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason`), then `Evidence:` (only checks that ran: fresh `gh pr view`, reviewed SHA, pane and worktree lists), `Uncertainty:` (untested or unverified items, such as CI not observed or a failed release), and `Decision:` (merge is the user's; name any other approval, or "No approval needed."). The PR URL, branch, head SHA, `issue_context`, rounds, verdict, remaining FINDINGS, spawned roles, and cleanup state follow.
 
 ## Acceptance Criteria
 
 A phase is complete only when its criterion below holds. Never report PASS from a worker's claim alone — verify GitHub state, head SHA, pane list, and worktree list.
 
-- **Phase 1 — Preflight:** mode is unambiguous; target exists and is OPEN; required skills and Herdr root are available; linked-PR/issue evidence is recorded; no worker has spawned on a failing gate.
+- **Phase 1 — Preflight:** mode is unambiguous; target exists and is OPEN; every dependency the mode reaches is acquired under one `iwl_session`; Herdr root is available; linked-PR/issue evidence is recorded; no worker has spawned on a failing gate.
 - **Phase 2 — First Worker:** ISSUE has one validated open PR and a ready, autonomous reviewer, or an authoritative `already_resolved` terminal outcome; PR has only a ready, autonomous reviewer and the preflight head SHA. Any writer already spawned is also verified autonomous. If ISSUE reports `already_resolved` and a linked open PR appeared after preflight, require the same switch-to-PR confirmation; accept switches to full PR mode, decline aborts.
 - **Phase 3 — ROUNDs:** CLEAN has zero FINDINGS at the verified current SHA; or MAX_ROUNDS/FAILED records every remaining FINDING and a reason; every fix stayed on the same PR branch; PR-mode unsafe push paths spawned no FIXER.
 - **Phase 4 — SWEEP:** tracked worker panes are absent; no loop-created non-primary worktree remains; primary checkout is clean on the default branch, or each failed check has exact recovery instructions.
-- **Phase 5 — Handoff:** the PR remains open; final facts match a fresh `gh pr view`; merge ownership is explicitly human; no second PR, force-push, or hidden unresolved FINDING occurred.
+- **Phase 5 — Handoff:** the PR remains open; final facts match a fresh `gh pr view`; merge ownership is explicitly human; no second PR, force-push, or hidden unresolved FINDING occurred; `asm deps release` ran for `iwl_session`.
+- **Final report — understandable:** a reader finds the `Result:` status in the first line; verified facts name the check behind them, and assumptions or untested items sit under `Uncertainty:`; every claim (CLEAN, head SHA, cleanup) traces to a fresh query, not a worker's word; `Decision:` names the next action. Without user feedback, human understanding stays unconfirmed.
 
 ### Expected output
 
-Each phase and ROUND emits a Step Completion Report; the run ends with a USER-MERGE handoff naming the PR URL, branch, verified head SHA, `issue_context`, ROUNDs completed, final verdict, remaining FINDINGS, spawned roles, and cleanup state. The exact mode-specific layouts are in `references/output-format.md`.
+Each phase and ROUND emits a Step Completion Report; the run ends with the Phase 5 final report (`Result:`, `Evidence:`, `Uncertainty:`, `Decision:`, then the handoff facts). The exact mode-specific layouts are in `references/output-format.md`.
 
 ```text
 ◆ ROUND 2 (PR)
@@ -279,20 +284,7 @@ Each phase and ROUND emits a Step Completion Report; the run ends with a USER-ME
 
 ## Edge Cases
 
-Each row is a situation the loop must handle rather than crash on. Exact stop and handoff blocks are in `references/error-messages.md`.
-
-| Situation | Response |
-|---|---|
-| ISSUE implementer produces no unique open PR | If authoritative `already_resolved` with zero links, hand off `ALREADY_RESOLVED`; otherwise stop and report reason |
-| Existing linked PR in ISSUE preflight | Confirm switch to PR mode; decline aborts |
-| PR closed/not found | Stop before worker spawn |
-| Explicit issue/PR mismatch | Stop and ask user to correct identifiers |
-| Missing/contradictory reviewer verdict | One parse-only re-prompt, then fail ROUND |
-| PR head changes during review/fix | Refresh; discard stale review/fix plan and review the current SHA |
-| Fork/cross-repo push permission unavailable or uncertain | Review is allowed; stop before FIXER/push with handoff |
-| Autonomous mode cannot be enabled or verified | Stop before dispatch with the per-harness recovery from `error-messages.md`; never substitute skip-permissions flags |
-| Worker blocked | Surface trust/auth dialog; never type into it |
-| Max rounds | Report all remaining FINDINGS; leave PR open |
+Read `references/edge-cases.md` when one of these occurs: a dependency cannot be acquired; the ISSUE implementer produces no unique open PR; a linked PR exists at ISSUE preflight; the PR is closed or missing; the issue and PR do not match; the reviewer verdict is missing or contradictory; the PR head changes mid-ROUND; fork push access is uncertain; autonomous mode cannot be verified; a worker is blocked; max rounds is reached. Each row names the response; exact stop blocks are in `references/error-messages.md`.
 
 ## What You Must Not Do
 
@@ -331,4 +323,5 @@ A PASS requires the phase's criterion in **Acceptance Criteria** above.
 - `references/output-format.md` — mode-specific Step Completion Reports and handoffs
 - `references/vocabulary-and-config.md` — leading words and `work_loop.*` config keys
 - `references/error-messages.md` — exact stop/handoff blocks
-- Required skills: `herdr-agent`, `issue-pr-review`; ISSUE also requires `issue-resolver`
+- `references/edge-cases.md` — situation → response table
+- Required skills (frontmatter `dependencies`): `herdr-agent`, `issue-pr-review`; ISSUE also requires `issue-resolver`

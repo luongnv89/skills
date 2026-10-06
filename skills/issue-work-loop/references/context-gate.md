@@ -1,6 +1,6 @@
 # Context Gate — /issue-work-loop
 
-Best-effort gate: FRESHEN a reusable worker at or above `work_loop.context_threshold` (default 50%). Herdr does not expose normalized usage for every CLI, so use the worker probe and conservative UNKNOWN fallback.
+Best-effort gate: FRESHEN a reusable worker when its probed context-window usage is at or above `work_loop.context_threshold` (default 50%). Herdr does not expose normalized usage for every CLI, so use the worker probe and conservative UNKNOWN fallback.
 
 ## Gate points
 

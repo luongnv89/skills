@@ -231,8 +231,9 @@ CLI never inherits a previous profile check.
 
 ### Installed-helper capability gate
 
-Dependency Preflight records `herdr_agent_dir` as the absolute installed
-`herdr-agent` directory. Carry that value into this phase; do not derive it
+Dependency Preflight records `herdr_agent_dir` as the absolute `herdr-agent`
+directory: the `path` field that `asm deps acquire herdr-agent` returned for
+this run's `iwl_session`. Carry that value into this phase; do not derive it
 from the repository checkout or invent a repo-relative fallback. Check the
 installed helper and its supported selective option before splitting or
 starting a worker:

@@ -22,7 +22,7 @@ Optional `.gitissue.yml` keys (defaults when absent):
 |---|---|---|
 | `work_loop.max_rounds` | `5` | Maximum completed review ROUNDs |
 | `work_loop.agent_cli` | `"claude"` | Interactive worker launcher; autonomy follows the per-harness boot-gate matrix |
-| `work_loop.context_threshold` | `50` | FRESHEN at or above this percentage |
+| `work_loop.context_threshold` | `50` | FRESHEN when the worker's probed context-window usage is at or above this percentage |
 | `work_loop.implementer_name` | `"impl-{N}"` | ISSUE implementer pane |
 | `work_loop.reviewer_name` | `"rev-{N}"` in ISSUE; `"rev-pr-{M}"` in PR | Reviewer pane |
 | `work_loop.fixer_name` | `"fix-{M}"` | PR FIXER pane, lazily spawned |

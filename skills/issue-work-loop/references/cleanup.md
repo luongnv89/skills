@@ -19,7 +19,9 @@ Do not assume an issue-resolver worktree exists in PR mode. Do not claim or clos
 2. Close tracked worker panes.
 3. Remove eligible loop worktrees.
 4. Return primary checkout to default branch and a clean tree.
-5. Verify and print SWEEP plus USER-MERGE reports.
+5. Verify and print the SWEEP report.
+6. Release the dependency lease: `asm deps release --session "$iwl_session" --json`. This step also runs under `--no-cleanup` and on every stop. If it fails, record it under the final report's `Uncertainty:` line.
+7. Print the USER-MERGE final report (`output-format.md` → *Final report contract*).
 
 Continue safe cleanup after a partial failure. Preserve handoff facts.
 
