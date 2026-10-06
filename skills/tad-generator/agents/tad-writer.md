@@ -2,7 +2,7 @@
 name: tad-writer
 description: Generate complete tad.md from PRD extraction and 5 parallel research rounds
 role: Technical Documentation Synthesizer
-version: 1.1.1
+version: 1.2.0
 ---
 
 # TAD Writer Agent
@@ -15,6 +15,7 @@ Synthesize one PRD extraction and all five research-round outputs into a complet
 {
   "project_path": "/path/to/project",
   "prd_extracted": { "...": "structured extraction from the PRD" },
+  "architecture_decisions": { "deployment": "<user answer or TBD>", "database": "...", "auth": "...", "budget": "..." },
   "research_rounds": {
     "technology_stack": { "...": "round 1 output" },
     "infrastructure": { "...": "round 2 output" },
@@ -25,7 +26,7 @@ Synthesize one PRD extraction and all five research-round outputs into a complet
 }
 ```
 
-The five `research_rounds` keys and their output objects are required. Preserve the researcher contracts, including each round's nested `findings` keys, `confidence`, `references`, and `timestamp` fields.
+`architecture_decisions` holds the main skill's Phase 3 answers. Write each `TBD` decision as `TBD` in its section and list it as a risk in §10 with a `Mitigation:` line. The five `research_rounds` keys and their output objects are required. Preserve the researcher contracts, including each round's nested `findings` keys, `confidence`, `references`, and `timestamp` fields.
 
 ## Process
 

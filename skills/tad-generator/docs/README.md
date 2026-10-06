@@ -15,7 +15,9 @@
 - Extract requirements from PRD and conduct 5 research rounds
 - Cover tech stack, infrastructure, security, risks, and holistic review
 - Generate Mermaid architecture diagrams and cost estimates
-- Support modification mode with versioned backups
+- Support modification mode with timestamped backups (`tad.md.bak.YYYYMMDD_HHMMSS`)
+- Verify the TAD with up to seven shell checks before committing
+- End every run with a Final Report: `Result:` (COMPLETE, PARTIAL or BLOCKED), `Evidence:`, `Uncertainty:`, `Decision:` and `Next step:`
 
 ## When to Use
 
@@ -55,7 +57,7 @@ asm install github:luongnv89/skills:skills/tad-generator
 ## Usage
 
 ```
-/tad-generator
+/tad-generator ~/ideas/my_project
 ```
 
 ## Resources
@@ -67,7 +69,12 @@ asm install github:luongnv89/skills:skills/tad-generator
 | `agents/tad-writer.md` | Generate complete tad.md from all research inputs |
 | `references/tad-template.md` | Technical Architecture Document template |
 | `references/tech-stack.md` | Technology stack patterns and research guide |
+| `references/verification-steps.md` | Shell checks run on `tad.md` before commit |
+| `references/final-report.md` | Final Report examples, fill rules and reader checks |
+| `references/edge-cases.md` | Required behavior and final status for each edge case |
+| `references/step-completion-reports.md` | Per-phase Step Completion Report check names |
+| `evals/evals.json` | Scenario and negative-trigger eval cases |
 
 ## Output
 
-`tad.md` with System Overview, Architecture Diagram, Tech Stack, System Components, Data Architecture, Infrastructure, Security, Performance, Development Setup, Risk Matrix, and Appendix. Includes cost estimates and GitHub links.
+`tad.md` with System Overview, Architecture Diagram, Tech Stack, System Components, Data Architecture, Infrastructure, Security, Performance, Development Setup, Risk Matrix, and Appendix. Includes cost estimates. The chat output is a Final Report with the status, the verification counts, the commit hash and branch-based GitHub links.

@@ -1,0 +1,108 @@
+{
+  "skill_name": "tad-generator",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Design the system architecture for ~/ideas/2026_10_06_habit_tracker_for_nurses. (The folder has a 1,800-word prd.md naming Vercel hosting and PostgreSQL, plus idea.md and validate.md; it sits in an ideas git repo with origin and scripts/update_readme_ideas_index.py; no tad.md exists; the user answers the auth and budget questions and confirms the push.)",
+      "expected_output": "Runs Phase 1 (with Repo Sync) through Phase 8 in create mode: prd-reader once, five tech-researcher rounds in parallel, tad-writer once. Writes tad.md with the 11 numbered sections, runs the verification checks, updates the README index via the script, commits only the files it wrote, pushes after confirmation, and ends with a COMPLETE Final Report.",
+      "files": [],
+      "expectations": [
+        "Asked only the Phase 3 decisions the PRD does not answer (auth, budget), not deployment or database",
+        "Spawned five research rounds (technology_stack, infrastructure, security, risk_assessment, holistic_review) before writing tad.md",
+        "tad.md has 11 numbered '## N. ' sections and at least one ```mermaid block",
+        "Each §10 risk has a Mitigation: line, and §3 has no bare 'latest'",
+        "Staged files by path, did not run git add -A, and asked before pushing",
+        "The Final Report opens with a Result: line carrying COMPLETE, create mode, the tad.md path and the main stack decisions",
+        "Evidence: cites the verification counts, the cost estimates by phase, the commit hash, and GitHub links built from the current branch",
+        "Uncertainty: lists every TBD or assumption, or says none within the checks run",
+        "Decision: says No approval needed."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "We're moving from Vercel to AWS. Update the architecture doc in ~/ideas/2026_10_06_habit_tracker_for_nurses. (tad.md already exists; the user picks Infrastructure when asked which area changed and confirms the push.)",
+      "expected_output": "Enters modify mode, writes a non-empty tad.md.bak.YYYYMMDD_HHMMSS backup, changes only §6 Infrastructure, adds a §11.4 revision-history row, re-runs verification (7/7 with the backup check), commits tad.md and the backup by path, and ends with a COMPLETE Final Report.",
+      "files": [],
+      "expectations": [
+        "Wrote tad.md.bak.<YYYYMMDD_HHMMSS> and checked it is non-empty before editing tad.md",
+        "Did not run the five research rounds",
+        "Only §6 Infrastructure changed, apart from the new §11.4 revision-history row",
+        "Commit message is 'docs: update TAD for <product name>'",
+        "The Final Report Result: line says COMPLETE and modify mode, and Evidence: names the backup file"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Create a TAD for ~/ideas/2026_10_06_ai_meal_planner. (The folder has idea.md and validate.md but no prd.md.)",
+      "expected_output": "Stops in Phase 1 step 3 without writing anything. The Final Report is BLOCKED, and the Next step: line suggests running prd-generator first.",
+      "files": [],
+      "expectations": [
+        "Did not write tad.md or invent requirements",
+        "Final Result: line is BLOCKED and names the missing prd.md",
+        "Next step: suggests prd-generator"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Write the architecture for ~/scratch/notes_app. (prd.md has 120 words; the user replies 'just proceed with what you have'; the folder is not in a git repository.)",
+      "expected_output": "Warns that the PRD is under 200 words and asks for user flows and NFRs. The user says to proceed, so it continues with TBD values, skips Repo Sync, Phase 6 and Phase 7, and ends with a Final Report that lists the TBD values and the skipped phases.",
+      "files": [],
+      "expectations": [
+        "Warned that prd.md is under 200 words and asked for user flows and non-functional requirements",
+        "Did not run any git command that writes, and did not create a commit",
+        "Missing values appear as TBD in tad.md, not invented numbers",
+        "Uncertainty: lists the TBD values and the skipped Phases 6-7"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Generate the TAD for ~/ideas/2026_10_06_habit_tracker_for_nurses. (Create mode in an ideas repo; the user declines when asked to push.)",
+      "expected_output": "Writes and commits tad.md, skips the push, reports the commit as local only with no GitHub links, and ends with a PARTIAL Final Report.",
+      "files": [],
+      "expectations": [
+        "Asked before pushing and did not push after the refusal",
+        "Final Result: line is PARTIAL and names Phase 7",
+        "Evidence: marks the commit hash local only and omits GitHub links"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Design the architecture for ~/work/ledger. (prd.md says 'use MongoDB' in §6 and 'must use PostgreSQL for compliance' in §5; the user does not answer the conflict question; WebSearch is unavailable.)",
+      "expected_output": "Shows both database hints and asks the user to choose. With no answer, records the database as TBD in §3 and as a risk in §10, runs research without web access, and lists both on the Uncertainty: line.",
+      "files": [],
+      "expectations": [
+        "Showed both database hints and asked instead of picking one",
+        "§3 records the database as TBD and §10 lists the conflict as a risk with a Mitigation: line",
+        "Uncertainty: names the unanswered conflict and the missing web access"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Write a PRD for my habit tracker idea from idea.md and validate.md.",
+      "expected_output": "The skill does not trigger: PRD authoring is named in the negative-trigger clause (prd-generator owns it).",
+      "files": [],
+      "expectations": [
+        "Did not create or modify tad.md",
+        "Did not produce a TAD Final Report"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Break this TAD into two-week sprint tasks with story points.",
+      "expected_output": "The skill does not trigger: sprint tasks are named in the negative-trigger clause (tasks-generator owns them).",
+      "files": [],
+      "expectations": [
+        "Did not create or modify tad.md",
+        "Did not produce a TAD Final Report"
+      ]
+    }
+  ]
+}
