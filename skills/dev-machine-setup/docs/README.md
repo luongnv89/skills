@@ -14,7 +14,39 @@ Inspired by [XFreeze on new Windows boxes](https://x.com/xfreeze/status/20901894
 junk before installing anything). Self-contained: no external scripts repo is cloned — the shell config it
 deploys ships in the skill's own `assets/`.
 
-## How it works
+## Highlights
+
+- Reports what is present, missing and misconfigured before it changes anything
+- Installs only what is missing; never reinstalls or upgrades a working tool as a side effect
+- Every change that touches a working install gets its own yes, with rc files backed up first
+- Pauses and resumes from a session file, re-probing the machine before trusting what was recorded
+
+## When to Use
+
+| Say this... | Skill will... |
+|-------------|---------------|
+| "Set up this new laptop for development" | Run `setup` mode: gap report, fill every missing baseline tool and requested agent CLI, then optimize |
+| "My dev setup is a mess, verify what's missing and optimize it" | Run `setup` mode (the request mentions missing pieces), then fix findings |
+| "Don't install anything, just fix what's there" | Run `tune` mode: findings only, nothing new installed |
+| "I installed Claude Code but `claude` isn't found" | Diagnose the PATH finding and propose the fix instead of reinstalling |
+| "Fresh Windows laptop, remove the OEM junk first" | Inventory OEM bloat and remove it one confirmed package at a time |
+
+Not for Dockerfiles, CI images, or installing one named package.
+
+## How It Works
+
+```mermaid
+graph TD
+    A["0 · Resume check"] --> B["1 · Gap report (detect_env.py)"]
+    B --> C["2 · Debloat (fresh Windows, opt-in)"]
+    C --> D["3 · Baseline gaps (setup only)"]
+    D --> E["4 · Agent CLI gaps (setup only)"]
+    E --> F["5 · Optimize findings, re-run probe"]
+    F --> G["6 · Final report"]
+    B -. tune mode .-> F
+    style A fill:#4CAF50,color:#fff
+    style G fill:#2196F3,color:#fff
+```
 
 It runs **gap-driven**. A read-only probe (`scripts/detect_env.py`) reports three things:
 
@@ -68,3 +100,32 @@ Ask an agent that has this skill:
 runtime, `chsh`, editing your `~/.zshrc`, uninstalling anything, piping a remote script to a shell — needs an
 explicit yes per item, names its risk first, and backs up any rc file it touches. The skill never
 mass-uninstalls OEM tools and never replaces a working install as a side effect of filling a gap.
+
+## Resources
+
+| Path | Description |
+|------|-------------|
+| `scripts/detect_env.py` | Read-only probe: prints the gap report JSON (inventory, `missing`, `findings`); exits 1 with a stderr message when it cannot |
+| `references/approvals.md` | Additive vs mutating, the five-step approval loop, run-block format, pausing and resuming |
+| `references/procedure.md` | What each phase does, step by step, and when it is done |
+| `references/detect.md` | How to run the probe, its exit codes, fallbacks without `python3`, and every JSON key |
+| `references/windows.md` | Windows inventory, conservative debloat, winget install stack |
+| `references/macos.md` | macOS: Homebrew, Node, Python with uv, zsh, starship |
+| `references/linux.md` | Linux: apt/dnf/pacman, NodeSource LTS, python3-pip, zsh, starship |
+| `references/agent-clis.md` | Claude Code, Codex, Pi and OpenCode install and verify commands |
+| `references/optimize.md` | One section per finding id, each tagged additive or mutating |
+| `references/session.md` | Session file schema, write command, resume reconciliation, pause output |
+| `references/report-template.md` | FINAL REPORT block, status rules, outcome map, examples, reader checks |
+| `references/edge-cases.md` | No `python3`, Windows ARM64, WSL, containers, interrupted runs, unlisted distros |
+| `assets/zshrc-config` | The `~/.zshrc` the skill deploys (theme, plugins, starship init) |
+| `assets/starship.toml` | The starship prompt config the skill deploys |
+| `evals/evals.json` | Test prompts with expected behavior, including edge and negative-trigger cases |
+
+## Output
+
+- Changes on the machine: only the installs and fixes you approved, with backups of any rc file it edited.
+- `~/.dev-machine-setup/session.json`: the running log of every decision, marked `complete` at the end.
+- A FINAL REPORT in the chat. It opens with `Result:` (`READY`, `PARTIAL` or `BLOCKED`, with the reason),
+  lists each phase, then `Evidence:` (checks that ran), `Uncertainty:` (what is still unconfirmed, such as a
+  fix that needs a new shell) and `Decision:` (`No approval needed.` or what is pending, plus the actions
+  left to you).

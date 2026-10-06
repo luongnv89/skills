@@ -380,5 +380,27 @@ def main() -> int:
     return 0
 
 
+def _cli() -> int:
+    if sys.version_info < (3, 9):
+        found = ".".join(str(n) for n in sys.version_info[:3])
+        print(
+            f"detect_env.py: Python 3.9+ is required, but this is Python {found}. "
+            "Re-run it with a newer python3, or build the gap report by hand with the "
+            "fallbacks in references/detect.md.",
+            file=sys.stderr,
+        )
+        return 1
+    try:
+        return main()
+    except Exception as exc:  # noqa: BLE001 - the probes are fail-soft; this catches anything they missed
+        print(
+            f"detect_env.py: the gap report could not be built ({type(exc).__name__}: {exc}). "
+            "Discard any partial stdout; nothing on the machine was changed. Re-run it once; if it fails "
+            "again, build the gap report by hand with the fallbacks in references/detect.md.",
+            file=sys.stderr,
+        )
+        return 1
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_cli())

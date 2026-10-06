@@ -93,8 +93,8 @@ Create it at the end of phase 1 and rewrite it at every **Record** step — afte
 individual approve/decline/execute inside phases 2–5. Schema and the write command are in
 `references/session.md`.
 
-The user can say "pause" at any point. Answer with three things and nothing else: the session file path, what
-is left, and a **paste-once block of the remaining approved commands** so they can finish by hand if they
-never come back. Never leave a half-applied rc edit behind at a pause.
+The user can say "pause" at any point. Answer with the `Result: PARTIAL — paused` line, then three things and
+nothing else: the session file path, what is left, and a **paste-once block of the remaining approved
+commands** so they can finish by hand if they never come back. Exact format: `references/session.md` § Pausing. Never leave a half-applied rc edit behind at a pause.
 
 Resuming needs no arguments — triggering the skill again is enough (phase 0).
