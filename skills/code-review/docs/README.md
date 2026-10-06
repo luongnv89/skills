@@ -36,7 +36,7 @@
 | "Clean-code audit", "clean code review", "check this against clean code" | clean |
 | "Clean up the codebase", "remove the AI slop and dead code" | cleanup |
 | "code-review mode:perf" (explicit override) | perf |
-| "Review and optimize this" (two modes) | asks which mode to run first |
+| "Review and optimize this" (two modes) | asks which mode to use |
 
 ## How It Works
 

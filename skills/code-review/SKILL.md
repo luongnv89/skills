@@ -27,9 +27,9 @@ mode you need — this protects the agent's context budget.
 ## Selecting the mode
 
 1. **Explicit wins.** If the request carries `mode:review|perf|clean|cleanup` (or `--mode <name>`), use it.
-2. **Otherwise infer** from the request. The longest matching phrase wins: a phrase that sits inside
-   a longer matched phrase does not count, so "clean code review" is a **clean** phrase only, not
-   also a **review** phrase.
+2. **Otherwise infer** from the request. When one matched phrase sits inside a longer matched
+   phrase, only the longer one counts, so "clean code review" is a **clean** phrase only, not also
+   a **review** phrase. Phrases that do not overlap all count, whatever their length (step 3).
    - "review", "find bugs", "security", "is this correct", "look for vulnerabilities" → **review**
    - "slow", "faster", "optimize", "bottleneck", "memory leak", "performance" → **perf**
    - "clean code audit" (or "clean-code audit"), "clean code review", "check this against clean code" → **clean**
