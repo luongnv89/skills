@@ -18,6 +18,7 @@ Audit exactly **one** dimension of a codebase and return normalized finding reco
   "scope": ["src/**", "app/**"],
   "exclude": ["node_modules", "dist", "build", "vendor", ".git"],
   "invoke_delegate": "code-review mode:review",
+  "delegate_skill_md": "/abs/path/returned/by/asm-deps-acquire/SKILL.md",
   "plan_delegate": null,
   "baseline": {"verdict": "AMBER", "test_command": "npm test", "pass_rate": "41/58"},
   "id_prefix": "F-BUG"
@@ -51,6 +52,8 @@ each dimension has its own prefix, so no ID coordination is needed.
 3. **Pick the path.**
    - `invoke_delegate` set and the Skill tool available → invoke it over `scope`, then normalize every
      issue it reports into a finding record. Set `"path": "delegated"`.
+   - `invoke_delegate` set, the Skill tool unavailable, and `delegate_skill_md` set → read that
+     SKILL.md and follow it in the `invoke_delegate` mode over `scope`. Set `"path": "delegated"`.
    - otherwise → work the checklist for that dimension inline. Set `"path": "inline"`. This is the
      expected path for six of the ten dimensions, not a fallback.
 4. **Read the code.** Prioritize entry points, the largest and most-changed files

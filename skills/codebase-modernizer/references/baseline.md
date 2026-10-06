@@ -32,6 +32,20 @@ Artifacts section. A changed **tracked** file is not: report it as a finding ("t
 committed snapshots on every run", "the build refreshes a stale lockfile") and note that the probe was
 not reproducible. Do not revert it silently and do not let it pass unremarked.
 
+## Phase 0 rules: tracked files and the no-test-command fallback
+
+**Probes must not mutate tracked files.** Snapshot `git status --porcelain` before and after Phase 0.
+Build and test commands can legitimately create build output, but any *tracked* file they change
+(a rewritten lockfile, a newly written test snapshot) is a **finding**, not an accepted side effect —
+report it and note that the probe was not reproducible. This file gives the non-mutating form of
+each command.
+
+**When there is no test command**, the baseline-green assertion falls back to `<build command>`
+succeeding until the P0 suite-creation task lands, and to that suite afterwards. Never apply the
+fallback to Pre.
+
+## Rule: cap every probe
+
 Cap every probe with a timeout so a hanging build does not stall the run:
 
 ```bash

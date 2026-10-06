@@ -42,5 +42,25 @@ Both bars below are restated in SKILL.md — they are the contract, not detail.
 - [ ] The dependency table has no broken task IDs and no cycles; the critical path is stated.
 - [ ] Major dependency bumps are one task each, never batched, each naming its migration source.
 
+## Final report — understandable
+
+Correct files are not enough: the user must be able to read the result. Check the final chat report
+(`references/output-format.md`) against these four criteria:
+
+- [ ] **Main result is findable.** The first line is `Result:` with `COMPLETE`, `PARTIAL — <reason>`,
+      or `BLOCKED — <reason>`, set by the SKILL.md rules. The reader needs no log or file to learn
+      the status.
+- [ ] **Facts and assumptions are separated.** `Evidence:` names only checks that ran. Every Not
+      Assessed row, degraded path, and unexecuted item is under `Uncertainty:`. Inferences and
+      assumptions carry a label.
+- [ ] **Claims are traceable.** Each material claim points to its evidence: a command, a
+      `path:line`, or a finding ID. A passing phase report does not imply the run is complete.
+- [ ] **Next decision is clear.** `Decision:` says `No approval needed.` or names the approval, and
+      `Next:` names the user's remaining action.
+
+Agent inspection checks that these are present. It cannot confirm that a human understood the
+report. If no human reviewer answered, record human understanding as unconfirmed; do not count it
+as passed.
+
 If any criterion fails, report it as a `FAIL` row in the Step Completion Report and do not claim
 success.

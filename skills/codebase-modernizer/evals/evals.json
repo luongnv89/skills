@@ -18,7 +18,10 @@
         "No repo-writing delegate is invoked during the audit — agent-config, test-coverage, devops-pipeline, security-setup, doc-manager, code-review mode clean, and code-review mode cleanup are each named in a plan task instead",
         "The run modifies no tracked file: the target repo's `git status --porcelain`, its full `git diff`, and a SHA-256 manifest of every git-visible path (tracked plus untracked, honouring the target's `.gitignore`) are byte-identical before and after the run, once the declared artifacts (the two reports, CODE_REVIEW.md, and probe byproducts) are set aside. The target is a genuinely stale repo and is normally already dirty before the run starts, so the assertion is delta-against-a-pre-run-snapshot, not `git diff --stat` being empty (`scripts/eval-readonly-check.sh snapshot` then `verify`)",
         "Any new file is one of the two reports, the declared CODE_REVIEW.md artifact, or a probe byproduct, and all of them are enumerated in the report's Artifacts section",
-        "dont-make-me-think is invoked in review mode only — its Redesign Mode never runs and no UI source file is edited"
+        "dont-make-me-think is invoked in review mode only — its Redesign Mode never runs and no UI source file is edited",
+        "The final chat report's first line is `Result:` followed by COMPLETE, `PARTIAL — <reason>`, or `BLOCKED — <reason>`, chosen by the first matching rule in SKILL.md's Final report section, and the next three lines are `Evidence:`, `Uncertainty:`, and `Decision:` in that order",
+        "`Evidence:` names only checks that actually ran (the before/after git status --porcelain and git diff comparison, the baseline commands, the validator rounds); every Not Assessed row, degraded path, and unexecuted plan task is under `Uncertainty:`, and assumptions are labeled rather than stated as facts",
+        "`Decision:` says 'No approval needed.' (the audit changed nothing) or names the approval, and `Next:` names the user's next action, such as reviewing MODERNIZATION_PLAN.md or running Task Pre.1"
       ]
     },
     {
@@ -62,7 +65,8 @@
         "The plan starts with Pre / Agent environment before P0; missing CLAUDE.md and AGENTS.md are scheduled as /agent-config create, not written during the audit",
         "Pre has no green-build/suite acceptance criterion; restore-green stays on Sprint 0",
         "The plan's Sprint 0 restores baseline-green and later phases depend on milestone M0",
-        "The Limitations section names every Not Assessed dimension and every missing tool"
+        "The Limitations section names every Not Assessed dimension and every missing tool",
+        "The RED baseline and 'Not Assessed — no UI detected' do not by themselves make the final `Result:` PARTIAL or BLOCKED; a dimension hidden by a missing tool or skill does make it PARTIAL, with the reason on the `Result:` line"
       ]
     },
     {
@@ -75,7 +79,8 @@
         "Exactly the DEP and TEST dimensions are audited",
         "The other eight dimensions appear in the coverage table marked Not Assessed with the out-of-scope reason",
         "No findings are produced for dimensions that were not audited",
-        "The plan starts with Pre / Agent environment, then the fixed P0-P4 skeleton, with empty P0-P4 phases collapsed to a one-line note rather than dropped or renumbered"
+        "The plan starts with Pre / Agent environment, then the fixed P0-P4 skeleton, with empty P0-P4 phases collapsed to a one-line note rather than dropped or renumbered",
+        "Dimensions Not Assessed because they are out of the requested scope do not downgrade the final `Result:`; if nothing else degraded the run it reads COMPLETE"
       ]
     },
     {
@@ -162,6 +167,23 @@
         "agent-config is not invoked during the audit; CLAUDE.md and AGENTS.md content is unchanged",
         "P0 through P4 remain present and are not renamed or renumbered",
         "The run leaves no delta: `git status --porcelain`, the full `git diff`, and a SHA-256 manifest of every git-visible path (tracked plus untracked, honouring the target's `.gitignore`) are byte-identical to the pre-run snapshot once the declared artifacts are set aside (`scripts/eval-readonly-check.sh snapshot` / `verify` / `restore`). Whatever dirtiness the target already carried is part of the baseline, not a failure"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "edge",
+      "prompt": "Audit this repo and write the modernization plan. (Environment: code-review is not installed and `asm deps acquire code-review` exits non-zero; dont-make-me-think is available; the target has a web UI.)",
+      "expected_output": "The audit continues fail-soft: BUG and PERF are Not Assessed — skill unavailable, UX is delegated through the acquired dont-make-me-think, both files are written, the lease is released, and the final report opens with `Result: PARTIAL` naming the missing skill.",
+      "files": [],
+      "expectations": [
+        "The Dependency Preflight runs `asm deps discover codebase-modernizer --json` before Phase 0 and acquires nothing at that point",
+        "`asm deps acquire` runs only when Phase 2 first reaches the dimension that needs the skill, under one recorded session ID",
+        "The code-review acquire failure prints the install hint (`asm install github:luongnv89/skills:skills/code-review -p claude --yes`) and the run never executes an install itself",
+        "BUG and PERF appear in the coverage table as 'Not Assessed — skill unavailable' and in Limitations; no BUG or PERF findings are invented",
+        "UX is audited through dont-make-me-think in review mode only, recorded as `Path: delegated`, and no UI source file is edited",
+        "`asm deps release --session <id> --json` runs once before the final report",
+        "The final report's first line is `Result: PARTIAL —` with a reason naming code-review, and `Uncertainty:` lists BUG and PERF as Not Assessed",
+        "Both MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md are written and no tracked file's content changed relative to the pre-run snapshot"
       ]
     }
   ]

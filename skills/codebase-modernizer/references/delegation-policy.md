@@ -8,7 +8,9 @@ each path without breaking the read-only contract.
 ## Invoked path — `BUG`, `PERF`, `UX`
 
 These three delegates only read and report, so calling them during an audit is safe. Call them with
-the Skill tool:
+the Skill tool. If the Skill tool does not list the delegate but the Dependency Preflight acquired
+it, read the returned `skillMdPath` (passed to workers as `delegate_skill_md`) and follow that
+SKILL.md in the same mode. Either way the dimension is `Path: delegated`:
 
 | Dim | Call | Args |
 |---|---|---|
@@ -46,10 +48,31 @@ Instead, for each dimension:
 Here `inline` is the **expected** path, not a degradation. Do not report it as a limitation, and do
 not describe these dimensions as shallowly audited — the checklist is the intended depth.
 
+## Missing dependency
+
+When `asm deps acquire` exits non-zero for `code-review` or `dont-make-me-think`, or `asm` is not
+installed, print these lines to stderr, then record the dimensions **Not Assessed — skill
+unavailable** (`BUG` and `PERF` for `code-review`, `UX` for `dont-make-me-think`):
+
+```bash
+echo "Missing required skill: $s" >&2
+echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
+echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
+echo "No asm yet:      npm install -g agent-skill-manager" >&2
+```
+
+`-p claude` is not decoration: `asm install` refuses to guess a provider non-interactively, `--yes`
+does not cover that choice, and naming the same provider in the verification stops an install under
+a different tool from reporting success.
+
+Never run the install yourself during the audit. Continue with the other dimensions and name the
+missing skill in Limitations.
+
 ## Skill tool unavailable
 
-When the Skill tool is absent, or the session's skill list cannot be enumerated, the three invoked
-dimensions fall back to inline as well. That *is* reduced depth, unlike the six above:
+When the Skill tool is absent, or the session's skill list cannot be enumerated, and no
+`skillMdPath` was acquired for the delegate, the three invoked dimensions fall back to inline as
+well. That *is* reduced depth, unlike the six above:
 
 - Record `Path: inline (Skill tool unavailable)` — or `Path: inline (availability unknown)` when the
   list could not be read at all.
