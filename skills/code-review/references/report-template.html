@@ -155,6 +155,14 @@
   .sev-group .count{font-family:var(--mono); font-size:12px; color:var(--ink-faint)}
   .dot-crit{background:var(--crit)} .dot-major{background:var(--major)} .dot-minor{background:var(--minor)} .dot-info{background:var(--info)}
 
+  .filters{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:16px}
+  .filters button{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); background:var(--panel-2);
+    border:1px solid var(--line); border-radius:6px; padding:5px 10px; cursor:pointer}
+  .filters button[aria-pressed="true"]{color:var(--ink); border-color:var(--green)}
+  .filters button:focus-visible{outline:2px solid var(--info); outline-offset:2px}
+  .filters .shown{margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-faint)}
+  [hidden]{display:none!important}
+
   .finding{padding:18px; border-top:1px solid var(--line-soft)}
   .finding .top{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:8px}
   .badge{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:6px; border:1px solid currentColor}
@@ -307,6 +315,16 @@
   <section id="findings">
     <div class="sec-head"><span class="n">03</span><h2>Findings</h2><span class="rule"></span></div>
 
+    <div class="filters" role="group" aria-label="Filter findings by severity">
+      <button type="button" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-filter="crit" aria-pressed="false">Critical</button>
+      <button type="button" data-filter="major" aria-pressed="false">Major</button>
+      <button type="button" data-filter="minor" aria-pressed="false">Minor</button>
+      <button type="button" data-filter="info" aria-pressed="false">Info</button>
+      <button type="button" data-filter-reset>Reset</button>
+      <span class="shown" aria-live="polite" data-shown></span>
+    </div>
+
     <!-- One <details> per severity that has findings. Repeat the .finding block inside. -->
     <!-- REPEAT:sevgroup -->
     <details class="sev-group" open>
@@ -318,7 +336,7 @@
       </summary>
 
       <!-- REPEAT:finding -->
-      <article class="finding">
+      <article class="finding" data-sev="{{SEV_CLASS}}">
         <div class="top">
           <span class="badge {{SEV_CLASS}}">{{SEV_LABEL}}</span>
           <h4>{{FINDING_TITLE}}</h4>
@@ -419,6 +437,28 @@
       });
     });
     refresh();
+    /* Severity filter: hide non-matching findings and empty groups, show the visible count. */
+    var findings = document.querySelectorAll('article.finding[data-sev]');
+    var buttons = document.querySelectorAll('[data-filter]');
+    var shown = document.querySelector('[data-shown]');
+    function applyFilter(sev){
+      var n = 0;
+      findings.forEach(function(f){
+        var on = sev === 'all' || f.getAttribute('data-sev') === sev;
+        f.hidden = !on; if(on) n++;
+      });
+      document.querySelectorAll('details.sev-group').forEach(function(g){
+        g.hidden = !g.querySelector('article.finding:not([hidden])');
+      });
+      buttons.forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === sev)); });
+      if(shown) shown.textContent = 'Showing ' + n + ' of ' + findings.length + ' findings';
+    }
+    buttons.forEach(function(b){
+      b.addEventListener('click', function(){ applyFilter(b.getAttribute('data-filter')); });
+    });
+    var reset = document.querySelector('[data-filter-reset]');
+    if(reset) reset.addEventListener('click', function(){ applyFilter('all'); });
+    applyFilter('all');
     /* stagger section reveals */
     document.querySelectorAll('section').forEach(function(s,i){
       s.classList.add('reveal'); s.style.animationDelay = (0.04*i)+'s';

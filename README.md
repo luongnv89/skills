@@ -178,7 +178,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 2.1.3 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**code-review**](skills/code-review/) | 2.2.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**codebase-modernizer**](skills/codebase-modernizer/) | 1.3.3 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.3.2 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.5.0 | medium | Usability review using Krug's principles |
