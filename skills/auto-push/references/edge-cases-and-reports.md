@@ -51,4 +51,4 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 If user wants control, suggest:
 1. **Selective staging**: Review/stage specific files
 2. **Interactive staging**: `git add -p` for patch selection
-3. **PR workflow**: Create branch → push → PR (use `/pr` command)
+3. **PR workflow**: Create branch → push → open a PR with `gh pr create`
