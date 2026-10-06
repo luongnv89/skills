@@ -231,6 +231,23 @@ To place text inside a shape:
 }
 ```
 
+### Minimal bound-text example
+
+A start node and its label, abbreviated to the binding fields (a real file carries every Check 2 field):
+
+```json
+{
+  "type": "excalidraw", "version": 2, "source": "https://excalidraw.com",
+  "elements": [
+    {"id": "start-1", "type": "ellipse", "x": 300, "y": 40, "width": 120, "height": 56,
+     "boundElements": [{"id": "txt-start", "type": "text"}]},
+    {"id": "txt-start", "type": "text", "text": "Start", "fontSize": 18, "fontFamily": 1,
+     "containerId": "start-1", "lineHeight": 1.25, "autoResize": true}
+  ],
+  "appState": {"theme": "light", "viewBackgroundColor": "#ffffff"}, "files": {}
+}
+```
+
 ### Critical: Sizing shapes to fit their text
 
 Excalidraw does NOT auto-resize shapes to fit text. If a shape is too small for its bound text, the text overflows and renders as garbled/overlapping characters. You MUST size shapes based on their text content.

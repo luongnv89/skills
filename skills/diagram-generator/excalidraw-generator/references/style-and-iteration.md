@@ -37,7 +37,7 @@ When diagram complexity exceeds 30 elements, spawn a review loop to ensure quali
 ### Complexity threshold check (end of Phase 2)
 - **Small** (< 10 elements): proceed inline (Phases 3-4 in main agent context).
 - **Medium** (10-30 elements): proceed inline with careful validation.
-- **Large** (> 30 elements): spawn subagent review loop (recommended).
+- **Large** (> 30 elements): spawn the subagent review loop.
 
 ### Phase 3: Generate → `agents/json-generator.md`
 - Receives: diagram type, elements list, arrows list, style options, complexity estimate.
@@ -47,17 +47,17 @@ When diagram complexity exceeds 30 elements, spawn a review loop to ensure quali
 ### Phase 4: Validate → review loop (max 3 cycles)
 1. **Cycle 1: fresh validation** — spawn `agents/json-validator.md` with the generated JSON. Outputs structured validation report with PASS/FAIL for all 10 checks.
 2. **If NEEDS_FIX**: spawn `agents/json-fixer.md` with the validation report. Outputs patched JSON (never regenerated from scratch). Apply only targeted fixes; skip semantic/structure issues (those require generator revision).
-3. **If still NEEDS_FIX and cycle < 3**: return to step 1 (re-validate) with cycle++.
-4. **If cycle == 3 or PASS**: return to main agent for file write or user review.
+3. **If still NEEDS_FIX and cycle < 3**: return to step 1 (re-validate) with cycle++. If the fixer returns `ready_for_validation: false` (check 1 or 8), re-spawn `agents/json-generator.md` with the validator report instead; that counts as a cycle.
+4. **If cycle == 3 or PASS**: return the JSON and the last validator report to the main agent, which applies SKILL.md → *Phase 4* steps 1–4 (write as `COMPLETE`, write as `PARTIAL`, or `BLOCKED` with no file written).
 
 ### Fallback (Agent tool unavailable)
 Execute validation inline with self-review against the 10 checks. Less rigorous but functional.
 
 ## Edge cases (extended)
 
-- **Complex diagram (30+ elements)**: spawn the subagent review loop above. Cap at 3 fix cycles before surfacing remaining issues to the user.
+- **Complex diagram (>30 elements)**: spawn the subagent review loop above. Cap at 3 fix cycles, then report remaining failures in the Final Report.
 - **Text-heavy input (long labels, multi-line node text)**: apply Check 10 strictly — `min_shape_height = line_count * fontSize * 1.25 + 40`. Garbled text is the most common failure mode.
 - **Ambiguous relationships**: if connections between entities are unclear, ask the user to clarify direction and cardinality before generating rather than guessing and requiring regeneration.
-- **User says "just do it"**: use sensible defaults (hand-drawn style, roughness 1, Virgil font, best-fit layout) and skip the proposal step.
+- **User says "just do it"**: use sensible defaults (hand-drawn style, roughness 1, Virgil font, best-fit layout), state them in one line, and skip waiting for confirmation.
 - **Large diagram with overlapping nodes**: apply Check 7 — shift overlapping elements by adjusting `x`/`y` coordinates. Never allow bounding boxes to overlap by more than 10px outside of containers.
-- **Iteration request on existing file**: read the existing `.excalidraw` file first, preserve unchanged element IDs, apply only the requested modifications, then rewrite the file.
+- **Iteration request on existing file**: run Repo Sync, read the existing `.excalidraw` file, preserve unchanged element IDs, apply only the requested modifications, run Phase 4, then rewrite the file. A `BLOCKED` result leaves the original untouched.

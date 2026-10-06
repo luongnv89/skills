@@ -1,6 +1,6 @@
 # Step Completion Report Format
 
-After each major step, output a status report in this template:
+Read this when printing a phase report (SKILL.md → *Step Completion Reports*). After each phase, output a status report in this template:
 
 ```
 ◆ [Step Name] ([step N of M] — [context])
@@ -33,7 +33,7 @@ Use `√` for pass, `×` for fail, `—` for brief context. The "Criteria" line 
 ◆ Propose (step 2 of 4 — [diagram type])
 ··································································
   Type selected:          √ pass ([diagram type] chosen)
-  User approved:          √ pass | × fail — awaiting confirmation
+  User approved:          √ pass | √ defaults stated | × fail — awaiting confirmation
   ____________________________
   Result:                 PASS | FAIL | PARTIAL
 ```
@@ -43,6 +43,8 @@ Use `√` for pass, `×` for fail, `—` for brief context. The "Criteria" line 
 ◆ Generate (step 3 of 4 — [diagram type])
 ··································································
   JSON valid:             √ pass
+  Output path chosen:     √ pass ([filename].excalidraw, new | update | overwrite confirmed)
+  Requirements covered:   √ pass
   ____________________________
   Result:                 PASS | FAIL | PARTIAL
 ```
@@ -51,9 +53,12 @@ Use `√` for pass, `×` for fail, `—` for brief context. The "Criteria" line 
 ```
 ◆ Validate (step 4 of 4 — [diagram type])
 ··································································
-  Quality checks 10/10:   √ pass | × fail — [checks failed]
+  Fix cycles:             √ N/3
+  Quality checks N/10:    √ pass | × fail — [checks failed]
   Text sizing correct:    √ pass | × fail — [elements affected]
-  File written:           √ pass ([filename].excalidraw)
+  File written:           √ pass ([filename].excalidraw) | × not written (BLOCKED)
   ____________________________
   Result:                 PASS | FAIL | PARTIAL
 ```
+
+The Validate report precedes the Final Report (`final-report.md`); it does not replace it.
