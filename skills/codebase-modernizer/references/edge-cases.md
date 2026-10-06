@@ -1,8 +1,7 @@
 # Edge Cases
 
-Read the entry when its situation arises. SKILL.md keeps **Monorepo**, **Existing report files**,
-and **User asks to apply fixes** inline — they change how the run is invoked or protect existing
-work. Everything else is here.
+Read the entry when its situation arises. SKILL.md lists every case here by name and keeps only
+**User asks to apply fixes** inline, under its Read-only contract.
 
 ## Not a git repo
 

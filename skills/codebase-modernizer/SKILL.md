@@ -3,8 +3,11 @@ name: codebase-modernizer
 description: "Audit a stale, inherited, or messy codebase — deps, bugs, security, tests, CI, docs, UI/UX — then emit a phased, testable modernization plan. Read-only: plans upgrades, never applies them. Not for single-PR review, PRD-to-tasks, or UX-only audits."
 license: MIT
 effort: max
+dependencies:
+  - code-review
+  - dont-make-me-think
 metadata:
-  version: 1.3.3
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -44,33 +47,36 @@ both enumerated in the report's Artifacts section: a **declared delegate artifac
 
 ## Dependency Preflight (mandatory)
 
-This skill **invokes** two other skills during the audit: `code-review` (modes `review` and `perf`)
-and `dont-make-me-think` (`UX`). Detect both **before Phase 0**, the first phase that probes
-anything, and report every missing one in a single pass — never install from a preflight:
+This skill **invokes** the two skills declared in frontmatter `dependencies`: `code-review` (modes
+`review` and `perf`, for `BUG` and `PERF`) and `dont-make-me-think` (`UX`). Run this before Phase 0,
+the first phase that probes anything. Discovery acquires nothing:
 
 ```bash
-missing=""
-for s in code-review dont-make-me-think; do
-  asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
-done
-if [ -n "$missing" ]; then
-  for s in $missing; do
-    echo "Missing required skill: $s" >&2
-    echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
-    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
-  done
-  echo "No asm yet:      npm install -g agent-skill-manager" >&2
+if command -v asm >/dev/null && asm deps --help >/dev/null 2>&1; then
+  asm deps discover codebase-modernizer --json || echo "discover failed; acquire at first use" >&2
+  printf 'cm_session=%s\n' "codebase-modernizer-$(date +%s)-$$"   # record it; reuse it verbatim
+else
+  echo "asm deps unavailable: npm install -g agent-skill-manager@latest" >&2
 fi
 ```
 
-`-p claude` is not decoration: `asm install` refuses to guess a provider non-interactively, `--yes`
-does not cover that choice, and naming the same provider in the verification stops an install under
-a different tool from reporting success.
+1. If the block prints `asm deps unavailable`, record every delegated dimension **Not Assessed —
+   skill unavailable**, skip steps 2–5, and continue.
+2. When Phase 2 first reaches `BUG` or `PERF`, run
+   `asm deps acquire code-review --session <cm_session> --json`. When it first reaches `UX`, run the
+   same command for `dont-make-me-think`. Never acquire for a dimension that is Not Assessed.
+3. If the acquire exits 0, pass its returned `skillMdPath` to the dimension worker as
+   `delegate_skill_md`. Read that path directly.
+4. If the acquire exits non-zero, print the install hint in `references/delegation-policy.md`
+   (*Missing dependency*). Record **Not Assessed — skill unavailable** for `BUG` and `PERF`
+   (`code-review`) or `UX` (`dont-make-me-think`), continue, and name it in Limitations. A missing
+   dependency is **fail-soft**, not fatal.
+5. **Release in `finally`.** If any acquire ran, run
+   `asm deps release --session <cm_session> --json` once at every terminal outcome (after Phase 5,
+   on a stop, or on an error), before the final report. Put a failed release under `Uncertainty:`.
 
-A dependency that stays missing is **fail-soft**, not fatal: record that dimension **Not Assessed —
-skill unavailable** — `BUG` and `PERF` when `code-review` is missing, `UX` when
-`dont-make-me-think` is — continue, and name it in Limitations. The six *inline* dimensions below
-name their skill in a plan task and never invoke it, so they need no preflight.
+Lease-owned copies live outside the target repo, so they are not target artifacts. The six *inline*
+dimensions name their skill in a plan task and never invoke it, so they need no dependency entry.
 
 ## Leading terms
 
@@ -95,8 +101,9 @@ report files. Rebasing mid-audit can pull in a year of upstream commits, invalid
 `path:line` citation and the recorded SHA. Audit the tree as you found it.
 
 **Sync only when the user asks for the reports committed or pushed.** Then sync at the *start* of
-Phase 3, after the audit is recorded; because HEAD moves, re-record the commit SHA and re-verify
-every citation. One that no longer resolves means the audit is stale — say so and re-run.
+Phase 3, after the audit is recorded. Because HEAD moves, re-record the commit SHA and re-verify
+every citation. If any citation no longer resolves, stop with `Result: BLOCKED — audit stale after
+sync` and re-run the audit.
 
 When syncing, sync the current branch with remote — stash first if the tree is not clean:
 
@@ -113,16 +120,15 @@ before continuing. A dirty tree is common on a neglected repo — never discard 
 ## Scope and branch selection
 
 Resolve all nine branches in `references/scope-detection.md` **before Phase 0**. Each is a real
-branch in the workflow, not a preference. Two change what is obtainable at all, so check them
-early:
+branch in the workflow, not a preference. Check these two first, because they change what is
+obtainable at all:
 
-- **No Bash** → no baseline is obtainable; every Phase 0 probe is a shell command. Record the whole
-  baseline **Not Assessed — no shell**, audit only what static reading supports, and never fabricate
-  a verdict.
+- **No Bash** → record the whole baseline **Not Assessed — no shell**, audit only what static
+  reading supports, and never fabricate a verdict.
 - **No UI detected** → UI/UX dimensions are **Not Assessed — no UI detected**. Never invent UX
   findings.
 
-Never assume the permissive side of a branch you did not check.
+If a branch was not checked, take its restrictive side.
 
 ## What this skill owns, and what it delegates
 
@@ -144,40 +150,33 @@ currency**, the **baseline gate**, and the **audit → plan bridge**. Everything
 
 **Delegation policy — one rule: a delegate is invoked only if it changes no tracked file.**
 
-- **Invoked** (`BUG`, `PERF`, `UX`) — these never touch source. Normalize their output into finding
-  records and record `Path: delegated`. Never let `dont-make-me-think` enter its **Redesign Mode,
-  which edits UI source files** — ask for the usability review only and decline any offer to apply
-  fixes.
-- **Inline** (`CLEAN`, `DEAD`, `TEST`, `CI`, `SEC`, `DOCS`) — these delegates **write**, so invoking
-  one during an audit would break the read-only contract. Never do it. Audit the dimension with its
-  checklist in `references/dimension-map.md`, record `Path: inline`, and name that skill as the
-  invocation in the plan task that does the work. `inline` is the expected path, not a degradation.
-  The plan's Pre step likewise names `/agent-config create|update` and never runs it.
+- **Invoked** (`BUG`, `PERF`, `UX`) — normalize the output into finding records and record
+  `Path: delegated`. Never let `dont-make-me-think` enter its **Redesign Mode, which edits UI
+  source files**.
+- **Inline** (`CLEAN`, `DEAD`, `TEST`, `CI`, `SEC`, `DOCS`) — these delegates **write**, so never
+  invoke one during the audit. Audit the dimension with its checklist in
+  `references/dimension-map.md`, record `Path: inline`, and name that skill in the plan task.
+  `inline` is the expected path, not a degradation.
 
-Read `references/delegation-policy.md` before Phase 2 for exact invocation args, the `CODE_REVIEW.md`
-declared-artifact handling, and the Skill-tool-unavailable fallback (which *is* reduced depth).
+Read `references/delegation-policy.md` before Phase 2. It holds the invocation args, the
+`CODE_REVIEW.md` declared-artifact handling, the review-only rule for `dont-make-me-think`, the
+`/agent-config` Pre-step rule, and the Skill-tool-unavailable fallback (which *is* reduced depth).
 
 ## Workflow
 
 ### Phase 0 — Baseline (gate)
 
-Read `references/baseline.md` and follow it. Establish and record, with evidence:
-build status, test command and pass rate, coverage if obtainable, lint status, CI presence and last
+Follow `references/baseline.md`. Record each of these with the command that produced it: build
+status, test command and pass rate, coverage if obtainable, lint status, CI presence and last
 result, runtime/toolchain versions in use.
 
 A **RED** baseline (does not build, tests do not run, there is no suite, or the build could not be
 probed at all) does **not** stop the audit. Record `Baseline: RED`, continue, and make restoring
 baseline-green the plan's Sprint 0 — nothing downstream is verifiable without it.
 
-**Probes must not mutate tracked files.** Snapshot `git status --porcelain` before and after Phase 0.
-Build and test commands can legitimately create build output, but any *tracked* file they change
-(a rewritten lockfile, a newly written test snapshot) is a **finding**, not an accepted side effect —
-report it and note that the probe was not reproducible. `references/baseline.md` gives the
-non-mutating form of each command.
-
-**When there is no test command**, the baseline-green assertion falls back to `<build command>`
-succeeding until the P0 suite-creation task lands, and to that suite afterwards. Never apply the
-fallback to Pre.
+**Probes must not mutate tracked files.** A tracked file a probe changes is a **finding**. The
+snapshot procedure and the no-test-command fallback are in `references/baseline.md` (*Phase 0
+rules: tracked files and the no-test-command fallback*).
 
 **Completion criteria:** every row of the baseline table in `references/baseline.md` holds a recorded
 value or an explicit **Not Assessed** with a reason; the overall verdict is `GREEN`, `AMBER`, or
@@ -186,8 +185,9 @@ value or an explicit **Not Assessed** with a reason; the overall verdict is `GRE
 ### Phase 1 — Inventory and dimension selection
 
 Detect stack, ecosystems, UI presence, repo size, and entry points. Produce the dimension worklist:
-each of the 10 dimensions marked **audit** or **Not Assessed + reason**. Confirm it with the user
-only if the dimension filter is ambiguous; otherwise proceed.
+each of the 10 dimensions marked **audit** or **Not Assessed + reason**. If a requested area maps to
+no dimension ID, or to more than one, ask the user once which to audit. Otherwise proceed without
+asking.
 
 **Completion criteria:** all 10 dimensions have a disposition; every ecosystem with a manifest is
 listed; repo-size branch and Agent-tool branch are both resolved and stated.
@@ -197,8 +197,9 @@ listed; repo-size branch and Agent-tool branch are both resolved and stated.
 **Read `references/delegation-policy.md` before invoking any delegated dimension.**
 
 Run `DEP` first — its output feeds the plan's upgrade waves and often explains findings in other
-dimensions. Then run the remaining audited dimensions, in parallel via `agents/dimension-auditor.md`
-when the size branch calls for subagents, otherwise inline.
+dimensions. Then run the remaining audited dimensions. If the Repo size and Agent tool branches
+select subagents, spawn one `agents/dimension-auditor.md` per dimension in parallel. Otherwise run
+them inline, one at a time.
 
 - `DEP` uses `agents/dependency-auditor.md` and `references/dependency-audit.md`, one invocation per
   ecosystem. All `DEP` findings share the `F-DEP-` prefix, so allocate each ecosystem a distinct
@@ -220,9 +221,7 @@ evidence; finding IDs are unique and follow `F-<DIM>-<NNN>`.
 Merge all finding records into `MODERNIZATION_REPORT.md` using `references/report-template.md`.
 Rank by severity: `Critical` → `High` → `Medium` → `Low`.
 
-**Deduplicate before writing.** Two dimensions reporting the same `path:line` produce one counted
-row, kept by whichever dimension appears earlier in the delegate table above. That rule is what
-keeps the Summary counts equal to the number of rows.
+**Deduplicate before writing**, by the *Deduplication rule* in `references/report-template.md`.
 
 **Completion criteria:** the file exists at the repo root; it contains the baseline table, a
 dimension coverage table showing all 10 dispositions, and the full finding table; every finding has
@@ -233,18 +232,10 @@ table.
 
 Spawn `agents/plan-architect.md` with the report path (or run it inline when the Agent tool is
 unavailable). It writes `MODERNIZATION_PLAN.md` from `references/plan-template.md`, using the fixed
-skeleton (unconditional **Pre**, then **P0–P4** — do not rename or renumber P0–P4):
-
-| Phase | Goal | Milestone |
-|---|---|---|
-| **Pre Agent environment** | env an AI agent can use autonomously; `CLAUDE.md` / `AGENTS.md` created or improved | `ME` — both files exist (create or update via planned `/agent-config`); recorded commands in `AGENTS.md`, which `CLAUDE.md` imports |
-| **P0 Stabilize** | build green, tests runnable, lockfile committed, CI running | `M0` — baseline-green reproducible in CI |
-| **P1 Secure & Patch** | vulnerabilities closed, security patch + patch/minor **upgrade waves** | `M1` — zero known High/Critical vulns; patch/minor current |
-| **P2 Modernize** | each major dependency bump and runtime/toolchain upgrade, one task each | `M2` — every major current or deferred with written rationale |
-| **P3 Clean & Harden** | dead code, duplication, weak types, test coverage to target | `M3` — coverage target met; duplication below stated threshold |
-| **P4 Polish** | UI/UX, performance, docs alignment | `M4` — UX findings closed; perf budget met; docs match code |
-
-Phases split into sprints. Every task uses the `tasks-generator` task format so the plan interoperates
+skeleton: unconditional **Pre Agent environment** (`ME`), then **P0 Stabilize** (`M0`), **P1 Secure
+& Patch** (`M1`), **P2 Modernize** (`M2`), **P3 Clean & Harden** (`M3`), and **P4 Polish** (`M4`).
+Do not rename or renumber P0–P4. Each phase's goal and exit milestone are in
+`references/plan-template.md` (*The fixed phase skeleton*). Phases split into sprints. Every task uses the `tasks-generator` task format so the plan interoperates
 with that skill, plus a `Closes:` line naming finding IDs.
 
 **Completion criteria:** Pre is present and ordered before P0; every `Critical` and `High` finding
@@ -256,13 +247,13 @@ create-vs-update rule, and the RED-baseline exemption.
 
 ### Phase 5 — Validation pass
 
-Spawn `agents/plan-validator.md` with fresh context, giving it both output files and the repo. It
-verifies evidence citations resolve, severities are defensible, no finding is orphaned, no task
-invents work not traceable to a finding or a milestone, and the **stated critical path is actually
-the longest chain** in the dependency table.
-
-Apply its corrections, then **re-run the validator — maximum 2 rounds.** Anything still open after
-round 2 goes into the report's Limitations with a reason rather than looping further.
+1. Spawn `agents/plan-validator.md` with fresh context, giving it both output files and the repo.
+   It verifies evidence citations resolve, severities are defensible, no finding is orphaned, no
+   task invents work not traceable to a finding or a milestone, and the **stated critical path is
+   actually the longest chain** in the dependency table.
+2. Apply each `must-fix` correction it returns.
+3. If round 1 returned any `must-fix`, re-run the validator once. **Never run a third round.**
+4. Record each `must-fix` still open after round 2 in the report's Limitations, with a reason.
 
 **Completion criteria:** the validator has run at least twice when round 1 returned any `must-fix`;
 zero unresolved `must-fix` items remain, or each survivor is recorded in Limitations with a reason.
@@ -281,58 +272,67 @@ After each phase, emit:
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Per-phase check names:
-
-- **Baseline:** `Build probed`, `Tests probed`, `Coverage probed`, `CI probed`, `Verdict recorded`
-- **Inventory:** `Stack detected`, `Ecosystems listed`, `UI branch resolved`, `Worklist complete`
-- **Audits:** `DEP complete`, `Delegated dims complete`, `Evidence cited`, `IDs unique`
-- **Report:** `File written`, `Coverage table complete`, `Counts reconcile`
-- **Plan:** `All Critical/High closed`, `Task format valid`, `No circular deps`, `Critical path stated`, `Milestones measurable`
-- **Validation:** `Citations resolve`, `No orphan findings`, `Must-fix count 0`
-
-Never report `PASS` while a phase completion criterion, required output file, or safety guardrail is
-unresolved.
+Use the per-phase check names in `references/output-format.md`. Never report `PASS` while a phase
+completion criterion, required output file, or safety guardrail is unresolved.
 
 ## Acceptance Criteria
 
-The two bars that define this skill. The full run checklist — outputs, findings, and every plan
-criterion — is `references/acceptance-criteria.md`; walk it before writing the report.
+Walk `references/acceptance-criteria.md` before writing the final report. It is the full run
+checklist: outputs, the read-only contract, findings, the plan, and an understandable final report.
+The two bars this skill exists to keep:
 
-- [ ] **No tracked file's content changed** relative to the pre-run snapshot. On a clean tree,
-      `git diff --stat` is empty. On a stale already-dirty tree, `git status --porcelain` and
-      `git diff` match the snapshot taken before the run (declared artifacts set aside). No source,
-      manifest, lockfile, hook, workflow, test, or docs file was modified by the audit.
-- [ ] Every new file in `git status --short` is either one of the two reports, a **declared delegate
+- [ ] **No tracked file's content changed** relative to the pre-run snapshot (*Read-only contract*).
+- [ ] Every new file in `git status --short` is one of the two reports, a **declared delegate
       artifact** (`CODE_REVIEW.md`), or a probe byproduct listed in the report's Artifacts section.
-      Anything else is a contract breach.
-- [ ] Both output files exist at the repo root and every criterion in
-      `references/acceptance-criteria.md` holds.
 
-If any criterion fails, report it as a `FAIL` row in the Step Completion Report and do not claim
-success.
+If any criterion fails, report it as a `FAIL` row in the Step Completion Report and set `Result:` by
+the rules below.
+
+## Final report
+
+End the run with one final report in chat. Its first four lines are fixed; field contents, the
+outcome table, and the format rule are in `references/output-format.md`.
+
+```text
+Result: COMPLETE | PARTIAL — <reason> | BLOCKED — <reason>
+Evidence: <checks that actually ran, and what each showed>
+Uncertainty: <Not Assessed rows, degraded paths, untested items, labeled assumptions>
+Decision: <approval needed, or "No approval needed."> Next: <remaining user action>
+```
+
+Set `Result:` with the first rule that matches:
+
+1. **BLOCKED** — either output file is missing at the repo root, a tracked file's content changed
+   during the run (even if restored), or the run stopped (sync conflict, stale citations, user
+   stop).
+2. **PARTIAL** — any of: a dimension is Not Assessed for an environment reason (no shell, offline,
+   missing tool, missing skill); `BUG`, `PERF`, or `UX` ran inline at reduced depth; a huge-repo
+   cap left paths unscanned; the read-only check could not run (not a git repo); a `must-fix`
+   survived round 2; an acceptance criterion fails.
+3. **COMPLETE** — every other run. A RED baseline, or Not Assessed because of no UI, no manifest,
+   or the requested scope, is a finding or a scope choice, not a gap.
 
 ## Expected Output
 
 ```text
-Target: /path/to/repo
-Baseline: AMBER — builds; 41/58 tests pass; no coverage tool; CI absent
-Dimensions: 8 audited, 2 Not Assessed (UX — no UI detected; PERF — out of requested scope)
-Findings: 3 critical, 11 high, 24 medium, 9 low
-Outputs: MODERNIZATION_REPORT.md, MODERNIZATION_PLAN.md
-Plan: Pre + P0–P4, 10 sprints, 50 tasks — critical path Pre.1 → Pre.2 → 0.1 → 2.4
-Validation: plan-validator PASS, 0 must-fix
-Source files changed: 0
+Result: COMPLETE — 47 findings; Pre + P0–P4 plan; 0 must-fix
+Evidence: git status --porcelain and git diff match the pre-run snapshot; validator ran 1 round
+Uncertainty: coverage Not Assessed (no coverage tool); no plan task was executed
+Decision: No approval needed. Next: review MODERNIZATION_PLAN.md, then run Task Pre.1
 ```
+
+The summary facts that follow these four lines (target, baseline, dimensions, findings, outputs,
+plan, validation, source files changed) are in `references/output-format.md` (*Full example*).
 
 ## Edge Cases
 
-Two cases change how the run is invoked or protect existing work — **monorepo** layouts and
-**existing report files**; both live in `references/edge-cases.md`. A user asking mid-run to apply
-fixes is handled by the Read-only contract above. Every other case — not a git repo, no manifest,
-no network, baseline RED, a huge repo, a narrowed dimension filter — is in
-`references/edge-cases.md`, read when it arises.
+Read `references/edge-cases.md` when a case arises: not a git repo, no manifest, no network,
+baseline RED, a huge repo, a narrowed dimension filter, a **monorepo**, or **existing report
+files**. A user asking mid-run to apply fixes is handled by the Read-only contract above.
 
 ## Reference files
+
+Read each file only when its phase needs it; that keeps the agent's context budget for the audit.
 
 - `references/scope-detection.md` — the nine scope branches, detection, and resolution order.
 - `references/delegation-policy.md` — invocation args, artifact handling, fallbacks per path.
@@ -343,6 +343,7 @@ no network, baseline RED, a huge repo, a narrowed dimension filter — is in
 - `references/report-template.md` — report structure and the deduplication rule.
 - `references/plan-template.md` — plan structure, task format, task-ID and Pre rules.
 - `references/acceptance-criteria.md` — the full run checklist.
+- `references/output-format.md` — Step Completion Report checks, final-report fields, format rule.
 - `references/edge-cases.md` — the full edge-case list.
 - `scripts/dep_scan.sh` — read-only ecosystem and dependency probe; prints a markdown summary.
 

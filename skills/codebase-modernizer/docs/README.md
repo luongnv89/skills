@@ -15,12 +15,26 @@ It is **read-only**: no tracked file's content changes. It never upgrades a depe
 file, installs a hook, or rewrites your docs. It writes two documents — plus, if it delegates the bug
 review, that skill's own `CODE_REVIEW.md` — and every file it created is listed in the report.
 
-## What you get
+## Highlights
+
+- Records a build-and-test baseline before anything else, so every plan task can prove the suite is still green
+- Audits ten dimensions, from dependency currency to docs drift, and cites `file:line` for every finding
+- Sorts dependency upgrades into waves (security patches, patch/minor batch, one major per task) instead of a bulk update
+- Marks anything it could not check as **Not Assessed** with the reason, never a guess
+- Ends with a short report that starts with `COMPLETE`, `PARTIAL`, or `BLOCKED`
+
+## Output
 
 | File | Contents |
 |---|---|
 | `MODERNIZATION_REPORT.md` | Baseline health + every finding, severity-ranked, each citing `file:line` |
 | `MODERNIZATION_PLAN.md` | Pre + P0–P4 → sprints → tasks → milestones, every task closing named findings |
+
+In chat, the run ends with a short final report. Its first line is `Result: COMPLETE`,
+`PARTIAL — <reason>`, or `BLOCKED — <reason>`. Then come the checks that actually ran
+(`Evidence:`), what was not checked or is assumed (`Uncertainty:`), and whether you need to approve
+anything plus your next step (`Decision:`). A RED baseline or a dimension you scoped out does not
+make a run partial. A missing tool or skill that hid a dimension does.
 
 ## When to Use
 
@@ -39,7 +53,18 @@ review, that skill's own `CODE_REVIEW.md` — and every file it created is liste
 - A usability review on its own → `dont-make-me-think`
 - Actually applying the refactors → `code-review` mode `cleanup`, run against the plan afterward
 
-## How it works
+## How It Works
+
+```mermaid
+graph TD
+    A["Baseline: build and test probe"] --> B["Inventory and dimension worklist"]
+    B --> C["Ten dimension audits"]
+    C --> D["MODERNIZATION_REPORT.md"]
+    D --> E["MODERNIZATION_PLAN.md"]
+    E --> F["Fresh-context validation and final report"]
+    style A fill:#4CAF50,color:#fff
+    style F fill:#2196F3,color:#fff
+```
 
 ```
 Phase 0  Baseline        does it build? do tests run? what's the pass rate?  → GREEN | AMBER | RED
@@ -130,6 +155,24 @@ bash scripts/dep_scan.sh --help
 It detects 14 ecosystems, runs each one's read-only `outdated` and audit commands, and reports
 "Not Assessed" for anything it can't check. It installs nothing and modifies nothing.
 
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/scope-detection.md` | The nine scope branches (shell, UI, repo size, skill availability, and others) and their resolution order |
+| `references/delegation-policy.md` | Which delegates run during the audit, their arguments, missing-skill install hints, and fallbacks |
+| `references/baseline.md` | Phase 0 probe protocol per stack and the baseline evidence table |
+| `references/dependency-audit.md` | Per-ecosystem dependency probes, classification, upgrade waves, and migration sources |
+| `references/dimension-map.md` | Inline checklist, severity rubric, and skip rule for each dimension |
+| `references/report-template.md` | `MODERNIZATION_REPORT.md` structure and the deduplication rule |
+| `references/plan-template.md` | `MODERNIZATION_PLAN.md` structure, task format, phase skeleton, and Pre rules |
+| `references/acceptance-criteria.md` | The full run checklist, including the final-report understanding checks |
+| `references/output-format.md` | Step Completion Report checks, final-report fields, status examples, and the format rule |
+| `references/edge-cases.md` | Not a git repo, no manifest, offline, RED baseline, huge repo, monorepo, existing reports |
+| `agents/` | Dependency auditor, dimension auditor, plan architect, and plan validator subagent prompts |
+| `scripts/dep_scan.sh` | Read-only ecosystem and dependency probe |
+| `evals/evals.json` | Trigger and behavior eval cases, including final-report checks |
+
 ## Notes
 
 - Works without the Agent tool — dimensions run sequentially instead of in parallel, and the report
@@ -137,5 +180,9 @@ It detects 14 ecosystems, runs each one's read-only `outdated` and audit command
 - On a repo over ~2000 source files it audits by subsystem in priority order and states exactly what
   it didn't scan.
 - Existing report files are backed up with a timestamp before being overwritten.
-- It syncs the branch with `origin` before writing (stashing first if your tree is dirty) — a
-  neglected repo often has uncommitted work, and none of it gets discarded.
+- It does not sync with `origin` by default: a rebase mid-audit would invalidate every citation.
+  It syncs only when you ask for the reports to be committed or pushed, stashing first if your tree
+  is dirty — a neglected repo often has uncommitted work, and none of it gets discarded.
+- It uses `code-review` and `dont-make-me-think` during the audit, fetched through `asm` only when
+  their dimension is reached. If one is missing, its dimensions are marked Not Assessed and the run
+  is reported as `PARTIAL`.
