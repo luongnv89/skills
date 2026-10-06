@@ -16,6 +16,7 @@
 - Research latest SEO and AI bot best practices via web search
 - Handle large codebases by sampling representative files
 - Hand off to `/website-agent-readiness` for a live-site agent-readiness score
+- Under `/search-optimizer` with a URL and no repo, audit the captured live evidence only and list fixes as "needs source repo"
 
 ## When to Use
 

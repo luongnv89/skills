@@ -1,0 +1,21 @@
+{
+  "skill_name": "seo-ai-optimizer",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "edge",
+      "name": "orchestrated-url-only",
+      "prompt": "/seo-ai-optimizer\norchestrated-by: search-optimizer\nevidence-dir: /tmp/search-optimizer/example-com/evidence\nskip-checks: agent-readiness-scan\noutput-dir: /tmp/search-optimizer/example-com/reports/seo-ai-optimizer\n\nThere is no source repo for https://example.com, only the captured live evidence.",
+      "expected_output": "Runs the live-evidence-only path: audits the evidence dir with scripts/audit_seo.py, reads manifest.json so blocked files are 'not tested', writes seo-audit-report.md headed 'live evidence only — no source repo' to output-dir, lists every fix as 'needs source repo', skips Repo Sync and Steps 6-7, and lists agent-readiness-scan as skipped.",
+      "files": [],
+      "expectations": [
+        "Does not stop on the git-repository prerequisite; it names the live-evidence-only path instead.",
+        "Runs scripts/audit_seo.py against the evidence dir, not a project root.",
+        "Reports a file the manifest records as blocked as 'not tested', not as missing.",
+        "Lists every proposed fix as 'needs source repo' and asks for no plan or diff approval.",
+        "Does not run Repo Sync, Step 6 or Step 7, and writes nothing into the evidence dir.",
+        "Writes seo-audit-report.md to output-dir and lists agent-readiness-scan as skipped — owned by its owner."
+      ]
+    }
+  ]
+}

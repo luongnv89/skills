@@ -55,7 +55,8 @@
       "expectations": [
         "Does not send the URL to isitagentready.com.",
         "Passes seo-ai-optimizer skip-checks agent-readiness-scan and lets it own crawler-access.",
-        "Lists markdown-pages, ai-actions and agent-readiness-scan under Not covered with the reason."
+        "Lists markdown-pages, ai-actions and agent-readiness-scan under Not covered with the reason.",
+        "With no codebase given, invokes seo-ai-optimizer with no repo path plus evidence-dir, so it audits the evidence dir only and lists its fixes as 'needs source repo'."
       ]
     },
     {

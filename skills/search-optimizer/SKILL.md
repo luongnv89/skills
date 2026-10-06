@@ -4,7 +4,7 @@ description: "Optimize a site or app for SEO, AI-bot search and app-store search
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (detect target → web and/or store branch → member audits with skip-checks → merged report)"
 ---
@@ -114,7 +114,8 @@ Pass each member the orchestrated-run block (`references/check-ownership.md`):
    `REUSED` and does **not** invoke website-agent-readiness again. In B/C pass `agent-readiness-scan` so
    Step 8 does not repeat a declined or failed scan; if seo-ai-optimizer still offers the Step 8
    handoff, remind the user of their G1 decision and let them answer. Its Step 5 plan approval
-   and Step 6 diff approval stay in force.
+   and Step 6 diff approval stay in force (a URL-only run applies nothing; fixes are listed as
+   "needs source repo").
 3. **viral-product-evaluator** with `skip-checks: meta-tags`.
 
 ### Phase 4 — Store audit
@@ -189,8 +190,8 @@ while a member failed or a check is silently missing.
 
 ## Edge Cases
 
-See `references/edge-cases.md`. Key ones: URL with no codebase → seo-ai-optimizer audits the live
-evidence only and fixes need the repo; G1 declined or scan failed → markdown-pages
+See `references/edge-cases.md`. Key ones: URL with no codebase → seo-ai-optimizer gets no repo
+path, audits the evidence dir only (its live-evidence-only run) and lists fixes as "needs source repo"; G1 declined or scan failed → markdown-pages
 and the scan are not covered; `ai-actions` is never covered here (no web member evaluates it —
 use `/ux-ax-review`); store listing with no repo → aso-marketing works from the listing text; "fix my
 robots.txt" alone → that is seo-ai-optimizer, not this skill.

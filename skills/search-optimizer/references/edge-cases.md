@@ -2,7 +2,7 @@
 
 | Situation | Behavior |
 |---|---|
-| URL only, no codebase | seo-ai-optimizer audits the live evidence only; codebase fixes are listed as "needs source repo". |
+| URL only, no codebase | Invoke seo-ai-optimizer with no repo path, plus `evidence-dir`. Its live-evidence-only run audits `page.html` (`head.json` when it is missing), `robots.txt`, `sitemap.xml` and `llms.txt` from the evidence dir. Files the manifest records as blocked are "not tested". Every fix is listed as "needs source repo"; Steps 6-7 do not run and nothing is written. |
 | Codebase only, not deployed | No intake fetches, no scan (case B); seo-ai-optimizer audits source; crawler delivery marked not tested. |
 | User declines G1 | Case B: seo-ai-optimizer skips `agent-readiness-scan` (it owns `crawler-access` in every case); markdown-pages is not covered. |
 | Any web run | `ai-actions` is not covered in every case — neither seo-ai-optimizer nor the scan evaluates it; point to `/ux-ax-review` or `/design-optimizer`. |

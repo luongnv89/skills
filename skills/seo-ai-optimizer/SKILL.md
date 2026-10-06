@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.4.0
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -62,7 +62,7 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 ## Prerequisites
 
 Before starting the SEO audit, ensure the following:
-- **Environment:** The project must be managed by a git repository.
+- **Environment:** The project must be managed by a git repository (except a live-evidence-only orchestrated run — see Orchestrated Runs).
 - **Tools:** Python 3.x must be installed and available in the path.
 - **Audit Script:** `scripts/audit_seo.py` (shipped with this skill) is invoked against the audited project: `python scripts/audit_seo.py <project-root>`.
 - **Access:** You must have write access to the project files and permission to create new files (robots.txt, llms.txt, etc.).
@@ -191,7 +191,12 @@ An orchestrator (`search-optimizer`) may append these lines; without them nothin
 | `skip-checks` | Do not audit or plan those IDs (`meta-tags`, `robots-sitemap`, `structured-data`, `llms-txt`, `crawler-access`); `agent-readiness-scan` skips Step 8, since the orchestrator owns the scan decision; list each as `skipped — owned by <owner>` (owner from the manifest's `owners`, else "orchestrator"). Note unknown IDs in one line. In the subagent workflow, pass this and `evidence-dir` to the auditor. |
 | `output-dir` | Write the Step 4 report there as `seo-audit-report.md`. |
 
-Repo Sync, plan approval (Step 5) and diff-and-confirm (Step 6) are unchanged.
+Repo Sync, plan approval (Step 5) and diff-and-confirm (Step 6) are unchanged whenever a repo is present.
+
+**Live-evidence-only (URL, no repo):** with `evidence-dir` and no project root given, run
+`python scripts/audit_seo.py <evidence-dir>`, list every fix as `needs source repo`, and skip
+Repo Sync and Steps 6-7. Follow `references/live-evidence-only.md`. Without `evidence-dir`, a
+missing repo still stops the run.
 
 ## Step Completion Reports
 
