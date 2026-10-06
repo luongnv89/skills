@@ -4,7 +4,7 @@ description: "Transform a project into a professional open-source repository by 
 license: MIT
 effort: low
 metadata:
-  version: 1.3.1
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -12,232 +12,168 @@ metadata:
 
 Transform a project into a professional open-source repository with standard community files and GitHub templates.
 
+Two terms are used throughout:
+
+- **Additive edit**: on a file that already exists, add only missing sections or lines. Never replace, reword, translate or delete the user's content.
+- **Placeholder**: a match of `PH='\[(YEAR|COPYRIGHT HOLDER|INSERT [A-Z ]+)\]|TODO|TBD|FIXME'` in a created file, or in a line the run added to an existing file.
+
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, require a named branch and use the stash-first sync flow below. A detached HEAD stops before any stash or sync operation:
 
-```bash
-branch="$(git symbolic-ref --quiet --short HEAD)" || {
-  echo "✗ Detached HEAD — stop before stashing or syncing."
-  exit 1
-}
-dirty=0
-if [ -n "$(git status --porcelain)" ]; then
-  git stash push -u -m "pre-sync: ${branch} $(date +%Y-%m-%dT%H:%M:%S)" || {
-    echo "✗ Could not stash local changes — resolution stopped."
-    echo "  Recovery: inspect git status; do not discard the working tree."
-    exit 1
-  }
-  dirty=1
-fi
+Prerequisites: a git repository on a named branch with an `origin` remote. Run the block in `references/repo-sync.md` once, before Step 0. It stops at the first failure:
 
-if ! git fetch origin || ! git pull --rebase origin "$branch"; then
-  echo "✗ Repository sync failed — resolution stopped."
-  if [ "$dirty" -eq 1 ]; then
-    echo "  Your changes remain safe in the stash."
-    echo "  Recovery: git stash list"
-    echo "            git stash show -p stash@{0}"
-  fi
-  exit 1
-fi
+1. Stop when `git rev-parse --git-dir` fails (not a git repository).
+2. Stop when `git symbolic-ref --quiet --short HEAD` fails (detached HEAD), before any stash or sync.
+3. Stop and ask the user when `git remote get-url origin` fails.
+4. If `git status --porcelain` prints a line, stash with `git stash push -u`.
+5. Run `git fetch origin && git pull --rebase origin "$branch"`.
+6. Restore the stash with `git stash pop --index`.
 
-if [ "$dirty" -eq 1 ]; then
-  git stash pop --index || {
-    echo "✗ Stash restore failed — resolution stopped; your changes remain safe in the stash."
-    echo "  Recovery: git stash list"
-    echo "            git stash show -p stash@{0}"
-    echo "            git checkout stash@{0} -- <path>"
-    echo "            git stash pop --index stash@{0}"
-    exit 1
-  }
-fi
-```
+On a non-zero exit, print the final report with `BLOCKED` and the recovery commands the block printed. Never discard changes. If the only failure is the missing `origin` and the user approves continuing, go to Step 0 and list `Repo Sync skipped (no origin)` under `Uncertainty:`.
 
 ## Workflow
 
-> Before proceeding, check **Edge Cases** below for a non-MIT LICENSE, a monorepo, no detectable language, a private/internal repo, or a dirty/detached HEAD — handle the matching case first if it applies.
+> Before Step 0, check `references/edge-cases.md`. If a case matches the repo, handle it as written there first.
 
-### 0. Create Feature Branch
+### Step 0: Create Feature Branch
 
-Before making any changes:
-1. Check the current branch - if already on a feature branch for this task, skip
-2. Check the repo for branch naming conventions (e.g., `feat/`, `feature/`, etc.)
-3. Create and switch to a new branch following the repo's convention, or fallback to: `feat/oss-ready`
+1. Read the current branch: `git branch --show-current`.
+2. Read the default branch: `git symbolic-ref --short refs/remotes/origin/HEAD`, without the `origin/` prefix. If that fails, use `main`, or `master` when only `master` exists.
+3. If the current branch is not the default branch and its name contains `oss`, stay on it and go to Step 1.
+4. Choose the prefix `feature/` when `git branch -a --format='%(refname:short)'` lists more `feature/` than `feat/` branches; otherwise `feat/`.
+5. If `<prefix>oss-ready` exists, ask the user to reuse it or to give another name. Never reset an existing branch.
+6. Run `git switch -c <prefix>oss-ready`, or `git switch <name>` to reuse. If it fails, stop with `BLOCKED`.
 
-### 1. Analyze Project
+### Step 1: Analyze Project
 
-Identify:
-- Primary language(s) and tech stack
-- Project purpose and functionality
-- Existing documentation to preserve
-- Package manager (npm, pip, cargo, etc.)
+Record the stack, purpose, existing files, license, repo URL, README language, visibility and fill values, as `references/file-specs.md` → *Analysis values* describes. Ask for the security and conduct contacts in one question. If no stack is detectable, ask which stack to assume.
 
-### 2. Create/Update Core Files
+### Step 2: Create/Update Core Files
 
-**README.md** - Enhance with:
-- Project overview and motivation
-- Key features list
-- Quick start (< 5 min setup)
-- Prerequisites and installation
-- Usage examples with code
-- Project structure
-- Technology stack
-- Contributing link
-- License badge
+Write `README.md` and `CONTRIBUTING.md` from the Step 1 values. Copy `LICENSE` from `assets/LICENSE-MIT` unless one exists or the user names another license. Copy `CODE_OF_CONDUCT.md` (Contributor Covenant 2.0) and `SECURITY.md` from `assets/`. Replace each placeholder with its Step 1 value. Section lists and per-file rules: `references/file-specs.md`.
 
-**CONTRIBUTING.md** - Include:
-- How to contribute overview
-- Development setup
-- Branching strategy (feature branches from main)
-- Commit conventions (Conventional Commits)
-- PR process and review expectations
-- Coding standards
-- Testing requirements
+Take every usage example from the repo's code, scripts or `--help` output. Never invent a command or contact. A section with no source in the code is left out and listed under `Manual review`.
 
-**LICENSE** - Default to MIT unless specified. Copy from `assets/LICENSE-MIT`.
+### Step 3: Create GitHub Templates
 
-**CODE_OF_CONDUCT.md** - Use Contributor Covenant. Copy from `assets/CODE_OF_CONDUCT.md`.
+Copy each missing file from `assets/.github/`: `ISSUE_TEMPLATE/bug_report.md`, `ISSUE_TEMPLATE/feature_request.md`, `PULL_REQUEST_TEMPLATE.md`. Keep every existing file and workflow under `.github/` unchanged.
 
-**SECURITY.md** - Vulnerability reporting process. Copy from `assets/SECURITY.md`.
+### Step 4: Create Documentation Structure
 
-### 3. Create GitHub Templates
-
-Copy from `assets/.github/`:
-- `ISSUE_TEMPLATE/bug_report.md`
-- `ISSUE_TEMPLATE/feature_request.md`
-- `PULL_REQUEST_TEMPLATE.md`
-
-### 4. Create Documentation Structure
+Create each missing file. Skip rules and contents: `references/file-specs.md` → *docs/*.
 
 ```
 docs/
 ├── ARCHITECTURE.md    # System design, components
 ├── DEVELOPMENT.md     # Dev setup, debugging
 ├── DEPLOYMENT.md      # Production deployment
-└── CHANGELOG.md       # Version history
+└── CHANGELOG.md       # Version history (skip when a root CHANGELOG.md exists)
 ```
 
-### 5. Update Project Metadata
+### Step 5: Update Project Metadata
 
-Update package file based on tech stack:
-- **Node.js**: `package.json` - name, description, keywords, repository, license
-- **Python**: `pyproject.toml` or `setup.py`
-- **Rust**: `Cargo.toml`
-- **Go**: `go.mod` + README badges
+Add each missing `license`, `description` and `repository` field to the root manifest. Never overwrite a field that has a value. Parse the file after the edit. Per-stack fields and parse commands: `references/file-specs.md` → *Project metadata*.
 
-### 6. Ensure .gitignore
+### Step 6: Ensure .gitignore
 
-Verify comprehensive patterns for the tech stack.
+Append each missing pattern for the stack from `references/file-specs.md` → *.gitignore*. Check one pattern with `grep -qxF '<pattern>' .gitignore`. Never remove a line.
 
-### 7. Present Checklist
+### Step 7: Verify and Report
 
-After completion, show:
-- [x] Files created/updated
-- [ ] Items needing manual review
-- Recommendations for next steps
+1. Run every Acceptance Criteria check. Record `pass`, `fail` or `not applicable` with its reason.
+2. Set `PH` as defined in **Placeholder** above. Run the placeholder `grep` on each created file: `grep -nE "$PH" <file>`.
+3. Run it on the lines added to each updated file: `git diff -U0 -- <file> | grep -E '^\+' | grep -E "$PH"`.
+4. Run `git status --porcelain`. Confirm that no line starts with ` D` or `D `.
+5. Print the final report.
+
+Do not commit or push. The user reviews and commits the branch.
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After each of Steps 1-7, print a report in this format (example: `references/final-report.md`):
 
 ```
-◆ [Step Name] ([step N of M] — [context])
+◆ [Step Name] ([step N of 7] — [context])
 ··································································
   [Check 1]:          √ pass
-  [Check 2]:          √ pass (note if relevant)
-  [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
+  [Check 2]:          × fail — [reason]
   [Criteria]:         √ N/M met
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+Name each check after what the step validates. Step 0 gets no report. If Step 0 or 1 fails, stop with `BLOCKED`. If one of Steps 2-6 reports `FAIL` or `PARTIAL`, continue; the run ends `PARTIAL`. Step 7 runs whenever Step 2 started.
 
-### Analysis (step 1 of 7)
+## Final Report
 
-```
-◆ Analysis (step 1 of 7 — project profiling)
-··································································
-  Language detected:       √ pass — TypeScript (primary)
-  Project type identified: √ pass — CLI tool
-  Existing docs found:     √ pass — README.md (partial), no LICENSE
-  [Criteria]:              √ 3/3 met
-  ____________________________
-  Result:                  PASS
-```
+Print one final report in the chat after the last step report; write a file only on request. Four parts, in order:
 
-Repeat this format for each subsequent step — Core Files, GitHub Templates, Documentation, Project Metadata, .gitignore, Checklist — adapting the check names to what that step actually validates. Steps 5 and 6 carry acceptance criteria of their own, so a run that reports complete without them has skipped verifiable work. Step 0 sets up the branch and gets no report.
+1. **`Result:`** the status word, the repo and branch, and the reason for `PARTIAL` or `BLOCKED`.
+2. **`Evidence:`** files created and updated, and the result of each Step 7 check that ran.
+3. **`Uncertainty:`** placeholders left, checks not run and why, and untested behavior.
+4. **`Decision:`** the approval needed, or `No approval needed.`, then each remaining user action.
 
-## Guidelines
+Apply the first status rule that matches:
 
-- Adapt to project's actual tech stack
-- Include working examples from the actual codebase
+1. **`BLOCKED`**: the run stopped before Step 7 and no file in the target repo was created or changed.
+2. **`PARTIAL`**: an applicable check failed or did not run, a placeholder remains, a step reported `FAIL` or `PARTIAL`, or the run stopped before Step 7 finished.
+3. **`COMPLETE`**: every applicable check passed, the placeholder `grep` found no match, and Steps 1-7 each reported `PASS`.
+
+`not applicable` is allowed only for a reason listed in `references/final-report.md`, with the outcome table, examples and reader checks. Any other skipped check counts as not run.
 
 ## Acceptance Criteria
 
-The skill is complete when every item below can be verified with `test -f`, `grep`, or a quick visual check. Treat this as a checklist the agent must assert before reporting success.
+Step 7 runs each check with `test -f`, `grep`, `git` or a visual check.
 
-- [ ] `LICENSE` exists at repo root and contains a valid SPDX identifier (e.g., `MIT`, `Apache-2.0`). Verify: `grep -E "MIT License|Apache License" LICENSE`.
-- [ ] `README.md` exists, is at least 40 lines, and includes sections for Installation, Usage, and License. Verify: `grep -iE "^#+ (install|usage|license)" README.md | wc -l` returns >= 3.
-- [ ] `CONTRIBUTING.md` exists and references the issue tracker plus a branching/PR workflow. Verify: `grep -iE "issue|pull request|branch" CONTRIBUTING.md`.
-- [ ] `CODE_OF_CONDUCT.md` exists and mentions the Contributor Covenant. Verify: `grep -i "contributor covenant" CODE_OF_CONDUCT.md`.
-- [ ] `SECURITY.md` exists and lists at least one vulnerability-reporting contact (email or form URL). Verify: `grep -E "@|https?://" SECURITY.md`.
-- [ ] `.github/ISSUE_TEMPLATE/bug_report.md` and `.github/ISSUE_TEMPLATE/feature_request.md` both exist with YAML frontmatter (`name:`, `about:`).
-- [ ] `.github/PULL_REQUEST_TEMPLATE.md` exists and contains a checklist (`- [ ]`).
-- [ ] `.gitignore` exists and excludes the language-appropriate build/temp artefacts (e.g., `node_modules/`, `dist/`, `__pycache__/`, `target/`).
-- [ ] Project metadata file (`package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod`) declares `license`, `description`, and `repository` fields where the format supports them.
-- [ ] No previously committed files were deleted; only additions and non-destructive enhancements were made.
+- [ ] `LICENSE` exists. A new MIT file passes `grep -c "MIT License" LICENSE` (or the named license's title). An existing one is unchanged: `git diff --quiet -- LICENSE`.
+- [ ] `README.md` is at least 40 lines with Installation, Usage, and License sections. In English, `grep -ciE "^#+ .*(install|usage|license)" README.md` returns >= 3; in another language, check the headings visually.
+- [ ] `CONTRIBUTING.md` references the issue tracker plus a branching/PR workflow: `grep -iE "issue|pull request|branch" CONTRIBUTING.md`.
+- [ ] `CODE_OF_CONDUCT.md` mentions the Contributor Covenant: `grep -i "contributor covenant" CODE_OF_CONDUCT.md`.
+- [ ] `SECURITY.md` lists a vulnerability-reporting contact: `grep -E "@|https?://" SECURITY.md`.
+- [ ] `.github/ISSUE_TEMPLATE/bug_report.md` and `feature_request.md` exist with YAML frontmatter (`name:`, `about:`).
+- [ ] `.github/PULL_REQUEST_TEMPLATE.md` contains a checklist (`- [ ]`).
+- [ ] Each `docs/` file the run created starts with a `#` heading: `head -1 <file>`.
+- [ ] `.gitignore` contains each Step 6 pattern for the stack.
+- [ ] The manifest (`package.json`, `pyproject.toml`, `Cargo.toml`) declares `license`, `description`, and `repository`, and still parses.
+- [ ] The placeholder `grep` finds no match.
+- [ ] No previously committed file was deleted (Step 7 item 4).
+- [ ] The final report starts with `Result:` and a status word, has the other three parts, and passes the reader checks in `references/final-report.md`.
 
 ## Expected Output
 
-After a successful run on a TypeScript CLI project that started with only a partial `README.md`, the agent emits a final report shaped like this:
+A complete run on a TypeScript CLI with a partial `README.md` ends like this:
 
 ```
-◆ OSS Ready summary (7 of 7 steps complete)
-··································································
-  Files created:
-    √ LICENSE                                  (MIT)
-    √ CONTRIBUTING.md                          (33 lines)
-    √ CODE_OF_CONDUCT.md                       (Contributor Covenant 2.1)
-    √ SECURITY.md                              (reporting via security@example.com)
-    √ .github/ISSUE_TEMPLATE/bug_report.md
-    √ .github/ISSUE_TEMPLATE/feature_request.md
-    √ .github/PULL_REQUEST_TEMPLATE.md
-    √ docs/ARCHITECTURE.md, DEVELOPMENT.md, DEPLOYMENT.md, CHANGELOG.md
-  Files updated:
-    √ README.md                                (+ Quick Start, Usage, License badge)
-    √ package.json                             (license, repository, keywords)
-    √ .gitignore                               (added dist/, .env)
-  Acceptance criteria:    √ 10/10 met
-  Manual review needed:
-    - Confirm SECURITY.md contact email is monitored
-    - Add real maintainer names to CODE_OF_CONDUCT enforcement section
-  ____________________________
-  Result:                 PASS
+Result: COMPLETE — acme/tsgrep on feat/oss-ready
+Evidence:
+  Created: LICENSE (MIT, 2026 Jane Doe), CONTRIBUTING.md,
+           CODE_OF_CONDUCT.md (conduct@acme.dev), SECURITY.md (security@acme.dev),
+           .github/ISSUE_TEMPLATE/bug_report.md, feature_request.md,
+           .github/PULL_REQUEST_TEMPLATE.md, docs/ (4 files)
+  Updated: README.md (+ Quick Start, Usage, License badge),
+           package.json (+ license, repository), .gitignore (+ dist/, .env)
+  Acceptance criteria: 13/13 pass. Placeholder grep: no matches. No deleted files.
+Uncertainty: README commands copied from package.json scripts, not executed.
+Decision: No approval needed.
+  Remaining action: confirm both contact addresses are monitored.
+  Remaining action: review and commit feat/oss-ready.
 ```
 
-The agent must list the manual-review items explicitly so the user can finish what cannot be automated. Assert that the file tree printed by the agent matches what is actually on disk before declaring PASS.
+Before printing, confirm each listed file exists (`test -f`).
 
 ## Edge Cases
 
-The skill should detect and handle these inputs explicitly rather than fail silently:
+Full table with detection and status effects: `references/edge-cases.md`. In short:
 
-- **Existing LICENSE with a non-MIT identifier** — never overwrite. Read it, log the detected license, and skip the LICENSE step.
-- **Monorepo with multiple `package.json` files** — update only the root metadata file unless the user names a sub-package.
-- **Repo with no detectable language** (empty repo or only docs) — pause and ask the user which template stack to assume.
-- **Existing `CODE_OF_CONDUCT.md` or `SECURITY.md`** — diff against the template; only append a missing section, never replace user content.
-- **Private/internal projects** — confirm with the user before adding public-facing files like SECURITY.md or community templates.
-- **Pre-existing `.github/` workflows or templates** — preserve them; merge only the missing files.
-- **Non-English README** — keep the existing language; do not translate, only add structurally missing sections in the same language.
-- **Detached HEAD** — stop before stashing or syncing; never force changes onto an unstable branch.
-- **Dirty working tree** — use the stash-first Repo Sync flow above. If stashing, syncing, or restoring fails, stop and use the printed recovery commands; never discard changes.
+- **Never overwrite** an existing non-MIT LICENSE, `.github/` file, or user content in `CODE_OF_CONDUCT.md` or `SECURITY.md`.
+- **Ask first** when the repo is private or internal, has no `origin`, or has no detectable stack.
+- **Update only the root manifest** in a monorepo, unless the user names a sub-package.
+- **Stop** on a detached HEAD, outside a git repository, or when a stash, sync or restore fails. Never discard changes.
+- **Keep** the README's language and a root `CHANGELOG.md`.
 
-## Assets
+## Assets and References
 
-Templates in `assets/`:
-- `LICENSE-MIT` - MIT license template
-- `CODE_OF_CONDUCT.md` - Contributor Covenant
-- `SECURITY.md` - Security policy template
-- `.github/ISSUE_TEMPLATE/bug_report.md`
-- `.github/ISSUE_TEMPLATE/feature_request.md`
-- `.github/PULL_REQUEST_TEMPLATE.md`
+- `assets/`: `LICENSE-MIT`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.0), `SECURITY.md`, and `.github/` issue and PR templates
+- `references/repo-sync.md`: the Repo Sync block
+- `references/file-specs.md`: analysis values, per-file content, fill values, metadata, `.gitignore`
+- `references/final-report.md`: status rules, outcome table, examples, reader checks
+- `references/edge-cases.md`: detection, handling and status per edge case
