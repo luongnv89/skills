@@ -99,6 +99,18 @@ Or describe the goal — "tile a reviewer agent with my pane", "launch a Herdr f
 /herdr-agent what is every fleet agent doing right now?
 ```
 
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/` | Spawn and layout recipes, launch-profile inheritance, prompt delivery and waiting, fleet monitoring, context handoff, edge cases, the help text, and the final-report format |
+| `scripts/` | `launch_profile.py` (inherited launch profile and `agent start`), `next_grid_split.py` (split planning and equalizing), `preflight_send.py` (refuses unsafe targets), `broadcast.sh`, `fleet_status.py`, `badge.py`, `wait_for_idle.py` (no-agent fallback) |
+| `tests/` | Unit tests against a fake `herdr` binary: `python3 -m unittest discover -s tests` |
+
+## Output
+
+No files. Each fleet operation ends with a step completion report, then a final report: `Result:` first (`COMPLETE`, `PARTIAL` or `BLOCKED`), then `Evidence:` from the commands that ran, `Uncertainty:` (for example an `UNKNOWN` model or an unchecked reply), and `Decision:` naming any approval you need to give. A `help` request prints only the usage summary.
+
 ## Requirements
 
 - Herdr **0.9.0 or later** (`herdr --version`) and server running (`herdr status`) — default same-kind launches additionally require `pane process-info` to return full argv; version alone cannot guarantee platform process visibility
