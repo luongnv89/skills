@@ -2,8 +2,12 @@
 """
 Benchmark Ollama performance with the current configuration.
 Measures tokens/second, time to first token, and memory usage.
+
+Exit codes: 0 = JSON results on stdout; 1 = error, JSON {"error": ...} on stderr;
+2 = invalid arguments (argparse usage message on stderr).
 """
 
+import shutil
 import subprocess
 import time
 import json
@@ -149,7 +153,7 @@ def check_gpu_memory():
     stdout, _, code = run_command(["nvidia-smi", "--query-gpu=memory.used,memory.total", "--format=csv,noheader,nounits"])
     if code == 0 and stdout:
         parts = stdout.strip().split(',')
-        if len(parts) == 2:
+        if len(parts) == 2 and all(p.strip().isdigit() for p in parts):
             return {
                 "type": "nvidia",
                 "used_mb": int(parts[0].strip()),
@@ -164,6 +168,12 @@ def check_gpu_memory():
     return None
 
 
+def fail(message):
+    """Print a JSON error on stderr and exit 1."""
+    print(json.dumps({"error": message}), file=sys.stderr)
+    sys.exit(1)
+
+
 def main():
     """Run benchmarks."""
     import argparse
@@ -176,15 +186,17 @@ def main():
     parser.add_argument("--all", "-a", action="store_true", help="Benchmark all installed models")
 
     args = parser.parse_args()
+    if args.runs < 1:
+        parser.error(f"--runs must be 1 or more, got {args.runs}")
+
+    if shutil.which("ollama") is None:
+        fail("'ollama' was not found on PATH. Install Ollama from https://ollama.com/download, then retry.")
 
     # Check Ollama is running
-    stdout, _, code = run_command(["ollama", "ps"])
+    stdout, stderr, code = run_command(["ollama", "ps"])
     if code != 0:
-        print(
-            json.dumps({"error": "Ollama check failed for 'ollama ps'. Start it with 'ollama serve' and retry."}),
-            file=sys.stderr,
-        )
-        sys.exit(1)
+        detail = f" ({stderr.strip()})" if stderr and stderr.strip() else ""
+        fail(f"Ollama check failed for 'ollama ps'{detail}. Start it with 'ollama serve' and retry.")
 
     models = get_ollama_models()
     if not models:
@@ -223,6 +235,12 @@ def main():
     for model in models_to_test:
         print(f"Benchmarking {model}...", file=sys.stderr)
         model_result = benchmark_model(model, args.prompt, args.runs)
+        if "averages" not in model_result:
+            print(
+                f"Warning: all {args.runs} run(s) of '{model}' failed; no averages recorded. "
+                f"Try 'ollama run {model} --verbose' to see the error.",
+                file=sys.stderr,
+            )
         results["models"].append(model_result)
 
     results["gpu_memory_after"] = check_gpu_memory()
@@ -231,4 +249,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        fail("Benchmark interrupted before results were printed. Re-run to get results.")
+    except Exception as exc:
+        fail(
+            f"benchmark_ollama.py stopped: {type(exc).__name__}: {exc}. "
+            "Check that 'ollama list' works, then re-run."
+        )

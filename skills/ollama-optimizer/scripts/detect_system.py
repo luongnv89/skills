@@ -2,6 +2,9 @@
 """
 Detect system hardware and software for Ollama optimization.
 Outputs JSON with system specs relevant to Ollama configuration.
+
+Exit codes: 0 = JSON printed on stdout; 1 = unexpected failure, message on stderr.
+The script only reads system state; it never changes Ollama or system config.
 """
 
 import json
@@ -9,6 +12,7 @@ import platform
 import subprocess
 import os
 import re
+import sys
 from pathlib import Path
 
 
@@ -59,6 +63,15 @@ def get_macos_info():
     return info
 
 
+def nvidia_gpu_entry(parts):
+    """Build a GPU entry from one nvidia-smi CSV row; VRAM may read '[N/A]'."""
+    entry = {"name": parts[0], "type": "nvidia", "driver_version": parts[2]}
+    if parts[1].isdigit():
+        entry["vram_mb"] = int(parts[1])
+        entry["vram_gb"] = round(int(parts[1]) / 1024, 1)
+    return entry
+
+
 def get_linux_gpu_info():
     """Get Linux GPU information."""
     gpus = []
@@ -69,13 +82,7 @@ def get_linux_gpu_info():
         for line in nvidia_smi.strip().split('\n'):
             parts = [p.strip() for p in line.split(',')]
             if len(parts) >= 3:
-                gpus.append({
-                    "name": parts[0],
-                    "type": "nvidia",
-                    "vram_mb": int(parts[1]),
-                    "vram_gb": round(int(parts[1]) / 1024, 1),
-                    "driver_version": parts[2]
-                })
+                gpus.append(nvidia_gpu_entry(parts))
 
     # Check AMD GPUs (ROCm)
     rocm_info = run_command("rocm-smi --showmeminfo vram --csv")
@@ -102,13 +109,7 @@ def get_windows_gpu_info():
         for line in nvidia_smi.strip().split('\n'):
             parts = [p.strip() for p in line.split(',')]
             if len(parts) >= 3:
-                gpus.append({
-                    "name": parts[0],
-                    "type": "nvidia",
-                    "vram_mb": int(parts[1]),
-                    "vram_gb": round(int(parts[1]) / 1024, 1),
-                    "driver_version": parts[2]
-                })
+                gpus.append(nvidia_gpu_entry(parts))
 
     # Fallback to WMIC
     if not gpus:
@@ -261,6 +262,14 @@ def get_current_ollama_env():
     return ollama_vars
 
 
+def collect(stage, fn):
+    """Run one detection stage, tagging any exception with the stage name."""
+    try:
+        return fn()
+    except Exception as exc:
+        raise RuntimeError(f"{stage}: {type(exc).__name__}: {exc}") from exc
+
+
 def main():
     """Main function to collect all system information."""
     system = platform.system()
@@ -272,30 +281,30 @@ def main():
             "version": platform.version(),
             "machine": platform.machine()
         },
-        "cpu": get_cpu_info(),
-        "memory": get_memory_info(),
-        "storage": get_storage_info(),
-        "ollama": check_ollama_installation(),
-        "current_env_vars": get_current_ollama_env()
+        "cpu": collect("CPU detection", get_cpu_info),
+        "memory": collect("memory detection", get_memory_info),
+        "storage": collect("storage detection", get_storage_info),
+        "ollama": collect("Ollama detection", check_ollama_installation),
+        "current_env_vars": collect("environment variable read", get_current_ollama_env)
     }
 
     # OS-specific GPU detection
     if system == "Darwin":
-        macos_info = get_macos_info()
+        macos_info = collect("macOS GPU detection", get_macos_info)
         result["gpu"] = macos_info.get("gpu", [])
         result["apple_silicon"] = macos_info.get("apple_silicon", False)
         result["metal_support"] = macos_info.get("metal_support", False)
         if macos_info.get("unified_memory_gb"):
             result["unified_memory_gb"] = macos_info["unified_memory_gb"]
     elif system == "Linux":
-        result["gpu"] = get_linux_gpu_info()
-        result["cuda"] = check_cuda_installation()
+        result["gpu"] = collect("Linux GPU detection", get_linux_gpu_info)
+        result["cuda"] = collect("CUDA detection", check_cuda_installation)
     elif system == "Windows":
-        result["gpu"] = get_windows_gpu_info()
-        result["cuda"] = check_cuda_installation()
+        result["gpu"] = collect("Windows GPU detection", get_windows_gpu_info)
+        result["cuda"] = collect("CUDA detection", check_cuda_installation)
 
     # Calculate recommendations tier
-    result["hardware_tier"] = determine_hardware_tier(result)
+    result["hardware_tier"] = collect("hardware tier calculation", lambda: determine_hardware_tier(result))
 
     print(json.dumps(result, indent=2))
 
@@ -337,4 +346,13 @@ def determine_hardware_tier(info):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:
+        print(
+            f"Error: detect_system.py stopped in {exc}. "
+            "Re-run 'python3 scripts/detect_system.py'. If it fails again, fix the stage "
+            "named above (for example a missing or hanging system command), then re-run.",
+            file=sys.stderr,
+        )
+        sys.exit(1)

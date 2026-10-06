@@ -98,7 +98,7 @@ launchctl setenv OLLAMA_FLASH_ATTENTION 1
    ```
 
 ### Systemd Service Optimization
-Edit `/etc/systemd/system/ollama.service`:
+Prefer a drop-in override: `sudo systemctl edit ollama` opens one for the `[Service]` `Environment=` lines, and `sudo systemctl revert ollama` removes it. The full unit file below shows where those lines sit in `/etc/systemd/system/ollama.service`:
 
 ```ini
 [Unit]
@@ -113,7 +113,7 @@ Restart=always
 RestartSec=3
 Environment="OLLAMA_FLASH_ATTENTION=1"
 Environment="OLLAMA_KV_CACHE_TYPE=q8_0"
-Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_HOST=0.0.0.0:11434"  # only if the user asked for network access: exposes the API without auth
 
 [Install]
 WantedBy=default.target

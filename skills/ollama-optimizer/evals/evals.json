@@ -1,0 +1,123 @@
+{
+  "skill_name": "ollama-optimizer",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Ollama feels slow on my 16GB M2 MacBook Pro. Can you optimize it? I run the Ollama menu bar app.",
+      "expected_output": "Runs scripts/detect_system.py, reports the prosumer tier from hardware_tier, recommends OLLAMA_FLASH_ATTENTION=1 via launchctl setenv (Ollama.app row) and no KV cache quantization requirement at 16GB, asks approval before each write, and ends with the Result/Evidence/Uncertainty/Decision summary.",
+      "files": [],
+      "expectations": [
+        "Ran scripts/detect_system.py before recommending anything",
+        "Stated the tier as prosumer, taken from hardware_tier.category",
+        "Did not recommend a model larger than 14B",
+        "Placed the env vars with launchctl setenv for Ollama.app, not only in ~/.zshrc",
+        "Showed each write command and waited for approval before running it",
+        "Gave a one-command rollback (launchctl unsetenv) for each variable",
+        "Listed under Uncertainty that launchctl values reset at reboot",
+        "The final summary opens with a Result: line carrying COMPLETE, PARTIAL or BLOCKED and the tier",
+        "The final summary has Evidence:, Uncertainty: and Decision: lines, and Evidence cites only checks that ran"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Tune Ollama on my Ubuntu server with an RTX 3060 8GB. It runs as the systemd service.",
+      "expected_output": "Tier entry (8GB VRAM). Recommends flash attention and KV cache q8_0 as Environment= lines in a systemd override (sudo systemctl edit ollama), backs up with systemctl cat, gives sudo systemctl revert ollama as rollback, and runs no sudo command without approval.",
+      "files": [],
+      "expectations": [
+        "Stated the tier as entry",
+        "Recommended OLLAMA_KV_CACHE_TYPE=q8_0 together with OLLAMA_FLASH_ATTENTION=1",
+        "Put the env vars in a systemd override, not in a shell init file",
+        "Ran no sudo command without the user's explicit yes for that command",
+        "Gave 'sudo systemctl revert ollama' (or an equivalent single command) as the rollback",
+        "Did not set OLLAMA_HOST=0.0.0.0"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Just tell me what Ollama settings and models I should use on this machine. Don't change anything. (Run on a machine with Ollama and at least one model installed.)",
+      "expected_output": "Recommendations-only run: detection and analysis run, the guide is delivered, no applied change runs. Status COMPLETE, because a recommendations-only request is not a decline.",
+      "files": [],
+      "expectations": [
+        "Ran no env-var write, restart, ollama pull or sudo command",
+        "Delivered the guide with the execution checklist and rollback commands listed but not run",
+        "Final Result: line is COMPLETE, not PARTIAL",
+        "Decision: line says No approval needed. or names the optional checklist the user may approve later"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Set up a local LLM with Ollama on this laptop. (Run on a machine where detect_system.py reports ollama.installed: false and the user declines installing it now.)",
+      "expected_output": "Plan starts with the install step from references/platform_specific.md; Phase 4 is skipped with the reason recorded. Status PARTIAL, with installing Ollama as a Remaining action.",
+      "files": [],
+      "expectations": [
+        "Put the Ollama install step first in the plan",
+        "Did not run benchmark_ollama.py, and recorded why Phase 4 was skipped",
+        "Final Result: line is PARTIAL, not BLOCKED and not COMPLETE",
+        "Listed installing Ollama on a Remaining action: line"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Optimize Ollama for me. (The user approves OLLAMA_FLASH_ATTENTION but says no to OLLAMA_KV_CACHE_TYPE.)",
+      "expected_output": "Applies only the approved variable, marks the declined one as not applied in the guide, and ends PARTIAL. A declined change never produces BLOCKED.",
+      "files": [],
+      "expectations": [
+        "Backed up the config location before the first write",
+        "Did not write OLLAMA_KV_CACHE_TYPE after the user declined it",
+        "Marked OLLAMA_KV_CACHE_TYPE as not applied in the guide",
+        "Final Result: line is PARTIAL, not BLOCKED"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Can you check whether my Ollama setup is already optimal? (Run where current_env_vars already holds the recommended values and every installed model fits the tier.)",
+      "expected_output": "Nothing to change: the guide says so, no applied change is proposed, the current setup is benchmarked, and the status is COMPLETE, not BLOCKED.",
+      "files": [],
+      "expectations": [
+        "Stated that the current configuration already matches the tier recommendation",
+        "Proposed no env-var write or model pull",
+        "Final Result: line is COMPLETE, not BLOCKED"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "edge",
+      "prompt": "Speed up Ollama on my Linux box with an AMD Radeon RX 7800 XT. (detect_system.py reports the AMD GPU without vram_gb and returns hardware_tier low_vram.)",
+      "expected_output": "Recognizes that the low_vram tier comes from unknown VRAM, asks the user for the VRAM size, and either overrides the tier with a stated reason or keeps the conservative tier and lists it under Uncertainty.",
+      "files": [],
+      "expectations": [
+        "Explained that the AMD GPU has no vram_gb in the detection output",
+        "Asked the user for the VRAM size before recommending a model size",
+        "Either stated the reason for overriding the tier, or listed the conservative tier on the Uncertainty: line"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "My LM Studio models load slowly. How do I tune GPU offload in LM Studio?",
+      "expected_output": "The skill does not trigger: LM Studio is a different runtime named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not run scripts/detect_system.py",
+        "Did not recommend OLLAMA_* environment variables"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "negative-trigger",
+      "prompt": "How do I set tensor-parallel-size and gpu-memory-utilization for vLLM on two A100s?",
+      "expected_output": "The skill does not trigger: vLLM is a different serving runtime named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not run scripts/detect_system.py",
+        "Did not produce an ollama-optimization-guide.md"
+      ]
+    }
+  ]
+}

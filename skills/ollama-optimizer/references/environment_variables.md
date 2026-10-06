@@ -129,10 +129,12 @@ export OLLAMA_KV_CACHE_TYPE=q8_0
 ### macOS (launchd for Ollama.app)
 ```bash
 launchctl setenv OLLAMA_FLASH_ATTENTION 1
+launchctl unsetenv OLLAMA_FLASH_ATTENTION   # rollback
 ```
+Quit and reopen Ollama.app after each change. `launchctl setenv` values do not survive a reboot.
 
 ### Linux (systemd service)
-Edit `/etc/systemd/system/ollama.service`:
+Run `sudo systemctl edit ollama` to create a drop-in override (back up first with `systemctl cat ollama > ~/ollama.service.bak`; roll back with `sudo systemctl revert ollama`), or edit `/etc/systemd/system/ollama.service`:
 
 ```ini
 [Service]
@@ -151,4 +153,5 @@ Use Settings > System > About > Advanced system settings > Environment Variables
 
 ```powershell
 [System.Environment]::SetEnvironmentVariable("OLLAMA_FLASH_ATTENTION", "1", "User")
+[System.Environment]::SetEnvironmentVariable("OLLAMA_FLASH_ATTENTION", $null, "User")  # rollback
 ```
