@@ -54,7 +54,8 @@ Decision: Install excalidraw-generator with the printed command, then re-run. dr
 - `Result:` comes first, and its first word after `Result:` is the status.
 - `Evidence:` names the routing rule that matched, the user's words that matched it, and the
   preflight mode and outcome when the preflight ran. Cite only checks that ran.
-- `Uncertainty:` states that no file was generated or validated. Add a failed release here.
+- `Uncertainty:` states that no file was generated or validated. A failed release is reported in
+  the `Router note:` line after the report, not here, because the release runs after the report.
 - `Decision:` names the one action that unblocks the run. Name the other engine only as an option
   the user may request; never as a switch already made.
 

@@ -73,7 +73,7 @@ printf 'dg_session=%s\n' "diagram-generator-$(date +%s)-$$"   # record it; reuse
    then stop with the missing-engine Final Report. Never substitute the other engine. Never
    imitate the engine inline.
 4. **Release in `finally`.** If any acquire ran, run `asm deps release --session <dg_session> --json`
-   once at every terminal outcome, stops included, after the engine's Final Report.
+   once at every terminal outcome, stops included, after the closing Final Report.
 
 Do not acquire the engine that routing did not select.
 
@@ -86,8 +86,9 @@ before it writes. Do not run a second sync here, and do not skip the engine's sy
 ## Workflow
 
 1. Apply the routing rules. If rule 1 matches, write the out-of-scope Final Report and stop.
-2. If rule 6 asks a question, wait for the answer. If the user ends the run without answering,
-   write the unanswered-routing Final Report and stop.
+2. If rule 4 or 6 asks the routing question, wait for the answer. If the user has not answered
+   after the question was asked twice (*Edge Cases*), write the unanswered-routing Final Report
+   and stop.
 3. Print one line: `Routing to <engine>: <the rule that matched, in the user's words>.`
 4. Run the *Dependency Preflight*.
 5. Read the recorded `SKILL.md` path and follow that engine's workflow with the user's request
@@ -102,7 +103,7 @@ before it writes. Do not run a second sync here, and do not skip the engine's sy
 Both engines end every run, stops included, with a four-line Final Report (`Result:` COMPLETE |
 PARTIAL | BLOCKED, `Evidence:`, `Uncertainty:`, `Decision:`). When an engine ran, its Final Report
 is this skill's closing output. Relay it verbatim: do not restate it, re-grade it, or change its
-status. If the release step fails, add one line after it:
+status. If the release step fails, add one line after the closing report, whichever skill wrote it:
 `Router note: asm deps release failed for session <dg_session>; run asm deps release --session <dg_session> --json.`
 
 When the umbrella stops before any engine runs (out of scope, unanswered routing question, missing
@@ -111,7 +112,7 @@ engine), it writes its own four-line report with status `BLOCKED`. Templates and
 
 ```text
 Result: BLOCKED. No diagram written: drawio-generator is not installed.
-Evidence: Routed to drawio-generator (user named draw.io). Preflight dg_mode=lease; asm deps acquire drawio-generator failed.
+Evidence: Routed to drawio-generator (rule 3, "in draw.io"). Preflight dg_mode=lease; asm deps acquire drawio-generator failed.
 Uncertainty: No engine ran, so no file was generated or validated.
 Decision: Install drawio-generator with the printed command, then re-run. Excalidraw output is available only if you ask for it.
 ```
@@ -145,8 +146,9 @@ Verify these for every run:
 ## Edge Cases
 
 - **Both formats** — run the engine the user named first, or `drawio-generator` when no order was
-  given. After its Final Report, ask whether to run the other engine on the same content. If yes,
-  acquire it under the same `dg_session` and run it. Each engine's Final Report is relayed in turn.
+  given. After its Final Report, run the other engine on the same content without asking again,
+  because the user already asked for both: acquire it under the same `dg_session`. If the first
+  engine ended `BLOCKED`, ask before running the second. Relay each engine's Final Report in turn.
 - **Unanswered routing question** — ask it once more. Silence or a timeout is not delegation. If the
   user still does not answer, write the unanswered-routing Final Report.
 - **Routed engine unavailable** — the preflight stops the run. Name the other engine as an option

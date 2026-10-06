@@ -86,12 +86,13 @@
       "id": 7,
       "kind": "edge",
       "prompt": "Give me the login flow both as a draw.io file and as an Excalidraw sketch: user enters credentials, server validates, success goes to the dashboard, failure shows an error.",
-      "expected_output": "Both formats: runs drawio-generator first, relays its Final Report, then asks before running excalidraw-generator under the same session.",
+      "expected_output": "Both formats: runs drawio-generator first, relays its Final Report, then runs excalidraw-generator under the same session without asking again.",
       "files": [],
       "expectations": [
         "Ran drawio-generator first, because the request names it first",
-        "Relayed drawio-generator's Final Report before asking whether to run excalidraw-generator",
-        "Did not run excalidraw-generator without that answer",
+        "Relayed drawio-generator's Final Report before excalidraw-generator started",
+        "Did not ask again whether to produce the Excalidraw version, unless drawio-generator ended BLOCKED",
+        "Wrote one .drawio file and one .excalidraw file",
         "Reused the same dg_session value for any second acquire"
       ]
     },
