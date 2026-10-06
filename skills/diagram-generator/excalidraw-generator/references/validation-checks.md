@@ -1,6 +1,6 @@
 # Phase 4 Validation Checks (full detail)
 
-Run every check below on the in-memory JSON before writing the file. If any fails, fix and re-check until all pass.
+Run every check below on the in-memory JSON before writing the file. Fix any failures and re-run all checks, for at most 3 fix cycles. SKILL.md → *Phase 4* decides what happens when a check still fails after cycle 3 (`PARTIAL` or `BLOCKED`).
 
 ## Check 1: Valid JSON structure
 - The JSON parses without error.
@@ -80,14 +80,14 @@ This is the most common cause of garbled rendering in Excalidraw. For every text
 
 ## Validation report format
 
-After all checks pass, include a brief validation summary as a comment in your response (not in the file):
+Print this in the response (not in the file) after the last check run, then give the Final Report (`references/final-report.md`). Write `N/10` with the real count, and list each failed check by number with the element ID it names:
 
 ```
-Validation: 10/10 checks passed
+Validation: N/10 checks passed (cycle C of 3)
 - Elements: N shapes, M text labels, K arrows
-- Bindings: X text bindings, Y arrow bindings (all two-way)
-- Text fits: all shapes sized to fit their bound text
-- No overlaps, no missing fields
+- Bindings: X text bindings, Y arrow bindings
+- Fixes applied: none | 10 (svc-auth height 50 -> 76), ...
+- Failed: none | 7 (svc-a overlaps svc-b by 24px), 10 (...)
 ```
 
-If any check required auto-fixes, mention what was corrected so the user knows.
+Fix the generated JSON, never patch around a check: when a new failure pattern appears that these checks do not cover, name it in the Validate step completion report.

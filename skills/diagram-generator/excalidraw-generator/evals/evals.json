@@ -3,21 +3,107 @@
   "evals": [
     {
       "id": 1,
+      "kind": "happy-path",
       "prompt": "Draw a flowchart for a user registration process: user enters email, we validate the format, check if email exists in DB, if yes show error, if no send verification email, user clicks link, account activated.",
-      "expected_output": "A top-to-bottom flowchart with rectangles for process steps, diamonds for decisions, ellipses for start/end, arrows connecting everything. Should have proper colors and labels.",
-      "files": []
+      "expected_output": "A .excalidraw file with a top-to-bottom flowchart: rectangles for process steps, diamonds for decisions, ellipses for start/end, arrows connecting everything, followed by a COMPLETE Final Report.",
+      "files": [],
+      "expectations": [
+        "Wrote a kebab-case .excalidraw file whose JSON parses, with top-level type, version, elements, appState and files",
+        "The 'email exists' check is a diamond with two labeled outgoing arrows (yes and no)",
+        "Every arrow has points starting at [0,0], and its startBinding/endBinding elements list the arrow in their boundElements",
+        "Stated the chosen defaults in one line and did not wait for confirmation, because the request names the type and every step",
+        "The Final Report opens with a Result: line carrying COMPLETE and the file name",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence gives the absolute file path and the N/10 count, and Uncertainty says rendering in Excalidraw is untested"
+      ]
     },
     {
       "id": 2,
+      "kind": "happy-path",
       "prompt": "I have a microservice architecture with these services: API Gateway, Auth Service, User Service, Order Service, Payment Service, Notification Service, and a PostgreSQL database shared by User and Order services, plus a Redis cache used by Auth and API Gateway. Visualize this architecture.",
-      "expected_output": "A system architecture diagram showing all services as rectangles, databases as distinct shapes, arrows showing communication paths, color-coded by layer/function.",
-      "files": []
+      "expected_output": "A .excalidraw architecture diagram showing all services, the two data stores as distinct shapes, arrows for communication paths, color-coded by layer, followed by a Final Report.",
+      "files": [],
+      "expectations": [
+        "All six services, PostgreSQL and Redis appear as shapes with bound text labels",
+        "PostgreSQL has arrows from both User Service and Order Service; Redis has arrows from both Auth Service and API Gateway",
+        "Every bound text has containerId set and its container lists it in boundElements with type text",
+        "No two shape bounding boxes overlap by more than 10px",
+        "The Final Report labels any inferred relationship (for example, which services the gateway calls) as an assumption on the Uncertainty: line"
+      ]
     },
     {
       "id": 3,
+      "kind": "happy-path",
       "prompt": "Create a mind map about 'Machine Learning' with branches for: Supervised Learning (classification, regression), Unsupervised Learning (clustering, dimensionality reduction), Reinforcement Learning (Q-learning, policy gradient), and Deep Learning (CNN, RNN, Transformer).",
-      "expected_output": "A radial mind map with 'Machine Learning' in the center, main branches radiating outward to sub-topics, different colors per branch, clean readable layout.",
-      "files": []
+      "expected_output": "A radial mind map with 'Machine Learning' in the center, four main branches and their sub-topics, a color per branch, followed by a Final Report.",
+      "files": [],
+      "expectations": [
+        "'Machine Learning' is a central node with arrows or lines to exactly four branch nodes",
+        "All nine sub-topics appear, each connected to its own branch",
+        "Every text element has fontSize >= 16, lineHeight 1.25 and autoResize true",
+        "Each container's height is at least line_count * fontSize * 1.25 + 40 for its bound text",
+        "The Final Report Result: line gives the shape and arrow counts and the status"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Make me an Excalidraw diagram.",
+      "expected_output": "Asks targeted questions (entities, relationships, flow direction, style) and writes no file until the user answers.",
+      "files": [],
+      "expectations": [
+        "Asked about the main entities and relationships before generating anything",
+        "Did not write a .excalidraw file or a placeholder diagram",
+        "Did not report 10/10 checks passed or claim a file was written"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Add a Billing Service between Order Service and Payment Service in architecture.excalidraw.",
+      "expected_output": "Reads the existing file, preserves its element IDs, adds the new service and rewires the arrows with two-way bindings, validates, then rewrites the same file.",
+      "files": [],
+      "expectations": [
+        "Read architecture.excalidraw before generating any JSON",
+        "Every element ID present in the original file and not removed by the request is unchanged",
+        "The old Order -> Payment arrow is removed from the elements array (not left with isDeleted: true) or rebound, and both endpoint shapes' boundElements are updated",
+        "Ran the 10 checks on the modified JSON before rewriting the file",
+        "The Final Report names architecture.excalidraw and says what was added"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Sketch all 70 of our microservices and every call between them on one Excalidraw canvas.",
+      "expected_output": "Warns that one canvas will be crowded and offers frames, a split into several files, or an overview first; if it generates, it uses the subagent loop with at most 3 cycles.",
+      "files": [],
+      "expectations": [
+        "Warned that a single canvas with more than 50 elements will be crowded",
+        "Offered frames, a split into several files, or a higher-level overview, and waited for the user's choice",
+        "If generation ran, it used the json-generator, json-validator and json-fixer subagent loop with at most 3 cycles",
+        "If a check from 1-6 still failed after cycle 3, no file was written and the Final Report says BLOCKED"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Create a draw.io C4 container diagram of our payment platform that I can edit in diagrams.net.",
+      "expected_output": "The skill does not trigger: draw.io output is named in the negative-trigger clause; drawio-generator owns this request.",
+      "files": [],
+      "expectations": [
+        "excalidraw-generator did not trigger",
+        "No .excalidraw file was written"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Write a Mermaid sequence diagram for our OAuth login that I can paste into a GitHub README.",
+      "expected_output": "The skill does not trigger: Mermaid output is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "excalidraw-generator did not trigger",
+        "No .excalidraw file was written"
+      ]
     }
   ]
 }

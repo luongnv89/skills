@@ -2,6 +2,18 @@
 
 This reference covers all supported visualization types, when to use each, and how to structure them in Excalidraw elements.
 
+## Input → diagram type
+
+When the user supplies code, data, schemas, or files, extract their structure:
+
+| Input | Diagram type |
+|---|---|
+| Code | Class, dependency, or architecture diagram |
+| SQL / schema | ER diagram |
+| JSON / YAML config | Architecture or deployment diagram |
+| Steps / process | Flowchart or sequence diagram |
+| Org data | Org chart or tree |
+
 ## Table of Contents
 
 1. [Flow & Process](#flow--process)

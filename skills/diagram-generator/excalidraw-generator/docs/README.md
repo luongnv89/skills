@@ -13,11 +13,11 @@
 
 - Supports 25+ diagram types across 8 categories (flow, architecture, data, planning, comparison, charts, UX, custom)
 - Interactive workflow: analyzes input, proposes visualization type with selectable options, iterates until clear
-- Built-in validation: 10 automated quality checks with auto-fix before writing output
-- Subagent architecture for large diagrams (30+ elements): fresh-context generator, validator, and fixer agents
+- Built-in validation: 10 quality checks with auto-fix (at most 3 cycles) before writing output; structural failures never write a broken file
+- Subagent architecture for large diagrams (more than 30 elements): fresh-context generator, validator, and fixer agents
 - Outputs native `.excalidraw` files by default (can embed in `.md` on request)
 - Automatically extracts structure from code, SQL, config files, or plain descriptions
-- Multiple color palettes: professional, pastel, monochrome
+- Hand-drawn by default, with sketchy, clean/geometric, code/technical, and monochrome variants; colors chosen to fit the diagram
 
 ## When to Use
 
@@ -37,8 +37,8 @@ graph TD
     A["1. Understand Input"] --> B["2. Propose Options"]
     B --> C["3. Generate JSON"]
     C --> D["4. Validate (10 checks)"]
-    D -->|Pass| E["Write File"]
-    D -->|Fail| F["Auto-fix & Re-check"]
+    D -->|Pass| E["Write File + Final Report"]
+    D -->|Fail| F["Auto-fix & Re-check (max 3 cycles)"]
     F --> D
     style A fill:#4CAF50,color:#fff
     style E fill:#2196F3,color:#fff
@@ -82,12 +82,16 @@ asm install github:luongnv89/skills:skills/diagram-generator/excalidraw-generato
 
 | Path | Description |
 |---|---|
-| `agents/json-generator.md` | Generate Excalidraw JSON diagrams from user descriptions and requirements |
-| `agents/json-validator.md` | Validate Excalidraw JSON output against schema and quality standards |
-| `agents/json-fixer.md` | Repair malformed or invalid Excalidraw JSON files |
-| `references/excalidraw-format.md` | Complete Excalidraw JSON schema and element reference |
+| `agents/json-generator.md` | Subagent for large diagrams (more than 30 elements): generates Excalidraw JSON from the confirmed plan |
+| `agents/json-validator.md` | Subagent: runs the 10 checks and returns a PASS / NEEDS_FIX report; fixes nothing |
+| `agents/json-fixer.md` | Subagent: patches the failed checks from the validator report, up to 3 cycles; sends JSON structure and missing-entity failures back to the generator |
+| `references/excalidraw-format.md` | Complete Excalidraw JSON schema, element types, and field defaults |
 | `references/diagram-types.md` | All supported diagram types with layout guidance |
+| `references/validation-checks.md` | The 10 Phase 4 checks, the shape-to-text sizing formula, fix recipes, and the validation report |
+| `references/style-and-iteration.md` | Style variants, iteration requests, the subagent review loop, and extended edge cases |
+| `references/final-report.md` | Final Report examples (COMPLETE, PARTIAL, BLOCKED), fill rules, and reader checks |
+| `references/step-reports.md` | Per-phase step completion report template and the checks each phase reports |
 
 ## Output
 
-Generates native `.excalidraw` files (raw JSON) by default. Can also embed in a `.md` file with a fenced code block on request.
+Generates native `.excalidraw` files (raw JSON) by default; on request, also a companion `.md` with the same JSON in an `excalidraw` fenced block. Every run ends with a four-line Final Report (`Result:`, `Evidence:`, `Uncertainty:`, `Decision:`) whose status is COMPLETE (all 10 checks pass), PARTIAL (file written, a layout or readability check failed and is listed), or BLOCKED (no file written).
