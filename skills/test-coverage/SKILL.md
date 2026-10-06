@@ -4,7 +4,7 @@ description: "Generate unit tests for untested branches and edge cases. Use when
 license: MIT
 effort: low
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -33,7 +33,7 @@ Detect the project's language from its manifest file and use the matching comman
 If none of these manifests is found, see [Edge Cases](#edge-cases) — "No test framework detected".
 
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote. First save `git status --porcelain` as the pre-sync list; Step 4 never stages those paths.
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -94,7 +94,7 @@ Target scenarios:
 1. Run the full test suite. If a new test fails, fix or remove it, then rerun. If a previously passing test now fails, report PARTIAL and name it.
 2. Run the same coverage command as Step 1.
 3. Compare the new total with the Step 1 baseline. If it is not strictly higher, report PARTIAL and list the Step 2 gaps that are still untested.
-4. If the full suite passed in item 1, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered.
+4. If the full suite passed in item 1, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered. Stage each test file this run wrote by explicit path (`git add tests/test_parser.py`); never `git add -A`, `git add .` or `git commit -a`, which would sweep in user work Repo Sync restored. Never stage a path on the pre-sync list. Stage a changed manifest or lockfile (*Coverage tool not installed*) only with its reason in the commit message. Check `git diff --cached --name-only` before committing. Under `Uncertainty:`, list each changed file left unstaged, or every new test file when the commit is skipped (failed suite or regression).
 5. Print the final report. It opens with `Result:` — `COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason` — followed by:
    - `Evidence:` the commands that ran, with before/after totals and pass/fail counts
    - `Uncertainty:` what was not checked (e.g., excluded paths, CI not run, covered lines without output assertions)
@@ -128,6 +128,7 @@ A run passes when **all** of the following are true:
 - [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.).
 - [ ] All new tests live on a feature branch (e.g., `feat/test-coverage`), never on `main`/`master`.
 - [ ] Commit message records the before/after coverage percentages and the files newly covered.
+- [ ] The commit holds only files this run wrote, staged by explicit path.
 
 If any item fails, the final report says `PARTIAL` or `BLOCKED` and names the reason.
 
