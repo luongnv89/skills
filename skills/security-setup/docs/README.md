@@ -11,12 +11,10 @@
 
 ## Highlights
 
-- Detect project language and choose the smallest useful security tool set
-- Add pre-commit checks for secrets, dependencies, and static analysis
+- Detect project language and add pre-commit checks for secrets, dependencies, and static analysis with the smallest useful tool set
 - File-aware scoping: only run the checks the staged file set implies, while keeping secret scanning always-on as a safety floor
-- Recommend optional Socket Firewall aliases so package installs go through `sfw` by default on macOS/Linux
-- Run hooks offline using local rules and warmed vulnerability databases
-- Print JSON, Markdown, and terminal summary reports with severity counts
+- Run hooks offline using local rules and warmed vulnerability databases, with optional Socket Firewall aliases for package installs on macOS/Linux
+- Print JSON, Markdown, and terminal summary reports with severity counts, and end every run with a final report (status, evidence, uncertainty, decision)
 - Gate CI workflow creation until local Phase 1 checks are installed and passing
 
 ## When to Use
@@ -53,7 +51,10 @@ graph TD
 |---|---|
 | `references/tool-selection.md` | Offline-first scanner selection and install guidance |
 | `references/templates.md` | Target repository file templates |
+| `references/verification-scenarios.md` | No-blindspot scenarios for checking file-aware scoping by hand |
+| `references/final-report.md` | Final report parts, COMPLETE/PARTIAL/BLOCKED rules, and examples |
 | `scripts/security_check.py` | Copyable local security summary runner |
+| `evals/evals.json` | Trigger and behavior eval cases, including final-report checks |
 
 ## Output
 
@@ -62,3 +63,4 @@ graph TD
 - `security/security-tools.json` and `security/semgrep-rules.yml`
 - `SECURITY.md` summary of selected tools, gaps, run commands, and bypass policy
 - Optional `.github/workflows/security.yml` when `--ci` is requested
+- A final report that starts with `COMPLETE`, `PARTIAL`, or `BLOCKED`, then lists the evidence, what is still untested, and the decision left to you

@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.4.2
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -32,7 +32,11 @@ user explicitly asks for it (e.g. `--ci`).
 - (Optional for `--ci`) GitHub Actions enabled on the repo.
 - Network for initial tool/db installs (subsequent hook runs are offline).
 
-Confirm these before Phase 1. If a tool cannot be made offline, document the gap instead of pretending.
+Check these before Phase 1:
+
+1. Run `git rev-parse --git-dir`. If it exits non-zero, stop and end with a `BLOCKED` final report.
+2. Run `python3 --version` (`python --version` on Windows). If no interpreter answers, or the version is below 3.8, stop and end with a `BLOCKED` final report.
+3. If a selected tool cannot run offline, record the gap for `SECURITY.md` and the final report. Do not claim offline coverage for it.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -168,11 +172,13 @@ gitleaks (or its replacement) into a path-restricted trigger.
 
 ### 3. Generate Local Files
 
-Before writing files, dry-run the changes: list every target path, diff any
-existing file against the planned content, and confirm with the user. If a
-target file already exists, back it up to `<path>.bak` so the user can
-rollback. Treat any overwrite of `.pre-commit-config.yaml` or `SECURITY.md`
-as destructive and require explicit confirmation.
+Dry-run the changes before writing any file:
+
+1. List every target path below and mark each one `new` or `exists`.
+2. For each `exists` target, show the diff between the current file and the planned content.
+3. Ask the user to confirm the list. Name `.pre-commit-config.yaml` and `SECURITY.md` explicitly when they exist: overwriting either one is destructive.
+4. If the user declines every file, write nothing and end with a `BLOCKED` final report. If the user declines some files, write only the confirmed ones and record each declined file for the final report.
+5. Before changing an `exists` target, copy it to `<path>.bak` so the user can roll back.
 
 Create or update these files:
 
@@ -235,6 +241,18 @@ Run the local checks after writing files. Use `python3` on macOS/Linux and
 Verification uses `--all` so every configured check runs regardless of what
 happens to be staged.
 
+First run `pre-commit --version`. If it exits non-zero, print the install
+commands below, run only the `security_check.py` command, skip
+`pre-commit run`, and end with a `PARTIAL` final report that names the
+missing `pre-commit`:
+
+```bash
+python3 -m pip install pre-commit   # use `python` on Windows
+pre-commit install
+```
+
+If it exits 0, run both verification commands and record each exit code:
+
 ```bash
 # macOS / Linux
 python3 scripts/security_check.py --all --no-fail-on-missing-tools
@@ -253,12 +271,10 @@ table in §2. `--all` overrides this for verification or one-off full scans;
 `--staged-only` errors if no staged files are found (useful for guarded
 hooks).
 
-If `pre-commit` is not installed, print the install command and stop:
-
-```bash
-python3 -m pip install pre-commit   # use `python` on Windows
-pre-commit install
-```
+Exit codes: `0` means no failing finding (or an accepted bypass), `1` means
+at least one `fail_on` finding, and `2` means the runner could not run (an
+invalid `security-tools.json`, `--staged-only` with nothing staged, or an
+unwritable report path); its stderr message names the input and the fix.
 
 #### Expected output
 
@@ -277,16 +293,20 @@ Only run this phase when the user asks for CI/CD, for example
 
 Preconditions:
 - Phase 1 files exist
-- `python3 scripts/security_check.py --no-fail-on-missing-tools` runs locally
+- `python3 scripts/security_check.py --all --no-fail-on-missing-tools` exits 0 locally
 - `.pre-commit-config.yaml` contains the `security-check` hook
 
-Then create `.github/workflows/security.yml` using `references/templates.md`.
-Keep the workflow free-tier friendly:
+If any precondition fails, do not create the workflow; record `CI not created`
+and the failing precondition for the final report.
+
+Otherwise create `.github/workflows/security.yml` using `references/templates.md`.
+If that file already exists, apply the Step 3 dry-run steps to it first
+(diff, confirm, `.bak` backup). Keep the workflow free-tier friendly:
 
 - Trigger on `pull_request` and `push` to the default branch.
 - Install only the selected tools.
 - Cache scanner databases where supported.
-- Run `python3 scripts/security_check.py`.
+- Run `python3 scripts/security_check.py --all` (CI always full-scans).
 - Upload SARIF only when the repo can use GitHub Code Scanning; otherwise keep
   the job summary only.
 
@@ -348,14 +368,20 @@ A completed setup passes when:
 - [ ] `--ci` creates `.github/workflows/security.yml` only after Phase 1 passes.
 - [ ] File-aware scoping has been walked through manually against the
       no-blindspot scenarios in `references/verification-scenarios.md`.
+- [ ] The final report passes the reader checks in `references/final-report.md`:
+      the status is on the first line, verified checks are separated from
+      assumptions, each claim cites a command or file, and the next decision is
+      named. Human understanding stays unconfirmed until the user gives feedback.
 
 ## Edge Cases
 
 - **Existing hooks**: merge the new hook; preserve all existing hooks and revs.
 - **Monorepo**: use path filters in `security/security-tools.json` and document
   per-package coverage.
-- **Missing tools**: install the minimal missing set or tell the user the exact
-  command; do not silently skip required categories.
+- **Missing tools**: print the install command from
+  `references/tool-selection.md` for each missing selected tool, and install it
+  only after the user confirms. A category whose tool stays missing is listed
+  in the final report; never skip it silently.
 - **Private repo SARIF**: GitHub Code Scanning may require a paid plan. Keep the
   summary report and skip SARIF upload unless available.
 - **Network-restricted setup**: create configs and report the commands that must
@@ -378,9 +404,22 @@ After each phase, report:
   Result:                 PASS | PARTIAL | FAIL
 ```
 
+## Final Report
+
+End every run, including a stop, with one final report in the shape
+`references/final-report.md` defines. Read it before writing the report. The
+four parts are required, in this order:
+
+1. `Result:` — `COMPLETE`, `PARTIAL — <reason>`, or `BLOCKED — <reason>`, then one line on what changed.
+2. `Evidence:` — only commands that ran, with exit codes, and each file written with its `.bak` path.
+3. `Uncertainty:` — missing tools, offline gaps, declined files, and checks that did not run.
+4. `Decision:` — the approval the user must give, or `No approval needed.`, then each remaining user action.
+
 ## Resources
 
 - `references/tool-selection.md` - offline-first tool matrix and install notes
 - `references/templates.md` - target repo file templates
 - `references/verification-scenarios.md` - no-blindspot manual verification scenarios
+- `references/final-report.md` - final report parts, status rules, and examples
 - `scripts/security_check.py` - reusable local security summary runner
+- `evals/evals.json` - trigger and behavior eval cases with final-report assertions
