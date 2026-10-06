@@ -15,6 +15,7 @@
 - Strict 5-step approval-gated workflow: Analyze → Design → Plan → Execute → Summarize
 - Recommends best CLI library per language (click, commander, cobra, clap, picocli, thor)
 - Includes starter scaffolds, testing patterns, and quality guardrails
+- Ends with a final report: status (`COMPLETE`, `PARTIAL` or `BLOCKED`), evidence, uncertainty, and the next decision
 - Supports Python, JavaScript/TypeScript, Go, Rust, Java/Kotlin, and Ruby
 
 ## When to Use
@@ -42,7 +43,7 @@ graph TD
     style D fill:#2196F3,color:#fff
 ```
 
-Each step requires user approval before proceeding to the next.
+Steps 1-3 each require explicit user approval before the next step, and they write no files. Step 4 runs the tests after every task and commits once per phase (in a git repository). Step 5 prints the final report.
 
 ## Installation
 
@@ -69,8 +70,12 @@ asm install github:luongnv89/skills:skills/cli-builder
 | Path | Description |
 |---|---|
 | `references/cli-libraries.md` | Per-language library recommendations + starter scaffolds |
-| `references/testing-patterns.md` | CLI testing patterns (unit, integration, stdin, JSON) |
+| `references/testing-patterns.md` | CLI testing patterns (unit, integration, stdin, JSON) and the canonical exit-code table |
+| `references/final-report.md` | Final report parts, status rules, two examples, and reader checks |
+| `evals/evals.json` | Six eval cases (happy path, edge cases, negative trigger) |
 
 ## Output
 
-A production-quality CLI tool with entry point, subcommand handlers, unit/integration tests, and proper packaging. Every CLI includes `--help` at every level, `--version`, proper exit codes (0/1/2), stderr for errors, `NO_COLOR` support, and POSIX flag conventions.
+A production-quality CLI tool with entry point, subcommand handlers, unit/integration tests, and proper packaging. Every CLI includes `--help` at every level, `--version`, exit codes from the canonical table in `references/testing-patterns.md` (0 success, 1 runtime error, 2 usage error, 3 input error, 130 interrupted), stderr for errors, `NO_COLOR` support, and POSIX flag conventions.
+
+The run ends with a plain-text final report in the chat: `Result:` (`COMPLETE`, `PARTIAL` or `BLOCKED`), `Evidence:` (files, test counts, demo commands), `Uncertainty:` (untested platforms, skipped items), and `Decision:` (the approval needed, or `No approval needed.`), followed by a usage quick-start.

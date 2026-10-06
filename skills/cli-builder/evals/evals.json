@@ -1,0 +1,77 @@
+{
+  "skill_name": "cli-builder",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Build a CLI for my Python module mylib. It has two public functions, run(input_path, output_path) and info(). I want subcommands and JSON output.",
+      "expected_output": "Detects Python from the manifest, records the exposed functions, asks only what it cannot infer, presents a design document and waits for explicit approval, presents a three-phase plan and waits for explicit approval, then implements task by task with tests after each task, a demo and a commit per phase, and ends with the four-part final report.",
+      "files": [],
+      "expectations": [
+        "No file is created or modified before the user explicitly approves both the design document and the plan.",
+        "The design document includes a command tree, options per command, global options, I/O behavior, a config strategy, and at least 3 example invocations.",
+        "The project's test command runs after each task, and each phase ends with a demo of --help plus at least one approved example invocation.",
+        "The final report starts with Result: and a status word (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only commands that ran with their results, Uncertainty, and Decision naming the approval needed or 'No approval needed.', followed by an install command and at least 3 usage examples."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Wrap our Go package in a command-line tool called deploy-tool with deploy and status commands. Status should support --format json.",
+      "expected_output": "Detects Go from go.mod, recommends cobra from the library reference, designs both commands with --help at every level and --version, uses exit codes from the canonical table in references/testing-patterns.md, keeps errors on stderr and clean output on stdout, and respects NO_COLOR.",
+      "files": [],
+      "expectations": [
+        "The recommended library comes from references/cli-libraries.md (cobra for Go) and the choice is shown in the design for approval.",
+        "Exit codes follow the canonical table in references/testing-patterns.md, including 2 for usage errors and 3 for input errors.",
+        "Tests check stdout, stderr, and exit codes separately, including a --format json case.",
+        "The final report's first line gives the status and the tool name, and Evidence lists each test command with its pass/fail counts."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "Add a CLI to this project. Actually, I don't like the command names in your design. Let me think about it later, stop for now.",
+      "expected_output": "Treats the reply as not approval, writes no files, does not start Step 3 or Step 4, and prints a final report with status BLOCKED that names the unapproved design as the reason.",
+      "files": [],
+      "expectations": [
+        "No file is created or modified, and no branch is created.",
+        "The final report status is BLOCKED with the reason that the design was not approved.",
+        "Decision names the remaining user action: approve or revise the design to resume."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Build a CLI for this Rust crate. Note: cargo is not installed on this machine, so you can't run cargo test.",
+      "expected_output": "Proceeds through design and plan approval, tells the user the test command cannot run, continues only after explicit approval, records each task's tests as not run, and ends with status PARTIAL.",
+      "files": [],
+      "expectations": [
+        "The skill tells the user that cargo test cannot run and waits for explicit approval before continuing Step 4.",
+        "Each affected task's tests are recorded as not run under Uncertainty, never as passed.",
+        "The final report status is PARTIAL, not COMPLETE, and Evidence lists no test counts for tests that did not run."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Build a CLI for this Node module. The integration test for the export command keeps failing on a missing field and I don't want to change the API right now.",
+      "expected_output": "Fixes and re-runs the failing test, stops Step 4 after 3 failed fix attempts on the same task, shows the failing output, asks the user how to proceed, does not start the next task, and reports PARTIAL with the failing test and the decision needed.",
+      "files": [],
+      "expectations": [
+        "The skill does not start the next task while the export test fails.",
+        "After 3 failed fix attempts on the same task, the skill stops and shows the failing test output.",
+        "The final report status is PARTIAL, Uncertainty names the unfinished task, and Decision names the choice the user must make to fix the failing test."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Write a quick one-off bash script that renames all .jpeg files in this folder to .jpg.",
+      "expected_output": "cli-builder does not trigger: this is a one-off shell script, which the description excludes. No five-step workflow, design document, or approval gates are started.",
+      "files": [],
+      "expectations": [
+        "The response does not start the cli-builder five-step workflow or present a CLI design document."
+      ]
+    }
+  ]
+}
