@@ -5,18 +5,19 @@ Step 5 of `SKILL.md` → *Instructions*, run only when the user asks for fixes t
 ## Procedure
 
 1. Produce the review first (`report-format.md`).
-2. If the fixes go into code files, run the Repo Sync below. For screenshot or wireframe input, write no file and run no sync: give specs an AI agent or developer can implement without guessing, then print the Redesign summary with `Applied 0 fixes; specs only`.
+2. For screenshot or wireframe input, write no file and run no sync: give specs an AI agent or developer can implement without guessing, then print the Redesign summary with `Applied 0 fixes; specs only`.
 3. **Dry-run first.** Show the planned diff for each fix: file path, selector, before and after. List 🔴 issues first, then 🟡. Leave 🟢 issues out unless the user names them.
-4. Wait for explicit confirmation. The user may confirm all fixes or name a subset. If the user does not confirm, write nothing and print the `BLOCKED` Redesign summary. An orchestrator never confirms on the user's behalf.
-5. Before each edit, record the file's current content.
-6. Apply each confirmed fix. Change the minimum necessary: surgical, not a rewrite. Preserve the brand and aesthetic. On a CSS framework (Tailwind, Bootstrap), keep the framework classes and change only values.
-7. If a write fails, restore that file's recorded content and name the fix as not written. Never roll back with `git checkout` or `git restore`: they would discard the user's other uncommitted edits.
-8. If a file is not writable, write nothing to it, name the permission issue in the Redesign summary, and give the fix as a spec.
-9. Show the before/after for each fix written, then print the Redesign summary.
+4. Wait for explicit confirmation. The user may confirm all fixes or name a subset. If the user does not confirm, write nothing, run no git command, and print the `BLOCKED` Redesign summary. An orchestrator never confirms on the user's behalf.
+5. Run the Repo Sync below. If it changed a file named in the confirmed diff, show that file's dry-run diff again and wait for confirmation.
+6. Before each edit, record the file's current content.
+7. Apply each confirmed fix. Change the minimum necessary: surgical, not a rewrite. Preserve the brand and aesthetic. On a CSS framework (Tailwind, Bootstrap), keep the framework classes and change only values.
+8. If a write fails, restore that file's recorded content and name the fix as not written. Never roll back with `git checkout` or `git restore`: they would discard the user's other uncommitted edits.
+9. If a file is not writable, write nothing to it, name the permission issue in the Redesign summary, and give the fix as a spec.
+10. Show the before/after for each fix written, then print the Redesign summary.
 
 ## Repo Sync steps
 
-Run these once, before the first edit. The sync target is the directory holding the files to edit.
+Run these once, after the user confirms the dry-run diff and before the first edit. The sync stashes and rebases the user's tree, so it never runs on a declined diff. The sync target is the directory holding the files to edit.
 
 1. Run `repo="$(git -C "<target dir>" rev-parse --show-toplevel)"`. If it fails, skip the sync and record `sync: skipped (not a git repo)`.
 2. Run `git -C "$repo" remote get-url origin`. If it fails, skip steps 3-7 and record `sync: skipped (no origin)`.

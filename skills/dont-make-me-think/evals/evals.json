@@ -78,11 +78,11 @@
       "id": 6,
       "kind": "edge",
       "prompt": "Review evals/files/checkout.html and fix the critical usability problems in the file.",
-      "expected_output": "The review first, then Redesign Mode: Repo Sync is run or its skip is recorded, a dry-run diff is shown for each 🔴 fix with file path, selector and before/after, and no file is written until the user confirms. Without confirmation the BLOCKED Redesign summary is printed.",
+      "expected_output": "The review first, then Redesign Mode: a dry-run diff is shown for each 🔴 fix with file path, selector and before/after, and no file is written and no git command runs until the user confirms; Repo Sync runs only after confirmation. Without confirmation the BLOCKED Redesign summary is printed.",
       "files": ["evals/files/checkout.html"],
       "expectations": [
         "Produces the full usability review before proposing any edit",
-        "Records a Repo Sync result (pulled, skipped with a reason, or failed) before the first edit",
+        "Runs no Repo Sync or other git command before the user confirms; after a confirmation, records a Repo Sync result (pulled, skipped with a reason, or failed) before the first edit",
         "Shows a dry-run diff for each planned fix with the file path, the selector and the before/after, 🔴 issues first",
         "Does not modify checkout.html before the user explicitly confirms",
         "Without confirmation, prints a Redesign summary whose first line starts 'Result: BLOCKED.'",

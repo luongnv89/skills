@@ -51,10 +51,10 @@ The install-path tests run first because gstack may install `/browse` without `a
 
 ## Repo Sync Before Edits (mandatory)
 
-Steps 1-4 below are read-only. **Redesign Mode (step 5) writes to UI source files**: before its
-first edit, run the seven *Repo Sync steps* in `references/redesign-mode.md` (scoped with
-`git -C "$repo"`, stash-first, skips recorded). On a rebase conflict, run `git -C "$repo" rebase --abort`,
-write no file, and stop and ask the user — never skip or force the sync. This skill commits nothing.
+Steps 1-4 below are read-only. **Redesign Mode (step 5) writes to UI source files**: once the user
+confirms the dry-run diff, run the seven *Repo Sync steps* in `references/redesign-mode.md`
+(`git -C "$repo"`, stash-first, skips recorded) before the first edit. On a rebase conflict, run
+`git -C "$repo" rebase --abort`, write no file, and stop and ask the user. Never force the sync. This skill commits nothing.
 
 ## Instructions
 
