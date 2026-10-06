@@ -56,7 +56,7 @@
       "files": ["evals/files/checkout.html"],
       "expectations": [
         "Opens with the '**Result:**' line under the title",
-        "Lists exactly 3 issues, in Fix Priority order",
+        "Lists exactly 3 issues, in Fix Priority order, and the Result line counts every issue found and ends with 'top 3 listed'",
         "Scores every applicable lens in the Scorecard table and omits the xychart",
         "Omits the Issue Map and the Page Flow Analysis",
         "Keeps the Evidence and Limits section and the Next Decision line"

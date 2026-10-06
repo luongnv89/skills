@@ -135,7 +135,7 @@ Bullet list — protect these during redesign:
 
 | Case | What changes |
 |---|---|
-| Quick check (the user asks for a quick look) | Score every applicable lens in the Scorecard table; omit the chart, the Issue Map and the Page Flow Analysis; list only the top 3 issues in Fix Priority order. Keep the `**Result:**` line, Evidence and Limits, and Next Decision. |
+| Quick check (the user asks for a quick look) | Score every applicable lens in the Scorecard table; omit the chart, the Issue Map and the Page Flow Analysis; list only the top 3 issues in Fix Priority order, and keep the Fix Priority table with those 3 rows. The `**Result:**` line and Thinking Cost still count every issue found; end the Result line with `top 3 listed`. Keep Evidence and Limits and Next Decision. |
 | No issues found | Keep the Result line (`0 issues`), Thinking Cost `LOW`, the Scorecard, What Works, Evidence and Limits, and Next Decision. Omit Issues, Issue Map and Fix Priority. Do not invent issues. |
 | Several screenshots of one flow | One report. Name each screenshot in **Reviewed**, and put each issue's screenshot file name in its **Where** line. |
 
