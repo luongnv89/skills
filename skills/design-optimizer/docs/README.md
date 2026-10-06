@@ -14,7 +14,7 @@ Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
 ## Highlights
 
 - Captures the page, head tags, screenshots and robots/sitemap/llms.txt **once**; every member reads the same evidence.
-- Runs `dont-make-me-think`, `ux-ax-review`, `website-agent-readiness` and `viral-product-evaluator` with a check-ownership matrix, so no check runs twice.
+- Runs `dont-make-me-think`, `ux-ax-review`, `website-agent-readiness` and `viral-product-evaluator` with a check-ownership matrix: evidence is captured once, the live scan runs at most once, overlapping checks are skipped where the member supports skip-checks, and remaining overlaps are merged into one row per defect.
 - Merges all findings into one deduplicated `design-optimization.md`, one row per finding, owner cited.
 - Audit by default; fixes only on explicit opt-in, through `frontend-design` or Redesign Mode and their own confirmation gates.
 - Third-party scans, issue filing and repo writes stay behind each member's gate.
@@ -24,7 +24,7 @@ Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
 | Say this... | Skill will... |
 |---|---|
 | "Optimize my website design." | Capture once, run all design audits, write one merged report |
-| "Review this app for users and AI agents in one pass." | Same, with agent-readiness owning AX checks if you allow the scan |
+| "Review this app for users and AI agents in one pass." | Same, with agent-readiness owning the AX checks its scan covers (robots/sitemap, Markdown pages, crawler access) if you allow the scan |
 | "Apply D-01 and D-04 from the report." | Route each finding to one fixing skill behind its own gate |
 
 Use a single member instead for one lens: `dont-make-me-think` (Krug review), `ux-ax-review` (UX/AX audit), `website-agent-readiness` (scan), `viral-product-evaluator` (virality).

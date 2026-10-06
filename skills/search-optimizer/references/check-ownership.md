@@ -34,7 +34,8 @@ Decide after website-agent-readiness returns, from evidence — not from consent
 |---|---|---|
 | `meta-tags`, `robots-sitemap`, `structured-data`, `llms-txt` | seo-ai-optimizer | seo-ai-optimizer |
 | `crawler-access` | seo-ai-optimizer (GPTBot/ClaudeBot directives) | seo-ai-optimizer |
-| `markdown-pages`, `ai-actions` | website-agent-readiness | not covered (reason) |
+| `markdown-pages` | website-agent-readiness | not covered (reason) |
+| `ai-actions` | not covered — no web-branch member evaluates it; run `/ux-ax-review` or `/design-optimizer` for it | not covered (same pointer) |
 | `agent-readiness-scan` | website-agent-readiness | not covered (reason) |
 | `virality` | viral-product-evaluator | viral-product-evaluator |
 
@@ -42,8 +43,11 @@ Fix routes (website-agent-readiness never fixes):
 
 - seo-owned checks, `crawler-access` included → seo-ai-optimizer's Step 5 plan and Step 6 diff
   approval in this run. The scan's crawler-access results are cited on seo's row, never re-fixed.
-- `markdown-pages`, `ai-actions` → website-agent-readiness's `agent-ready-plan.md` (G3) or
-  issues (G4); no member applies them automatically.
+- `markdown-pages` → website-agent-readiness's `agent-ready-plan.md` (G3) or issues (G4); no
+  member applies it automatically.
+- `ai-actions` → none in this run. Neither seo-ai-optimizer nor the isitagentready.com scan
+  evaluates copy/share/open-in-AI actions, so it is listed under "Not covered" in every case with
+  the pointer: run `/ux-ax-review` or `/design-optimizer` for it.
 
 ## Skip-checks per member
 
@@ -74,7 +78,7 @@ store metadata.
     "structured-data": "seo-ai-optimizer", "llms-txt": "seo-ai-optimizer",
     "crawler-access": "seo-ai-optimizer",
     "markdown-pages": "not-covered: user declined third-party scan",
-    "ai-actions": "not-covered: user declined third-party scan",
+    "ai-actions": "not-covered: no web-branch member evaluates it; run /ux-ax-review or /design-optimizer",
     "agent-readiness-scan": "not-covered: user declined third-party scan",
     "virality": "viral-product-evaluator"
   }
@@ -83,6 +87,6 @@ store metadata.
 
 ## Merge rule
 
-The scan cannot skip checks, so it also reports robots, crawler directives, llms.txt and
-structured data. Merge those results into seo-ai-optimizer's row for the same check and cite the scan as corroboration — one
+The scan cannot skip checks, so it also reports robots/sitemap, crawler directives and, when the
+scanner runs it, llms.txt. Merge those results into seo-ai-optimizer's row for the same check and cite the scan as corroboration — one
 row, never two.

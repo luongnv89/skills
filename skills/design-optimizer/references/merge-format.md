@@ -21,7 +21,7 @@ Members: dont-make-me-think √ · ux-ax-review √ · website-agent-readiness �
 | ID | Pri | Check | Finding | Evidence | Owner | Also reported by | Fix route |
 |---|---|---|---|---|---|---|---|
 | D-01 | P0 | clarity | Primary CTA reads "Learn more" on a pricing page | screenshots/desktop.png, hero | dont-make-me-think | ux-ax-review (conversion) | Redesign Mode |
-| D-02 | P1 | llms-txt | No llms.txt at origin | manifest: llms.txt 404 | website-agent-readiness | — | seo-ai-optimizer |
+| D-02 | P1 | llms-txt | No llms.txt at origin | manifest: llms.txt 404 | ux-ax-review | website-agent-readiness scan (when it ran the llms.txt check) | seo-ai-optimizer |
 
 ## Skipped (owned elsewhere)
 | Check | Skipped by | Owner |

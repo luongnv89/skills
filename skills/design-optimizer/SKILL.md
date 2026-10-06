@@ -1,6 +1,6 @@
 ---
 name: design-optimizer
-description: "Optimize a website or app design in one run: capture the page once, audit usability, UX/AX, virality and agent readiness without repeats, merge one prioritized report, apply fixes on opt-in. Don't use for one lens (dont-make-me-think, ux-ax-review)."
+description: "Optimize a website or app design in one run: capture the page once, audit usability, UX/AX, virality and agent readiness, merge overlaps into one prioritized report, apply fixes on opt-in. Don't use for one lens (dont-make-me-think, ux-ax-review)."
 license: MIT
 effort: high
 metadata:
@@ -11,9 +11,10 @@ metadata:
 
 # Design Optimizer
 
-One invocation for "optimize my website/app design". This skill does no auditing of its own: it
-captures the target **once**, runs each member skill on that shared evidence with the checks other
-members own switched off, and merges everything into **one** deduplicated, prioritized report.
+One invocation for "optimize my website/app design". This skill does no auditing of its own:
+evidence is captured once, the live scan runs at most once, overlapping checks are skipped where
+the member supports skip-checks, and remaining overlaps are merged into one row per defect in
+**one** prioritized report.
 Members keep their full workflows and gates; this file stays short to protect the context budget.
 Load `references/` files only at the phase that names them.
 
@@ -22,8 +23,8 @@ Load `references/` files only at the phase that names them.
 | Member | Role | Owns (canonical check IDs) | Required? |
 |---|---|---|---|
 | `dont-make-me-think` | Krug usability audit; Redesign Mode in apply | `clarity` | required |
-| `ux-ax-review` | human UX + AI/search AX audit | `brand,responsive,accessibility,performance,conversion` (+ AX checks when no scan) | required |
-| `website-agent-readiness` | isitagentready.com live scan | `agent-readiness-scan` + AX checks when its scan exists | optional |
+| `ux-ax-review` | human UX + AI/search AX audit | `brand,responsive,accessibility,performance,conversion,structured-data,llms-txt,ai-actions` (+ scan-covered AX checks when no scan) | required |
+| `website-agent-readiness` | isitagentready.com live scan | `agent-readiness-scan` + scan-covered AX checks (`robots-sitemap,markdown-pages,crawler-access`) when its scan exists | optional |
 | `viral-product-evaluator` | 32-principle virality audit | `virality`, `meta-tags` | optional |
 | `frontend-design` | UI build in apply phase | — (writes code) | required only for `mode:apply` |
 
@@ -112,9 +113,11 @@ Run members in this order, each with the orchestrated-run block (format in
    names the same URL. Then **finalize** `manifest.json` `owners` (case A, B or C in the ownership
    file) before any other member runs. Its later gates (G3 plan, G4 issues) stay opt-in; a "no"
    there still leaves the scan usable.
-2. **ux-ax-review** with `skip-checks` = `clarity` plus the AX checks only in case A.
+2. **ux-ax-review** with `skip-checks` = `clarity`, plus the three scan-covered AX checks only in
+   case A.
 3. **dont-make-me-think** with `evidence-dir` and `output-dir`; no skips.
-4. **viral-product-evaluator** with `evidence-dir` and `output-dir`; no skips.
+4. **viral-product-evaluator** with `evidence-dir` and `output-dir`; no skips. Overlaps from
+   these two are removed at merge time, not before the audit.
 
 Each member writes into `<output>/reports/<member>/`. Report each member's result as it finishes.
 
@@ -150,8 +153,9 @@ Stop after the merge and offer apply as a choice of finding IDs. Only on an expl
 
 ```text
 Input:  "Optimize the design of https://example.com for users and AI agents."
-Run:    intake once → G1 approved, scan ok (case A) → ux-ax-review skips clarity + 6 AX checks
-        → dont-make-me-think → viral-product-evaluator → merge
+Run:    intake once → G1 approved, scan ok (case A) → ux-ax-review skips clarity +
+        robots-sitemap, markdown-pages, crawler-access → dont-make-me-think
+        → viral-product-evaluator → merge
 Output: <output>/design-optimization.md (14 findings, 3 merged duplicates), apply offer by ID
 ```
 
@@ -193,6 +197,6 @@ Never report PASS while a member failed or a canonical check is silently missing
 ## Edge Cases
 
 See `references/edge-cases.md` for the full table. Key ones: G1 declined or scan failed →
-ux-ax-review keeps the AX checks; localhost/private URL → skip the scan and say so; screenshot-only
+ux-ax-review keeps all AX checks; localhost/private URL → skip the scan and say so; screenshot-only
 target → no fetches, members review screenshots; native app with no web → AX checks marked
 not applicable by ux-ax-review; user asks to "just fix it" before any report → run audit first.

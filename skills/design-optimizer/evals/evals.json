@@ -5,14 +5,15 @@
       "id": 1,
       "kind": "happy-path",
       "prompt": "Optimize the design of https://example.com for both users and AI agents in one go. I'm fine with sending the URL to the agent-readiness scanner. Put the output in /tmp/do-run.",
-      "expected_output": "One run: preflight, a single intake into /tmp/do-run/evidence, website-agent-readiness scans once after G1, owners finalized as case A, ux-ax-review runs with clarity and the six AX checks skipped, then dont-make-me-think and viral-product-evaluator, and one merged design-optimization.md. No repo writes.",
+      "expected_output": "One run: preflight, a single intake into /tmp/do-run/evidence, website-agent-readiness scans once after G1, owners finalized as case A, ux-ax-review runs with clarity and the three scan-covered AX checks (robots-sitemap, markdown-pages, crawler-access) skipped, then dont-make-me-think and viral-product-evaluator, and one merged design-optimization.md. No repo writes.",
       "files": [],
       "expectations": [
         "Runs the Dependency Preflight for all five members in one pass before intake.",
         "Captures page.html, head.json, robots.txt, sitemap.xml and llms.txt once into the evidence dir and writes manifest.json.",
         "Presents website-agent-readiness's G1 third-party-send gate before any scan.",
         "Finalizes manifest owners after the scan and before ux-ax-review runs.",
-        "Passes ux-ax-review skip-checks containing clarity,robots-sitemap,structured-data,markdown-pages,llms-txt,crawler-access,ai-actions.",
+        "Passes ux-ax-review skip-checks of clarity,robots-sitemap,markdown-pages,crawler-access.",
+        "Does not put structured-data, llms-txt or ai-actions in ux-ax-review skip-checks; ux-ax-review keeps them and any scan result for them is cited as corroboration.",
         "Writes a single design-optimization.md with one row per finding and the owner cited.",
         "Stops with an apply offer by finding ID and does not edit any source file."
       ]

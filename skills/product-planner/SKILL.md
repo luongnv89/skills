@@ -45,22 +45,23 @@ before the first member runs.
 ## Dependency Preflight (mandatory)
 
 Run at Workflow step 4, after the range is fixed. Check only the members the range invokes and
-report every missing one in one pass. Example for
+report every missing one in one pass. Test the install path first: same-repo skills can be
+installed without the registry knowing the bare name. Example for
 a full run with the brand check opted in:
 
 ```bash
-missing=""
+reg="$(asm list -p claude --json 2>/dev/null || true)"
+missing_req=""; missing_opt=""
 for s in idea-validator prd-generator tad-generator tasks-generator brand-name-checker; do
-  asm list -p claude --json | grep -q "\"$s\"" || missing="$missing $s"
+  test -d "$HOME/.claude/skills/$s" || printf '%s' "$reg" | grep -q "\"$s\"" || {
+    case "$s" in brand-name-checker) missing_opt="$missing_opt $s";; *) missing_req="$missing_req $s";; esac; }
 done
-if [ -n "$missing" ]; then
-  for s in $missing; do
-    echo "Missing required skill: $s" >&2
-    echo "Install it:      asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
-    echo "Verify:          asm list -p claude --json | grep '\"$s\"'" >&2
-  done
-  echo "No asm yet:      npm install -g agent-skill-manager" >&2
-fi
+for s in $missing_req $missing_opt; do
+  echo "Missing skill: $s — install: asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
+done
+[ -n "$missing_opt" ] && echo "Optional, will be skipped:$missing_opt" >&2
+[ -z "$missing_req" ] || { echo "No asm yet: npm install -g agent-skill-manager" >&2
+  echo "Verify: asm list -p claude --json | grep '\"<name>\"'" >&2; exit 1; }
 ```
 
 A missing **chain** member stops the run before any file is written; never imitate its output inline.

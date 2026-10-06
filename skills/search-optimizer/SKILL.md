@@ -12,9 +12,9 @@ metadata:
 # Search Optimizer
 
 One invocation for "optimize for SEO / AI-bot search / app-store search". This skill does no
-auditing of its own: it detects the target type, captures web evidence **once**, runs each member
-on it with the checks other members own switched off, and merges everything into **one**
-deduplicated, prioritized report. It is **audit-first**: every write happens inside a member's own
+auditing of its own: it detects the target type; evidence is captured once, the live scan runs at
+most once, overlapping checks are skipped where the member supports skip-checks, and remaining
+overlaps are merged into one row per defect in **one** prioritized report. It is **audit-first**: every write happens inside a member's own
 approval gate. This file stays short to protect the context budget; load `references/` files
 only at the phase that names them.
 
@@ -23,7 +23,7 @@ only at the phase that names them.
 | Branch | Member | Owns | Required? |
 |---|---|---|---|
 | web | `seo-ai-optimizer` | `meta-tags,robots-sitemap,structured-data,llms-txt,crawler-access` + all codebase fixes | required |
-| web | `website-agent-readiness` | `agent-readiness-scan,markdown-pages,ai-actions` (plans only, never fixes) | optional |
+| web | `website-agent-readiness` | `agent-readiness-scan,markdown-pages` (plans only, never fixes) | optional |
 | web, store | `viral-product-evaluator` | `virality` (skips `meta-tags`) | optional |
 | store | `aso-marketing` | the store listing: keywords, metadata, localization | required |
 
@@ -127,8 +127,8 @@ evidence dir); in a "both" run it already ran in Phase 3 — do not run it again
 ### Phase 5 — Merge
 
 Build `<output>/search-optimization.md` from `references/merge-format.md`: one row per finding,
-owner cited, cross-member duplicates merged under the owner (the scan's robots/llms/JSON-LD
-results corroborate seo-ai-optimizer's rows), prioritized P0–P3, with "Skipped" and "Not covered"
+owner cited, cross-member duplicates merged under the owner (the scan's robots/sitemap, crawler
+and, when scanned, llms.txt results corroborate seo-ai-optimizer's rows), prioritized P0–P3, with "Skipped" and "Not covered"
 sections. Note that the scan predates any seo-ai-optimizer fixes; a re-scan after deploy is a new
 G1 the user decides on.
 
@@ -190,6 +190,7 @@ while a member failed or a check is silently missing.
 ## Edge Cases
 
 See `references/edge-cases.md`. Key ones: URL with no codebase → seo-ai-optimizer audits the live
-evidence only and fixes need the repo; G1 declined or scan failed → markdown-pages, ai-actions
-and the scan are not covered; store listing with no repo → aso-marketing works from the listing text; "fix my
+evidence only and fixes need the repo; G1 declined or scan failed → markdown-pages
+and the scan are not covered; `ai-actions` is never covered here (no web member evaluates it —
+use `/ux-ax-review`); store listing with no repo → aso-marketing works from the listing text; "fix my
 robots.txt" alone → that is seo-ai-optimizer, not this skill.

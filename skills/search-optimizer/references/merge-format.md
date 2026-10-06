@@ -38,6 +38,7 @@ Members: seo-ai-optimizer √ · website-agent-readiness √ (3/5, scanned once)
 ## Not covered
 | Check | Reason |
 |---|---|
+| ai-actions | No web-branch member evaluates it; run /ux-ax-review or /design-optimizer |
 
 ## Member reports
 - reports/seo-ai-optimizer/

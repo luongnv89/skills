@@ -10,7 +10,7 @@
       "expectations": [
         "Reports that no project artifacts exist yet and that the run starts at idea-validator.",
         "Plans stages idea-validator, prd-generator, tad-generator, tasks-generator in that order, ending at tasks.md.",
-        "Runs the Dependency Preflight for exactly those four members with asm list -p claude --json.",
+        "Runs the Dependency Preflight for exactly those four members (install path, then asm list -p claude --json).",
         "Warns that idea-validator commits and pushes without asking before invoking it.",
         "Hands prd-generator and tad-generator the project folder and tasks-generator the prd.md file path.",
         "Does not answer the members' clarifying questions or push confirmations on the user's behalf.",

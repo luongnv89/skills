@@ -138,9 +138,10 @@ npx skills add https://github.com/luongnv89/skills --skill <name>
 
 ### Find by Task
 
-One skill to invoke per task. The task skills call the related skills for you, capture
-shared input once, and give each overlapping check to a single owner, so a grouped run does
-not repeat the same work.
+One skill to invoke per task. The task skills call the related skills for you. In the two
+web task skills, evidence is captured once, the live scan runs at most once, overlapping checks
+are skipped where the member supports skip-checks, and remaining overlaps are merged into one
+row per defect.
 
 | Task | Invoke | It runs |
 |---|---|---|
