@@ -59,13 +59,14 @@ Use `✗ what failed`, `To fix:`, and exact identifiers. Never expose tokens. Is
   Both:    issue-pr-review, herdr-agent
   ISSUE:   issue-resolver (not required in PR mode)
   No asm:  npm install -g agent-skill-manager
+  Old asm: asm deps --help fails → npm install -g agent-skill-manager@latest
   To fix:  install each one, restart the session, and retry:
            asm install github:luongnv89/skills:skills/herdr-agent -p claude --yes
            asm install https://github.com/luongnv89/idd --skill skills/{issue-skill} -p claude --yes
   Verify:  asm list -p claude --json | grep '"{name}"'
 ```
 
-`-p claude` is required in the manual install: `asm install` refuses to guess a provider non-interactively, `--yes` does not cover that choice, and naming the same provider in the verification stops an install under a different tool from reporting success. The lease from any dependency that was acquired is released before this block prints.
+`-p claude` is required in the manual install: `asm install` refuses to guess a provider non-interactively, `--yes` does not cover that choice, and naming the same provider in the verification stops an install under a different tool from reporting success. An `asm` without the `deps` command stops before any acquire with the upgrade hint, because every acquire would fail and this block would wrongly report installed skills as missing. The lease from any dependency that was acquired is released before this block prints.
 
 ### Missing bundled dependency
 ```text

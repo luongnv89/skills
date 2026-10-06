@@ -19,6 +19,9 @@ CLEANUP = SKILL_DIR / "references" / "cleanup.md"
 
 FAKE_ASM = """#!/bin/sh
 echo "$*" >> "$ASM_LOG"
+if [ "$1" = deps ] && [ -n "$ASM_NO_DEPS" ]; then
+  echo 'Error: Unknown command: "deps"' >&2; exit 2
+fi
 if [ "$1 $2" = "deps acquire" ]; then
   case " $ASM_FAIL " in
     *" $3 "*) echo "Error: Skill \\"$3\\" not found" >&2; exit 1 ;;
@@ -63,7 +66,7 @@ class DependencyLeaseTests(unittest.TestCase):
         self.log = self.tmp / "asm.log"
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
 
-    def run_snippet(self, mode, fail="", with_asm=True):
+    def run_snippet(self, mode, fail="", with_asm=True, no_deps=False):
         path_dirs = [str(self.bin)] if with_asm else []
         env = {
             "PATH": os.pathsep.join(path_dirs + ["/usr/bin", "/bin"]),
@@ -71,6 +74,7 @@ class DependencyLeaseTests(unittest.TestCase):
             "ASM_LOG": str(self.log),
             "ASM_ROOT": str(self.tmp / "skills"),
             "ASM_FAIL": fail,
+            "ASM_NO_DEPS": "1" if no_deps else "",
             "mode": mode,
             "number": "42",
         }
@@ -127,6 +131,13 @@ class DependencyLeaseTests(unittest.TestCase):
         result = self.run_snippet("pr", with_asm=False)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("npm install -g agent-skill-manager", result.stderr)
+
+    def test_asm_without_deps_stops_with_upgrade_hint_not_missing_skills(self):
+        result = self.run_snippet("issue", no_deps=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("agent-skill-manager@latest", result.stderr)
+        self.assertNotIn("Missing required skill", result.stderr)
+        self.assertEqual(self.acquired(), [])
 
     def test_release_runs_at_every_terminal_outcome(self):
         lowered = self.preflight.lower()

@@ -81,6 +81,7 @@ This skill hands whole phases to the skills declared in frontmatter `dependencie
 
 ```bash
 command -v asm >/dev/null || { echo "Missing installer: npm install -g agent-skill-manager" >&2; exit 1; }
+asm deps --help >/dev/null 2>&1 || { echo "asm has no 'deps' command; upgrade: npm install -g agent-skill-manager@latest" >&2; exit 1; }
 asm deps discover issue-work-loop --json
 iwl_session="iwl-${mode}-${number}-$(date +%s)"   # mode: issue | pr
 req="herdr-agent issue-pr-review"
