@@ -14,7 +14,8 @@
         "Warns that idea-validator commits and pushes without asking before invoking it.",
         "Hands prd-generator and tad-generator the project folder and tasks-generator the prd.md file path.",
         "Does not answer the members' clarifying questions or push confirmations on the user's behalf.",
-        "Ends with one summary listing every artifact with an absolute path and status."
+        "Ends with one summary listing every artifact with an absolute path and status.",
+        "The Final Report opens with a Result line whose first word is COMPLETE, PARTIAL or BLOCKED, copies each link and hash from the members' Evidence lines, and ends with Uncertainty, Decision and Next step lines."
       ]
     },
     {
@@ -63,7 +64,7 @@
         "Stops before invoking prd-generator and reports the verdict rationale.",
         "Offers an explicit override instead of continuing on its own.",
         "Does not write prd.md, tad.md or tasks.md.",
-        "Still emits a closing summary naming why the chain stopped."
+        "Still emits a Final Report whose Result line is PARTIAL, names the stop at the verdict gate, and whose Decision line asks for the override."
       ]
     },
     {
@@ -99,6 +100,41 @@
       "expectations": [
         "Uses tasks-generator, not product-planner.",
         "Does not invoke idea-validator, prd-generator or tad-generator."
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "prompt": "Continue the project in evals/files/maybe-rule-project: write the PRD and the architecture, then stop.",
+      "expected_output": "Reads the verdict line '**Maybe (rule 2)**' as Maybe by its leading token, shows the concerns, continues to prd-generator, and ends at tad-generator.",
+      "files": [
+        "evals/files/maybe-rule-project/idea.md",
+        "evals/files/maybe-rule-project/validate.md"
+      ],
+      "expectations": [
+        "Reads the Quick Verdict as Maybe despite the trailing '(rule 2)'.",
+        "Shows the top concerns from validate.md before continuing.",
+        "Does not stop the chain or ask for an override, as it would for Skip it.",
+        "Sets the range to stages 2-3 and does not invoke idea-validator or tasks-generator.",
+        "Hands prd-generator and tad-generator the absolute project folder path."
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "Continue planning the project in evals/files/resume-project through to tasks. I can't answer any questions today, just run it.",
+      "expected_output": "tad-generator waits on the thin-PRD question; with no answer it reports BLOCKED, the chain stops at stage 3, and the Final Report is BLOCKED.",
+      "files": [
+        "evals/files/resume-project/idea.md",
+        "evals/files/resume-project/validate.md",
+        "evals/files/resume-project/prd.md"
+      ],
+      "expectations": [
+        "Relays tad-generator's thin-PRD question to the user instead of answering it.",
+        "Treats tad-generator's BLOCKED member report as a chain stop and does not invoke tasks-generator.",
+        "Marks tasks.md as not reached and does not claim tad.md was generated.",
+        "Final Report Result line starts with BLOCKED and names stage 3 and the unanswered question.",
+        "Releases the asm deps session before the Final Report when an acquire ran."
       ]
     }
   ]
