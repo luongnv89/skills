@@ -98,7 +98,7 @@ launchctl setenv OLLAMA_FLASH_ATTENTION 1
    ```
 
 ### Systemd Service Optimization
-Edit `/etc/systemd/system/ollama.service`:
+Prefer a dedicated drop-in file over editing the unit: write the `[Service]` `Environment=` lines to `/etc/systemd/system/ollama.service.d/zz-ollama-optimizer.conf`, and roll back by removing that file (commands in [Environment Variables](environment_variables.md) → *Linux (systemd service)*). Do not use `sudo systemctl revert ollama`, which deletes the user's other drop-ins too. The full unit file below shows where `Environment=` lines sit in `/etc/systemd/system/ollama.service`:
 
 ```ini
 [Unit]
@@ -113,6 +113,8 @@ Restart=always
 RestartSec=3
 Environment="OLLAMA_FLASH_ATTENTION=1"
 Environment="OLLAMA_KV_CACHE_TYPE=q8_0"
+# Only if the user asked for network access: exposes the API without auth.
+# systemd reads "#" only at the start of a line, so keep this comment on its own line.
 Environment="OLLAMA_HOST=0.0.0.0:11434"
 
 [Install]

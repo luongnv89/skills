@@ -272,7 +272,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**cli-builder**](skills/cli-builder/) | 1.2.0 | high | 5-step CLI tool builder with approval gates |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.2.1 | medium | Hardware-aware Ollama tuning |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.3.0 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.3.0 | high | Cross-platform install.sh with env detection |
 | [**opencode-runner**](skills/opencode-runner/) | 1.6.0 | medium | Delegate work to opencode free cloud models |
 | [**herdr-agent**](skills/herdr-agent/) | 3.2.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
