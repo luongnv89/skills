@@ -84,7 +84,7 @@ asm install github:luongnv89/skills:skills/release-manager
 | Path | Description |
 |---|---|
 | `agents/` | Subagent prompts: version-bumper, changelog-generator, docs-updater, landing-page-updater, release-reviewer |
-| `references/` | Publishing workflows for PyPI and npm |
+| `references/` | Orchestration details, step report templates, final report format, and PyPI/npm publishing workflows |
 
 ## Output
 
@@ -97,4 +97,5 @@ asm install github:luongnv89/skills:skills/release-manager
 - Synced project documentation (API docs, guides, migration notes)
 - Refreshed landing page (version, download CTA, "What's New") when the project ships one
 - Published package on PyPI and/or npm (if applicable)
+- Final report that opens with the result status (`COMPLETE`, `PARTIAL` or `BLOCKED`), followed by the checks that ran, what was not verified, and any decision still waiting on you
 - Post-release checklist for follow-up tasks
