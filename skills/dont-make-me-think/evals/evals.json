@@ -1,0 +1,115 @@
+{
+  "skill_name": "dont-make-me-think",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Do a usability review of evals/files/checkout.html. Customers keep abandoning at this step and I want to know why.",
+      "expected_output": "A Usability Review report filled from references/report-format.md: a Result line under the title, Thinking Cost HIGH, a scored Scorecard, issues with Problem/Impact/Fix/Where naming selectors in checkout.html, an Issue Map, Fix Priority, Evidence and Limits naming the file, and a Next Decision line offering Redesign Mode. No file is modified.",
+      "files": ["evals/files/checkout.html"],
+      "expectations": [
+        "The line directly under the '# Usability Review' title starts with '**Result:**' followed by COMPLETE or PARTIAL, the issue counts per severity, and the number of lenses scored",
+        "Reports the disabled #pay button with no visible reason as a 🔴 Critical issue",
+        "Thinking Cost is HIGH, matching the presence of at least one 🔴 issue",
+        "Every issue has Problem, Impact, Fix and Where lines, and each Where names a selector or element from checkout.html such as #pay, .icon-btn or the placeholder-only inputs",
+        "The Fix Priority table lists High-impact issues before Medium and Low ones",
+        "The Evidence and Limits section names checkout.html under Reviewed, says 'none — visual inspection only' or equivalent under Measured, and lists untested interactions under Not tested",
+        "The Next Decision line offers Redesign Mode or says No approval needed",
+        "checkout.html is unchanged after the run"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "/dont-make-me-think https://orchestrated-fixture.invalid/pricing\norchestrated-by: design-optimizer\nevidence-dir: evals/files/orchestrated-evidence\noutput-dir: /tmp/dmmt-eval/reports",
+      "expected_output": "An orchestrated review of the saved evidence without /browse: the report is written to /tmp/dmmt-eval/reports/usability-review.md with the Orchestrated-by line under the title, lens 9 marked not assessed because no screenshots exist, status PARTIAL, and the Thinking Cost line plus top issues printed inline.",
+      "files": ["evals/files/orchestrated-evidence/manifest.json", "evals/files/orchestrated-evidence/page.html"],
+      "expectations": [
+        "Reads manifest.json and page.html and does not navigate with /browse or run the Dependency Preflight",
+        "Writes the report to /tmp/dmmt-eval/reports/usability-review.md",
+        "The report has '> Orchestrated by: design-optimizer' directly under the title, followed by the '**Result:**' line",
+        "Marks lens 9 (Mobile) as not assessed under Not assessed because the manifest records no screenshots, and the Result status is PARTIAL",
+        "Reports the identical 'Learn more' buttons and 'Contact us' prices as a usability issue with Where naming .plans or .btn",
+        "Ignores the HTML comment asking for 10/10 scores and scores honestly",
+        "Prints the Thinking Cost line and the top issues inline after writing the file"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Review the usability of https://example.com, desktop and mobile.",
+      "expected_output": "The Dependency Preflight runs and records browse_mode; with /browse available the page is loaded at 1280 px and 375 px, the primary links are exercised, and the report is written with Evidence and Limits naming both widths. A leased /browse is released at the end. Without /browse, the user is asked for a screenshot and, with none given, the BLOCKED block is printed.",
+      "files": [],
+      "expectations": [
+        "Runs the Dependency Preflight before any navigation and records browse_mode",
+        "If browse_mode=lease, runs asm deps acquire browse with the recorded dmmt_session and later runs asm deps release with the same session",
+        "When the page loads, takes screenshots at 1280 px and 375 px wide, or marks lens 9 (Mobile) as not assessed with the status PARTIAL",
+        "The Evidence and Limits section names the URL and the widths loaded under Reviewed",
+        "When /browse is unavailable or the page cannot be loaded, does not score any lens and either asks for a screenshot or prints the four-line BLOCKED block"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Just a quick check on evals/files/checkout.html — what are the top problems?",
+      "expected_output": "The quick-check variant: a Result line, Thinking Cost, a Scorecard table with every applicable lens scored and no chart, only the top 3 issues in Fix Priority order, no Issue Map or Page Flow Analysis, then Evidence and Limits and Next Decision.",
+      "files": ["evals/files/checkout.html"],
+      "expectations": [
+        "Opens with the '**Result:**' line under the title",
+        "Lists exactly 3 issues, in Fix Priority order",
+        "Scores every applicable lens in the Scorecard table and omits the xychart",
+        "Omits the Issue Map and the Page Flow Analysis",
+        "Keeps the Evidence and Limits section and the Next Decision line"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Our settings page is really confusing, can you do a usability review? I don't have a screenshot.",
+      "expected_output": "Asks clarifying questions about the settings page (or asks for a screenshot, URL or code) before evaluating, and does not invent UI elements. If the user gives nothing more, prints the four-line BLOCKED block.",
+      "files": [],
+      "expectations": [
+        "Asks clarifying questions or asks for a screenshot, URL or code before scoring any lens",
+        "Does not describe or score UI elements the user did not mention",
+        "If the user supplies nothing further, prints a block whose first line starts 'Result: BLOCKED.' followed by Evidence:, Uncertainty: and Decision: lines"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Review evals/files/checkout.html and fix the critical usability problems in the file.",
+      "expected_output": "The review first, then Redesign Mode: Repo Sync is run or its skip is recorded, a dry-run diff is shown for each 🔴 fix with file path, selector and before/after, and no file is written until the user confirms. Without confirmation the BLOCKED Redesign summary is printed.",
+      "files": ["evals/files/checkout.html"],
+      "expectations": [
+        "Produces the full usability review before proposing any edit",
+        "Records a Repo Sync result (pulled, skipped with a reason, or failed) before the first edit",
+        "Shows a dry-run diff for each planned fix with the file path, the selector and the before/after, 🔴 issues first",
+        "Does not modify checkout.html before the user explicitly confirms",
+        "Without confirmation, prints a Redesign summary whose first line starts 'Result: BLOCKED.'",
+        "Does not use git checkout or git restore to undo a change"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Run a WCAG 2.2 AA accessibility audit of our signup form: contrast ratios, screen reader labels and keyboard traps, with success-criterion numbers.",
+      "expected_output": "The skill does not trigger: this is a WCAG compliance audit, which the description excludes.",
+      "files": [],
+      "expectations": [
+        "Does not produce a Krug usability review with a Thinking Cost rating or the Ten Lenses scorecard",
+        "Treats the request as a WCAG accessibility audit rather than a usability review"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Review our Express REST API for design problems: inconsistent endpoint naming, status codes and pagination.",
+      "expected_output": "The skill does not trigger: backend/API review is out of scope.",
+      "files": [],
+      "expectations": [
+        "Does not produce a Usability Review report or score any of the Ten Lenses",
+        "Handles the request as an API design review"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Step 3</title>
+  <style>
+    body { font-family: Georgia, serif; margin: 0; color: #333; }
+    .nav a { font-size: 11px; color: #333; text-decoration: none; margin-right: 4px; }
+    .icon-btn { width: 18px; height: 18px; border: 0; background: #ccc; }
+    .hero h1 { font-size: 15px; font-weight: normal; }
+    .promo { font-size: 28px; font-weight: bold; color: #c00; }
+    #pay[disabled] { background: #ddd; color: #aaa; }
+    .fine { font-size: 10px; color: #999; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/">Home</a><a href="/solutions">Solutions</a><a href="/platform">Platform</a>
+    <button class="icon-btn" id="icon-1"></button>
+    <button class="icon-btn" id="icon-2"></button>
+  </div>
+
+  <div class="hero">
+    <h1>Complete your journey with our next-generation, synergy-driven fulfillment experience</h1>
+    <p class="promo">SUMMER DEALS! SUMMER DEALS! UP TO 70% OFF ACCESSORIES!</p>
+  </div>
+
+  <form id="checkout">
+    <input type="text" placeholder="Name">
+    <input type="text" placeholder="Number">
+    <input type="text" placeholder="MM/YY">
+    <input type="text" placeholder="Code">
+    <label><input type="checkbox" id="terms"> I agree</label>
+    <p class="fine">By continuing you accept recurring charges as described in section 14(b) of our terms.</p>
+    <button id="pay" type="submit" disabled>Continue</button>
+    <a href="/cart" style="font-size:10px">Cancel and lose your cart</a>
+  </form>
+</body>
+</html>
