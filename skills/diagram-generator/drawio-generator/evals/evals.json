@@ -3,21 +3,104 @@
   "evals": [
     {
       "id": 1,
+      "kind": "happy-path",
       "prompt": "Create a draw.io flowchart for a user registration process: user enters email, validate format, check if email exists in DB, if yes show error, if no send verification email, user clicks link, account activated.",
-      "expected_output": "A .drawio file with a top-to-bottom flowchart using rectangles, diamonds, and terminators with proper edge routing.",
-      "files": []
+      "expected_output": "A .drawio file with a top-to-bottom flowchart using rectangles, diamonds, and terminators with proper edge routing, followed by a COMPLETE Final Report.",
+      "files": [],
+      "expectations": [
+        "Wrote a kebab-case .drawio file whose XML parses, with system cells id=\"0\" and id=\"1\" parent=\"0\"",
+        "The 'email exists' check is a diamond with two labeled outgoing edges (yes and no)",
+        "Every edge has source and target IDs that exist on the page and a <mxGeometry relative=\"1\" as=\"geometry\"/> child",
+        "Stated the chosen defaults in one line and did not wait for confirmation, because the request names the type and every step",
+        "The Final Report opens with a Result: line carrying COMPLETE and the file name",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence gives the absolute file path and the N/9 count, and Uncertainty says rendering in draw.io is untested"
+      ]
     },
     {
       "id": 2,
+      "kind": "happy-path",
       "prompt": "Generate a draw.io C4 container diagram for a microservice system with: API Gateway, Auth Service, User Service, Order Service, Payment Service, Notification Service, PostgreSQL (shared by User and Order), and Redis (used by Auth and API Gateway).",
-      "expected_output": "A .drawio file with a C4-styled container diagram showing all services, databases, and connections with proper C4 colors.",
-      "files": []
+      "expected_output": "A .drawio file with a C4-styled container diagram showing all services, databases, and connections with proper C4 colors, followed by a Final Report.",
+      "files": [],
+      "expectations": [
+        "All six services, PostgreSQL and Redis appear as shapes",
+        "PostgreSQL has edges from both User Service and Order Service; Redis has edges from both Auth Service and API Gateway",
+        "Shapes use C4 colors (dark blue fills with white text) rather than the Professional palette",
+        "No two vertex bounding boxes overlap by more than 10px",
+        "The Final Report labels any inferred relationship (for example, which services the gateway calls) as an assumption on the Uncertainty: line"
+      ]
     },
     {
       "id": 3,
+      "kind": "happy-path",
       "prompt": "Make a draw.io swimlane diagram showing a CI/CD pipeline across 3 lanes: Developer (write code, create PR), CI System (run tests, build, lint), and Ops (deploy staging, approve, deploy production).",
-      "expected_output": "A .drawio file with 3 horizontal swimlanes containing process steps and cross-lane arrows.",
-      "files": []
+      "expected_output": "A .drawio file with 3 horizontal swimlanes containing process steps and cross-lane arrows, followed by a Final Report.",
+      "files": [],
+      "expectations": [
+        "Three swimlane containers exist, and each step's parent is its lane's container ID",
+        "Child coordinates are relative to their lane container",
+        "At least one edge crosses lanes (for example, create PR to run tests)",
+        "The Final Report Result: line gives the container count (3) and the status"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Make me a draw.io diagram.",
+      "expected_output": "Asks targeted questions (entities, relationships, flow direction) and writes no file until the user answers.",
+      "files": [],
+      "expectations": [
+        "Asked about the main entities and relationships before generating anything",
+        "Did not write a .drawio file or a placeholder diagram",
+        "Did not report 9/9 checks passed or claim a file was written"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Add a Billing Service between Order Service and Payment Service in architecture.drawio.",
+      "expected_output": "Reads the existing file, preserves its cell IDs, adds the new service and rewires the edges, validates, then rewrites the same file.",
+      "files": [],
+      "expectations": [
+        "Read architecture.drawio before generating any XML",
+        "Every cell ID present in the original file and not removed by the request is unchanged",
+        "Ran the 9 checks on the modified XML before rewriting the file",
+        "The Final Report names architecture.drawio and says what was added"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Draw one draw.io diagram with all 70 of our microservices and every call between them on a single page.",
+      "expected_output": "Warns that one page will be crowded and offers multi-page or hierarchical C4 before generating.",
+      "files": [],
+      "expectations": [
+        "Warned that a single page with more than 50 elements will be crowded",
+        "Offered a multi-page or hierarchical C4 alternative and waited for the user's choice",
+        "If generation ran, it used the xml-generator, xml-validator and xml-fixer subagent loop with at most 3 cycles"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Sketch a hand-drawn whiteboard-style diagram of our login flow in Excalidraw.",
+      "expected_output": "The skill does not trigger: Excalidraw output and hand-drawn sketch styles are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not write a .drawio file",
+        "Did not produce draw.io mxfile XML"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Write a Mermaid sequence diagram for the checkout flow that I can paste into our README.",
+      "expected_output": "The skill does not trigger: Mermaid output is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Did not write a .drawio file",
+        "Did not produce draw.io mxfile XML"
+      ]
     }
   ]
 }
