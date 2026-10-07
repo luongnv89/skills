@@ -103,11 +103,14 @@ git remote get-url origin >/dev/null || { echo "No origin remote — stop and as
 branch="$(git rev-parse --abbrev-ref HEAD)"
 stashed=0
 if [ -n "$(git status --porcelain)" ]; then
-  git stash push -u -m "pre-search-optimizer" && stashed=1
+  git stash push -u -m "pre-search-optimizer" || { echo "Stash failed — stop and ask" >&2; exit 1; }
+  stashed=1
 fi
 git fetch origin && git pull --rebase origin "$branch" || {
   echo "Sync failed — stop and ask (stashed=$stashed: changes are in the pre-search-optimizer stash)" >&2; exit 1; }
-[ "$stashed" = 1 ] && { git stash pop || { echo "Stash pop conflict — stop and ask" >&2; exit 1; }; }
+if [ "$stashed" = 1 ]; then
+  git stash pop || { echo "Stash pop conflict — stop and ask" >&2; exit 1; }
+fi
 ```
 
 On any `stop and ask` line, stop before the member writes and ask the user; never resolve the
