@@ -30,16 +30,9 @@ already have?" If not, cut it.
 
 ## Repo Sync Before Edits (mandatory)
 
-This mode rewrites a tracked file, so sync with remote first:
-
-```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
-
-If the working tree is dirty: `git stash push -u -m "pre-sync"`, sync, then `git stash pop`.
-If `origin` is missing or conflicts occur, stop and ask the user.
+This mode rewrites a tracked file, so sync with remote first. Follow the `## Repo Sync
+Before Edits (mandatory)` section in `SKILL.md` (stash-first pattern); if `origin` is
+missing or a conflict occurs, stop and ask the user.
 
 ## Workflow
 
@@ -126,7 +119,9 @@ Briefly explain:
 1. Framework chosen
 2. Where original content lives (`README.backup.md` + collapsed sections)
 
-Ask for feedback. Do NOT commit unless asked.
+Ask for feedback. Do NOT commit unless asked. Close the run with the Final Report defined
+in `SKILL.md` → *Final Report* (`Result:` and its status first, then `Evidence:`,
+`Uncertainty:`, `Decision:`).
 
 ## Expected Output
 
@@ -181,6 +176,8 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 - [ ] H1 follows the value-proposition rule (see Step 5)
 - [ ] Step 6 Self-Review Checklist (13 checks) passes before presenting
 - [ ] Rewritten README meets the Default Quality Bar in `SKILL.md` (professional, production-ready, elegant, premium) without the user asking
+- [ ] The run closes with the Final Report defined in `SKILL.md` → *Final Report*: `Result:` and its status first, then `Evidence:`, `Uncertainty:`, and `Decision:` lines; `Evidence:` cites only checks that ran
+- [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear)
 
 ## Step Completion Reports
 

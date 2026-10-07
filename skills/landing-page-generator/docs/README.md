@@ -20,6 +20,7 @@
 - Anti-slop rules to avoid generic AI marketing filler
 - Default quality bar in both modes: professional, production-ready, elegant, and premium output without being asked
 - A/B test ideas and conversion optimization notes with every copy deliverable
+- Step Completion Reports per step and a closing Final Report (`Result` / `Evidence` / `Uncertainty` / `Decision`) with a COMPLETE / PARTIAL / BLOCKED status for every run, stops included
 
 ## When to Use
 
@@ -58,6 +59,8 @@ graph TD
 | `references/readme-mode.md` | Mode B — full README-to-landing-page workflow |
 | `references/readme-section-templates.md` | Mode B section flow for the rewritten README |
 | `references/readme-step-reports.md` | Mode B step-completion report format |
+| `references/step-reports.md` | Mode A step-completion report format |
+| `references/final-report.md` | Closing Final Report: status rule, PARTIAL/BLOCKED examples, fill rules, reader checks |
 
 ## Output
 
@@ -66,3 +69,5 @@ graph TD
   specific copy-only format.
 - **Mode B** — a rewritten `README.md` (visual-first, scannable, mermaid-driven) with the original
   preserved in `README.backup.md` and collapsed `<details>` blocks.
+- **Both modes** — close with a compact Final Report: `Result` (COMPLETE / PARTIAL / BLOCKED)
+  first, then `Evidence`, `Uncertainty`, and `Decision`.
