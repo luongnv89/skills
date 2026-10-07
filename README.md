@@ -57,13 +57,16 @@ npx skills add https://github.com/luongnv89/skills
 
 ### lstack package
 
-For a named, platform-neutral bundle of the maintained first-party catalog,
-see [lstack](packages/lstack/README.md). Build `dist/lstack-0.1.0.zip` with
-`python3 scripts/build-lstack.py` from a committed checkout (Git + Python 3.9+).
-Its explicit manifest includes 41 skill definitions, exporting suite children
-separately without changing member files or versions. The package docs cover
-extraction, manual use, external prerequisites and compatibility limits; Claude
-Code and Codex plugin adapters are separate work.
+For a named bundle of the maintained first-party catalog, see
+[lstack 0.2.0](packages/lstack/README.md). Build `dist/lstack-0.2.0.zip` with
+`python3 scripts/build-lstack.py` from a committed checkout (Git + Python 3.9+),
+or use `--target claude` for a skills-only Claude Code plugin and local
+marketplace. The [Claude install/access/update runbook](packages/lstack/README.md#claude-code-plugin-build-install-and-access)
+starts with clone/build/extract, then `claude --plugin-dir` or local marketplace
+installation; commands are namespaced `/lstack:<skill>`. The explicit manifest
+includes 41 definitions, exporting suite children separately without changing
+member files or versions. External tools and global skill preflights still
+apply; complex workflows are not guaranteed plugin-local. Codex is separate work.
 
 ### agent-skill-manager
 

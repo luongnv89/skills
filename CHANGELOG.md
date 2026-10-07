@@ -4,6 +4,7 @@
 
 ### Added
 
+- **lstack 0.2.0 Claude Code adapter (#396):** `--target claude` generates a deterministic skills-only plugin ZIP plus a local marketplace pointing to included `plugins/lstack` contents. Clone/build/extract, session-only `--plugin-dir`, persistent local installation, `/lstack:<skill>` discovery and explicit updates are documented against official Claude docs. All 41 member definitions/resources/versions remain unchanged; metadata and prerequisite summaries now include optional `dont-make-me-think` browse use and `issue-work-loop` idd dependencies. Focused stdlib tests cover native layout, payload parity, safety and reproducibility. No hosted marketplace, plugin runtime agents/hooks/MCP, source-preflight rewrites or Codex adapter are added.
 - **lstack 0.1.0 (#394):** platform-neutral package manifest for all 41 tracked first-party skill definitions, a deterministic standard-library Python ZIP builder and obtain/use documentation. Suite children are exported independently without duplicate umbrella payloads; included member bytes, versions and executable modes remain unchanged. Separate provenance records the committed source and payload hashes. Workspaces, development fixtures, runtime copies and secret-like files are excluded. External dependencies and installed-path limitations are documented; Claude Code/Codex plugin adapters remain separate work (#396/#395).
 
 ## v3.0.0 — 2026-10-07

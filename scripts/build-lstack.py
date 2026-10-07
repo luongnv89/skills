@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the internal lstack bundle from one immutable Git commit (stdlib only)."""
+"""Build the lstack bundle or Claude Code plugin from one Git commit (stdlib only)."""
 
 import argparse
 import hashlib
@@ -63,8 +63,10 @@ def json_bytes(value):
     return (json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True) + "\n").encode()
 
 
-def prepare(repo, revision="HEAD"):
+def prepare(repo, revision="HEAD", target="bundle"):
     """Return validated archive entries and provenance; never read working-tree payloads."""
+    if target not in {"bundle", "claude"}:
+        raise ValueError("unknown package target: " + str(target))
     sha = git(repo, "rev-parse", "--verify", revision + "^{commit}").decode().strip()
     tree = {}
     for record in git(repo, "ls-tree", "-rz", "--full-tree", sha).split(b"\0"):
@@ -152,16 +154,50 @@ def prepare(repo, revision="HEAD"):
                   "source_commit": sha, "builder_sha256": hashlib.sha256(blob(BUILDER)).hexdigest(),
                   "manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
                   "skill_versions": versions, "files": files}
-    entries["provenance.json"] = (json_bytes(provenance), 0o644)
+    if target == "claude":
+        adapter = manifest.get("claude")
+        fields = {"description", "author", "repository", "license", "marketplace_name"}
+        if (not isinstance(adapter, dict) or set(adapter) != fields
+                or not isinstance(adapter["description"], str) or not adapter["description"].strip()
+                or not isinstance(adapter["author"], dict) or set(adapter["author"]) != {"name"}
+                or not isinstance(adapter["author"]["name"], str) or not adapter["author"]["name"].strip()
+                or not isinstance(adapter["repository"], str) or not adapter["repository"].startswith("https://")
+                or adapter["license"] != "MIT"
+                or not isinstance(adapter["marketplace_name"], str)
+                or not NAME.fullmatch(adapter["marketplace_name"])):
+            raise ValueError("invalid Claude adapter metadata")
+        plugin = {key: value for key, value in adapter.items() if key != "marketplace_name"}
+        plugin.update({"name": manifest["name"], "version": manifest["version"]})
+        marketplace = {"name": adapter["marketplace_name"], "owner": adapter["author"],
+                       "plugins": [{"name": manifest["name"], "source": "./plugins/lstack",
+                                    "description": adapter["description"]}]}
+        generated = {"plugins/lstack/.claude-plugin/plugin.json": json_bytes(plugin),
+                     ".claude-plugin/marketplace.json": json_bytes(marketplace)}
+        # A marketplace container surrounds the native plugin; payload bytes/modes never change.
+        entries = {"plugins/lstack/" + path: value for path, value in entries.items()}
+        entries.update({path: (data, 0o644) for path, data in generated.items()})
+        provenance["target"] = target
+        provenance["generated_metadata"] = [
+            {"path": path, "sha256": hashlib.sha256(data).hexdigest()}
+            for path, data in sorted(generated.items())]
+        provenance_path = "plugins/lstack/provenance.json"
+    else:
+        provenance_path = "provenance.json"
+    entries[provenance_path] = (json_bytes(provenance), 0o644)
+    for path in entries:
+        safe_path(path)
     return entries, provenance
 
 
-def build(repo, revision="HEAD", output=None, check=False):
-    entries, provenance = prepare(repo, revision)
-    prefix = "lstack-" + provenance["package_version"]
+def build(repo, revision="HEAD", output=None, check=False, target="bundle"):
+    entries, provenance = prepare(repo, revision, target)
+    prefix = "lstack-" + ("claude-" if target == "claude" else "") + provenance["package_version"]
     result = {"package": "lstack", "version": provenance["package_version"],
               "source_commit": provenance["source_commit"],
               "skills": len(provenance["skill_versions"]), "files": len(entries)}
+    if target == "claude":
+        result.update({"target": target, "marketplace_root": prefix,
+                       "plugin_root": prefix + "/plugins/lstack"})
     if check:
         return result
     output = Path(output) if output else Path(repo) / "dist" / (prefix + ".zip")
@@ -193,7 +229,9 @@ def build(repo, revision="HEAD", output=None, check=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--revision", default="HEAD", help="immutable source commit or Git ref (default HEAD)")
-    parser.add_argument("--output", type=Path, help="new ZIP path (default dist/lstack-VERSION.zip)")
+    parser.add_argument("--target", choices=("bundle", "claude"), default="bundle",
+                        help="platform-neutral bundle (default) or Claude Code plugin/local marketplace")
+    parser.add_argument("--output", type=Path, help="new ZIP path (default dist/lstack[-claude]-VERSION.zip)")
     parser.add_argument("--check", action="store_true", help="validate committed inputs without writing an archive")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parent.parent
@@ -202,7 +240,7 @@ def main():
         sha = git(repo, "rev-parse", "--verify", args.revision + "^{commit}").decode().strip()
         if git(repo, "show", sha + ":" + BUILDER) != Path(__file__).read_bytes():
             raise ValueError("builder differs from selected revision; check out that revision first")
-        print(json.dumps(build(repo, sha, args.output, args.check), sort_keys=True))
+        print(json.dumps(build(repo, sha, args.output, args.check, args.target), sort_keys=True))
     except (ValueError, OSError, subprocess.CalledProcessError) as exc:
         print("lstack: " + str(exc), file=sys.stderr)
         return 1
