@@ -174,7 +174,7 @@ After implementation, validation shows: `critical issues: 2 → 0`, `llms.txt cr
 
 ### Acceptance Criteria
 - [ ] Audit report identifies the framework detected or explicitly states "generic HTML".
-- [ ] Findings are grouped by severity (Critical / Major / Minor) and each cites the affected file path.
+- [ ] Findings are grouped by severity (Critical / Warning / Info) and each cites the affected file path.
 - [ ] User explicitly approved the improvement plan before any file was modified.
 - [ ] Safety Protocol (Diff & Confirm) was followed for all file modifications.
 - [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0.
