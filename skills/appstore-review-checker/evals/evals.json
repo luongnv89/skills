@@ -1,0 +1,105 @@
+{
+  "skill_name": "appstore-review-checker",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "I'm about to submit my SwiftUI recipe app to the App Store. It has user accounts with Google Sign-In and a monthly subscription. The Xcode project is in the current directory. Will it pass review?",
+      "expected_output": "A full static audit that writes APPSTORE_AUDIT.md with a verdict from the ordered Verdict Criteria, evidence-backed FAIL and WARNING entries, a numbered pre-submission checklist, an offer to fix that waits for approval, and a four-line Final Report.",
+      "files": [],
+      "expectations": [
+        "Writes APPSTORE_AUDIT.md at the project root, or asks before overwriting an existing one",
+        "The report's verdict line is exactly LIKELY PASS, AT RISK, or LIKELY REJECT",
+        "Checks 4.8 (Sign in with Apple alongside Google Sign-In), 5.1.1-v-delete (account deletion), 3.1.1-restore and 3.1.2-disclosure (subscription terms)",
+        "Every FAIL cites a specific file, line number, or config key and gives a concrete fix",
+        "If any FAIL is on a Top 20 trigger, the verdict is LIKELY REJECT",
+        "Lists the items that need manual verification because the audit is static",
+        "Does not edit any project file before the user approves specific FAIL IDs",
+        "The run ends with a four-line Final Report whose first word after 'Result:' is COMPLETE, PARTIAL, or BLOCKED, and which also names the audit verdict",
+        "The Final Report's Evidence line names checks that ran, and its Uncertainty line labels assumptions and static-analysis limits",
+        "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Run a pre-submission compliance check on my iOS fitness app. It reads HealthKit data, shows ads, and uses a WKWebView for the help pages.",
+      "expected_output": "An audit focused on the guideline sections the app classification activates (HealthKit privacy, App Tracking Transparency for ads, web content), with evidence for each verdict and a Final Report.",
+      "files": [],
+      "expectations": [
+        "Classifies the app (health data, advertising, web content) before applying guidelines",
+        "Checks 5.1.2-i (App Tracking Transparency) and the HealthKit usage descriptions in Info.plist",
+        "Does not flag WKWebView as a 2.5.6 violation",
+        "Every verdict cites evidence or is marked WARNING for manual verification, never an unsupported PASS or FAIL",
+        "Ends with a numbered pre-submission checklist",
+        "The Final Report's first line states the run status, the app, the report file, and the audit verdict"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Check whether Apple might reject my Mac Catalyst note-taking app. The project is in ./NotesApp and it has two targets, a free one and a pro one.",
+      "expected_output": "An audit that applies macOS-specific checks for Catalyst, audits each target separately, flags near-identical targets under 4.3 as WARNING, and ends with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Applies macOS checks (sandbox entitlements, notarization) in addition to iOS guidelines",
+        "Audits each of the two targets separately",
+        "Flags the near-identical free and pro targets as a WARNING under 4.3 (Spam) unless they clearly differ",
+        "Does not modify any .entitlements file",
+        "The Final Report names the app, the report file, and the audit verdict on its first line"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "I don't have the code handy. Here's my App Store listing: title 'Best Free Budget App', subtitle 'Better than Mint', description mentions it 'also works great on Android'. Can you check it against App Store guidelines?",
+      "expected_output": "A metadata-only audit: code-level checks are marked N/A (no source), metadata violations under 2.3.7, 5.2.1 and 2.3.10 are FAILs with the quoted text as evidence, and the Final Report states the narrowed scope.",
+      "files": [],
+      "expectations": [
+        "Runs a metadata-only audit instead of stopping for missing source code",
+        "Marks code-level guideline checks as N/A (no source) and lists them for manual verification",
+        "Flags 'Best' and 'Free' under 2.3.7-keywords, the competitor name 'Mint' under 5.2.1, and the Android mention under 2.3.10",
+        "Quotes the exact metadata text as evidence for each FAIL",
+        "The verdict is LIKELY REJECT because the FAILs are on Top 20 triggers",
+        "The Final Report's Uncertainty line says the code, entitlements and runtime behavior were not audited"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "My app was rejected under Guideline 5.1.1(v) because users can't delete their accounts. I added a delete button. Can you check that it's fixed and that nothing else will get rejected?",
+      "expected_output": "The skill starts from the cited guideline, verifies the account-deletion fix in code, then runs the full audit for second-round risks and ends with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Starts by verifying 5.1.1-v-delete in code, citing the file and line of the deletion flow",
+        "Checks that the deletion flow removes the account (an API call or backend request), not only the button",
+        "Then runs the full audit for other rejection risks",
+        "Marks backend deletion behavior as requiring manual verification when it cannot be confirmed statically",
+        "Does not draft an appeal to App Review",
+        "The Final Report's Decision line names the pending approval or says 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Check my Android app against Google Play's developer program policies before I publish it on the Play Store.",
+      "expected_output": "appstore-review-checker does not trigger: Google Play is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Does not run an App Store Review Guidelines audit",
+        "Does not write APPSTORE_AUDIT.md"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Review the Swift code in this pull request for bugs, retain cycles, and naming issues.",
+      "expected_output": "appstore-review-checker does not trigger: general code review is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "Does not run an App Store Review Guidelines audit",
+        "Does not write APPSTORE_AUDIT.md"
+      ]
+    }
+  ]
+}

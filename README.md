@@ -265,7 +265,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**aso-marketing**](skills/aso-marketing/) | 1.4.0 | max | App Store + Google Play keyword and metadata optimization |
-| [**appstore-review-checker**](skills/appstore-review-checker/) | 1.3.0 | high | Pre-submission audit vs Apple guidelines |
+| [**appstore-review-checker**](skills/appstore-review-checker/) | 1.4.0 | high | Pre-submission audit vs Apple guidelines |
 
 ### Tooling
 

@@ -82,6 +82,8 @@ graph LR
 | `agents/guideline-auditor.md` | Subagent that applies 150+ guidelines and produces audit-results.json |
 | `agents/report-writer.md` | Subagent that formats audit results into human-readable markdown report |
 | `agents/fixer.md` | Subagent that implements code-level fixes for user-approved failures |
+| `references/final-report.md` | Final Report status rules (COMPLETE / PARTIAL / BLOCKED), examples and reader checks |
+| `evals/evals.json` | 7 trigger and behavior eval cases (3 happy-path, 2 edge, 2 negative-trigger) |
 
 ## Output
 
@@ -91,3 +93,5 @@ A structured audit report with:
 - Warnings needing manual verification
 - Summary of passed checks
 - Pre-submission checklist of action items
+
+The run then ends with a four-line Final Report in chat (Result, Evidence, Uncertainty, Decision). Its run status (COMPLETE / PARTIAL / BLOCKED) is separate from the audit verdict.

@@ -4,7 +4,7 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -42,6 +42,7 @@ Load only the reference you need for the current step — keep the working conte
 - `references/example-output.md` — Example `APPSTORE_AUDIT.md` snippet showing FAIL/WARNING entries
 - `references/edge-cases.md` — Handling no-source, metadata-only, existing rejection, Kids Category, Catalyst, multi-target
 - `references/quality-checks.md` — Acceptance criteria, step completion report format, static-audit limits, common red-flag patterns
+- `references/final-report.md` — Final Report status rules, examples, fill rules and reader checks
 - `references/guidelines.md` — Full 150+ App Store guideline checklist plus Top 20 Rejection Triggers
 
 ## Repo Sync Before Edits (mandatory)
@@ -94,30 +95,32 @@ The skill produces `APPSTORE_AUDIT.md` at the project root. Minimal expected sha
 **Date:** 2026-04-19
 **Platform:** iOS 16+
 
-## Verdict: AT RISK
+## Verdict: LIKELY REJECT
 
 - Total checks: 47 | Pass: 38 | Fail: 2 | Warning: 5 | N/A: 2
 
 ## Critical Issues (FAIL)
 
-### 5.1.1 — Account Deletion
+### 5.1.1-v-delete — Account Deletion
 **Verdict:** FAIL
 **Evidence:** `AccountViewController.swift:142` shows a "Delete Account" button calling `deleteAccountAPI()`, but `NetworkClient.swift:87` returns 501.
 **Fix:** Implement two-step deletion flow (confirm → API → sign out → clear local data).
 
 ## Pre-Submission Checklist
 
-1. [ ] Implement account deletion flow (5.1.1)
-2. [ ] Replace UIWebView with WKWebView (4.2)
+1. [ ] Implement account deletion flow (5.1.1-v-delete)
+2. [ ] Replace UIWebView with WKWebView (2.5.6)
 ```
 
 Full example with warnings and metadata sections: `references/example-output.md`.
 
 ## Verdict Criteria
 
-- **LIKELY PASS** — Zero FAILs; few/minor warnings.
-- **AT RISK** — Zero FAILs but multiple grey-area warnings, OR 1-2 minor easy-fix FAILs.
-- **LIKELY REJECT** — Any FAIL on a Top 20 trigger, or 3+ FAILs overall.
+Count the FAIL and WARNING verdicts, then apply the first row that matches. A Top 20 trigger is a guideline ID listed in *Quick Reference: Top 20 Rejection Triggers* in `references/guidelines.md`.
+
+1. **LIKELY REJECT** — At least one FAIL on a Top 20 trigger, or 3 or more FAILs.
+2. **AT RISK** — 1-2 FAILs, none on a Top 20 trigger; or 0 FAILs and 3 or more WARNINGs.
+3. **LIKELY PASS** — 0 FAILs and 0-2 WARNINGs.
 
 ## Acceptance Criteria (Summary)
 
@@ -130,10 +133,31 @@ A successful run satisfies the full checklist in `references/quality-checks.md`.
 - A numbered pre-submission checklist closes the report.
 - Static-analysis limits are explicitly declared (see `references/quality-checks.md` for the list of items requiring manual verification).
 - Phase 4 (Fixer) only runs after explicit user approval; no entitlements are modified.
+- The run ends with the four-line Final Report.
+
+Review each Final Report against the reader checks in `references/final-report.md` as well as these correctness items.
 
 ## Step Completion Reports
 
 After each major phase, output a status report. Format and per-phase check names live in `references/quality-checks.md` (section "Step Completion Reports"). Use `√` for pass, `×` for fail, `—` for context.
+
+## Final Report
+
+End every run, stops included, with a four-line chat block after the last Step Completion Report. It summarizes the run; it never replaces `APPSTORE_AUDIT.md`.
+
+```text
+Result: COMPLETE. Audited NutriTrack (iOS 16+); wrote APPSTORE_AUDIT.md; audit verdict LIKELY REJECT (2 FAIL, 5 WARNING).
+Evidence: Read project.pbxproj, Info.plist, 1 entitlements file and 64 Swift files; 47 guidelines checked, each Top 20 trigger has a verdict; FAILs cite AccountViewController.swift:142 and LegacyBrowserViewController.swift:14.
+Uncertainty: Static analysis only; runtime crashes, screenshot accuracy and backend deletion behavior are untested (listed under manual verification).
+Decision: Approve fixes for FAIL IDs 5.1.1-v-delete and 2.5.6, or say none.
+```
+
+- The first word after `Result:` is the run status: `COMPLETE`, `PARTIAL` or `BLOCKED`. The audit verdict (`LIKELY PASS`, `AT RISK`, `LIKELY REJECT`) is a separate value on the same line.
+- Use `BLOCKED` when no `APPSTORE_AUDIT.md` (or `APPSTORE_AUDIT_v2.md`) was written.
+- Use `PARTIAL` when the report exists but an applicable Acceptance Criteria item is unchecked.
+- Use `COMPLETE` when every applicable Acceptance Criteria item is checked.
+
+Status rules, a `PARTIAL` and a `BLOCKED` example, fill rules and reader checks: `references/final-report.md`.
 
 ## Edge Cases
 
