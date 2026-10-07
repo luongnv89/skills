@@ -1,0 +1,47 @@
+{
+  "url": "https://example.com",
+  "targetUrl": "https://example.com",
+  "scannedAt": "2026-09-01T08:00:00Z",
+  "level": 1,
+  "levelName": "Basic Web Presence",
+  "isCommerce": false,
+  "commerceSignals": [],
+  "checks": {
+    "discoverability": {
+      "robotsTxt": {
+        "status": "pass",
+        "message": "robots.txt found",
+        "evidence": [{ "bodyPreview": "User-agent: *\nAllow: /" }],
+        "durationMs": 120
+      },
+      "sitemap": {
+        "status": "fail",
+        "message": "No sitemap.xml found at the origin",
+        "evidence": [],
+        "durationMs": 98
+      }
+    },
+    "botAccessControl": {
+      "robotsTxtAiRules": {
+        "status": "fail",
+        "message": "robots.txt carries no AI-bot rules",
+        "evidence": [{ "bodyPreview": "User-agent: *\nAllow: /" }],
+        "durationMs": 87
+      }
+    }
+  },
+  "nextLevel": {
+    "target": 2,
+    "name": "Discoverable",
+    "requirements": [
+      {
+        "check": "sitemap",
+        "description": "Publish a sitemap.xml at the origin so crawlers and agents can enumerate the public pages.",
+        "shortPrompt": "Add /sitemap.xml listing the public pages.",
+        "prompt": "Create a sitemap.xml at the site origin listing every public page, and reference it from robots.txt with a Sitemap: line.",
+        "specUrls": ["https://www.sitemaps.org/protocol.html"],
+        "skillUrl": "https://isitagentready.com/.well-known/agent-skills/sitemap/SKILL.md"
+      }
+    ]
+  }
+}
