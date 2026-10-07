@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the lstack bundle, Claude Code or Codex plugin from one Git commit (stdlib only)."""
+"""Build committed lstack exports or project native Claude working-tree metadata (stdlib only)."""
 
 import argparse
 import hashlib
@@ -63,6 +63,110 @@ def json_bytes(value):
     return (json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True) + "\n").encode()
 
 
+def manifest_roots(manifest, catalog):
+    """Validate the package identity and exact canonical catalog membership."""
+    if (not isinstance(manifest, dict) or manifest.get("schema_version") != 1
+            or manifest.get("name") != "lstack" or not isinstance(manifest.get("version"), str)
+            or not VERSION.fullmatch(manifest["version"])):
+        raise ValueError("invalid lstack manifest identity/schema/version")
+    members = manifest.get("members")
+    if not isinstance(members, list) or not members:
+        raise ValueError("manifest members must be a non-empty list")
+    roots, names = {}, set()
+    for member in members:
+        if not isinstance(member, dict) or set(member) != {"name", "source"}:
+            raise ValueError("member must contain name and source only")
+        name, source = member["name"], member["source"]
+        if not isinstance(name, str) or not NAME.fullmatch(name):
+            raise ValueError("invalid member name")
+        path = safe_path(source)
+        if len(path.parts) < 2 or path.parts[0] != "skills" or path.name != name:
+            raise ValueError("member source/name mismatch: " + source)
+        if source in roots or name in names:
+            raise ValueError("duplicate member source/name")
+        roots[source] = name
+        names.add(name)
+    if set(roots) != catalog:
+        raise ValueError("manifest/catalog mismatch; missing=" + repr(sorted(catalog - set(roots)))
+                         + "; stale=" + repr(sorted(set(roots) - catalog)))
+    return roots
+
+
+def plugin_metadata(manifest, target):
+    """Shared adapter projection; native component injection is not permitted."""
+    adapter = manifest.get(target)
+    fields = {"description", "author", "repository", "license", "marketplace_name"}
+    if (not isinstance(adapter, dict) or set(adapter) != fields
+            or not isinstance(adapter["description"], str) or not adapter["description"].strip()
+            or not isinstance(adapter["author"], dict) or set(adapter["author"]) != {"name"}
+            or not isinstance(adapter["author"]["name"], str) or not adapter["author"]["name"].strip()
+            or not isinstance(adapter["repository"], str) or not adapter["repository"].startswith("https://")
+            or adapter["license"] != "MIT"
+            or not isinstance(adapter["marketplace_name"], str)
+            or not NAME.fullmatch(adapter["marketplace_name"])):
+        raise ValueError("invalid " + ("Claude" if target == "claude" else "Codex") + " adapter metadata")
+    plugin = {key: value for key, value in adapter.items() if key != "marketplace_name"}
+    plugin.update({"name": manifest["name"], "version": manifest["version"]})
+    return plugin
+
+
+def claude_metadata(manifest, additional_skills=None, source="./plugins/lstack"):
+    """Project Claude metadata for a flattened export or the canonical root tree."""
+    plugin = plugin_metadata(manifest, "claude")
+    if additional_skills:
+        plugin["skills"] = additional_skills
+    adapter = manifest["claude"]
+    marketplace = {"name": adapter["marketplace_name"], "owner": adapter["author"],
+                   "description": adapter["description"],
+                   "plugins": [{"name": manifest["name"], "source": source,
+                                "description": adapter["description"]}]}
+    return plugin, marketplace
+
+
+def plugin_metadata_paths(repo):
+    """Limit generation to two regular root files, never following symlinks."""
+    directory = Path(repo) / ".claude-plugin"
+    if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
+        raise ValueError("native metadata directory must be a regular directory")
+    paths = [directory / name for name in ("plugin.json", "marketplace.json")]
+    for path in paths:
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise ValueError("native metadata must be regular files: " + str(path))
+    return paths
+
+
+def native_metadata(repo):
+    """Read authoring working-tree inputs, not the selected archive commit."""
+    repo = Path(repo).resolve()
+    manifest = json.loads((repo / MANIFEST).read_bytes())
+    catalog = {str(p.parent.relative_to(repo)) for p in (repo / "skills").rglob("SKILL.md")}
+    roots = manifest_roots(manifest, catalog)
+    for source in roots:
+        path = repo / source / "SKILL.md"
+        if not path.is_file() or any(p.is_symlink() for p in (path, *path.parents) if p != repo):
+            raise ValueError("missing or non-regular canonical skill: " + source)
+    # Default skills/ discovers only immediate members. Add nested children, not parents.
+    children = ["./" + source for source in roots if len(PurePosixPath(source).parts) > 2]
+    plugin, marketplace = claude_metadata(manifest, children, source="./")
+    paths = plugin_metadata_paths(repo)
+    return dict(zip(paths, (json_bytes(plugin), json_bytes(marketplace)))), manifest, roots
+
+
+def sync_plugin_metadata(repo, write=False):
+    generated, manifest, roots = native_metadata(repo)
+    if write:
+        for path, data in generated.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+    for path, data in generated.items():
+        if not path.is_file() or path.read_bytes() != data:
+            raise ValueError("stale native plugin metadata: " + str(path)
+                             + "; run --write-plugin-metadata")
+    return {"package": manifest["name"], "version": manifest["version"],
+            "skills": len(roots), "metadata_files": len(generated),
+            "inputs": "working-tree", "mode": "write" if write else "check"}
+
+
 def prepare(repo, revision="HEAD", target="bundle"):
     """Return validated archive entries and provenance; never read working-tree payloads."""
     if target not in {"bundle", "claude", "codex"}:
@@ -88,32 +192,10 @@ def prepare(repo, revision="HEAD", target="bundle"):
 
     manifest_bytes = blob(MANIFEST)
     manifest = json.loads(manifest_bytes)
-    if (not isinstance(manifest, dict) or manifest.get("schema_version") != 1
-            or manifest.get("name") != "lstack" or not isinstance(manifest.get("version"), str)
-            or not VERSION.fullmatch(manifest["version"])):
-        raise ValueError("invalid lstack manifest identity/schema/version")
-    members = manifest.get("members")
-    if not isinstance(members, list) or not members:
-        raise ValueError("manifest members must be a non-empty list")
-    roots, names = {}, set()
-    for member in members:
-        if not isinstance(member, dict) or set(member) != {"name", "source"}:
-            raise ValueError("member must contain name and source only")
-        name, source = member["name"], member["source"]
-        if not isinstance(name, str) or not NAME.fullmatch(name):
-            raise ValueError("invalid member name")
-        path = safe_path(source)
-        if len(path.parts) < 2 or path.parts[0] != "skills" or path.name != name:
-            raise ValueError("member source/name mismatch: " + source)
-        if source in roots or name in names:
-            raise ValueError("duplicate member source/name")
-        roots[source] = name
-        names.add(name)
     catalog = {str(PurePosixPath(p).parent) for p in tree
                if p.startswith("skills/") and p.endswith("/SKILL.md")}
-    if set(roots) != catalog:
-        raise ValueError("manifest/catalog mismatch; missing=" + repr(sorted(catalog - set(roots)))
-                         + "; stale=" + repr(sorted(set(roots) - catalog)))
+    roots = manifest_roots(manifest, catalog)
+    names = set(roots.values())
     # Deepest member owns its subtree; children never occur inside umbrella copies.
     owners = sorted(roots, key=lambda p: (-len(PurePosixPath(p).parts), p))
     entries, files, versions = {}, [], {}
@@ -155,23 +237,11 @@ def prepare(repo, revision="HEAD", target="bundle"):
                   "manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
                   "skill_versions": versions, "files": files}
     if target in {"claude", "codex"}:
-        adapter = manifest.get(target)
-        fields = {"description", "author", "repository", "license", "marketplace_name"}
-        if (not isinstance(adapter, dict) or set(adapter) != fields
-                or not isinstance(adapter["description"], str) or not adapter["description"].strip()
-                or not isinstance(adapter["author"], dict) or set(adapter["author"]) != {"name"}
-                or not isinstance(adapter["author"]["name"], str) or not adapter["author"]["name"].strip()
-                or not isinstance(adapter["repository"], str) or not adapter["repository"].startswith("https://")
-                or adapter["license"] != "MIT"
-                or not isinstance(adapter["marketplace_name"], str)
-                or not NAME.fullmatch(adapter["marketplace_name"])):
-            raise ValueError("invalid " + ("Claude" if target == "claude" else "Codex") + " adapter metadata")
-        plugin = {key: value for key, value in adapter.items() if key != "marketplace_name"}
-        plugin.update({"name": manifest["name"], "version": manifest["version"]})
-        marketplace = {"name": adapter["marketplace_name"], "owner": adapter["author"],
-                       "plugins": [{"name": manifest["name"], "source": "./plugins/lstack",
-                                    "description": adapter["description"]}]}
+        plugin = plugin_metadata(manifest, target)
+        adapter = manifest[target]
         if target == "claude":
+            # Export children are flattened; never inherit root native skill paths.
+            plugin, marketplace = claude_metadata(manifest)
             generated = {"plugins/lstack/.claude-plugin/plugin.json": json_bytes(plugin),
                          ".claude-plugin/marketplace.json": json_bytes(marketplace)}
         else:
@@ -243,10 +313,20 @@ def main():
     parser.add_argument("--target", choices=("bundle", "claude", "codex"), default="bundle",
                         help="platform-neutral bundle (default), Claude Code or Codex plugin/local marketplace")
     parser.add_argument("--output", type=Path, help="new ZIP path (default dist/lstack[-TARGET]-VERSION.zip)")
-    parser.add_argument("--check", action="store_true", help="validate committed inputs without writing an archive")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--check", action="store_true", help="validate committed inputs without writing an archive")
+    modes.add_argument("--write-plugin-metadata", action="store_true",
+                       help="generate the two root Claude JSON files from working-tree inputs")
+    modes.add_argument("--check-plugin-metadata", action="store_true",
+                       help="check the two root Claude JSON projections against working-tree inputs")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parent.parent
     try:
+        if args.write_plugin_metadata or args.check_plugin_metadata:
+            if args.target != "bundle" or args.revision != "HEAD" or args.output is not None:
+                raise ValueError("native metadata modes cannot select archive target, revision or output")
+            print(json.dumps(sync_plugin_metadata(repo, args.write_plugin_metadata), sort_keys=True))
+            return 0
         # Use the builder committed at the selected revision, not mismatched local code.
         sha = git(repo, "rev-parse", "--verify", args.revision + "^{commit}").decode().strip()
         if git(repo, "show", sha + ":" + BUILDER) != Path(__file__).read_bytes():

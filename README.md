@@ -37,40 +37,75 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 
 > Validate this runbook: `./scripts/validate-install.sh --check`
 
-Pick one:
+### lstack: direct Claude Code plugin
+
+[lstack 0.4.0](packages/lstack/README.md) exposes the same canonical `skills/`
+tree: 39 top-level definitions plus the two nested diagram-generator children,
+**41** namespaced skills in total. No source copies or moves are required.
+With a plugin-capable Claude Code CLI, install directly from this repository:
+
+```bash
+claude plugin marketplace add luongnv89/skills
+claude plugin install lstack@lstack --scope user
+```
+
+These commands change your Claude configuration. **The remote route becomes
+available only after the root metadata is committed and pushed**; local draft
+changes are not live on GitHub. For one session from a trusted local checkout:
+
+```bash
+claude --plugin-dir /absolute/path/to/skills
+```
+
+Discover `/lstack:code-review`, `/lstack:drawio-generator`, etc. There is no
+`/lstack` orchestrator, plugin hook, MCP server or native plugin agent.
+To update a repository-backed installation, review the upstream changes, then:
+
+```bash
+claude plugin marketplace update lstack
+claude plugin update lstack@lstack --scope user
+```
+
+Restart Claude Code (or use `/reload-plugins` where supported). Native discovery
+is **not workflow compatibility**: unchanged global `~/.claude/skills/` and
+`~/.agents/skills/` lookups, `asm deps`, unqualified sibling invocations and
+external requirements can need separate installation/configuration.
+
+**Capabilities and data handling:** members cover code review, diagrams,
+research, app audits, documentation, repository maintenance and orchestrated
+workflows. Some can edit/delete files, commit/push, install tools, contact APIs,
+fetch websites, or open/update GitHub issues and PRs, subject to their own
+approval gates. Workflows can send prompts, source code, URLs, screenshots or
+other supplied data to the chosen agent/model and external services; inspect
+the selected member before running it. Tools/credentials such as authenticated
+`gh`, Herdr, OpenCode, browser tooling or App Store access are not bundled.
+External `browse` (gstack) and idd skills remain separate dependencies. This is
+not a promise of offline execution or of no data collection by those services.
+
+Maintainers generate/check root JSON from the single authoring version in
+`packages/lstack/manifest.json` (member versions remain independent):
+
+```bash
+python3 scripts/build-lstack.py --write-plugin-metadata
+python3 scripts/build-lstack.py --check-plugin-metadata
+```
+
+These modes read the working tree, unlike the committed-input archive `--check`.
+Optional deterministic ZIPs remain available through `--target claude` or
+`--target codex`; see the [full runbook](packages/lstack/README.md). Codex still
+requires clone/build/extract and its local `lstack-local` marketplace; this
+repository is **not a hosted Codex marketplace**. No directory submission or
+approval is claimed; see the runbook's portal review caveats.
+
+### Standalone skills (other agents or selected members)
+
+Pick one, several, or the whole catalog:
 
 ```bash
 npx skills add https://github.com/luongnv89/skills --skill code-review
-```
-
-Pick several:
-
-```bash
 npx skills add https://github.com/luongnv89/skills --skill code-review --skill auto-push --skill test-coverage
-```
-
-All of them:
-
-```bash
 npx skills add https://github.com/luongnv89/skills
 ```
-
-### lstack package
-
-For a named bundle of the maintained first-party catalog, see
-[lstack 0.3.0](packages/lstack/README.md). Build `dist/lstack-0.3.0.zip` with
-`python3 scripts/build-lstack.py` from a committed checkout (Git + Python 3.9+),
-or use `--target claude` for a skills-only Claude Code plugin and local
-marketplace. The [Claude install/access/update runbook](packages/lstack/README.md#claude-code-plugin-build-install-and-access)
-starts with clone/build/extract, then `claude --plugin-dir` or local marketplace
-installation; commands are namespaced `/lstack:<skill>`. The explicit manifest
-includes 41 definitions, exporting suite children separately without changing
-member files or versions. External tools and global skill preflights still
-apply; complex workflows are not guaranteed plugin-local.
-Use `--target codex` for a portable skills-only Codex plugin and local marketplace;
-the [Codex install/access runbook](packages/lstack/README.md#codex-plugin-build-install-and-access)
-uses clone/build/extract, `codex plugin marketplace add` and the `/plugins` browser.
-Neither generated marketplace is hosted by this source repository.
 
 ### agent-skill-manager
 
