@@ -4,7 +4,7 @@ description: "Optimize App Store and Google Play listings via a 7-phase, plan-ap
 license: MIT
 effort: max
 metadata:
-  version: 1.3.1
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -71,7 +71,7 @@ Phase 1: Analyze → Phase 2: Plan → Phase 3: Policy Compliance Check
 
 ## Phase Execution
 
-Run each phase in order. Detailed instructions, templates, and checklists live in the reference files. Read each one before executing the corresponding phase.
+Run each phase in order. Detailed instructions, templates, and checklists live in the reference files. Read each one before executing the corresponding phase, and only then, to keep the context window small.
 
 ### Phase 1: Analyze
 
@@ -117,16 +117,20 @@ Emit exactly 5 reports per run — the denominator `M` is always 5: Phase 1, Pha
 
 ## Expected Output
 
-A complete run produces three artifacts: Analysis Report (Phase 1), ASO Plan + Compliance Report + updated metadata files (Phases 2-4), and Summary Report (Phase 7). Worked examples for each: see `references/expected-output.md`.
+A complete run produces three artifacts: Analysis Report (Phase 1), ASO Plan + Compliance Report + updated metadata files (Phases 2-4), and Summary Report (Phase 7). Worked examples for each: see `references/expected-output.md`. The run then closes with the Final Report.
+
+## Final Report
+
+End every run, stops included, with a four-line `Result` / `Evidence` / `Uncertainty` / `Decision` block after the Step Completion Reports; it never replaces the Phase 7 Summary Report. The first word after `Result:` is `COMPLETE` (every applicable Acceptance Criteria item is checked), `PARTIAL` (the Analysis Report exists but an item is unchecked, for example the user rejected the plan), or `BLOCKED` (no Analysis Report). Status table, examples and fill rules: `references/final-report.md`.
 
 ## Example
 
 Input: an iOS+Android productivity app with weak metadata.
 
 ```
-Title (iOS): FocusFlow: Work Timer            (22/30, no primary keyword)
-Keywords (iOS): timer,focus,work,productivity (34/100, 66 chars unused)
-Short Desc (Android): A simple timer for focused work. (36/80, weak)
+Title (iOS): FocusFlow: Work Timer            (21/30, no primary keyword)
+Keywords (iOS): timer,focus,work,productivity (29/100, 71 chars unused)
+Short Desc (Android): A simple timer for focused work. (32/80, weak)
 ```
 
 Output after Phase 4 (`metadata/app-info/en-US.json`):
@@ -141,14 +145,14 @@ Output after Phase 4 (`metadata/app-info/en-US.json`):
 Output keywords field:
 
 ```
-pomodoro,deep,work,concentration,study,block,distraction,habit,goal,flow,task
+pomodoro,concentration,study,productivity,distraction,blocker,habit,goal,task,routine,break,planner
 ```
 
-(97/100 chars, all prohibited terms cleared, no title/subtitle duplicates.) Full walkthrough in `references/expected-output.md`.
+(99/100 chars, all prohibited terms cleared, no word repeated from the title or subtitle.) Full walkthrough in `references/expected-output.md`.
 
 ## Acceptance Criteria
 
-The skill run is successful when all metadata is within character limits, contains no prohibited keywords or trademarks, the user-approval gate was respected, and all required reports were produced. Full criteria list: `references/edge-cases.md` (Acceptance Criteria section).
+The skill run is successful when all metadata is within character limits, contains no prohibited keywords or trademarks, the user-approval gate was respected, and all required reports were produced. Full criteria list: `references/edge-cases.md` (Acceptance Criteria section). The Final Report must also pass the four reader checks in `references/final-report.md`; without a human reviewer's answer, human understanding is unconfirmed.
 
 ## Edge Cases
 
@@ -164,6 +168,6 @@ This skill complements `seo-ai-optimizer`. See `references/edge-cases.md` (Cross
 
 ## Safety and Caution
 
-- **No destructive action without confirmation.** Before any `git pull --rebase`, `git stash`, file deletion, or overwriting an existing metadata file, either run a dry-run preview, create a `.bak` backup, or ask the user. Failures and errors must surface to the user — do not silently retry.
+- **No destructive action without confirmation.** Before `git pull --rebase`, run the dry-run preview in Repo Sync and get the user's confirmation. Before `git stash` or any file deletion, ask the user. Before overwriting an existing metadata file, create a `.bak` backup or confirm the file is tracked in version control. Report every failure or error to the user; do not retry it silently.
 - **Compliance gate is non-negotiable.** Never present a non-compliant plan to the user; never execute without explicit approval.
 - **Trademark caution:** Competitor brand names from Phase 1 analysis must never appear in proposed metadata.

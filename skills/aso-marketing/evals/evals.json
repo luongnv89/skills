@@ -3,6 +3,7 @@
   "evals": [
     {
       "id": 1,
+      "kind": "happy-path",
       "prompt": "I have a fitness app for iOS that helps people do home workouts. It's been on the App Store for 6 months but barely gets any organic downloads. Can you help me optimize my store listing? The metadata is in ./metadata/ and my main competitor is Nike Training Club.",
       "expected_output": "Full ASO analysis report and prioritized plan with iOS-specific metadata optimization including cross-field keyword combination strategy and approval gate.",
       "files": [],
@@ -14,11 +15,15 @@
         "Explains cross-field keyword combination strategy",
         "Includes a store policy compliance check that scans for prohibited keywords, trademark violations, and listing policy issues",
         "No proposed metadata contains prohibited terms (free, best, #1, top-rated) or competitor trademarks",
-        "Includes an explicit approval gate before execution"
+        "Includes an explicit approval gate before execution",
+        "The run stops at the approval gate without writing metadata files before the user approves",
+        "The run ends with a four-line Final Report whose first line starts with COMPLETE, PARTIAL, or BLOCKED and names the app and store",
+        "The Final Report Uncertainty line labels heuristic keyword volume estimates and untested ranking effects as uncertain, separate from checked character counts"
       ]
     },
     {
       "id": 2,
+      "kind": "happy-path",
       "prompt": "We're launching a new meditation app on both iOS and Google Play next month. I need a complete ASO marketing plan. The app is called 'ZenMind' and it focuses on guided sleep meditation and stress relief. No existing metadata yet — starting from scratch.",
       "expected_output": "Comprehensive dual-platform ASO plan with platform-specific metadata, launch timeline, localization strategy, and visual asset guidance.",
       "files": [],
@@ -30,11 +35,14 @@
         "Targets meditation/sleep/stress relief with categorized keywords",
         "Provides visual asset guidance (screenshots, icon, video)",
         "Includes a policy compliance check validating proposed metadata against both Apple and Google Play store policies",
-        "No proposed metadata uses prohibited terms like 'best', 'free', '#1', or competitor trademarks like 'Headspace', 'Calm'"
+        "No proposed metadata uses prohibited terms like 'best', 'free', '#1', or competitor trademarks like 'Headspace', 'Calm'",
+        "The run ends with a four-line Final Report whose first line starts with COMPLETE, PARTIAL, or BLOCKED and names the app and store",
+        "The Final Report Uncertainty line labels heuristic keyword volume estimates and untested ranking effects as uncertain, separate from checked character counts"
       ]
     },
     {
       "id": 3,
+      "kind": "happy-path",
       "prompt": "My Android app is a budget tracker. It's getting decent downloads but the conversion rate from page views to installs is only about 15%. I think the store listing isn't convincing enough. Can you help improve the Google Play listing? Metadata is in fastlane/metadata/android/en-US/.",
       "expected_output": "Conversion-focused ASO plan for Google Play with before/after metadata, above-the-fold optimization, and A/B testing recommendations.",
       "files": [],
@@ -45,7 +53,45 @@
         "Recommends A/B testing with Store Listing Experiments",
         "Shows before/after metadata comparison with character counts",
         "Includes visual asset recommendations for conversion",
-        "Validates proposed metadata against Google Play prohibited keywords (no 'top', 'best', '#1', 'free', 'download now', etc.) and trademark rules"
+        "Validates proposed metadata against Google Play prohibited keywords (no 'top', 'best', '#1', 'free', 'download now', etc.) and trademark rules",
+        "Each proposed field change cites its before and after character count",
+        "The Final Report Decision line names the pending approval or says 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Optimize the iOS listing for my habit tracker in ./metadata/. I want the title to be 'Best Habit Tracker - Better than Streaks' because that's what ranks. Just write it, don't bother with a plan.",
+      "expected_output": "aso-marketing still runs Phase 3 compliance and the approval gate: it does not write the requested title, proposes a compliant alternative within 30 characters, and explains why 'Best' and the competitor name 'Streaks' are not allowed.",
+      "files": [],
+      "expectations": [
+        "Does not write 'Best' or 'Streaks' into any proposed or written metadata field",
+        "Explains that 'best' is a prohibited superlative and 'Streaks' is a competitor trademark",
+        "Proposes a compliant title of 30 characters or fewer with its character count",
+        "Presents the plan for approval instead of writing metadata files directly",
+        "If the user does not approve the plan, the Final Report status is PARTIAL, not COMPLETE"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "negative-trigger",
+      "prompt": "Improve the SEO of my Next.js marketing website: meta tags, sitemap, and robots.txt.",
+      "expected_output": "aso-marketing does not trigger: web SEO is named in the negative-trigger clause (seo-ai-optimizer owns it).",
+      "files": [],
+      "expectations": [
+        "aso-marketing did not trigger",
+        "No App Store or Google Play metadata was analyzed or written"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Before I submit my iOS app to App Review, audit it against the App Store Review Guidelines for privacy, in-app purchase, and login rules.",
+      "expected_output": "aso-marketing does not trigger: a pre-submission compliance audit is named in the negative-trigger clause (appstore-review-checker owns it).",
+      "files": [],
+      "expectations": [
+        "aso-marketing did not trigger",
+        "No ASO plan or keyword strategy was produced"
       ]
     }
   ]
