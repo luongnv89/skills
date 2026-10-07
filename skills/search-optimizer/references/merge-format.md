@@ -7,9 +7,9 @@ label.
 ```markdown
 # Search Optimization: <target>
 
-Run: search-optimizer 1.0.0 · <UTC timestamp> · branch: web | store | both
+Run: search-optimizer 1.1.0 · <UTC timestamp> · branch: web | store | both
 Evidence: <output>/evidence/manifest.json · scan case: A | B | C
-Members: seo-ai-optimizer √ · website-agent-readiness √ (3/5, scanned once) · viral-product-evaluator √ · aso-marketing √ (plan pending approval)
+Members: seo-ai-optimizer √ · website-agent-readiness √ (3/5, scanned once) · viral-product-evaluator √ · aso-marketing ~ PARTIAL (user ended the run at the plan gate)
 
 ## Summary
 - Agent-readiness score: 3/5 (scan predates any seo-ai-optimizer fixes)
@@ -44,11 +44,27 @@ Members: seo-ai-optimizer √ · website-agent-readiness √ (3/5, scanned once)
 - reports/seo-ai-optimizer/
 - reports/website-agent-readiness/ (scan.json; agent-ready-plan.md if G3 approved)
 - reports/viral-product-evaluator/viral-evaluation.md
-- aso-marketing phase reports
+- reports/aso-marketing/summary.md (Phase 7 Summary Report and Final Report)
 
 ## Next step
 Fixes run only inside member gates: approve items in seo-ai-optimizer's Step 5 plan or aso-marketing's post-Phase-3 plan.
 ```
+
+## Member status marks
+
+Each member on the `Members:` line carries the mark of its own closing `Result:` line
+(`COMPLETE | PARTIAL | BLOCKED` for seo-ai-optimizer and aso-marketing, `PASS | PARTIAL |
+BLOCKED` for website-agent-readiness and viral-product-evaluator):
+
+| Mark | Member outcome |
+|---|---|
+| `√` | COMPLETE or PASS (append a score in parentheses when the member reports one) |
+| `~ PARTIAL (reason)` | the member ended PARTIAL, e.g. the user ended it at a plan or diff gate |
+| `× BLOCKED (reason)` / `× error (reason)` | the member ended BLOCKED or errored mid-run |
+| `— skipped (reason)` | not installed, branch not reached, or gate declined |
+
+Every member has exactly one mark. A member that ended PARTIAL or BLOCKED is never shown as `√`,
+and the run's `Result:` line (SKILL.md → *Final response*) is never PASS in that case.
 
 ## Priority
 

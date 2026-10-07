@@ -9,7 +9,7 @@
 
 > One run to optimize a website or app for SEO, AI-bot search and app-store search, with one merged report.
 
-Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -56,6 +56,7 @@ graph TD
 - `evidence/manifest.json` (web) with captured files and check owners
 - `reports/<member>/` — each member's own report
 - `search-optimization.md` — the single merged, prioritized report
+- A closing chat response: `Result:` (PASS, PARTIAL or BLOCKED) first, then Evidence, Uncertainty and Decision, with each member's own `Result:` line relayed
 
 ## Requirements
 

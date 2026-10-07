@@ -3,8 +3,13 @@ name: search-optimizer
 description: "Optimize a site or app for SEO, AI-bot search and app-store search in one run: detect web vs store, run each audit once, merge one prioritized report; fixes only via member gates. Don't use for one fix (seo-ai-optimizer, aso-marketing)."
 license: MIT
 effort: high
+dependencies:
+  - seo-ai-optimizer
+  - website-agent-readiness
+  - viral-product-evaluator
+  - aso-marketing
 metadata:
-  version: 1.0.1
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (detect target → web and/or store branch → member audits with skip-checks → merged report)"
 ---
@@ -24,7 +29,7 @@ only at the phase that names them.
 |---|---|---|---|
 | web | `seo-ai-optimizer` | `meta-tags,robots-sitemap,structured-data,llms-txt,crawler-access` + all codebase fixes | required |
 | web | `website-agent-readiness` | `agent-readiness-scan,markdown-pages` (plans only, never fixes) | optional |
-| web, store | `viral-product-evaluator` | `virality` (skips `meta-tags`) | optional |
+| web, store | `viral-product-evaluator` | `virality` (skips `meta-tags` on the web branch) | optional |
 | store | `aso-marketing` | the store listing: keywords, metadata, localization | required |
 
 Matrix, fallback cases and per-member `skip-checks`: `references/check-ownership.md`.
@@ -47,30 +52,45 @@ Matrix, fallback cases and per-member `skip-checks`: `references/check-ownership
 
 ## Dependency Preflight (mandatory)
 
-Check every member in one pass, after branch detection and before intake. Test the install path
-first: same-repo skills can be installed without the registry knowing the bare name.
+This skill invokes the four members declared in frontmatter `dependencies`. Run this once, in
+Phase 1 after branch detection and before intake:
 
 ```bash
-target="web"   # web | store | both — from detection
-case "$target" in web) req="seo-ai-optimizer";; store) req="aso-marketing";;
-  both) req="seo-ai-optimizer aso-marketing";; esac
-reg="$(asm list -p claude --json 2>/dev/null || true)"
-missing_req=""; missing_opt=""
-for s in seo-ai-optimizer website-agent-readiness viral-product-evaluator aso-marketing; do
-  test -d "$HOME/.claude/skills/$s" || printf '%s' "$reg" | grep -q "\"$s\"" || {
-    case " $req " in *" $s "*) missing_req="$missing_req $s";; *) missing_opt="$missing_opt $s";; esac; }
-done
-for s in $missing_req $missing_opt; do
-  echo "Missing skill: $s — install: asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
-done
-[ -n "$missing_opt" ] && echo "Optional or off-branch, skipped:$missing_opt" >&2
-[ -z "$missing_req" ] || { echo "No asm yet: npm install -g agent-skill-manager" >&2
-  echo "Verify: asm list -p claude --json | grep '\"<name>\"'" >&2; exit 1; }
+if command -v asm >/dev/null && asm deps --help >/dev/null 2>&1; then
+  asm deps discover search-optimizer --json || echo "discover failed; acquire still runs" >&2
+  echo "so_mode=lease"
+else
+  echo "asm deps unavailable: npm install -g agent-skill-manager@latest" >&2
+  echo "so_mode=installed"
+fi
+printf 'so_session=%s\n' "search-optimizer-$(date +%s)-$$"   # record it; reuse it verbatim
 ```
 
-- A missing **required** member for the chosen branch stops the run before intake.
-- A missing **optional** member is skipped; its checks fall back per the ownership file and the
-  merged report lists them under "Not covered". Never hand-run a member's workflow inline.
+1. Check only the members of the detected branch: web → seo-ai-optimizer,
+   viral-product-evaluator, and website-agent-readiness when the target has a public URL;
+   store → aso-marketing, viral-product-evaluator; both → the union. Never acquire a member
+   whose branch the run does not reach.
+2. With `so_mode=lease`, run `asm deps acquire <member> --session <so_session> --json` for each
+   member from step 1. Record each returned `skillMdPath` and read that file directly.
+3. With `so_mode=installed`, test each member from step 1 with
+   `test -f "$HOME/.claude/skills/<member>/SKILL.md" || test -f "$HOME/.agents/skills/<member>/SKILL.md"`,
+   falling back to `asm list -p claude --json | grep '"<member>"'`, because same-repo skills can
+   be installed without the registry knowing the bare name. Record the path that exists.
+4. seo-ai-optimizer (web) and aso-marketing (store) are **required** for their branch. If one
+   fails step 2 or 3, print
+   `Missing skill: <member> — install: asm install github:luongnv89/skills:skills/<member> -p claude --yes`
+   and stop before intake; write nothing. In a "both" run, offer to rerun with only the branch
+   whose required member is installed.
+5. website-agent-readiness and viral-product-evaluator are **optional**: a miss is fail-soft.
+   Skip the member, fall back per `references/check-ownership.md`, and list its checks under
+   "Not covered" with the install line.
+6. **Release in `finally`.** If any acquire ran, run `asm deps release --session <so_session> --json`
+   once at every terminal outcome, stops included, before the Final response. List a failed
+   release under `Uncertainty:`.
+
+Never substitute one member for another or hand-run a member's workflow inline. Members run
+their own preflights for their own dependencies (seo-ai-optimizer checks website-agent-readiness
+for its Step 8); this preflight covers only what search-optimizer invokes directly.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -79,14 +99,20 @@ The orchestrator writes only to the output dir. Members that write into a git re
 sync first:
 
 ```bash
+git remote get-url origin >/dev/null || { echo "No origin remote — stop and ask" >&2; exit 1; }
 branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
+stashed=0
+if [ -n "$(git status --porcelain)" ]; then
+  git stash push -u -m "pre-search-optimizer" && stashed=1
+fi
+git fetch origin && git pull --rebase origin "$branch" || {
+  echo "Sync failed — stop and ask (stashed=$stashed: changes are in the pre-search-optimizer stash)" >&2; exit 1; }
+[ "$stashed" = 1 ] && { git stash pop || { echo "Stash pop conflict — stop and ask" >&2; exit 1; }; }
 ```
 
-If the tree is dirty: `git stash push -u -m "pre-search-optimizer"`, sync, `git stash pop`. If
-`origin` is missing or the rebase/stash conflicts, **stop and ask the user**. Members still run
-their own Repo Sync; never skip theirs because this one ran.
+On any `stop and ask` line, stop before the member writes and ask the user; never resolve the
+conflict or drop the stash yourself. If the user ends the run there, close with the Final
+response. Members still run their own Repo Sync; never skip theirs because this one ran.
 
 ## Workflow
 
@@ -122,8 +148,21 @@ Pass each member the orchestrated-run block (`references/check-ownership.md`):
 
 Invoke **aso-marketing** normally (no orchestrated block — it is not a contract member). Its
 post-Phase-3 plan approval gate is kept; nothing is written to store metadata before the user
-approves. In a store-only run, invoke **viral-product-evaluator** here with `output-dir` (no
-evidence dir); in a "both" run it already ran in Phase 3 — do not run it again.
+approves. It takes no `output-dir`, so save its Phase 7 Summary Report (or the latest phase
+report, if it stopped earlier) and its Final Report into
+`<output>/reports/aso-marketing/summary.md`. In a store-only run, invoke
+**viral-product-evaluator** here with `output-dir` (no evidence dir); in a "both" run it
+already ran in Phase 3 — do not run it again.
+
+### Member results (Phases 3 and 4)
+
+Read each member's outcome from its own closing `Result:` line as it finishes:
+`COMPLETE | PARTIAL | BLOCKED` for seo-ai-optimizer and aso-marketing (their Final Report),
+`PASS | PARTIAL | BLOCKED` for website-agent-readiness and viral-product-evaluator. Report it
+to the user and record it for the `Members:` line (`references/merge-format.md` → *Member status
+marks*). A member's PARTIAL, BLOCKED or errored run makes this run PARTIAL. When a member ends
+with a pending approval in its `Decision:` line (seo-ai-optimizer's Step 5 plan or Step 6 diff,
+aso-marketing's plan gate), relay it verbatim; never answer it on the user's behalf.
 
 ### Phase 5 — Merge
 
@@ -159,6 +198,7 @@ Output: <output>/search-optimization.md with web and store sections
 - `<output>/reports/<member>/` — each member's own report.
 - `<output>/search-optimization.md` — the single merged, prioritized report.
 - Any codebase or metadata change only as approved inside a member's gate.
+- The Final response (`Result:` first), closing the chat.
 
 ## Acceptance Criteria
 
@@ -169,6 +209,8 @@ Output: <output>/search-optimization.md with web and store sections
 - Every canonical web check ID has one owner or is listed as not covered with a reason.
 - `search-optimization.md` has one row per finding with the owner cited; no duplicates.
 - No file changed outside a member's approval gate (verify with `git status`).
+- Each member's mark on the `Members:` line matches its own closing `Result:` line, and the
+  Final response status follows the rules in *Final response*.
 
 ## Step Completion Reports
 
@@ -184,9 +226,19 @@ After each phase, emit:
 ```
 
 Checks per phase: Preflight (branch, members found, skips named); Intake (files captured,
-manifest written); Web audit (scan once, owners finalized, seo Step 8 reused); Store audit (plan
-gate respected); Merge (IDs covered once, duplicates merged, report written). Never report PASS
-while a member failed or a check is silently missing.
+manifest written); Web audit (scan once, owners finalized, seo Step 8 reused, member `Result:`
+lines recorded); Store audit (plan gate respected, aso-marketing `Result:` recorded); Merge (IDs
+covered once, duplicates merged, report written). Never report PASS while a member failed or a
+check is silently missing.
+
+## Final response
+
+Close every run, early stops included, after the lease release, with a four-line `Result` /
+`Evidence` / `Uncertainty` / `Decision` block. The first word after `Result:` is `PASS` (merged
+report written, every member that ran ended `COMPLETE` or `PASS`), `PARTIAL` (merged report
+written, but a member ended PARTIAL, BLOCKED or errored, or the user stopped at a member gate)
+or `BLOCKED` (no merged report). Status table, examples, fill rules and reader checks:
+`references/final-report.md`.
 
 ## Edge Cases
 

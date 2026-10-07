@@ -8,14 +8,17 @@
       "expected_output": "Detects the web branch, captures the site once into the evidence dir, runs website-agent-readiness once after G1, finalizes owners as case A, runs seo-ai-optimizer owning crawler-access with Step 8 reusing scan.json, then viral-product-evaluator with meta-tags skipped, and writes one search-optimization.md.",
       "files": [],
       "expectations": [
-        "Detects the web branch and runs the Dependency Preflight with seo-ai-optimizer as required.",
+        "Detects the web branch and runs the Dependency Preflight for the web members only, with seo-ai-optimizer required, acquiring each member through asm deps (or the installed-path check) and releasing the session at the end.",
         "Captures page.html, head.json, robots.txt, sitemap.xml and llms.txt once and writes manifest.json.",
         "Presents website-agent-readiness's G1 gate before sending the URL to isitagentready.com.",
         "Keeps crawler-access with seo-ai-optimizer (not in its skip-checks) and cites the scan's crawler findings on seo's row instead of re-fixing them.",
         "Passes viral-product-evaluator skip-checks meta-tags.",
         "Lists ai-actions under Not covered with a pointer to /ux-ax-review or /design-optimizer, even though the scan ran (case A).",
         "Writes a single search-optimization.md with one row per finding and its owner.",
-        "Changes no repo file outside seo-ai-optimizer's diff approval."
+        "Changes no repo file outside seo-ai-optimizer's diff approval.",
+        "The Final response opens with a Result: line (PASS, PARTIAL or BLOCKED) naming the target and branch, so the outcome is findable without reading the reports.",
+        "Evidence: cites the manifest, scan case, each member report path with its own Result: line, and the merged report path; untested items such as ai-actions are on the Uncertainty: line.",
+        "Decision: relays seo-ai-optimizer's pending plan or diff approval verbatim, or says No approval needed. with the remaining user action."
       ]
     },
     {
@@ -42,7 +45,9 @@
         "Detects both web and store signals and checks seo-ai-optimizer and aso-marketing as required.",
         "Invokes aso-marketing without the orchestrated block and keeps its post-Phase-3 approval gate.",
         "Runs viral-product-evaluator exactly once.",
-        "Merged report contains separate web and store findings sections."
+        "Merged report contains separate web and store findings sections.",
+        "Saves aso-marketing's Phase 7 Summary Report and Final Report to reports/aso-marketing/summary.md and marks aso-marketing on the Members: line from its own Result: line.",
+        "If the user ends the run at aso-marketing's plan gate, the Final response is PARTIAL and the Decision: line names that pending plan approval."
       ]
     },
     {
@@ -56,7 +61,8 @@
         "Does not send the URL to isitagentready.com.",
         "Passes seo-ai-optimizer skip-checks agent-readiness-scan and lets it own crawler-access.",
         "Lists markdown-pages, ai-actions and agent-readiness-scan under Not covered with the reason.",
-        "With no codebase given, invokes seo-ai-optimizer with no repo path plus evidence-dir, so it audits the evidence dir only and lists its fixes as 'needs source repo'."
+        "With no codebase given, invokes seo-ai-optimizer with no repo path plus evidence-dir, so it audits the evidence dir only and lists its fixes as 'needs source repo'.",
+        "The Final response lists markdown-pages, agent-readiness-scan and ai-actions under Uncertainty: as not covered, separate from the verified seo-ai-optimizer findings."
       ]
     },
     {

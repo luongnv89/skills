@@ -71,7 +71,8 @@ fix from Top Fixes; all 32 principles stay scored).
 
 aso-marketing owns the whole store listing (title, subtitle, keywords, description, screenshots
 copy, localization). Report these rows with check label `store-listing`; it is a report label,
-not a skip-check ID. viral-product-evaluator owns `virality` for the app. No web member runs on
+not a skip-check ID. aso-marketing takes no `output-dir`: the orchestrator saves its Phase 7 Summary
+Report and Final Report into `reports/aso-marketing/summary.md`. viral-product-evaluator owns `virality` for the app. No web member runs on
 store metadata.
 
 ## Owners map example (case B)
