@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **lstack 0.1.0 (#394):** platform-neutral package manifest for all 41 tracked first-party skill definitions, a deterministic standard-library Python ZIP builder and obtain/use documentation. Suite children are exported independently without duplicate umbrella payloads; included member bytes, versions and executable modes remain unchanged. Separate provenance records the committed source and payload hashes. Workspaces, development fixtures, runtime copies and secret-like files are excluded. External dependencies and installed-path limitations are documented; Claude Code/Codex plugin adapters remain separate work (#396/#395).
+
 ## v3.0.0 — 2026-10-07
 
 Task-oriented workflows, clearer evidence-backed reports, and safer approval boundaries across the catalog. New design, search, and product-planning orchestrators coordinate existing skills; career research, repository cleanup, agent-readiness scans, and gap-driven developer-machine setup expand the available tasks. Herdr fleet management gains native agent operations, monitoring, help, and inherited worker launch profiles. The detailed entries below preserve the complete development history, including changes to skills later retired or moved elsewhere; they are not a list of everything still installable.

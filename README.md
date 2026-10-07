@@ -55,6 +55,16 @@ All of them:
 npx skills add https://github.com/luongnv89/skills
 ```
 
+### lstack package
+
+For a named, platform-neutral bundle of the maintained first-party catalog,
+see [lstack](packages/lstack/README.md). Build `dist/lstack-0.1.0.zip` with
+`python3 scripts/build-lstack.py` from a committed checkout (Git + Python 3.9+).
+Its explicit manifest includes 41 skill definitions, exporting suite children
+separately without changing member files or versions. The package docs cover
+extraction, manual use, external prerequisites and compatibility limits; Claude
+Code and Codex plugin adapters are separate work.
+
 ### agent-skill-manager
 
 Use [agent-skill-manager](https://github.com/luongnv89/agent-skill-manager) (`asm`) for a single TUI/CLI across agents:
