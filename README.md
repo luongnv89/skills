@@ -19,6 +19,20 @@ Skills are independent files. Works with Claude Code, Cursor, Windsurf, GitHub C
 
 ---
 
+## What's New in 3.0.0
+
+This catalog release adds task orchestrators for [design](skills/design-optimizer/), [search](skills/search-optimizer/), and [product planning](skills/product-planner/), plus [AI job research](skills/ai-job-scout/). A broad quality-standard sweep tightens approval gates, dependency checks, evidence requirements, and completion reports. Individual skills keep their own versions; the catalog release does not reset them to 3.0.0.
+
+**Upgrading from 2.0.0:**
+
+- `herdr-agent-comms` is now [**herdr-agent**](skills/herdr-agent/). Reinstall under the new name and update prompts; installers do not automatically remove the old installed copy, which can still trigger.
+- `plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd); see the [installation note](#product-planning). Its epic output is now a static plan map with status maintained through native GitHub sub-issues. Update parsers expecting `- [x] #N — <id>` to accept `- #N — <id>`.
+- [**cleanup-project**](skills/cleanup-project/docs/README.md#migrating-from-branch-inspector) replaces `branch-inspector`. `convert-documents-to-markdown`, `fork-upstream-sync`, `opencode-sandbox`, `opencode-handoff`, `subagent-creator`, and the `website-cloner` suite are retired from this catalog. Existing installed copies are not automatically removed.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full release history.
+
+---
+
 ## Install
 
 > Validate this runbook: `./scripts/validate-install.sh --check`
@@ -102,7 +116,7 @@ A skill is a self-contained playbook: frontmatter metadata, instructions, option
 | Feature | What you get |
 |---|---|
 | Standalone | Any mix installs cleanly; zero shared runtime |
-| Versioned | Semver + per-skill changelogs |
+| Versioned | Per-skill semver + catalog release history |
 | Structured | Steps, templates, checklists, self-validation |
 | Tool-agnostic | Same skill works in Claude Code, Cursor, Windsurf, Codex, Copilot |
 | Scannable | Tables, diagrams, short outputs |
@@ -169,7 +183,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [Shipping](#shipping) | Auto push, repo cleanup, pipelines, releases, security hardening |
 | [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming |
 | [Career Research](#career-research) | Tailored job discovery with employer/product due diligence |
-| [Frontend & Design](#frontend--design) | UIs, logos, diagrams, site clones |
+| [Frontend & Design](#frontend--design) | UIs, logos, diagrams, design optimization |
 | [Documentation](#documentation) | Docs gen, READMEs, SEO, OSS prep, agent config |
 | [App Store](#app-store) | ASO, review compliance |
 | [Tooling](#tooling) | CLIs, installers, local models, agent comms |

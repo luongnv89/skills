@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+## v3.0.0 — 2026-10-07
+
+Task-oriented workflows, clearer evidence-backed reports, and safer approval boundaries across the catalog. New design, search, and product-planning orchestrators coordinate existing skills; career research, repository cleanup, agent-readiness scans, and gap-driven developer-machine setup expand the available tasks. Herdr fleet management gains native agent operations, monitoring, help, and inherited worker launch profiles. The detailed entries below preserve the complete development history, including changes to skills later retired or moved elsewhere; they are not a list of everything still installable.
+
+### Breaking Changes and Upgrade Guidance
+
+- **Herdr skill rename:** replace `/herdr-agent-comms` with `/herdr-agent` and install `herdr-agent`. Review and remove the obsolete installed copy so both names do not compete for triggers; reinstalling does not automatically remove it. Fleet operations require Herdr 0.9.0 or later and a running server; `help` does not. `HAC_TIMEOUT`, `HAC_LINES`, and `HAC_BADGE` remain unchanged. Workers now inherit the main agent's launch profile by default; select explicit overrides or `--without bypass` / `--without flags` when appropriate. See the detailed Herdr entries below ([rename #188](https://github.com/luongnv89/skills/pull/188)).
+- **`agent-config` default output:** automation that expects a generated `CLAUDE.md` must request it explicitly; the default is now `AGENTS.md`. Inspect existing CLAUDE files for shadowing and approve migration diffs. Native Claude Code support starts at v2.1.277; older or affected clients may need the offered import wrapper. Never assume that writing AGENTS.md proves the client loaded it ([#283](https://github.com/luongnv89/skills/pull/283)).
+- **`plan-to-issues` changed output, then moved:** update epic-body consumers from `- [x] #N — <id>` checklist lines to `- #N — <id>` static-map lines. Read live progress from GitHub native sub-issues, not body checkboxes or derived percentages; `sync` is for plan or child-set changes, not each issue close ([#109](https://github.com/luongnv89/skills/pull/109)). The maintained skill is no longer in this catalog: install it with `asm install https://github.com/luongnv89/idd --skill plan-to-issues`, and install its `issue-creator` dependency from idd when missing. The idd Claude Code plugin route requires an idd release containing the moved skill; its command is `/idd:plan-to-issues`. Verify current idd availability and migration instructions before converting old epics; no automatic old-checklist conversion is promised here ([#290](https://github.com/luongnv89/skills/pull/290)).
+
+### Retired-Skill Migration
+
+The retirement commit's title says “five,” but its tracked deletion and the detailed Removed entry cover **six** top-level skills, including the whole website-cloner suite. These are not compatibility aliases:
+
+| Former skill | Next step |
+|---|---|
+| `convert-documents-to-markdown` | The removed implementation wrapped Firecrawl anydoc; its recorded direct CLI is `npx -y @firecrawl/anydoc@0.2.4 <file> -o out.md`. This is an external alternative, not a current catalog skill. Hosted OCR requires approval before uploading the document. |
+| `fork-upstream-sync` | No maintained drop-in replacement is declared in this catalog. `cleanup-project` is repository hygiene, not fork rebasing or upstream synchronization. |
+| `opencode-sandbox`, `opencode-handoff` | No maintained replacement for their container isolation or session handoff is declared here. `opencode-runner` supports ordinary OpenCode delegation, not the retired sandbox/credential boundary. |
+| `subagent-creator` | No maintained drop-in replacement is declared here. `agent-config` explicitly excludes subagent definitions. |
+| `website-cloner` and its six children | For scoped design review and opt-in fixes, use `design-optimizer`; for frontend implementation, use `frontend-design`. Neither is a drop-in replacement for the retired six-phase clone-and-GitHub-Pages workflow. |
+| Separately installed `branch-inspector` | Use `cleanup-project`'s single-branch drill-down. Review and remove old installed copies under `~/.claude/skills/branch-inspector` and `~/.agents/skills/branch-inspector` yourself; they are not removed automatically. |
+
+### Integration Notes
+
+- Existing pre-commit configurations using `commit` / `push` stage names should be reviewed and migrated with `pre-commit migrate-config`. Install both pre-commit and pre-push hook types; installing only the former omits the full-suite pre-push gate.
+- Consumers of skill closing reports should follow each skill's current contract, not assume one universal status enum. Reports now distinguish results, evidence, uncertainty, and next decisions; for example, doc-manager additionally defines `FAIL`.
+- Catalog release version 3.0.0 does not set every skill's independent version to 3.0.0. Recorded scores and test counts below are historical evidence, not a fresh release-wide test run.
+
 ### Changed
 - **`ai-job-scout` 1.1.0 → 1.1.1 (#303):** retrofitted to the current skill-creator standard. At baseline `quick_validate.py` exited 0 with no warnings and `asm eval` scored 94/A (context-efficiency 9 at 1498 words; `license` 5 catalog-wide by design), and four of the five human-review checks already passed (output contract, format selection, interactive HTML report, understanding criteria). The Gate 1 inspection found the controlled-instructions check failing in four places, all reworded in place: the candidate input now states how an unattended alert run with no profile is labeled (unpersonalized); the interestingness verdict is rated High, Medium, or Low, matching the HTML report's filter and the report example; step 4's closing sentence is split into three ordered actions; and the Step Completion Report status rule states step 1 (PASS or FAIL) separately from steps 2 and 3 (PASS, PARTIAL, FAIL against the requested count). The duplicated "check dates and open status on the run date" line moves from the Cadence input to `references/report-format.md` → Rules. `evals/evals.json` keeps its 9 cases; case 2 gains one expectation for the High/Medium/Low verdict. No dependency preflight or Repo Sync section: the skill invokes no other skill and does not change a git repo. After: `asm eval` 94/A, context-efficiency 9 at 1498 words by the evaluator, every other gated category 10.
 - **`brand-name-checker` 1.4.2 → 1.5.0 (#307):** retrofitted to the current skill-creator standard. At baseline `quick_validate.py` exited 0 with no warnings and `asm eval` scored 91/A (context-efficiency 8, the floor, at 1913 words; `license` 5 catalog-wide by design), but the Gate 1 inspection found the description's negative clause written as "Skip for", no closing-response contract (the report had no result status, evidence, uncertainty or next-decision line), correctness-only acceptance criteria, no `evals/`, and an Expected Output example that contradicted the skill's own risk policy (a Moderate result recommending Proceed). The report now opens with `RESULT: COMPLETE | PARTIAL | BLOCKED` and adds `EVIDENCE` and `UNKNOWN` lines plus a `next:` clause, while keeping `RISK` and `RECOMMEND` as the last two lines that `product-planner` reads. Per-source queries, edge cases, PRD integration and the output contract with three worked examples moved to 4 new references (`source-checks.md`, `edge-cases.md`, `prd-integration.md`, `output-contract.md`); the risk policy stays inline, as `tests/test_risk_policy.py` and the synthesizer require. `references/repo-sync.md` now stops on a failed stash, and the step-report example no longer speaks of a risk "score". New `evals/evals.json` with 8 cases (3 happy-path, 3 edge, 2 negative-trigger: name brainstorming, trademark filing). After: `asm eval` 94/A (context-efficiency 10, prompt-engineering 10), 156 lines / 1499 words by the evaluator.
@@ -165,6 +194,8 @@
 
 ### Removed
 - **Six retired skills deleted (#284, closes #285):** `convert-documents-to-markdown`, `fork-upstream-sync`, `opencode-sandbox`, `opencode-handoff`, `subagent-creator`, and the `website-cloner` suite (umbrella plus `website-analyzer`, `website-builder`, `website-clone-report`, `website-clone-final-report`, `website-implementation-plan`, `website-improvement-prd`). `opencode-handoff` went with the `opencode-sandbox` it composes. `docs/index.html` dropped the `website-cloner` catalog card and the advertised count moved 48 → 36.
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v2.0.0...v3.0.0
 
 ## v2.0.0 — 2026-08-18
 
