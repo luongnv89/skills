@@ -4,7 +4,7 @@ description: "Generate landing pages with PAS, AIDA, or StoryBrand from a produc
 license: MIT
 effort: high
 metadata:
-  version: 1.4.0
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -57,15 +57,23 @@ metrics, guarantees, scarcity, or compliance claims.
 
 ## Repo Sync Before Edits (mandatory)
 
-Mode B rewrites `README.md` inside the repo. Sync before that write to avoid clobbering remote work:
+Mode B rewrites `README.md` inside the repo. Sync before that write to avoid clobbering remote work. If the working tree is not clean, stash first, sync, then restore:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
+dirty=0
+if [ -n "$(git status --porcelain)" ]; then
+  git stash push -u -m "pre-sync"
+  dirty=1
+fi
 git fetch origin
 git pull --rebase origin "$branch"
+if [ "$dirty" -eq 1 ]; then
+  git stash pop
+fi
 ```
 
-If the working tree is dirty: stash → sync → pop. If `origin` is missing or a conflict occurs: **stop and ask the user.** Skip this section for Mode A, which emits copy in chat and writes nothing.
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing. Skip this section for Mode A, which emits copy in chat and writes nothing.
 
 ## Workflow (Mode A — Landing copy)
 
@@ -194,6 +202,17 @@ A/B Test Ideas: test speed-focused vs founder-control headlines.
   only generates landing-page copy and offer a copy-only structure.
 - If social proof is unavailable, write a proof slot rather than a fake testimonial.
 
+## Final Report
+
+End every run, stops included, with this compact text block. Status is `COMPLETE` (the deliverable is produced and every applicable check passes — Mode A: the full-page copy follows the chosen framework's template, or the requested single section plus its fit note is delivered; Mode B: `README.md` is rewritten, `README.backup.md` exists, and the Step 6 Self-Review Checklist passes), `PARTIAL` (a deliverable was produced but a check still fails), or `BLOCKED` (no deliverable: a required question went unanswered and the user ended the run, Mode B found no `README.md` and the user declined creating one, or Repo Sync stopped on a conflict). A question that awaits the user's answer does not end the run. Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
+
+```text
+Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA) plus A/B test ideas.
+Evidence: Framework PAS named and applied via references/section-templates.md; hero headline 8 words; every CTA starts with an action verb; two proof slots labeled [proof needed]; anti-slop check passed.
+Uncertainty: Assumed a setup-time objection belongs in the FAQ; no competitor information was supplied.
+Decision: No approval needed. Replace the two [proof needed] markers with real metrics before publishing.
+```
+
 ## Acceptance Criteria
 
 Verify before delivering:
@@ -207,3 +226,9 @@ Verify before delivering:
 - Copy passes `references/anti-slop-rules.md`.
 - Output meets the Default Quality Bar (professional, production-ready, elegant, premium) without the user asking.
 - Final response includes A/B test ideas and conversion tips unless the user asked for a single section.
+- The run closes with a Final Report: `Result:` and its status first, then `Evidence:`, `Uncertainty:`, and `Decision:` lines; `Evidence:` cites only checks that ran.
+- The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear). Without a human reviewer's answer, human understanding is unconfirmed.
+
+## Step Completion Reports
+
+After each major step, emit a compact status block — per-check `√`/`×` lines and a closing `Result: PASS | FAIL | PARTIAL` line. Mode A uses the format and per-step checks in `references/step-reports.md`; Mode B uses `references/readme-step-reports.md`.

@@ -3,24 +3,113 @@
   "evals": [
     {
       "id": 1,
+      "kind": "happy-path",
       "prompt": "turn my README into a landing page",
-      "expected_output": "README.md rewritten with landing page structure (hero, problem, solution, how it works, social proof, FAQ, CTA). README.backup.md created as backup. Technical content preserved in <details> blocks.",
+      "expected_output": "README.md rewritten with landing page structure (hero, problem, solution, how it works, social proof, FAQ, CTA). README.backup.md created as backup. Technical content preserved in <details> blocks. The run closes with a Final Report.",
       "files": [],
-      "expectations": []
+      "expectations": [
+        "Ran Repo Sync (stash-first) before rewriting README.md, or recorded sync: skipped with its reason",
+        "Created README.backup.md before rewriting README.md",
+        "Chose and named a framework (PAS, AIDA, or StoryBrand) and offered the user an override",
+        "Preserved all original technical content in README.backup.md and collapsed <details> blocks",
+        "Ran the Step 6 Self-Review Checklist and fixed any failures before presenting",
+        "Did not commit the rewrite (a commit happens only when the user asks)",
+        "The Final Report opens with a Result: line carrying COMPLETE and names README.md and README.backup.md",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence: cites only checks that ran, and Uncertainty: labels each assumption as an assumption",
+        "The Final Report's Decision: line names the pending choice or says No approval needed"
+      ]
     },
     {
       "id": 2,
+      "kind": "happy-path",
       "prompt": "make my README sell the project — I want more GitHub stars and contributors",
-      "expected_output": "README.md rewritten with persuasive copy focusing on attracting contributors. Should use benefit-focused language, CTAs, and social proof section. README.backup.md created.",
+      "expected_output": "README.md rewritten with persuasive copy focusing on attracting contributors. Should use benefit-focused language, CTAs, and social proof section. README.backup.md created. The run closes with a Final Report.",
       "files": [],
-      "expectations": []
+      "expectations": [
+        "Used benefit-focused language with a clear value proposition as the H1 (10 words or fewer, not the project name)",
+        "Used real proof or [placeholder] markers — no fabricated stars, downloads, or testimonials",
+        "Created README.backup.md before rewriting, and kept the original content recoverable",
+        "Included CTAs that start with an action verb and state the outcome",
+        "The Final Report opens with Result: and a status that matches the checks, and its Evidence: line cites only checks that ran"
+      ]
     },
     {
       "id": 3,
+      "kind": "happy-path",
       "prompt": "rewrite my README as a landing page, use the StoryBrand framework",
-      "expected_output": "README.md rewritten using StoryBrand framework specifically (user as hero, project as guide). README.backup.md created. Framework choice explained to user.",
+      "expected_output": "README.md rewritten using StoryBrand framework specifically (user as hero, project as guide). README.backup.md created. Framework choice explained to user. The run closes with a Final Report.",
       "files": [],
-      "expectations": []
+      "expectations": [
+        "Applied the user-requested StoryBrand framework instead of the default pick from the project-type table",
+        "Told the user which framework was applied",
+        "Structured the README around StoryBrand (user as hero, project as guide, plan, CTA, success/failure)",
+        "Created README.backup.md before rewriting",
+        "The Final Report opens with Result: COMPLETE and its Evidence: line names the framework check that ran"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "happy-path",
+      "prompt": "Write landing page copy for AcmeDesk, a helpdesk for solo founders. Audience: indie SaaS founders. Primary CTA: start free trial. Differentiator: setup in 10 minutes, shared inbox with AI drafts.",
+      "expected_output": "Full Mode A landing page copy in chat using a named framework's template from references/section-templates.md (hero through final CTA), ending with A/B test ideas and conversion tips, then a Final Report.",
+      "files": [],
+      "expectations": [
+        "Chose a framework (PAS, AIDA, or StoryBrand), named it to the user, and populated every section of its template",
+        "Hero headline is 10 words or fewer, value-led, and specific to solo founders",
+        "Every CTA starts with an action verb and states the outcome; none are generic (Submit, Click Here)",
+        "Unsupported proof is labeled [proof needed]; no invented metrics, testimonials, or logos",
+        "Ended with A/B test ideas and conversion tips",
+        "The Final Report opens with Result: COMPLETE; Evidence: cites the checks that ran; Uncertainty: labels assumptions; Decision: says No approval needed or names the pending action"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "name": "vague-brief",
+      "prompt": "Write me a landing page.",
+      "expected_output": "The skill asks 2-4 targeted questions (product name, target audience, problem solved, primary CTA) rather than writing generic copy. If the user ends the run without answering, the Final Report status is BLOCKED.",
+      "files": [],
+      "expectations": [
+        "Asked 2-4 targeted questions covering the missing core inputs instead of writing generic copy",
+        "Wrote no full-page copy before the answers arrived",
+        "If the run ends without answers, the Final Report status is BLOCKED and the Decision: line names the missing inputs"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "name": "missing-proof",
+      "prompt": "Generate landing page copy for my SaaS — we just launched, so no testimonials or metrics yet.",
+      "expected_output": "Full landing page copy with proof slots clearly labeled [proof needed]; no fabricated customers, metrics, guarantees, or urgency.",
+      "files": [],
+      "expectations": [
+        "Wrote [proof needed] markers where social proof, metrics, or guarantees would go",
+        "Invented no testimonials, logos, metrics, awards, or scarcity",
+        "The Final Report's Uncertainty: line separates the [proof needed] placeholders from verified claims",
+        "The Final Report's Decision: line names replacing the markers with real proof as a remaining user action"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Write a blog post announcing our v2 release.",
+      "expected_output": "The skill does not trigger: blog posts are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "landing-page-generator did not trigger",
+        "No landing-page framework structure (hero, CTA sections) was produced"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Build the HTML and CSS for this landing page design.",
+      "expected_output": "The skill does not trigger: HTML builds are named in the negative-trigger clause. If already running, it explains that it generates landing-page copy only and offers a copy-only structure.",
+      "files": [],
+      "expectations": [
+        "landing-page-generator did not trigger, or declined the HTML build and offered copy only",
+        "No HTML or CSS was produced"
+      ]
     }
   ]
 }
