@@ -129,7 +129,7 @@ class ClaudePackagingTests(unittest.TestCase):
 
     def test_unknown_target_rejected(self):
         with self.assertRaisesRegex(ValueError, "unknown package target"):
-            BUILDER.prepare(self.repo, target="codex")
+            BUILDER.prepare(self.repo, target="unsupported")
 
     def test_real_catalog_parity_and_runbook_contract(self):
         bundle, original = BUILDER.prepare(ROOT)

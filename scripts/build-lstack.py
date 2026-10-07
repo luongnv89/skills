@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the lstack bundle or Claude Code plugin from one Git commit (stdlib only)."""
+"""Build the lstack bundle, Claude Code or Codex plugin from one Git commit (stdlib only)."""
 
 import argparse
 import hashlib
@@ -65,7 +65,7 @@ def json_bytes(value):
 
 def prepare(repo, revision="HEAD", target="bundle"):
     """Return validated archive entries and provenance; never read working-tree payloads."""
-    if target not in {"bundle", "claude"}:
+    if target not in {"bundle", "claude", "codex"}:
         raise ValueError("unknown package target: " + str(target))
     sha = git(repo, "rev-parse", "--verify", revision + "^{commit}").decode().strip()
     tree = {}
@@ -154,8 +154,8 @@ def prepare(repo, revision="HEAD", target="bundle"):
                   "source_commit": sha, "builder_sha256": hashlib.sha256(blob(BUILDER)).hexdigest(),
                   "manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
                   "skill_versions": versions, "files": files}
-    if target == "claude":
-        adapter = manifest.get("claude")
+    if target in {"claude", "codex"}:
+        adapter = manifest.get(target)
         fields = {"description", "author", "repository", "license", "marketplace_name"}
         if (not isinstance(adapter, dict) or set(adapter) != fields
                 or not isinstance(adapter["description"], str) or not adapter["description"].strip()
@@ -165,14 +165,25 @@ def prepare(repo, revision="HEAD", target="bundle"):
                 or adapter["license"] != "MIT"
                 or not isinstance(adapter["marketplace_name"], str)
                 or not NAME.fullmatch(adapter["marketplace_name"])):
-            raise ValueError("invalid Claude adapter metadata")
+            raise ValueError("invalid " + ("Claude" if target == "claude" else "Codex") + " adapter metadata")
         plugin = {key: value for key, value in adapter.items() if key != "marketplace_name"}
         plugin.update({"name": manifest["name"], "version": manifest["version"]})
         marketplace = {"name": adapter["marketplace_name"], "owner": adapter["author"],
                        "plugins": [{"name": manifest["name"], "source": "./plugins/lstack",
                                     "description": adapter["description"]}]}
-        generated = {"plugins/lstack/.claude-plugin/plugin.json": json_bytes(plugin),
-                     ".claude-plugin/marketplace.json": json_bytes(marketplace)}
+        if target == "claude":
+            generated = {"plugins/lstack/.claude-plugin/plugin.json": json_bytes(plugin),
+                         ".claude-plugin/marketplace.json": json_bytes(marketplace)}
+        else:
+            plugin["$schema"] = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
+            marketplace = {"name": adapter["marketplace_name"],
+                           "interface": {"displayName": "lstack local"},
+                           "plugins": [{"name": manifest["name"],
+                                        "source": {"source": "local", "path": "./plugins/lstack"},
+                                        "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+                                        "category": "Productivity"}]}
+            generated = {"plugins/lstack/plugin.json": json_bytes(plugin),
+                         ".agents/plugins/marketplace.json": json_bytes(marketplace)}
         # A marketplace container surrounds the native plugin; payload bytes/modes never change.
         entries = {"plugins/lstack/" + path: value for path, value in entries.items()}
         entries.update({path: (data, 0o644) for path, data in generated.items()})
@@ -191,11 +202,11 @@ def prepare(repo, revision="HEAD", target="bundle"):
 
 def build(repo, revision="HEAD", output=None, check=False, target="bundle"):
     entries, provenance = prepare(repo, revision, target)
-    prefix = "lstack-" + ("claude-" if target == "claude" else "") + provenance["package_version"]
+    prefix = "lstack-" + (target + "-" if target != "bundle" else "") + provenance["package_version"]
     result = {"package": "lstack", "version": provenance["package_version"],
               "source_commit": provenance["source_commit"],
               "skills": len(provenance["skill_versions"]), "files": len(entries)}
-    if target == "claude":
+    if target in {"claude", "codex"}:
         result.update({"target": target, "marketplace_root": prefix,
                        "plugin_root": prefix + "/plugins/lstack"})
     if check:
@@ -229,9 +240,9 @@ def build(repo, revision="HEAD", output=None, check=False, target="bundle"):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--revision", default="HEAD", help="immutable source commit or Git ref (default HEAD)")
-    parser.add_argument("--target", choices=("bundle", "claude"), default="bundle",
-                        help="platform-neutral bundle (default) or Claude Code plugin/local marketplace")
-    parser.add_argument("--output", type=Path, help="new ZIP path (default dist/lstack[-claude]-VERSION.zip)")
+    parser.add_argument("--target", choices=("bundle", "claude", "codex"), default="bundle",
+                        help="platform-neutral bundle (default), Claude Code or Codex plugin/local marketplace")
+    parser.add_argument("--output", type=Path, help="new ZIP path (default dist/lstack[-TARGET]-VERSION.zip)")
     parser.add_argument("--check", action="store_true", help="validate committed inputs without writing an archive")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parent.parent

@@ -1,9 +1,8 @@
 # lstack
 
-**lstack 0.2.0** distributes this repository's maintained first-party Agent
-Skills as a platform-neutral ZIP or a skills-only Claude Code plugin with a
-local marketplace. It is a package, not a new skill or runtime. The Codex adapter
-remains separate work (#395). There are no plugin hooks, MCP servers, native
+**lstack 0.3.0** distributes this repository's maintained first-party Agent
+Skills as a platform-neutral ZIP or a skills-only Claude Code or Codex plugin
+with a local marketplace. It is a package, not a new skill or runtime. There are no plugin hooks, MCP servers, native
 plugin agents, npm publications or automatic dependency installers.
 
 ## Contents and scope
@@ -16,7 +15,7 @@ umbrella copy excludes those children's subtrees, so no skill occurs twice.
 Flat task orchestrators continue to share independently exported members.
 
 Included files keep their original bytes and Git executable modes: `SKILL.md`,
-references, scripts, agents, assets and human-facing docs. Package version 0.2.0
+references, scripts, agents, assets and human-facing docs. Package version 0.3.0
 is independent of both the catalog release and member versions. Generated
 `provenance.json` records the full source commit, manifest/builder SHA-256,
 original member versions, and source/destination/hash/mode for every member file.
@@ -46,7 +45,7 @@ python3 scripts/build-lstack.py --check
 python3 scripts/build-lstack.py
 ```
 
-The default output is `dist/lstack-0.2.0.zip` (ignored by Git). The JSON result
+The default output is `dist/lstack-0.3.0.zip` (ignored by Git). The JSON result
 prints the exact commit, skill/file counts, output path and archive SHA-256.
 Inputs come **entirely from the selected committed Git tree**, never from local
 edits or installed skills. Commit intended packaging/member changes before
@@ -74,14 +73,14 @@ Inspect and extract a **trusted, locally built** archive into a new staging
 folder, not directly over an existing agent installation:
 
 ```bash
-python3 -m zipfile -l dist/lstack-0.2.0.zip
-python3 -m zipfile -e dist/lstack-0.2.0.zip /tmp/lstack-staging
+python3 -m zipfile -l dist/lstack-0.3.0.zip
+python3 -m zipfile -e dist/lstack-0.3.0.zip /tmp/lstack-staging
 ```
 
 Layout:
 
 ```text
-lstack-0.2.0/
+lstack-0.3.0/
   README.md
   LICENSE
   manifest.json
@@ -99,7 +98,7 @@ and its relative resources to a skill-capable agent, or manually install the
 **whole member directory** at that agent's documented skill location. For the
 existing member preflights this is commonly `~/.claude/skills/<name>/` or
 `~/.agents/skills/<name>/`. Review any existing copy and back it up before
-replacing it; don't nest the entire `lstack-0.2.0` directory as one skill. For
+replacing it; don't nest the entire `lstack-0.3.0` directory as one skill. For
 example, after installing `code-review`, ask the agent to review the target
 repository using that skill and verify it loaded the intended definition.
 There is no `/lstack` entry point or automatic dependency installation.
@@ -120,8 +119,8 @@ register its marketplace. The following uses ignored `dist/` under the clone:
 ```bash
 python3 scripts/build-lstack.py --target claude --check
 python3 scripts/build-lstack.py --target claude
-python3 -m zipfile -e dist/lstack-claude-0.2.0.zip dist/claude-staging
-marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.2.0"
+python3 -m zipfile -e dist/lstack-claude-0.3.0.zip dist/claude-staging
+marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.3.0"
 plugin="$marketplace/plugins/lstack"
 claude plugin validate "$plugin"
 claude plugin validate "$marketplace"
@@ -132,10 +131,10 @@ files. The result JSON reports `marketplace_root` and `plugin_root` relative to
 the extraction directory. Its layout is:
 
 ```text
-lstack-claude-0.2.0/
+lstack-claude-0.3.0/
   .claude-plugin/marketplace.json   # lstack-local, source ./plugins/lstack
   plugins/lstack/
-    .claude-plugin/plugin.json     # name lstack, version 0.2.0
+    .claude-plugin/plugin.json     # name lstack, version 0.3.0
     README.md
     LICENSE
     manifest.json
@@ -224,6 +223,105 @@ Official references: [plugins](https://code.claude.com/docs/en/plugins),
 and [installation, scopes, updates and removal](https://code.claude.com/docs/en/discover-plugins).
 Native validation checks manifests; it does not prove all member workflows ran.
 
+## Codex plugin: build, install and access
+
+Follow **Obtain and build** first. Use a current Codex CLI with plugin support;
+CLI **0.160.0** is the tested version, not a claimed minimum. The target uses the
+recommended portable **Agent Plugins 1.0** root manifest, not the supported
+legacy `.codex-plugin/plugin.json` compatibility layout. It needs no hooks, MCP
+server, app mapping or compatibility overlay. Build output is fixed by the
+committed inputs, never selected by the installed Codex version.
+
+```bash
+python3 scripts/build-lstack.py --target codex --check
+python3 scripts/build-lstack.py --target codex
+python3 -m zipfile -e dist/lstack-codex-0.3.0.zip dist/codex-staging
+marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.3.0"
+codex plugin marketplace add "$marketplace"
+codex plugin marketplace list
+codex
+```
+
+In Codex CLI enter `/plugins`, choose **lstack** from **lstack-local**, and
+install it. Start a **new session** before using bundled skills. Registration
+and installation intentionally change your Codex configuration/cache. Keep the
+extracted marketplace directory accessible. There is no `codex plugin validate`
+or `codex plugin install` command assumed by this runbook. CLI 0.160.0 also
+exposes the following commands in its own `--help` (check your version first):
+
+```bash
+codex plugin list --available --json --marketplace lstack-local
+codex plugin add lstack@lstack-local --json
+codex plugin list --json --marketplace lstack-local
+```
+
+The generated archive is self-contained:
+
+```text
+lstack-codex-0.3.0/
+  .agents/plugins/marketplace.json  # lstack-local
+  plugins/lstack/
+    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.3.0
+    README.md
+    LICENSE
+    manifest.json
+    provenance.json
+    skills/<member>/SKILL.md        # 41 independent members
+```
+
+The marketplace entry uses `source: {"source": "local", "path": "./plugins/lstack"}`,
+`policy.installation: AVAILABLE`, `policy.authentication: ON_INSTALL`, and
+`category: Productivity`, following the official local example. Its path is
+relative to the **marketplace root**, not `.agents/plugins/`. The policy field
+is catalog metadata; this skills-only plugin adds no service authentication.
+The result JSON reports the extraction-relative `marketplace_root` and
+`plugin_root`. Skills and resources stay at the plugin root, not inside the
+metadata directory. Skill-local `agents/` remain resources, not native agents.
+
+After installation ask Codex, for example: "Use the lstack code-review skill to
+review this repository; confirm which SKILL.md you loaded before proceeding."
+The independently exported `drawio-generator` and `excalidraw-generator` are
+available alongside `diagram-generator`. Inspect `/plugins` and the skill
+picker for the names your client exposes; do not assume Claude's
+`/lstack:<skill>` syntax applies to Codex. There is no `/lstack` orchestrator.
+If standalone copies coexist, check the selected skill's path rather than
+assuming which copy an unqualified invocation loads. Read member prerequisites
+and approval gates before running any workflow.
+
+**This repository is not a hosted Codex marketplace.** Do not register
+`luongnv89/skills` expecting generated contents to be present remotely. The
+source checkout contains authoring metadata, not the ignored generated catalog
+or hundreds of duplicated skill files. Clone/build/extract locally, or share a
+trusted generated ZIP and extract it before registering its root.
+
+For updates select a newer trusted commit, build/extract to a **new** directory
+and register that local marketplace root again; inspect `marketplace list` to
+confirm the resolved path. Reinstall using `/plugins` (or the version-verified
+`plugin add` command) and start a new session. A marketplace refresh alone does
+not rebuild this repository's artifacts. Use a fresh `--output` filename for
+repeat builds and retain old artifacts for rollback. Do not assume Claude's
+update commands apply to Codex.
+
+### Verification and supported surfaces
+
+Native checks on Codex CLI 0.160.0 use a temporary `HOME`, `CODEX_HOME`, XDG paths
+and an empty working directory, with file-only credential storage and no copied
+credentials. Marketplace registration/listing, local installation and skill
+metadata discovery are checked without model execution. This proves native
+loading, not successful execution of every workflow. Desktop installation/UI,
+authenticated model sessions and all 41 workflows are not exercised. The
+current official overview supports CLI `/plugins` and Codex in the ChatGPT
+desktop app, but **not the IDE extension**. This local shell-oriented artifact
+is not a public-directory submission or a promise of web/mobile/cloud support.
+
+Official references (checked 2026-10-07):
+[portable package and marketplace format](https://developers.openai.com/plugins/build/plugins),
+[Agent Plugins 1.0 schema](https://agent-plugins.org/schemas/1.0.0/plugin.schema.json),
+[installation and supported surfaces](https://developers.openai.com/codex/plugins),
+and [isolated state via CODEX_HOME](https://developers.openai.com/codex/config-advanced).
+For older clients, upgrade to a version supporting this format; no compatibility
+artifact is emitted or silently substituted.
+
 ## Prerequisites and capability limits
 
 - Members retain their own approval gates, compatibility requirements and tool
@@ -233,7 +331,8 @@ Native validation checks manifests; it does not prove all member workflows ran.
   requires an appropriate registry/install setup. Simply extracting a ZIP or
   putting it in a plugin cache does **not** prove those preflights work. Use the
   installed-directory fallback supported by each member, or configure `asm`
-  separately. No runtime execution or host-native discovery is claimed here.
+  separately. Dependency-preflight success and runtime execution are not claimed
+  by packaging or native skill metadata discovery.
 - External `browse` from [garrytan/gstack](https://github.com/garrytan/gstack) is
   used by live-browser branches in `design-optimizer`, `viral-product-evaluator`
   and the optional live-URL path in `dont-make-me-think`. Follow those members' fail-soft evidence options
@@ -246,7 +345,7 @@ Native validation checks manifests; it does not prove all member workflows ran.
   modes, and `issue-resolver` from idd in ISSUE mode only. It also requires
   `asm`, Herdr, `git`, authenticated `gh`, and bundled `herdr-agent` resolved
   through its dependency preflight.
-- Claude's namespace and plugin cache do **not** repair the unchanged source
+- Claude's namespace and either host's plugin cache do **not** repair the unchanged source
   preflights. Several orchestrators look for global `~/.claude/skills/` or
   `~/.agents/skills/` copies or use `asm deps`; embedded sibling invocations can
   remain unqualified. A bundled sibling's presence is not proof that those
@@ -267,8 +366,8 @@ Native validation checks manifests; it does not prove all member workflows ran.
 ## Maintain and validate
 
 The manifest is an internal versioned contract, not itself a native plugin
-manifest. Its explicit `claude` metadata generates the native plugin manifest
-and local marketplace; the package version is the plugin version. New/removed tracked skill definitions require an explicit
+manifest. Its explicit `claude` and `codex` metadata generate their respective
+native plugin manifests and local marketplaces; the package version is the plugin version. New/removed tracked skill definitions require an explicit
 membership update: the builder rejects catalog/manifest drift. Bump the package
 version when changing its published membership/layout contract; member versions
 still follow the catalog's ordinary source-edit rules. Never hand-edit `dist/`.
@@ -276,8 +375,10 @@ still follow the catalog's ordinary source-edit rules. Never hand-edit `dist/`.
 ```bash
 python3 tests/test-lstack-packaging.py
 python3 tests/test-lstack-claude-packaging.py
+python3 tests/test-lstack-codex-packaging.py
 python3 scripts/build-lstack.py --check
 python3 scripts/build-lstack.py --target claude --check
+python3 scripts/build-lstack.py --target codex --check
 ```
 
 Tests use temporary Git repositories and the standard library, with a real-tree
