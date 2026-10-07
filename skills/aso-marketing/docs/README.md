@@ -26,7 +26,7 @@
 | "ASO plan for my app" | Build a keyword strategy with metadata optimization recommendations, validated against store policies |
 | "Increase app downloads organically" | Identify keyword gaps, conversion issues, and visibility improvements |
 | "Help me rank higher in the App Store / Google Play" | Audit metadata, research competitors, and optimize all store fields while avoiding policy violations |
-| "Check my listing for policy violations" | Scan metadata for prohibited keywords, trademark issues, and listing policy violations |
+| "Check my planned keywords for banned terms" | Scan proposed metadata for prohibited keywords and trademark issues (for a full App Review guideline audit, use appstore-review-checker) |
 | "App marketing plan" | Create a comprehensive ASO strategy covering search, conversion, localization, and store policy compliance |
 
 ## How It Works
@@ -74,6 +74,7 @@ asm install github:luongnv89/skills:skills/aso-marketing
 | `agents/compliance-checker.md` | Verify all proposed metadata against prohibited keyword and trademark rules |
 | `agents/executor.md` | Implement approved metadata changes into project files |
 | `agents/reviewer.md` | Run Phase 5 review checklist and Phase 6 best-practices verification |
+| `references/final-report.md` | Final Report status rules, examples, and reader checks |
 | `references/aso_best_practices.md` | Comprehensive ASO knowledge base covering keyword strategy, metadata rules, **store policy compliance (prohibited keywords, trademark rules, listing restrictions)**, conversion optimization, localization, and platform-specific techniques for 2025-2026 |
 
 ## Output
@@ -83,3 +84,4 @@ asm install github:luongnv89/skills:skills/aso-marketing
 - **Store Policy Compliance Report** — Validation of all proposed metadata against Apple and Google Play listing policies, trademark checks, and prohibited keyword scans
 - **Updated Metadata Files** — Optimized, policy-compliant metadata written to the project's canonical metadata directory
 - **ASO Summary Report** — Before/after comparison with compliance status, expected outcomes, and next steps
+- **Final Report** — A four-line closing block (`Result` / `Evidence` / `Uncertainty` / `Decision`) whose status is `COMPLETE`, `PARTIAL`, or `BLOCKED`, so a stopped or partly approved run is never reported as done

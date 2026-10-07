@@ -9,7 +9,7 @@
 - **Pre-launch app** — No live listing. Skip performance-baseline steps; focus on metadata creation and visual guidance.
 - **Metadata policy violation in proposed plan** — Compliance check (Phase 3) catches a prohibited term. Revise the plan silently, replace the violation, re-run compliance, present the corrected plan.
 - **Non-English primary locale** — Adapt all metadata templates, character limits, and keyword strategies to the target language.
-- **User rejects the plan** — Do not execute. Iterate in Phase 2, then re-run Phase 3 compliance check before presenting the revised plan.
+- **User rejects the plan** — Do not execute. Iterate in Phase 2, then re-run Phase 3 compliance check before presenting the revised plan. If the user ends the run without approving a plan, the Final Report status is `PARTIAL`.
 
 ## Platform-Specific Notes
 
@@ -48,6 +48,20 @@ A run is successful when all are verifiable:
 - [ ] **iOS keywords field has no duplicates with title/subtitle**.
 - [ ] **Metadata files written** — At least one file or correct directory structure exists.
 - [ ] **Summary report produced** — Changes Made, Metadata Comparison, Compliance, Next Steps.
+- [ ] **Final Report produced** — the four-line `Result` / `Evidence` / `Uncertainty` / `Decision` block in `references/final-report.md`, with a status that matches this checklist.
+
+A plan-only run (the user declines execution) treats the metadata-files and Summary Report items as not applicable.
+
+### Understanding criteria
+
+Review every happy-path and edge run's Final Report against these four reader checks (full table in `references/final-report.md`):
+
+- **Result is findable** — the first line gives the status, the app and store, and what was written.
+- **Facts and assumptions are separated** — character counts and scan counts are stated as checked; heuristic keyword volumes and untested ranking effects are labeled as uncertain.
+- **Claims are traceable** — every field change cites its before and after character count.
+- **Next decision is clear** — the pending approval is named, or the report says `No approval needed.` and names the remaining user action.
+
+Agent inspection cannot confirm human understanding. If no human reviewer answers these checks, record human understanding as unconfirmed.
 
 ## Step Completion Reports
 

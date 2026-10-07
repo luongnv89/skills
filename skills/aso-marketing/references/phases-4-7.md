@@ -143,3 +143,5 @@ Cross-reference against `references/aso_best_practices.md`:
 ### Files Modified
 - [list all files created or modified with paths]
 ```
+
+After the Summary Report and the Phase 7 Step Completion Report, close the run with the four-line Final Report in `references/final-report.md`.
