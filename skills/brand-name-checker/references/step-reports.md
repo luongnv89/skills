@@ -73,8 +73,8 @@ After completing each major step, output a status report in this format. Use `�
 ```
 ◆ Risk Assessment (step 5 of 6 — risk level)
 ··································································
-  Trademark risk level:   √ pass — Low, no conflicts in classes 9/35/42
-  Overall risk score:     √ pass — Moderate
+  Highest trigger found:  √ pass — similar INPI mark in class 42
+  Overall risk level:     √ pass — Moderate
   [Criteria]:             √ 2/2 met
   ____________________________
   Result:                 PASS

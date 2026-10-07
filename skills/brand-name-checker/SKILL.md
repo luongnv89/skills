@@ -1,10 +1,10 @@
 ---
 name: brand-name-checker
-description: "Check product and brand names for conflicts across trademarks, domains, social handles, and package registries. Returns a risk level and Proceed/Modify/Abandon recommendation. Skip for name brainstorming, logo design, or trademark filings."
+description: "Check product and brand names for conflicts across trademarks, domains, social handles, and package registries. Returns a risk level and Proceed/Modify/Abandon verdict. Don't use for name brainstorming, logo design, or trademark filings."
 license: MIT
 effort: max
 metadata:
-  version: 1.4.2
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -14,93 +14,46 @@ Check product and brand names for conflicts across trademarks, domains, social m
 
 ## When to Use
 
-Use this skill before adopting a product or brand name. To stay within the agent's context budget, lean sections (templates, examples) live in `references/*.md` and per-source workers live in `agents/*.md` — only the orchestrator instructions are inlined here.
+Use before adopting a product or brand name. To save context budget, queries, edge cases, and templates live in `references/*.md`.
 
 ## Subagent Architecture
 
-This skill uses parallel subagents to handle 13+ sequential web fetches across independent sources. **Pattern**: B (Parallel Workers) + D (Research+Synthesis).
+Workers in `agents/` each return JSON: **social-checker** (6 platforms), **registry-checker** (npm, PyPI, Homebrew, apt), **domain-checker** (TLDs), **trademark-checker** (WIPO, EUIPO, INPI). The **synthesizer** applies the Step 5 risk policy.
 
-### Agents
-
-| Agent | Role | Output |
-|-------|------|--------|
-| **social-checker** | Search 6 platforms (Twitter, Instagram, GitHub, LinkedIn, TikTok, Discord) in parallel | JSON: per-platform availability status |
-| **registry-checker** | Check npm, PyPI, Homebrew, apt availability with owner info | JSON: per-registry status and owner details |
-| **domain-checker** | Check .com, .io, .app, .co, regional TLDs availability | JSON: per-TLD registration status |
-| **trademark-checker** | Search WIPO, EUIPO, INPI trademark databases | JSON: conflict analysis per database |
-| **synthesizer** | Apply risk matrix and produce final recommendation | Markdown + JSON: Risk level, verdict, alternatives |
-
-### Parallelization Strategy
-
-- **Early-Exit Rule**: If social-checker finds an exact handle taken on any of the 6 platforms, skip steps 2-4 (Registry, Domain, Trademark) and jump straight to the synthesizer with an "Abandon" verdict. This is referenced elsewhere in this file simply as the Early-Exit Rule.
-- **Independent Workers**: Registry, domain, trademark checkers run in parallel without dependencies
-- **Sequential Flow**: Social → (if clear) → Parallel {Registry, Domain, Trademark} → Synthesizer
-
-**Speedup**: ~4x faster than sequential approach (13+ web fetches parallelized into 2-3 waves).
+- **Flow**: Social → (if no exact handle is taken) → parallel {Registry, Domain, Trademark} → Synthesizer.
+- **Early-Exit Rule**: if social-checker finds an exact handle taken on any of the 6 platforms, skip Steps 2-4 and go straight to the synthesizer with an "Abandon" verdict.
+- **Without subagents**: run Steps 1-4 inline from `references/source-checks.md`, in the same order.
 
 ## Environment Check
 
-Before executing:
-1. Verify WebSearch and WebFetch tools are available
-2. Confirm internet connectivity for external service queries
-3. Check rate limits on social platforms and registries
+1. Before Step 1, confirm the WebSearch and WebFetch tools are available.
+2. Run one test query.
+3. If either check fails, stop and return the `BLOCKED` report from *Output Format* with the error.
 
 ## Repo Sync Before Edits (mandatory)
 
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote. See `references/repo-sync.md` for the exact `git fetch` / `git pull --rebase` commands and stash recovery flow.
+This skill writes no files by default. Before creating, updating, or deleting files in a repository, run the stash-first sync in `references/repo-sync.md`.
 
 ## Input
 
-Name to analyze provided in `$ARGUMENTS`. If empty, ask user for the name.
-
-Optionally check for `prd.md` in project to understand product context.
+Read the name from `$ARGUMENTS`; if empty, ask the user. If `prd.md` exists, read it for industry, target registries, and target domains.
 
 ## Analysis Protocol
 
-**Early-Exit Rule applies** (see Subagent Architecture above): an exact social handle taken on any of the 6 platforms skips Steps 2-4 straight to Step 6 (Recommendation) with an "Abandon" verdict.
+Queries, check URLs, and status rules for Steps 1-4: `references/source-checks.md`. Record every result with its source.
 
 ### Step 1: Social Media Check (First Priority)
 
-Use WebSearch to check handles on:
-- X/Twitter: `"@[NAME]" site:twitter.com OR site:x.com`
-- Instagram: `"@[NAME]" site:instagram.com`
-- GitHub: `"[NAME]" site:github.com/[NAME]`
-- LinkedIn: `"[NAME]" site:linkedin.com/company`
-- TikTok: `"@[NAME]" site:tiktok.com`
-- Discord: `"[NAME]" site:discord.com`
-
-**If exact handle taken (Early-Exit Rule):** Return `NEGATIVE: Exact social handle taken (@platform)` and STOP. Suggest different name.
+Search X/Twitter, Instagram, GitHub, LinkedIn, TikTok, and Discord. If an exact handle is taken (Early-Exit Rule), return `NEGATIVE: Exact social handle taken (@platform)` and skip to Step 6.
 
 ### Step 2: Package Registry Check (if Step 1 clear)
 
-Package registries are first-come-first-served namespaces. Unlike GitHub (which allows duplicate project names), registries enforce unique names — once someone claims "your-name" on PyPI or npm, you cannot publish under that name. This makes registry checks urgent: if the name is taken on a registry you plan to publish to, you either need a different name or a naming variant (e.g., prefix/suffix).
-
-Use WebFetch to check these registries directly:
-
-| Registry | Check URL | Taken if... |
-|----------|-----------|-------------|
-| **npm** | `https://registry.npmjs.org/[NAME]` | Returns JSON with package data (not a 404) |
-| **PyPI** | `https://pypi.org/pypi/[NAME]/json` | Returns JSON with package data (not a 404) |
-| **Homebrew** | `https://formulae.brew.sh/api/formula/[NAME].json` | Returns JSON (not a 404) |
-| **apt** | Search: `"[NAME]" site:packages.debian.org OR site:packages.ubuntu.com` | Package listing found |
-
-For each registry, report:
-- **Available**: 404 / not found from the registry source — record the source evidence and scope
-- **Taken**: Package exists — note the owner, description, and last publish date (a recently claimed but empty package could indicate namespace squatting)
-- **Similar**: No exact match but close variants exist (e.g., `name-js`, `py-name`) — worth noting
-
-**If the name is taken on any target registry**, flag it prominently and suggest variants (e.g., `name-cli`, `name-py`, `name-lib`, prefixed with org scope like `@org/name` for npm). If target registry intent is missing or unverifiable, record it as unknown rather than treating every registry as clear.
+Check npm, PyPI, Homebrew, and apt as Available, Taken (owner, last publish date), Similar, or Unknown. If target registry intent is missing or unverifiable, record it as unknown rather than treating every registry as clear.
 
 ### Step 3: Domain Check (if Step 1 clear)
 
-Use WebSearch to check:
-- `.com` (highest priority)
-- `.io`, `.app`, `.co`
-- Regional: `.eu`, `.fr`
+Check `.com` first, then `.io`, `.app`, `.co`, `.eu`, `.fr`:
 
-Search: `site:[NAME].com` and `"[NAME].com" domain availability`
-
-**Status:**
 - Available: an authoritative availability result confirms the domain is unregistered
 - Parked: Domain exists but is for-sale/parking
 - Active: In use (flag if same industry)
@@ -108,15 +61,7 @@ Search: `site:[NAME].com` and `"[NAME].com" domain availability`
 
 ### Step 4: Trademark Check (if Step 1 clear)
 
-Use WebSearch for trademark databases:
-
-| Database | Search Query |
-|----------|--------------|
-| WIPO | `"[NAME]" site:branddb.wipo.int` |
-| EUIPO | `"[NAME]" site:euipo.europa.eu` |
-| INPI (France) | `"[NAME]" site:inpi.fr` |
-
-Focus on Nice Classes 9, 35, 42 (software/technology). Note if marks are live or expired.
+Search WIPO, EUIPO, and INPI in Nice Classes 9, 35, 42; record each mark as live or expired.
 
 ### Step 5: Risk Assessment
 
@@ -149,38 +94,26 @@ Follow the recommendation semantics above and the registration order in Final Ac
 
 ## Output Format
 
-Return this compact text report. Replace bracketed fields with observed evidence only; use `Unknown` when a check is unverifiable and `Skipped (not cleared)` for checks omitted by the Early-Exit Rule. The `RISK` line must state the highest matching trigger and its policy rationale, not only the level.
+Return this compact text report, the only format: it fits on one screen, so it needs no HTML or interactive view. Replace bracketed fields with observed evidence only. Use `Unknown` when a check is unverifiable and `Skipped (not cleared)` for checks omitted by the Early-Exit Rule. The `RISK` line must state the highest matching trigger and its policy rationale, not only the level. Keep `RISK` and `RECOMMEND` as the last two lines; callers read them.
 
 ```
+RESULT: [COMPLETE | PARTIAL | BLOCKED] - [N/M checks verified; unknown and skipped counts]
 SOCIAL: [Clear | NEGATIVE: reason | Unknown: reason]
 REGISTRY: npm ([status]) | PyPI ([status]) | Homebrew ([status]) | apt ([status])
 DOMAIN: .com ([status]) | .io ([status]) | .app ([status])
 TM: WIPO ([status]) | EUIPO ([status]) | INPI ([status])
+EVIDENCE: [source queried for each status: URL or search query, and check time]
 SKIPPED: [sources, if any; skipped is not cleared]
+UNKNOWN: [checks not verified, why, and what would verify them | none]
 RISK: [Low | Moderate | High] - [highest matching trigger, evidence, and policy rationale]
-RECOMMEND: [Proceed | Modify | Abandon] - [reason and checked or unverified alternatives]
+RECOMMEND: [Proceed | Modify | Abandon] - [reason and checked or unverified alternatives]; next: [the user's decision and remaining actions]
 ```
 
-## PRD Integration
-
-If `prd.md` found, add:
-
-**Name Fit Assessment:**
-- Alignment with product vision
-- Memorability, pronunciation, spelling
-- Target audience fit
-
-**Alternative Suggestions:**
-
-| Name | Rationale | Quick Risk |
-|------|-----------|------------|
-| Name1 | Why it fits | Availability |
-| Name2 | Why it fits | Availability |
-| Name3 | Why it fits | Availability |
+`RESULT` status: **COMPLETE** when every check is verified or skipped by the Early-Exit Rule; **PARTIAL** when any check is Unknown; **BLOCKED** when no name was given or the web tools are unavailable (return only the `RESULT` line with the reason and fix). Before writing the report, read `references/output-contract.md` for the field rules and the `next:` clause. If `prd.md` exists, append the blocks from `references/prd-integration.md`.
 
 ## Step Completion Reports
 
-After each major step, emit a status report. The general template, plus per-step examples (Social, Registry, Domain, Trademark, Risk, Recommendation), live in `references/step-reports.md`. Adapt check names to what the step actually validates; use `√` for pass, `×` for fail.
+After each major step, emit a status report. The general template and per-step examples (Social, Registry, Domain, Trademark, Risk, Recommendation) live in `references/step-reports.md`. Adapt check names to what the step validates; use `√` for pass and `×` for fail.
 
 ## Acceptance Criteria
 
@@ -188,30 +121,30 @@ After each major step, emit a status report. The general template, plus per-step
 - Package registry status confirmed for npm, PyPI, Homebrew, and apt (unless the Early-Exit Rule fired)
 - Domain availability checked for .com and at least two alternative TLDs (unless the Early-Exit Rule fired)
 - Trademark search completed against WIPO, EUIPO, and INPI (unless the Early-Exit Rule fired)
-- Risk level assigned (Low / Moderate / High) with supporting rationale
+- Risk level assigned (Low / Moderate / High) with the highest matching trigger as rationale
 - Final recommendation delivered (Proceed / Modify / Abandon) with named alternatives if needed
+- Understanding: the first line states the `RESULT` status; verified statuses cite a source on `EVIDENCE` while unverified ones sit on `UNKNOWN`; `RISK` names its trigger; `RECOMMEND` ends with `next:`. Unanswered human review leaves understanding unconfirmed (`references/output-contract.md`)
 
 ## Expected Output
 
-For `check "acme-flow"` where no hard conflicts surface but `.com` is parked:
+Example of an Early-Exit run for `nimbus`; COMPLETE and PARTIAL runs: `references/output-contract.md`.
 
 ```text
-SOCIAL: Clear
-REGISTRY: npm (available) | PyPI (available) | Homebrew (available) | apt (available)
-DOMAIN: .com (taken) | .io (available) | .app (available)
-TM: WIPO (clear) | EUIPO (clear) | INPI (clear)
-RISK: Moderate - .com held by unrelated parked page; socials and registries clear
-RECOMMEND: Proceed - pair the .io domain with the clear social handles
+RESULT: COMPLETE - 6/16 checks verified; 0 unknown, 10 skipped by the Early-Exit Rule
+SOCIAL: NEGATIVE: Exact social handle taken (@github)
+REGISTRY: Skipped (not cleared)
+DOMAIN: Skipped (not cleared)
+TM: Skipped (not cleared)
+EVIDENCE: github.com/nimbus resolves to an active organization; checked 2026-01-15T10:31Z
+SKIPPED: registries, domains, trademarks; skipped is not cleared
+UNKNOWN: none
+RISK: High - exact social handle collision on GitHub (Early-Exit Rule)
+RECOMMEND: Abandon - nimbus-dev, nimbusly (both unverified); next: pick a candidate and run this check on it
 ```
 
 ## Edge Cases
 
-- **Exact social handle taken on any of the 6 platforms**: Early-Exit Rule (see Subagent Architecture) — skip all remaining checks and return an Abandon recommendation with alternative name suggestions.
-- **Rate-limited registry API**: Retry once after 5 seconds; if still blocked, mark the registry as "unchecked"/unknown and note it in the report — do not skip silently. Apply the unknown policy; do not infer availability.
-- **Trademark database unavailable**: Note the outage per database and mark the affected check unknown. Do not downgrade a known High finding; without a known High finding, use provisional Moderate + Modify pending verification.
-- **Name contains special characters or spaces**: Normalize to slug form (e.g., `my tool` → `my-tool`) before all checks; report both the original and normalized forms.
-- **Very short names (1–3 characters)**: Flag high trademark collision risk upfront; abbreviations are almost always claimed across social and TM databases.
-- **Name already in use by a well-known brand (typosquat risk)**: Escalate to High risk even if all technical checks pass.
+Rate limits, source outages, special characters, very short names, and typosquats: `references/edge-cases.md`. A rate-limited registry gets one retry after 5 seconds, then is marked unknown — do not skip silently or infer availability.
 
 ## Final Action
 

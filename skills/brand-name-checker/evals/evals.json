@@ -1,0 +1,108 @@
+{
+  "skill_name": "brand-name-checker",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Check whether 'quillstack' is a safe name for my new CLI tool. I plan to publish it on npm and Homebrew.",
+      "expected_output": "A compact report that opens with a RESULT line, gives one status per source for 6 social platforms, 4 registries, 3 domains and 3 trademark databases, cites the source of each verified status on EVIDENCE, lists unverified checks on UNKNOWN, and ends with RISK and RECOMMEND lines that apply the Step 5 policy with npm and Homebrew as target registries.",
+      "files": [],
+      "expectations": [
+        "The first line starts with 'RESULT:' followed by COMPLETE, PARTIAL, or BLOCKED and the count of verified checks",
+        "Has SOCIAL, REGISTRY, DOMAIN, TM, EVIDENCE, SKIPPED and UNKNOWN lines, with RISK and RECOMMEND as the last two lines",
+        "Treats npm and Homebrew as target registries: a confirmed collision on either one yields High risk",
+        "The EVIDENCE line names a URL or query for each verified status, such as registry.npmjs.org/quillstack",
+        "The RISK line names the highest matching trigger and its rationale, not only a level",
+        "The RECOMMEND line ends with a 'next:' clause naming the user's remaining decision",
+        "Any alternative name that was not checked is labeled unverified"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "/brand-name-checker github",
+      "expected_output": "The exact GitHub handle is taken, so the Early-Exit Rule fires: registries, domains and trademarks are reported as Skipped (not cleared), risk is High, the recommendation is Abandon, and suggested alternatives are labeled unverified.",
+      "files": [],
+      "expectations": [
+        "SOCIAL reports 'NEGATIVE: Exact social handle taken' for at least one platform",
+        "REGISTRY, DOMAIN and TM each read 'Skipped (not cleared)' and none of them is reported as clear or available",
+        "RISK is High and cites the exact social handle collision as the trigger",
+        "RECOMMEND is Abandon and every suggested alternative is labeled unverified",
+        "No registry, domain or trademark lookups run after the exact handle is confirmed"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Here's my PRD in prd.md for a meal-planning app called 'Platewise'. Is the name OK to use?",
+      "expected_output": "The compact report for 'Platewise', with target registries and domains read from prd.md, followed by the Name Fit Assessment and Alternative Suggestions blocks from references/prd-integration.md. RISK and RECOMMEND keep their compact form.",
+      "files": [],
+      "expectations": [
+        "Reads prd.md for industry and target registries before judging same-industry conflicts",
+        "Appends a Name Fit Assessment that quotes the PRD for vision, memorability and audience fit",
+        "Appends an Alternative Suggestions table whose Quick Risk column labels unchecked names unverified",
+        "The compact report's RISK and RECOMMEND lines are unchanged in form"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "Is 'Nova Path!' available as a product name? Note the EUIPO site has been down all day.",
+      "expected_output": "The name is normalized to 'nova-path' and both forms are reported. EUIPO is marked Unknown with the reason, RESULT is PARTIAL, and without a known High finding the risk is provisional Moderate with a Modify recommendation pending EUIPO verification.",
+      "files": [],
+      "expectations": [
+        "Reports both the original 'Nova Path!' and the normalized slug 'nova-path'",
+        "TM shows EUIPO as Unknown and the UNKNOWN line names EUIPO, the outage, and how to verify it",
+        "The RESULT line reads PARTIAL",
+        "If no High trigger was found, RISK is a provisional Moderate and RECOMMEND is Modify pending verification",
+        "Never reports Low risk or Proceed while any check is Unknown"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "prompt": "Check the name 'QX' for my startup.",
+      "expected_output": "The very short name is flagged up front for elevated trademark collision risk, which the Step 5 matrix treats as a High trigger, so the recommendation is Abandon with unverified alternatives.",
+      "files": [],
+      "expectations": [
+        "Flags the 1-3 character name for elevated trademark collision risk before or alongside the source checks",
+        "RISK is High and names the very-short-name trigger",
+        "RECOMMEND is Abandon and does not claim any alternative is available without checking it"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "prompt": "Check whether 'gooogle-docs' is free to use as my document editor's name.",
+      "expected_output": "The name is treated as a typosquat of a well-known brand and escalated to High risk with an Abandon recommendation, even if technical checks come back clear.",
+      "files": [],
+      "expectations": [
+        "Identifies the name as a near-copy of a well-known brand",
+        "RISK is High because of the typosquat conflict even when individual source checks are clear",
+        "RECOMMEND is Abandon; mitigation or available alternatives do not lower the High result"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Brainstorm 20 catchy names for my meditation app.",
+      "expected_output": "The skill does not trigger: name brainstorming is excluded by the description.",
+      "files": [],
+      "expectations": [
+        "Does not produce a RESULT/SOCIAL/REGISTRY/DOMAIN/TM availability report",
+        "Treats the request as name generation rather than a conflict check"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "File a US trademark application for my brand 'Lumora' in class 9 and fill out the USPTO form for me.",
+      "expected_output": "The skill does not trigger: trademark filing is excluded by the description.",
+      "files": [],
+      "expectations": [
+        "Does not run the social, registry, domain and trademark availability checks",
+        "Treats the request as a trademark filing task, not a name conflict check"
+      ]
+    }
+  ]
+}

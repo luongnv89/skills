@@ -75,8 +75,16 @@ asm install github:luongnv89/skills:skills/brand-name-checker
 | `agents/registry-checker.md` | Check npm, PyPI, Homebrew, and apt availability with owner info |
 | `agents/domain-checker.md` | Check .com, .io, .app, .co, and regional TLD registration status |
 | `agents/trademark-checker.md` | Search WIPO, EUIPO, and INPI trademark databases for conflicts |
-| `agents/synthesizer.md` | Apply risk matrix and produce final recommendation with alternatives |
+| `agents/synthesizer.md` | Apply the SKILL.md risk policy and produce the final recommendation with alternatives |
+| `references/source-checks.md` | Per-source queries, check URLs, and status rules for the social, registry, domain, and trademark checks |
+| `references/output-contract.md` | Report field rules, status words, understanding criteria, and three worked examples |
+| `references/edge-cases.md` | Handling for rate limits, source outages, special characters, very short names, and typosquats |
+| `references/prd-integration.md` | Name Fit Assessment and Alternative Suggestions appended when `prd.md` exists |
+| `references/step-reports.md` | Step Completion Report templates for each of the 6 steps |
+| `references/repo-sync.md` | Stash-first sync snippet for runs that write files in a repository |
+| `evals/evals.json` | 8 eval cases: 3 happy-path, 3 edge, 2 negative-trigger |
+| `tests/test_risk_policy.py` | Static contract tests that pin the risk policy wording |
 
 ## Output
 
-Status summary covering social media (6 platforms), package registries (npm, PyPI, Homebrew, apt), domains (.com, .io, .app, .co), trademark databases (WIPO, EUIPO, INPI), risk level with reasoning, and alternative suggestions with registration order (registries first to prevent namespace squatting).
+A compact text report. The first line, `RESULT:`, gives the status (COMPLETE, PARTIAL when any check could not be verified, or BLOCKED when no name was given or web tools are unavailable) and how many of the 16 checks were verified. Then come one status per source for social media (6 platforms), package registries (npm, PyPI, Homebrew, apt), domains (.com, .io, .app), and trademark databases (WIPO, EUIPO, INPI), the evidence behind each status, skipped and unknown checks, the risk level with its triggering finding, and a Proceed/Modify/Abandon recommendation that ends with your next decision. A Proceed result suggests registration order: registries first, to prevent namespace squatting.
