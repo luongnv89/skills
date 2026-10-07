@@ -13,6 +13,11 @@ The skill run is considered successful when all of the following are verifiable:
 - [ ] **Scope of static analysis declared** — The report includes a section or note listing items that require manual verification (runtime behavior, screenshot accuracy, backend API behavior, etc.).
 - [ ] **Phase 4 (Fixer) conditional** — The fixer agent is only offered after the user reviews the report and explicitly approves which FAILs to fix. No code changes are made automatically.
 - [ ] **No entitlements modified** — The fixer agent does not touch `.entitlements` files or App Store Connect configuration.
+- [ ] **Final Report produced** — The run ends with the four-line Final Report (`references/final-report.md`), and its status follows that file's status table.
+
+Not applicable items: in a metadata-only or no-source audit, the code-level items are not applicable once each skipped code-level guideline is marked `N/A (no source)`. When the user declines every fix, the Phase 4 items are not applicable.
+
+These items check correctness only. Also review the Final Report against the four reader checks in `references/final-report.md` (*Reader checks*).
 
 ## Step Completion Reports
 

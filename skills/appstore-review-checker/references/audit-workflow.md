@@ -119,9 +119,11 @@ Based on this audit, here's what to do before submitting:
 
 ### Verdict Criteria
 
-- **LIKELY PASS** — Zero FAILs, few warnings, and those warnings are minor or likely OK
-- **AT RISK** — Zero FAILs but multiple warnings that could go either way, OR 1-2 minor FAILs that are easy fixes
-- **LIKELY REJECT** — Any FAIL on a Top 20 rejection trigger, or 3+ FAILs on any guidelines
+Apply the first row that matches. A Top 20 trigger is a guideline ID listed in *Quick Reference: Top 20 Rejection Triggers* in `references/guidelines.md`.
+
+1. **LIKELY REJECT** — At least one FAIL on a Top 20 trigger, or 3 or more FAILs.
+2. **AT RISK** — 1-2 FAILs, none on a Top 20 trigger; or 0 FAILs and 3 or more WARNINGs.
+3. **LIKELY PASS** — 0 FAILs and 0-2 WARNINGs.
 
 ## Phase 4: Offer to Fix
 
