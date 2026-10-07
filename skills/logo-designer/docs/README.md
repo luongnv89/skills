@@ -9,6 +9,8 @@
 
 > Design professional, modern logos with automatic project context detection and multiple SVG deliverables.
 
+Version: **1.4.0** · Author: Luong NGUYEN · License: MIT
+
 ## Highlights
 
 - Analyze project type (CLI, SaaS, Startup, Enterprise, Consumer) for style selection
@@ -70,6 +72,7 @@ asm install github:luongnv89/skills:skills/logo-designer
 - 7 SVG files in `/assets/logo/` (full, mark, wordmark, icon, favicon, white, black)
 - Design rationale document with color specifications
 - Brand kit suggestions with Tailwind config
+- A closing Final Report that opens with `Result: COMPLETE | PARTIAL | BLOCKED`, then Evidence, Uncertainty and Decision
 
 ## Example
 

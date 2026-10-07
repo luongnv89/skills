@@ -4,7 +4,7 @@ description: "Generate professional SVG logos from project context: 7 brand vari
 license: MIT
 effort: medium
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -49,21 +49,20 @@ Final Output: 7 SVG files in /assets/logo/ + brand-showcase.html + Design Ration
 **Key Insight**: 7 SVG files generated inline is the single biggest context cost. Brand research across multiple project files adds to the burden. The reviewer acts as a quality gate to catch SVG structure issues before files are committed.
 
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote. If the working tree is not clean, stash first, sync, then restore:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
+dirty=0
+if [ -n "$(git status --porcelain)" ]; then
+  git stash push -u -m "pre-sync"
+  dirty=1
+fi
 git fetch origin
 git pull --rebase origin "$branch"
-```
-
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
+if [ "$dirty" -eq 1 ]; then
+  git stash pop
+fi
 ```
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
@@ -177,6 +176,17 @@ Typography: Inter Bold for wordmark
 - **favicon.svg complexity**: At 16×16 the full mark is unreadable — always simplify to 2 layers (outer + inner) and drop the middle detail layer; preserve proportional geometry.
 - **User rejects the proposed style**: Iterate on Phase 2 (style selection) until the user approves before generating any SVG files.
 
+## Final Report
+
+End every run, stops included, with this compact text block. Status is `COMPLETE` (all 7 SVGs and `brand-showcase.html` written, geometry verification passed), `PARTIAL` (files written, a check still fails), or `BLOCKED` (no files written). A question that awaits the user's answer does not end the run; if the user ends the run without answering, the status is `BLOCKED`. Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
+
+```text
+Result: COMPLETE. Wrote 7 SVGs and brand-showcase.html to /assets/logo/.
+Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters. Default Quality Bar passed. sync: skipped (not a git repo)
+Uncertainty: Assumed a developer-tool audience from the CLI entry point; the user did not say.
+Decision: No approval needed. Export PNG sizes from logo-icon.svg if you need raster assets.
+```
+
 ## Acceptance Criteria
 
 - [ ] All 7 SVG files are written to `/assets/logo/` with the correct filenames
@@ -189,6 +199,8 @@ Typography: Inter Bold for wordmark
 - [ ] Color specification includes hex codes for all palette roles
 - [ ] Wordmark casing is confirmed with the user before any SVG containing text is generated
 - [ ] Every SVG and the showcase page meet the Default Quality Bar (professional, production-ready, elegant, premium) without the user asking
+- [ ] The Final Report opens with `Result:` and its status, and has `Evidence:`, `Uncertainty:`, and `Decision:` lines. `Evidence:` cites only checks that ran
+- [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear). Without a human reviewer's answer, human understanding is unconfirmed
 
 ## Step Completion Reports
 
