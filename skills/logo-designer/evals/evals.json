@@ -1,0 +1,99 @@
+{
+  "skill_name": "logo-designer",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Design a logo for this project. The README describes fastbuild, a CLI build tool for developers.",
+      "expected_output": "Project analysis summarized, a style proposed and confirmed, wordmark casing confirmed, then 7 SVGs written to /assets/logo/ with logo-mark.svg first, geometry verified by reading back the variants, brand-showcase.html generated, and a Final Report.",
+      "files": [],
+      "expectations": [
+        "Summarized the detected product identity (name, type, purpose, audience, existing colors) before designing",
+        "Confirmed the style selection and the wordmark casing with the user before generating any text-bearing SVG",
+        "Wrote logo-mark.svg first and derived the 6 sibling variants from its exact path data",
+        "Read back the mark, full, icon, white and black variants and verified the d=\"\" strings are identical or correctly scaled via transform",
+        "Every SVG has a correct viewBox and contains no embedded rasters; favicon.svg is a simplified 2-layer mark at 16x16",
+        "The Final Report opens with a Result: line carrying COMPLETE and the files written",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence names the geometry read-back and the svg-reviewer result, and Uncertainty labels each assumption as an assumption",
+        "The Final Report's Decision: line names the pending choice or says No approval needed"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Our brand colors are teal #0D9488 and amber #F59E0B. Create the logo suite for our SaaS dashboard, wordmark as \"Acornly\" in title case.",
+      "expected_output": "The detected brand colors are used instead of the default dark/neon-green palette, the casing answer is accepted without re-asking, and the full 7-SVG suite plus showcase page is delivered with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Used teal #0D9488 and amber #F59E0B instead of the default dark base plus neon-green palette",
+        "Confirmed the detected brand colors with the user before proceeding, or noted the user's message as that confirmation",
+        "Did not ask again about wordmark casing, because the user already specified title case",
+        "Monochrome variants differ from logo-full.svg only in color, not geometry",
+        "The Final Report opens with Result: and its status, and its Evidence: line cites only checks that ran"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "name": "no-project-context",
+      "prompt": "Make me a logo.",
+      "expected_output": "The skill finds no project context and asks for the product name, product type, and one-sentence purpose before generating anything.",
+      "files": [],
+      "expectations": [
+        "Checked README.md, package.json, pyproject.toml, Cargo.toml and go.mod for product identity",
+        "Asked for the product name, product type, and one-sentence purpose",
+        "Wrote no SVG file before the user answered",
+        "If the run ends without an answer, the Final Report status is BLOCKED and the Decision: line names the missing information"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "name": "geometry-divergence",
+      "prompt": "Design a logo for my notes app. After generating, the icon variant's paths don't match the mark.",
+      "expected_output": "The Phase 3 verification catches the divergence: the variants are read back, the d=\"\" strings are diffed, and the icon is fixed from the canonical mark's path data before the run finishes.",
+      "files": [],
+      "expectations": [
+        "Read back the mark, full, icon, white and black variants and compared the d=\"\" strings",
+        "Re-derived the diverging variant from logo-mark.svg's exact path data instead of paraphrasing the shape",
+        "Did not declare the run finished while a variant's geometry diverged",
+        "If the divergence is still unresolved at the end, the Final Report status is PARTIAL and names the failing file"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "name": "casing-not-specified",
+      "prompt": "Generate the full logo set for DataPipe, our ETL CLI.",
+      "expected_output": "The skill asks explicitly how the product name should be cased in the wordmark before generating any text-bearing SVG.",
+      "files": [],
+      "expectations": [
+        "Asked for the wordmark casing before generating logo-full.svg or logo-wordmark.svg",
+        "Generated no text-bearing SVG before the casing answer",
+        "A text-free asset such as the mark may proceed only if the style confirmation gate was also satisfied"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Draw a detailed illustration of a forest cabin for our blog post header.",
+      "expected_output": "The skill does not trigger: illustrations are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "logo-designer did not trigger",
+        "No SVG logo variants or brand-showcase.html were produced"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "We need full brand guidelines: voice and tone, typography scale, spacing system, and usage rules.",
+      "expected_output": "The skill does not trigger: full brand guidelines are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "logo-designer did not trigger",
+        "No /assets/logo/ directory was created"
+      ]
+    }
+  ]
+}
