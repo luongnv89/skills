@@ -56,28 +56,46 @@ def _reject_constant(value: str) -> None:
 
 def _validate_verdicts(payload: Any) -> Dict[str, str]:
     if not isinstance(payload, dict):
-        raise InputError(f"input must be a JSON object, got {type(payload).__name__}")
+        raise InputError(
+            f"input must be a JSON object, got {type(payload).__name__}"
+            ' — pass {"verdicts": {"1": "PASS", ...}}'
+        )
     if any(not isinstance(key, str) for key in payload):
-        raise InputError("top-level keys must be strings")
+        raise InputError("top-level keys must be strings — quote every key")
     if "verdicts" not in payload:
-        raise InputError("missing required top-level key: verdicts")
+        raise InputError(
+            "missing required top-level key: verdicts"
+            ' — the payload must be {"verdicts": {"1": "PASS", ...}}'
+        )
     extra = sorted(set(payload) - {"verdicts"})
     if extra:
-        raise InputError(f"unexpected top-level key(s): {', '.join(extra)}")
+        raise InputError(
+            f"unexpected top-level key(s): {', '.join(extra)}"
+            ' — only "verdicts" is allowed'
+        )
 
     verdicts = payload["verdicts"]
     if not isinstance(verdicts, dict):
-        raise InputError(f"verdicts must be a JSON object, got {type(verdicts).__name__}")
+        raise InputError(
+            f"verdicts must be a JSON object, got {type(verdicts).__name__}"
+            " — map each principle number to PASS, PARTIAL or FAIL"
+        )
 
     keys = set(verdicts)
     if any(not isinstance(key, str) for key in keys):
-        raise InputError("verdict keys must be strings")
+        raise InputError('verdict keys must be strings — use "1" ... "32"')
     unknown = sorted(keys - EXPECTED_KEYS, key=_sort_key)
     if unknown:
-        raise InputError(f"unknown principle key(s): {', '.join(unknown)}")
+        raise InputError(
+            f"unknown principle key(s): {', '.join(unknown)}"
+            " — use only principle numbers 1-32"
+        )
     missing = sorted(EXPECTED_KEYS - keys, key=_sort_key)
     if missing:
-        raise InputError(f"missing principle verdict(s): {', '.join(missing)}")
+        raise InputError(
+            f"missing principle verdict(s): {', '.join(missing)}"
+            " — score all 32 principles; use FAIL for absent features"
+        )
 
     validated: Dict[str, str] = {}
     for key in sorted(EXPECTED_KEYS, key=_sort_key):
@@ -140,13 +158,21 @@ def _read_payload(input_path: str) -> Any:
         try:
             raw = path.read_bytes()
         except OSError as exc:
-            raise InputError(f"cannot read --input file {path}: {exc}") from exc
+            raise InputError(
+                f"cannot read --input file {path}: {exc}"
+                " — check the path exists and is readable, or pass '-' for stdin"
+            ) from exc
     if not raw.strip():
-        raise InputError("input is empty")
+        raise InputError(
+            "input is empty"
+            ' — provide a JSON object like {"verdicts": {"1": "PASS", ...}} covering all 32 principles'
+        )
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as exc:
-        raise InputError(f"input is not valid UTF-8: {exc}") from exc
+        raise InputError(
+            f"input is not valid UTF-8: {exc} — re-encode the payload as UTF-8"
+        ) from exc
     try:
         return json.loads(
             text,
@@ -156,7 +182,10 @@ def _read_payload(input_path: str) -> Any:
     except InputError:
         raise
     except json.JSONDecodeError as exc:
-        raise InputError(f"input is not valid JSON: {exc}") from exc
+        raise InputError(
+            f"input is not valid JSON: {exc}"
+            ' — fix the JSON syntax; the payload must be one object with a "verdicts" key'
+        ) from exc
 
 
 def _parser() -> argparse.ArgumentParser:

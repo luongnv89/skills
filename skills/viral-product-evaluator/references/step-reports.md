@@ -1,6 +1,7 @@
 # Step Completion Reports
 
-Emit one after each phase. Use `√` pass, `×` fail, `—` for context.
+Emit one after each phase. Use `√` pass, `×` fail, `—` for context. In an orchestrated run,
+append `· orchestrated by <name>` to the header line of each report.
 
 ## Phase 1 — Resolve & Gather Evidence
 
@@ -39,7 +40,7 @@ Emit one after each phase. Use `√` pass, `×` fail, `—` for context.
   Each fix is actionable:  √ pass — quotes current + proposed
   Strengths listed:        √ pass
   Caveats listed:          √ pass
-  Report written:          √ pass — <file path> (always written, also printed inline)
+  Report written:          √ pass — <file path> | returned inline (write declined → PARTIAL)
   ____________________________
   Result:                  PASS | PARTIAL | FAIL
 ```

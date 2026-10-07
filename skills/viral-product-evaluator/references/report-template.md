@@ -3,21 +3,28 @@
 Produce the report in this exact order and shape. Keep it scannable — the user wants
 "what's satisfied" and "what to do next, in priority order", not an essay.
 
-Always write the report to `viral-evaluation.md` — at the repo root, or in the current working
-directory when there is no repo. Also print the verdict block + top fixes inline so the user
-sees the headline result without opening the file.
+Write the report to `viral-evaluation.md` — `output-dir` when given, else the repo root, else
+the current working directory — after the user's confirmation (SKILL.md Phase 3). When the
+user declines the write, return the full report inline instead and mark the run PARTIAL.
+Either way, print the verdict block + top fixes inline so the user sees the headline result
+without opening the file.
 
 ---
 
 ## 1. Verdict block (print inline + top of file)
 
 ```
+Result: <PASS | PARTIAL> — <one-line reason when PARTIAL>
 Virality Score: <NN>/100 — <Tier>
 Product: <name or one-line description>
 Evaluated: <landing page source> · <codebase path>
 
 PASS: <n>/32   PARTIAL: <n>/32   FAIL: <n>/32
 ```
+
+The `Result` word comes from the status rule in `references/final-report.md`; a BLOCKED run
+writes no report, so the word here is never `BLOCKED`. In an orchestrated run, add
+`Orchestrated by: <name>` under `Evaluated:`.
 
 ## 2. Scorecard (all 32, grouped, with one-line evidence)
 

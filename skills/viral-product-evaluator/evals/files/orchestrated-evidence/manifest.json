@@ -1,0 +1,24 @@
+{
+  "url": "https://orchestrated-fixture.invalid/",
+  "final_url": "https://orchestrated-fixture.invalid/",
+  "captured_at": "2026-10-06T08:00:00Z",
+  "target_type": "live-url",
+  "files": {
+    "page.html": {"status": 200},
+    "head.json": {"status": "derived"},
+    "screenshots": {"status": "skipped", "reason": "browse not installed"},
+    "robots.txt": {"status": 404, "reason": "not found"},
+    "sitemap.xml": {"status": 403, "reason": "blocked"},
+    "llms.txt": {"status": 404, "reason": "not found"}
+  },
+  "owners": {
+    "clarity": "dont-make-me-think",
+    "brand": "ux-ax-review", "responsive": "ux-ax-review", "accessibility": "ux-ax-review",
+    "performance": "ux-ax-review", "conversion": "ux-ax-review",
+    "robots-sitemap": "ux-ax-review", "markdown-pages": "ux-ax-review",
+    "crawler-access": "ux-ax-review",
+    "structured-data": "ux-ax-review", "llms-txt": "ux-ax-review", "ai-actions": "ux-ax-review",
+    "agent-readiness-scan": "not-covered: user declined third-party send",
+    "virality": "viral-product-evaluator", "meta-tags": "viral-product-evaluator"
+  }
+}
