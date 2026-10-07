@@ -14,7 +14,96 @@
         "Reports a file the manifest records as blocked as 'not tested', not as missing.",
         "Lists every proposed fix as 'needs source repo' and asks for no plan or diff approval.",
         "Does not run Repo Sync, Step 6 or Step 7, and writes nothing into the evidence dir.",
-        "Writes seo-audit-report.md to output-dir and lists agent-readiness-scan as skipped — owned by its owner."
+        "Writes seo-audit-report.md to output-dir and lists agent-readiness-scan as skipped — owned by its owner.",
+        "The Final Report's Result: line says live evidence only and counts the fixes listed as needs source repo",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence: cites only checks that ran, and Uncertainty: labels each assumption as an assumption",
+        "The Final Report's Decision: line names the pending approval or says No approval needed"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Optimize my Next.js marketing site for SEO and make sure GPTBot and ClaudeBot can crawl it. The repo is the current directory.",
+      "expected_output": "Runs Repo Sync before any edit, runs scripts/audit_seo.py, reports findings grouped Critical / Warning / Info with file paths, proposes a prioritized plan and waits for approval, shows a diff and gets confirmation per file, re-runs the audit to show critical issues at 0, offers the Step 8 handoff, and closes with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Ran python scripts/audit_seo.py against the project root before reporting",
+        "Named the framework as Next.js in the audit report",
+        "Grouped findings by severity (Critical / Warning / Info) and cited a file path for each",
+        "Asked for plan approval and modified no file before the user approved",
+        "Showed a diff and asked for confirmation before writing each file",
+        "robots.txt allows GPTBot and ClaudeBot (or the report justifies a block), and llms.txt is created or justified",
+        "Re-ran audit_seo.py after the fixes and reported the before and after critical counts",
+        "Step 8 records an agent-readiness score or names the unmet condition that made it skip",
+        "The Final Report opens with a Result: line whose first word is the status (COMPLETE, PARTIAL or BLOCKED)",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence: cites only checks that ran, and Uncertainty: labels each assumption as an assumption",
+        "The Final Report's Decision: line names the pending approval or says No approval needed"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Audit SEO for this Astro blog, but don't change any files yet.",
+      "expected_output": "Runs the audit and presents the report and plan, writes no file, and closes with a COMPLETE Final Report whose Decision line names the plan awaiting approval.",
+      "files": [],
+      "expectations": [
+        "Ran scripts/audit_seo.py and presented findings grouped by severity",
+        "Presented a prioritized improvement plan",
+        "Did not create or modify any project file",
+        "Did not run Repo Sync, because nothing was modified",
+        "The Final Report opens with a Result: line whose first word is the status (COMPLETE, PARTIAL or BLOCKED)",
+        "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence: cites only checks that ran, and Uncertainty: labels each assumption as an assumption",
+        "The Final Report's Decision: line names the pending approval or says No approval needed"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "name": "no-git-repo",
+      "prompt": "Run an SEO audit on /tmp/static-site — it's just a folder of HTML files, not a git repo.",
+      "expected_output": "Stops on the git-repository prerequisite (no evidence-dir was given), reads and writes no file, and closes with a BLOCKED Final Report that names the missing git repo and the next action.",
+      "files": [],
+      "expectations": [
+        "Did not run audit_seo.py or modify any file",
+        "Named the git-repository prerequisite as the reason for stopping",
+        "The Final Report's Result: line starts with BLOCKED and says No audit report",
+        "The Final Report's Decision: line names how to continue (run from a git repo or use /search-optimizer with captured evidence)"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "name": "existing-custom-robots",
+      "prompt": "My robots.txt already has custom Disallow rules for /admin and /drafts. Add the AI bot directives without breaking them.",
+      "expected_output": "Merges GPTBot/ClaudeBot directives into the existing robots.txt, keeps every existing rule, shows the diff and waits for confirmation before writing.",
+      "files": [],
+      "expectations": [
+        "Kept the existing Disallow rules for /admin and /drafts",
+        "Showed a diff of robots.txt before writing it",
+        "Did not write robots.txt before the user confirmed",
+        "The Final Report's Evidence: line names robots.txt among the confirmed diffs"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "Improve my App Store listing keywords and subtitle for my iOS app.",
+      "expected_output": "seo-ai-optimizer does not trigger: App Store ASO is named in the negative-trigger clause (aso-marketing owns it).",
+      "files": [],
+      "expectations": [
+        "seo-ai-optimizer did not trigger, or declined and pointed to an ASO skill",
+        "No website file was audited or modified"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Write a 1500-word blog post about our new product launch.",
+      "expected_output": "seo-ai-optimizer does not trigger: blog writing is named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "seo-ai-optimizer did not trigger",
+        "No audit was run"
       ]
     }
   ]

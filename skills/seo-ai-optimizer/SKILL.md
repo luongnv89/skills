@@ -1,10 +1,10 @@
 ---
 name: seo-ai-optimizer
-description: "Audit and optimize websites for technical SEO, content SEO, and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, llms.txt, and GPTBot/ClaudeBot directives. Not for App Store ASO, paid search, or blog writing."
+description: "Audit and optimize websites for technical SEO, content SEO, and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, llms.txt, and GPTBot/ClaudeBot directives. Don't use for App Store ASO, paid search, or blog writing."
 license: MIT
 effort: high
 metadata:
-  version: 1.5.0
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -27,10 +27,9 @@ test -d "$HOME/.claude/skills/website-agent-readiness" ||
 }
 ```
 
-The install path is tested **before** `asm list`: this skill ships in the same repo as its
-dependency, so a repo-installed `website-agent-readiness` is present without the curated
-registry knowing the bare name — an `asm list` check alone would nag on every run, and a
-bare-name `asm install` would not resolve.
+Test the install path first: a repo-installed `website-agent-readiness` is absent from the
+curated registry, so an `asm list` check alone would nag on every run and a bare-name
+`asm install` would not resolve.
 
 On a miss, print those commands and **skip Step 8** (an orchestrated run that reuses a scan
 needs no install — see Orchestrated Runs) — Steps 1-7 audit the codebase and
@@ -40,50 +39,41 @@ skill does not re-check them.
 
 ## Repo Sync Before Edits (mandatory)
 
-Before modifying any project files, sync the current branch with remote:
+Before modifying any project files, sync the current branch with remote. Stash first, so a
+dirty working tree never meets a bare rebase:
 
 ```bash
+stashed=0
+if [ -n "$(git status --porcelain)" ]; then git stash push -u -m "pre-sync" && stashed=1; fi
 branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
+if git fetch origin && git pull --rebase origin "$branch"; then
+  if [ "$stashed" = 1 ]; then git stash pop; fi
+fi
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+If `origin` is missing, the pull fails, or the rebase or stash pop conflicts, stop and ask the
+user before continuing. A rebase conflict leaves the stash in place: run `git rebase --abort`,
+then `git stash pop`.
 
 ## Prerequisites
 
-Before starting the SEO audit, ensure the following:
-- **Environment:** The project must be managed by a git repository (except a live-evidence-only orchestrated run — see Orchestrated Runs).
-- **Tools:** Python 3.x must be installed and available in the path.
-- **Audit Script:** `scripts/audit_seo.py` (shipped with this skill) is invoked against the audited project: `python scripts/audit_seo.py <project-root>`.
-- **Access:** You must have write access to the project files and permission to create new files (robots.txt, llms.txt, etc.).
+- **Environment:** The project is a git repository (except a live-evidence-only orchestrated run — see Orchestrated Runs). Otherwise stop.
+- **Tools:** Python 3.x on the path, for the bundled `scripts/audit_seo.py`.
+- **Access:** Write access to the project, including new files (robots.txt, llms.txt).
 
 ## Quick Reference
 
-Consult these reference files as needed during the workflow:
-- `references/workflow-detail.md` — Detailed checklists, templates, and implementation steps
-- `references/technical-seo.md` — Full SEO checklist and best practices
-- `references/framework-configs.md` — Framework-specific configuration
+Read each file only when its step needs it, to keep the context window small:
+- `references/workflow-detail.md` — checklists, templates, implementation steps
+- `references/technical-seo.md` — full SEO checklist
+- `references/framework-configs.md` — framework-specific configuration
 - `references/ai-bot-guide.md` — AI crawler directives, llms.txt format, JSON-LD templates
 
 ## Environment Check
 
-This skill has two modes of operation:
-
-**With Subagent Architecture (Recommended):**
-If the Agent tool is available in your environment, the audit runs via a 4-phase subagent workflow for maximum accuracy and depth. See `references/subagent-architecture.md`.
-
-**Without Subagent Tool (Fallback):**
-If Agent is not available, the skill runs a complete audit in a single conversation. The end result (SEO audit report) is the same.
+If the Agent tool is available, run the 4-phase subagent workflow in
+`references/subagent-architecture.md`. Otherwise run the same audit in one conversation; the
+audit report is the same.
 
 ## Important
 
@@ -202,9 +192,26 @@ missing repo still stops the run.
 
 After each step, emit a `◆` status block. For templates and per-step check lists, see `references/step-reports.md`.
 
+## Final Report
+
+End every run, stops included, with a four-line `Result` / `Evidence` / `Uncertainty` /
+`Decision` block after the step reports; it never replaces the audit report. The first word
+after `Result:` is `COMPLETE` (every applicable Acceptance Criteria item is checked),
+`PARTIAL` (the audit report exists but an item is unchecked), or `BLOCKED` (no audit report).
+Status table, examples and fill rules: `references/final-report.md`.
+
 ## Acceptance Criteria
 
-See the itemized checklist in `references/workflow-detail.md` (Acceptance Criteria) — a run only passes when every item there is checked.
+See the itemized checklist in `references/workflow-detail.md` (Acceptance Criteria). A run
+passes only when every item there is checked. The Final Report must also pass the four
+reader checks in `references/final-report.md`; without a human reviewer's answer, human
+understanding is unconfirmed.
+
+## Edge Cases
+
+Existing custom robots.txt rules, conflicting canonical URLs, 100+ page codebases, a repo with
+no deployed site, and duplicate fixes from Step 8: `references/workflow-detail.md` (Edge
+Cases).
 
 ## Expected Output
 
@@ -213,6 +220,7 @@ After a full run, the agent should produce:
 2. **Implementation:** Modified or new files (robots.txt, llms.txt, sitemap.xml, JSON-LD) with confirmed changes.
 3. **Validation Report:** A post-fix verification showing critical issues reduced to 0.
 4. **Agent-Readiness Handoff:** The live-site score and `agent-ready-plan.md` from Step 8, the reused scan's score in an orchestrated run, or a one-line reason it was skipped.
+5. **Final Report:** The four-line closing block.
 
 For a concrete example of the audit report output, see `references/workflow-detail.md`.
 

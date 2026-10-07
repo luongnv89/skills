@@ -17,6 +17,7 @@
 - Handle large codebases by sampling representative files
 - Hand off to `/website-agent-readiness` for a live-site agent-readiness score
 - Under `/search-optimizer` with a URL and no repo, audit the captured live evidence only and list fixes as "needs source repo"
+- Close every run with a four-line Final Report (Result, Evidence, Uncertainty, Decision) and a COMPLETE, PARTIAL or BLOCKED status
 
 ## When to Use
 
@@ -73,6 +74,9 @@ asm install github:luongnv89/skills:skills/seo-ai-optimizer
 | `agents/implementer.md` | Apply SEO fixes (meta tags, robots.txt, llms.txt, structured data, sitemaps) |
 | `agents/validator.md` | Validate fixes and confirm improvements in generated report |
 | `references/` | Framework-specific configs and SEO checklists |
+| `references/final-report.md` | Final Report status rules, examples, fill rules and reader checks |
+| `references/step-reports.md` | Per-step completion report templates |
+| `evals/evals.json` | Trigger and behavior eval cases (happy-path, edge, negative-trigger) |
 | `scripts/` | Automated scanning and validation scripts |
 
 ## Requires
@@ -86,3 +90,4 @@ Step 8 invokes [`website-agent-readiness`](../../website-agent-readiness/). Inst
 - Applied fixes: meta tags, robots.txt, llms.txt, structured data, sitemaps
 - Validation results confirming improvements
 - Live-site agent-readiness score and `agent-ready-plan.md` (Step 8), or a stated reason it was skipped
+- A closing Final Report with the run status, the checks that ran, open uncertainty and the next decision
