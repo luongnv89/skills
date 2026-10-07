@@ -9,7 +9,7 @@
 
 > One run to optimize a website or app design: capture once, audit with every lens, get one prioritized report.
 
-Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -54,6 +54,7 @@ graph TD
 - `evidence/` with `manifest.json` (captured files + check owners)
 - `reports/<member>/` — each member's own report
 - `design-optimization.md` — the single merged, prioritized report
+- A closing response that opens with `Result: PASS | PARTIAL | BLOCKED`, then Evidence, Uncertainty and the apply offer as the Decision
 
 ## Requirements
 

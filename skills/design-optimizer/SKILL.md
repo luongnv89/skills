@@ -3,8 +3,15 @@ name: design-optimizer
 description: "Optimize a website or app design in one run: capture the page once, audit usability, UX/AX, virality and agent readiness, merge overlaps into one prioritized report, apply fixes on opt-in. Don't use for one lens (dont-make-me-think, ux-ax-review)."
 license: MIT
 effort: high
+dependencies:
+  - dont-make-me-think
+  - ux-ax-review
+  - website-agent-readiness
+  - viral-product-evaluator
+  - frontend-design
+  - browse
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (intake once → member audits with skip-checks → merged report → gated apply)"
 ---
@@ -50,29 +57,46 @@ so after seeing the report (or pass `mode:apply`) and to name which findings to 
 
 ## Dependency Preflight (mandatory)
 
-Check every member in one pass, before intake. Test the install path first: same-repo skills can
-be installed without the registry knowing the bare name.
+This skill invokes the six skills declared in frontmatter `dependencies`. Run this once, in
+Phase 1 before intake:
 
 ```bash
-reg="$(asm list -p claude --json 2>/dev/null || true)"
-missing_req=""; missing_opt=""
-for s in dont-make-me-think ux-ax-review website-agent-readiness viral-product-evaluator frontend-design; do
-  test -d "$HOME/.claude/skills/$s" || printf '%s' "$reg" | grep -q "\"$s\"" || {
-    case "$s" in dont-make-me-think|ux-ax-review) missing_req="$missing_req $s";; *) missing_opt="$missing_opt $s";; esac; }
-done
-for s in $missing_req $missing_opt; do
-  echo "Missing skill: $s — install: asm install github:luongnv89/skills:skills/$s -p claude --yes" >&2
-done
-[ -n "$missing_opt" ] && echo "Optional, will be skipped:$missing_opt" >&2
-[ -z "$missing_req" ] || { echo "No asm yet: npm install -g agent-skill-manager" >&2
-  echo "Verify: asm list -p claude --json | grep '\"<name>\"'" >&2; exit 1; }
+if command -v asm >/dev/null && asm deps --help >/dev/null 2>&1; then
+  asm deps discover design-optimizer --json || echo "discover failed; acquire still runs" >&2
+  echo "do_mode=lease"
+else
+  echo "asm deps unavailable: npm install -g agent-skill-manager@latest" >&2
+  echo "do_mode=installed"
+fi
+printf 'do_session=%s\n' "design-optimizer-$(date +%s)-$$"   # record it; reuse it verbatim
 ```
 
-- A missing **required** member stops the run before intake, with the install lines above.
-- A missing **optional** member is skipped; its checks fall back per `references/check-ownership.md`
-  and the merged report lists it under "Not covered". `frontend-design` becomes required only when
-  apply routes a finding to it — re-check then, and stop that apply item if it is missing.
-- Never substitute one member for another or hand-run a member's workflow inline.
+1. With `do_mode=lease`, run `asm deps acquire <member> --session <do_session> --json` for each
+   audit member (dont-make-me-think, ux-ax-review, website-agent-readiness,
+   viral-product-evaluator). Record each returned `skillMdPath`. Do not acquire `frontend-design`
+   or `browse` here — their branches are not reached yet.
+2. With `do_mode=installed`, test each audit member with
+   `test -f "$HOME/.claude/skills/<member>/SKILL.md" || test -f "$HOME/.agents/skills/<member>/SKILL.md"`,
+   falling back to the registry listing — `asm list -p claude --json | grep '"<member>"'` —
+   because same-repo skills can be installed without the registry knowing the bare name. Record
+   the path that exists.
+3. `dont-make-me-think` and `ux-ax-review` are **required**. If either fails step 1 or 2, print
+   `Missing skill: <member> — install: asm install github:luongnv89/skills:skills/<member> -p claude --yes`
+   and stop before intake; write nothing.
+4. `website-agent-readiness` and `viral-product-evaluator` are **optional**: a miss is fail-soft.
+   Skip the member, fall back per `references/check-ownership.md`, and list its checks under
+   "Not covered". `browse` is fail-soft too: acquire it at first use in intake, or test its
+   install path — a miss only drops screenshots (`references/intake.md` records the skip).
+   Check `frontend-design` only when apply routes a finding to it — acquire or test it then,
+   and skip that apply item if it is missing.
+5. **Release in `finally`.** If any acquire ran, run `asm deps release --session <do_session> --json`
+   once at every terminal outcome, stops included, after the final response. List a failed
+   release under `Uncertainty:`.
+
+Never substitute one member for another or hand-run a member's workflow inline. Members run
+their own preflights for their own dependencies (e.g. website-agent-readiness acquires
+`plan-to-issues` only at its G4); this preflight covers only what design-optimizer invokes
+directly.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -119,7 +143,13 @@ Run members in this order, each with the orchestrated-run block (format in
 4. **viral-product-evaluator** with `evidence-dir` and `output-dir`; no skips. Overlaps from
    these two are removed at merge time, not before the audit.
 
-Each member writes into `<output>/reports/<member>/`. Report each member's result as it finishes.
+Each member writes into `<output>/reports/<member>/`. Read each member's result from its own
+closing signal as it finishes — the `Result: PASS | PARTIAL | BLOCKED` line that ends a
+ux-ax-review, viral-product-evaluator or website-agent-readiness run, or the `**Result:**` line
+under the `> Orchestrated by:` line in dont-make-me-think's report — and report it to the user.
+A member's BLOCKED or errored run makes this run PARTIAL (see Safety). When a member ends with
+a question for the user (e.g. ux-ax-review's choice-of-IDs implementation offer), relay it
+verbatim; never answer it on the user's behalf.
 
 ### Phase 4 — Merge
 
@@ -190,9 +220,27 @@ After each phase, emit:
 ```
 
 Checks per phase: Preflight (members found, optional skips named); Intake (files captured,
-manifest written); Audit (each member ran or was skipped with reason, owners finalized); Merge
-(IDs covered once, duplicates merged, report written); Apply (opt-in explicit, gate passed).
+manifest written); Audit (each member ran or was skipped with reason, owners finalized, member
+`Result:` lines reported); Merge (IDs covered once, duplicates merged, report written); Apply
+(opt-in explicit, gate passed).
 Never report PASS while a member failed or a canonical check is silently missing.
+
+## Final response
+
+Close every run — audit, apply, or an early stop — with a chat response in this order:
+
+- `Result: PASS | PARTIAL | BLOCKED` — first line. PASS: the merged report is written and every
+  member that ran ended at its own passing status (`PASS`, or `COMPLETE` for
+  dont-make-me-think). PARTIAL: a member failed, errored, or itself ended PARTIAL.
+  BLOCKED: a required member was missing or intake failed; no report was written. An optional
+  member skipped at preflight is a declared scope reduction — listed under "Not covered" and
+  `Uncertainty:` — and does not by itself make the run PARTIAL.
+- `Evidence:` — the manifest path, each member report path with its `Result:` line, and the
+  merged report path.
+- `Uncertainty:` — skipped members and their uncovered checks, untested interactions the members
+  reported, member caveats, and any failed lease release.
+- `Decision:` — the apply offer by finding ID (audit mode), the per-finding confirmation results
+  (apply mode), or "No approval needed." when nothing is actionable.
 
 ## Edge Cases
 

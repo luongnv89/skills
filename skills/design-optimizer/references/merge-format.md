@@ -6,7 +6,7 @@ appears exactly once across the Findings, Skipped and Not covered sections.
 ```markdown
 # Design Optimization: <target>
 
-Run: design-optimizer 1.0.0 · <UTC timestamp> · mode: audit | apply
+Run: design-optimizer 1.1.0 · <UTC timestamp> · mode: audit | apply
 Evidence: <output>/evidence/manifest.json · AX ownership case: A | B | C
 Members: dont-make-me-think √ · ux-ax-review √ · website-agent-readiness √ (score 3/5) · viral-product-evaluator — skipped (not installed)
 
@@ -41,6 +41,21 @@ Members: dont-make-me-think √ · ux-ax-review √ · website-agent-readiness �
 ## Next step
 Apply is opt-in. Reply with finding IDs to fix (e.g. "apply D-01, D-04"); each routes to one member and its own confirmation gate.
 ```
+
+## Member status marks
+
+Each member on the `Members:` line carries the mark of its own closing `Result:` line
+(dont-make-me-think's is the `**Result:**` line under `> Orchestrated by:` in its report):
+
+| Mark | Member outcome |
+|---|---|
+| `√` | PASS (append a score in parentheses when the member reports one) |
+| `~ PARTIAL (reason)` | the member ended PARTIAL |
+| `× BLOCKED (reason)` / `× error (reason)` | the member ended BLOCKED or errored mid-run |
+| `— skipped (reason)` | not installed, branch not reached, or gate declined |
+
+Every member has exactly one mark. A member that ended PARTIAL or BLOCKED is never shown as `√`,
+and the run's final `Result:` line (SKILL.md → Final response) is never PASS in that case.
 
 ## Priority
 
