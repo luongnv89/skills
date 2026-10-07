@@ -4,7 +4,7 @@ description: "Find open AI engineering jobs that fit a candidate, verify locatio
 license: MIT
 effort: high
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: "Luong NGUYEN"
 ---
 
@@ -29,9 +29,9 @@ Terms used throughout:
 
 ## Inputs and branches
 
-- **Candidate:** Public GitHub/profile URL and any résumé or constraints the user has supplied. If none is available, ask for the profile before claiming a personal fit. If the user gives none, label the search unpersonalized. Re-read the public profile on each run; do not store a biography in this skill.
+- **Candidate:** Public GitHub/profile URL and any résumé or constraints the user has supplied. If no profile is available, ask for one before any personal-fit claim. If none arrives, or no one can answer (an unattended alert run), label the search unpersonalized. Re-read the public profile on each run; do not store a biography in this skill.
 - **Geography:** Build the **location rule**, the candidate's accepted work arrangements as testable conditions, from the user's work arrangement and home location. Hybrid in a city: admit a role only when its verified listing names that city and states an office-attendance policy. Fully remote: admit a role only when its verified listing says applicants in the user's country are eligible. Example: "Paris hybrid or fully remote from France" admits Paris hybrid roles with a stated attendance policy and remote roles open to France-based applicants. "Remote" with no eligible country or region is *unknown*, not worldwide. If hybrid is only inferred (for example, from where the candidate lives), label the fit conditional and ask the candidate to confirm.
-- **Cadence:** If a recurring alert has a prior report, compare against it and skip repeats unless the listing materially changed. If no prior report is available, state that deduplication was not verified; do not claim every pick is new. Check dates and open status on the run date.
+- **Cadence:** If a recurring alert has a prior report, compare against it and skip repeats unless the listing materially changed. If no prior report is available, state that deduplication was not verified; do not claim every pick is new.
 - **Count:** Default to three roles; use the user's count when given. Fewer qualifying roles is a valid result.
 - **Format:** Write the text report by default. If the count is above five, or the user asks to filter roles (for example by salary or remote policy), read `references/interactive-report.md` and build the HTML report instead, unless the user asks for text. If HTML cannot be produced here, say so and write the text report.
 
@@ -59,7 +59,7 @@ For *each* shortlisted role, read the employer's product/about pages, docs or en
 
 1. The product, its users or problem, and the role's documented responsibilities. Name the specific assigned project only when the listing or another employer source identifies it; otherwise label the assignment unknown.
 2. Where AI actually fits in the product and what is technically distinctive versus generic AI marketing.
-3. A candid **interestingness verdict** for this candidate, supported by concrete engineering problems, not prestige or funding alone.
+3. An **interestingness verdict** for this candidate: High, Medium, or Low, supported by concrete engineering problems, not prestige or funding alone.
 4. Unknowns or risks (e.g. unclear product maturity, vague AI remit, domain mismatch). Include funding, customer counts, revenue, and stage only when sourced and relevant; never infer traction from a polished site.
 
 **Gate:** At least one directly read company/project source beyond the job ad supports the product description for every ranked role. If none can be read, report the role as a near-miss instead of ranking it.
@@ -68,7 +68,11 @@ For *each* shortlisted role, read the employer's product/about pages, docs or en
 
 Rank by (in order) hard-gate certainty, relevant demonstrated skills, centrality of AI work, strength of the actual project, and posting recency. Do not assign numerical scores. State why #1 beats #2, including tradeoffs.
 
-Read `references/report-format.md` and draft the report in its order: **Result** (first line: `Complete`, `Partial`, or `None`, with K of N roles), **Search evidence**, **Ranked roles**, **Uncertainty**, and **Decision** ("No approval needed" plus the candidate's next actions). Check the draft against the Acceptance Criteria, print step 4's report block, then deliver.
+Read `references/report-format.md` and draft the report in its order: **Result** (first line: `Complete`, `Partial`, or `None`, with K of N roles), **Search evidence**, **Ranked roles**, **Uncertainty**, and **Decision** ("No approval needed" plus the candidate's next actions).
+
+1. Check the draft against the Acceptance Criteria.
+2. Print step 4's Step Completion Report.
+3. Deliver.
 
 ## Step Completion Reports
 
@@ -88,15 +92,15 @@ After each step, print one block. Its `Gate` line restates that step's **Gate**:
 | 3 | `Product sources read`, `Near-misses` |
 | 4 | `Ranked`, `Acceptance criteria`, `Format` (HTML: delivery check) |
 
-Status is PASS when the gate holds (from step 2, for every requested role), PARTIAL when it holds for fewer, and FAIL when it holds for none. Step 4's gate is the Acceptance Criteria. A FAIL still continues to step 4.
+Step 1's Status is PASS or FAIL on its gate. Steps 2–3 are PASS when the gate holds for the requested count, PARTIAL for fewer, FAIL for none. Step 4's gate is the Acceptance Criteria. A FAIL still continues to step 4.
 
 ## Expected output
 
-See `references/report-format.md` for each section's fields and a full example.
+See `references/report-format.md` for fields and a full example.
 
 ## Edge Cases
 
-- **An aggregator shows a role as active, but its verified listing is closed or unreachable:** Reject the role.
+- **An aggregator shows a role active, but its verified listing is closed or unreachable:** Reject it.
 - **No qualifying roles, or only a prior report's unchanged listings:** Report `None — 0 of N roles` with the filters applied; never pad the list or fabricate roles.
 
 ## Acceptance Criteria

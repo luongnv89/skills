@@ -15,7 +15,7 @@
       "prompt": "I am a senior Python LLM engineer in Lyon and only want fully remote positions that accept France. Compare the actual AI projects, not just the titles.",
       "expected_output": "Role shortlist constrained to France-eligible remote jobs with product interestingness verdicts and evidence.",
       "files": [],
-      "expectations": ["The run rejects generic 'remote' roles without confirmed France eligibility", "A missing candidate profile is requested or fit is labeled unpersonalized rather than invented", "Product and AI mechanism are researched separately from the listing", "The report's first line states the result status and count", "Each material claim links to the source that supports it", "The Decision line names the candidate's remaining actions, such as supplying a profile"]
+      "expectations": ["The run rejects generic 'remote' roles without confirmed France eligibility", "A missing candidate profile is requested or fit is labeled unpersonalized rather than invented", "Product and AI mechanism are researched separately from the listing", "Each ranked role's interestingness verdict is rated High, Medium, or Low and cites a concrete engineering problem", "The report's first line states the result status and count", "Each material claim links to the source that supports it", "The Decision line names the candidate's remaining actions, such as supplying a profile"]
     },
     {
       "id": 3,

@@ -19,6 +19,7 @@ Read this before writing the report. It is the content contract for both formats
 
 ## Rules
 
+- Check each role's posting date and open status on the run date; that run date is the role's checked date.
 - Put each source link next to the claim it supports.
 - Label each inference as an inference.
 - A reachable application form does not prove that the applicant qualifies or that a hiring team is responding.
