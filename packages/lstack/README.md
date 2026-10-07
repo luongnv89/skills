@@ -294,13 +294,29 @@ source checkout contains authoring metadata, not the ignored generated catalog
 or hundreds of duplicated skill files. Clone/build/extract locally, or share a
 trusted generated ZIP and extract it before registering its root.
 
-For updates select a newer trusted commit, build/extract to a **new** directory
-and register that local marketplace root again; inspect `marketplace list` to
-confirm the resolved path. Reinstall using `/plugins` (or the version-verified
-`plugin add` command) and start a new session. A marketplace refresh alone does
-not rebuild this repository's artifacts. Use a fresh `--output` filename for
-repeat builds and retain old artifacts for rollback. Do not assume Claude's
-update commands apply to Codex.
+For updates select a newer trusted commit and build/extract to a **new**
+directory. CLI 0.160.0 refuses to add an already-registered marketplace name
+from a different source, so replace the registration before reinstalling.
+These commands intentionally change your Codex configuration. Inspect the
+existing registration first and confirm `lstack-local` is this local,
+single-plugin marketplace; preserve any deliberate enabled/disabled settings.
+
+```bash
+# Set marketplace to the absolute NEW extracted lstack-codex-VERSION directory.
+codex plugin marketplace list
+codex plugin marketplace remove lstack-local
+codex plugin marketplace add "$marketplace"
+codex plugin marketplace list
+codex plugin add lstack@lstack-local --json
+```
+
+Confirm the listed root is the new directory, inspect `/plugins` and restore any
+deliberate disabled state, then start a **new session**. Registration replacement
+alone is not a plugin update: reinstall using `/plugins` or the version-verified
+`plugin add` command above. A marketplace refresh alone does not rebuild this
+repository's artifacts. Use a fresh `--output` filename for repeat builds and
+retain old artifacts for rollback. Do not assume Claude's update commands apply
+to Codex.
 
 ### Verification and supported surfaces
 

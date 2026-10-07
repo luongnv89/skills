@@ -160,7 +160,8 @@ class CodexPackagingTests(unittest.TestCase):
             if path.startswith("skills/"):
                 self.assertEqual(codex["plugins/lstack/" + path], value)
         doc = bundle["README.md"][0].decode()
-        for text in ("--target codex", "codex plugin marketplace add", "/plugins", "new session",
+        for text in ("--target codex", "codex plugin marketplace add", "codex plugin marketplace remove lstack-local",
+                     "/plugins", "new session",
                      "IDE extension", "not a hosted Codex marketplace", "CODEX_HOME",
                      "lstack-codex-" + adapted["package_version"]):
             self.assertIn(text, doc)
