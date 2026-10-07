@@ -28,7 +28,8 @@ test -d "$HOME/.claude/skills/website-agent-readiness" ||
 ```
 
 Test the install path first: a repo-installed `website-agent-readiness` is absent from the
-curated registry, so an `asm list` check alone would nag on every run.
+curated registry, so an `asm list` check alone would nag on every run and a bare-name
+`asm install` would not resolve.
 
 On a miss, print those commands and **skip Step 8** (an orchestrated run that reuses a scan
 needs no install — see Orchestrated Runs) — Steps 1-7 audit the codebase and
