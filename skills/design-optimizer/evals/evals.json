@@ -8,13 +8,15 @@
       "expected_output": "One run: preflight, a single intake into /tmp/do-run/evidence, website-agent-readiness scans once after G1, owners finalized as case A, ux-ax-review runs with clarity and the three scan-covered AX checks (robots-sitemap, markdown-pages, crawler-access) skipped, then dont-make-me-think and viral-product-evaluator, and one merged design-optimization.md. No repo writes.",
       "files": [],
       "expectations": [
-        "Runs the Dependency Preflight for all five members in one pass before intake.",
+        "Runs the Dependency Preflight before intake: dont-make-me-think and ux-ax-review required, website-agent-readiness and viral-product-evaluator optional, frontend-design deferred until apply, and the lease session released in finally.",
         "Captures page.html, head.json, robots.txt, sitemap.xml and llms.txt once into the evidence dir and writes manifest.json.",
         "Presents website-agent-readiness's G1 third-party-send gate before any scan.",
         "Finalizes manifest owners after the scan and before ux-ax-review runs.",
         "Passes ux-ax-review skip-checks of clarity,robots-sitemap,markdown-pages,crawler-access.",
         "Does not put structured-data, llms-txt or ai-actions in ux-ax-review skip-checks; ux-ax-review keeps them and any scan result for them is cited as corroboration.",
-        "Writes a single design-optimization.md with one row per finding and the owner cited.",
+        "Reads each member's result from its own closing signal (the Result: line for ux-ax-review, viral-product-evaluator and website-agent-readiness; the **Result:** line under the Orchestrated-by line in dont-make-me-think's report) and reports it.",
+        "Writes a single design-optimization.md with one row per finding and the owner cited, and the Members line marks each member with its own Result status.",
+        "The closing response opens with a Result: PASS | PARTIAL | BLOCKED line, then Evidence naming the manifest and member report paths, Uncertainty, and the apply offer by finding ID as the Decision.",
         "Stops with an apply offer by finding ID and does not edit any source file."
       ]
     },
@@ -44,7 +46,8 @@
         "Does not post the URL to isitagentready.com.",
         "Passes ux-ax-review skip-checks of clarity only.",
         "Lists agent-readiness-scan under Not covered with the reason 'user declined third-party send'.",
-        "Still produces one merged design-optimization.md."
+        "Still produces one merged design-optimization.md.",
+        "The closing response opens with a Result line, separates the verified findings from the declined scan (named under Uncertainty or Not covered), and names the apply offer as the next decision."
       ]
     },
     {
@@ -56,7 +59,8 @@
       "files": [],
       "expectations": [
         "Treats the request as audit mode; no UI source file is modified.",
-        "Ends with an offer to apply chosen finding IDs.",
+        "Relays any member's closing implementation question (e.g. ux-ax-review's choice of IDs) instead of answering it for the user.",
+        "Ends with an offer to apply chosen finding IDs, stated as the Decision of the closing response.",
         "Describes that each applied finding routes to exactly one of frontend-design or dont-make-me-think Redesign Mode behind that member's confirmation gate."
       ]
     },

@@ -239,7 +239,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**frontend-design**](skills/frontend-design/) | 1.4.0 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.3.0 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.4.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
-| [**design-optimizer**](skills/design-optimizer/) | 1.0.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
+| [**design-optimizer**](skills/design-optimizer/) | 1.1.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
 
 **Diagram generator engines** (install the umbrella or a single engine):
 
