@@ -48,14 +48,24 @@ emits it correctly — read this before changing that script or hand-editing the
 `/plan-to-issues`'s Phase 1 completion check, and a one-line fix like "add a
 Content-Signal directive" is exactly where the criterion gets dropped as obvious.
 
-Verify both before handing the plan over:
+Verify all three before handing the plan over:
 
 ```bash
-grep -cE '^#{3,4} Task ' agent-ready-plan.md
-grep -cE '^\*\*Effort\*\*: (XS|S|M|L|XL)$' agent-ready-plan.md
+grep -cE '^#{3,4} Task ' agent-ready-plan.md      # must equal the triage task count
+grep -cE '^\*\*Effort\*\*: (XS|S|M|L|XL)$' agent-ready-plan.md   # must equal it too
+python3 - agent-ready-plan.md <<'PY'              # must print "none"
+import re, sys
+txt = open(sys.argv[1]).read()
+bad = [b.split(':')[0] for b in re.split(r'^#### Task ', txt, flags=re.M)[1:]
+       if not re.search(r'^- \[ \] ', b, flags=re.M)]
+print(f"tasks without an acceptance criterion: {bad or 'none'}")
+PY
 ```
 
-Both must equal the triage task count.
+The third is not redundant with the first two: a task missing its `- [ ]` line fails
+`/plan-to-issues`'s Phase 1 completion check, and a one-line fix like "add a
+Content-Signal directive" is exactly where the criterion gets dropped as too obvious to
+state.
 
 ## Why `Closes:` is a dash
 
