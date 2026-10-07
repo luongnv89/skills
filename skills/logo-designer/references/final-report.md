@@ -59,13 +59,22 @@ Decision: Resolve the conflict on the branch or tell me to continue without sync
   written, or say `No files written`.
 - `Evidence:` names each verification check that ran and its observed result: the Phase
   3 read-back of the five compared variants, the svg-reviewer's findings, the Default
-  Quality Bar pass. Cite a file name for each failure. Cite only checks that ran.
-- `Uncertainty:` lists each check that could not run, a `sync: failed (...)` or
-  `sync: skipped (...)` record (for example `sync: skipped (not a git repo)`), and each
-  assumption made where the user was silent. Label assumptions as assumptions.
+  Quality Bar pass, and the `sync:` record (`sync: skipped (...)` or `sync: failed
+  (...)`; a failed sync that stopped the run is the `BLOCKED` reason). Cite a file name
+  for each failure. Cite only checks that ran.
+- `Uncertainty:` lists each check that could not run and each assumption made where the
+  user was silent. Label assumptions as assumptions.
 - `Decision:` names the one action the user must take, or says `No approval needed.`
   Name a remaining user action (for example, exporting a PNG from the SVGs) in the same
   line after `No approval needed.`
+
+## Step completion reports
+
+The per-phase report in SKILL.md (*Step Completion Reports*) uses its own result words:
+`PASS` when every check of the phase passes, `PARTIAL` when the phase ends with a
+recorded gap, `FAIL` when a check is blocked and the run cannot continue. A phase `FAIL`
+that stops the run before any file is written becomes a Final Report `BLOCKED`; a phase
+`PARTIAL` that survives to the end becomes a Final Report `PARTIAL`.
 
 ## Reader checks
 
