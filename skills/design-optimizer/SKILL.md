@@ -90,7 +90,7 @@ printf 'do_session=%s\n' "design-optimizer-$(date +%s)-$$"   # record it; reuse 
    Check `frontend-design` only when apply routes a finding to it — acquire or test it then,
    and skip that apply item if it is missing.
 5. **Release in `finally`.** If any acquire ran, run `asm deps release --session <do_session> --json`
-   once at every terminal outcome, stops included, after the final response. List a failed
+   once at every terminal outcome, stops included, before the final response. List a failed
    release under `Uncertainty:`.
 
 Never substitute one member for another or hand-run a member's workflow inline. Members run
