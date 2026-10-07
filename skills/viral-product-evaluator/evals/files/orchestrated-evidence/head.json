@@ -1,0 +1,11 @@
+{
+ "title": "Churnkit — Know which customer is about to leave",
+ "meta": {
+  "viewport": "width=device-width, initial-scale=1",
+  "description": "Churnkit watches your Stripe subscriptions and warns you 14 days before a customer churns.",
+  "og:image": "https://orchestrated-fixture.invalid/og-cover.png",
+  "twitter:image": "https://orchestrated-fixture.invalid/og-cover.png"
+ },
+ "canonical": null,
+ "jsonld": []
+}
