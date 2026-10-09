@@ -4,17 +4,17 @@ Auto mode publishes without asking, so this file decides **whether** to publish 
 
 ## Decide per registry (in Step 2, before any file changes)
 
-A registry applies when the project has a `package.json` with a `"name"` (npm), or a `pyproject.toml` with `[project] name` and a `[build-system]` table, or a `setup.py` (PyPI). For each one, run the checks in this order. The first check that fails decides the outcome, and Step 9 acts on it.
+A registry applies when the project has a `package.json` with a `"name"` (npm), or a `pyproject.toml` with a `[build-system]` table and a package name in `[project]` or `[tool.poetry]`, or a `setup.py` (PyPI). For each one, select the publisher in check 1, then run checks 2–4 for both local and CI publishers before any file changes. The first failed gate decides the outcome, and Step 9 acts on it. Check 5 applies only to an unfinished local upload. On resume, verify an existing target version instead of blocking on check 4 (`resume.md`); no upload credentials are needed for that completed publication.
 
-| # | Check | npm | PyPI | If it fails |
+| # | Check | npm | PyPI | Failure or selection outcome |
 |---|---|---|---|---|
-| 1 | Not CI-owned | No workflow publishes on tag push (_CI-owned publishing_ below) | Same | Do not publish locally. After the tag push, verify the CI run instead |
-| 2 | Not private | No `"private": true` | No `Private :: Do Not Upload` classifier | Skip; note "not a published package" under `Evidence` |
-| 3 | Published by this project | `npm view <name> repository.url` names the same repository as `git remote get-url origin` | `https://pypi.org/pypi/<name>/json` exists, and its `info.project_urls` or `info.home_page` names the same repository | Name not on the registry: publish only if the request names the registry ("publish to npm"), otherwise skip and note it. Name owned by another project: skip, and put the name conflict under `Decision` |
+| 1 | Publisher selection | A workflow publishes on tag push or a published release → CI; otherwise local (_CI-owned publishing_ below) | Same | Record the publisher and continue through checks 2–4. For CI, Step 9 verifies the workflow instead of uploading locally |
+| 2 | Not private | No `"private": true` | No `Private :: Do Not Upload` classifier | Local: skip; note "not a published package" under `Evidence`. CI: stop with `BLOCKED — CI publication not authorized` |
+| 3 | Published by this project | `npm view <name> repository.url` names the same repository as `git remote get-url origin` | `https://pypi.org/pypi/<name>/json` exists, and its `info.project_urls` or `info.home_page` names the same repository | Name not on the registry: publish only if the request names the registry ("publish to npm"); otherwise local skips, CI stops with `BLOCKED — CI publication not authorized`. Name owned by another project: local skips, CI stops with the same `BLOCKED`; put the name conflict under `Decision` |
 | 4 | Version is new | `npm view <name>@X.Y.Z version` prints nothing | `https://pypi.org/pypi/<name>/X.Y.Z/json` returns 404 | Stop before any file changes: `BLOCKED — X.Y.Z already on <registry>` |
-| 5 | Credentials | `npm whoami` succeeds | `TWINE_PASSWORD` is set or `~/.pypirc` exists | Skip at Step 9: `PARTIAL — no <registry> credentials`, the setup under `Decision` |
+| 5 | Local upload credentials | `npm whoami` succeeds | `TWINE_PASSWORD` is set or `~/.pypirc` exists | Skip this check for CI or a completed resume publication. Otherwise skip at Step 9: `PARTIAL — no <registry> credentials`, the setup under `Decision` |
 
-A skipped registry does not make the release `PARTIAL`, except for missing credentials and a one-time-password prompt.
+A rejected CI eligibility gate stops before any release file changes, tag push, or GitHub release creation: those events can publish even when the local upload is skipped. Record the rejected gate under `Evidence`. A local registry skip does not make the release `PARTIAL`, except for missing credentials and a one-time-password prompt.
 
 ### CI-owned publishing
 

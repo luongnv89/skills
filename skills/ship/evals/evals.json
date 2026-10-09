@@ -171,6 +171,183 @@
         "Reports Result: BLOCKED — release owned by release-it.",
         "Decision gives the project's release command (npm run release) or suggests /ship --no-auto."
       ]
+    },
+    {
+      "id": 13,
+      "name": "tagged-head-different-version",
+      "kind": "edge",
+      "prompt": "/ship 1.2.4 (clean default branch; HEAD and the package version are v1.2.3 / 1.2.3; v1.2.3 is fully released, with no later commits; 1.2.4 has no tag or registry publication)",
+      "expected_output": "Treats 1.2.4 as a new release: syncs, selects the explicit version, prepares and reviews the changes, builds, and releases 1.2.4. Does not resume or report 1.2.3 as the requested release.",
+      "files": [],
+      "expectations": [
+        "Does not enter the resume path just because HEAD has the v1.2.3 tag.",
+        "Runs normal repo sync and Step 2 version selection, choosing 1.2.4 from the explicit argument despite the empty since-tag log.",
+        "Runs the normal preparation, review, sweep, and build for 1.2.4 before tagging or publishing it.",
+        "Does not recreate or republish 1.2.3."
+      ]
+    },
+    {
+      "id": 14,
+      "name": "tagged-head-explicit-bump",
+      "kind": "edge",
+      "prompt": "/ship patch (clean default branch; HEAD has the fully released v1.2.3 tag, package.json says 1.2.3, and there are no later commits; v1.2.4 is unused)",
+      "expected_output": "Follows normal sync and version selection, computes 1.2.4 from the explicit patch argument, and prepares a new release rather than resuming 1.2.3.",
+      "files": [],
+      "expectations": [
+        "An explicit bump argument does not enter the tagged-HEAD resume path.",
+        "Chooses 1.2.4 by applying patch to 1.2.3 and does not stop with nothing to release.",
+        "Prepares and reviews the new release instead of skipping Steps 2-5.",
+        "Reports the explicit patch argument as the version-selection rule."
+      ]
+    },
+    {
+      "id": 15,
+      "name": "tagged-head-same-version-resume",
+      "kind": "edge",
+      "prompt": "/ship 1.2.3 (clean default branch; HEAD has v1.2.3, which is already pushed and has a GitHub release; npm already has this project's 1.2.3; no local build artifacts exist)",
+      "expected_output": "Resumes the requested 1.2.3 release, verifies its existing tag, GitHub release, and npm publication, and reports them done without bumping, rebuilding, or uploading again.",
+      "files": [],
+      "expectations": [
+        "Accepts the exact matching explicit version as a resume, rather than blocking on the existing tag or registry version.",
+        "Skips sync and version preparation and reuses the existing commit and tag.",
+        "Verifies npm's existing 1.2.3 publication and performs no local build, npm publish, retag, or release recreation.",
+        "Reports the verified steps as done before the stop and names 1.2.3 as the release."
+      ]
+    },
+    {
+      "id": 16,
+      "name": "resume-npm-fresh-clone-build",
+      "kind": "edge",
+      "prompt": "/ship (fresh clone on a clean default branch at tagged HEAD v1.2.3; tag and GitHub release are already on origin; package.json has main=dist/index.js, files=[dist], and a build script that creates dist/index.js; dist/ is ignored and absent; npm belongs to this repository but has only 1.2.2; credentials work and no CI publishes)",
+      "expected_output": "Resumes 1.2.3, runs the required build to regenerate dist/index.js, verifies it is included in npm pack --dry-run, and only then publishes and verifies npm 1.2.3.",
+      "files": [],
+      "expectations": [
+        "Does not assume the earlier release build's ignored artifacts exist in the fresh clone.",
+        "Runs the required npm build before the unfinished local npm upload.",
+        "Confirms dist/index.js exists and is in the npm pack --dry-run file list before npm publish; packing only package.json does not pass.",
+        "Reuses the existing version, commit, tag, and GitHub release without preparing or tagging a new release.",
+        "Reports the build, package validation, and registry verification under Evidence."
+      ]
+    },
+    {
+      "id": 17,
+      "name": "resume-npm-build-failure",
+      "kind": "edge",
+      "prompt": "/ship (fresh clone on a clean default branch at tagged HEAD v1.2.3; tag and GitHub release are already pushed; npm 1.2.3 is still unpublished and the local upload is authorized; package.json requires dist/index.js, dist/ is absent, and npm run build fails)",
+      "expected_output": "Runs the required resume build, stops with Result: BLOCKED — build failed, and performs no package upload. Reports the failed build and the unfinished npm publication while preserving the existing release.",
+      "files": [],
+      "expectations": [
+        "Runs npm run build before attempting a local upload.",
+        "Stops with Result: BLOCKED — build failed when that command fails.",
+        "Does not run npm publish or accept npm pack success as a substitute for the failed build.",
+        "Does not delete or recreate the existing release commit, tag, or GitHub release.",
+        "Evidence records the failed build and Decision identifies the remaining build repair and npm publication."
+      ]
+    },
+    {
+      "id": 18,
+      "name": "poetry-only-pypi-metadata",
+      "kind": "edge",
+      "prompt": "/ship 1.2.4 (clean default branch; pyproject.toml has [tool.poetry] name=existing-project and version=1.2.3, no [project] table, and [build-system] uses poetry-core; PyPI's existing-project belongs to this repository and has only 1.2.3; credentials work, no CI publishes, and 1.2.4 has no tag)",
+      "expected_output": "Recognizes the Poetry package as a PyPI publishing target, checks ownership and target-version availability before edits, updates [tool.poetry] version, builds and validates the distribution, and publishes 1.2.4.",
+      "files": [],
+      "expectations": [
+        "Recognizes [tool.poetry] name with [build-system] as a PyPI package even without [project] or setup.py.",
+        "Checks the existing package's repository ownership and that PyPI 1.2.4 is absent before changing files.",
+        "Updates [tool.poetry] version to 1.2.4 and builds the distribution using the configured build backend.",
+        "Runs distribution validation before uploading and verifies the published PyPI version.",
+        "Does not skip PyPI solely because the package metadata uses [tool.poetry]."
+      ]
+    },
+    {
+      "id": 19,
+      "name": "ci-publisher-existing-target-blocks",
+      "kind": "edge",
+      "prompt": "/ship 1.2.4 (clean default branch with commits after v1.2.3; v1.2.4 does not exist locally or on origin; npm package belongs to this repository and already has 1.2.4; a tag-triggered GitHub workflow runs npm publish)",
+      "expected_output": "Selects CI as the publisher but still checks npm's target version before edits, then stops with Result: BLOCKED — 1.2.4 already on npm without creating or pushing a release tag.",
+      "files": [],
+      "expectations": [
+        "Treats CI ownership as publisher selection and continues through private, repository-ownership, and target-version checks.",
+        "Queries npm for 1.2.4 before preparing or applying release changes.",
+        "Reports Result: BLOCKED — 1.2.4 already on npm despite the unused release tag.",
+        "Does not change files, commit, tag, push, or trigger the publishing workflow.",
+        "Does not defer the duplicate-version failure until CI publishing."
+      ]
+    },
+    {
+      "id": 20,
+      "name": "ci-publisher-no-local-credentials",
+      "kind": "edge",
+      "prompt": "/ship 1.2.4 (clean default branch with commits after v1.2.3; npm package belongs to this repository, is public, and has only 1.2.3; 1.2.4 has no tag or registry publication; a tag-triggered GitHub workflow has publishing credentials and succeeds, but this machine is not logged into npm)",
+      "expected_output": "Checks registry eligibility and target-version availability, selects the CI publisher, and runs the release without requiring local npm credentials. After pushing the tag, verifies the workflow and npm 1.2.4 instead of uploading locally.",
+      "files": [],
+      "expectations": [
+        "Runs private, repository-ownership, and target-version checks before any release file changes despite CI ownership.",
+        "Does not require npm whoami or local upload credentials for the CI publisher.",
+        "Does not skip publication or report PARTIAL solely because this machine is not logged into npm.",
+        "After the tag push, waits for the matching CI workflow and verifies npm 1.2.4.",
+        "Does not run a duplicate local npm publish."
+      ]
+    },
+    {
+      "id": 21,
+      "name": "first-ci-publication-needs-registry-request",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch with commits after v1.2.3; package.json names a public npm package that has never been published; a tag-triggered GitHub workflow has credentials and runs npm publish; the request does not name npm)",
+      "expected_output": "Rejects the first npm publication without an explicit registry request and stops with Result: BLOCKED — CI publication not authorized before any release edits or publishing trigger event.",
+      "files": [],
+      "expectations": [
+        "Checks first-publication eligibility even though the publisher is CI.",
+        "Reports Result: BLOCKED — CI publication not authorized because the package is unpublished and the request does not name npm.",
+        "Does not prepare or apply release file changes, commit, tag, push, or create a GitHub release.",
+        "Does not treat a skipped local upload as sufficient to prevent the CI publication.",
+        "Evidence names the first-publication gate and Decision identifies the missing explicit registry request."
+      ]
+    },
+    {
+      "id": 22,
+      "name": "first-ci-publication-explicit-registry",
+      "kind": "edge",
+      "prompt": "Publish this release to npm with /ship 1.2.4 (clean default branch with commits after v1.2.3; package.json names a public package not on npm; a tag-triggered GitHub workflow has credentials and runs npm publish; 1.2.4 has no tag and this machine is not logged into npm)",
+      "expected_output": "Accepts the explicit npm request for the first publication, checks the remaining registry and release gates, then releases 1.2.4 and verifies its CI publication without requiring local npm credentials or uploading twice.",
+      "files": [],
+      "expectations": [
+        "Records that the explicit npm request permits the first registry publication.",
+        "Continues registry eligibility and target-version checks before release file changes.",
+        "Does not require local npm login for the CI publisher.",
+        "After the tag push, verifies the matching workflow and npm 1.2.4 publication.",
+        "Does not run a duplicate local npm publish."
+      ]
+    },
+    {
+      "id": 23,
+      "name": "unprefixed-breaking-footer-priority",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch; last tag and package version are v2.3.0 / 2.3.0; the only new commit has subject 'Remove old config' and footer 'BREAKING CHANGE: config.yml is renamed to app.yml'; there are no conventional-commit subject prefixes)",
+      "expected_output": "Detects the breaking footer and chooses 3.0.0 before considering the no-prefix minor fallback. The release reviewer validates the breaking bump, and the notes explain the config migration.",
+      "files": [],
+      "expectations": [
+        "Reads the commit body and detects its BREAKING CHANGE footer despite the unprefixed subject.",
+        "Chooses 3.0.0, not 2.4.0, and records the breaking-change rule.",
+        "Does not apply the no-conventional-prefix fallback when a breaking subject or footer was detected.",
+        "The release reviewer checks breaking-change bump consistency even for a no-prefix fallback proposal and rejects a minor bump when metadata reports this breaking change.",
+        "The end-user notes and documentation explain the config.yml to app.yml migration."
+      ]
+    },
+    {
+      "id": 24,
+      "name": "nonbreaking-no-prefix-fallback",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch; last tag and package version are v2.3.0 / 2.3.0; the only new commit has subject 'Improve config diagnostics' and a body with no breaking-change marker; there are no conventional-commit prefixes)",
+      "expected_output": "Preserves the no-prefix fallback: chooses 2.4.0 and reports 'no conventional commits, defaulted to minor' under Uncertainty, while the release reviewer checks the proposed bump against the nonbreaking metadata.",
+      "files": [],
+      "expectations": [
+        "Checks subjects and bodies for breaking changes before selecting the no-prefix fallback.",
+        "Chooses 2.4.0 because there are no conventional prefixes and no breaking change.",
+        "Records 'no conventional commits, defaulted to minor' under Uncertainty.",
+        "Does not infer a breaking change or choose a major bump solely from an unprefixed subject.",
+        "The release reviewer includes this fallback in its version-consistency check."
+      ]
     }
   ]
 }

@@ -52,7 +52,7 @@ Step 2 applies the first row that matches, after a version argument (which alway
 | No previous tag | Release the primary version file's value as-is; no version file → `0.1.0` | Propose the same; ask |
 | The primary version file is ahead of `OLD_VERSION` and that version has no tag | Release the file's value as-is | Propose the same; ask |
 | `OLD_VERSION` is a pre-release (`2.0.0-rc.1`, PEP 440 `2.0.0rc1`) | Stop: `BLOCKED — pre-release needs an explicit version`; `Decision`: `/ship 2.0.0` or `/ship 2.0.0-rc.2` | Ask for the version |
-| No conventional-commit prefixes | MINOR; write "no conventional commits, defaulted to minor" under `Uncertainty` | Show the commits; ask |
+| No conventional-commit prefixes and no breaking subject or footer detected | MINOR; write "no conventional commits, defaulted to minor" under `Uncertainty` | Show the commits; ask |
 | Breaking change while `OLD_VERSION` is `0.y.z` | MINOR (`0.(y+1).0`). `1.0.0` only from an explicit version argument | Recommend MINOR; ask |
 
 ## What auto mode records

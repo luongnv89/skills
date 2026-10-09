@@ -4,7 +4,7 @@ description: "Run a release end to end, autonomous by default: version bump ever
 license: MIT
 effort: max
 metadata:
-  version: 3.0.0
+  version: 3.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -56,7 +56,7 @@ If a rebase or stash conflict occurs, stop with `BLOCKED — sync conflict` and 
 1. Print the mode, the version argument, and the scope.
 2. Full release only: run `git status --porcelain`. If it prints anything: auto mode stops with `BLOCKED — uncommitted changes` and lists the files; interactive mode asks whether to stash (pop after the final report), commit, or abort. Never discard work.
 3. Full release only: check that the current branch is the default branch: `git symbolic-ref --short refs/remotes/origin/HEAD` prints `origin/<default>`; if that ref is missing, read the `HEAD branch:` line of `git remote show origin`. If the branches differ, follow the `Not on the default branch` row in `references/auto-mode.md`.
-4. Full release only: run `git describe --exact-match --tags HEAD`. If it prints a tag, this run resumes that release: follow `references/resume.md`, which skips the sync and Steps 2-6.
+4. Full release only: run `git describe --exact-match --tags HEAD`. Resume that release only when no version argument was given, or an explicit version equals the tag's release version. A different version or `major|minor|patch` continues through the sync and normal version selection. For resume, follow `references/resume.md`: skip version preparation, but rebuild and verify artifacts before any unfinished local upload.
 5. Run the Repo Sync above.
 6. Check for a release tool or a monorepo:
 
@@ -164,7 +164,7 @@ Every run, including one that stops early, ends with: `Result:` (`COMPLETE`, `PA
 ## Edge Cases
 
 - **No remote**: tag locally; skip the push, the GitHub release, and publishing: `PARTIAL — no remote`.
-- **Resume**: HEAD already carries the release tag after an earlier stop. Step 1 sends the run to `references/resume.md`, which recovers the notes and registry decisions and finishes only the steps not yet done.
+- **Resume**: HEAD carries the requested release tag after an earlier stop (no version argument, or the same explicit version). Step 1 sends the run to `references/resume.md`, which recovers the notes and registry decisions, rebuilds for unfinished local uploads, and finishes only the steps not yet done.
 - **Failure after the push**: never roll back automatically, in either mode. Stop with `BLOCKED` and list the recovery commands (delete the tag locally and on origin, revert the commit) under `Decision`; the user confirms and runs them. A version published to PyPI or npm cannot be reused; the fix is a new version.
 
 ## Acceptance Criteria
