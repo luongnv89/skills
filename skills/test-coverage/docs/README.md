@@ -14,6 +14,8 @@
 - Analyze existing coverage to identify specific gaps
 - Target untested branches, error paths, and boundary values
 - Adapt to any testing framework (Jest, Vitest, pytest, Go, Rust)
+- Write deterministic, isolated tests: no network, real database, wall clock, unseeded randomness, or `sleep()`, and every test asserts on behavior, not just executed lines
+- Rerun the new tests on their own to catch flaky ones. A test that exposes a suspected bug is reported to you, never weakened to pass
 - Create feature branch automatically before adding tests
 - Final report states the result, the commands that ran, what was not checked, and any action left to you
 
@@ -31,8 +33,8 @@
 ```mermaid
 graph TD
     A["Analyze Coverage Gaps"] --> B["Identify Untested Paths"]
-    B --> C["Write Targeted Tests"]
-    C --> D["Run & Verify Improvement"]
+    B --> C["Write Deterministic, Isolated Tests"]
+    C --> D["Verify: Suite, Rerun, Coverage"]
     style A fill:#4CAF50,color:#fff
     style D fill:#2196F3,color:#fff
 ```
@@ -57,6 +59,12 @@ asm install github:luongnv89/skills:skills/test-coverage
 /test-coverage
 ```
 
+## Resources
+
+| Path | Description |
+|---|---|
+| `references/unit-test-quality.md` | The standard every new test meets: rules, fakes, layout, flakiness fixes, and a four-question self-check |
+
 ## Output
 
-New test cases added to the project's existing test suite, following current patterns and naming conventions. Tests target error handling, boundary values, null/empty inputs, and async edge cases, and must raise total coverage above the baseline. The run ends with a report that opens with `COMPLETE`, `PARTIAL`, or `BLOCKED`, followed by Evidence, Uncertainty, and Decision lines.
+New test cases added to the project's existing test suite, following current patterns and naming conventions. Tests target error handling, boundary values, null/empty inputs, and async edge cases, and must raise total coverage above the baseline. A new test that exposes a suspected bug is left out of the commit and shown to you with its failure output. The run ends with a report that opens with `COMPLETE`, `PARTIAL`, or `BLOCKED`, followed by Evidence, Uncertainty, and Decision lines.

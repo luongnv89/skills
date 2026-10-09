@@ -246,7 +246,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 |---|---|---|---|
 | [**code-review**](skills/code-review/) | 2.2.1 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**codebase-modernizer**](skills/codebase-modernizer/) | 1.4.0 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
-| [**test-coverage**](skills/test-coverage/) | 1.4.1 | low | Target untested branches and edge cases |
+| [**test-coverage**](skills/test-coverage/) | 1.5.0 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.6.0 | medium | Usability review using Krug's principles |
 | [**ux-ax-review**](skills/ux-ax-review/) | 1.2.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
@@ -324,7 +324,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.6.0 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.4.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.4.0 | low | Add OSS files and templates |
-| [**agent-config**](skills/agent-config/) | 2.1.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
+| [**agent-config**](skills/agent-config/) | 2.2.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
 
 ### App Store
 

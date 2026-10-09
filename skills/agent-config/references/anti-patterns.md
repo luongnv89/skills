@@ -4,7 +4,7 @@ When drafting `AGENTS.md` or `CLAUDE.md`, **don't include**:
 
 - Codebase overviews, directory trees, dependency lists, or anything the README or manifest already says. Agents read those directly, and overviews don't help them find the right files any sooner.
 - Style rules that a linter or formatter already enforces.
-- Generic best practices ("write clean code", "be careful"). The injected `## Token Efficiency` block is the one deliberate exception.
+- Generic best practices ("write clean code", "be careful").
 - Long explanations, tutorials, or API encyclopedias. Point to the doc instead.
 - Pasted code examples. Point to an exemplar file instead (rule 6 in `agents-md-writing.md`).
 - Information that changes often: dependency versions, dates, ticket IDs.
@@ -23,6 +23,8 @@ These structural failure modes are just as disqualifying:
 - **`@import` as a token-saving device**: imported files still load at launch.
 - **Prose standing in for a gate** *(audit-time)*: a must-never-happen rule written as a sentence instead of a `PreToolUse` hook, or "please test" instead of a test. Constraints written during create or update are expected, so raise this on `audit` as a routing recommendation.
 - **The 400-line constitution**: past 200 lines, adherence drops and rules get lost.
+
+Exempt from every item above: the injected `## Token Efficiency` block and opt-in blocks inserted from `optional-blocks.md`, including the unit-test block without its last line.
 
 For each line, ask: *"Would removing this cause the agent to make a specific mistake?"* If not, cut it.
 

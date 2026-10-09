@@ -16,6 +16,7 @@
         "AGENTS.md has a Done-when section naming the exact lint, typecheck, and test commands",
         "AGENTS.md contains no directory tree and no overview that restates package.json or the README",
         "'## Token Efficiency' appears exactly once in AGENTS.md",
+        "AGENTS.md has no '## Unit Tests' section, because the prompt did not ask for unit-test rules",
         "AGENTS.md is under 200 lines",
         "The run performed the shadow check (looked for CLAUDE.md, .claude/CLAUDE.md, CLAUDE.local.md at or above the repo) before writing",
         "The response includes a Step Completion Report ending in a Result line",
@@ -131,6 +132,23 @@
         ".claude/agents/pr-reviewer.md exists with YAML frontmatter",
         "No AGENTS.md or CLAUDE.md was created or modified",
         "The run did not perform agent-config's shadow check or emit its branch report"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "unit-test-block-on-request",
+      "kind": "happy-path",
+      "prompt": "Set up agent instructions for this repo, and include rules for how agents should write good unit tests. Go ahead and write them.",
+      "expected_output": "Fixture pnpm-fresh (evals/build-fixtures.sh). Branch agents-only: AGENTS.md as in eval 1, plus the opt-in '## Unit Tests' block from references/optional-blocks.md, inserted verbatim above '## Token Efficiency'. No CLAUDE.md is created.",
+      "files": ["evals/build-fixtures.sh"],
+      "expectations": [
+        "AGENTS.md exists at the repo root after the run, and no CLAUDE.md or .claude/CLAUDE.md was created",
+        "'## Unit Tests' appears exactly once in AGENTS.md",
+        "The Unit Tests section matches the block in references/optional-blocks.md line for line, with no paraphrase",
+        "The Unit Tests section contains no fenced code block",
+        "'## Token Efficiency' appears exactly once in AGENTS.md, and it is the last section, below '## Unit Tests'",
+        "AGENTS.md is under 200 lines",
+        "The response ends with a final report whose first line is Result: COMPLETE, PARTIAL, or BLOCKED, followed by Evidence (checks that ran, with observed results), Uncertainty (at least the unobserved client load), and Decision (the pending user action, or No approval needed)"
       ]
     }
   ]

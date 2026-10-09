@@ -25,6 +25,7 @@
 | "Set up agent instructions for this repo" | Write a lean `AGENTS.md`, with no `CLAUDE.md` |
 | "Update our agent config" (repo has only `CLAUDE.md`) | Migrate the shared rules into `AGENTS.md` and turn `CLAUDE.md` into an `@AGENTS.md` import, after showing you the diff |
 | "Create a CLAUDE.md for this project" | Write `CLAUDE.md`: a thin `@AGENTS.md` wrapper if `AGENTS.md` exists, otherwise a standalone file |
+| "Add rules for writing good unit tests to our AGENTS.md" | Insert the opt-in unit-test block (deterministic, isolated, fast tests that assert on behavior) above the token-efficiency block |
 | "Audit my AGENTS.md" | Report pass/fail per checklist item, including whether Claude Code actually loads the file, without changing anything |
 
 ## How It Works
@@ -73,6 +74,7 @@ asm install github:luongnv89/skills:skills/agent-config
 - **migrate / wrapper**: the same `AGENTS.md`, plus a `CLAUDE.md` that opens with `@AGENTS.md` and holds only Claude-only lines.
 - **claude-only**: a standalone `CLAUDE.md`, written only when you ask for one and no `AGENTS.md` exists.
 - **audit**: a checklist report with routing recommendations. No files are changed.
+- **Opt-in blocks** (workflow orchestration, coding discipline, unit tests) are added only when you ask for them.
 - **Every run** ends with a short final report: `Result:` (complete, partial, or blocked), the checks that ran, what was not verified, and any decision waiting on you.
 
 ## Resources
@@ -85,5 +87,5 @@ asm install github:luongnv89/skills:skills/agent-config
 | `references/knowledge-routing.md` | Which layer owns each instruction, file scopes, the `CLAUDE.md` wrapper, the maintenance loop |
 | `references/anti-patterns.md` | Content and structural failure modes |
 | `references/token-efficiency-block.md` | The block injected into every file |
-| `references/optional-blocks.md` | Opt-in orchestration and coding-discipline blocks |
+| `references/optional-blocks.md` | Opt-in orchestration, coding-discipline, and unit-test blocks |
 | `references/final-report.md` | The end-of-run report: statuses, examples, reader checks |
