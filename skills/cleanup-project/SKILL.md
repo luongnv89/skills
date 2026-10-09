@@ -4,7 +4,7 @@ description: "Prepare a git repo before new work: review uncommitted changes, fi
 license: MIT
 effort: high
 metadata:
-  version: 1.0.1
+  version: 1.0.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -22,7 +22,7 @@ files updated, merged branches deleted locally and on `origin`, and an up-to-dat
 - "Is `spike/llm-cache` worth keeping?" This goes straight to the single-branch drill-down (Step 6).
 
 Don't use it to remove dead code or unused imports (`code-review` mode:cleanup), commit and
-push everything (`auto-push`), cut a release or tag (`release-manager`), or add LICENSE, CONTRIBUTING and other OSS
+push everything (`auto-push`), cut a release or tag (`ship`), or add LICENSE, CONTRIBUTING and other OSS
 files (`oss-ready`). For a git how-to question ("`branch -d` vs `-D`?"), answer it directly and run
 no workflow.
 

@@ -1,0 +1,176 @@
+{
+  "skill_name": "ship",
+  "evals": [
+    {
+      "id": 1,
+      "name": "auto-full-release",
+      "kind": "happy-path",
+      "prompt": "/ship",
+      "expected_output": "Runs the whole release in auto mode without asking: minor bump from feat commits, version updated in every source including package-lock.json, sweep with no missed hit, reviewer PASS, tag pushed and confirmed, GitHub release created, npm publish for an already-published package, and a final report that lists each auto decision.",
+      "files": [],
+      "expectations": [
+        "Asks the user no confirmation question at any step.",
+        "Prints Mode: auto in the Step 1 report and in the final report.",
+        "Chooses a minor bump because the commits since the last tag include feat: and no breaking change, and states that rule.",
+        "Updates both version fields in package-lock.json (top-level version and packages[\"\"].version), not only package.json.",
+        "Runs the old-version git grep sweep after applying changes and reports 0 missed hits with the counts of other classes.",
+        "Spawns the release-reviewer before writing any project file and continues only on PASS.",
+        "Confirms the pushed tag with git ls-remote before creating the GitHub release.",
+        "Publishes to npm only after checking that the package already exists on npm and the new version does not.",
+        "The final report's first line is Result: COMPLETE, PARTIAL — <reason>, or BLOCKED — <reason>.",
+        "Evidence names the check behind each claim; anything not verified, such as a clean install, appears under Uncertainty.",
+        "Decision names a pending user action or states No approval needed."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "interactive-mode",
+      "kind": "happy-path",
+      "prompt": "/ship --no-auto",
+      "expected_output": "Runs the same release but stops for confirmation before the version, the consolidated file changes, the build, the push, the GitHub release, and the publish.",
+      "files": [],
+      "expectations": [
+        "Prints Mode: interactive in the Step 1 report.",
+        "Asks the user to confirm or override the computed version before spawning subagents.",
+        "Shows the consolidated summary under four headings (version, changelog, docs, landing page) and waits for confirmation before writing files.",
+        "Asks before running the build, before pushing, before creating the GitHub release, and before publishing.",
+        "If the user declines the push, ends with Result: PARTIAL — tag vX.Y.Z created locally, not pushed."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "auto-dirty-tree-blocks",
+      "kind": "edge",
+      "prompt": "/ship (the working tree has a modified src/app.ts and an untracked notes.txt)",
+      "expected_output": "Stops in Step 1 with Result: BLOCKED — uncommitted changes, lists both files, and changes nothing: no stash, commit, discard, version bump, or tag.",
+      "files": [],
+      "expectations": [
+        "Stops before Step 2 and reports Result: BLOCKED — uncommitted changes.",
+        "Lists src/app.ts and notes.txt under Evidence.",
+        "Does not stash, commit, restore, or delete any file.",
+        "Decision tells the user to commit or stash the changes and re-run, or to use /ship --no-auto."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "notes-only-scope",
+      "kind": "edge",
+      "prompt": "What changed since the last release? Draft the release notes for me.",
+      "expected_output": "Runs pre-flight, the version analysis, and the changelog-generator only, shows the developer changelog and the plain-language end-user notes, and changes no project files: no commit, tag, push, GitHub release, or publish.",
+      "files": [],
+      "expectations": [
+        "Does not modify, commit, tag, push, or publish anything.",
+        "Shows a developer changelog grouped by category with PR links.",
+        "Shows end-user notes grouped under New, Improved, Fixed, or Action needed, with no commit hashes, PR numbers, or author handles.",
+        "States that this was a notes-only request, so no release steps ran."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "landing-page-four-items",
+      "kind": "edge",
+      "prompt": "/ship (the repo has site/index.html with a v1.4.2 version pill, a footer that still says v1.4.0, a What's new section, a features grid, and an install section; the release adds a PDF export feature)",
+      "expected_output": "The landing-page-updater reports version, end-user changelog, feature list, and documentation, each with a status and path:line; it fixes both the pill and the stale footer version, rewrites What's new in plain language, adds a PDF export feature card, and adds no new section.",
+      "files": [],
+      "expectations": [
+        "Reports all four landing-page items (version, changelog, features, docs), each as updated, current, or not on page with path:line evidence.",
+        "Updates the stale v1.4.0 footer as well as the v1.4.2 pill.",
+        "Rewrites the What's new section from user-notes.md without commit hashes, PR numbers, author handles, or conventional-commit prefixes.",
+        "Adds a feature card for PDF export that matches the existing card markup.",
+        "Does not add a section the page did not already have.",
+        "The landing-page-updater, not the version-bumper, owns the version lines in site/index.html, so each line is changed once."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "unreleased-and-drift",
+      "kind": "edge",
+      "prompt": "/ship (CHANGELOG.md has a ## Unreleased section with three entries; package.json says 2.3.0 but src/version.ts still says 2.2.9)",
+      "expected_output": "Promotes the Unreleased section to the release heading and adds a fresh empty Unreleased heading, so the release appears once; reports src/version.ts as a drifted version source and updates it to the new version.",
+      "files": [],
+      "expectations": [
+        "Retitles the existing ## Unreleased section as the release heading instead of adding a second entry with the same changes.",
+        "Leaves an empty ## Unreleased heading above the new release entry.",
+        "Lists src/version.ts as a drifted version source (2.2.9) and updates it to the new version.",
+        "After applying, every version source reads the new version."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "zero-major-breaking",
+      "kind": "edge",
+      "prompt": "/ship (the last tag is v0.9.3 and one commit since then is feat!: drop the legacy config format)",
+      "expected_output": "Releases v0.10.0, not v1.0.0, because auto mode never crosses to 1.0.0 without an explicit version argument; records the rule under Evidence and the breaking change as an Action needed item in the end-user notes.",
+      "files": [],
+      "expectations": [
+        "Chooses 0.10.0, not 1.0.0, and states the 0.y.z breaking-change rule.",
+        "Writes the breaking change as an Action needed step in user-notes.md.",
+        "Adds upgrade instructions for the dropped config format to the changelog entry."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "negative-open-pr",
+      "kind": "negative-trigger",
+      "prompt": "Open a pull request for my feature branch so the team can review it.",
+      "expected_output": "Does not run ship; opening a PR is not a release.",
+      "files": [],
+      "expectations": [
+        "Does not start the ship workflow.",
+        "Does not bump a version, create a tag, or publish anything."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "negative-routine-commit",
+      "kind": "negative-trigger",
+      "prompt": "Commit my changes with a good message and push them.",
+      "expected_output": "Does not run ship; a routine commit and push is not a release.",
+      "files": [],
+      "expectations": [
+        "Does not start the ship workflow.",
+        "Does not create a tag or a GitHub release."
+      ]
+    },
+    {
+      "id": 10,
+      "name": "feature-branch-blocks",
+      "kind": "edge",
+      "prompt": "ship it (current branch is feat/export, which has an open PR; the default branch is main)",
+      "expected_output": "Stops in Step 1 with Result: BLOCKED — not on the default branch, before any version bump, commit, tag, release, or publish, and says a release from another branch needs --no-auto.",
+      "files": [],
+      "expectations": [
+        "Compares the current branch with the default branch from refs/remotes/origin/HEAD or git remote show origin.",
+        "Reports Result: BLOCKED — not on the default branch.",
+        "Does not bump a version, commit, tag, push, create a GitHub release, or publish.",
+        "Decision says to merge the PR first, or to re-run with --no-auto to release from feat/export."
+      ]
+    },
+    {
+      "id": 11,
+      "name": "breaking-footer-major",
+      "kind": "edge",
+      "prompt": "/ship (the last tag is v2.3.0; one commit since then is 'feat: new config loader' whose body has the footer 'BREAKING CHANGE: config.yml is renamed to app.yml')",
+      "expected_output": "Detects the BREAKING CHANGE footer in the commit body and releases v3.0.0, with an Action needed item in the end-user notes and upgrade steps in the changelog.",
+      "files": [],
+      "expectations": [
+        "Reads commit bodies, not only subjects, and finds the BREAKING CHANGE footer.",
+        "Chooses 3.0.0, not 2.4.0, and states the rule.",
+        "user-notes.md tells users to rename config.yml to app.yml under Action needed."
+      ]
+    },
+    {
+      "id": 12,
+      "name": "release-tool-auto",
+      "kind": "edge",
+      "prompt": "/ship (package.json has \"scripts\": {\"release\": \"release-it\"})",
+      "expected_output": "Detects release-it and stops with Result: BLOCKED — release owned by release-it, without running npm run release, and gives the command under Decision.",
+      "files": [],
+      "expectations": [
+        "Does not run npm run release or release-it.",
+        "Reports Result: BLOCKED — release owned by release-it.",
+        "Decision gives the project's release command (npm run release) or suggests /ship --no-auto."
+      ]
+    }
+  ]
+}
