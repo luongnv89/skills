@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## v4.0.0 — 2026-10-09
+
+This catalog release introduces the lstack distribution for 41 skills, adds Claude Code and Codex installation routes, improves unit-test guidance, and replaces release-manager with autonomous ship releases. The catalog release version is 4.0.0; the lstack package remains 0.4.0 and each member keeps its independent version.
+
+### Breaking Changes and Upgrade
+
+- Install `ship` and replace `/release-manager` invocations with `/ship`. Reinstallation leaves the old runtime copy in place; review and remove that installed `release-manager` copy to avoid competing triggers. ([#402](https://github.com/luongnv89/skills/pull/402)) @luongnv89
+- `/ship [X.Y.Z|major|minor|patch]` now runs autonomously by default. Add `--no-auto` to retain step-by-step confirmations. This semantic migration is the reason for the catalog's major release, although the original commit used a prose breaking-change declaration.
+
+### Release Summary
+
+- Obtain all 41 skills as a deterministic lstack bundle, or install them through Claude Code and Codex plugin distributions; Claude also supports the repository's native plugin layout. ([#397](https://github.com/luongnv89/skills/pull/397), [#398](https://github.com/luongnv89/skills/pull/398), [#399](https://github.com/luongnv89/skills/pull/399), [891c720](https://github.com/luongnv89/skills/commit/891c720)) @luongnv89
+- Generate deterministic, isolated unit tests with suspected-bug reporting, and opt into a preserved Unit Tests block in agent instructions. ([#400](https://github.com/luongnv89/skills/pull/400)) @luongnv89
+- Run and resume end-to-end releases with version discovery, registry checks, and plain-language release notes. ([#402](https://github.com/luongnv89/skills/pull/402)) @luongnv89
+
+The existing Unreleased entries below are preserved verbatim as developer history, including their original draft-time scope descriptions.
+
 ### Added
 
 - **lstack 0.4.0 native Claude repository layout:** root plugin and `lstack` marketplace metadata project the existing canonical `skills/` tree, adding only the two nested diagram children to default discovery (41 total). Direct repository installation, session loading, explicit updates, capability/data-handling disclosures and owner-only portal review caveats are documented. Working-tree metadata generation/check modes derive from the authoritative package manifest and reject stale renders/paths; optional committed-input exports retain deterministic resource byte/mode parity and flattened Claude children. Codex keeps `lstack-local` and its output layout. No skill definitions/resources/versions, `CLAUDE.md`, hooks/MCP/native agents, runtime installations, commits or submissions are changed by this draft.
@@ -16,6 +33,8 @@
 - **cleanup-project 1.0.2:** its "don't use for releases" pointers (SKILL.md, docs, negative-trigger eval 7) name `ship` instead of the renamed `release-manager`.
 - **test-coverage 1.5.0:** new tests meet a unit-test standard in `references/unit-test-quality.md`: deterministic, isolated, fast, one behavior per test, and assertions on behavior rather than implementation, with a flakiness cause-and-fix table and a four-question self-check. Step 4 reruns the new tests on their own and classifies an intermittent failure as flaky, not as a bug. A new test that exposes a suspected bug is left out of the commit and reported under `Decision:`, never loosened to pass or silently deleted. The guideline preferring real collaborators at external boundaries, which contradicted isolation, is replaced.
 - **agent-config 2.2.0:** opt-in `## Unit Tests` block in `references/optional-blocks.md`, inserted verbatim above `## Token Efficiency` only when the user asks for unit-test rules; CI setup from the same request is routed to the CI config. The checklist (sections 2–4) and the anti-pattern list now exempt inserted opt-in blocks, and the prune pass keeps them, so a requested block is not flagged or deleted by the skill's own audit. Eval 9 covers the block, and eval 1 checks that it stays out unless requested.
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v3.0.0...v4.0.0
 
 ## v3.0.0 — 2026-10-07
 

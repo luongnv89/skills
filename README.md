@@ -19,11 +19,17 @@ Skills are independent files. Works with Claude Code, Cursor, Windsurf, GitHub C
 
 ---
 
-## What's New in 3.0.0
+## What's New in 4.0.0
 
-This catalog release adds task orchestrators for [design](skills/design-optimizer/), [search](skills/search-optimizer/), and [product planning](skills/product-planner/), plus [AI job research](skills/ai-job-scout/). A broad quality-standard sweep tightens approval gates, dependency checks, evidence requirements, and completion reports. Individual skills keep their own versions; the catalog release does not reset them to 3.0.0.
+This catalog release adds [lstack](packages/lstack/README.md) bundles and Claude Code/Codex plugin distributions, autonomous releases with [ship](skills/ship/), and clearer unit-test guidance in [test-coverage](skills/test-coverage/) and [agent-config](skills/agent-config/). Individual skills keep their own versions; the catalog release does not reset them to 4.0.0.
 
-**Upgrading from 2.0.0:**
+**Upgrading from 3.0.0:**
+
+- Install [**ship**](skills/ship/docs/README.md): `npx skills add https://github.com/luongnv89/skills --skill ship`, then replace `/release-manager` invocations with `/ship`.
+- Review and remove the obsolete installed `release-manager` copy yourself; reinstalling does not remove it automatically, and both names can compete for triggers.
+- `/ship [X.Y.Z|major|minor|patch]` runs autonomously by default. Use `/ship --no-auto` to keep step-by-step confirmations.
+
+**Earlier upgrade guidance (from 2.0.0):**
 
 - `herdr-agent-comms` is now [**herdr-agent**](skills/herdr-agent/). Reinstall under the new name and update prompts; installers do not automatically remove the old installed copy, which can still trigger.
 - `plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd); see the [installation note](#product-planning). Its epic output is now a static plan map with status maintained through native GitHub sub-issues. Update parsers expecting `- [x] #N — <id>` to accept `- #N — <id>`.

@@ -939,13 +939,13 @@
         <path class="hring" d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="currentColor"/>
         <path class="hcard" d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="#00FF41" fill-rule="evenodd"/>
       </svg>
-      <a class="pill fadeup" style="--i:0" href="https://github.com/luongnv89/skills/releases/tag/v3.0.0">
+      <a class="pill fadeup" style="--i:0" href="https://github.com/luongnv89/skills/releases/tag/v4.0.0">
         <span class="led" aria-hidden="true"></span>
-        v3.0.0 · 41 skills · MIT
+        v4.0.0 · 41 skills · MIT
         <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6h7M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <h1 class="fadeup" style="--i:1">Plug in a skill.<br>Your agent knows&nbsp;it<span class="ph">.</span></h1>
-      <p class="sub fadeup" style="--i:2">Tested, versioned workflows for AI coding agents. Install one or several at once with agent-skill-manager (asm), and your agent follows the same expert process every time.</p>
+      <p class="sub fadeup" style="--i:2">Tested, versioned workflows for AI coding agents. Pick skills with agent-skill-manager (asm), or get them together in the lstack bundle and Claude Code or Codex plugins.</p>
       <div class="cmd cmd-rows fadeup" style="--i:3">
         <div class="cmd-row">
           <span class="prompt" aria-hidden="true">$</span>
@@ -1036,7 +1036,7 @@
           <div class="step" data-reveal style="--i:2">
             <span class="num">03</span>
             <h3>Call it by name</h3>
-            <p>Your agent loads the skill and follows its steps, templates, and checks.</p>
+            <p>Your agent loads the skill and follows its steps, templates, and checks. Ask <code>test-coverage</code> for isolated unit tests, or <code>agent-config</code> to record unit-test rules in your agent instructions.</p>
           </div>
         </div>
         <div class="tpanel" data-reveal>
@@ -1121,7 +1121,9 @@
           </div>
         </div>
         <p class="asm-note" data-reveal>agent-skill-manager (asm) installs, searches, and audits skills across your agent tools, and scans each skill before it installs. <a href="https://github.com/luongnv89/asm">asm on GitHub ↗</a></p>
-        <p class="upgrade-note" data-reveal>Upgrading? <code>herdr-agent-comms</code> is now <code>herdr-agent</code>, and <code>plan-to-issues</code> has moved to <a href="https://github.com/luongnv89/idd">luongnv89/idd</a>. From v1, <code>docs-generator</code> is now <code>doc-manager</code>.</p>
+        <p class="asm-note" data-reveal>lstack 0.4.0 downloads: <a href="https://github.com/luongnv89/skills/releases/download/v4.0.0/lstack-0.4.0.zip">standalone bundle</a>, <a href="https://github.com/luongnv89/skills/releases/download/v4.0.0/lstack-claude-0.4.0.zip">Claude Code marketplace</a>, or <a href="https://github.com/luongnv89/skills/releases/download/v4.0.0/lstack-codex-0.4.0.zip">Codex marketplace</a>.</p>
+        <p class="asm-note" data-reveal>For Claude Code, run <code>claude plugin marketplace add luongnv89/skills</code>, then <code>claude plugin install lstack@lstack --scope user</code>. Start a new session and use <code>/lstack:code-review</code>. The <a href="https://github.com/luongnv89/skills/blob/main/packages/lstack/README.md">lstack installation guide</a> covers local marketplaces, Codex setup, and updates.</p>
+        <p class="upgrade-note" data-reveal>Upgrading from v3? Install <code>ship</code>, replace <code>/release-manager</code> with <code>/ship</code>, and review and remove the obsolete installed copy. Releases now run through publication by default; use <code>/ship --no-auto</code> for step-by-step confirmations. Earlier changes: <code>herdr-agent-comms</code> is now <code>herdr-agent</code>, and <code>plan-to-issues</code> moved to <a href="https://github.com/luongnv89/idd">luongnv89/idd</a>. From v1, <code>docs-generator</code> is now <code>doc-manager</code>.</p>
         <a class="btn btn-secondary" data-reveal href="https://github.com/luongnv89/skills#install">All install options</a>
       </div>
     </section>
@@ -1145,18 +1147,18 @@
           </div>
           <div class="tile" data-reveal style="--i:1">
             <span class="num">02</span>
-            <h3>One command</h3>
-            <p>asm&rsquo;s picker installs every skill you tick, in one pass. Paths handled for seven agent tools.</p>
+            <h3>Bundles and plugins</h3>
+            <p>Get every skill in the reproducible lstack bundle or a Claude Code or Codex plugin. Claude Code also loads the plugin directly from this repository; local marketplaces have installation and update guides.</p>
           </div>
           <div class="tile" data-reveal>
             <span class="num">03</span>
             <h3>Versioned</h3>
-            <p>Semver and a changelog for every skill.</p>
+            <p>Each skill keeps its own version and changelog. lstack 0.4.0 packages them independently of this catalog release.</p>
           </div>
           <div class="tile" data-reveal style="--i:1">
             <span class="num">04</span>
-            <h3>Structured</h3>
-            <p>Steps, templates, checklists, and self-validation, written down.</p>
+            <h3>Clear rules and tests</h3>
+            <p>Steps, templates, checklists, and self-validation, written down. test-coverage generates isolated, deterministic unit tests and reports suspected bugs. agent-config adds unit-test rules when requested and preserves them during audits.</p>
           </div>
           <div class="tile" data-reveal style="--i:2">
             <span class="num">05</span>
@@ -1234,7 +1236,7 @@
             <span class="scard-in">
               <span class="cat">Shipping</span>
               <span class="name">ship</span>
-              <span class="desc">Release on autopilot: bump every version, changelog, site refresh, tag, publish.</span>
+              <span class="desc">Run releases from version updates through publication with /ship, and resume unfinished work after a stop. Use --no-auto for confirmations.</span>
               <span class="foot">
                 <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                 <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -1305,23 +1307,23 @@
       <div class="container">
         <div class="section-head" data-reveal>
           <span class="eyebrow">Latest release</span>
-          <h2>v3.0.0: new workflows, clearer checks.</h2>
+          <h2>v4.0.0: bundles, plugins, and autonomous releases.</h2>
         </div>
         <div class="release-panel" data-reveal>
           <div class="col">
-            <h3>New workflows</h3>
-            <p>Find AI engineering roles with <code>ai-job-scout</code>, review human UX and AI/search access with <code>ux-ax-review</code>, plan agent-readiness work with <code>website-agent-readiness</code>, and prepare a repo with <code>cleanup-project</code>.</p>
+            <h3>Bundles and plugins</h3>
+            <p>Get every skill in one reproducible <code>lstack</code> bundle or install a Claude Code or Codex plugin. Load the Claude plugin directly from this repository, or use local marketplaces with documented installation and update steps.</p>
           </div>
           <div class="col">
-            <h3>One invocation per task</h3>
-            <p><code>design-optimizer</code>, <code>search-optimizer</code>, and <code>product-planner</code> coordinate related skills for design, discoverability, and product planning, while keeping each member&rsquo;s approval gates.</p>
+            <h3>Autonomous releases</h3>
+            <p>Run releases from version updates through publication with <code>/ship</code>, and resume unfinished work after a stop. Install <code>ship</code>, replace <code>/release-manager</code>, and review and remove the obsolete installed copy. Use <code>/ship --no-auto</code> to keep step-by-step confirmations.</p>
           </div>
           <div class="col">
-            <h3>Clearer checks and reports</h3>
-            <p>Catalog quality updates clarify workflow steps, add result, evidence, uncertainty, and next-decision summaries, and expand scenario evals.</p>
+            <h3>Clearer unit-test guidance</h3>
+            <p>Generate isolated, deterministic unit tests and get clearer reports when a test reveals a suspected bug. Ask <code>agent-config</code> to add unit-test rules to your agent instructions and keep them during later audits.</p>
           </div>
         </div>
-        <a class="btn btn-secondary release-more" data-reveal href="https://github.com/luongnv89/skills/releases/tag/v3.0.0">Read the release notes</a>
+        <a class="btn btn-secondary release-more" data-reveal href="https://github.com/luongnv89/skills/releases/tag/v4.0.0">Read the release notes</a>
       </div>
     </section>
 
@@ -1404,7 +1406,7 @@
           <h4>Project</h4>
           <ul>
             <li><a href="https://github.com/luongnv89/skills">GitHub</a></li>
-            <li><a href="https://github.com/luongnv89/skills/releases/tag/v3.0.0">Release v3.0.0</a></li>
+            <li><a href="https://github.com/luongnv89/skills/releases/tag/v4.0.0">Release v4.0.0</a></li>
             <li><a href="https://github.com/luongnv89/skills/blob/main/CHANGELOG.md">Changelog</a></li>
             <li><a href="https://github.com/luongnv89/skills/blob/main/CONTRIBUTING.md">Contribute</a></li>
           </ul>
