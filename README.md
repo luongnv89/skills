@@ -222,7 +222,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Task | Skills, in order |
 |---|---|
 | Prepare an app store submission | aso-marketing → appstore-review-checker |
-| Harden and ship a repo | security-setup → devops-pipeline → release-manager (auto-push and cleanup-project for day-to-day work) |
+| Harden and ship a repo | security-setup → devops-pipeline → ship (auto-push and cleanup-project for day-to-day work) |
 | Open-source a project | oss-ready → doc-manager → landing-page-generator |
 | Brand and launch | brand-name-checker → logo-designer → landing-page-generator |
 | Run an agent fleet | herdr-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner |
@@ -273,10 +273,10 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**auto-push**](skills/auto-push/) | 1.1.1 | low | Commit message + stage + push with secret and size checks |
-| [**cleanup-project**](skills/cleanup-project/) | 1.0.1 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
+| [**cleanup-project**](skills/cleanup-project/) | 1.0.2 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.3.0 | medium | Pre-commit + GitHub Actions quality gates |
 | [**security-setup**](skills/security-setup/) | 1.5.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
-| [**release-manager**](skills/release-manager/) | 2.7.1 | max | Bump, changelog, tag, GitHub release, publish |
+| [**ship**](skills/ship/) | 3.0.1 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 
 ### Product Planning
 

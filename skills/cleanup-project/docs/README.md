@@ -34,7 +34,7 @@ Version: **1.0.1** · Author: Luong NGUYEN · License: MIT
 - Remove dead code or unused imports: use `code-review` (mode:cleanup).
 - Commit and push everything as-is: use `auto-push`.
 - Add LICENSE, CONTRIBUTING, or other open-source files: use `oss-ready`.
-- Bump a version, tag, or publish a release: use `release-manager`.
+- Bump a version, tag, or publish a release: use `ship`.
 - Ask a general git question ("`branch -d` vs `-D`?"): no skill needed.
 
 ## Usage

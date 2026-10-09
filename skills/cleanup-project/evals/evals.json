@@ -108,7 +108,7 @@
       "name": "negative-release",
       "kind": "negative-trigger",
       "prompt": "Cut a 2.4.0 release: bump the version, update the changelog, tag it, and publish the GitHub release.",
-      "expected_output": "Does not run cleanup-project; release work belongs to release-manager.",
+      "expected_output": "Does not run cleanup-project; release work belongs to ship.",
       "files": [],
       "expectations": [
         "Does not start the cleanup workflow.",
