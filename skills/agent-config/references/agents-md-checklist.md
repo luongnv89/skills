@@ -1,6 +1,6 @@
 # AGENTS.md / CLAUDE.md Verification Checklist
 
-The audit standard for any agent instruction file. Walk it verbatim during `audit`. Sections 1–3 and 5–7 are the bar for `create` and `update`. Section 4 is reported on audit only. For budgets and sources, see `official-standards.md`; for writing rules, `agents-md-writing.md`; for layers, `knowledge-routing.md`.
+The audit standard for any agent instruction file. Walk it verbatim during `audit`. Sections 1–3 and 5–7 are the bar for `create` and `update`. Section 4 is reported on audit only. The injected `## Token Efficiency` block and opt-in blocks inserted from `optional-blocks.md` are exempt from sections 2–4: report them as present, not as findings. For budgets and sources, see `official-standards.md`; for writing rules, `agents-md-writing.md`; for layers, `knowledge-routing.md`.
 
 ## 1. Length & budget
 
@@ -12,7 +12,7 @@ The audit standard for any agent instruction file. Walk it verbatim during `audi
 
 - [ ] **Every line** passes the test: "Would removing this cause a specific mistake?"
 - [ ] No overview, directory tree, dependency list, or restatement of the README. The agent reads those directly.
-- [ ] No personality fluff or generic advice. The injected `## Token Efficiency` block is the one exception.
+- [ ] No personality fluff or generic advice.
 - [ ] Every command is copy-pasteable and was read from a manifest or CI. The single-test form is present.
 - [ ] Every listed check is one the agent should really run on each task. Slow suites say *when* to run them.
 - [ ] Nothing duplicates facts already in auto memory (check with `/memory`).

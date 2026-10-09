@@ -4,7 +4,7 @@ description: "Create, update, or audit AGENTS.md (default) or CLAUDE.md agent in
 license: MIT
 effort: medium
 metadata:
-  version: 2.1.0
+  version: 2.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -101,11 +101,11 @@ Done when every command you will write was read from a file. If no manifest or C
 
 ## Step 3: Draft
 
-For a **targeted edit**, make the requested change, add the token-efficiency block if it's missing, and change nothing else. List other prune candidates in the report, but don't apply them. For a **full pass**, read `references/agents-md-writing.md` first. It holds the template, the writing rules, and the evidence behind them. Then:
+For a **targeted edit**, make the requested change, add the token-efficiency block if it's missing, and change nothing else. A request for general workflow, coding-discipline, or unit-test rules is met by the matching block in `references/optional-blocks.md`. List other prune candidates in the report, but don't apply them. For a **full pass**, read `references/agents-md-writing.md` first. It holds the template, the writing rules, and the evidence behind them. Then:
 
 1. **Fill the template.** **Commands**, **Constraints** (*Never* and *Ask first*), and **Done when** are required. Project, Layout, Conventions, and Read when needed appear only when they hold a fact the agent cannot infer.
-2. **Prune pass.** Delete every line that fails the deletion test: *"would removing this cause a specific mistake?"* Also delete any overview, directory tree, dependency list, or restatement of the README. Move Claude-only lines to the place Step 1 names.
-3. Add opt-in blocks from `references/optional-blocks.md` only when the user asks for them.
+2. **Prune pass.** Delete every line that fails the deletion test: *"would removing this cause a specific mistake?"* Also delete any overview, directory tree, dependency list, or restatement of the README. Keep opt-in blocks already in the file. Move Claude-only lines to the place Step 1 names.
+3. Add opt-in blocks from `references/optional-blocks.md` (workflow orchestration, coding discipline, unit tests) only when the user asks for them.
 4. **Append the token-efficiency block** (see below) last.
 
 Done when every remaining line is a command, a pin, a constraint, or a pointer.
@@ -134,7 +134,7 @@ Done when every remaining line is a command, a pin, a constraint, or a pointer.
 
 ## Token Efficiency Block (always inject)
 
-Append the fenced block from `references/token-efficiency-block.md` once, as the last section of the source-of-truth file. The source of truth is the root `AGENTS.md`, or `CLAUDE.md` on the claude-only branch. Never add the block to a wrapper, a nested package file, or a `.claude/rules/` file: those load alongside the root file, and a second copy would double it. It is the one deliberate exception to "no general advice": these are always-on rules for how the agent spends its context window. Non-negotiable: add it on every write run where the source of truth lacks it, including a targeted edit, and say so in the report. The one exception is the wrapper branch: don't edit an `AGENTS.md` that already exists just to add the block; report that it's missing instead.
+Append the fenced block from `references/token-efficiency-block.md` once, as the last section of the source-of-truth file. The source of truth is the root `AGENTS.md`, or `CLAUDE.md` on the claude-only branch. Never add the block to a wrapper, a nested package file, or a `.claude/rules/` file: those load alongside the root file, and a second copy would double it. It is the only general advice added without a request: these are always-on rules for how the agent spends its context window. Non-negotiable: add it on every write run where the source of truth lacks it, including a targeted edit, and say so in the report. The one exception is the wrapper branch: don't edit an `AGENTS.md` that already exists just to add the block; report that it's missing instead.
 
 ## Step Completion Reports
 
