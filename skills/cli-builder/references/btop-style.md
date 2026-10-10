@@ -162,14 +162,14 @@ Either way, the CLI needs a **width function** that counts terminal cells (CJK a
 |----------|-----------------|----------------|----------------------------------|
 | Python | rich | built in (`rich.cells.cell_len`) | `Console(force_terminal=..., color_system=None` or `"standard"`/`"256"`/`"truecolor")`; never `no_color`, which keeps bold and faint |
 | JavaScript/TS | chalk (v5 is ESM-only; use chalk 4 in a CommonJS project) | string-width (v5+ is ESM-only; use v4 in CommonJS) | chalk 5: `new Chalk({level: 0-3})`; chalk 4: `new chalk.Instance({level: 0-3})`; one instance per stream |
-| Go | lipgloss v1 | built in (`lipgloss.Width`) | `lipgloss.SetColorProfile(...)` |
+| Go | lipgloss v1 | built in (`lipgloss.Width`) | one renderer per stream: `r := lipgloss.NewRenderer(w)`, then `r.SetColorProfile(...)`, and build styles with `r.NewStyle()` |
 | Rust | anstream + anstyle | unicode-width | `AutoStream::new(stream, ColorChoice::Always` or `Never)` |
 | Java/Kotlin | picocli `CommandLine.Help.Ansi` (16 colors only; use raw SGR for 256 and 24-bit) | JLine `AttributedString.columnLength` or a zero-width-aware helper | `Help.Ansi.ON` or `OFF` |
 | Ruby | pastel (16 colors only; use raw SGR for 256 and 24-bit) | unicode-display_width | `Pastel.new(enabled: ...)` |
 
 Libraries and parsers run their own terminal detection, and it can disagree with section 2: some ignore `FORCE_COLOR`, and some strip escape codes whenever the stream is not a TTY. Turn that detection off by passing the decision explicitly to every layer that writes output, including the parser (for example `click.echo(..., color=...)` and clap `Command::color(...)`).
 
-In rich, pass every user-supplied string, titles included, as `rich.text.Text(value)` (or through `rich.markup.escape`), so `[...]` is never parsed as markup, and create the Console with `highlight=False`.
+In rich, pass every user-supplied string, titles included, as `rich.text.Text(value)`, so `[...]` is never parsed as markup and `:name:` is never replaced by an emoji (`rich.markup.escape` keeps that replacement), and create the Console with `highlight=False, emoji=False`.
 
 None of these libraries draws the btop title notch (`┐title┌`) as a built-in border style. Build that top line in the style module.
 
