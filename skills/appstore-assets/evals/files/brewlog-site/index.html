@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brewlog — your coffee brewing journal for iPhone</title>
+<!-- Eval fixture for appstore-assets: a landing page with two in-page app UI mocks and no codebase. -->
+<style>
+  :root { --roast: #3b2416; --crema: #f6efe6; --copper: #c2652a; --ink: #22160e; --muted: #6f5a4b; }
+  body { margin: 0; font-family: "Fraunces", Georgia, serif; background: var(--crema); color: var(--ink); }
+  header, section { max-width: 1040px; margin: 0 auto; padding: 48px 24px; }
+  .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center; }
+  h1 { font-size: 56px; line-height: 1.02; margin: 0 0 16px; }
+  .sub { font-family: system-ui, sans-serif; font-size: 19px; color: var(--muted); }
+  .badge { display: inline-block; margin-top: 20px; padding: 12px 20px; border-radius: 12px; background: #000; color: #fff; font-family: system-ui; }
+  .phones { display: flex; gap: 20px; justify-content: center; }
+  .phone { width: 220px; height: 470px; border-radius: 36px; background: #111; padding: 9px; }
+  .scr { width: 100%; height: 100%; border-radius: 28px; background: #fff; overflow: hidden; font-family: -apple-system, system-ui, sans-serif; }
+  .bar { padding: 14px 16px 6px; font-size: 22px; font-weight: 700; }
+  .row { display: flex; justify-content: space-between; padding: 10px 16px; border-top: 1px solid #eee; font-size: 13px; }
+  .row small { display: block; color: #8a8a8e; }
+  .timer { text-align: center; padding-top: 70px; }
+  .timer .t { font-size: 52px; font-weight: 300; font-variant-numeric: tabular-nums; }
+  .timer .step { margin-top: 12px; color: var(--copper); font-weight: 600; }
+  .timer .btn { margin: 40px auto 0; width: 120px; padding: 12px; border-radius: 24px; background: var(--copper); color: #fff; font-weight: 600; }
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; font-family: system-ui; }
+  .features h3 { font-family: "Fraunces", Georgia, serif; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div>
+    <h1>Every cup, dialed in.</h1>
+    <p class="sub">Brewlog is the brewing journal for iPhone. Save your recipes, follow a guided pour timer, and remember what made your best cup.</p>
+    <a class="badge" href="#">Download on the App Store</a>
+  </div>
+  <div class="phones" aria-label="Brewlog app screens">
+    <div class="phone"><div class="scr">
+      <div class="bar">Recipes</div>
+      <div class="row"><span>Morning V60<small>15 g · 250 ml · 93 °C</small></span><span>★</span></div>
+      <div class="row"><span>AeroPress Classic<small>17 g · 220 ml · 85 °C</small></span><span></span></div>
+      <div class="row"><span>Chemex for Two<small>32 g · 500 ml · 94 °C</small></span><span>★</span></div>
+      <div class="row"><span>French Press<small>30 g · 500 ml · 96 °C</small></span><span></span></div>
+    </div></div>
+    <div class="phone"><div class="scr timer">
+      <div class="t">1:45</div>
+      <div class="step">Pour to 250 g</div>
+      <div style="color:#8a8a8e;font-size:13px;margin-top:6px">Step 3 of 4 · Morning V60</div>
+      <div class="btn">Pause</div>
+    </div></div>
+  </div>
+</header>
+<section class="features">
+  <div><h3>Your recipes</h3><p>Dose, water, temperature and grind for every brew method you use.</p></div>
+  <div><h3>Guided pour timer</h3><p>Step-by-step pours with gentle haptics, so you can keep your eyes on the kettle.</p></div>
+  <div><h3>Tasting notes</h3><p>Rate each cup and jot down what you'd change next time.</p></div>
+</section>
+<footer style="text-align:center;padding:32px;font-family:system-ui;color:#6f5a4b">Available on iPhone. © 2026 Brewlog</footer>
+</body>
+</html>

@@ -1,0 +1,127 @@
+{
+  "skill_name": "appstore-assets",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "name": "trailmark-codebase-preauthorized",
+      "prompt": "Generate the App Store screenshots for Trailmark 2.1. The Xcode project is in evals/files/trailmark (copy it into your working folder first and work on the copy). Use an editorial light direction with the app's green accent, recreate the screens from the SwiftUI code, render iPhone and iPad, and include the header and search creatives. Don't ask me anything, just build it.",
+      "expected_output": "A brief citing TARGETED_DEVICE_FAMILY = \"1,2\", a one-line plan instead of a question, an asset set built from assets/template with no TODO markers and a Source comment per screen builder, iPhone and iPad screenshots plus header/search creatives that pass check_assets.py, no Health-sync or Apple Watch overclaim, a fresh review, and a Result/Evidence/Uncertainty/Decision report.",
+      "files": ["evals/files/trailmark"],
+      "expectations": [
+        "The app brief lists iphone and ipad as platforms and cites TARGETED_DEVICE_FAMILY = \"1,2\" in project.pbxproj as evidence",
+        "The run fetched Apple's screenshot specification page, or recorded that it fell back to the dated snapshot in references/apple-specs.md",
+        "Because the prompt pre-authorized the run, it stated the plan in one line and did not stop to ask a question",
+        "The asset set's src/ is a copy of assets/template/, src/config.js contains no 'TODO:' marker, and every screen builder has a '// Source:' comment naming a file in the fixture",
+        "scripts/render.py and scripts/check_assets.py were both run, and check_assets.py printed a PASS summary line",
+        "iphone-6.3/ holds 3 to 10 PNGs at 1206x2622 and ipad-13/ holds PNGs at 2064x2752, all RGB without alpha",
+        "creative/ holds header.png at 3840x1646 and search.png at 3840x2560",
+        "No frame or caption presents Apple Health sync as a working feature, and no frame shows an Apple Watch app",
+        "The app's accent #2F9E6B (or the colorset's value) is used as the in-screen tint or brand color",
+        "A reviewer separate from the builder checked the frames against references/apple-guidelines.md, or the report says the review ran inline because no Agent tool was available",
+        "The final report opens with a Result: line carrying COMPLETE or PARTIAL and the output folder",
+        "The report has Evidence:, Uncertainty: and Decision: lines; Evidence cites the check_assets.py summary, Uncertainty names the recreated screens to verify on a build, and Decision names the upload or commit approval",
+        "The report states that nothing was committed or uploaded"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "name": "brewlog-landing-page",
+      "prompt": "Here's our landing page: evals/files/brewlog-site/index.html. We don't have the code handy. Make App Store screenshots for Brewlog, iPhone only, a bold brand direction using the site's copper and roast colors, no creatives. Go ahead without asking.",
+      "expected_output": "Landing-page branch: screens grounded only on the page's two UI mocks (recipe list, pour timer), captions drawn from the page's own claims without its © line, iPhone screenshots that pass check_assets.py, and a report flagging that the screens come from marketing mocks rather than the app.",
+      "files": ["evals/files/brewlog-site/index.html"],
+      "expectations": [
+        "The app brief records the input as a landing page and derives the iPhone platform from the page text ('Available on iPhone' or 'for iPhone')",
+        "Every recreated screen matches one of the page's two UI mocks: the Recipes list or the pour timer",
+        "No frame recreates a tasting-notes screen or any other screen the page does not show",
+        "No caption contains a price, URL or © symbol",
+        "iphone-6.3/ holds PNGs at 1206x2622 and check_assets.py printed a PASS summary line",
+        "No creative/ assets were rendered, because the prompt excluded them",
+        "The copper (#c2652a) and roast (#3b2416) colors from the page's CSS appear in config.js brand tokens",
+        "The report's Uncertainty: line says the screens are based on landing-page mocks and should be checked against, or replaced with, real captures",
+        "The final report opens with Result: and has Evidence:, Uncertainty: and Decision: lines"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "name": "trailmark-iphone-five-alternating",
+      "prompt": "Prepare the App Store visuals for Trailmark (the project is at evals/files/trailmark; work on a copy). iPhone only this time: five screenshots, alternating light and brand-colored frames, no creatives, and give me a preview I can look at. You have my go-ahead on the plan.",
+      "expected_output": "Exactly five iPhone frames in both iPhone classes with matching names, alternating canvas treatment, no iPad or creative output, a preview pointer, and the standard four-line report.",
+      "files": ["evals/files/trailmark"],
+      "expectations": [
+        "iphone-6.3/ and iphone-6.9/ each hold exactly 5 PNGs with identical file names, at 1206x2622 and 1320x2868",
+        "No ipad-13/ or creative/ files were rendered, because the user asked for iPhone only and no creatives",
+        "config.js alternates the canvas treatment across frames (for example dark: true on every other frame)",
+        "The first frame shows the trail log or another core screen, not settings",
+        "The run points to a preview: a published gallery page, or src/index.html opened without a query string, or the contact sheets",
+        "check_assets.py printed a PASS summary line",
+        "The final report opens with Result: and has Evidence:, Uncertainty: and Decision: lines"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "name": "approval-gate-stops",
+      "prompt": "Generate App Store screenshots for the app in evals/files/trailmark (work on a copy).",
+      "expected_output": "The run discovers the app and presents a plan with one combined question (direction, frames, UI source, extras), and writes no asset set before an answer. Ending without an answer, it reports BLOCKED with the pending question as the Decision.",
+      "files": ["evals/files/trailmark"],
+      "expectations": [
+        "The run produced an app brief (platforms iphone and ipad) before asking anything",
+        "The run asked one combined question covering direction, frame list, UI source and extras",
+        "No PNG and no src/ asset-set folder were written before the user answered",
+        "If the run ended without an answer, the report status is BLOCKED and its Decision: line names the pending question"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "name": "no-apple-target",
+      "prompt": "Make App Store screenshots for my Android app. The Kotlin project is in ./android-app.",
+      "expected_output": "No Apple target is found (the folder does not exist or holds no Xcode project), so the run takes the Stop branch or asks for an Apple project or landing page, writes nothing, and renders nothing.",
+      "files": [],
+      "expectations": [
+        "The run did not invoke scripts/render.py",
+        "No asset-set folder or PNG was written",
+        "The run reported that no Apple target or input was found and asked for an Apple project or landing page, or reported BLOCKED with that reason"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "name": "aso-keywords",
+      "prompt": "Write a better App Store subtitle and keyword list for Trailmark, a hiking journal app for iPhone and iPad.",
+      "expected_output": "Keyword and subtitle copy, handled without the appstore-assets workflow.",
+      "files": [],
+      "expectations": [
+        "The run did not invoke scripts/render.py or copy assets/template",
+        "The run did not produce the appstore-assets final report format"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "name": "app-icon",
+      "prompt": "Design an app icon for Trailmark, a green hiking journal app.",
+      "expected_output": "Icon design work, handled without the appstore-assets workflow.",
+      "files": [],
+      "expectations": [
+        "The run did not invoke scripts/render.py or copy assets/template",
+        "No screenshot display-class folders (iphone-6.3/, ipad-13/) were created"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "name": "review-guideline-audit",
+      "prompt": "Check my app against the App Store Review Guidelines before I submit. The project is in evals/files/trailmark.",
+      "expected_output": "A compliance audit, handled without generating screenshots.",
+      "files": ["evals/files/trailmark"],
+      "expectations": [
+        "The run did not invoke scripts/render.py or copy assets/template",
+        "No screenshot or creative PNGs were written"
+      ]
+    }
+  ]
+}

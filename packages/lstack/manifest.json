@@ -4,21 +4,22 @@
   "version": "0.4.0",
   "description": "Platform-neutral distribution of the maintained first-party Agent Skills catalog.",
   "claude": {
-    "description": "41 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+    "description": "42 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
     "marketplace_name": "lstack"
   },
   "codex": {
-    "description": "41 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
+    "description": "42 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
     "marketplace_name": "lstack-local"
   },
   "external_skill_prerequisites": [
-    {"name": "browse", "source": "https://github.com/garrytan/gstack", "used_by": ["design-optimizer", "dont-make-me-think", "viral-product-evaluator"], "required_for": "Live browser evidence, including dont-make-me-think's optional live-URL path; member-defined source-only/supplied-evidence fallbacks remain available."},
+    {"name": "browse", "source": "https://github.com/garrytan/gstack", "used_by": ["appstore-assets", "design-optimizer", "dont-make-me-think", "viral-product-evaluator"], "required_for": "Live browser evidence, including dont-make-me-think's optional live-URL path; member-defined source-only/supplied-evidence fallbacks remain available."},
+    {"name": "emil-design-eng", "source": "https://github.com/emilkowalski/skills", "used_by": ["appstore-assets"], "required_for": "Optional static polish pass in appstore-assets Step 6; without it the member uses its own polish checklist."},
     {"name": "plan-to-issues", "source": "https://github.com/luongnv89/idd", "used_by": ["website-agent-readiness"], "required_for": "Phase 4 issue filing; also requires idd issue-creator, git and authenticated gh."},
     {"name": "issue-creator", "source": "https://github.com/luongnv89/idd", "used_by": ["website-agent-readiness"], "required_for": "Transitive dependency of plan-to-issues for Phase 4 issue filing."},
     {"name": "issue-pr-review", "source": "https://github.com/luongnv89/idd", "used_by": ["issue-work-loop"], "required_for": "Both ISSUE and PR modes; requires asm dependency resolution, Herdr, git and authenticated gh."},
@@ -27,6 +28,7 @@
   "members": [
     {"name": "agent-config", "source": "skills/agent-config"},
     {"name": "ai-job-scout", "source": "skills/ai-job-scout"},
+    {"name": "appstore-assets", "source": "skills/appstore-assets"},
     {"name": "appstore-review-checker", "source": "skills/appstore-review-checker"},
     {"name": "aso-marketing", "source": "skills/aso-marketing"},
     {"name": "auto-push", "source": "skills/auto-push"},

@@ -159,7 +159,7 @@ class ClaudePackagingTests(unittest.TestCase):
         repo = self.snapshot_catalog()
         bundle, original = BUILDER.prepare(repo)
         claude, adapted = BUILDER.prepare(repo, target="claude")
-        self.assertEqual(len(adapted["skill_versions"]), 41)
+        self.assertEqual(len(adapted["skill_versions"]), 42)
         self.assertEqual(adapted["skill_versions"], original["skill_versions"])
         self.assertEqual(adapted["files"], original["files"])
         for path, value in bundle.items():
@@ -180,7 +180,7 @@ class ClaudePackagingTests(unittest.TestCase):
         for flags in [("--check",), ("--target", "claude", "--check"),
                       ("--target", "codex", "--check"), ("--check-plugin-metadata",)]:
             result = json.loads(subprocess.check_output(cmd + list(flags)))
-            self.assertEqual((result["version"], result["skills"]), ("0.4.0", 41))
+            self.assertEqual((result["version"], result["skills"]), ("0.4.0", 42))
         first, second = self.artifact("catalog-one.zip"), self.artifact("catalog-two.zip")
         BUILDER.build(repo, output=first, target="claude")
         BUILDER.build(repo, output=second, target="claude")
@@ -203,7 +203,7 @@ class ClaudePackagingTests(unittest.TestCase):
 
     def test_root_metadata_projection_and_additive_discovery_exactly_once(self):
         result = BUILDER.sync_plugin_metadata(ROOT)
-        self.assertEqual((result["version"], result["skills"]), ("0.4.0", 41))
+        self.assertEqual((result["version"], result["skills"]), ("0.4.0", 42))
         plugin = json.loads((ROOT / ".claude-plugin/plugin.json").read_bytes())
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_bytes())
         self.assertEqual(set(plugin), {"name", "version", "description", "author", "repository", "license", "skills"})
@@ -215,10 +215,10 @@ class ClaudePackagingTests(unittest.TestCase):
         self.assertEqual((ROOT / market["plugins"][0]["source"]).resolve(), ROOT)
         self.assertTrue((ROOT / market["plugins"][0]["source"] / ".claude-plugin/plugin.json").is_file())
         paths = list((ROOT / "skills").glob("*/SKILL.md"))
-        self.assertEqual(len(paths), 39)
+        self.assertEqual(len(paths), 40)
         paths += [ROOT / source / "SKILL.md" for source in plugin["skills"]]
-        self.assertEqual(len(paths), 41)
-        self.assertEqual(len({p.resolve() for p in paths}), 41)
+        self.assertEqual(len(paths), 42)
+        self.assertEqual(len({p.resolve() for p in paths}), 42)
         manifest = json.loads((ROOT / BUILDER.MANIFEST).read_bytes())
         self.assertEqual({p.parent.resolve() for p in paths},
                          {(ROOT / m["source"]).resolve() for m in manifest["members"]})

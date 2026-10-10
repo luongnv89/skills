@@ -30,9 +30,9 @@ claude --plugin-dir /absolute/path/to/skills
 ```
 
 The path is the repository root, not `.claude-plugin/`. Only native metadata
-lives in that directory. Default root `skills/` discovery finds 39 immediate
+lives in that directory. Default root `skills/` discovery finds 40 immediate
 members; the plugin manifest adds **only** the two nested diagram children.
-Together they expose 41 skills once, without flattening, copying or moving
+Together they expose 42 skills once, without flattening, copying or moving
 source files. Skill-local `agents/` files stay resources, not native agents.
 
 Review upstream changes before explicitly updating a repository-backed install:
@@ -74,8 +74,8 @@ no invented contact, retention or privacy guarantees.
 
 ## Contents and scope
 
-[manifest.json](manifest.json) explicitly lists all **41** current tracked skill
-definitions: 39 top-level skills plus `drawio-generator` and
+[manifest.json](manifest.json) explicitly lists all **42** current tracked skill
+definitions: 40 top-level skills plus `drawio-generator` and
 `excalidraw-generator`, the two children of `diagram-generator`. Native Claude
 loading uses the unchanged nested source layout. In optional ZIP exports every
 member becomes a separately discoverable `skills/<name>/SKILL.md` directory;
@@ -157,7 +157,7 @@ lstack-0.4.0/
     diagram-generator/SKILL.md
     drawio-generator/SKILL.md
     excalidraw-generator/SKILL.md
-    ... (41 independent member directories)
+    ... (42 independent member directories)
 ```
 
 Read a member's `SKILL.md` and prerequisites before using it. Supply that file
@@ -206,7 +206,7 @@ lstack-claude-0.4.0/
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md       # all 41 members, including flattened children
+    skills/<member>/SKILL.md       # all 42 members, including flattened children
 ```
 
 Only metadata goes inside `.claude-plugin/`; `skills/` is at the **plugin** root.
@@ -334,7 +334,7 @@ lstack-codex-0.4.0/
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md        # 41 independent members
+    skills/<member>/SKILL.md        # 42 independent members
 ```
 
 The marketplace entry uses `source: {"source": "local", "path": "./plugins/lstack"}`,
@@ -393,7 +393,7 @@ and an empty working directory, with file-only credential storage and no copied
 credentials. Marketplace registration/listing, local installation and skill
 metadata discovery are checked without model execution. This proves native
 loading, not successful execution of every workflow. Desktop installation/UI,
-authenticated model sessions and all 41 workflows are not exercised. The
+authenticated model sessions and all 42 workflows are not exercised. The
 current official overview supports CLI `/plugins` and Codex in the ChatGPT
 desktop app, but **not the IDE extension**. This local shell-oriented artifact
 is not a public-directory submission or a promise of web/mobile/cloud support.
@@ -444,7 +444,7 @@ artifact is emitted or silently substituted.
   the original repository, not the extracted layout. Follow the manifest's
   source-to-name mapping; no member instructions are rewritten for this bundle.
 - Member-root tests/evals stay in the source repository. Packaging checks prove
-  artifact structure/parity/safety, not all 41 workflows' runtime behavior,
+  artifact structure/parity/safety, not all 42 workflows' runtime behavior,
   host compatibility, or that a human understood every report.
 
 ## Maintain and validate
