@@ -15,7 +15,7 @@
 - Strict 5-step approval-gated workflow: Analyze → Design → Plan → Execute → Summarize
 - Recommends best CLI library per language (click, commander, cobra, clap, picocli, thor)
 - Includes starter scaffolds, testing patterns, and quality guardrails
-- Styles every CLI after [btop](https://github.com/aristocratos/btop): rounded boxes with titles in the border, gradient meters, braille sparklines, and one role-based theme, with plain output for pipes, JSON, and `NO_COLOR`
+- Styles every CLI after [btop](https://github.com/aristocratos/btop): rounded boxes with titles in the border, gradient meters, braille sparklines, and one role-based theme, with plain output for pipes and JSON, and no escape codes under `NO_COLOR`
 - Ends with a final report: status (`COMPLETE`, `PARTIAL` or `BLOCKED`), evidence, uncertainty, and the next decision
 - Supports Python, JavaScript/TypeScript, Go, Rust, Java/Kotlin, and Ruby
 

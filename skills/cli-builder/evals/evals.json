@@ -95,7 +95,8 @@
       "expectations": [
         "The design's Visual style section records that the user declined the btop style and chose plain output, instead of presenting boxes, meters, or theme colors.",
         "No output mode of the built CLI emits escape codes or box-drawing characters.",
-        "The final report's Evidence names the plain visual style the user chose instead of btop."
+        "The final report's Evidence names the plain visual style the user chose instead of btop.",
+        "No FORCE_COLOR=1 demo is run, and none is reported as failing."
       ]
     }
   ]

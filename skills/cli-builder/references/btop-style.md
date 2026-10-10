@@ -16,7 +16,7 @@ Write these five items in the Step 2 design document:
 4. **Implementation** — the styling library or the zero-dependency module, plus the width function (section 6). A library is a new runtime dependency, so name it here for approval.
 5. **Mockup** — one command's styled output, drawn like section 5.
 
-If the user explicitly declines the btop style, in the request or at design approval, replace the five items with `Visual style: <the style the user chose> — btop style declined by the user`. Keep section 2's plain-output rules and section 7's tests 1-3; skip tests 4-7, the forced demo, and the two `Uncertainty:` lines of section 7.
+If the user explicitly declines the btop style, in the request or at design approval, replace the five items with `Visual style: <the style the user chose> — btop style declined by the user`. Keep section 2's plain-output rules and section 7's tests 1-3 and 8; skip tests 4-7, the forced demo, and the two `Uncertainty:` lines of section 7.
 
 ## 2. Three decisions per stream
 
@@ -30,6 +30,8 @@ Make these decisions in the style module, right after argument parsing, so `--no
 
 Plain output carries the same records and fields as styled output: one record per line, fields separated by one tab, no header row, and no frames, meters, graphs, truncation, or escape codes.
 
+**User-supplied text** (file, folder, and service names, messages, any value the CLI did not write itself). In styled and plain output, replace each control character (U+0000-001F, U+007F, U+0080-009F) with a visible escape: `\t`, `\n`, and `\xNN` for the rest (ESC prints as `\x1b`). In plain output, also escape a backslash as `\\`, so each record stays one line with the same fields. Machine formats such as JSON use their own encoding.
+
 **B. Color tier** (styled streams only). Apply the first rule that matches:
 
 1. `--no-color` is given, or `NO_COLOR` is set to a non-empty value → **none**: no escape sequences at all, not even bold or faint. This rule wins over `FORCE_COLOR`.
@@ -37,7 +39,7 @@ Plain output carries the same records and fields as styled output: one record pe
 3. `TERM` contains `256color` → **256**.
 4. Otherwise → **16**.
 
-On Windows, enable virtual-terminal processing before the first escape code. If it cannot be enabled, use tier none.
+When the stream is a Windows console, enable virtual-terminal processing before the first escape code, and use tier none if that fails. A stream that is not a console (a pipe or file styled through `FORCE_COLOR`) gets the escape codes as they are.
 
 **C. Glyph set** (styled streams only). Use **Unicode** when the stream's encoding is UTF-8; otherwise use **ASCII**. In Python, read `sys.stdout.encoding` or `sys.stderr.encoding`. Elsewhere, read the first set variable of `LC_ALL`, `LC_CTYPE`, `LANG` and look for `UTF-8` or `utf8`; on Windows, treat a set `WT_SESSION` as UTF-8.
 
@@ -87,7 +89,7 @@ Each component gives its Unicode form and its ASCII form. Draw the ASCII form wh
 - Print the value after the meter, right-aligned: ` 72%`.
 - ASCII: filled `#`, empty `.`.
 
-**Sparkline** (a time series on one line). Each braille cell shows two samples: pair samples 1-2, 3-4, and so on, repeating the last sample when the count is odd. Scale each sample to a level from 0 to 4: `round(sample / max * 4)`, where `max` is the known ceiling (100 for percentages) or else the series maximum. Take the cell from btop's `braille_up` table below: the line is the first sample's level, and the position in that line (0-4) is the second sample's level.
+**Sparkline** (a time series on one line). Each braille cell shows two samples: pair samples 1-2, 3-4, and so on, repeating the last sample when the count is odd. Scale each sample to a level from 0 to 4: `round(sample / max * 4)`, where `max` is the known ceiling (100 for percentages) or else the series maximum. Clamp the level to 0-4. When `max` is 0 (an all-zero series), every level is 0 and every cell uses the `low` color. Take the cell from btop's `braille_up` table below: the line is the first sample's level, and the position in that line (0-4) is the second sample's level.
 
 ```text
 level 0: " ⢀⢠⢰⢸"
@@ -97,7 +99,7 @@ level 3: "⡆⣆⣦⣶⣾"
 level 4: "⡇⣇⣧⣷⣿"
 ```
 
-- Color each cell with the gradient at the larger of its two samples, as a share of `max`.
+- Color each cell with the gradient at the larger of its two samples, as a share of `max` (capped at 100%; `low` when `max` is 0).
 - Print the minimum, maximum, and last value after the sparkline. Some fonts lack braille (btop's README notes the same limit), so the numbers carry the data.
 - ASCII: print only the three numbers.
 
@@ -167,11 +169,13 @@ Either way, the CLI needs a **width function** that counts terminal cells (CJK a
 
 Libraries and parsers run their own terminal detection, and it can disagree with section 2: some ignore `FORCE_COLOR`, and some strip escape codes whenever the stream is not a TTY. Turn that detection off by passing the decision explicitly to every layer that writes output, including the parser (for example `click.echo(..., color=...)` and clap `Command::color(...)`).
 
+In rich, pass every user-supplied string, titles included, as `rich.text.Text(value)` (or through `rich.markup.escape`), so `[...]` is never parsed as markup, and create the Console with `highlight=False`.
+
 None of these libraries draws the btop title notch (`┐title┌`) as a built-in border style. Build that top line in the style module.
 
 ## 7. Verify
 
-Add these tests with the Phase 2 output-formatting tasks. Build each subprocess environment explicitly: remove `FORCE_COLOR`, `NO_COLOR`, `CLICOLOR_FORCE`, and `COLUMNS`, set `TERM=xterm-256color` and `LANG=en_US.UTF-8`, then add the variables the test names. Test runners such as Jest export `FORCE_COLOR` to their workers.
+Add these tests with the Phase 2 output-formatting tasks. Build each subprocess environment explicitly: remove `FORCE_COLOR`, `NO_COLOR`, `CLICOLOR_FORCE`, `COLORTERM`, `COLUMNS`, `LC_ALL`, and `LC_CTYPE`, set `TERM=xterm-256color` and `LANG=C.UTF-8`, then add the variables the test names. Test runners such as Jest export `FORCE_COLOR` to their workers.
 
 1. Run a command that prints a box on a terminal, with stdout captured (not a TTY). Check that stdout contains no ESC byte (`0x1b`) and no `╭`.
 2. Run a `--format json` command with `FORCE_COLOR=1`. Check that stdout parses as JSON and contains no ESC byte.
@@ -180,6 +184,7 @@ Add these tests with the Phase 2 output-formatting tasks. Build each subprocess 
 5. Call the renderer with an explicit mode: styled, 16 colors, Unicode. Check that the output contains `\x1b[` and `╭─┐`.
 6. Call the renderer with the ASCII glyph set. Check that every character is below `0x80`.
 7. Call the meter with value 50, width 10, and color tier none. Check that the output is 5 `■`, 5 `·`, and ` 50%`.
+8. Render a record whose value contains an ESC byte and a tab, once plain and once styled with color tier none. Check that neither output contains a raw ESC byte and that the plain record keeps its field count.
 
 Demo (SKILL.md Step 4, item 5), from Phase 2 on:
 

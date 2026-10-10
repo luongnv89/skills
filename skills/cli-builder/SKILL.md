@@ -153,7 +153,7 @@ Before the first file write, apply the Branch-First Safety Rule. Then, for each 
 
 At the end of each phase:
 
-5. Run the demo (`--help` plus at least one approved example invocation) and show the output. From Phase 2 on, also run one example with `FORCE_COLOR=1` (`references/btop-style.md` → Verify). A demo that exits non-zero is a failing test (item 3).
+5. Run the demo (`--help` plus at least one approved example invocation) and show the output. From Phase 2 on, also run one example with `FORCE_COLOR=1`, unless the user declined the btop style (`references/btop-style.md` → Verify). A demo that exits non-zero is a failing test (item 3).
 6. In a git repository, stage only the files this phase created or modified, then commit them with a descriptive message.
 
 If a task needs a change to the approved design (a command, option, or output format differs), stop Step 4. Present the proposed change and wait for explicit approval before you continue.
