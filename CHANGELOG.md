@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **Eval fixtures move out of the plugin folder.** The 31 eval input fixtures (`evals/files/` in seven skills, plus agent-config's `evals/build-fixtures.sh`) move to `eval-fixtures/<skill>/` at the repository root. `skills/` drops from 508 to 477 files, which leaves 35 files of headroom under the Claude plugin directory's 512-file limit. Each `evals/evals.json` stays in its skill and now points at `../../eval-fixtures/<skill>/`; skill definitions, versions and the lstack ZIP exports (which already excluded `evals/`) are unchanged.
+- **lstack plugin icon.** `skills/.claude-plugin/icon.png` is a 512×512 render of `docs/assets/logo/logo-icon.svg`, and the generated `plugin.json` now declares it as `"icon"` for the Claude plugin directory listing. The `claude` adapter in `packages/lstack/manifest.json` accepts an optional `icon` field, limited to `./.claude-plugin/icon.png` or `.svg`. `--check-plugin-metadata` fails if that file is missing, and the `--target claude` export copies the icon next to its `plugin.json`.
 
 ## v4.1.0 — 2026-10-10
 

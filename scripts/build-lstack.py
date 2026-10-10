@@ -96,7 +96,7 @@ def plugin_metadata(manifest, target):
     """Shared adapter projection; native component injection is not permitted."""
     adapter = manifest.get(target)
     fields = {"description", "author", "repository", "license", "marketplace_name"}
-    optional = {"homepage", "keywords"}
+    optional = {"homepage", "keywords", "icon"}
     if (not isinstance(adapter, dict) or not fields <= set(adapter) <= fields | optional
             or not isinstance(adapter["description"], str) or not adapter["description"].strip()
             or not isinstance(adapter["author"], dict) or set(adapter["author"]) != {"name"}
@@ -106,6 +106,7 @@ def plugin_metadata(manifest, target):
             or not isinstance(adapter["marketplace_name"], str)
             or not NAME.fullmatch(adapter["marketplace_name"])
             or not str(adapter.get("homepage", "https://")).startswith("https://")
+            or adapter.get("icon", ICONS[0]) not in ICONS
             or not isinstance(adapter.get("keywords", []), list)
             or not all(isinstance(k, str) and NAME.fullmatch(k) for k in adapter.get("keywords", []))):
         raise ValueError("invalid " + ("Claude" if target == "claude" else "Codex") + " adapter metadata")
@@ -130,6 +131,8 @@ def claude_metadata(manifest, additional_skills=None, source="./plugins/lstack")
 # The plugin folder is skills/ so the directory portal scans only skill payloads;
 # the repository-root marketplace points at it.
 PLUGIN_ROOT = "skills"
+# Listing icons live beside plugin.json, at the paths the directory validator probes.
+ICONS = ("./.claude-plugin/icon.png", "./.claude-plugin/icon.svg")
 
 
 def plugin_metadata_paths(repo):
@@ -159,6 +162,9 @@ def native_metadata(repo):
     children = ["./" + str(PurePosixPath(source).relative_to(PLUGIN_ROOT))
                 for source in roots if len(PurePosixPath(source).parts) > 2]
     plugin, marketplace = claude_metadata(manifest, ["./", *children], source="./" + PLUGIN_ROOT)
+    icon = repo / PLUGIN_ROOT / plugin.get("icon", ICONS[0])
+    if "icon" in plugin and (icon.is_symlink() or not icon.is_file()):
+        raise ValueError("missing or non-regular plugin icon: " + str(icon))
     paths = plugin_metadata_paths(repo)
     return dict(zip(paths, (json_bytes(plugin), json_bytes(marketplace)))), manifest, roots
 
@@ -272,6 +278,9 @@ def prepare(repo, revision="HEAD", target="bundle"):
         # A marketplace container surrounds the native plugin; payload bytes/modes never change.
         entries = {"plugins/lstack/" + path: value for path, value in entries.items()}
         entries.update({path: (data, 0o644) for path, data in generated.items()})
+        if target == "claude" and "icon" in plugin:
+            icon = plugin["icon"][2:]
+            entries["plugins/lstack/" + icon] = (blob(PLUGIN_ROOT + "/" + icon), 0o644)
         provenance["target"] = target
         provenance["generated_metadata"] = [
             {"path": path, "sha256": hashlib.sha256(data).hexdigest()}

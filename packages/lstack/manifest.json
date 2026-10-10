@@ -9,6 +9,7 @@
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
     "homepage": "https://luongnv.com/skills/",
+    "icon": "./.claude-plugin/icon.png",
     "keywords": ["skills", "code-review", "documentation", "diagrams", "github", "release", "seo", "productivity"],
     "marketplace_name": "lstack"
   },

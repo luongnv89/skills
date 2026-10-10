@@ -4,6 +4,7 @@
   },
   "description": "42 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
   "homepage": "https://luongnv.com/skills/",
+  "icon": "./.claude-plugin/icon.png",
   "keywords": [
     "skills",
     "code-review",

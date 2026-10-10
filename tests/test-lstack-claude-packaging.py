@@ -113,7 +113,8 @@ class ClaudePackagingTests(unittest.TestCase):
         plugin = json.loads(entries["plugins/lstack/.claude-plugin/plugin.json"][0])
         self.assertEqual((plugin["homepage"], plugin["keywords"]), ("https://example.invalid/", ["fixture"]))
         for key, value in (("homepage", "http://example.invalid/"), ("keywords", "fixture"),
-                           ("keywords", ["Not Kebab"])):
+                           ("keywords", ["Not Kebab"]), ("icon", "../icon.png"),
+                           ("icon", "./.claude-plugin/icon.gif")):
             with self.subTest(key=key, value=value):
                 valid = dict(self.manifest["claude"])
                 self.manifest["claude"][key] = value
@@ -121,6 +122,20 @@ class ClaudePackagingTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "invalid Claude adapter"):
                     BUILDER.prepare(self.repo, target="claude")
                 self.manifest["claude"] = valid
+
+    def test_adapter_icon_is_copied_beside_exported_manifest(self):
+        self.put("skills/.claude-plugin/icon.png", "fixture icon bytes")
+        self.commit()
+        self.manifest["claude"]["icon"] = "./.claude-plugin/icon.png"
+        self.update_manifest()
+        claude, _ = BUILDER.prepare(self.repo, target="claude")
+        plugin = json.loads(claude["plugins/lstack/.claude-plugin/plugin.json"][0])
+        self.assertEqual(plugin["icon"], "./.claude-plugin/icon.png")
+        self.assertEqual(claude["plugins/lstack/.claude-plugin/icon.png"], (b"fixture icon bytes", 0o644))
+        BUILDER.sync_plugin_metadata(self.repo, write=True)
+        (self.repo / "skills/.claude-plugin/icon.png").unlink()
+        with self.assertRaisesRegex(ValueError, "missing or non-regular plugin icon"):
+            BUILDER.sync_plugin_metadata(self.repo)
 
     def test_adapter_metadata_cannot_add_runtime_components(self):
         for key, value in (("hooks", {}), ("marketplace_name", "../escape"), ("author", "invalid")):
@@ -169,7 +184,8 @@ class ClaudePackagingTests(unittest.TestCase):
         paths = subprocess.check_output([
             "git", "-C", str(ROOT), "ls-files", "-z", "skills", "packages/lstack",
             "scripts/build-lstack.py", "README.md", "LICENSE"]).decode().split("\0")
-        paths += ["skills/.claude-plugin/plugin.json", ".claude-plugin/marketplace.json", "skills/README.md"]
+        paths += ["skills/.claude-plugin/plugin.json", "skills/.claude-plugin/icon.png",
+                  ".claude-plugin/marketplace.json", "skills/README.md"]
         for relative in sorted(set(filter(None, paths))):
             source, destination = ROOT / relative, repo / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
@@ -237,7 +253,8 @@ class ClaudePackagingTests(unittest.TestCase):
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_bytes())
         self.assertFalse((ROOT / ".claude-plugin/plugin.json").exists())
         self.assertEqual(set(plugin), {"name", "version", "description", "author", "repository", "license",
-                                       "homepage", "keywords", "skills"})
+                                       "homepage", "icon", "keywords", "skills"})
+        self.assertTrue((plugin_root / plugin["icon"]).is_file())
         self.assertEqual(plugin["skills"], ["./", "./diagram-generator/drawio-generator",
                                            "./diagram-generator/excalidraw-generator"])
         self.assertEqual((market["name"], market["plugins"][0]["source"]), ("lstack", "./skills"))
@@ -252,14 +269,14 @@ class ClaudePackagingTests(unittest.TestCase):
         manifest = json.loads((ROOT / BUILDER.MANIFEST).read_bytes())
         self.assertEqual({p.parent.resolve() for p in paths},
                          {(ROOT / m["source"]).resolve() for m in manifest["members"]})
-        self.assertEqual(len(manifest["claude"]), 7)
+        self.assertEqual(len(manifest["claude"]), 8)
         self.assertEqual(len(manifest["codex"]), 5)
 
     def test_plugin_folder_meets_directory_file_policy(self):
         """Directory portal holds: >512 files, non-image files over 256 KiB, other binaries."""
         tracked = subprocess.check_output(["git", "-C", str(ROOT), "ls-files", "-z", "skills"]).decode()
         files = set(filter(None, tracked.split("\0")))
-        files |= {"skills/.claude-plugin/plugin.json", "skills/README.md"}
+        files |= {"skills/.claude-plugin/plugin.json", "skills/.claude-plugin/icon.png", "skills/README.md"}
         files = {f for f in files if (ROOT / f).exists()}
         self.assertLessEqual(len(files), 512)
         images = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".woff", ".woff2", ".ttf", ".otf")
