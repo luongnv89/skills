@@ -159,7 +159,7 @@ Either way, the CLI needs a **width function** that counts terminal cells (CJK a
 | Language | Styling library | Width function | Pass the section 2 decision with |
 |----------|-----------------|----------------|----------------------------------|
 | Python | rich | built in (`rich.cells.cell_len`) | `Console(force_terminal=..., color_system=None` or `"standard"`/`"256"`/`"truecolor")`; never `no_color`, which keeps bold and faint |
-| JavaScript/TS | chalk (v5 is ESM-only; use chalk 4 in a CommonJS project) | string-width | `new Chalk({level: 0-3})`, one instance per stream |
+| JavaScript/TS | chalk (v5 is ESM-only; use chalk 4 in a CommonJS project) | string-width (v5+ is ESM-only; use v4 in CommonJS) | chalk 5: `new Chalk({level: 0-3})`; chalk 4: `new chalk.Instance({level: 0-3})`; one instance per stream |
 | Go | lipgloss v1 | built in (`lipgloss.Width`) | `lipgloss.SetColorProfile(...)` |
 | Rust | anstream + anstyle | unicode-width | `AutoStream::new(stream, ColorChoice::Always` or `Never)` |
 | Java/Kotlin | picocli `CommandLine.Help.Ansi` (16 colors only; use raw SGR for 256 and 24-bit) | JLine `AttributedString.columnLength` or a zero-width-aware helper | `Help.Ansi.ON` or `OFF` |
