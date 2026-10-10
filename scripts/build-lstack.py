@@ -96,14 +96,18 @@ def plugin_metadata(manifest, target):
     """Shared adapter projection; native component injection is not permitted."""
     adapter = manifest.get(target)
     fields = {"description", "author", "repository", "license", "marketplace_name"}
-    if (not isinstance(adapter, dict) or set(adapter) != fields
+    optional = {"homepage", "keywords"}
+    if (not isinstance(adapter, dict) or not fields <= set(adapter) <= fields | optional
             or not isinstance(adapter["description"], str) or not adapter["description"].strip()
             or not isinstance(adapter["author"], dict) or set(adapter["author"]) != {"name"}
             or not isinstance(adapter["author"]["name"], str) or not adapter["author"]["name"].strip()
             or not isinstance(adapter["repository"], str) or not adapter["repository"].startswith("https://")
             or adapter["license"] != "MIT"
             or not isinstance(adapter["marketplace_name"], str)
-            or not NAME.fullmatch(adapter["marketplace_name"])):
+            or not NAME.fullmatch(adapter["marketplace_name"])
+            or not str(adapter.get("homepage", "https://")).startswith("https://")
+            or not isinstance(adapter.get("keywords", []), list)
+            or not all(isinstance(k, str) and NAME.fullmatch(k) for k in adapter.get("keywords", []))):
         raise ValueError("invalid " + ("Claude" if target == "claude" else "Codex") + " adapter metadata")
     plugin = {key: value for key, value in adapter.items() if key != "marketplace_name"}
     plugin.update({"name": manifest["name"], "version": manifest["version"]})
@@ -123,12 +127,18 @@ def claude_metadata(manifest, additional_skills=None, source="./plugins/lstack")
     return plugin, marketplace
 
 
+# The plugin folder is skills/ so the directory portal scans only skill payloads;
+# the repository-root marketplace points at it.
+PLUGIN_ROOT = "skills"
+
+
 def plugin_metadata_paths(repo):
-    """Limit generation to two regular root files, never following symlinks."""
-    directory = Path(repo) / ".claude-plugin"
-    if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
-        raise ValueError("native metadata directory must be a regular directory")
-    paths = [directory / name for name in ("plugin.json", "marketplace.json")]
+    """Limit generation to two regular files, never following symlinks."""
+    paths = [Path(repo) / PLUGIN_ROOT / ".claude-plugin/plugin.json",
+             Path(repo) / ".claude-plugin/marketplace.json"]
+    for directory in {path.parent for path in paths}:
+        if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
+            raise ValueError("native metadata directory must be a regular directory")
     for path in paths:
         if path.is_symlink() or (path.exists() and not path.is_file()):
             raise ValueError("native metadata must be regular files: " + str(path))
@@ -145,15 +155,20 @@ def native_metadata(repo):
         path = repo / source / "SKILL.md"
         if not path.is_file() or any(p.is_symlink() for p in (path, *path.parents) if p != repo):
             raise ValueError("missing or non-regular canonical skill: " + source)
-    # Default skills/ discovers only immediate members. Add nested children, not parents.
-    children = ["./" + source for source in roots if len(PurePosixPath(source).parts) > 2]
-    plugin, marketplace = claude_metadata(manifest, children, source="./")
+    # "./" scans the plugin folder's immediate members. Add nested children, not parents.
+    children = ["./" + str(PurePosixPath(source).relative_to(PLUGIN_ROOT))
+                for source in roots if len(PurePosixPath(source).parts) > 2]
+    plugin, marketplace = claude_metadata(manifest, ["./", *children], source="./" + PLUGIN_ROOT)
     paths = plugin_metadata_paths(repo)
     return dict(zip(paths, (json_bytes(plugin), json_bytes(marketplace)))), manifest, roots
 
 
 def sync_plugin_metadata(repo, write=False):
     generated, manifest, roots = native_metadata(repo)
+    legacy = Path(repo).resolve() / ".claude-plugin/plugin.json"
+    if legacy.exists() or legacy.is_symlink():
+        raise ValueError("stale native plugin metadata: remove " + str(legacy)
+                         + "; the plugin folder is " + PLUGIN_ROOT + "/")
     if write:
         for path, data in generated.items():
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -316,9 +331,9 @@ def main():
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--check", action="store_true", help="validate committed inputs without writing an archive")
     modes.add_argument("--write-plugin-metadata", action="store_true",
-                       help="generate the two root Claude JSON files from working-tree inputs")
+                       help="generate the two native Claude JSON files from working-tree inputs")
     modes.add_argument("--check-plugin-metadata", action="store_true",
-                       help="check the two root Claude JSON projections against working-tree inputs")
+                       help="check the two native Claude JSON projections against working-tree inputs")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parent.parent
     try:

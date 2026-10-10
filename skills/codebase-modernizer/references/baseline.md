@@ -94,7 +94,7 @@ common case, not an edge case.
 
 | Stack | Build | Test | Coverage | Lint / types |
 |---|---|---|---|---|
-| Node / TS | `npm run build` (or `pnpm`/`yarn`) | `npm test -- --ci` (Jest `--ci` refuses to write new snapshots) | `npm test -- --ci --coverage` | `npx tsc --noEmit`, `npm run lint` |
+| Node / TS | `npm run build` (or `pnpm`/`yarn`) | `npm test -- --ci` (Jest `--ci` refuses to write new snapshots) | `npm test -- --ci --coverage` | `npx --no-install tsc --noEmit` (local TypeScript only; plain `npx tsc` without it fetches an unrelated npm package), `npm run lint` |
 | Python | `python -m build` or import check | `pytest -q -p no:cacheprovider` | `pytest --cov` | `ruff check .`, `mypy .` |
 | Go | `go build ./...` | `go test ./...` | `go test -cover ./...` | `go vet ./...` |
 | Rust | `cargo build --locked` | `cargo test --locked` | `cargo llvm-cov` | `cargo clippy --locked` |

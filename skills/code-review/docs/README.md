@@ -61,7 +61,7 @@ The `cleanup` mode is the only one that modifies files; it never fires by weak i
 ## Installation
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill code-review
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review
 ```
 
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):

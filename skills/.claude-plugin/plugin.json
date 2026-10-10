@@ -1,0 +1,26 @@
+{
+  "author": {
+    "name": "Luong NGUYEN"
+  },
+  "description": "42 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+  "homepage": "https://luongnv.com/skills/",
+  "keywords": [
+    "skills",
+    "code-review",
+    "documentation",
+    "diagrams",
+    "github",
+    "release",
+    "seo",
+    "productivity"
+  ],
+  "license": "MIT",
+  "name": "lstack",
+  "repository": "https://github.com/luongnv89/skills",
+  "skills": [
+    "./",
+    "./diagram-generator/drawio-generator",
+    "./diagram-generator/excalidraw-generator"
+  ],
+  "version": "0.5.0"
+}

@@ -1,6 +1,6 @@
 # Guide to Building, Testing, and Validating Agent Skills for Claude
 
-> Based on "The Complete Guide to Building Skills for Claude" by Anthropic.
+> Based on ["The Complete Guide to Building Skills for Claude"](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf) by Anthropic.
 > Repo-specific conventions for **this** catalog override generic advice where noted (see [CONTRIBUTING.md](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md)).
 
 ---
@@ -573,7 +573,7 @@ description: Advanced data analysis for CSV files. Use for statistical
 For **this** catalog (`luongnv89/skills`), end users install via the methods in [README.md](../README.md#install):
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill <name>
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill <name>
 # or
 curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash
 # or clone + bash install.sh

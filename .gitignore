@@ -5,6 +5,8 @@ dist/
 # Python
 __pycache__/
 *.pyc
+.pytest_cache/
+.ruff_cache/
 
 # OS files
 .DS_Store
@@ -14,12 +16,10 @@ Thumbs.db
 *.swp
 *.tmp
 *~
-.windsurf
-.cursor/
+*.bak
 
 # GitHub
 .github/instructions/
-.gstack/
 
 # Skill workspaces
 *-workspace/
@@ -48,14 +48,13 @@ PHASE_1_SUMMARY.md
 
 # Skill auto-improver iteration artifacts
 .asm-improver/
-SKILL.md.bak
 
 # AI tool config/scratch folders (per-vendor, not part of the catalog)
 .agents/
-.claude/skills/stripe-best-practices
-.claude/skills/stripe-projects
-.claude/skills/upgrade-stripe
-.claude/skills/website-cloner
+.claude/skills/
+.cursor/
+.gstack/
+.windsurf/
 .ai-tools/
 .adal/
 .augment/

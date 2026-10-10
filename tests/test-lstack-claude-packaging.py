@@ -90,9 +90,37 @@ class ClaudePackagingTests(unittest.TestCase):
         BUILDER.build(self.repo, output=first, target="claude")
         self.put("packages/lstack/manifest.json", "uncommitted invalid metadata")
         self.put("skills/parent/SKILL.md", "local modified definition")
-        self.put(".claude-plugin/plugin.json", "untracked runtime metadata")
+        self.put("skills/.claude-plugin/plugin.json", "untracked runtime metadata")
         BUILDER.build(self.repo, output=second, target="claude")
         self.assertEqual(first.read_bytes(), second.read_bytes())
+
+    def test_exports_exclude_committed_plugin_folder_metadata_and_listing(self):
+        self.manifest["codex"] = dict(self.manifest["claude"])
+        self.update_manifest()
+        BUILDER.sync_plugin_metadata(self.repo, write=True)
+        self.put("skills/README.md", "Directory listing page")
+        self.commit()
+        for target in ("bundle", "claude", "codex"):
+            with self.subTest(target=target):
+                entries, _ = BUILDER.prepare(self.repo, target=target)
+                self.assertFalse(any(p.endswith("skills/README.md") or "skills/.claude-plugin" in p
+                                     for p in entries))
+
+    def test_adapter_optional_listing_fields(self):
+        self.manifest["claude"].update({"homepage": "https://example.invalid/", "keywords": ["fixture"]})
+        self.update_manifest()
+        entries, _ = BUILDER.prepare(self.repo, target="claude")
+        plugin = json.loads(entries["plugins/lstack/.claude-plugin/plugin.json"][0])
+        self.assertEqual((plugin["homepage"], plugin["keywords"]), ("https://example.invalid/", ["fixture"]))
+        for key, value in (("homepage", "http://example.invalid/"), ("keywords", "fixture"),
+                           ("keywords", ["Not Kebab"])):
+            with self.subTest(key=key, value=value):
+                valid = dict(self.manifest["claude"])
+                self.manifest["claude"][key] = value
+                self.update_manifest()
+                with self.assertRaisesRegex(ValueError, "invalid Claude adapter"):
+                    BUILDER.prepare(self.repo, target="claude")
+                self.manifest["claude"] = valid
 
     def test_adapter_metadata_cannot_add_runtime_components(self):
         for key, value in (("hooks", {}), ("marketplace_name", "../escape"), ("author", "invalid")):
@@ -141,8 +169,8 @@ class ClaudePackagingTests(unittest.TestCase):
         paths = subprocess.check_output([
             "git", "-C", str(ROOT), "ls-files", "-z", "skills", "packages/lstack",
             "scripts/build-lstack.py", "README.md", "LICENSE"]).decode().split("\0")
-        paths += [".claude-plugin/plugin.json", ".claude-plugin/marketplace.json"]
-        for relative in filter(None, paths):
+        paths += ["skills/.claude-plugin/plugin.json", ".claude-plugin/marketplace.json", "skills/README.md"]
+        for relative in sorted(set(filter(None, paths))):
             source, destination = ROOT / relative, repo / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             if source.is_symlink():
@@ -171,7 +199,7 @@ class ClaudePackagingTests(unittest.TestCase):
                         "/lstack:code-review", "issue-pr-review", "issue-resolver", "dont-make-me-think"):
             self.assertIn(command, doc)
         self.assertIn("lstack-claude-" + adapted["package_version"], doc)
-        self.assertEqual(adapted["package_version"], "0.4.0")
+        self.assertEqual(adapted["package_version"], "0.5.0")
         plugin = json.loads(claude["plugins/lstack/.claude-plugin/plugin.json"][0])
         self.assertNotIn("skills", plugin)  # Root additive paths do not exist in flattened exports.
         market = json.loads(claude[".claude-plugin/marketplace.json"][0])
@@ -180,7 +208,7 @@ class ClaudePackagingTests(unittest.TestCase):
         for flags in [("--check",), ("--target", "claude", "--check"),
                       ("--target", "codex", "--check"), ("--check-plugin-metadata",)]:
             result = json.loads(subprocess.check_output(cmd + list(flags)))
-            self.assertEqual((result["version"], result["skills"]), ("0.4.0", 42))
+            self.assertEqual((result["version"], result["skills"]), ("0.5.0", 42))
         first, second = self.artifact("catalog-one.zip"), self.artifact("catalog-two.zip")
         BUILDER.build(repo, output=first, target="claude")
         BUILDER.build(repo, output=second, target="claude")
@@ -193,7 +221,7 @@ class ClaudePackagingTests(unittest.TestCase):
                 self.assertEqual(codex["plugins/lstack/" + path], value)
         root_doc = (repo / "README.md").read_text()
         for command in ("claude plugin marketplace add luongnv89/skills",
-                        "--write-plugin-metadata", "--check-plugin-metadata", "lstack 0.4.0"):
+                        "--write-plugin-metadata", "--check-plugin-metadata", "lstack 0.5.0"):
             self.assertIn(command, root_doc)
         manifest = json.loads(bundle["manifest.json"][0])
         prerequisites = {p["name"]: p for p in manifest["external_skill_prerequisites"]}
@@ -203,27 +231,51 @@ class ClaudePackagingTests(unittest.TestCase):
 
     def test_root_metadata_projection_and_additive_discovery_exactly_once(self):
         result = BUILDER.sync_plugin_metadata(ROOT)
-        self.assertEqual((result["version"], result["skills"]), ("0.4.0", 42))
-        plugin = json.loads((ROOT / ".claude-plugin/plugin.json").read_bytes())
+        self.assertEqual((result["version"], result["skills"]), ("0.5.0", 42))
+        plugin_root = ROOT / "skills"
+        plugin = json.loads((plugin_root / ".claude-plugin/plugin.json").read_bytes())
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_bytes())
-        self.assertEqual(set(plugin), {"name", "version", "description", "author", "repository", "license", "skills"})
-        self.assertEqual(plugin["skills"], ["./skills/diagram-generator/drawio-generator",
-                                           "./skills/diagram-generator/excalidraw-generator"])
-        self.assertEqual((market["name"], market["plugins"][0]["source"]), ("lstack", "./"))
+        self.assertFalse((ROOT / ".claude-plugin/plugin.json").exists())
+        self.assertEqual(set(plugin), {"name", "version", "description", "author", "repository", "license",
+                                       "homepage", "keywords", "skills"})
+        self.assertEqual(plugin["skills"], ["./", "./diagram-generator/drawio-generator",
+                                           "./diagram-generator/excalidraw-generator"])
+        self.assertEqual((market["name"], market["plugins"][0]["source"]), ("lstack", "./skills"))
         self.assertEqual(market["description"], plugin["description"])
         self.assertEqual(market["plugins"][0]["description"], plugin["description"])
-        self.assertEqual((ROOT / market["plugins"][0]["source"]).resolve(), ROOT)
-        self.assertTrue((ROOT / market["plugins"][0]["source"] / ".claude-plugin/plugin.json").is_file())
-        paths = list((ROOT / "skills").glob("*/SKILL.md"))
+        self.assertEqual((ROOT / market["plugins"][0]["source"]).resolve(), plugin_root)
+        paths = list(plugin_root.glob("*/SKILL.md"))
         self.assertEqual(len(paths), 40)
-        paths += [ROOT / source / "SKILL.md" for source in plugin["skills"]]
+        paths += [plugin_root / source / "SKILL.md" for source in plugin["skills"][1:]]
         self.assertEqual(len(paths), 42)
         self.assertEqual(len({p.resolve() for p in paths}), 42)
         manifest = json.loads((ROOT / BUILDER.MANIFEST).read_bytes())
         self.assertEqual({p.parent.resolve() for p in paths},
                          {(ROOT / m["source"]).resolve() for m in manifest["members"]})
-        self.assertEqual(len(manifest["claude"]), 5)
+        self.assertEqual(len(manifest["claude"]), 7)
         self.assertEqual(len(manifest["codex"]), 5)
+
+    def test_plugin_folder_meets_directory_file_policy(self):
+        """Directory portal holds: >512 files, non-image files over 256 KiB, other binaries."""
+        tracked = subprocess.check_output(["git", "-C", str(ROOT), "ls-files", "-z", "skills"]).decode()
+        files = set(filter(None, tracked.split("\0")))
+        files |= {"skills/.claude-plugin/plugin.json", "skills/README.md"}
+        files = {f for f in files if (ROOT / f).exists()}
+        self.assertLessEqual(len(files), 512)
+        images = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".woff", ".woff2", ".ttf", ".otf")
+        for relative in sorted(files):
+            path = ROOT / relative
+            with self.subTest(path=relative):
+                self.assertFalse(path.is_symlink())
+                self.assertNotIn(path.name, {".DS_Store", "Thumbs.db", "desktop.ini"})
+                if relative.lower().endswith(images):
+                    continue
+                self.assertLess(path.stat().st_size, 256 * 1024)
+                path.read_bytes().decode("utf-8")  # Text only outside images and fonts.
+        listing = (ROOT / "skills/README.md").read_text()
+        prose = "".join(part for index, part in enumerate(listing.split("```")) if index % 2 == 0)
+        self.assertGreaterEqual(len(prose.split()), 40)
+        self.assertIn("claude plugin install lstack@lstack", listing)
 
     def test_native_modes_read_working_manifest_not_committed_archive(self):
         self.manifest["version"] = "0.4.0"
@@ -235,23 +287,25 @@ class ClaudePackagingTests(unittest.TestCase):
         self.assertEqual((written["version"], checked["inputs"]), ("0.4.0", "working-tree"))
         archived = json.loads(subprocess.check_output(cmd + ["--target", "claude", "--check"]))
         self.assertEqual(archived["version"], "0.1.0")
-        plugin = json.loads((self.repo / ".claude-plugin/plugin.json").read_bytes())
-        self.assertEqual(plugin["skills"], ["./skills/parent/child"])
+        plugin = json.loads((self.repo / "skills/.claude-plugin/plugin.json").read_bytes())
+        self.assertEqual(plugin["skills"], ["./", "./parent/child"])
+        market = json.loads((self.repo / ".claude-plugin/marketplace.json").read_bytes())
+        self.assertEqual(market["plugins"][0]["source"], "./skills")
         self.assertFalse((self.repo / "dist").exists())
 
     def test_native_check_rejects_stale_version_paths_and_components(self):
         mutations = [("plugin.json", "version", "9.9.9"),
-                     ("plugin.json", "skills", ["./skills/missing"]),
-                     ("plugin.json", "skills", ["./skills/parent", "./skills/parent/child"]),
+                     ("plugin.json", "skills", ["./missing"]),
+                     ("plugin.json", "skills", ["./", "./parent", "./parent/child"]),
                      ("plugin.json", "hooks", {}), ("plugin.json", "mcpServers", {}),
                      ("plugin.json", "agents", []), ("plugin.json", "commands", []),
                      ("marketplace.json", "name", "other"),
                      ("marketplace.json", "description", "stale description"),
-                     ("marketplace.json", "plugins", [{"name": "lstack", "source": "./missing"}])]
+                     ("marketplace.json", "plugins", [{"name": "lstack", "source": "./"}])]
         for filename, key, value in mutations:
             with self.subTest(filename=filename, key=key, value=value):
                 BUILDER.sync_plugin_metadata(self.repo, write=True)
-                path = self.repo / ".claude-plugin" / filename
+                path = self.repo / ("skills/" if filename == "plugin.json" else "") / ".claude-plugin" / filename
                 mutated = json.loads(path.read_bytes())
                 mutated[key] = value
                 path.write_bytes(BUILDER.json_bytes(mutated))
@@ -265,7 +319,7 @@ class ClaudePackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "stale native plugin metadata"):
             BUILDER.sync_plugin_metadata(self.repo)
         BUILDER.sync_plugin_metadata(self.repo, write=True)
-        path = self.repo / ".claude-plugin/plugin.json"
+        path = self.repo / "skills/.claude-plugin/plugin.json"
         path.write_bytes(path.read_bytes() + b"\n")
         with self.assertRaisesRegex(ValueError, "stale native plugin metadata"):
             BUILDER.sync_plugin_metadata(self.repo)
@@ -273,13 +327,20 @@ class ClaudePackagingTests(unittest.TestCase):
     def test_native_check_rejects_missing_malformed_and_unknown_metadata(self):
         with self.assertRaisesRegex(ValueError, "stale native plugin metadata"):
             BUILDER.sync_plugin_metadata(self.repo)
-        self.put(".claude-plugin/plugin.json", "malformed JSON")
+        self.put("skills/.claude-plugin/plugin.json", "malformed JSON")
         self.put(".claude-plugin/marketplace.json", "{}")
         self.put(".claude-plugin/unknown.json", "preserve me")
         with self.assertRaisesRegex(ValueError, "stale native plugin metadata"):
             BUILDER.sync_plugin_metadata(self.repo)
         BUILDER.sync_plugin_metadata(self.repo, write=True)
         self.assertEqual((self.repo / ".claude-plugin/unknown.json").read_text(), "preserve me")
+
+    def test_native_rejects_legacy_root_plugin_manifest(self):
+        BUILDER.sync_plugin_metadata(self.repo, write=True)
+        self.put(".claude-plugin/plugin.json", "{}")
+        for write in (False, True):
+            with self.subTest(write=write), self.assertRaisesRegex(ValueError, "remove .*plugin folder is skills/"):
+                BUILDER.sync_plugin_metadata(self.repo, write=write)
 
     def test_native_rejects_stale_missing_and_unsafe_canonical_members(self):
         valid = json.loads(json.dumps(self.manifest))
@@ -291,6 +352,7 @@ class ClaudePackagingTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     BUILDER.sync_plugin_metadata(self.repo, write=True)
                 self.assertFalse((self.repo / ".claude-plugin").exists())
+                self.assertFalse((self.repo / "skills/.claude-plugin").exists())
         self.put(BUILDER.MANIFEST, json.dumps(valid))
         (self.repo / "skills/parent/child/SKILL.md").unlink()
         with self.assertRaisesRegex(ValueError, "stale"):
@@ -315,7 +377,7 @@ class ClaudePackagingTests(unittest.TestCase):
         directory.unlink()
         directory.mkdir()
         marker = self.put("preserve.txt", "untouched")
-        (directory / "plugin.json").symlink_to(marker)
+        (directory / "marketplace.json").symlink_to(marker)
         with self.assertRaisesRegex(ValueError, "regular files"):
             BUILDER.sync_plugin_metadata(self.repo, write=True)
         self.assertEqual(marker.read_text(), "untouched")

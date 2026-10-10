@@ -6,10 +6,10 @@ The Agent Skills logo is built around the **Keyed Slot** concept: a chamfered sk
 
 ### Logo Files
 
-Files on disk under `assets/logo/` (verified 2026-09-27):
+Files on disk under `docs/assets/logo/`, the single copy in the repo:
 
 ```
-assets/logo/
+docs/assets/logo/
 ├── logo-full.svg        # Mark + wordmark (horizontal lockup, light backgrounds)
 ├── logo-mark.svg        # Symbol only — canonical source of truth
 ├── logo-wordmark.svg    # Outlined caps wordmark
@@ -20,7 +20,7 @@ assets/logo/
 └── brand-showcase.html  # Brand identity showcase page
 ```
 
-Root README uses `assets/logo/logo-icon.svg` (`README.md:2`). The GitHub Pages site serves byte-identical copies of all eight files from `docs/assets/logo/`, so the showcase is live at https://luongnv89.github.io/skills/assets/logo/brand-showcase.html. Re-copy them whenever `assets/logo/` changes.
+Root README uses `docs/assets/logo/logo-icon.svg` (`README.md:2`). GitHub Pages publishes `docs/` as the site root, so the same files serve the site and the showcase is live at https://luongnv89.github.io/skills/assets/logo/brand-showcase.html.
 
 ### Usage Guidelines
 
