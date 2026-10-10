@@ -13,6 +13,7 @@ A **file write** is any file this skill creates or modifies in the user's projec
    - the branch name, or `no git repository`
    - each file created or modified
    - the CLI library chosen and the language detected
+   - the visual style: `btop` with its styling library or zero-dependency module, or the style the user chose instead
    - each test command with its pass/fail counts (coverage only if the runner printed it)
    - each demo command with its exit code
    - each commit made, by short SHA and message
@@ -21,6 +22,7 @@ A **file write** is any file this skill creates or modifies in the user's projec
 3. **`Uncertainty:`** — what is unknown or untested, labeled apart from verified facts:
    - each task whose tests were recorded as `not run`, and why
    - each platform, shell, or Python/Node/Go version not tried
+   - with the btop style: `styled output not viewed in a real terminal` and `light-background terminal not tried`, until the user confirms otherwise (`btop-style.md` → Verify)
    - each Phase 3 item skipped or declined (completions, config file, packaging)
    - each design or library choice the user did not confirm
    - `no git repository: no branch or commits` when Repo Sync was skipped
@@ -64,7 +66,7 @@ Map a step report to the status: a step `Result: PASS` does not by itself make t
 Result: COMPLETE — mylib CLI (Python, click) with subcommands run and info
 Evidence:
   Branch: feat/cli-mylib-20260419-143200
-  Language: Python (pyproject.toml); library: click
+  Language: Python (pyproject.toml); library: click; visual style: btop with rich
   Files created:
     cli/main.py          — entry point with argparse/click/typer wiring
     cli/commands/run.py  — "mylib run" subcommand
@@ -73,10 +75,11 @@ Evidence:
   Files modified:
     pyproject.toml       — updated with [project.scripts] entry point
   pytest: 8 passed, 0 failed
-  Demo: mylib --help (exit 0), mylib --version (exit 0), mylib run --input data.csv (exit 0)
+  Demo: mylib --help (exit 0), mylib --version (exit 0), mylib info (exit 0), env -u NO_COLOR FORCE_COLOR=1 mylib info (exit 0, ESC codes present)
   Commits: a1b2c3d feat(cli): add mylib CLI foundation; d4e5f6a feat(cli): add info command and JSON output
 Uncertainty:
   Tested on macOS with Python 3.12 only.
+  Styled output not viewed in a real terminal; light-background terminal not tried.
   Shell completions and packaging not built (Phase 3 declined).
 Decision: No approval needed.
   Remaining action: review the branch and push it.
