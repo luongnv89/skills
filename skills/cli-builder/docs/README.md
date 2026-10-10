@@ -51,7 +51,7 @@ Steps 1-3 each require explicit user approval before the next step, and they wri
 Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill cli-builder
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill cli-builder
 ```
 
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):

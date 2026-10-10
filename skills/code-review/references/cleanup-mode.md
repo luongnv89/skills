@@ -41,7 +41,7 @@ This skill **deletes and rewrites code aggressively**. That is the point. But be
 Before starting:
 
 1. **Detect language/stack** — read `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `pom.xml`, etc. The subagents tailor tool choices (knip, madge, ts-prune, vulture, ruff, etc.) to the stack.
-2. **Verify tooling** — if a subagent depends on a tool (knip for JS/TS unused code, madge for circular deps), confirm it's installed or can be run via `npx`. If not, fall back to manual analysis and note this in the report.
+2. **Verify tooling** — if a subagent depends on a tool (knip for JS/TS unused code, madge for circular deps), confirm it's already installed in the project or on PATH (e.g. `npx --no-install knip --version`). Don't download tools on the fly; if one is missing, fall back to manual analysis and note this in the report.
 3. **Determine scope** — full codebase vs. a subdirectory. Default to full unless the user specifies.
 4. **Detect test/typecheck commands** — read scripts in `package.json`, `Makefile`, `pyproject.toml`, CI configs. These run between phases.
 

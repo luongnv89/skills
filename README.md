@@ -25,7 +25,7 @@ This catalog release adds [lstack](packages/lstack/README.md) bundles and Claude
 
 **Upgrading from 3.0.0:**
 
-- Install [**ship**](skills/ship/docs/README.md): `npx skills add https://github.com/luongnv89/skills --skill ship`, then replace `/release-manager` invocations with `/ship`.
+- Install [**ship**](skills/ship/docs/README.md): `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill ship`, then replace `/release-manager` invocations with `/ship`.
 - Review and remove the obsolete installed `release-manager` copy yourself; reinstalling does not remove it automatically, and both names can compete for triggers.
 - `/ship [X.Y.Z|major|minor|patch]` runs autonomously by default. Use `/ship --no-auto` to keep step-by-step confirmations.
 
@@ -108,9 +108,9 @@ approval is claimed; see the runbook's portal review caveats.
 Pick one, several, or the whole catalog:
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill code-review
-npx skills add https://github.com/luongnv89/skills --skill code-review --skill auto-push --skill test-coverage
-npx skills add https://github.com/luongnv89/skills
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review --skill auto-push --skill test-coverage
+npx skills@1.7.0 add https://github.com/luongnv89/skills
 ```
 
 ### agent-skill-manager
@@ -185,11 +185,11 @@ A skill is a self-contained playbook: frontmatter metadata, instructions, option
 ## Quick Start
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill landing-page-generator
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill landing-page-generator
 ```
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill code-review --skill auto-push
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review --skill auto-push
 ```
 
 After install, call skills by name in your agent prompts (see catalog for each skill's trigger guidance).
@@ -205,7 +205,7 @@ Every skill is standalone. Install one or many.
 Use:
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill <name>
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill <name>
 ```
 
 ### Find by Task
@@ -250,8 +250,8 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 2.2.1 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
-| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.4.0 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
+| [**code-review**](skills/code-review/) | 2.2.2 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.4.1 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.5.0 | low | Target untested branches and edge cases |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.6.0 | medium | Usability review using Krug's principles |
 | [**ux-ax-review**](skills/ux-ax-review/) | 1.2.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
@@ -398,7 +398,7 @@ No. They only guide the agent during development.
 ## Get Started
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill code-review
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review
 ```
 
 [**All skills**](./skills) · [**Contribute**](CONTRIBUTING.md) · MIT

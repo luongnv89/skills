@@ -50,7 +50,7 @@ graph TD
 Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill seo-ai-optimizer
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill seo-ai-optimizer
 ```
 
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):

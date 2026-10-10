@@ -573,7 +573,7 @@ description: Advanced data analysis for CSV files. Use for statistical
 For **this** catalog (`luongnv89/skills`), end users install via the methods in [README.md](../README.md#install):
 
 ```bash
-npx skills add https://github.com/luongnv89/skills --skill <name>
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill <name>
 # or
 curl -sSL https://raw.githubusercontent.com/luongnv89/skills/main/remote-install.sh | bash
 # or clone + bash install.sh

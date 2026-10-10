@@ -7,7 +7,7 @@ dependencies:
   - code-review
   - dont-make-me-think
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
