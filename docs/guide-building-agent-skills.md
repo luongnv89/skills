@@ -1,6 +1,6 @@
 # Guide to Building, Testing, and Validating Agent Skills for Claude
 
-> Based on "The Complete Guide to Building Skills for Claude" by Anthropic.
+> Based on ["The Complete Guide to Building Skills for Claude"](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf) by Anthropic.
 > Repo-specific conventions for **this** catalog override generic advice where noted (see [CONTRIBUTING.md](../CONTRIBUTING.md), [CLAUDE.md](../CLAUDE.md)).
 
 ---

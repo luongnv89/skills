@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo/logo-icon.svg" alt="Agent Skills" width="120">
+  <img src="docs/assets/logo/logo-icon.svg" alt="Agent Skills" width="120">
 </p>
 
 <p align="center">
@@ -45,71 +45,35 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 
 ### lstack: direct Claude Code plugin
 
-[lstack 0.5.0](packages/lstack/README.md) exposes the same canonical `skills/`
-tree: 39 top-level definitions plus the two nested diagram-generator children,
-**41** namespaced skills in total. `skills/` is the plugin folder; the root
-marketplace points at it. No source copies or moves are required.
-With a plugin-capable Claude Code CLI, install directly from this repository:
+[lstack 0.5.0](packages/lstack/README.md) packages the canonical `skills/` tree as one
+Claude Code plugin: 39 top-level definitions plus the two nested diagram-generator
+children, **41** namespaced skills in total. `skills/` is the plugin folder; the root
+marketplace points at it.
 
 ```bash
 claude plugin marketplace add luongnv89/skills
 claude plugin install lstack@lstack --scope user
 ```
 
-These commands change your Claude configuration. **The remote route becomes
-available only after the root metadata is committed and pushed**; local draft
-changes are not live on GitHub. For one session from a trusted local checkout:
+For one session from a trusted local checkout, run
+`claude --plugin-dir /absolute/path/to/checkout/skills`. Skills appear as
+`/lstack:code-review`, `/lstack:drawio-generator`, and so on. Upgrading from lstack
+0.4.0 or earlier: `--plugin-dir` now takes the checkout's `skills/` folder, not the
+repository root.
 
-```bash
-claude --plugin-dir /absolute/path/to/checkout/skills
-```
+Some members edit files, commit and push, install tools, call APIs or open GitHub
+issues and PRs, each behind its own approval gates.
+[skills/README.md](skills/README.md#what-each-skill-runs-sends-or-fetches) lists what
+each skill runs, sends or fetches.
 
-Discover `/lstack:code-review`, `/lstack:drawio-generator`, etc. There is no
-`/lstack` orchestrator, plugin hook, MCP server or native plugin agent.
-To update a repository-backed installation, review the upstream changes, then:
-
-```bash
-claude plugin marketplace update lstack
-claude plugin update lstack@lstack --scope user
-```
-
-Upgrading from lstack 0.4.0 or earlier: `--plugin-dir` now takes the checkout's
-`skills/` folder, not the repository root. Marketplace installs pick up the new
-source on the update commands above.
-
-Restart Claude Code (or use `/reload-plugins` where supported). Native discovery
-is **not workflow compatibility**: unchanged global `~/.claude/skills/` and
-`~/.agents/skills/` lookups, `asm deps`, unqualified sibling invocations and
-external requirements can need separate installation/configuration.
-
-**Capabilities and data handling:** members cover code review, diagrams,
-research, app audits, documentation, repository maintenance and orchestrated
-workflows. Some can edit/delete files, commit/push, install tools, contact APIs,
-fetch websites, or open/update GitHub issues and PRs, subject to their own
-approval gates. Workflows can send prompts, source code, URLs, screenshots or
-other supplied data to the chosen agent/model and external services; inspect
-the selected member before running it. Tools/credentials such as authenticated
-`gh`, Herdr, OpenCode, browser tooling or App Store access are not bundled.
-External `browse` (gstack) and idd skills remain separate dependencies. This is
-not a promise of offline execution or of no data collection by those services.
-The per-skill list of external services, data sent and credentialed actions is
-in [skills/README.md](skills/README.md#what-each-skill-runs-sends-or-fetches).
-
-Maintainers generate/check `skills/.claude-plugin/plugin.json` and the root
-`.claude-plugin/marketplace.json` from the single authoring version in
-`packages/lstack/manifest.json` (member versions remain independent):
+Updates, Codex builds, ZIP exports, external prerequisites and directory-portal caveats
+are in the [lstack runbook](packages/lstack/README.md). Maintainers regenerate and check
+the plugin metadata from `packages/lstack/manifest.json` with:
 
 ```bash
 python3 scripts/build-lstack.py --write-plugin-metadata
 python3 scripts/build-lstack.py --check-plugin-metadata
 ```
-
-These modes read the working tree, unlike the committed-input archive `--check`.
-Optional deterministic ZIPs remain available through `--target claude` or
-`--target codex`; see the [full runbook](packages/lstack/README.md). Codex still
-requires clone/build/extract and its local `lstack-local` marketplace; this
-repository is **not a hosted Codex marketplace**. No directory submission or
-approval is claimed; see the runbook's portal review caveats.
 
 ### Standalone skills (other agents or selected members)
 
@@ -187,22 +151,6 @@ A skill is a self-contained playbook: frontmatter metadata, instructions, option
 | Tool-agnostic | Same skill works in Claude Code, Cursor, Windsurf, Codex, Copilot |
 | Scannable | Tables, diagrams, short outputs |
 | Suite support | Multi-phase products (e.g. diagram-generator) with independent phases |
-
----
-
-## Quick Start
-
-```bash
-npx skills@1.7.0 add https://github.com/luongnv89/skills --skill landing-page-generator
-```
-
-```bash
-npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review --skill auto-push
-```
-
-After install, call skills by name in your agent prompts (see catalog for each skill's trigger guidance).
-
-See [skills/](skills/) for full SKILL.md files.
 
 ---
 
@@ -386,6 +334,7 @@ Mirror the layout for your own multi-skill products.
 | [docs/archive/](docs/archive/) | Historical work notes (not current product docs) |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 | [SECURITY.md](SECURITY.md) | Vulnerability reporting |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community standards |
 
 ## FAQ
 
@@ -400,16 +349,6 @@ Follow [CONTRIBUTING.md](CONTRIBUTING.md), [docs/guide-building-agent-skills.md]
 
 **Do skills change my runtime code?**  
 No. They only guide the agent during development.
-
----
-
-## Get Started
-
-```bash
-npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review
-```
-
-[**All skills**](./skills) · [**Contribute**](CONTRIBUTING.md) · MIT
 
 ---
 
@@ -433,51 +372,26 @@ npx skills@1.7.0 add https://github.com/luongnv89/skills --skill code-review
 
 ```
 .
-├── skills/
-│   └── <name>/
-│       ├── SKILL.md
-│       ├── scripts/
-│       ├── references/
-│       └── docs/
+├── skills/                  # Skill sources; also the lstack Claude plugin folder
+│   ├── <name>/
+│   │   ├── SKILL.md         # Required: frontmatter + instructions
+│   │   ├── references/      # Loaded on demand
+│   │   ├── scripts/ tests/  # Optional helpers and their tests
+│   │   ├── agents/          # Optional subagent prompts
+│   │   ├── evals/           # evals.json trigger/behavior suites
+│   │   └── docs/README.md   # Human-facing docs
+│   ├── <umbrella>/<child>/  # Suite children (install.sh:44-46)
+│   ├── README.md            # Plugin directory listing page
+│   └── .claude-plugin/      # Generated plugin.json
+├── packages/lstack/         # lstack manifest + runbook
+├── scripts/                 # Build, validation and eval runners
+├── tests/                   # lstack packaging tests
+├── docs/                    # GitHub Pages site, guides, brand assets
+├── examples/                # Worked examples (logo-designer case study)
+├── .claude-plugin/          # Root marketplace.json
+├── .claude/agents/          # Maintainer subagents for this repo
 └── install.sh / remote-install.sh
-
-# Suite umbrellas also hold child skills:
-# skills/<umbrella>/<child>/SKILL.md  (install.sh:44-46)
 ```
-</details>
-
-<details>
-<summary><b>Creating Skills</b></summary>
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-Minimal:
-
-```yaml
----
-name: my-skill
-description: "When to use and what it produces. Don't use for X."
-license: MIT
-effort: medium
-metadata:
-  version: 1.0.0
-  author: "Your Name"
----
-# Agent instructions here. Keep SKILL.md under 500 lines.
-```
-
-</details>
-
-<details>
-<summary><b>Contributing</b></summary>
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
-</details>
-
-<details>
-<summary><b>Security</b></summary>
-
-See [SECURITY.md](SECURITY.md).
 </details>
 
 <details>
