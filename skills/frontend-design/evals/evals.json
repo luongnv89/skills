@@ -75,11 +75,11 @@
     {
       "id": 6,
       "kind": "edge",
-      "prompt": "Add a React settings page to the app in evals/files/vue-repo with a profile form and a notifications toggle.",
+      "prompt": "Add a React settings page to the app in ../../eval-fixtures/frontend-design/vue-repo with a profile form and a notifications toggle.",
       "expected_output": "The skill reads the repo first, sees it is a Vue project, and confirms the framework before generating code instead of writing React JSX into it.",
       "files": [
-        "evals/files/vue-repo/package.json",
-        "evals/files/vue-repo/src/App.vue"
+        "../../eval-fixtures/frontend-design/vue-repo/package.json",
+        "../../eval-fixtures/frontend-design/vue-repo/src/App.vue"
       ],
       "expectations": [
         "Read package.json or App.vue and noticed the project uses Vue, not React",

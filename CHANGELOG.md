@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Eval fixtures move out of the plugin folder.** The 31 eval input fixtures (`evals/files/` in seven skills, plus agent-config's `evals/build-fixtures.sh`) move to `eval-fixtures/<skill>/` at the repository root. `skills/` drops from 508 to 477 files, which leaves 35 files of headroom under the Claude plugin directory's 512-file limit. Each `evals/evals.json` stays in its skill and now points at `../../eval-fixtures/<skill>/`; skill definitions, versions and the lstack ZIP exports (which already excluded `evals/`) are unchanged.
+
 ## v4.1.0 — 2026-10-10
 
 This catalog release makes the checkout's `skills/` folder the lstack Claude Code plugin folder, the layout prepared for submission to the Claude Code plugin directory, and adds `appstore-assets` for upload-ready App Store screenshots and creative assets. `cli-builder` now gives every CLI it builds a btop-inspired style. Install commands in the README and skill docs pin `npx skills@1.7.0`, and `code-review` and `codebase-modernizer` stop fetching tools from npm on the fly. The catalog release version is 4.1.0. The lstack package and plugin version is 0.5.0, first released by this tag, with 42 members, and each member keeps its independent version.

@@ -17,6 +17,7 @@ Skill **definitions** live in `skills/<name>/`. Installed copies under `~/.claud
 - Never: edit installed skill copies (`~/.claude/skills/`, `~/.agents/skills/`) from this repo
 - Never: hand-edit `dist/`; regenerate it with `package_skill.py`
 - Never: commit `*-workspace/`, `.asm-improver/`, `.claude/scheduled_tasks.lock`, secrets, `.env`, or `**/credentials*`
+- Never: add eval fixtures under `skills/`; they go in `eval-fixtures/<name>/` (the `skills/` plugin folder is capped at 512 files)
 - Never: commit or push without an explicit user request (drafting the message is fine)
 - Ask first: destructive ops (`rm -rf`, `git reset --hard`, force-push, branch delete)
 - Ask first: a change that touches more than one skill

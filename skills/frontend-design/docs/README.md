@@ -67,7 +67,7 @@ asm install github:luongnv89/skills:skills/frontend-design
 | `references/step-reports.md` | Step-completion report template, symbol legend, and per-phase checks |
 | `references/final-report.md` | Final Report status rules, PARTIAL and BLOCKED examples, fill rules, and reader checks |
 | `evals/evals.json` | Trigger and behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
-| `evals/files/vue-repo/` | Small Vue fixture for the framework-mismatch eval |
+| `eval-fixtures/frontend-design/vue-repo/` (repo root) | Small Vue fixture for the framework-mismatch eval |
 
 ## Output
 

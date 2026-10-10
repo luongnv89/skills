@@ -174,11 +174,11 @@
       "id": 13,
       "name": "orchestrated-stale-scan",
       "kind": "edge",
-      "prompt": "/website-agent-readiness https://example.com\norchestrated-by: design-optimizer\nevidence-dir: evals/files/orchestrated-evidence\noutput-dir: /tmp/war-run\n\n(The evidence dir ships a scan.json whose scannedAt is weeks old.)",
+      "prompt": "/website-agent-readiness https://example.com\norchestrated-by: design-optimizer\nevidence-dir: ../../eval-fixtures/website-agent-readiness/orchestrated-evidence\noutput-dir: /tmp/war-run\n\n(The evidence dir ships a scan.json whose scannedAt is weeks old.)",
       "expected_output": "Runs the reuse check from references/orchestrated-runs.md against the fixture's own url/targetUrl and scannedAt; Finds the scan older than 24h and prints the reason; Falls back to a fresh scan behind gate G1 — the third-party send still needs explicit approval; Never treats the stale fixture as reusable evidence.",
       "files": [
-        "evals/files/orchestrated-evidence/agent-readiness/scan.json",
-        "evals/files/orchestrated-evidence/agent-readiness/fixes.md"
+        "../../eval-fixtures/website-agent-readiness/orchestrated-evidence/agent-readiness/scan.json",
+        "../../eval-fixtures/website-agent-readiness/orchestrated-evidence/agent-readiness/fixes.md"
       ],
       "expectations": [
         "Runs the reuse check from references/orchestrated-runs.md against the fixture's own url/targetUrl and scannedAt",

@@ -67,7 +67,7 @@ Live-URL reviews also need gstack's `/browse`. The skill checks for it before na
 | `references/step-completion-reports.md` | Step-completion report template and per-step checks |
 | `scripts/process_screenshots.py` | Extracts palette, layout regions, density and quality from screenshots as JSON |
 | `evals/evals.json` | Trigger and behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
-| `evals/files/` | A checkout page fixture and a saved-evidence folder for the orchestrated-run eval |
+| `eval-fixtures/dont-make-me-think/` (repo root) | A checkout page fixture and a saved-evidence folder for the orchestrated-run eval |
 
 ## Output
 

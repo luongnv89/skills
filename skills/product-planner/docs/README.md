@@ -71,4 +71,4 @@ Note: idea-validator commits and pushes on its own, and reuses a folder with tod
 | `references/member-contracts.md` | Each member's inputs, outputs, gates, push behavior and stop conditions |
 | `references/final-report.md` | The Final Report template, two filled examples, fill rules and reader checks |
 | `evals/evals.json` | Nine trigger and behavior cases (happy path, edge, negative trigger) |
-| `evals/files/` | Fixtures: `resume-project`, `skip-verdict-project`, `maybe-rule-project` |
+| `eval-fixtures/product-planner/` (repo root) | Fixtures: `resume-project`, `skip-verdict-project`, `maybe-rule-project` |

@@ -103,7 +103,11 @@ Hard rules for this catalog (`CLAUDE.md:28-42`):
 
 ### Eval Suites (`evals/evals.json`)
 
-A skill may ship a test set at `skills/<name>/evals/evals.json`. The canonical shape is defined by **skill-creator**, which is external to this repo (`CONTRIBUTING.md:18`, `:24-27`) — see `~/.claude/skills/skill-creator/references/schemas.md:9-45`:
+A skill may ship a test set at `skills/<name>/evals/evals.json`. The canonical shape is defined by **skill-creator**, which is external to this repo (`CONTRIBUTING.md:18`, `:24-27`) — see `~/.claude/skills/skill-creator/references/schemas.md:9-45`.
+
+Input fixtures for those cases live outside the plugin folder, in `eval-fixtures/<name>/` at the repository root, because `skills/` is the Claude plugin folder and the directory portal caps it at 512 files. A case's `files` entries stay relative to the skill root, so they read `../../eval-fixtures/<name>/<fixture>`.
+
+The suite itself looks like this:
 
 ```json
 {

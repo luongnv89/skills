@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the on-disk fixture repos that agent-config's evals (evals.json) run against.
 #
-# Usage: bash evals/build-fixtures.sh <dest-dir> [fixture ...]
+# Usage: bash eval-fixtures/agent-config/build-fixtures.sh <dest-dir> [fixture ...]
 #   With no fixture names, builds all of them. Each lands in <dest-dir>/<fixture>/ as a
 #   git repo with one commit and no remote.
 #
@@ -14,7 +14,7 @@ ALL="pnpm-fresh uv-claude-only go-bare audit-shadowed npm-local-shadow npm-symli
 
 if [ $# -lt 1 ]; then
   echo "Error: missing destination directory." >&2
-  echo "Usage: bash evals/build-fixtures.sh <dest-dir> [fixture ...]" >&2
+  echo "Usage: bash eval-fixtures/agent-config/build-fixtures.sh <dest-dir> [fixture ...]" >&2
   echo "Fixtures: $ALL" >&2
   exit 1
 fi

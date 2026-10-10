@@ -95,7 +95,7 @@ or sent to third-party AI services as an “improvement.”
 | `scripts/validate_report.py` | Stdlib-only report coverage/reference validator |
 | `tests/` | Executable validator regression tests and their TDD notes |
 | `evals/evals.json` | Behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
-| `evals/files/` | Synthetic web, repo, native, blocked and orchestrated-run fixtures |
+| `eval-fixtures/ux-ax-review/` (repo root) | Synthetic web, repo, native, blocked and orchestrated-run fixtures |
 
 ## Verification
 
