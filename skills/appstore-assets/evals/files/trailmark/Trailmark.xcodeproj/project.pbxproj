@@ -1,0 +1,29 @@
+// !$*UTF8*$!
+// Trimmed eval fixture: only the build settings the appstore-assets explorer reads.
+{
+	archiveVersion = 1;
+	objectVersion = 77;
+	objects = {
+/* Begin XCBuildConfiguration section */
+		A1B2C3D4E5F60001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Trailmark;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Trailmark records your route while you hike.";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 2.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.trailmark;
+				PRODUCT_NAME = Trailmark;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+	};
+	rootObject = A1B2C3D4E5F60000;
+}

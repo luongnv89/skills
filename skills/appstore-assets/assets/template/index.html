@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Store Assets</title>
+<link rel="stylesheet" href="kit.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="kit.js"></script>
+<script src="config.js"></script>
+<script>
+  // One page load renders one asset; render.py drives it with query params.
+  renderFromQuery(window.APP_CONFIG).catch((e) => {
+    document.getElementById("root").textContent = "RENDER ERROR: " + e.message;
+    document.getElementById("root").id = "render-error";
+  });
+</script>
+</body>
+</html>
