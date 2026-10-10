@@ -1,7 +1,8 @@
 # lstack
 
-**lstack 0.4.0** exposes this repository's maintained first-party Agent Skills
-as a native Claude Code plugin directly from the canonical root `skills/` tree.
+**lstack 0.5.0** exposes this repository's maintained first-party Agent Skills
+as a native Claude Code plugin directly from the canonical `skills/` tree, which
+is itself the plugin folder.
 Optional platform-neutral, Claude and Codex ZIP exports remain available. It is
 a package, not a new skill or runtime. There are no plugin hooks, MCP servers,
 native plugin agents, npm publications or automatic dependency installers.
@@ -16,7 +17,7 @@ claude plugin install lstack@lstack --scope user
 claude plugin list
 ```
 
-This intentionally changes your user plugin configuration. The root native
+This intentionally changes your user plugin configuration. The native
 metadata must first be committed and pushed for GitHub installation to work;
 a local draft is **not live remotely**. Start a new session and inspect `/plugin`
 or completion for `/lstack:<skill>`, e.g. `/lstack:code-review` or
@@ -26,14 +27,18 @@ commands when standalone copies coexist; inspect paths before invoking a workflo
 For a single session from a trusted checkout, without persistent installation:
 
 ```bash
-claude --plugin-dir /absolute/path/to/skills
+claude --plugin-dir /absolute/path/to/checkout/skills
 ```
 
-The path is the repository root, not `.claude-plugin/`. Only native metadata
-lives in that directory. Default root `skills/` discovery finds 39 immediate
-members; the plugin manifest adds **only** the two nested diagram children.
-Together they expose 41 skills once, without flattening, copying or moving
-source files. Skill-local `agents/` files stay resources, not native agents.
+The path is the checkout's `skills/` folder, not the repository root and not
+`skills/.claude-plugin/`. Only native metadata lives in that directory. The
+manifest's `./` entry discovers the 39 immediate members, and two further
+entries add **only** the nested diagram children. Together they expose 41
+skills once, without flattening, copying or moving source files. Skill-local
+`agents/` files stay resources, not native agents. The repository-root
+`.claude-plugin/marketplace.json` lists the plugin with source `./skills`.
+Before 0.5.0 the repository root was the plugin folder; point an existing
+`--plugin-dir` at `skills/` instead.
 
 Review upstream changes before explicitly updating a repository-backed install:
 
@@ -43,7 +48,7 @@ claude plugin update lstack@lstack --scope user
 ```
 
 Restart Claude Code (or use `/reload-plugins` where supported). For session-only
-use, update your trusted checkout and restart with its root `--plugin-dir`.
+use, update your trusted checkout and restart with its `skills/` `--plugin-dir`.
 Discovery proves loading, **not** compatibility of every workflow: global paths,
 `asm deps`, unqualified sibling calls and external dependencies are unchanged.
 See **Prerequisites and capability limits** before use.
@@ -51,19 +56,22 @@ See **Prerequisites and capability limits** before use.
 ### Directory portal and review caveats
 
 If the owner chooses to submit, use repository **luongnv89/skills**, plugin path
-**empty** (root), branch **main**. No separate plugin repository or skill tree
-is needed. Paid login, connected GitHub account, contact information and
-accurate data-handling/legal disclosures are owner responsibilities. This
-implementation does not submit, publish, or claim acceptance/approval.
+**`skills`**, branch **main**. No separate plugin repository or skill tree is
+needed. Paid login, connected GitHub account, contact information and accurate
+data-handling/legal disclosures are owner responsibilities. This implementation
+does not submit, publish, or claim acceptance/approval.
 
-The directory portal reviews the **whole repository tree**, not the builder's
-filtered ZIP. The baseline contains 602 tracked entries (604 with these two
-metadata files), 12 PNGs and one PDF, the largest about 562 KB, and a tracked
-`.claude/skills/skill-creator` symlink. Root `CLAUDE.md` is a regular tracked
-AGENTS import wrapper with two rules; it is intentionally preserved, not
-plugin-context instructions. Reviewer holds, file-count and format/symlink
-policies remain uncertain; builder exclusions do not resolve those risks.
-No deletions or source reorganization are authorized by this packaging change.
+Most portal checks read only the plugin folder, which is why it is `skills/` and
+not the repository root: the folder holds the 41 members, `skills/README.md`
+(the listing page and per-skill data-handling disclosure) and the native
+manifest, and stays under the portal's 512-file limit, with no symlinks, no
+non-image binaries and no file over 256 KiB.
+`tests/test-lstack-claude-packaging.py` enforces those limits. Root-only
+material such as `docs/`, `examples/` and `CLAUDE.md` is outside the plugin
+folder; repository-wide checks (total size, file names, `.gitattributes`) still
+apply. The `license` field in the manifest satisfies the license requirement;
+the root MIT `LICENSE` covers the repository. Only the portal's **Validate**
+result is authoritative.
 
 Members can mutate files/repos, commit/push, install tools and interact with
 websites, APIs and GitHub. Depending on the workflow and agent configuration,
@@ -82,7 +90,7 @@ member becomes a separately discoverable `skills/<name>/SKILL.md` directory;
 the exported umbrella excludes the children's subtrees to avoid duplication.
 
 Exported files keep their original bytes and Git executable modes: `SKILL.md`,
-references, scripts, agents, assets and human-facing docs. Package version 0.4.0
+references, scripts, agents, assets and human-facing docs. Package version 0.5.0
 is independent of both the catalog release and member versions. Generated
 `provenance.json` records the full source commit, manifest/builder SHA-256,
 original member versions, and source/destination/hash/mode for every member file.
@@ -112,7 +120,7 @@ python3 scripts/build-lstack.py --check
 python3 scripts/build-lstack.py
 ```
 
-The default output is `dist/lstack-0.4.0.zip` (ignored by Git). The JSON result
+The default output is `dist/lstack-0.5.0.zip` (ignored by Git). The JSON result
 prints the exact commit, skill/file counts, output path and archive SHA-256.
 Inputs come **entirely from the selected committed Git tree**, never from local
 edits or installed skills. Commit intended packaging/member changes before
@@ -140,14 +148,14 @@ Inspect and extract a **trusted, locally built** archive into a new staging
 folder, not directly over an existing agent installation:
 
 ```bash
-python3 -m zipfile -l dist/lstack-0.4.0.zip
-python3 -m zipfile -e dist/lstack-0.4.0.zip /tmp/lstack-staging
+python3 -m zipfile -l dist/lstack-0.5.0.zip
+python3 -m zipfile -e dist/lstack-0.5.0.zip /tmp/lstack-staging
 ```
 
 Layout:
 
 ```text
-lstack-0.4.0/
+lstack-0.5.0/
   README.md
   LICENSE
   manifest.json
@@ -165,7 +173,7 @@ and its relative resources to a skill-capable agent, or manually install the
 **whole member directory** at that agent's documented skill location. For the
 existing member preflights this is commonly `~/.claude/skills/<name>/` or
 `~/.agents/skills/<name>/`. Review any existing copy and back it up before
-replacing it; don't nest the entire `lstack-0.4.0` directory as one skill. For
+replacing it; don't nest the entire `lstack-0.5.0` directory as one skill. For
 example, after installing `code-review`, ask the agent to review the target
 repository using that skill and verify it loaded the intended definition.
 There is no `/lstack` entry point or automatic dependency installation.
@@ -186,8 +194,8 @@ register its marketplace. The following uses ignored `dist/` under the clone:
 ```bash
 python3 scripts/build-lstack.py --target claude --check
 python3 scripts/build-lstack.py --target claude
-python3 -m zipfile -e dist/lstack-claude-0.4.0.zip dist/claude-staging
-marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.4.0"
+python3 -m zipfile -e dist/lstack-claude-0.5.0.zip dist/claude-staging
+marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.5.0"
 plugin="$marketplace/plugins/lstack"
 claude plugin validate "$plugin"
 claude plugin validate "$marketplace"
@@ -198,10 +206,10 @@ files. The result JSON reports `marketplace_root` and `plugin_root` relative to
 the extraction directory. Its layout is:
 
 ```text
-lstack-claude-0.4.0/
+lstack-claude-0.5.0/
   .claude-plugin/marketplace.json   # lstack, source ./plugins/lstack
   plugins/lstack/
-    .claude-plugin/plugin.json     # name lstack, version 0.4.0
+    .claude-plugin/plugin.json     # name lstack, version 0.5.0
     README.md
     LICENSE
     manifest.json
@@ -303,8 +311,8 @@ committed inputs, never selected by the installed Codex version.
 ```bash
 python3 scripts/build-lstack.py --target codex --check
 python3 scripts/build-lstack.py --target codex
-python3 -m zipfile -e dist/lstack-codex-0.4.0.zip dist/codex-staging
-marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.4.0"
+python3 -m zipfile -e dist/lstack-codex-0.5.0.zip dist/codex-staging
+marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.5.0"
 codex plugin marketplace add "$marketplace"
 codex plugin marketplace list
 codex
@@ -326,10 +334,10 @@ codex plugin list --json --marketplace lstack-local
 The generated archive is self-contained:
 
 ```text
-lstack-codex-0.4.0/
+lstack-codex-0.5.0/
   .agents/plugins/marketplace.json  # lstack-local
   plugins/lstack/
-    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.4.0
+    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.5.0
     README.md
     LICENSE
     manifest.json
@@ -465,30 +473,27 @@ python3 scripts/build-lstack.py --check-plugin-metadata
 ```
 
 These modes validate canonical membership, existing regular skill paths and the
-two root files' exact deterministic render (including version and additive paths).
-Check mode is read-only. Write mode updates only `.claude-plugin/plugin.json`
-and `marketplace.json`, refusing symlink/non-regular destinations. The two writes
-are not transactional: an interruption or I/O failure can leave incomplete or
-mismatched metadata. Re-run write mode, then check mode successfully before
-staging or publishing. No archive or member source is changed.
-Stage regenerated metadata with intended manifest changes when ready to commit.
+two files' exact deterministic render (including version and additive paths).
+They also refuse a leftover root `.claude-plugin/plugin.json` from before 0.5.0.
+Check mode is read-only. Write mode updates only `skills/.claude-plugin/plugin.json`
+and the root `.claude-plugin/marketplace.json`, refusing symlink/non-regular
+destinations. The two writes are not transactional: an interruption or I/O
+failure can leave incomplete or mismatched metadata. Re-run write mode, then
+check mode successfully before staging or publishing. No archive or member
+source is changed. Stage regenerated metadata with intended manifest changes
+when ready to commit.
 
 Optional native validation (no model execution):
 
 ```bash
-claude plugin validate --json .claude-plugin/plugin.json
-claude plugin validate --json .claude-plugin/marketplace.json
-claude plugin validate --json --strict .
+claude plugin validate --strict skills
+claude plugin validate --strict .
 ```
 
-The preserved root `CLAUDE.md` causes strict validation to exit 1 with exactly
-this known warning: **"CLAUDE.md at the plugin root is not loaded as project
-context. To ship context with your plugin, use a skill (skills/<name>/SKILL.md)
-instead."** Baseline only that message on root `CLAUDE.md`, with zero errors
-and zero other warnings; do not blanket-ignore warnings or remove the wrapper.
-Root plugin and marketplace manifests themselves should have no errors/warnings.
-Use disposable `HOME`/`CLAUDE_CONFIG_DIR` without credentials when checking CLI
-behavior; a strict nonzero exit alone is not a successful baseline check.
+The first checks the plugin folder, the second the root marketplace. Both pass
+with no errors or warnings; root `CLAUDE.md` is outside the plugin folder and no
+longer triggers the "CLAUDE.md at the plugin root" warning. Use disposable
+`HOME`/`CLAUDE_CONFIG_DIR` without credentials when checking CLI behavior.
 
 In contrast, optional archive builds and `--check` still use **committed inputs**
 and require the running builder to match the selected revision. A local draft

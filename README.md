@@ -45,9 +45,10 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 
 ### lstack: direct Claude Code plugin
 
-[lstack 0.4.0](packages/lstack/README.md) exposes the same canonical `skills/`
+[lstack 0.5.0](packages/lstack/README.md) exposes the same canonical `skills/`
 tree: 39 top-level definitions plus the two nested diagram-generator children,
-**41** namespaced skills in total. No source copies or moves are required.
+**41** namespaced skills in total. `skills/` is the plugin folder; the root
+marketplace points at it. No source copies or moves are required.
 With a plugin-capable Claude Code CLI, install directly from this repository:
 
 ```bash
@@ -60,7 +61,7 @@ available only after the root metadata is committed and pushed**; local draft
 changes are not live on GitHub. For one session from a trusted local checkout:
 
 ```bash
-claude --plugin-dir /absolute/path/to/skills
+claude --plugin-dir /absolute/path/to/checkout/skills
 ```
 
 Discover `/lstack:code-review`, `/lstack:drawio-generator`, etc. There is no
@@ -71,6 +72,10 @@ To update a repository-backed installation, review the upstream changes, then:
 claude plugin marketplace update lstack
 claude plugin update lstack@lstack --scope user
 ```
+
+Upgrading from lstack 0.4.0 or earlier: `--plugin-dir` now takes the checkout's
+`skills/` folder, not the repository root. Marketplace installs pick up the new
+source on the update commands above.
 
 Restart Claude Code (or use `/reload-plugins` where supported). Native discovery
 is **not workflow compatibility**: unchanged global `~/.claude/skills/` and
@@ -87,8 +92,11 @@ the selected member before running it. Tools/credentials such as authenticated
 `gh`, Herdr, OpenCode, browser tooling or App Store access are not bundled.
 External `browse` (gstack) and idd skills remain separate dependencies. This is
 not a promise of offline execution or of no data collection by those services.
+The per-skill list of external services, data sent and credentialed actions is
+in [skills/README.md](skills/README.md#what-each-skill-runs-sends-or-fetches).
 
-Maintainers generate/check root JSON from the single authoring version in
+Maintainers generate/check `skills/.claude-plugin/plugin.json` and the root
+`.claude-plugin/marketplace.json` from the single authoring version in
 `packages/lstack/manifest.json` (member versions remain independent):
 
 ```bash

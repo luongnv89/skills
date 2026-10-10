@@ -8,7 +8,7 @@
     {
       "description": "41 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
       "name": "lstack",
-      "source": "./"
+      "source": "./skills"
     }
   ]
 }

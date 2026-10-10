@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
   "name": "lstack",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Platform-neutral distribution of the maintained first-party Agent Skills catalog.",
   "claude": {
     "description": "41 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
+    "homepage": "https://luongnv.com/skills/",
+    "keywords": ["skills", "code-review", "documentation", "diagrams", "github", "release", "seo", "productivity"],
     "marketplace_name": "lstack"
   },
   "codex": {
