@@ -4,7 +4,7 @@ description: "Build production-quality CLIs with language detection and a five-s
 license: MIT
 effort: high
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -14,6 +14,7 @@ Build production-quality CLI tools for any module or application, in any languag
 
 Reference files (read each one on demand, not upfront, to keep the agent's context budget small):
 - `references/cli-libraries.md` — read during Step 2 (Design) to recommend libraries and during Step 4 (Execute) for starter scaffolds
+- `references/btop-style.md` — read during Step 2 (Design) to write the Visual style section and during Step 4 (Execute) to build the style module and its tests
 - `references/testing-patterns.md` — read during Step 4 (Execute) when writing tests
 - `references/final-report.md` — read during Step 5 (Summarize) to write the final report
 
@@ -95,6 +96,7 @@ Present a structured CLI design document:
 - **I/O behavior** (stdin support, stdout/stderr separation, piping)
 - **Config strategy** (CLI args > env vars > config file > defaults)
 - **Example invocations** (at least 3 realistic examples showing common use cases)
+- **Visual style** (in every design) — the btop-inspired look from `references/btop-style.md`: components per command, theme roles, fallbacks, the styling library or zero-dependency module, and a mockup of one command's styled output. Use another style only when the user explicitly declines this one.
 
 Approval loop:
 1. Present the design document.
@@ -118,7 +120,7 @@ Break implementation into three phases, each with granular tasks.
 **Phase 2 — Complete** (full feature set):
 - All remaining commands
 - Input validation and error handling
-- Output formatting (text, JSON, table as designed)
+- Output formatting (text, JSON, table as designed) through one style module that follows the approved Visual style
 - Comprehensive tests
 
 **Phase 3 — Polish** (optional; include it only when the user confirms it):
@@ -151,7 +153,7 @@ Before the first file write, apply the Branch-First Safety Rule. Then, for each 
 
 At the end of each phase:
 
-5. Run the demo (`--help` plus at least one approved example invocation) and show the output. A demo that exits non-zero is a failing test (item 3).
+5. Run the demo (`--help` plus at least one approved example invocation) and show the output. From Phase 2 on, also run one example with `FORCE_COLOR=1`, unless the user declined the btop style (`references/btop-style.md` → Verify). A demo that exits non-zero is a failing test (item 3).
 6. In a git repository, stage only the files this phase created or modified, then commit them with a descriptive message.
 
 If a task needs a change to the approved design (a command, option, or output format differs), stop Step 4. Present the proposed change and wait for explicit approval before you continue.
@@ -186,9 +188,11 @@ Evidence:
   Created: cli/main.py, cli/commands/run.py, cli/commands/info.py, tests/test_cli.py
   Modified: pyproject.toml ([project.scripts] entry point)
   pytest: 8 passed, 0 failed
-  Demo: mylib --help, mylib --version, mylib run --input data.csv (all exit 0)
+  Visual style: btop, rich
+  Demo: mylib --help, mylib --version, mylib info, env -u NO_COLOR FORCE_COLOR=1 mylib info (all exit 0)
 Uncertainty:
-  Tested on macOS only. Shell completions not built (Phase 3 declined).
+  Tested on macOS only. Styled output not viewed in a real terminal; light-background terminal not tried.
+  Shell completions not built (Phase 3 declined).
 Decision: No approval needed.
   Remaining action: review the branch and push it.
 
@@ -217,6 +221,8 @@ Step Completion Report (Steps 4-5):
 - **No clear module to wrap**: Ask the user what functions/features the CLI should expose before proceeding with analysis.
 - **Multiple languages detected**: Present a choice; recommend the language with the most existing CLI-related code.
 - **Existing CLI found**: Offer to extend or refactor rather than rebuild; audit what already exists first.
+- **Existing CLI has its own visual style**: Present the btop style in the design anyway, list where it differs from the current output, and let the user choose at design approval.
+- **Live, refreshing btop-like view requested**: In Step 1, say a full-screen live view is a TUI, which this skill does not build, and offer append-only output (`references/btop-style.md`).
 - **Monorepo with many packages**: Ask which package/service should get the CLI; scope the analysis to that subtree.
 - **No test framework present**: Add a minimal test setup (pytest, jest, go test) as part of Phase 1 foundation tasks.
 - **Binary output required (standalone .exe / compiled)**: Note distribution method during Design phase and add build step (PyInstaller, pkg, goreleaser) to Phase 3 polish.
@@ -231,6 +237,7 @@ Step Completion Report (Steps 4-5):
 - [ ] Exit codes follow the canonical table in `references/testing-patterns.md`
 - [ ] Error messages go to stderr; clean output goes to stdout (pipeable)
 - [ ] `NO_COLOR` env var or `--no-color` flag is respected
+- [ ] Terminal output follows the approved Visual style, and `--format json`, piped, and `NO_COLOR` output contain no ESC (`0x1b`) byte
 - [ ] Tests are written and pass before moving to the next phase
 - [ ] Final report includes install command and at least 3 usage examples
 - [ ] The final report opens with `Result:` and a status chosen by the Step 5 status rules, then `Evidence:`, `Uncertainty:`, and `Decision:`
@@ -258,7 +265,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase: Analyze (Step 1)** — checks: `Project analysis`, `Language detected`, `Entry points identified`, `Clarifying questions asked`
 
-**Phase: Design (Step 2)** — checks: `Design approval`, `Command tree defined`, `I/O behavior specified`, `Example invocations provided`
+**Phase: Design (Step 2)** — checks: `Design approval`, `Command tree defined`, `I/O behavior specified`, `Example invocations provided`, `Visual style defined`
 
 **Phase: Plan (Step 3)** — checks: `Plan approval`, `Phases broken down`, `Tasks have goals and tests`, `Effort estimated`
 

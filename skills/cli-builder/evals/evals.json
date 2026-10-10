@@ -9,7 +9,7 @@
       "files": [],
       "expectations": [
         "No file is created or modified before the user explicitly approves both the design document and the plan.",
-        "The design document includes a command tree, options per command, global options, I/O behavior, a config strategy, and at least 3 example invocations.",
+        "The design document includes a command tree, options per command, global options, I/O behavior, a config strategy, at least 3 example invocations, and a Visual style section with a btop-style mockup.",
         "The project's test command runs after each task, and each phase ends with a demo of --help plus at least one approved example invocation.",
         "The final report starts with Result: and a status word (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only commands that ran with their results, Uncertainty, and Decision naming the approval needed or 'No approval needed.', followed by an install command and at least 3 usage examples."
       ]
@@ -71,6 +71,32 @@
       "files": [],
       "expectations": [
         "The response does not start the cli-builder five-step workflow or present a CLI design document."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "happy-path",
+      "prompt": "Build a CLI for our Node disk-usage module: a scan <path> command that lists the largest folders and their share of the total, with --format json for scripts.",
+      "expected_output": "Without being asked for styling, presents a design whose Visual style section follows references/btop-style.md: a rounded box with the title in the border, a meter that prints each folder's share, theme roles, plain and ASCII fallbacks, the styling library or zero-dependency module, and a mockup. Builds one style module with an explicit mode argument, keeps --format json, piped, and NO_COLOR output free of escape codes, and demos the output plain and with FORCE_COLOR=1.",
+      "files": [],
+      "expectations": [
+        "The design includes a Visual style section, although the prompt never asks for styling, with a mockup showing a rounded box whose title sits between the notches ┐ and ┌, and a meter that prints its percentage.",
+        "The design names the styling library or the zero-dependency module for approval, and the argument parser still comes from references/cli-libraries.md (commander for Node).",
+        "Tests check that --format json output, NO_COLOR=1 output, and piped stdout contain no ESC (0x1b) byte, that FORCE_COLOR=1 output does contain one, and a test renders the styled mode through an explicit mode argument and finds the box frame.",
+        "The Step 4 demo runs one example plain and again with FORCE_COLOR=1, and the final report lists 'styled output not viewed in a real terminal' under Uncertainty."
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "prompt": "Build a CLI for this Python package. Keep the output plain: no boxes, no colors.",
+      "expected_output": "Treats the request as an explicit decline of the btop style: the design's Visual style section records the plain style the user chose, and the build adds no boxes, meters, or color, while machine formats and piped output stay plain and NO_COLOR is still respected.",
+      "files": [],
+      "expectations": [
+        "The design's Visual style section records that the user declined the btop style and chose plain output, instead of presenting boxes, meters, or theme colors.",
+        "No output mode of the built CLI emits escape codes or box-drawing characters.",
+        "The final report's Evidence names the plain visual style the user chose instead of btop.",
+        "No FORCE_COLOR=1 demo is run, and none is reported as failing."
       ]
     }
   ]
