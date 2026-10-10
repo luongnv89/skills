@@ -62,7 +62,7 @@ data-handling/legal disclosures are owner responsibilities. This implementation
 does not submit, publish, or claim acceptance/approval.
 
 Most portal checks read only the plugin folder, which is why it is `skills/` and
-not the repository root: the folder holds the 41 members, `skills/README.md`
+not the repository root: the folder holds the 42 members, `skills/README.md`
 (the listing page and per-skill data-handling disclosure) and the native
 manifest, and stays under the portal's 512-file limit, with no symlinks, no
 non-image binaries and no file over 256 KiB.
