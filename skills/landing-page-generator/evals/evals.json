@@ -151,7 +151,7 @@
         "Did not write TERMS.md and recorded the reason (MIT-licensed tool with no accounts or payments)",
         "Wrote docs/getting-started.md whose install command (npm install -g logtail-cli) comes from the README and whose flags include --since from src/cli.js; no invented command or flag",
         "The README links PRIVACY.md, CHANGELOG.md, and docs/getting-started.md, and each link target exists",
-        "Built landing-page/index.html, privacy.html, changelog.html (from the unchanged CHANGELOG.md), and docs.html with frontend-design; every local link in the built pages passes test -e from landing-page/, and each [placeholder] marker of the source files appears verbatim on its page",
+        "Built landing-page/index.html, privacy.html, changelog.html (from the unchanged CHANGELOG.md), and docs.html with frontend-design; every local link in the built pages passes test -e from landing-page/ and resolves inside it, and each [placeholder] marker of the source files appears verbatim on its page",
         "The Final Report opens with Result: and a status that matches the checks, lists each companion page as written, linked, or skipped on Evidence:, and names the legal review of PRIVACY.md on Decision:"
       ]
     },
