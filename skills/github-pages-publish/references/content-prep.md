@@ -41,13 +41,13 @@ the site, then publish the output folder".
 
 ## Validate the staged copy
 
-Run `P check-site --dir <work>/content`. For a project site, add `--project-site --fix-root-links`.
+Run `P check-site --dir <work>/content`. For a project site, add `--project-site <name> --fix-root-links`, with `<name>` from preflight `target.name`. Links that already start with `/<name>/` (a framework build with that base path) are valid and left as they are.
 
 | Error id | Handling |
 |---|---|
 | `no-index` | Apply the table above, then re-run the check |
 | `broken-link` | Copy the missing file from the user's source when it exists. If it does not exist, ask the user, or remove the link only with the user's yes |
-| `root-absolute-link` | Re-run with `--fix-root-links`. The command rewrites `href`, `src`, `srcset`, and CSS `url()` links to relative paths |
+| `root-absolute-link` | Re-run with `--fix-root-links`. The command rewrites `/` links in `href`, `src`, `srcset`, and CSS `url()` to relative paths, except links under `/<name>/` |
 | `needs-build` | Report BLOCKED, as described above |
 | `file-too-large`, `site-too-large` | Report BLOCKED. Git hosting rejects files over 100 MB, and Pages rejects sites over 1 GB |
 

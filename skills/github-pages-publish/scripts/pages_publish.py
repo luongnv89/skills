@@ -409,14 +409,24 @@ SRCSET_RE = re.compile(r"""(srcset\s*=\s*)(["'])([^"']*)\2""", re.I)
 CSS_ROOT_RE = re.compile(r"""(url\(\s*)(['"]?)/(?!/)([^'")]*)\2(\s*\))""", re.I)
 
 
-def fix_root_links(root, rel):
-    """Rewrite root-absolute links (/x) to paths relative to the file. Returns the original links rewritten."""
+def strip_base(link, base):
+    """Map a link under the project base path (/<repo>/x) to its root-absolute form (/x); others unchanged."""
+    if base and (link == base[:-1] or link.startswith(base)):
+        return "/" + link[len(base):]
+    return link
+
+
+def fix_root_links(root, rel, base=None):
+    """Rewrite root-absolute links (/x) to paths relative to the file, leaving links under `base`
+    (/<repo>/) as they are. Returns the original links rewritten."""
     path = os.path.join(root, rel)
     text = open(path, encoding="utf-8", errors="surrogateescape").read()
     prefix = "../" * rel.count("/")
     changed = []
 
     def attr(m):
+        if strip_base("/" + m.group(3), base) != "/" + m.group(3):
+            return m.group(0)
         changed.append("/" + m.group(3))
         return "%s%s%s%s" % (m.group(1), m.group(2), (prefix + m.group(3)) or "./", m.group(2))
 
@@ -424,13 +434,15 @@ def fix_root_links(root, rel):
         parts = []
         for cand in m.group(3).split(","):
             c = cand.strip()
-            if c.startswith("/") and not c.startswith("//"):
+            if c.startswith("/") and not c.startswith("//") and strip_base(c.split()[0], base) == c.split()[0]:
                 changed.append(c.split()[0])
                 c = prefix + c[1:]
             parts.append(c)
         return "%s%s%s%s" % (m.group(1), m.group(2), ", ".join(parts), m.group(2))
 
     def css(m):
+        if strip_base("/" + m.group(3), base) != "/" + m.group(3):
+            return m.group(0)
         changed.append("/" + m.group(3))
         return "%s%s%s%s%s" % (m.group(1), m.group(2), (prefix + m.group(3)) or "./", m.group(2), m.group(4))
 
@@ -455,6 +467,7 @@ def cmd_check_site(a):
     if not os.path.isdir(root):
         die(2, "content folder %s does not exist" % root, "pass the folder that holds index.html")
     errors, warnings, fixed = [], [], []
+    base = "/%s/" % a.project_site.strip("/") if (a.project_site or "").strip("/") else None
     files = list_files(root)
     all_files = list_files(root, skip_hidden=False)
     hidden = sorted(set(all_files) - set(files))
@@ -481,8 +494,8 @@ def cmd_check_site(a):
     if total > MAX_SITE:
         errors.append({"id": "site-too-large", "detail": "site is %d MB (Pages limit 1 GB)" % (total >> 20)})
     for rel in [f for f in files if f.lower().endswith((".html", ".htm", ".css"))]:
-        if a.project_site and a.fix_root_links:
-            links = fix_root_links(root, rel)
+        if a.project_site is not None and a.fix_root_links:
+            links = fix_root_links(root, rel, base)
             if links:
                 fixed.append({"file": rel, "root_links_rewritten": len(links), "links": links[:20]})
         text = open(os.path.join(root, rel), encoding="utf-8", errors="replace").read()
@@ -500,11 +513,12 @@ def cmd_check_site(a):
         for link in links:
             if is_external(link):
                 continue
-            if link.startswith("/") and a.project_site:
+            local = strip_base(link, base)
+            if local.startswith("/") and local == link and a.project_site is not None:
                 errors.append({"id": "root-absolute-link", "file": rel, "link": link,
                                "detail": "breaks on a project site served under /<repo>/; re-run with --fix-root-links"})
                 continue
-            missing = resolve_local(root, rel, link)
+            missing = resolve_local(root, rel, local)
             if missing:
                 errors.append({"id": "broken-link", "file": rel, "link": link, "detail": "target %s not found" % missing})
     emit({"ok": not errors, "dir": root, "files": len(files), "bytes": total,
@@ -811,7 +825,8 @@ def main():
     p.add_argument("--msg", required=True); p.add_argument("--cmd"); p.set_defaults(fn=cmd_log)
     p = sp.add_parser("preflight"); p.add_argument("--repo", required=True); p.set_defaults(fn=cmd_preflight)
     p = sp.add_parser("check-site"); p.add_argument("--dir", required=True)
-    p.add_argument("--project-site", action="store_true", help="site is served under /<repo>/")
+    p.add_argument("--project-site", nargs="?", const="", metavar="REPO",
+                   help="site is served under /<REPO>/; links already under that base stay valid")
     p.add_argument("--fix-root-links", action="store_true"); p.set_defaults(fn=cmd_check_site)
     p = sp.add_parser("sync-site"); p.add_argument("--src", required=True); p.add_argument("--repo-dir", required=True)
     p.add_argument("--site-dir", required=True); p.add_argument("--dry-run", action="store_true")

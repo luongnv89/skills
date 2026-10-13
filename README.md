@@ -242,7 +242,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**auto-push**](skills/auto-push/) | 1.1.1 | low | Commit message + stage + push with secret and size checks |
 | [**cleanup-project**](skills/cleanup-project/) | 1.0.2 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.3.0 | medium | Pre-commit + GitHub Actions quality gates |
-| [**github-pages-publish**](skills/github-pages-publish/) | 1.0.0 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
+| [**github-pages-publish**](skills/github-pages-publish/) | 1.0.1 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
 | [**security-setup**](skills/security-setup/) | 1.5.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**ship**](skills/ship/) | 3.0.1 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 

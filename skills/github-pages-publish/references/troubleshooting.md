@@ -39,7 +39,7 @@ symptom, apply the fix once, log it, and re-run only the failed step.
 | 404 only on some paths | Case-sensitive paths, or hidden files (names starting with `.`) that `upload-pages-artifact` skips | Rename the files, or record them under Uncertainty |
 | `content differs from commit` until timeout | Another workflow or a branch-based build deployed over this one | Run `gh api repos/<repo>/pages` and check `build_type` is `workflow`. Then list the runs that deployed after yours |
 | Connection errors on a custom domain | DNS is not pointing at GitHub, or HTTPS is still being provisioned (up to 24 h). The `github.io` URL redirects to the custom domain, so it cannot be used as a fallback | Report PARTIAL: the deploy run succeeded, but the live check on the custom domain is unverified. The Decision names the DNS or HTTPS fix |
-| Assets load locally but 404 live | Root-absolute links (`/css/x.css`) on a project site served under `/<repo>/` | Run `check-site --project-site --fix-root-links` |
+| Assets load locally but 404 live | Root-absolute links (`/css/x.css`) on a project site served under `/<repo>/` | Run `check-site --project-site <name> --fix-root-links` (links already under `/<name>/` stay) |
 
 ## Limits
 

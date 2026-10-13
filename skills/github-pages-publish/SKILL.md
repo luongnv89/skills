@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -116,7 +116,7 @@ stages the content in `<work>/content/`, never touching the user's originals:
 - **Text branch**: `frontend-design` builds `index.html` from a pre-authorized brief that keeps the text verbatim. Without it, the fallback template is used.
 - **Ready files branch**: copy the file or folder. Resolve a missing `index.html`.
 
-Then run `P check-site --dir <work>/content`. For a project site, add `--project-site --fix-root-links`.
+Then run `P check-site --dir <work>/content`. For a project site, add `--project-site <name> --fix-root-links`, with `<name>` from preflight `target.name`.
 Handle each error id as the reference says, then re-run the check.
 
 Bar: `check-site` exits 0, and every `fixed` entry and warning is logged.
