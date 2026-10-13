@@ -1,0 +1,151 @@
+{
+  "skill_name": "github-pages-publish",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "name": "ready-folder-new-repo-preauthorized",
+      "prompt": "Publish the website in ../../eval-fixtures/github-pages-publish/ready-site to a new GitHub repo called pages-publish-eval-tea under my account. Create the repo if it doesn't exist, public is fine. Just give me the link when it's live.",
+      "expected_output": "A run log, preflight JSON with a create-repo gate answered by the pre-authorization, a public repo created, the two root-absolute links in index.html rewritten for a project site, the site at the repo root with a managed pages.yml, Pages build_type workflow, a successful deploy run, a verify pass with every file matched, and a PUBLISHED report with the html_url Pages reports.",
+      "files": [
+        "../../eval-fixtures/github-pages-publish/ready-site"
+      ],
+      "expectations": [
+        "The run log exists under .pages-publish/ and has one row per step that ran, including the create-repo gate logged as pre-authorized",
+        "The skill did not stop to ask about creating the repo, because the prompt pre-authorized it",
+        "The repo was created with --public",
+        "check-site ran with --project-site and the report or log records that /css/style.css and /about.html in index.html were rewritten to relative links",
+        "The site folder is '.' and the log names rule 4 (new or empty repo)",
+        ".github/workflows/pages.yml contains the managed-by comment, actions/upload-pages-artifact and actions/deploy-pages",
+        "The commit was made with --pathspec-from-file and contains only site files, the workflow and .github/pages-publish.json",
+        "pages_publish.py verify exited 0 with matched equal to checked before the URL was reported",
+        "The final report opens with 'Result: PUBLISHED' and the URL that Pages reports as html_url (a custom domain inherited from the owner's user site counts)",
+        "Evidence names the commit sha, the run URL and conclusion, and the matched file count",
+        "The report has Uncertainty, Decision and Log lines, and Decision says no approval is needed or names a specific action",
+        "A reader can find the result in the first line, tell verified checks from assumptions, and trace each claim to a command or log row"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "name": "text-update-existing-repo",
+      "prompt": "Turn the release notes in ../../eval-fixtures/github-pages-publish/launch-notes.md into a web page and publish it on the pages-publish-eval-tea repo, replacing what's there now. Don't ask me design questions.",
+      "expected_output": "frontend-design (or the fallback template, recorded under Uncertainty) builds index.html with the notes' text verbatim; sync-site reads the previous manifest and deletes the old pages it lists (about.html, css/style.css, img/logo.svg) while logging each deletion; the workflow, run with --keep-versions, reports unchanged; verify passes; the report says PUBLISHED with the same URL.",
+      "files": [
+        "../../eval-fixtures/github-pages-publish/launch-notes.md"
+      ],
+      "expectations": [
+        "frontend-design was acquired for the Text branch, or the report records under Uncertainty that the fallback template was used",
+        "The published index.html contains the headings 'Quillpad 1.0 is out', 'What's in 1.0' and 'Install', and the line 'brew install quillpad'",
+        "The page adds no feature, price, testimonial or link that the notes do not contain",
+        "sync-site used the existing .github/pages-publish.json, and the log lists the deleted files from the previous publish",
+        "The workflow subcommand ran with --keep-versions and reported 'unchanged' for pages.yml",
+        "verify exited 0 before the URL was reported, and the report opens with 'Result: PUBLISHED'",
+        "The skill asked no design question",
+        "The report opens with the result and URL, separates verified checks from assumptions under Uncertainty, and names a log a reader can trace"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "name": "new-repo-needs-confirmation",
+      "prompt": "Put ../../eval-fixtures/github-pages-publish/ready-site online with GitHub Pages in a repo named pages-publish-eval-unconfirmed.",
+      "expected_output": "Preflight finds the repo missing and returns the create-repo gate; the skill asks 'Create public repo <owner>/pages-publish-eval-unconfirmed?' and stops; no repo is created and nothing is pushed.",
+      "files": [
+        "../../eval-fixtures/github-pages-publish/ready-site"
+      ],
+      "expectations": [
+        "preflight ran and its target shows exists false",
+        "The skill asked whether to create the public repo pages-publish-eval-unconfirmed",
+        "gh repo create was not run, and gh repo view for the repo still fails after the run",
+        "The run log records the gate with status ASK"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "name": "dry-run-plan-only",
+      "prompt": "Dry run only: show me what you would do to publish ../../eval-fixtures/github-pages-publish/ready-site to a repo called pages-publish-eval-dry. Don't create or push anything.",
+      "expected_output": "Preflight runs; the create-repo gate is listed but not asked or executed; the content is staged and checked with the root-link fix; a local git init workspace receives sync-site and workflow with --dry-run; the report says DRY-RUN with the planned files, workflow and URL, and states nothing was created or pushed.",
+      "files": [
+        "../../eval-fixtures/github-pages-publish/ready-site"
+      ],
+      "expectations": [
+        "No gh repo create, gh repo edit, configure (without --dry-run), git commit or git push command ran",
+        "sync-site and workflow ran with --dry-run",
+        "The report lists the create-repo gate it would ask",
+        "The report opens with 'Result: DRY-RUN' and lists the files that would be published",
+        "The original fixture folder is unchanged: index.html still contains href=\"/css/style.css\"",
+        "The report gives preflight's target.expected_url (which accounts for a custom domain on the owner's user site) and labels it expected, not checked"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge",
+      "name": "folder-without-index",
+      "prompt": "Dry run: publish the folder ../../eval-fixtures/github-pages-publish/no-index-site to my pages-publish-eval-dry repo.",
+      "expected_output": "The staged copy renames the only HTML file, home.html, to index.html; check-site then reports the broken contact.html link; the skill asks the user about the missing contact page instead of inventing one; nothing is pushed.",
+      "files": [
+        "../../eval-fixtures/github-pages-publish/no-index-site"
+      ],
+      "expectations": [
+        "The staged copy in <work>/content has index.html built from home.html, and the original folder still holds only home.html",
+        "check-site reported a broken-link error for contact.html",
+        "The skill did not create a contact.html page with invented content, and asked the user how to handle the missing page",
+        "No commit or push ran"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge",
+      "name": "build-workflow-conflict",
+      "prompt": "Dry run: show me what you would do to publish ../../eval-fixtures/github-pages-publish/ready-site to my pages-publish-eval-tea repo. Don't push anything.",
+      "expected_output": "The repo already holds .github/workflows/build.yml, which runs `npm ci && npm run build` and deploys to Pages (eval setup). In the dry-run clone, the workflow subcommand exits 3 with conflict existing-pages-workflow; the skill shows that workflow and asks whether to replace it instead of overwriting the build pipeline; nothing is pushed.",
+      "files": [
+        "../../eval-fixtures/github-pages-publish/ready-site"
+      ],
+      "expectations": [
+        "The workflow subcommand exited 3 with conflict 'existing-pages-workflow' naming .github/workflows/build.yml",
+        "The skill asked whether to replace the build workflow, and did not overwrite it",
+        "No commit or push ran, and the repo's default branch head is unchanged after the run",
+        "The report opens with 'Result: DRY-RUN', still lists the files it would publish, and its Decision line names the replace-or-stop question"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "name": "ci-test-workflow",
+      "prompt": "Add a GitHub Actions workflow to this repo that runs pytest and ruff on every pull request.",
+      "expected_output": "The github-pages-publish skill is not used; this is a CI quality pipeline (devops-pipeline territory).",
+      "files": [],
+      "expectations": [
+        "The github-pages-publish skill was not invoked",
+        "No Pages configuration or deploy workflow was created"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "name": "netlify-hosting",
+      "prompt": "Deploy my portfolio site in ./portfolio to Netlify and give me the URL.",
+      "expected_output": "The github-pages-publish skill is not used; the user asked for Netlify hosting.",
+      "files": [],
+      "expectations": [
+        "The github-pages-publish skill was not invoked",
+        "No GitHub repo was created and no Pages setting changed"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "negative-trigger",
+      "name": "design-only-landing-page",
+      "prompt": "Design a landing page for my habit-tracking app with a hero section and pricing table. I'll host it myself later.",
+      "expected_output": "The github-pages-publish skill is not used; this is page design without publishing (frontend-design or landing-page-generator).",
+      "files": [],
+      "expectations": [
+        "The github-pages-publish skill was not invoked",
+        "Nothing was pushed to any repo"
+      ]
+    }
+  ]
+}

@@ -51,8 +51,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.5.0](packages/lstack/README.md) packages the canonical `skills/` tree as one
-Claude Code plugin: 40 top-level definitions plus the two nested diagram-generator
-children, **42** namespaced skills in total. `skills/` is the plugin folder; the root
+Claude Code plugin: 41 top-level definitions plus the two nested diagram-generator
+children, **43** namespaced skills in total. `skills/` is the plugin folder; the root
 marketplace points at it.
 
 ```bash
@@ -190,8 +190,8 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 |---|---|
 | Prepare an app store submission | aso-marketing → appstore-assets → appstore-review-checker |
 | Harden and ship a repo | security-setup → devops-pipeline → ship (auto-push and cleanup-project for day-to-day work) |
-| Open-source a project | oss-ready → doc-manager → landing-page-generator |
-| Brand and launch | brand-name-checker → logo-designer → landing-page-generator |
+| Open-source a project | oss-ready → doc-manager → landing-page-generator → github-pages-publish |
+| Brand and launch | brand-name-checker → logo-designer → landing-page-generator → github-pages-publish |
 | Run an agent fleet | herdr-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner |
 
 ### Find by Category
@@ -199,7 +199,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Category | What it covers |
 |---|---|
 | [Code Quality](#code-quality) | Reviews, cleanup, testing, optimization, usability |
-| [Shipping](#shipping) | Auto push, repo cleanup, pipelines, releases, security hardening |
+| [Shipping](#shipping) | Auto push, repo cleanup, pipelines, releases, GitHub Pages publishing, security hardening |
 | [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming |
 | [Career Research](#career-research) | Tailored job discovery with employer/product due diligence |
 | [Frontend & Design](#frontend--design) | UIs, logos, diagrams, design optimization |
@@ -242,6 +242,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**auto-push**](skills/auto-push/) | 1.1.1 | low | Commit message + stage + push with secret and size checks |
 | [**cleanup-project**](skills/cleanup-project/) | 1.0.2 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.3.0 | medium | Pre-commit + GitHub Actions quality gates |
+| [**github-pages-publish**](skills/github-pages-publish/) | 1.0.0 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
 | [**security-setup**](skills/security-setup/) | 1.5.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**ship**](skills/ship/) | 3.0.1 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 

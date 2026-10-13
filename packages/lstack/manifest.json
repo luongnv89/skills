@@ -4,7 +4,7 @@
   "version": "0.5.0",
   "description": "Platform-neutral distribution of the maintained first-party Agent Skills catalog.",
   "claude": {
-    "description": "42 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+    "description": "43 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
@@ -14,7 +14,7 @@
     "marketplace_name": "lstack"
   },
   "codex": {
-    "description": "42 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
+    "description": "43 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
@@ -49,6 +49,7 @@
     {"name": "doc-manager", "source": "skills/doc-manager"},
     {"name": "dont-make-me-think", "source": "skills/dont-make-me-think"},
     {"name": "frontend-design", "source": "skills/frontend-design"},
+    {"name": "github-pages-publish", "source": "skills/github-pages-publish"},
     {"name": "herdr-agent", "source": "skills/herdr-agent"},
     {"name": "idea-validator", "source": "skills/idea-validator"},
     {"name": "install-script-generator", "source": "skills/install-script-generator"},

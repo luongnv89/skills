@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 42 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 43 first-party Agent Skills for everyday
 engineering and product work: code review, test generation, documentation,
 diagrams, release shipping, repository cleanup, SEO and App Store audits,
 product planning, and multi-agent orchestration. Each skill is a plain-text
@@ -31,7 +31,9 @@ point. To update, run `claude plugin marketplace update lstack`, then
   and publishes to PyPI and npm **without asking by default**; pass `--no-auto`
   to confirm each step. `auto-push` stages everything, commits and pushes once
   its secret and large-file scan passes. `idea-validator` commits and pushes
-  its reports to your ideas repo without a further prompt. Other skills that
+  its reports to your ideas repo without a further prompt. `github-pages-publish`
+  pushes the site to the target repo's default branch and sets its Pages source
+  without a further prompt, but asks before creating a repo or making one public. Other skills that
   push, delete branches or open PRs ask first.
 - **Agent-fleet skills pass on autonomy.** `herdr-agent` starts worker agents
   with the same permission-bypass flags as the agent that launched them
@@ -80,6 +82,7 @@ working in. That is the only network access many skills make.
 | drawio-generator | your git remote, before writing into a repo | none | none | git |
 | excalidraw-generator | your git remote, before writing into a repo | none | none | git |
 | frontend-design | your git remote; optional browser for render checks | none | writes UI files after approval; runs your build, lint and test commands | git, project tooling |
+| github-pages-publish | your git remote; GitHub via `gh` (the target repo, its Pages settings and Actions runs, release lookups for the `actions/*` deploy actions); the published site (live check) | the site content you publish, which becomes a public website | commits and pushes the site to the target repo's default branch and sets Pages to deploy from Actions without a further prompt; asks before creating a repo or making a private repo public | git, gh, python3, asm (optional, for frontend-design) |
 | herdr-agent | local Herdr socket; workers contact their own model providers | task prompts typed to worker agents | starts workers with the launcher's permission-bypass flags by default (see above); types into panes | herdr, python3, claude, codex, pi |
 | idea-validator | web search; your ideas repo remote | idea text and search queries; reports committed to your remote | commits and pushes `idea.md` and `validate.md` without a further prompt | git, web search |
 | install-script-generator | your git remote; a HEAD request to raw.githubusercontent.com when `install.sh` already exists | repository owner, name and branch | none; no commit or push | git, python3 helpers (dry run), bash, shellcheck, curl |

@@ -1,0 +1,32 @@
+# Managed by the github-pages-publish skill. It deploys {{SITE_LABEL}} to GitHub Pages
+# exactly as committed: no build step and no Jekyll. Edit the site files, not this workflow.
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [{{BRANCH}}]
+{{PATHS_BLOCK}}  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@{{CHECKOUT}}
+      - uses: actions/configure-pages@{{CONFIGURE}}
+      - uses: actions/upload-pages-artifact@{{UPLOAD}}
+        with:
+          path: {{SITE_PATH}}
+      - id: deployment
+        uses: actions/deploy-pages@{{DEPLOY}}
