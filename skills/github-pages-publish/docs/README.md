@@ -9,7 +9,7 @@
 
 > Publish or update a static website on GitHub Pages via GitHub Actions, in this repo or any other, and get back a URL that was checked live.
 
-Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.0.2** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -65,6 +65,18 @@ Requires `git`, an authenticated `gh` (with the `repo` scope, and `workflow` whe
 | `assets/text-page.html` | Fallback page shell for text when `frontend-design` is unavailable |
 | `references/content-prep.md` | Text brief, ready-file rules, check-site error handling |
 | `references/troubleshooting.md` | Symptom → cause → fix for pushes, Pages settings, runs and the live check |
+| `tests/test_pages_publish.py` | Unit tests for `sync-site`, `check-site` and `workflow --offline` against temp git repos; no network |
+
+## Tests
+
+The helper's tests use only the standard library and throwaway git repos, so they need `git` and `python3` but no network or GitHub account. Run them from the skill folder:
+
+```bash
+cd skills/github-pages-publish
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+CI runs the same command (`.github/workflows/github-pages-publish-tests.yml`) when the script, assets or tests change.
 
 ## Output
 

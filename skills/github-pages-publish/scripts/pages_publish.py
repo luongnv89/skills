@@ -406,6 +406,10 @@ def resolve_local(root, page_rel, link):
 
 ATTR_LINK_RE = re.compile(r"""((?:href|src|poster|action|data)\s*=\s*)(["'])/(?!/)([^"']*)\2""", re.I)
 SRCSET_RE = re.compile(r"""(srcset\s*=\s*)(["'])([^"']*)\2""", re.I)
+# Unquoted values (minified HTML) end at whitespace or `>`, as html.parser reads them. The lookbehind
+# skips names that only end in an attribute name (data-src=, el.href=).
+ATTR_BARE_RE = re.compile(r"""(?<=[\s"'/])((?:href|src|poster|action|data)\s*=\s*)/(?!/)([^\s>]*)""", re.I)
+SRCSET_BARE_RE = re.compile(r"""(?<=[\s"'/])(srcset\s*=\s*)(?!["'\s])([^\s>]+)""", re.I)
 CSS_ROOT_RE = re.compile(r"""(url\(\s*)(['"]?)/(?!/)([^'")]*)\2(\s*\))""", re.I)
 
 
@@ -430,15 +434,27 @@ def fix_root_links(root, rel, base=None):
         changed.append("/" + m.group(3))
         return "%s%s%s%s" % (m.group(1), m.group(2), (prefix + m.group(3)) or "./", m.group(2))
 
-    def srcset(m):
+    def bare(m):
+        if strip_base("/" + m.group(2), base) != "/" + m.group(2):
+            return m.group(0)
+        changed.append("/" + m.group(2))
+        return m.group(1) + ((prefix + m.group(2)) or "./")
+
+    def srcset_value(value, sep):
         parts = []
-        for cand in m.group(3).split(","):
+        for cand in value.split(","):
             c = cand.strip()
             if c.startswith("/") and not c.startswith("//") and strip_base(c.split()[0], base) == c.split()[0]:
                 changed.append(c.split()[0])
                 c = prefix + c[1:]
             parts.append(c)
-        return "%s%s%s%s" % (m.group(1), m.group(2), ", ".join(parts), m.group(2))
+        return sep.join(parts)
+
+    def srcset(m):
+        return "%s%s%s%s" % (m.group(1), m.group(2), srcset_value(m.group(3), ", "), m.group(2))
+
+    def srcset_bare(m):
+        return m.group(1) + (srcset_value(m.group(2), ",") or "./")  # unquoted: no spaces allowed
 
     def css(m):
         if strip_base("/" + m.group(3), base) != "/" + m.group(3):
@@ -450,6 +466,8 @@ def fix_root_links(root, rel, base=None):
     if rel.lower().endswith((".html", ".htm")):
         new = ATTR_LINK_RE.sub(attr, new)
         new = SRCSET_RE.sub(srcset, new)
+        new = ATTR_BARE_RE.sub(bare, new)
+        new = SRCSET_BARE_RE.sub(srcset_bare, new)
     new = CSS_ROOT_RE.sub(css, new)
     if new != text:
         with open(path, "w", encoding="utf-8", errors="surrogateescape") as f:
@@ -565,8 +583,9 @@ def cmd_sync_site(a):
     if moved_from is not None:
         old_prefix = "" if moved_from == "." else moved_from + "/"
         old_tracked = set(tracked_files(repo, moved_from))
+        published = {prefix + r for r in new_files}  # an overlapping old path now holds a new page
         old_deleted = [old_prefix + f for f in prev.get("files", []) if f in old_tracked
-                       and posixpath.basename(f) not in KEEP_IN_SITE_DIR]
+                       and posixpath.basename(f) not in KEEP_IN_SITE_DIR and old_prefix + f not in published]
         candidates = []
     else:
         old_deleted = []

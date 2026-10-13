@@ -47,7 +47,7 @@ Run `P check-site --dir <work>/content`. For a project site, add `--project-site
 |---|---|
 | `no-index` | Apply the table above, then re-run the check |
 | `broken-link` | Copy the missing file from the user's source when it exists. If it does not exist, ask the user, or remove the link only with the user's yes |
-| `root-absolute-link` | Re-run with `--fix-root-links`. The command rewrites `/` links in `href`, `src`, `srcset`, and CSS `url()` to relative paths, except links under `/<name>/` |
+| `root-absolute-link` | Re-run with `--fix-root-links`. The command rewrites `/` links in `href`, `src`, `poster`, `action`, `data`, `srcset` (quoted or unquoted, as in minified HTML), and CSS `url()` to relative paths, except links under `/<name>/` |
 | `needs-build` | Report BLOCKED, as described above |
 | `file-too-large`, `site-too-large` | Report BLOCKED. Git hosting rejects files over 100 MB, and Pages rejects sites over 1 GB |
 

@@ -1,0 +1,39 @@
+name: github-pages-publish tests
+
+on:
+  pull_request:
+    paths:
+      - "skills/github-pages-publish/scripts/**"
+      - "skills/github-pages-publish/assets/**"
+      - "skills/github-pages-publish/tests/**"
+      - ".github/workflows/github-pages-publish-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skills/github-pages-publish/scripts/**"
+      - "skills/github-pages-publish/assets/**"
+      - "skills/github-pages-publish/tests/**"
+      - ".github/workflows/github-pages-publish-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Byte-compile the helper
+        run: python3 -m py_compile skills/github-pages-publish/scripts/pages_publish.py
+
+      - name: Run unit tests (temp git repos, no network)
+        run: |
+          cd skills/github-pages-publish
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
