@@ -406,10 +406,10 @@ def resolve_local(root, page_rel, link):
 
 ATTR_LINK_RE = re.compile(r"""((?:href|src|poster|action|data)\s*=\s*)(["'])/(?!/)([^"']*)\2""", re.I)
 SRCSET_RE = re.compile(r"""(srcset\s*=\s*)(["'])([^"']*)\2""", re.I)
-# Unquoted values (minified HTML) end at whitespace or `>`, as html.parser reads them. The lookbehind
-# skips names that only end in an attribute name (data-src=, el.href=).
-ATTR_BARE_RE = re.compile(r"""(?<=[\s"'/])((?:href|src|poster|action|data)\s*=\s*)/(?!/)([^\s>]*)""", re.I)
-SRCSET_BARE_RE = re.compile(r"""(?<=[\s"'/])(srcset\s*=\s*)(?!["'\s])([^\s>]+)""", re.I)
+# Unquoted values (minified HTML) are rewritten only inside start tags, never in text, comments, or script/style bodies.
+TAG_RE = re.compile(r"""(?P<open><(?P<raw>script|style)\b(?:[^>"']|"[^"]*"|'[^']*')*>)(?:.*?</(?P=raw)\s*>|.*$)"""
+                    r"""|<!--.*?-->|(?P<tag><[A-Za-z](?:[^>"']|"[^"]*"|'[^']*')*>)""", re.S | re.I)
+TAG_ATTR_RE = re.compile(r"""([^\s"'=<>/]+)(\s*=\s*)("[^"]*"|'[^']*'|[^\s"'>][^\s>]*)""")
 CSS_ROOT_RE = re.compile(r"""(url\(\s*)(['"]?)/(?!/)([^'")]*)\2(\s*\))""", re.I)
 
 
@@ -434,12 +434,6 @@ def fix_root_links(root, rel, base=None):
         changed.append("/" + m.group(3))
         return "%s%s%s%s" % (m.group(1), m.group(2), (prefix + m.group(3)) or "./", m.group(2))
 
-    def bare(m):
-        if strip_base("/" + m.group(2), base) != "/" + m.group(2):
-            return m.group(0)
-        changed.append("/" + m.group(2))
-        return m.group(1) + ((prefix + m.group(2)) or "./")
-
     def srcset_value(value, sep):
         parts = []
         for cand in value.split(","):
@@ -453,8 +447,25 @@ def fix_root_links(root, rel, base=None):
     def srcset(m):
         return "%s%s%s%s" % (m.group(1), m.group(2), srcset_value(m.group(3), ", "), m.group(2))
 
-    def srcset_bare(m):
-        return m.group(1) + (srcset_value(m.group(2), ",") or "./")  # unquoted: no spaces allowed
+    def bare(m):
+        name, eq, val = m.groups()
+        if val[0] in "\"'":
+            return m.group(0)  # quoted: handled by the passes above
+        if name.lower() in LinkParser.ATTRS and val.startswith("/") and not val.startswith("//"):
+            if strip_base(val, base) != val:
+                return m.group(0)
+            changed.append(val)
+            return name + eq + ((prefix + val[1:]) or "./")
+        if name.lower() == "srcset":
+            return name + eq + (srcset_value(val, ",") or "./")  # unquoted: no spaces allowed
+        return m.group(0)
+
+    def tag(m):
+        if m.group("open"):
+            return TAG_ATTR_RE.sub(bare, m.group("open")) + m.group(0)[len(m.group("open")):]
+        if m.group("tag"):
+            return TAG_ATTR_RE.sub(bare, m.group("tag"))
+        return m.group(0)  # comment
 
     def css(m):
         if strip_base("/" + m.group(3), base) != "/" + m.group(3):
@@ -466,8 +477,7 @@ def fix_root_links(root, rel, base=None):
     if rel.lower().endswith((".html", ".htm")):
         new = ATTR_LINK_RE.sub(attr, new)
         new = SRCSET_RE.sub(srcset, new)
-        new = ATTR_BARE_RE.sub(bare, new)
-        new = SRCSET_BARE_RE.sub(srcset_bare, new)
+        new = TAG_RE.sub(tag, new)
     new = CSS_ROOT_RE.sub(css, new)
     if new != text:
         with open(path, "w", encoding="utf-8", errors="surrogateescape") as f:

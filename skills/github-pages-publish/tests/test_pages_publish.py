@@ -261,6 +261,22 @@ class CheckSiteTest(Base):
         again = self.cli("check-site", "--dir", src, "--project-site", "demo")
         self.assertTrue(again["ok"], again["errors"])
 
+    def test_fix_leaves_unquoted_text_outside_tags_alone(self):
+        # Unquoted rewriting is limited to start tags: text, comments and script bodies stay intact.
+        pre = "<pre><code>export DATA=/var/lib/app\nmake SRC=/usr/src/app install\n&lt;a href=/about&gt;</code></pre>"
+        script = r"<script>const data = /^\d+$/; var src=/x/;</script>"
+        comment = "<!-- <a href=/old> -->"
+        files = {
+            "index.html": (pre + script + "<script src=/js/a.js></script>" + comment
+                           + '<a title="see href=/x" href=/js/a.js>a</a>'),
+            "js/a.js": "",
+        }
+        src, res = self.check(files, "--project-site", "demo", "--fix-root-links")
+        self.assertTrue(res["ok"], res["errors"])
+        index = read(os.path.join(src, "index.html"))
+        for frag in (pre, script, comment, 'title="see href=/x"', "<script src=js/a.js>", "href=js/a.js>"):
+            self.assertIn(frag, index)
+
 
 class WorkflowTest(Base):
     def test_offline_workflow_is_created_then_unchanged(self):
