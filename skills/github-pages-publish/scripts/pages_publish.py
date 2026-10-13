@@ -138,14 +138,9 @@ def head_blobs(repo, site_dir):
     return out
 
 
-def blob_id(path, like):
-    """Git blob id of a file, in the hash format of the sample id `like` (SHA-1 or SHA-256 repos)."""
-    h = hashlib.sha1() if len(like) == 40 else hashlib.sha256()
-    h.update(b"blob %d\0" % os.path.getsize(path))
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(1 << 16), b""):
-            h.update(chunk)
-    return h.hexdigest()
+def blob_id(repo, path, repo_path):
+    """Blob id `git add` would store for `path` at `repo_path` (clean filters, eol, LFS applied)."""
+    return run(["git", "-C", repo, "hash-object", "--path=" + repo_path, path], check=True).stdout.strip()
 
 
 def safe_site_dir(repo, site_dir):
@@ -542,12 +537,13 @@ def cmd_sync_site(a):
     # Classify against HEAD, not the working tree: an untracked or uncommitted file that already
     # matches the source must still be committed, or the deploy lacks it.
     head = head_blobs(repo, site_dir)
+    prefix = "" if site_dir == "." else site_dir + "/"
     added, changed, to_copy = [], [], []
     for rel in new_files:
         s, d = os.path.join(src, rel), os.path.join(dest, rel)
         if rel not in head:
             added.append(rel)
-        elif blob_id(s, head[rel]) != head[rel]:
+        elif blob_id(repo, os.path.abspath(s), prefix + rel) != head[rel]:
             changed.append(rel)
         if not same_dir and (not os.path.exists(d) or sha256(d) != sha256(s)):
             to_copy.append(rel)
@@ -571,7 +567,6 @@ def cmd_sync_site(a):
     stale = untracked + ([] if prev or site_dir != "." else
                          [f for f in tracked if f.lower().endswith((".html", ".htm"))
                           and f not in new_files and "/" not in f])
-    prefix = "" if site_dir == "." else site_dir + "/"
     new_paths = [prefix + r for r in added + changed]
     ignored = []
     if new_paths:
