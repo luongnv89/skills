@@ -19,9 +19,9 @@ asks nothing:
 Fallback when `frontend-design` is unavailable:
 
 1. Copy `<skill>/assets/text-page.html` to `<work>/content/index.html`.
-2. Replace `{{TITLE}}` with the first heading. Replace `{{DESCRIPTION}}` with the first sentence. Replace `{{LANG}}` with the text's language code.
-3. Convert the text to semantic HTML: headings, paragraphs, lists, links, `<pre><code>`. Put the result in `{{CONTENT}}`.
-4. Check that `grep -cE "\{\{(TITLE|DESCRIPTION|LANG|CONTENT)\}\}" <work>/content/index.html` prints `0`. Escape `<`, `>` and `&` in the user's text; leave other braces as they are.
+2. Replace `{{TITLE}}` with the first heading. Replace `{{DESCRIPTION}}` with the first sentence. Replace `{{LANG}}` with the text's language code. Escape both values before substituting: `&` → `&amp;` first, then `<` → `&lt;`, `>` → `&gt;`, `"` → `&quot;`.
+3. Convert the text to semantic HTML: headings, paragraphs, lists, links, `<pre><code>`. Escape `&` (first), `<` and `>` in the text itself, not in the tags you generate. Put the result in `{{CONTENT}}`.
+4. Check that `grep -cE "\{\{(TITLE|DESCRIPTION|LANG|CONTENT)\}\}" <work>/content/index.html` prints `0`. Leave other braces as they are.
 5. Record "page built from the fallback template" under Uncertainty.
 
 ## Ready files branch

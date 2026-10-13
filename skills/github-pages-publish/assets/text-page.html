@@ -15,13 +15,13 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--fg);
            font: 1.0625rem/1.65 ui-serif, Georgia, "Times New Roman", serif; }
-    main { max-width: 42rem; margin: 0 auto; padding: 3.5rem 1.25rem 4rem; }
+    main { max-width: 42rem; margin: 0 auto; padding: 3.5rem 1.25rem 4rem; overflow-wrap: anywhere; }
     h1, h2, h3 { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.2; }
     h1 { font-size: clamp(2rem, 6vw, 2.75rem); margin: 0 0 1.5rem; }
     h2 { font-size: 1.35rem; margin: 2.5rem 0 .75rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
     a { color: var(--accent); text-underline-offset: .15em; }
     pre, code { font: .92em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
-    pre { background: var(--rule); padding: 1rem; overflow-x: auto; border-radius: 6px; }
+    pre { background: var(--rule); padding: 1rem; overflow-x: auto; overflow-wrap: normal; border-radius: 6px; }
     img { max-width: 100%; height: auto; }
     footer { color: var(--muted); font-size: .875rem; margin-top: 3rem; }
   </style>

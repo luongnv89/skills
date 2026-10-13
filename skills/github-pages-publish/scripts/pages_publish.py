@@ -126,6 +126,28 @@ def tracked_files(repo, site_dir):
     return sorted(out)
 
 
+def head_blobs(repo, site_dir):
+    """Blob ids committed at HEAD under site_dir, keyed relative to site_dir ({} when HEAD has no commit)."""
+    spec = "." if site_dir == "." else site_dir
+    p = run(["git", "-C", repo, "ls-tree", "-r", "-z", "HEAD", "--", spec])
+    out = {}
+    for entry in (p.stdout.split("\0") if p.returncode == 0 else []):
+        meta, _, f = entry.partition("\t")
+        if f and meta.split(" ")[1:2] == ["blob"]:
+            out[f if site_dir == "." else posixpath.relpath(f, site_dir)] = meta.split(" ")[2]
+    return out
+
+
+def blob_id(path, like):
+    """Git blob id of a file, in the hash format of the sample id `like` (SHA-1 or SHA-256 repos)."""
+    h = hashlib.sha1() if len(like) == 40 else hashlib.sha256()
+    h.update(b"blob %d\0" % os.path.getsize(path))
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 16), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def safe_site_dir(repo, site_dir):
     """Normalize a site folder and refuse anything outside the repo or inside .git/.github."""
     norm = posixpath.normpath((site_dir or ".").strip().strip("/") or ".")
@@ -517,13 +539,18 @@ def cmd_sync_site(a):
     same_dir = os.path.realpath(src) == os.path.realpath(dest)
     tracked = tracked_files(repo, site_dir) if os.path.isdir(dest) else []
     on_disk = list_files(dest) if os.path.isdir(dest) else []
-    added, changed = [], []
+    # Classify against HEAD, not the working tree: an untracked or uncommitted file that already
+    # matches the source must still be committed, or the deploy lacks it.
+    head = head_blobs(repo, site_dir)
+    added, changed, to_copy = [], [], []
     for rel in new_files:
-        d = os.path.join(dest, rel)
-        if not os.path.exists(d):
+        s, d = os.path.join(src, rel), os.path.join(dest, rel)
+        if rel not in head:
             added.append(rel)
-        elif not same_dir and sha256(d) != sha256(os.path.join(src, rel)):
+        elif blob_id(s, head[rel]) != head[rel]:
             changed.append(rel)
+        if not same_dir and (not os.path.exists(d) or sha256(d) != sha256(s)):
+            to_copy.append(rel)
     # Deletion candidates are tracked files only, so an untracked file is never lost.
     if moved_from is not None:
         old_prefix = "" if moved_from == "." else moved_from + "/"
@@ -555,7 +582,7 @@ def cmd_sync_site(a):
                         or bool(added or changed or deleted))
     if not a.dry_run:
         if not same_dir:
-            for rel in added + changed:
+            for rel in to_copy:
                 os.makedirs(os.path.dirname(os.path.join(dest, rel)) or dest, exist_ok=True)
                 shutil.copy2(os.path.join(src, rel), os.path.join(dest, rel))
         removals = [os.path.join(dest, rel) for rel in deleted] + [os.path.join(repo, p) for p in old_deleted]
