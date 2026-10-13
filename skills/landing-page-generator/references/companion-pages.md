@@ -175,7 +175,7 @@ that cannot be fixed makes the run `PARTIAL` (`references/final-report.md`).
 | Pages decided | Each of the four pages is recorded as delivered, linked (Mode B), or skipped with its reason |
 | Facts traced | Each data practice, legal term, version, date, command, flag, and setting traces to the brief, the user's answers, or a project file; every other fact is a gap marker |
 | No compliance claims | No page claims regulatory compliance, a security guarantee, or a no-sale promise the user did not supply |
-| Footer links | Mode A: the COMPANION PAGES block lists every delivered page. Mode B: the README links every delivered or linked page, and `test -e` passes for each link target |
+| Footer links | Mode A: the COMPANION PAGES block lists every delivered page. Mode B: the README links every delivered or linked page, and `test -e` passes for each link target. Companion pages only, with `README.md` left unchanged: the run names the README link each page needs instead |
 | Changelog style | Newest release first; each release has a version and a date or a gap marker; no hashes, PR or issue numbers, or author handles |
 | Docs commands | Each command comes from a source; Mode B puts each independently runnable command in its own code block |
 | Nothing overwritten | Mode B modified no existing file except `README.md`, which `README.backup.md` preserves |

@@ -135,7 +135,7 @@ the sources, the Mode B templates, and the checks.
    | Applies and does not exist | Write it from its template; link it | `written` |
    | Does not apply | Write nothing | `skipped — <reason>` |
 
-3. Run `test -e` on each README link to a companion page. Fix each failing link.
+3. Run `test -e` on each README link to a companion page. Fix each failing link. In a companion-only run that leaves `README.md` unchanged, name the README link each page needs instead.
 4. Run the companion checks in `references/companion-pages.md`. Fix each failure before presenting.
 5. If a fix changed `README.md`, re-run the Step 6 checklist.
 
@@ -209,7 +209,7 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 - **Project with no visual output** — Use code-before/after comparisons and terminal snippets instead of screenshots.
 - **README longer than 300 lines** — Preserve full original in `README.backup.md`; summarize technical sections as collapsed `<details>` blocks.
 - **Companion page already exists** — Link it and leave it unchanged; offer targeted refinements only when the user asks.
-- **User asks for one companion file only (for example `PRIVACY.md`)** — Run Repo Sync, then Step 7 for that page only, then Step 8 (`page: skipped — companion pages only` unless the user asks for HTML). Leave `README.md` unchanged unless the user asks to link the page.
+- **User asks for one companion file only (for example `PRIVACY.md`)** — Run Repo Sync, then Step 7 for that page only, then Step 8 (`page: skipped — companion pages only` unless the user asks for HTML). Leave `README.md` unchanged unless the user asks to link the page; otherwise name the README link it needs (the *Footer links* check accepts this).
 
 ## Acceptance Criteria
 
