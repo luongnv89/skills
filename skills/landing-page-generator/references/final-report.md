@@ -2,7 +2,7 @@
 
 The closing chat response of every landing-page-generator run, stops included, in both
 modes. It sits beside the deliverable (Mode A copy in chat; Mode B the rewritten
-`README.md`; the companion pages in both) and never replaces it. `SKILL.md` (*Final Report*) holds the status rule and
+`README.md`; the companion pages and the built pages in both) and never replaces it. `SKILL.md` (*Final Report*) holds the status rule and
 a `COMPLETE` example; this file holds the `PARTIAL` and `BLOCKED` examples, the fill
 rules, and the reader checks.
 
@@ -16,8 +16,8 @@ Apply the first row that matches:
 
 | Status | When |
 |--------|------|
-| `COMPLETE` | The deliverable is produced and every applicable check passes. Mode A: the full-page copy follows the chosen framework's template in `references/section-templates.md` and the Acceptance Criteria pass, or the user asked for a single section and that section plus its fit note is delivered. Mode B: `README.md` is rewritten, `README.backup.md` exists, all original content is preserved (backup plus `<details>` blocks), and the Step 6 Self-Review Checklist passes. Both modes: each applicable companion page is delivered (Mode A) or written or linked (Mode B), and passes the companion checks in `references/companion-pages.md`. Companion pages only: each requested page is delivered or written and passes the companion checks. |
-| `PARTIAL` | A deliverable was produced and at least one holds: a template section is missing, a CTA fails the CTA Button Rules, the A/B test ideas and conversion tips are missing from a full-page deliverable, the Mode B Self-Review Checklist still fails after the fix pass, original README content was lost, an applicable companion page is missing or fails a companion check, or a change the user asked for was not made. |
+| `COMPLETE` | The deliverable is produced and every applicable check passes. Mode A: the full-page copy follows the chosen framework's template in `references/section-templates.md` and the Acceptance Criteria pass, or the user asked for a single section and that section plus its fit note is delivered. Mode B: `README.md` is rewritten, `README.backup.md` exists, all original content is preserved (backup plus `<details>` blocks), and the Step 6 Self-Review Checklist passes. Both modes: each applicable companion page is delivered (Mode A) or written or linked (Mode B), and passes the companion checks in `references/companion-pages.md`; the pages are built and pass the page checks in `references/page-build.md`, or the build was skipped at the user's request (copy only, a single section, companion pages only). Companion pages only: each requested page is delivered or written and passes the companion checks. |
+| `PARTIAL` | A deliverable was produced and at least one holds: a template section is missing, a CTA fails the CTA Button Rules, the A/B test ideas and conversion tips are missing from a full-page deliverable, the Mode B Self-Review Checklist still fails after the fix pass, original README content was lost, an applicable companion page is missing or fails a companion check, the page was not built (`frontend-design` unavailable or `BLOCKED`, the host cannot write files, or Repo Sync stopped the build) or a page check still fails, or a change the user asked for was not made. |
 | `BLOCKED` | No deliverable: the Mode A core inputs (product/service name, target audience, problem solved, primary CTA) or a Mode B context question went unanswered and the user ended the run; Mode B found no `README.md` and the user declined creating one from scratch; or Repo Sync stopped on a missing `origin` or a conflict. |
 
 A question that awaits the user's answer (core inputs, framework override, Mode B
@@ -32,6 +32,15 @@ Result: PARTIAL. Rewrote README.md with the PAS structure; the Self-Review Check
 Evidence: README.backup.md created before the rewrite; all original content preserved in <details> blocks; Self-Review Checklist 11/13 — feature descriptions and the no-rhetorical-questions check fail.
 Uncertainty: Trimming the two long feature descriptions further may drop technical detail the project wants visible; not confirmed with the user.
 Decision: Approve the shorter feature wording, or tell me which technical detail to keep and I will rebalance the sections.
+```
+
+## PARTIAL example — page not built
+
+```text
+Result: PARTIAL. Delivered full AIDA landing copy for PlanPal and Privacy Policy, Terms of Use, and Changelog pages in chat; page: not built — frontend-design unavailable.
+Evidence: Framework AIDA applied via references/section-templates.md; every CTA starts with an action verb; companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; page: not built — frontend-design unavailable, so the copy is delivered as is.
+Uncertainty: No page check ran because no page was built.
+Decision: Install frontend-design, then ask me to build the page from this copy; or use the copy as is. Before publishing: have a lawyer review the Privacy Policy and Terms of Use.
 ```
 
 ## BLOCKED examples
@@ -64,11 +73,14 @@ Decision: Resolve the conflict on the branch or tell me to continue without sync
   the gap markers placed (`[proof needed]` or `[placeholder]`), the anti-slop check, each companion page
   decision (delivered, written, linked, or skipped with its reason; repeat them here even when
   `Result:` names them) and each companion check by its name in `references/companion-pages.md`
-  with its result ("companion checks passed" alone is not enough), and for Mode B the backup, the content-preservation check, the Self-Review
-  Checklist count, and the `sync:` record (`sync: skipped (...)` or `sync: failed (...)`;
-  a failed sync that stopped the run is the `BLOCKED` reason). Cite only checks that ran.
-- `Uncertainty:` lists each check that could not run and each assumption made where the
-  user was silent. Label assumptions as assumptions.
+  with its result ("companion checks passed" alone is not enough), the `page:` entry (built
+  with its folder and files, skipped, or not built, each with its reason) and each page check
+  with its result, the `sync:` record in both modes (`sync: skipped (...)` or `sync: failed (...)`;
+  a Mode B sync that stopped the run before any deliverable is the `BLOCKED` reason; a sync
+  that stopped only the page build is a `page: not built` reason), and for Mode B the backup,
+  the content-preservation check, and the Self-Review Checklist count. Cite only checks that ran.
+- `Uncertainty:` lists each check that could not run (for example responsive rendering
+  without a browser) and each assumption made where the user was silent. Label assumptions as assumptions.
 - `Decision:` names the one action the user must take, or says `No approval needed.`
   Name a remaining user action (for example, replacing `[proof needed]` markers with
   real metrics, or committing the rewritten README) in the same line after

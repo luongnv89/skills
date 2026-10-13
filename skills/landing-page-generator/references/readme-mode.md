@@ -3,7 +3,7 @@
 Transform a project's existing `README.md` into a concise, visual, developer-friendly
 landing page. Use this mode when the source material is a repository README (not an open
 product brief) and the deliverable is a rewritten `README.md` file in the repo, plus the
-companion page files its footer links to (Step 7).
+companion page files its footer links to (Step 7) and the pages built from them as HTML (Step 8).
 
 > For marketing landing-page **copy** from a product brief, use Mode A in `SKILL.md` instead.
 
@@ -139,12 +139,25 @@ the sources, the Mode B templates, and the checks.
 4. Run the companion checks in `references/companion-pages.md`. Fix each failure before presenting.
 5. If a fix changed `README.md`, re-run the Step 6 checklist.
 
-### Step 8: Present to User
+### Step 8: Build the Final Page
+
+Follow `references/page-build.md` with the rewritten `README.md` as the landing copy and each
+`written` or `linked` companion file as a page. A `linked` file is read, never changed.
+
+1. Decide the build with its *Build decision* table and record the `page:` entry.
+2. Acquire `frontend-design` (`SKILL.md` → *Dependency Preflight*) and give it the brief from *Brief for frontend-design*.
+3. Run the *Page checks*. Fix each failure, then re-run the check.
+
+The pages carry every README section, CTA, and `[placeholder]` marker verbatim. Without
+`frontend-design`, follow *Fallback: copy only*: the README and companion files stand and the run is `PARTIAL`.
+
+### Step 9: Present to User
 
 Briefly explain:
 1. Framework chosen
 2. Where original content lives (`README.backup.md` + collapsed sections)
 3. Each companion page: written, linked, or skipped with its reason
+4. The `page:` entry: the built folder and its files, or the skip or fallback reason
 
 Ask for feedback. Do NOT commit unless asked. Close the run with the Final Report defined
 in `SKILL.md` → *Final Report* (`Result:` and its status first, then `Evidence:`,
@@ -196,7 +209,7 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 - **Project with no visual output** — Use code-before/after comparisons and terminal snippets instead of screenshots.
 - **README longer than 300 lines** — Preserve full original in `README.backup.md`; summarize technical sections as collapsed `<details>` blocks.
 - **Companion page already exists** — Link it and leave it unchanged; offer targeted refinements only when the user asks.
-- **User asks for one companion file only (for example `PRIVACY.md`)** — Run Repo Sync, then Step 7 for that page only. Leave `README.md` unchanged unless the user asks to link the page.
+- **User asks for one companion file only (for example `PRIVACY.md`)** — Run Repo Sync, then Step 7 for that page only, then Step 8 (`page: skipped — companion pages only` unless the user asks for HTML). Leave `README.md` unchanged unless the user asks to link the page.
 
 ## Acceptance Criteria
 
@@ -206,6 +219,7 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 - [ ] Step 6 Self-Review Checklist (13 checks) passes before presenting
 - [ ] Rewritten README meets the Default Quality Bar in `SKILL.md` (professional, production-ready, elegant, premium) without the user asking
 - [ ] Each companion page is recorded as written, linked, or skipped with its reason; every README link to a companion page passes `test -e`; no existing file other than `README.md` was modified
+- [ ] The run records a `page:` entry; built pages pass the page checks in `references/page-build.md`, or the skip or fallback reason is stated
 - [ ] The run closes with the Final Report defined in `SKILL.md` → *Final Report*: `Result:` and its status first, then `Evidence:`, `Uncertainty:`, and `Decision:` lines; `Evidence:` cites only checks that ran
 - [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear)
 

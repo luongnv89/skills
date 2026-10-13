@@ -11,6 +11,7 @@
 > from a product brief (PAS, AIDA, StoryBrand), or transform an existing project README into a
 > scannable, visual, developer-friendly landing page. Every full landing page ships with its
 > companion pages: Privacy Policy, Terms of Use, Changelog, and Docs, each where it applies.
+> The last step builds the landing page and its companion pages as HTML with `frontend-design`.
 
 ## Highlights
 
@@ -19,6 +20,7 @@
 - Complete page sections: framework-specific narrative blocks, how it works, social proof, FAQ, and closing CTA
 - README mode: mermaid diagrams, tables over prose, all original content preserved in `<details>`
 - Companion pages with every full landing page: Privacy Policy always, Terms of Use for accounts or paid plans, Changelog always, and Docs for CLIs, libraries, and products with setup steps, with every fact traced to the brief or a project file and every gap marked, never invented
+- A built page at the end of every full run: `frontend-design` turns the copy into `landing-page/index.html` plus one HTML file per companion page, keeping every section, CTA, and `[proof needed]` or `[placeholder]` marker verbatim. Without `frontend-design`, the run delivers the copy, says why no page was built, and reports PARTIAL
 - Anti-slop rules to avoid generic AI marketing filler
 - Default quality bar in both modes: professional, production-ready, elegant, and premium output without being asked
 - A/B test ideas and conversion optimization notes with every copy deliverable
@@ -35,6 +37,7 @@
 | "Make my GitHub page sell the project" | **Mode B** — apply a framework with mermaid diagrams, preserve technical detail |
 | "Write the landing page, privacy policy, and changelog for my CLI" | **Mode A** — landing copy plus Privacy Policy, Changelog, and Docs pages |
 | "Write a privacy policy page for my landing site" | **One companion page** — only the Privacy Policy, from the brief |
+| "Write landing page copy only, I'll build the page myself" | **Mode A, copy only** — the copy and companion pages, no HTML build (the skip is recorded) |
 
 ## How It Works
 
@@ -45,10 +48,12 @@ graph TD
     M -->|Repo README| C["Mode B: read project -> framework -> rewrite -> anti-slop check"]
     B --> P["Companion pages: privacy, terms, changelog, docs (each where it applies)"]
     C --> P
+    P --> H["Build the pages as HTML with frontend-design (copy only if it is unavailable)"]
     style A fill:#4CAF50,color:#fff
     style B fill:#2196F3,color:#fff
     style C fill:#2196F3,color:#fff
     style P fill:#FF9800,color:#fff
+    style H fill:#9C27B0,color:#fff
 ```
 
 ## Usage
@@ -68,16 +73,18 @@ graph TD
 | `references/readme-step-reports.md` | Mode B step-completion report format |
 | `references/step-reports.md` | Mode A step-completion report format |
 | `references/companion-pages.md` | Companion pages (both modes): sources, delivery, templates, and checks |
+| `references/page-build.md` | Page build (both modes): build decision, output folder, `frontend-design` brief, copy-only fallback, page checks |
 | `references/final-report.md` | Closing Final Report: status rule, PARTIAL/BLOCKED examples, fill rules, reader checks |
 
 ## Output
 
 - **Mode A** — structured landing page copy delivered in chat (hero through final CTA) plus A/B test
   ideas and conversion tips, then a COMPANION PAGES block and the copy of each companion page that
-  applies. Not HTML, wireframes, or design files unless the user asks for a specific copy-only format.
+  applies. The pages are then built as HTML in `landing-page/` (`index.html`, `privacy.html`,
+  `terms.html`, `changelog.html`, `docs.html`, each where it applies), unless the user asks for copy only.
 - **Mode B** — a rewritten `README.md` (visual-first, scannable, mermaid-driven) with the original
   preserved in `README.backup.md` and collapsed `<details>` blocks, plus `PRIVACY.md`, `TERMS.md`,
   `CHANGELOG.md`, and `docs/getting-started.md` where they apply. An existing page is linked, never
-  overwritten.
+  overwritten. The README and the written or linked companion files are then built as HTML in `landing-page/`.
 - **Both modes** — close with a compact Final Report: `Result` (COMPLETE / PARTIAL / BLOCKED)
   first, then `Evidence`, `Uncertainty`, and `Decision`.

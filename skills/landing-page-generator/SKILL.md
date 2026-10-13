@@ -1,10 +1,12 @@
 ---
 name: landing-page-generator
-description: "Generate landing pages (PAS, AIDA, StoryBrand) from a brief or README, plus their privacy, terms, changelog, and setup pages. Use for sales copy, hero sections, CTAs, or README rewrites. Don't use for blogs, release notes, project docs, or HTML."
+description: "Write landing pages (PAS, AIDA, StoryBrand) from a brief or README, as HTML with privacy, terms, changelog, setup pages. Use for sales copy, hero sections, CTAs, README rewrites. Don't use for blogs, release notes, project docs, or coding mockups."
 license: MIT
 effort: high
+dependencies:
+  - frontend-design
 metadata:
-  version: 1.6.0
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -14,6 +16,7 @@ Generate landing pages using proven copywriting frameworks (PAS, AIDA, StoryBran
 two modes: write conversion-focused marketing copy from a product brief, or transform an existing
 project README into a scannable, visual landing page. A full landing page ships with the companion
 pages its footer links to: Privacy Policy, Terms of Use, Changelog, and Docs, each where it applies.
+The last step builds the landing page and those pages as HTML with `frontend-design`.
 
 ## Two Modes
 
@@ -21,8 +24,8 @@ Pick the mode that matches the input and deliverable:
 
 | Mode | Use when | Input | Output | Where |
 |---|---|---|---|---|
-| **A — Landing copy** | You need marketing copy for a sales/landing page | Product/service brief | Conversion-focused copy (hero → CTA) + A/B notes + companion page copy, in chat | This file, below |
-| **B — README landing page** | You have an existing project `README.md` to make persuasive and scannable | Repo `README.md` + project files | Rewritten `README.md` (mermaid, tables, collapsed details) + `README.backup.md` + companion page files | `references/readme-mode.md` |
+| **A — Landing copy** | You need marketing copy for a sales/landing page | Product/service brief | Conversion-focused copy (hero → CTA) + A/B notes + companion page copy, in chat; the built pages in `landing-page/` | This file, below |
+| **B — README landing page** | You have an existing project `README.md` to make persuasive and scannable | Repo `README.md` + project files | Rewritten `README.md` (mermaid, tables, collapsed details) + `README.backup.md` + companion page files + the built pages in `landing-page/` | `references/readme-mode.md` |
 
 If the user asks to "turn my README into a landing page", "make my GitHub page sell the project",
 or similar, follow **Mode B** in `references/readme-mode.md`. Otherwise use **Mode A** below. When
@@ -56,7 +59,7 @@ AI-generated marketing copy has predictable tells that kill credibility. See `re
 
 ## Default Quality Bar
 
-In both modes, the final deliverable (Mode A copy and its structure; Mode B README layout; the companion pages) must be professional, production-ready, elegant, and premium, even when the user never asks. The brief or project voice decides the tone; this bar decides the finish:
+In both modes, the final deliverable (Mode A copy and its structure; Mode B README layout; the companion pages; the built pages) must be professional, production-ready, elegant, and premium, even when the user never asks. The brief or project voice decides the tone; this bar decides the finish:
 - **Professional**: precise and credible; no hype
 - **Production-ready**: ship-ready, every section complete; the only allowed gaps are labeled `[proof needed]` (Mode A) or `[placeholder]` (Mode B) markers
 - **Elegant**: concise, one consistent voice, clean scannable hierarchy
@@ -76,9 +79,28 @@ Before writing, confirm the user supplied enough detail to make specific claims:
 If proof is missing, write placeholders clearly labeled `[proof needed]`; never invent customers,
 metrics, guarantees, scarcity, compliance claims, or commands.
 
+## Dependency Preflight (mandatory)
+
+This skill optionally invokes `frontend-design`, declared in frontmatter `dependencies`, for
+the page build only (Mode A Step 7, Mode B Step 8). Before the first write:
+
+```bash
+command -v asm >/dev/null || echo "asm not installed: npm install -g agent-skill-manager"
+asm deps discover "<this skill's directory>" --json
+printf 'lp_session=%s\n' "landing-page-generator-$(date +%s)-$$"   # record it; reuse it verbatim
+```
+
+When the page build is reached, run `asm deps acquire frontend-design --session <lp_session> --json`
+and read the returned `skillMdPath`. If `asm` is missing or the acquire fails, read
+`~/.claude/skills/frontend-design/SKILL.md` or `~/.agents/skills/frontend-design/SKILL.md`. Do not
+acquire it when the build is skipped (`references/page-build.md` → *Build decision*). If an acquire
+ran, run `asm deps release --session <lp_session> --json` at the end, including an early stop.
+Without `frontend-design`, the run falls back to copy only and records `page: not built — <reason>`;
+it never skips the page silently.
+
 ## Repo Sync Before Edits (mandatory)
 
-Mode B rewrites `README.md` and writes companion page files inside the repo. Sync before those writes to avoid clobbering remote work. If the working tree is not clean, stash first, sync, then restore:
+Mode B rewrites `README.md` and writes companion page files inside the repo; the page build writes `landing-page/`. Sync before those writes to avoid clobbering remote work. If the working tree is not clean, stash first, sync, then restore:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -94,7 +116,7 @@ if [ "$dirty" -eq 1 ]; then
 fi
 ```
 
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing. If a command after `git stash push` fails, run `git rebase --abort` (when a rebase is in progress), then `git stash pop`, then stop. Skip the sync and record `sync: skipped (<reason>)` when the user says to skip it, or when `git rev-parse --show-toplevel` is not the project directory (ask before syncing a parent repo). Skip this section for Mode A, which emits copy in chat and writes nothing.
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing. If a command after `git stash push` fails, run `git rebase --abort` (when a rebase is in progress), then `git stash pop`, then stop. Skip the sync and record `sync: skipped (<reason>)` when the user says to skip it, or when `git rev-parse --show-toplevel` is not the project directory (ask before syncing a parent repo). Mode A runs this section only before its page build writes into an existing folder (`references/page-build.md` → *Output folder*).
 
 ## Workflow (Mode A — Landing copy)
 
@@ -177,12 +199,23 @@ test ideas and conversion tips.
 
 ### Step 6: Generate Companion Pages
 
-If *Companion Pages* skips every page, write no COMPANION PAGES block: record the skip in this step's report and the Final Report, then go to the Final Report.
+If *Companion Pages* skips every page, write no COMPANION PAGES block: record the skip in this step's report and the Final Report, then go to Step 7.
 
 1. Decide each page with the *Companion Pages* table. Record it as `delivered` or `skipped — <reason>`.
 2. After the OPTIMIZATION NOTES, write the COMPANION PAGES block from `references/companion-pages.md`.
 3. Write each delivered page from its template in `references/companion-pages.md`.
 4. Run the companion checks in `references/companion-pages.md`. Fix each failure before delivery.
+
+### Step 7: Build the Final Page
+
+Follow `references/page-build.md`:
+
+1. Decide the build with its *Build decision* table and record the `page:` entry.
+2. Acquire `frontend-design` (*Dependency Preflight*) and give it the *Brief for frontend-design* with the copy of each page.
+3. Run the *Page checks*. Fix each failure, then re-run the check.
+
+The pages carry the copy's sections, CTAs, and `[proof needed]` markers verbatim. Without
+`frontend-design`, follow *Fallback: copy only*: the copy stands and the run is `PARTIAL`.
 
 ## Example Triggers
 
@@ -192,6 +225,7 @@ If *Companion Pages* skips every page, write no COMPANION PAGES block: record th
 - "Write conversion-optimized CTAs"
 - "Help me with landing page headlines"
 - "Write the landing page, privacy policy, and changelog for my CLI tool"
+- "Write and build a landing page for my app"
 
 ## Expected Output Example
 
@@ -226,6 +260,8 @@ PRIVACY POLICY
 Product/Service: AcmeDesk
 Effective date: [proof needed — publication date]
 ...
+
+page: built (landing-page/: index.html, privacy.html, terms.html, changelog.html)
 ```
 
 ## Safety & Guardrails
@@ -244,18 +280,19 @@ Effective date: [proof needed — publication date]
 
 - If the user asks for only one section, generate that section and a short note on how it fits the page.
 - If the product is vague, ask 2–4 targeted questions rather than writing generic copy.
-- If the user requests HTML, design, wireframes, SEO strategy, or UX critique, explain that this skill
-  only generates landing-page copy and offer a copy-only structure.
+- If the user requests HTML or a design for the page, Step 7 builds it from the copy. If they want
+  copy only, skip the build and record why. If they bring a finished design and want only its code,
+  or ask for wireframes, SEO strategy, or UX critique, explain that this skill does not do it.
 - If social proof is unavailable, write a proof slot rather than a fake testimonial.
 
 ## Final Report
 
-End every run, stops included, with this compact text block. Status is `COMPLETE` (the deliverable is produced and every applicable check passes — Mode A: the full-page copy follows the chosen framework's template, or the requested single section plus its fit note is delivered; Mode B: `README.md` is rewritten, `README.backup.md` exists, and the Step 6 Self-Review Checklist passes; both modes: each applicable companion page is delivered, written, or linked and passes the companion checks; companion pages only: each requested page passes the companion checks), `PARTIAL` (a deliverable was produced but a check still fails), or `BLOCKED` (no deliverable: a required question went unanswered and the user ended the run, Mode B found no `README.md` and the user declined creating one, or Repo Sync stopped on a conflict). A question that awaits the user's answer does not end the run. Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
+End every run, stops included, with this compact text block. Status is `COMPLETE` (the deliverable is produced and every applicable check passes — Mode A: the full-page copy follows the chosen framework's template, or the requested single section plus its fit note is delivered; Mode B: `README.md` is rewritten, `README.backup.md` exists, and the Step 6 Self-Review Checklist passes; both modes: each applicable companion page is delivered, written, or linked and passes the companion checks, and the pages are built and pass the page checks or skipped at the user's request; companion pages only: each requested page passes the companion checks), `PARTIAL` (a deliverable was produced but a check still fails, or the page was not built), or `BLOCKED` (no deliverable: a required question went unanswered and the user ended the run, Mode B found no `README.md` and the user declined creating one, or Repo Sync stopped on a conflict). A question that awaits the user's answer does not end the run. Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
 
 ```text
-Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA), A/B test ideas, and Privacy Policy, Terms of Use, and Changelog pages; Docs skipped (hosted app, no setup outside the app).
-Evidence: Framework PAS named and applied via references/section-templates.md; hero headline 8 words; every CTA starts with an action verb; pages: Privacy Policy, Terms of Use, Changelog delivered, Docs skipped (hosted app); companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; [proof needed] markers: 2 on the landing page, 18 on the companion pages; anti-slop check passed.
-Uncertainty: Assumed a setup-time objection belongs in the FAQ; no data practices, legal entity, or release date were supplied, so those facts are markers.
+Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA), A/B test ideas, and Privacy Policy, Terms of Use, and Changelog pages, built as HTML in landing-page/; Docs skipped (hosted app, no setup outside the app).
+Evidence: Framework PAS named and applied via references/section-templates.md; hero headline 8 words; every CTA starts with an action verb; pages: Privacy Policy, Terms of Use, Changelog delivered, Docs skipped (hosted app); companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; [proof needed] markers: 2 on the landing page, 18 on the companion pages; anti-slop check passed; page: built (landing-page/: index.html, privacy.html, terms.html, changelog.html) by frontend-design; page checks Pages built, Sections carried, CTAs carried, Markers carried (24/24), Nothing added, Notes excluded, Links resolve, Design checks passed; sync: skipped (new folder).
+Uncertainty: Assumed a setup-time objection belongs in the FAQ; no data practices, legal entity, or release date were supplied, so those facts are markers; responsive rendering untested (no browser), breakpoints inspected in CSS.
 Decision: No approval needed. Before publishing: replace the [proof needed] markers with real facts, and have a lawyer review the Privacy Policy and Terms of Use.
 ```
 
@@ -274,6 +311,8 @@ Verify before delivering. When the run delivers companion pages only, only the c
 - Final response includes A/B test ideas and conversion tips unless the user asked for a single section.
 - Each companion page is recorded as delivered, linked, or skipped with its reason, and each delivered
   page passes the companion checks in `references/companion-pages.md`.
+- The run records a `page:` entry: built pages pass the page checks in `references/page-build.md`
+  (sections, CTAs, and gap markers carried verbatim; nothing added), or the skip or fallback reason is stated.
 - The run closes with a Final Report: `Result:` and its status first, then `Evidence:`, `Uncertainty:`, and `Decision:` lines; `Evidence:` cites only checks that ran.
 - The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear). Without a human reviewer's answer, human understanding is unconfirmed.
 

@@ -37,7 +37,7 @@ Mode B privacy evidence:
 
 | Mode | Each delivered page goes to | When the page already exists |
 |---|---|---|
-| A | A copy block in chat after the landing copy's OPTIMIZATION NOTES, opened by the COMPANION PAGES block below | Not applicable: Mode A writes no files |
+| A | A copy block in chat after the landing copy's OPTIMIZATION NOTES, opened by the COMPANION PAGES block below | Not applicable: Mode A writes no page copy to files |
 | B | `PRIVACY.md`, `TERMS.md`, `CHANGELOG.md`, `docs/getting-started.md` | Keep the existing file unchanged and link it from the README. Record the page as `linked` |
 
 Mode B finds existing pages by matching the base names of documentation files (`.md`, `.rst`, `.txt`, `.html`) in the project directory, case-insensitively. Skip `.git/`, `node_modules/`, build output, and other packages of a monorepo. When unsure a match is this product's page, ask. Before writing any page, run `test -e` on its path, and never write over an existing file:
