@@ -100,13 +100,13 @@
       "kind": "edge",
       "name": "build-workflow-conflict",
       "prompt": "Dry run: show me what you would do to publish ../../eval-fixtures/github-pages-publish/ready-site to my pages-publish-eval-tea repo. Don't push anything.",
-      "expected_output": "The repo already holds .github/workflows/build.yml, which runs `npm ci && npm run build` and deploys to Pages (eval setup). In the dry-run clone, the workflow subcommand exits 3 with conflict existing-pages-workflow; the skill shows that workflow and asks whether to replace it instead of overwriting the build pipeline; nothing is pushed.",
+      "expected_output": "The repo already holds .github/workflows/build.yml, which runs `npm ci && npm run build` and deploys to Pages (eval setup). In the dry-run clone, the workflow subcommand exits 3 with conflict existing-pages-workflow; the skill shows that workflow, does not overwrite the build pipeline, and asks nothing mid-run: it stops and puts the replace-or-stop question in its Decision line; nothing is pushed.",
       "files": [
         "../../eval-fixtures/github-pages-publish/ready-site"
       ],
       "expectations": [
         "The workflow subcommand exited 3 with conflict 'existing-pages-workflow' naming .github/workflows/build.yml",
-        "The skill asked whether to replace the build workflow, and did not overwrite it",
+        "The skill did not overwrite build.yml and put the replace-or-stop question in its Decision line without asking mid-run",
         "No commit or push ran, and the repo's default branch head is unchanged after the run",
         "The report opens with 'Result: DRY-RUN', still lists the files it would publish, and its Decision line names the replace-or-stop question"
       ]
