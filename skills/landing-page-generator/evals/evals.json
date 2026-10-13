@@ -5,7 +5,7 @@
       "id": 1,
       "kind": "happy-path",
       "prompt": "turn my README into a landing page",
-      "expected_output": "README.md rewritten with landing page structure (hero, problem, solution, how it works, social proof, FAQ, CTA). README.backup.md created as backup. Technical content preserved in <details> blocks. The run closes with a Final Report.",
+      "expected_output": "README.md rewritten with landing page structure (hero, problem, solution, how it works, social proof, FAQ, CTA). README.backup.md created as backup. Technical content preserved in <details> blocks. Each applicable companion page (PRIVACY.md, CHANGELOG.md, docs/getting-started.md when setup applies) is written or linked, never overwriting an existing file. The run closes with a Final Report.",
       "files": [],
       "expectations": [
         "Ran Repo Sync (stash-first) before rewriting README.md, or recorded sync: skipped with its reason",
@@ -13,6 +13,7 @@
         "Chose and named a framework (PAS, AIDA, or StoryBrand) and offered the user an override",
         "Preserved all original technical content in README.backup.md and collapsed <details> blocks",
         "Ran the Step 6 Self-Review Checklist and fixed any failures before presenting",
+        "Wrote or linked each applicable companion page, or recorded its skip with a reason, and modified no existing file other than README.md",
         "Did not commit the rewrite (a commit happens only when the user asks)",
         "The Final Report opens with a Result: line carrying COMPLETE and names README.md and README.backup.md",
         "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence: cites only checks that ran, and Uncertainty: labels each assumption as an assumption",
@@ -51,15 +52,18 @@
       "id": 4,
       "kind": "happy-path",
       "prompt": "Write landing page copy for AcmeDesk, a helpdesk for solo founders. Audience: indie SaaS founders. Primary CTA: start free trial. Differentiator: setup in 10 minutes, shared inbox with AI drafts.",
-      "expected_output": "Full Mode A landing page copy in chat using a named framework's template from references/section-templates.md (hero through final CTA), ending with A/B test ideas and conversion tips, then a Final Report.",
+      "expected_output": "Full Mode A landing page copy in chat using a named framework's template from references/section-templates.md (hero through final CTA), ending with A/B test ideas and conversion tips, then the COMPANION PAGES block with Privacy Policy, Terms of Use (free trial), and Changelog pages (Docs skipped: hosted app, no setup step outside the app), then a Final Report.",
       "files": [],
       "expectations": [
         "Chose a framework (PAS, AIDA, or StoryBrand), named it to the user, and populated every section of its template",
         "Hero headline is 10 words or fewer, value-led, and specific to solo founders",
         "Every CTA starts with an action verb and states the outcome; none are generic (Submit, Click Here)",
         "Unsupported proof is labeled [proof needed]; no invented metrics, testimonials, or logos",
-        "Ended with A/B test ideas and conversion tips",
-        "The Final Report opens with Result: COMPLETE; Evidence: cites the checks that ran; Uncertainty: labels assumptions; Decision: says No approval needed or names the pending action"
+        "Ended the landing copy with A/B test ideas and conversion tips",
+        "After the landing copy, wrote a COMPANION PAGES block and delivered Privacy Policy, Terms of Use, and Changelog pages",
+        "Recorded the Docs page as skipped with its reason (hosted app; the brief names no setup step outside the app)",
+        "The companion pages invent no data practice, processor, legal entity, price, or release date; each missing fact is a [proof needed] marker, and no page claims regulatory compliance",
+        "The Final Report opens with Result: COMPLETE; Evidence: cites the companion page decisions and checks; Uncertainty: labels assumptions; Decision: names replacing the markers and the legal review of the Privacy Policy and Terms of Use"
       ]
     },
     {
@@ -85,6 +89,7 @@
       "expectations": [
         "Wrote [proof needed] markers where social proof, metrics, or guarantees would go",
         "Invented no testimonials, logos, metrics, awards, or scarcity",
+        "The companion pages (Privacy Policy, Changelog, and Terms of Use when plans or a trial are named) invent no data practice, policy term, or release date; each missing fact is a [proof needed] marker",
         "The Final Report's Uncertainty: line separates the [proof needed] placeholders from verified claims",
         "The Final Report's Decision: line names replacing the markers with real proof as a remaining user action"
       ]
@@ -109,6 +114,104 @@
       "expectations": [
         "landing-page-generator did not trigger, or declined the HTML build and offered copy only",
         "No HTML or CSS was produced"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "happy-path",
+      "name": "cli-brief-companion-pages",
+      "prompt": "Write landing page copy for logtail, an open-source CLI that tails and filters JSON logs from any process. Audience: backend developers who debug services from the terminal. Primary CTA: install with brew install acme/tap/logtail. MIT licensed, free, no accounts, no telemetry. Current version is 0.4.0.",
+      "expected_output": "Mode A landing copy in chat from a named framework's template, then a COMPANION PAGES block and Privacy Policy, Changelog, and Docs pages. Terms of Use is skipped (open-source, no accounts or payments). The Changelog's 0.4.0 entry keeps its date and items as markers. The Docs page uses only the brief's install command; every unknown command or flag is a [proof needed] marker. The run closes with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Delivered full landing copy from a named framework's template, then a COMPANION PAGES block listing Privacy Policy, Changelog, and Docs as footer links",
+        "Skipped the Terms of Use page and recorded the reason (open-source tool with no accounts or payments)",
+        "The Docs page uses the install command from the brief (brew install acme/tap/logtail) and invents no other command, flag, or config key; each unknown is a [proof needed] marker",
+        "The Privacy Policy states only what the brief supports (no telemetry, no accounts), names no processor, and claims no regulatory compliance",
+        "The Changelog has one 0.4.0 entry whose date and items are [proof needed] markers, because the brief does not say 0.4.0 is the first release",
+        "The Final Report opens with Result: COMPLETE, cites the companion page decisions and checks on Evidence:, and names the legal review of the Privacy Policy on Decision:"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "happy-path",
+      "name": "readme-mode-companion-files",
+      "prompt": "Copy the project in ../../eval-fixtures/landing-page-generator/logtail-cli to a scratch directory and turn its README into a landing page there. The copy has no git remote, so skip the repo sync.",
+      "expected_output": "Fixture logtail-cli (../../eval-fixtures/landing-page-generator/logtail-cli). README.md rewritten with README.backup.md. PRIVACY.md discloses the usage ping in src/telemetry.js and the LOGTAIL_NO_TELEMETRY=1 opt-out. The existing CHANGELOG.md is linked and unchanged. TERMS.md is not written (MIT, no accounts or payments). docs/getting-started.md takes its install command from the README and its flags, including --since, from src/cli.js. Every README companion link resolves. The run closes with a Final Report.",
+      "files": [
+        "../../eval-fixtures/landing-page-generator/logtail-cli"
+      ],
+      "expectations": [
+        "Created README.backup.md before rewriting README.md, and recorded sync: skipped with its reason",
+        "Wrote PRIVACY.md that discloses the usage ping from src/telemetry.js (option names, logtail version, OS platform) and the LOGTAIL_NO_TELEMETRY=1 opt-out, and does not claim the tool collects no data",
+        "Left the existing CHANGELOG.md unchanged and linked it from the README",
+        "Did not write TERMS.md and recorded the reason (MIT-licensed tool with no accounts or payments)",
+        "Wrote docs/getting-started.md whose install command (npm install -g logtail-cli) comes from the README and whose flags include --since from src/cli.js; no invented command or flag",
+        "The README links PRIVACY.md, CHANGELOG.md, and docs/getting-started.md, and each link target exists",
+        "The Final Report opens with Result: and a status that matches the checks, lists each companion page as written, linked, or skipped on Evidence:, and names the legal review of PRIVACY.md on Decision:"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "name": "landing-only",
+      "prompt": "Write landing page copy only, no other pages, for PlanPal, a meal-planning app for busy parents. Audience: parents of school-age kids. Problem: deciding what to cook every night. Primary CTA: download on the App Store. Free with an optional paid plan.",
+      "expected_output": "Full Mode A landing copy only. No companion pages, even though the paid plan would otherwise add a Terms of Use page; the skip is recorded. The run closes with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Delivered full landing copy from a named framework's template",
+        "Wrote no Privacy Policy, Terms of Use, Changelog, or Docs page and no COMPANION PAGES block",
+        "Recorded the companion-page skip by name (Privacy Policy, Terms of Use, Changelog, Docs skipped because the user asked for landing copy only) in a step report or the Final Report",
+        "The Final Report opens with Result: COMPLETE"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "edge",
+      "name": "standalone-privacy-policy",
+      "prompt": "Write the privacy policy page for the landing site of Snapnote, an iOS note-taking app. Notes are stored in the user's iCloud account; we run no analytics and have no user accounts of our own.",
+      "expected_output": "Only the Privacy Policy page, from the companion template: iCloud storage and no analytics from the brief, [proof needed] markers for missing facts, no compliance claims, and a note on the footer link the landing page needs. The run closes with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Wrote only the Privacy Policy page: no landing copy and no other companion page",
+        "States iCloud storage and no analytics from the brief, and names no processor the brief did not supply",
+        "Marks the missing facts (for example the contact channel and effective date) with [proof needed] markers instead of inventing them",
+        "Claims no GDPR, CCPA, or other regulatory compliance and no security guarantee",
+        "Names the landing-page footer link the page needs",
+        "The Final Report opens with Result: COMPLETE and names the policy's legal review on Decision:"
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "negative-trigger",
+      "prompt": "Generate API reference documentation for the public functions in src/ of my library.",
+      "expected_output": "The skill does not trigger: API docs are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "landing-page-generator did not trigger",
+        "No landing copy, COMPANION PAGES block, or Docs page template was produced"
+      ]
+    },
+    {
+      "id": 14,
+      "kind": "negative-trigger",
+      "prompt": "Generate the changelog for our v2.3 release from the git log.",
+      "expected_output": "The skill does not trigger: release notes belong to ship and are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "landing-page-generator did not trigger",
+        "No landing copy or COMPANION PAGES block was produced"
+      ]
+    },
+    {
+      "id": 15,
+      "kind": "negative-trigger",
+      "prompt": "Write installation docs for my CLI tool from its source code.",
+      "expected_output": "The skill does not trigger: project docs belong to doc-manager and are named in the negative-trigger clause.",
+      "files": [],
+      "expectations": [
+        "landing-page-generator did not trigger",
+        "No landing copy, COMPANION PAGES block, or companion Docs page template was produced"
       ]
     }
   ]

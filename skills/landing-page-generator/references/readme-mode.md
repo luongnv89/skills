@@ -2,7 +2,8 @@
 
 Transform a project's existing `README.md` into a concise, visual, developer-friendly
 landing page. Use this mode when the source material is a repository README (not an open
-product brief) and the deliverable is a rewritten `README.md` file in the repo.
+product brief) and the deliverable is a rewritten `README.md` file in the repo, plus the
+companion page files its footer links to (Step 7).
 
 > For marketing landing-page **copy** from a product brief, use Mode A in `SKILL.md` instead.
 
@@ -30,7 +31,7 @@ already have?" If not, cut it.
 
 ## Repo Sync Before Edits (mandatory)
 
-This mode rewrites a tracked file, so sync with remote first. Follow the `## Repo Sync
+This mode rewrites a tracked file and adds companion files, so sync with remote first. Follow the `## Repo Sync
 Before Edits (mandatory)` section in `SKILL.md` (stash-first pattern); if `origin` is
 missing or a conflict occurs, stop and ask the user.
 
@@ -47,9 +48,11 @@ Read project files to build a picture:
 |---|---|
 | `README.md` | Source material (required) |
 | `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` | Name, description, version |
-| `CHANGELOG.md` | Momentum signals |
+| `CHANGELOG.md` | Momentum signals; the Changelog page when it exists |
 | `LICENSE` | Risk reversal ("MIT licensed") |
 | `docs/` | Existing detailed docs to preserve |
+| Existing privacy, terms, or setup pages | Companion pages to link, not rewrite (`references/companion-pages.md` → *Delivery*) |
+| Source, manifests, lockfiles, `.env.example` | Docs facts and privacy evidence (`references/companion-pages.md` → *Sources and gap markers*) |
 
 Also check: GitHub stars, forks, download stats, notable users. If purpose or audience is unclear, ask.
 
@@ -73,9 +76,13 @@ Tell the user which you picked. Let them override.
 
 ### Step 4: Back Up Original
 
+If `README.backup.md` does not exist, back up to it:
+
 ```bash
 cp README.md README.backup.md
 ```
+
+If it exists, keep it and back up to `README.backup.<YYYYMMDD-HHMMSS>.md` instead. Never overwrite a backup.
 
 ### Step 5: Rewrite README.md
 
@@ -90,6 +97,7 @@ Key rules across all sections:
 - One copy-paste-runnable command per code block
 - Quick Start <=5 steps
 - All original technical content preserved in `<details>` blocks
+- The final CTA line links each companion page that will exist: run Step 7 items 1-2 first to decide them
 
 ### Step 6: Self-Review Checklist
 
@@ -113,11 +121,30 @@ Before presenting to the user, verify:
 
 If any check fails, fix it before presenting.
 
-### Step 7: Present to User
+### Step 7: Write Companion Pages
+
+`SKILL.md` → *Companion Pages* decides which pages apply. `references/companion-pages.md` holds
+the sources, the Mode B templates, and the checks.
+
+1. Run the existing-page checks in `references/companion-pages.md` → *Delivery*.
+2. Decide each page with this table:
+
+   | The page | Action | Record |
+   |---|---|---|
+   | Applies and exists | Leave the file unchanged; link it | `linked` |
+   | Applies and does not exist | Write it from its template; link it | `written` |
+   | Does not apply | Write nothing | `skipped — <reason>` |
+
+3. Run `test -e` on each README link to a companion page. Fix each failing link.
+4. Run the companion checks in `references/companion-pages.md`. Fix each failure before presenting.
+5. If a fix changed `README.md`, re-run the Step 6 checklist.
+
+### Step 8: Present to User
 
 Briefly explain:
 1. Framework chosen
 2. Where original content lives (`README.backup.md` + collapsed sections)
+3. Each companion page: written, linked, or skipped with its reason
 
 Ask for feedback. Do NOT commit unless asked. Close the run with the Final Report defined
 in `SKILL.md` → *Final Report* (`Result:` and its status first, then `Evidence:`,
@@ -168,6 +195,8 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 - **Highly technical README (API reference)** — Preserve all content in `<details>` blocks; landing-page sections stay brief.
 - **Project with no visual output** — Use code-before/after comparisons and terminal snippets instead of screenshots.
 - **README longer than 300 lines** — Preserve full original in `README.backup.md`; summarize technical sections as collapsed `<details>` blocks.
+- **Companion page already exists** — Link it and leave it unchanged; offer targeted refinements only when the user asks.
+- **User asks for one companion file only (for example `PRIVACY.md`)** — Run Repo Sync, then Step 7 for that page only. Leave `README.md` unchanged unless the user asks to link the page.
 
 ## Acceptance Criteria
 
@@ -176,6 +205,7 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 - [ ] H1 follows the value-proposition rule (see Step 5)
 - [ ] Step 6 Self-Review Checklist (13 checks) passes before presenting
 - [ ] Rewritten README meets the Default Quality Bar in `SKILL.md` (professional, production-ready, elegant, premium) without the user asking
+- [ ] Each companion page is recorded as written, linked, or skipped with its reason; every README link to a companion page passes `test -e`; no existing file other than `README.md` was modified
 - [ ] The run closes with the Final Report defined in `SKILL.md` → *Final Report*: `Result:` and its status first, then `Evidence:`, `Uncertainty:`, and `Decision:` lines; `Evidence:` cites only checks that ran
 - [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear)
 

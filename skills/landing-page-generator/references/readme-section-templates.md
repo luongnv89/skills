@@ -130,10 +130,12 @@ Only include if there are genuine common questions. Keep answers to 1-2 sentence
 npm install my-tool
 ` ` `
 
-[**Read the docs ->**](./docs) · [**View examples ->**](./examples) · MIT Licensed
+[**Read the docs ->**](./docs/getting-started.md) · [**View examples ->**](./examples) · [Changelog](./CHANGELOG.md) · [Privacy](./PRIVACY.md) · MIT Licensed
 ```
 
 If the CTA involves multiple steps, use separate code blocks — same rule as Quick Start.
+
+Link each companion page that Step 7 writes or finds, at its real path. Drop the link of a page Step 7 skips, and keep the examples link only when `./examples` exists.
 
 ## 5.10 Technical Details (collapsed)
 

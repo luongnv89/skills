@@ -2,7 +2,7 @@
 
 The closing chat response of every landing-page-generator run, stops included, in both
 modes. It sits beside the deliverable (Mode A copy in chat; Mode B the rewritten
-`README.md`) and never replaces it. `SKILL.md` (*Final Report*) holds the status rule and
+`README.md`; the companion pages in both) and never replaces it. `SKILL.md` (*Final Report*) holds the status rule and
 a `COMPLETE` example; this file holds the `PARTIAL` and `BLOCKED` examples, the fill
 rules, and the reader checks.
 
@@ -16,8 +16,8 @@ Apply the first row that matches:
 
 | Status | When |
 |--------|------|
-| `COMPLETE` | The deliverable is produced and every applicable check passes. Mode A: the full-page copy follows the chosen framework's template in `references/section-templates.md` and the Acceptance Criteria pass, or the user asked for a single section and that section plus its fit note is delivered. Mode B: `README.md` is rewritten, `README.backup.md` exists, all original content is preserved (backup plus `<details>` blocks), and the Step 6 Self-Review Checklist passes. |
-| `PARTIAL` | A deliverable was produced and at least one holds: a template section is missing, a CTA fails the CTA Button Rules, the A/B test ideas and conversion tips are missing from a full-page deliverable, the Mode B Self-Review Checklist still fails after the fix pass, original README content was lost, or a change the user asked for was not made. |
+| `COMPLETE` | The deliverable is produced and every applicable check passes. Mode A: the full-page copy follows the chosen framework's template in `references/section-templates.md` and the Acceptance Criteria pass, or the user asked for a single section and that section plus its fit note is delivered. Mode B: `README.md` is rewritten, `README.backup.md` exists, all original content is preserved (backup plus `<details>` blocks), and the Step 6 Self-Review Checklist passes. Both modes: each applicable companion page is delivered (Mode A) or written or linked (Mode B), and passes the companion checks in `references/companion-pages.md`. Companion pages only: each requested page is delivered or written and passes the companion checks. |
+| `PARTIAL` | A deliverable was produced and at least one holds: a template section is missing, a CTA fails the CTA Button Rules, the A/B test ideas and conversion tips are missing from a full-page deliverable, the Mode B Self-Review Checklist still fails after the fix pass, original README content was lost, an applicable companion page is missing or fails a companion check, or a change the user asked for was not made. |
 | `BLOCKED` | No deliverable: the Mode A core inputs (product/service name, target audience, problem solved, primary CTA) or a Mode B context question went unanswered and the user ended the run; Mode B found no `README.md` and the user declined creating one from scratch; or Repo Sync stopped on a missing `origin` or a conflict. |
 
 A question that awaits the user's answer (core inputs, framework override, Mode B
@@ -61,16 +61,20 @@ Decision: Resolve the conflict on the branch or tell me to continue without sync
   say `No copy written` / `No files written`.
 - `Evidence:` names each verification check that ran and its observed result: the
   framework template applied, the hero headline word count, the CTA Button Rules check,
-  the `[proof needed]` markers placed, the anti-slop check, and for Mode B the backup,
-  the content-preservation check, the Self-Review Checklist count, and the `sync:`
-  record (`sync: skipped (...)` or `sync: failed (...)`; a failed sync that stopped the
-  run is the `BLOCKED` reason). Cite only checks that ran.
+  the gap markers placed (`[proof needed]` or `[placeholder]`), the anti-slop check, each companion page
+  decision (delivered, written, linked, or skipped with its reason; repeat them here even when
+  `Result:` names them) and each companion check by its name in `references/companion-pages.md`
+  with its result ("companion checks passed" alone is not enough), and for Mode B the backup, the content-preservation check, the Self-Review
+  Checklist count, and the `sync:` record (`sync: skipped (...)` or `sync: failed (...)`;
+  a failed sync that stopped the run is the `BLOCKED` reason). Cite only checks that ran.
 - `Uncertainty:` lists each check that could not run and each assumption made where the
   user was silent. Label assumptions as assumptions.
 - `Decision:` names the one action the user must take, or says `No approval needed.`
   Name a remaining user action (for example, replacing `[proof needed]` markers with
   real metrics, or committing the rewritten README) in the same line after
-  `No approval needed.`
+  `No approval needed.` When a Privacy Policy or Terms of Use was delivered, name its
+  legal review as a remaining user action that comes before publishing: `No approval
+  needed. Before publishing: have a lawyer review PRIVACY.md.`
 
 ## Step completion reports
 

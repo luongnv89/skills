@@ -9,7 +9,8 @@
 
 > The one skill for landing-page work. Two modes: generate conversion-focused landing page copy
 > from a product brief (PAS, AIDA, StoryBrand), or transform an existing project README into a
-> scannable, visual, developer-friendly landing page.
+> scannable, visual, developer-friendly landing page. Every full landing page ships with its
+> companion pages: Privacy Policy, Terms of Use, Changelog, and Docs, each where it applies.
 
 ## Highlights
 
@@ -17,6 +18,7 @@
 - Proven copywriting frameworks: PAS, AIDA, and StoryBrand
 - Complete page sections: framework-specific narrative blocks, how it works, social proof, FAQ, and closing CTA
 - README mode: mermaid diagrams, tables over prose, all original content preserved in `<details>`
+- Companion pages with every full landing page: Privacy Policy always, Terms of Use for accounts or paid plans, Changelog always, and Docs for CLIs, libraries, and products with setup steps, with every fact traced to the brief or a project file and every gap marked, never invented
 - Anti-slop rules to avoid generic AI marketing filler
 - Default quality bar in both modes: professional, production-ready, elegant, and premium output without being asked
 - A/B test ideas and conversion optimization notes with every copy deliverable
@@ -31,6 +33,8 @@
 | "Generate hero section copy" | **Mode A** — produce headline, subheadline, CTA, and trust bar |
 | "Turn my README into a landing page" | **Mode B** — rewrite README with visual-first landing page structure |
 | "Make my GitHub page sell the project" | **Mode B** — apply a framework with mermaid diagrams, preserve technical detail |
+| "Write the landing page, privacy policy, and changelog for my CLI" | **Mode A** — landing copy plus Privacy Policy, Changelog, and Docs pages |
+| "Write a privacy policy page for my landing site" | **One companion page** — only the Privacy Policy, from the brief |
 
 ## How It Works
 
@@ -39,9 +43,12 @@ graph TD
     A["Landing request"] --> M{"Brief or existing README?"}
     M -->|Product brief| B["Mode A: gather info -> framework -> sections -> copy"]
     M -->|Repo README| C["Mode B: read project -> framework -> rewrite -> anti-slop check"]
+    B --> P["Companion pages: privacy, terms, changelog, docs (each where it applies)"]
+    C --> P
     style A fill:#4CAF50,color:#fff
     style B fill:#2196F3,color:#fff
     style C fill:#2196F3,color:#fff
+    style P fill:#FF9800,color:#fff
 ```
 
 ## Usage
@@ -60,14 +67,17 @@ graph TD
 | `references/readme-section-templates.md` | Mode B section flow for the rewritten README |
 | `references/readme-step-reports.md` | Mode B step-completion report format |
 | `references/step-reports.md` | Mode A step-completion report format |
+| `references/companion-pages.md` | Companion pages (both modes): sources, delivery, templates, and checks |
 | `references/final-report.md` | Closing Final Report: status rule, PARTIAL/BLOCKED examples, fill rules, reader checks |
 
 ## Output
 
 - **Mode A** — structured landing page copy delivered in chat (hero through final CTA) plus A/B test
-  ideas and conversion tips. Not HTML, wireframes, or design files unless the user asks for a
-  specific copy-only format.
+  ideas and conversion tips, then a COMPANION PAGES block and the copy of each companion page that
+  applies. Not HTML, wireframes, or design files unless the user asks for a specific copy-only format.
 - **Mode B** — a rewritten `README.md` (visual-first, scannable, mermaid-driven) with the original
-  preserved in `README.backup.md` and collapsed `<details>` blocks.
+  preserved in `README.backup.md` and collapsed `<details>` blocks, plus `PRIVACY.md`, `TERMS.md`,
+  `CHANGELOG.md`, and `docs/getting-started.md` where they apply. An existing page is linked, never
+  overwritten.
 - **Both modes** — close with a compact Final Report: `Result` (COMPLETE / PARTIAL / BLOCKED)
   first, then `Evidence`, `Uncertainty`, and `Decision`.

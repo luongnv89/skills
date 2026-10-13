@@ -293,7 +293,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.1.1 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**landing-page-generator**](skills/landing-page-generator/) | 1.5.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite |
+| [**landing-page-generator**](skills/landing-page-generator/) | 1.6.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages |
 | [**search-optimizer**](skills/search-optimizer/) | 1.1.0 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.6.0 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.4.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
