@@ -57,8 +57,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.6.0](packages/lstack/README.md) packages the canonical `skills/` tree as one
-Claude Code plugin: 41 top-level definitions plus the two nested diagram-generator
-children, **43** namespaced skills in total. `skills/` is the plugin folder; the root
+Claude Code plugin: 42 top-level definitions plus the two nested diagram-generator
+children, **44** namespaced skills in total. `skills/` is the plugin folder; the root
 marketplace points at it.
 
 ```bash
@@ -198,7 +198,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Harden and ship a repo | security-setup → devops-pipeline → ship (auto-push and cleanup-project for day-to-day work) |
 | Open-source a project | oss-ready → doc-manager → landing-page-generator → github-pages-publish |
 | Brand and launch | brand-name-checker → logo-designer → landing-page-generator → github-pages-publish |
-| Run an agent fleet | herdr-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner |
+| Run an agent fleet | herdr-agent *or* rex-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner |
 
 ### Find by Category
 
@@ -317,6 +317,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **d
 | [**install-script-generator**](skills/install-script-generator/) | 2.3.0 | high | Cross-platform install.sh with env detection |
 | [**opencode-runner**](skills/opencode-runner/) | 1.6.0 | medium | Delegate work to opencode free cloud models |
 | [**herdr-agent**](skills/herdr-agent/) | 3.2.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
+| [**rex-agent**](skills/rex-agent/) | 1.0.0 | medium | Manage Rex agent fleets: equal columns, prompt/wait/read via program status, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.6.0 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.4.0 | medium | Spawn, message, read CLI agents in tmux |
 | [**dev-machine-setup**](skills/dev-machine-setup/) | 0.10.0 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |

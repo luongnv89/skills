@@ -1,0 +1,181 @@
+{
+  "skill_name": "rex-agent",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "I have a Rex agent named 'reviewer' already running in my tab. Ask it to summarize the open PRs and show me what it says back.",
+      "expected_output": "Runs agent.py check, resolves reviewer by exact label with agent.py get, then sends and waits in one `agent.py prompt reviewer \"...\" --timeout N` call rather than rex send plus a sleep or a hand-rolled capture loop. Maps blocked / stalled / timeout to distinct outcomes, reads the reply with `agent.py read <block> --turn <turn>` using the turn ID the prompt printed, and relays only the delta.",
+      "files": [],
+      "expectations": [
+        "The prompt goes through `agent.py prompt` (one call that preflights, sends, and waits), not raw `rex send` followed by sleep or repeated captures.",
+        "The reply is read with `agent.py read ... --turn <id>` (the prompt's turn ID) and only the relevant delta is relayed.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Spin up two Rex agents for this project named 'tests' and 'docs'. Use pi with thinking low for both. Put them beside my pane so I see root + both agents in one tab.",
+      "expected_output": "Runs agent.py check, resolves the launch profile once and relays its summary, then starts each worker with `launch_profile.py --start tests --kind pi --thinking low --cwd <project>` (and docs), which splits the rightmost column, equalizes all columns, and waits for an idle program status. Does not create new windows, does not pass the main agent's Claude model or effort to pi, and confirms with agent.py fleet before assigning work.",
+      "files": [],
+      "expectations": [
+        "Each worker is started with `launch_profile.py --start <name> --kind pi --thinking low`, not with a hand-built `rex split -- pi ...` command.",
+        "Both workers land as columns in the root window (no `--new-window`, no `rex window new`), and the run reports equal column widths.",
+        "No Claude model ID or effort value is passed to the pi workers.",
+        "The launch-profile summary line is resolved as its own call and relayed before the first start.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "I'm done with all my Rex fleet agents for this project — shut them down.",
+      "expected_output": "Treats teardown as destructive: lists the worker blocks this run knows, asks for explicit confirmation, then closes only those worker blocks with `rex block close -s <session> <full block IDs>`, keeping the root block. Never closes the session or window unless asked, never stops the Rex server or kills Rex processes. If the user does not confirm, closes nothing and records the teardown as skipped.",
+      "files": [],
+      "expectations": [
+        "The agent asks for confirmation before closing anything.",
+        "Only worker blocks are closed, by full block ID; the root block, the session, and the Rex server are left alone.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "happy-path",
+      "prompt": "Launch three Rex agents (reviewer, tests, docs) for this repo with different tasks in parallel and keep them visible in one view so I can jump into any pane to steer.",
+      "expected_output": "Resolves the inherited launch profile once (passing its own model ID; leaving thinking empty on Claude Code so CLAUDE_EFFORT is read) and relays the summary, starts three workers with launch_profile.py --start in the root window, confirms with agent.py fleet --fail-on-blocked, begins each worker's first task with the worker preamble, and gives each its own task in one `agent.py dispatch` call (or parallel agent.py prompt calls), then reports per-agent outcomes from agent.py fleet.",
+      "files": [],
+      "expectations": [
+        "The launch-profile summary line is relayed to the user before the first worker starts.",
+        "Each worker's first task starts with the worker preamble telling it not to rename the session or touch other blocks.",
+        "The three different tasks go out concurrently through `agent.py dispatch` (or parallel `agent.py prompt` calls), not as one identical broadcast.",
+        "The closing fleet state comes from an `agent.py fleet` call, not from memory.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "happy-path",
+      "prompt": "Broadcast 'pull latest main and report status' to all my Rex fleet agents and collect replies.",
+      "expected_output": "Uses `agent.py broadcast \"pull latest main and report status\" <targets...>`: one block listing, dedupe, refusal of working/blocked/unverifiable targets, concurrent prompts so wall clock is the slowest agent, and one outcome line per target (settled, blocked, stalled, timeout, exited, working, unverifiable). Reads each settled reply with agent.py read --turn, using the turn ID printed for that target.",
+      "files": [],
+      "expectations": [
+        "The fan-out uses `agent.py broadcast` (or concurrent `agent.py prompt` calls), never sequential rex send loops.",
+        "Every target appears in the report with its outcome, including refused or failed ones.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "prompt": "My SSH session died — can you reattach my tmux coding agents?",
+      "expected_output": "Should NOT trigger rex-agent (tmux domain). Routes to tmux-agent-comms or plain tmux help.",
+      "files": [],
+      "expectations": [
+        "rex-agent is not applied: no rex or rex-agent script command runs, and the request is handled as a tmux task."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "happy-path",
+      "prompt": "Keep driving this Rex fleet through the whole refactor — I don't want the run to fall over when you fill up your own context.",
+      "expected_output": "Treats its own context as a gated resource: self-checks at the gate points (before a spawn wave, before a broadcast, after each relayed reply), continues below 50%, and at or above it (or on the UNKNOWN fallback: 20 relayed reads or 4 spawn waves) starts a successor with `launch_profile.py --start main-g2`, sends the handoff brief through agent.py prompt, reads the ack `HANDOFF ACCEPTED gen=2 fleet=<k>` (the successor then waits), sends `GO gen=2`, then goes read-only and focuses the successor with rex focus.",
+      "files": [],
+      "expectations": [
+        "The context gate is checked at the named gate points, with a percentage or an explicit UNKNOWN fallback log line.",
+        "A HANDOFF starts the successor through `launch_profile.py --start main-g<N>` on the inherited profile and waits for the exact ack before going read-only.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "happy-path",
+      "prompt": "What are all my Rex fleet agents doing right now?",
+      "expected_output": "Reports fleet state from `agent.py fleet` (one table, blocked first, polled), not from recollection of what was dispatched and not from screen captures of every block. Lists each worker with name, block ID, kind, and status, surfaces blocked workers as needing a human, and states the poll time.",
+      "files": [],
+      "expectations": [
+        "The answer comes from an `agent.py fleet` call, with blocked workers listed first.",
+        "The report says the table was polled (with a time), not an atomic snapshot.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "happy-path",
+      "prompt": "/rex-agent help",
+      "expected_output": "Answers from the Help branch before any prerequisite check: prints the usage summary (spawn, message, read, status, broadcast, steer, teardown, handoff, help), the safety behaviours, and the requirements (rex CLI, running server, inside a Rex terminal, agents that report program status). Runs no rex command and no script, and emits no completion report.",
+      "files": [],
+      "expectations": [
+        "No rex command and no rex-agent script runs.",
+        "The help summary lists the operations and the requirements, and no Step Completion Report or final report follows."
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "happy-path",
+      "prompt": "Add one more Rex agent called 'critic' beside my pane to challenge the reviewer's findings.",
+      "expected_output": "Does not ask which agent CLI, model or thinking level to use and does not hardcode one. Resolves the inherited launch profile (kind from the root's program status app, model from its own self-report, thinking from CLAUDE_EFFORT on Claude Code, setup flags from root argv), relays the summary including any ⚠ bypass line, and starts `launch_profile.py --start critic` as the new rightmost column.",
+      "files": [],
+      "expectations": [
+        "The worker is started with `launch_profile.py --start critic` and the main agent's own model ID passed as --main-model.",
+        "The run does not ask the user to pick a CLI, model, or thinking level.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "happy-path",
+      "prompt": "Spin up a codex agent named 'second-opinion' next to me — I want a different model family to review the plan.",
+      "expected_output": "Treats codex as a user-named kind: starts `launch_profile.py --start second-opinion --kind codex`, which inherits nothing else (no Claude model, effort, or flags), relays the summary saying so, and waits for Codex to report idle. If Codex shows a dialog that reports no status (for example an update prompt), the start times out and the run captures the screen and asks instead of typing into it.",
+      "files": [],
+      "expectations": [
+        "The worker is started with `--kind codex` and no Claude --model/--effort values reach it.",
+        "A start that times out or exits is reported with its orphan block ID, and nothing is typed into the codex block.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "negative-trigger",
+      "prompt": "Spin up two Herdr agents beside my pane and have them review the diff.",
+      "expected_output": "Should NOT trigger rex-agent: the request names Herdr, which herdr-agent owns.",
+      "files": [],
+      "expectations": [
+        "rex-agent is not applied: no rex command or rex-agent script runs, and the request is routed to herdr-agent."
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "negative-trigger",
+      "prompt": "In Rex, open a new tab with git diff so I can look at my changes.",
+      "expected_output": "Should NOT trigger rex-agent: a one-off Rex tab is plain Rex usage (rex window new ... -- git --no-pager diff, or Rex's own rex skill), not fleet work.",
+      "files": [],
+      "expectations": [
+        "rex-agent's fleet workflow is not applied: no launch_profile.py, agent.py, or grid.py runs."
+      ]
+    },
+    {
+      "id": 14,
+      "kind": "edge",
+      "prompt": "The 'tests' Rex agent looks stuck — just type 'y' and press Enter in its pane so it continues.",
+      "expected_output": "Inspects first with agent.py get tests. If it is blocked on a permission, trust, or auth dialog, refuses to answer the dialog for the user: focuses the block with rex focus and asks the user to answer it. If it is unverified (no program status), captures the screen and reports instead of typing. Never sends 'y' into a dialog on the user's behalf.",
+      "files": [],
+      "expectations": [
+        "The agent checks the worker's status (agent.py get or fleet) before any key is sent.",
+        "No keystroke is sent to answer a permission, trust, or auth dialog; the user is asked to answer it.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 15,
+      "kind": "edge",
+      "prompt": "Start a Rex fleet with a reviewer agent for this repo.",
+      "expected_output": "When run outside a Rex terminal (REX_SESSION and REX_BLOCK unset) or with the Rex server unreachable, agent.py check fails and the run stops BLOCKED before any split: it does not pass --autostart, does not pick whatever session the app is showing, and tells the user to open the Rex app or run inside a Rex terminal.",
+      "files": [],
+      "expectations": [
+        "When agent.py check fails, no split, window, or session is created and no server is started.",
+        "The final report starts with `Result: BLOCKED` and names the fix."
+      ]
+    }
+  ]
+}

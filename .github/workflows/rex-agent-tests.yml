@@ -1,0 +1,47 @@
+name: rex-agent tests
+
+on:
+  pull_request:
+    paths:
+      - "skills/rex-agent/scripts/**"
+      - "skills/rex-agent/tests/**"
+      - "skills/rex-agent/SKILL.md"
+      - "skills/rex-agent/references/**"
+      - ".github/workflows/rex-agent-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skills/rex-agent/scripts/**"
+      - "skills/rex-agent/tests/**"
+      - "skills/rex-agent/SKILL.md"
+      - "skills/rex-agent/references/**"
+      - ".github/workflows/rex-agent-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Byte-compile Python scripts
+        run: |
+          python3 -m py_compile \
+            skills/rex-agent/scripts/agent.py \
+            skills/rex-agent/scripts/grid.py \
+            skills/rex-agent/scripts/launch_profile.py \
+            skills/rex-agent/scripts/rexlib.py \
+            skills/rex-agent/tests/fake_rex.py
+
+      - name: Run unit tests (fake rex CLI, no Rex app needed)
+        run: |
+          cd skills/rex-agent
+          python3 -m unittest discover -s tests -p 'test_*.py' -v

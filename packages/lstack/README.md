@@ -32,8 +32,8 @@ claude --plugin-dir /absolute/path/to/checkout/skills
 
 The path is the checkout's `skills/` folder, not the repository root and not
 `skills/.claude-plugin/`. Only native metadata lives in that directory. The
-manifest's `./` entry discovers the 41 immediate members, and two further
-entries add **only** the nested diagram children. Together they expose 43
+manifest's `./` entry discovers the 42 immediate members, and two further
+entries add **only** the nested diagram children. Together they expose 44
 skills once, without flattening, copying or moving source files. Skill-local
 `agents/` files stay resources, not native agents. The repository-root
 `.claude-plugin/marketplace.json` lists the plugin with source `./skills`.
@@ -62,7 +62,7 @@ data-handling/legal disclosures are owner responsibilities. This implementation
 does not submit, publish, or claim acceptance/approval.
 
 Most portal checks read only the plugin folder, which is why it is `skills/` and
-not the repository root: the folder holds the 43 members, `skills/README.md`
+not the repository root: the folder holds the 44 members, `skills/README.md`
 (the listing page and per-skill data-handling disclosure) and the native
 manifest, and stays under the portal's 512-file limit, with no symlinks, no
 non-image binaries and no file over 256 KiB.
@@ -82,8 +82,8 @@ no invented contact, retention or privacy guarantees.
 
 ## Contents and scope
 
-[manifest.json](manifest.json) explicitly lists all **43** current tracked skill
-definitions: 41 top-level skills plus `drawio-generator` and
+[manifest.json](manifest.json) explicitly lists all **44** current tracked skill
+definitions: 42 top-level skills plus `drawio-generator` and
 `excalidraw-generator`, the two children of `diagram-generator`. Native Claude
 loading uses the unchanged nested source layout. In optional ZIP exports every
 member becomes a separately discoverable `skills/<name>/SKILL.md` directory;
@@ -165,7 +165,7 @@ lstack-0.6.0/
     diagram-generator/SKILL.md
     drawio-generator/SKILL.md
     excalidraw-generator/SKILL.md
-    ... (43 independent member directories)
+    ... (44 independent member directories)
 ```
 
 Read a member's `SKILL.md` and prerequisites before using it. Supply that file
@@ -215,7 +215,7 @@ lstack-claude-0.6.0/
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md       # all 43 members, including flattened children
+    skills/<member>/SKILL.md       # all 44 members, including flattened children
 ```
 
 Only metadata goes inside `.claude-plugin/`; `skills/` is at the **plugin** root.
@@ -343,7 +343,7 @@ lstack-codex-0.6.0/
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md        # 43 independent members
+    skills/<member>/SKILL.md        # 44 independent members
 ```
 
 The marketplace entry uses `source: {"source": "local", "path": "./plugins/lstack"}`,
@@ -402,7 +402,7 @@ and an empty working directory, with file-only credential storage and no copied
 credentials. Marketplace registration/listing, local installation and skill
 metadata discovery are checked without model execution. This proves native
 loading, not successful execution of every workflow. Desktop installation/UI,
-authenticated model sessions and all 43 workflows are not exercised. The
+authenticated model sessions and all 44 workflows are not exercised. The
 current official overview supports CLI `/plugins` and Codex in the ChatGPT
 desktop app, but **not the IDE extension**. This local shell-oriented artifact
 is not a public-directory submission or a promise of web/mobile/cloud support.
@@ -453,7 +453,7 @@ artifact is emitted or silently substituted.
   the original repository, not the extracted layout. Follow the manifest's
   source-to-name mapping; no member instructions are rewritten for this bundle.
 - Member-root tests/evals stay in the source repository. Packaging checks prove
-  artifact structure/parity/safety, not all 43 workflows' runtime behavior,
+  artifact structure/parity/safety, not all 44 workflows' runtime behavior,
   host compatibility, or that a human understood every report.
 
 ## Maintain and validate

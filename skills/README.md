@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 43 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 44 first-party Agent Skills for everyday
 engineering and product work: code review, test generation, documentation,
 diagrams, release shipping, repository cleanup, SEO and App Store audits,
 product planning, and multi-agent orchestration. Each skill is a plain-text
@@ -35,13 +35,13 @@ point. To update, run `claude plugin marketplace update lstack`, then
   pushes the site to the target repo's default branch and sets its Pages source
   without a further prompt, but asks before creating a repo or making one public. Other skills that
   push, delete branches or open PRs ask first.
-- **Agent-fleet skills pass on autonomy.** `herdr-agent` starts worker agents
-  with the same permission-bypass flags as the agent that launched them
-  (`--dangerously-skip-permissions`, `bypassPermissions`, Codex bypass, pi
-  `--approve`). It prints a warning, and `--without bypass` turns this off.
-  `issue-work-loop` drops those flags, then switches Claude workers to
-  auto-accept edits and OpenCode workers to the full-permission Build agent.
-  Neither skill edits your Claude settings files.
+- **Agent-fleet skills pass on autonomy.** `herdr-agent` and `rex-agent` start
+  worker agents with the same permission-bypass flags as the agent that
+  launched them (`--dangerously-skip-permissions`, `bypassPermissions`, Codex
+  bypass, pi `--approve`). They print a warning, and `--without bypass` turns
+  this off. `issue-work-loop` drops those flags, then switches Claude workers
+  to auto-accept edits and OpenCode workers to the full-permission Build agent.
+  None of these skills edits your Claude settings files.
 - **Some skills install software, but only after you approve each item.**
   `dev-machine-setup` can run remote installers (Homebrew, NodeSource, uv, Oh
   My Zsh, starship, Claude Code) and system package managers with `sudo`.
@@ -52,7 +52,7 @@ point. To update, run `claude plugin marketplace update lstack`, then
   services have their own terms; lstack makes no promise about how they handle
   data.
 - Some skills need external tools or other skills: authenticated `gh`, Herdr,
-  OpenCode, gstack `browse`, the idd skills and `asm`. The plugin bundles none
+  Rex, OpenCode, gstack `browse`, the idd skills and `asm`. The plugin bundles none
   of them. See each skill's `SKILL.md` for its prerequisites.
 
 ## What each skill runs, sends or fetches
@@ -94,6 +94,7 @@ working in. That is the only network access many skills make.
 | oss-ready | GitHub API via `gh repo view`; your git remote | the repository name (read-only) | creates a local branch; no commit or push | git, gh, python3 |
 | prd-generator | your ideas repo remote | `prd.md` and `README.md` commits | commit and push after asking; never force | git |
 | product-planner | your git remote; member skills reach their own destinations | none itself | none itself; `idea-validator` pushes without asking, the other members ask first | git, asm, planning skills |
+| rex-agent | local Rex server socket; workers contact their own model providers | task prompts typed to worker agents | starts workers with the launcher's permission-bypass flags by default (see above); types into worker blocks; closes blocks only after confirmation | rex, python3, claude, codex, pi, gemini |
 | search-optimizer | the target site's page, robots.txt, sitemap.xml and llms.txt; isitagentready.com only through `website-agent-readiness` after you approve; your git remote | the target URL | git fetch/pull; no push | curl, python3, git, asm, delegated audit skills |
 | security-setup | package registries for approved tool installs; Trivy vulnerability DB download; your git remote. Installed hooks then run offline | package names only | writes hook config, scripts and `SECURITY.md` after a dry run and approval; no push | git, pre-commit, gitleaks, trivy, semgrep, bandit, detect-secrets |
 | seo-ai-optimizer | web search for current guidance; your deployed site when needed; isitagentready.com only through `website-agent-readiness` after you approve; your git remote | generic search queries, the URL you supply | edits SEO files after plan approval and per-diff confirmation; no push | python3, git, asm |
