@@ -139,7 +139,7 @@ Verdict rules:
 Verdict rules:
 - **FAIL**: App sells non-consumables or subscriptions but no Restore Purchases is implemented (consumables-only apps need no restore)
 - **WARNING**: Product types are `unknown` and no Restore Purchases is implemented (ask the user to confirm the app sells only consumables; never PASS on missing data)
-- **FAIL** (3.1.1-iap): Digital goods bought through an in-app non-IAP checkout (Stripe, PayPal SDK), unless a 3.1.3 or 3.1.4 exception covers them (reader, multiplatform, enterprise, person-to-person, stand-alone companion, ad-campaign management, hardware-specific)
+- **FAIL** (3.1.1-iap): Digital goods bought through an in-app non-IAP checkout (Stripe, PayPal SDK), unless a 3.1.3 exception lets the app collect that payment outside IAP: real-time person-to-person services (3.1.3(d)), ad-campaign management (3.1.3(g)), or enterprise sales to organizations (3.1.3(c); consumer, single-user, or family sales still use IAP). Reader (3.1.3(a)), multiplatform (3.1.3(b)), stand-alone companion (3.1.3(f)), and hardware-specific (3.1.4) apps may unlock content bought elsewhere, but an in-app non-IAP checkout for digital goods still FAILs 3.1.1-iap
 - **FAIL** (2.3.2): Metadata features a paid item without saying it costs extra
 - **PASS**: IAP properly configured and disclosed
 - **N/A**: App has no IAP

@@ -157,6 +157,20 @@
         "Because 3.1.1-restore is a Top 20 trigger, the verdict is LIKELY REJECT",
         "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
       ]
+    },
+    {
+      "id": 12,
+      "kind": "edge",
+      "prompt": "My iOS magazine reader app lets people read issues they bought on our website. It also has a 'Subscribe now' screen inside the app that charges a monthly digital subscription through the Stripe SDK instead of in-app purchase. Since reader apps are exempt, is it fine to submit? The project is in ./MagReader.",
+      "expected_output": "The audit fails 3.1.1-iap for the in-app Stripe checkout, explains that the 3.1.3(a) reader exception only covers access to content bought elsewhere, rates the app LIKELY REJECT, and ends with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Flags 3.1.1-iap as a FAIL because the app sells a digital subscription through an in-app Stripe checkout",
+        "Does not treat the 3.1.3(a) reader-app exception as covering an in-app non-IAP checkout; says it only lets the app give access to content bought elsewhere",
+        "Recommends selling the subscription through in-app purchase or removing the in-app Stripe checkout",
+        "Because 3.1.1-iap is a Top 20 trigger, the verdict is LIKELY REJECT",
+        "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
+      ]
     }
   ]
 }
