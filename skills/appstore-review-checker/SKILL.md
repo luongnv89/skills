@@ -4,7 +4,7 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.4.0
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -43,7 +43,7 @@ Load only the reference you need for the current step — keep the working conte
 - `references/edge-cases.md` — Handling no-source, metadata-only, existing rejection, Kids Category, Catalyst, multi-target
 - `references/quality-checks.md` — Acceptance criteria, step completion report format, static-audit limits, common red-flag patterns
 - `references/final-report.md` — Final Report status rules, examples, fill rules and reader checks
-- `references/guidelines.md` — Full 150+ App Store guideline checklist plus Top 20 Rejection Triggers
+- `references/guidelines.md` — Full 150+ App Store guideline checklist, synced to Apple's October 16, 2026 revision, plus Top 20 Rejection Triggers
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -161,7 +161,7 @@ Status rules, a `PARTIAL` and a `BLOCKED` example, fill rules and reader checks:
 
 ## Edge Cases
 
-See `references/edge-cases.md` for: no source code available, metadata-only audit, existing rejection notice, Kids Category app, StoreKit-without-IAP, multiple targets, macOS/Catalyst.
+See `references/edge-cases.md` for: no source code available, metadata-only audit, existing rejection notice, Kids Category app, StoreKit-without-IAP, multiple targets, macOS/Catalyst, a request to hide a feature from App Review, unknown storefronts for external purchase links.
 
 ## Common Red Flags
 

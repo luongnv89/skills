@@ -21,6 +21,10 @@ Before checking guidelines, build a mental model of the app. Read these files (i
 - Background modes: audio, location, fetch, processing
 - Network: IPv4 hardcoding, API calls, data transmission
 - Third-party SDKs: analytics, ads, crash reporting (especially in Kids apps)
+- Third-party AI services: SDKs or API endpoints that receive user content
+- Remote config and feature flags that switch features on after release
+- Review prompts: the system API versus custom rating dialogs
+- External purchase links and how they are gated by storefront
 
 **Metadata (if available):**
 - App Store description, keywords, title, subtitle
@@ -32,9 +36,9 @@ Classify the app into relevant categories to determine which guidelines apply:
 - General app / Game / Kids Category
 - Uses IAP / Subscriptions / External payments
 - Has user accounts / UGC / Social features
-- Medical / Health / Finance / Gambling / Cannabis (regulated)
+- Medical / Health / Finance / Gambling / Cannabis / Crypto / VPN / MDM (regulated)
 - Uses extensions / widgets / keyboard / Safari extension
-- Has AR / streaming / mini-apps / chatbot features
+- Has AR / streaming / mini-apps / chatbot / AI content-generation features
 
 ## Phase 2: Run the Audit
 

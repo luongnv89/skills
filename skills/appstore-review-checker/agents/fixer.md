@@ -66,7 +66,7 @@ Not all FAIL verdicts are code-fixable. Categorize:
 
 ### Fix Category 1: Privacy Descriptions
 
-**Guideline:** 1.5-a, 1.6, or specific permission violations
+**Guideline:** 5.1.1-ii (purpose strings), or the specific permission violation
 
 **What to check:** Is the permission used in code (from app-profile.json) but the description is missing from Info.plist?
 
@@ -166,7 +166,7 @@ func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SK
 
 ### Fix Category 3: Account Deletion UI
 
-**Guideline:** 5.1.2 — Account deletion must be accessible to users
+**Guideline:** 5.1.1-v-delete — Account deletion must be accessible to users
 
 **Code fix pattern:**
 

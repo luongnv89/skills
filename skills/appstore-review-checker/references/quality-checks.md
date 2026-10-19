@@ -69,11 +69,13 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - `NSUserTrackingUsageDescription` missing with tracking SDKs
 - No privacy policy URL in project or metadata
 - Account creation exists but no account deletion flow
+- User data sent to a third-party AI API with no disclosure and opt-in (5.1.2-i-ai)
 
 ### IAP Red Flags
 - `StoreKit` imported but no restore purchases mechanism
 - Subscription without clear terms display before purchase
-- Digital goods sold without Apple IAP (external payment links)
+- Digital goods bought through an in-app non-IAP checkout (Stripe, PayPal)
+- External purchase links shown outside the US storefront without an entitlement (3.1.1a)
 - Loot boxes or gacha mechanics without probability disclosure
 
 ### Metadata Red Flags
@@ -87,5 +89,7 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 ### Design Red Flags
 - `UIWebView` usage (deprecated, should be `WKWebView`)
 - App is essentially a web wrapper with no native functionality
-- Sign in with Apple not implemented alongside third-party login (Facebook, Google, etc.)
+- Third-party login (Facebook, Google, etc.) with no equivalent privacy-focused option such as Sign in with Apple (4.8)
 - Multiple targets producing nearly identical apps (spam/copycat risk)
+- Remote feature flags gating features absent from the review notes (2.5.19)
+- Custom rating dialog instead of the system review prompt (5.6.1)

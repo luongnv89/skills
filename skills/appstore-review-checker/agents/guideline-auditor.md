@@ -24,7 +24,7 @@ Load the app-profile.json and understand:
 4. **Payments**: Is there IAP? External payment? Subscriptions?
 5. **User-Generated Content**: Does users post/comment/share?
 6. **Third-party SDKs**: Which analytics, ad networks, crash reporting?
-7. **Regulatory Status**: Is it in a regulated category (health, finance, gambling)?
+7. **Regulatory Status**: Is it in a regulated category (health, finance, gambling, crypto, VPN, MDM)?
 
 These characteristics will determine which guidelines are applicable (N/A) and which require deep checking.
 
@@ -58,13 +58,13 @@ For applicable guidelines, examine the profile facts:
 
 **Example: Guideline 2.3.2 "IAP disclosed in description, screenshots, previews"**
 - Check: `in_app_purchase.implemented == true`?
-- If yes: Check if metadata.description_text mentions "in-app purchase" or "subscription"
-- Verdict: PASS if mentioned, FAIL if IAP exists but not disclosed
+- If yes: Check whether the description, screenshots, or previews feature an item, level, or subscription that costs extra without saying so
+- Verdict: FAIL if a featured paid item is not marked as an extra purchase, PASS if every featured paid item is marked, WARNING if metadata is unavailable
 
 **Example: Guideline 1.3-b "No third-party analytics in Kids Category"**
 - Check: `app_classification.is_kids_category == true`?
 - If yes: Check `third_party_sdks.analytics` array
-- Verdict: FAIL if any analytics SDKs present, PASS if none
+- Verdict: PASS if none; WARNING if an SDK may fit 1.3's limited exception (no IDFA and no identifiable data about children, their location, or devices); FAIL if an SDK collects either
 
 ### Step 2c: Construct the Verdict Object
 
@@ -111,7 +111,7 @@ For each guideline, create a verdict with this structure:
 
 ### Step 2d: Special Handling for Common Guideline Groups
 
-#### Privacy Permissions (Section 1.6, widespread)
+#### Privacy Permissions (Guidelines 5.1.1-ii, 5.1.1-iii, widespread)
 
 **For each permission declared in the profile:**
 
@@ -121,7 +121,8 @@ Check:
 3. Is there a matching NSUsageDescription key in Info.plist (listed in findings)?
 
 Verdict rules:
-- **FAIL**: Permission declared but no usage found, AND no description (wasted declaration) OR permission used but not declared
+- **FAIL**: Permission used in code but its purpose string is missing from Info.plist
+- **WARNING**: Permission declared but no usage found (an unused declaration requests nothing; confirm and remove it)
 - **PASS**: Permission declared with matching usage + description found
 - **WARNING**: Permission declared with usage but description not verifiable from profile
 
@@ -133,31 +134,38 @@ Verdict rules:
 3. If subscriptions: Is Restore Purchases implemented? (`in_app_purchase.restore_purchases_implemented`)
 4. Are IAP products disclosed in metadata? (description mentions purchases)
 5. Is external payment used for digital goods? (`in_app_purchase.external_payment_links_found`)
+6. Where do purchase calls to action point, and in which storefronts? (`in_app_purchase.external_purchase_ctas`, `in_app_purchase.storefronts`)
 
 Verdict rules:
-- **FAIL**: App has IAP but no Restore Purchases implemented
-- **FAIL**: Digital goods sold via external payment (Stripe, PayPal) instead of IAP
-- **FAIL**: IAP implemented but not disclosed in description
+- **FAIL**: App sells non-consumables or subscriptions but no Restore Purchases is implemented (consumables-only apps need no restore)
+- **FAIL** (3.1.1-iap): Digital goods bought through an in-app non-IAP checkout (Stripe, PayPal SDK), unless a 3.1.3 or 3.1.4 exception covers them (reader, multiplatform, enterprise, person-to-person, stand-alone companion, ad-campaign management, hardware-specific)
+- **FAIL** (2.3.2): Metadata features a paid item without saying it costs extra
 - **PASS**: IAP properly configured and disclosed
 - **N/A**: App has no IAP
 
-#### User Accounts & Deletion (Guidelines 5.1.x, widespread)
+External purchase links (3.1.1a, 3.1.1-nft, 3.1.3) — a button, link, or call to action that sends users to buy outside the app:
+- **PASS**: The app ships only on the US storefront, or every call to action is gated to the US storefront, or an External Purchase Link Entitlement is recorded for every non-US storefront and platform that shows the link (the 3.1.3(a) account-link entitlement covers only reader-app account links)
+- **FAIL**: An ungated call to action ships in a storefront outside the US with no purchase-link entitlement
+- **WARNING**: `storefronts` is `unknown`, or an entitlement exists but its storefront coverage isn't recorded; name the storefront check as the fix
+- Apply the same rule to purchase links in metadata
+
+#### User Accounts & Deletion (Guideline 5.1.1-v-delete)
 
 **Check:**
-1. Does app have user accounts? (`account_system.has_login`)
+1. Does the app support account creation, including sign-up through a third-party login? (`account_system.account_creation_supported`)
 2. If yes: Is account deletion implemented? (`account_system.account_deletion_implemented`)
 3. Is account deletion UI visible/accessible? (`account_system.account_deletion_visible`)
 
 Verdict rules:
-- **FAIL**: User accounts exist but no account deletion mechanism found
+- **FAIL**: Account creation is supported but no account deletion mechanism found
 - **FAIL**: Account deletion exists but is hidden (not accessible from settings/profile UI)
 - **PASS**: User accounts with visible, accessible account deletion
-- **N/A**: App has no user accounts
+- **N/A**: The app doesn't let users create accounts (for example, sign-in only with accounts created elsewhere)
 
 #### User-Generated Content (Guidelines 1.2.x)
 
 **Check:**
-1. Does app accept UGC? (`user_generated_content.accepts_ugc`)
+1. Does app accept UGC? (`user_generated_content.accepts_ugc`). AI generation from user prompts (`ai_generated_content`) and random or anonymous chat (`random_or_anonymous_chat`) count as UGC.
 2. If yes, check all of:
    - Moderation system? (`user_generated_content.moderation_system`)
    - Reporting mechanism? (`user_generated_content.reporting_system`)
@@ -165,10 +173,42 @@ Verdict rules:
    - Contact info visible? (in metadata or findings)
 
 Verdict rules:
-- **FAIL**: UGC allowed but no moderation, reporting, or blocking found
-- **WARNING**: UGC allowed with some but not all moderation features found
-- **PASS**: UGC with complete moderation, reporting, blocking systems
+- **FAIL**: UGC allowed and any of filtering, reporting, blocking, or published contact info is confirmed missing
+- **WARNING**: One or more of the four can't be confirmed from the profile
+- **PASS**: All four present: filtering, reporting, blocking, and published contact info
 - **N/A**: App does not allow UGC
+- **1.2-ncii**: If the app generates or edits images of people, filtering and takedown must cover nonconsensual intimate imagery; WARNING when the profile can't show it
+- **1.2-prohibited**: FAIL when the core feature is random or anonymous chat with strangers, hot-or-not voting, or porn-centric content
+
+#### Login Services (Guideline 4.8)
+
+Applies when `account_system.third_party_login_scope` is `primary_account`.
+
+Verdict rules:
+- **PASS**: `sign_in_with_apple` is true, or an exemption applies: login requires an existing education or enterprise account, uses a government or industry-backed citizen ID, or is an alternative marketplace's own login
+- **WARNING**: The only other options are email/password or another provider whose privacy properties (name and email only, private email, no ad tracking) the profile can't confirm
+- **FAIL**: Third-party logins only, with no equivalent option and no exemption
+- **N/A**: No third-party login (the app uses only its own account system), or `third_party_login_scope` is `service_client`
+
+Never report Sign in with Apple itself as mandatory; it is one option that meets the rule.
+
+#### Third-Party AI (Guideline 5.1.2-i-ai)
+
+If `third_party_ai.providers` is non-empty and user data is sent:
+- **PASS**: `disclosure_and_opt_in` cites a screen that discloses the data goes to a third-party AI service and asks for explicit permission before the first request
+- **FAIL**: Personal data is sent and either the disclosure or the explicit permission is confirmed missing
+- **WARNING**: A disclosure exists but its timing or wording can't be confirmed
+- **N/A**: No third-party AI, or only non-personal data is sent
+
+#### Hidden Features (Guideline 2.5.19)
+
+For each `feature_flags` entry: **WARNING** when the gated feature is user-facing, unless the review notes say it is enabled and reachable for review (features must be accessible for review under 2.3.1-a); **FAIL** when the evidence shows the flag hides functionality from App Review, such as a feature or business model meant to switch on only after approval.
+
+#### Review Prompts (Guideline 5.6.1)
+
+- **PASS**: Only the system API (`review_prompt.system_api`)
+- **FAIL**: A custom rating dialog (`review_prompt.custom_prompt`); a user-tapped "Write a review" link to the App Store page is fine
+- **N/A**: The app never asks for ratings
 
 #### Kids Category Restrictions (Guidelines 1.3.x)
 
@@ -181,9 +221,9 @@ If `app_classification.is_kids_category == true`:
 4. No external links in app? (profile documents no web view loads to external URLs)
 
 Verdict rules:
-- **FAIL**: Any third-party analytics or ads found
+- **FAIL**: Third-party analytics or ads that collect the IDFA or identifiable data about children; WARNING for ones that may fit 1.3's limited exceptions (analytics without identifiers, contextual ads with human-reviewed creatives)
 - **FAIL**: IDFA used or ATT dialog requested
-- **FAIL**: External links found in code
+- **FAIL**: External links or purchase prompts outside a parental gate
 - **PASS**: None of the above found
 - **N/A**: App is not in Kids Category
 
@@ -193,13 +233,13 @@ If app claims to be medical/health:
 
 **Check:**
 1. Are accuracy claims made in description or code?
-2. Is there evidence of validation/approval in the profile?
+2. Is the data and methodology behind those claims disclosed?
 3. Are disclaimers present in UI or description?
 
 Verdict rules:
-- **FAIL**: Medical claims without evidence of approval
-- **WARNING**: Medical features without clear disclaimers
-- **PASS**: Medical claims with supporting documentation
+- **FAIL**: Accuracy claims with no disclosed data or methodology, or claims to measure x-rays, blood pressure, temperature, glucose, or blood oxygen with device sensors alone
+- **WARNING**: No reminder to consult a doctor, or validation the profile can't confirm
+- **PASS**: Accuracy claims backed by disclosed data and methodology (regulatory approval is required only for dosage calculators, 1.4.2)
 - **N/A**: Not a medical app
 
 ### Step 2e: Highest-Priority Guidelines to Check First
@@ -208,11 +248,11 @@ Apply guidelines in this priority order to catch the most common rejections earl
 
 1. **2.1-a** — App must be final version, complete, tested
 2. **2.3.2** — IAP disclosed in description
-3. **5.1.1** — Privacy policy required
-4. **5.1.2** — Account deletion if user accounts exist
+3. **5.1.1-i** — Privacy policy required
+4. **5.1.1-v-delete** — Account deletion if the app supports account creation
 5. **1.5-a** — Support contact required
 6. **1.3-b** — No third-party analytics in Kids apps
-7. **3.1.1** — IAP restore button required
+7. **3.1.1-restore** — Restore for non-consumables and subscriptions
 8. **2.3.3** — Screenshots show real app UI
 9. **1.2** — UGC moderation if UGC present
 10. **1.6** — Data security (HTTPS, encryption)

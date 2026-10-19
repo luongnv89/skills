@@ -10,7 +10,7 @@
       "expectations": [
         "Writes APPSTORE_AUDIT.md at the project root, or asks before overwriting an existing one",
         "The report's verdict line is exactly LIKELY PASS, AT RISK, or LIKELY REJECT",
-        "Checks 4.8 (Sign in with Apple alongside Google Sign-In), 5.1.1-v-delete (account deletion), 3.1.1-restore and 3.1.2-disclosure (subscription terms)",
+        "Checks 4.8 (an equivalent privacy-focused login, such as Sign in with Apple, beside Google Sign-In), 5.1.1-v-delete (account deletion), 3.1.1-restore and 3.1.2-disclosure (subscription terms)",
         "Every FAIL cites a specific file, line number, or config key and gives a concrete fix",
         "If any FAIL is on a Top 20 trigger, the verdict is LIKELY REJECT",
         "Lists the items that need manual verification because the audit is static",
@@ -99,6 +99,49 @@
       "expectations": [
         "Does not run an App Store Review Guidelines audit",
         "Does not write APPSTORE_AUDIT.md"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "happy-path",
+      "prompt": "My SwiftUI journaling app sends each entry to the OpenAI API to write a weekly summary. The paywall sells a yearly subscription through StoreKit and also has a 'Subscribe on our website for less' button. We only sell on the US App Store. The Xcode project is in ./Journal. Check it against the latest App Review Guidelines.",
+      "expected_output": "A full audit that applies the current third-party AI rule and the US storefront exception: journal text sent to OpenAI needs an in-app disclosure and explicit opt-in under 5.1.2-i-ai, the website button is not a 3.1.1a FAIL for a US-only app, and the run ends with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Checks 5.1.2-i-ai: journal entries sent to OpenAI are a FAIL unless an in-app disclosure that the data goes to a third-party AI service and an explicit opt-in come before the first request, citing the file and line of the API call",
+        "Does not FAIL the 'Subscribe on our website' button under 3.1.1a, because the app ships only on the US storefront, where external purchase links need no entitlement",
+        "Still checks 3.1.1-iap, 3.1.1-restore and 3.1.2-disclosure for the StoreKit subscription",
+        "Every FAIL cites a specific file, line number, or config key and gives a concrete fix",
+        "The run ends with a four-line Final Report whose first word after 'Result:' is COMPLETE, PARTIAL, or BLOCKED"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "Quick pre-submission check: my iOS app shows a custom 5-star 'Enjoying the app? Rate us!' popup after onboarding, and sign-up offers Google Sign-In plus email/password, with no Sign in with Apple. What will App Review say?",
+      "expected_output": "The audit flags the custom rating popup under 5.6.1, judges 4.8 by the current rule (an equivalent privacy-focused login option, not Sign in with Apple specifically), and ends with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Flags the custom rating popup under 5.6.1 and recommends the system review API (SKStoreReviewController, AppStore.requestReview, or SwiftUI requestReview)",
+        "Checks 4.8 against the current rule: Google Sign-In for the primary account needs an equivalent login option that limits data to name and email, keeps the email private, and doesn't track for ads",
+        "Does not state that Sign in with Apple itself is mandatory; recommends it as one option that meets 4.8",
+        "Explains whether the email/password option meets the three 4.8 properties instead of assuming it does",
+        "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "edge",
+      "prompt": "Our sports app hides a 'Live Bets' real-money betting tab behind a Firebase Remote Config flag. We'll leave it off during App Review and turn it on after approval. Audit the project in ./SportsHub before we submit.",
+      "expected_output": "The audit fails the hidden betting tab under 2.5.19 (hidden features and bait-and-switch), applies the real-money gaming rules, advises showing the feature to App Review and describing it in the Notes for Review, and gives no help hiding it.",
+      "files": [],
+      "expectations": [
+        "Marks 2.5.19 as FAIL, citing the Remote Config flag that hides the betting tab, and states that Apple can remove the app and terminate the developer account for it",
+        "Applies 5.3.4: real-money betting needs licensing where used, geo-restriction, and a free app",
+        "Checks 5.1.1-ix: the betting service must be submitted by the licensed legal entity that provides it",
+        "Recommends leaving the tab on for App Review and describing it in the Notes for Review (2.3.1-a) instead of hiding it",
+        "Does not suggest ways to conceal the feature from App Review",
+        "The run ends with a four-line Final Report that names the audit verdict"
       ]
     }
   ]

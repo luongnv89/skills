@@ -58,6 +58,8 @@ Locate `*.entitlements` file (usually associated with main target):
   - com.apple.developer.payment
   - com.apple.developer.healthkit
   - com.apple.developer.devicecheck.app-attest
+  - com.apple.developer.storekit.external* (external purchase and external link entitlements)
+  - com.apple.developer.networking.networkextension, com.apple.developer.networking.vpn.api (VPN and network extensions)
   - Any capability that requires signing (HealthKit, HomeKit, Apple Pay, etc.)
 
 ### Step 1d: Read Dependency Files
@@ -149,8 +151,9 @@ Scan for StoreKit usage:
 - Record: Subscription pricing tiers if available in code
 
 **External Payment:**
-- Look for: Direct Stripe/Braintree/PayPal SDK usage for digital goods
-- Record: If found, flag as potential guideline violation (must use IAP)
+- Look for: Direct Stripe/Braintree/PayPal SDK checkout for digital goods inside the app
+- Look for: Buttons, links, or calls to action that send users to buy outside the app (web checkout URLs, "Subscribe on our website")
+- Record: Each call to action's file:line and destination, whether code gates it by storefront (`Storefront.current?.countryCode`, `SKPaymentQueue.default().storefront`), any `com.apple.developer.storekit.external*` entitlement, and the storefronts the app ships in when metadata or the user states them (otherwise `unknown`)
 
 ### Step 2c: Authentication and Account Management
 
@@ -164,9 +167,15 @@ Scan for:
 **Third-party Login:**
 - Imports: Facebook SDK, Google Sign-In, Auth0, Firebase Auth
 - Record: Which providers are used; are they required or optional
+- Record: Whether a third-party login sets up the app's primary account, or only signs in to that service to show its own content (a client app)
+
+**Other Login Options:**
+- Look for: email/password sign-up, passkeys (`ASAuthorizationPlatformPublicKeyCredentialProvider`), other providers
+- Record: Each option offered beside the third-party logins
 
 **Account Creation & Deletion:**
 - Search for: Account creation flows, user registration, profile deletion
+- Record: Whether users can create an account in the app, including a first sign-in through a third-party login that creates one (`account_creation_supported`)
 - Record: Whether account deletion mechanism is visible/accessible
 - Look for: Account deletion endpoints, deletion confirmation flows
 
@@ -176,8 +185,9 @@ Scan for:
 
 **UGC Features:**
 - Look for: Text input, file upload, image/video posting, commenting, messaging
+- Look for: AI generation from user prompts or photos (image generation, editing photos of people, chatbots) and random or anonymous chat with strangers
 - Classes: `UITextView`, `UIImagePickerController`, API upload calls
-- Record: What types of user content the app accepts
+- Record: What types of user content the app accepts, including AI-generated content and random or anonymous chat
 
 **Moderation System:**
 - Look for: Content filtering, abuse reporting UI, block/report functions
@@ -264,6 +274,14 @@ From Podfile/Package.swift and code imports, catalog all third-party SDKs:
 - Stripe, PayPal, Square, Braintree, etc. (for non-IAP payments)
 - Record: Which payment methods are supported
 
+**AI Services:**
+- SDKs or endpoints for OpenAI, Anthropic, Google Gemini or Vertex AI, and other hosted models (hosts such as `api.openai.com`, `api.anthropic.com`, `generativelanguage.googleapis.com`)
+- Record: Provider, file:line, what user data is sent, and the file:line of any disclosure and opt-in shown before the first request
+
+**Remote Config and Feature Flags:**
+- Firebase Remote Config, LaunchDarkly, Statsig, Optimizely, ConfigCat, or a homegrown flag endpoint
+- Record: Each flag that turns a user-facing feature on or off, with file:line and the feature it gates
+
 **Other Popular SDKs:**
 - Video streaming (YouTube, Vimeo, Twitch), mapping (Google Maps, Mapbox), chat/messaging libraries, etc.
 
@@ -284,6 +302,12 @@ Scan for:
 - Import: `import Security` or `#import <Security/Security.h>`
 - Classes: `SecItem`, keychain queries
 - Record: Whether sensitive data is stored securely
+
+### Step 2j: Review Prompts
+
+- Look for: `SKStoreReviewController`, `AppStore.requestReview`, SwiftUI `requestReview`
+- Look for: Custom rating dialogs ("Rate us", star pickers, "Enjoying the app?" alerts)
+- Record: file:line for each
 
 ## Phase 3: Build the app-profile.json
 
@@ -313,7 +337,7 @@ Create a JSON file with this structure:
     "has_social_features": boolean,
     "is_kids_category": boolean,
     "is_medical_app": boolean,
-    "is_regulated_category": "finance|gambling|health|cannabis|dating|none"
+    "is_regulated_category": "finance|gambling|health|cannabis|air_travel|crypto|vpn|mdm|none"
   },
 
   "permissions_declared": {
@@ -410,13 +434,24 @@ Create a JSON file with this structure:
     "storekit_version": "1|2|both|none",
     "restore_purchases_implemented": boolean,
     "subscription_groups_found": ["string"],
-    "external_payment_links_found": boolean
+    "external_payment_links_found": boolean,
+    "external_purchase_ctas": [
+      {
+        "location": "string — file:line",
+        "destination": "string — URL or screen",
+        "gating": "us_storefront_check|entitlement|none"
+      }
+    ],
+    "storefronts": "us_only|includes_non_us|unknown"
   },
 
   "account_system": {
     "has_login": boolean,
+    "account_creation_supported": boolean,
     "sign_in_with_apple": boolean,
     "third_party_login": ["string"],
+    "third_party_login_scope": "primary_account|service_client|none",
+    "other_login_options": ["string — email/password, passkey, other providers"],
     "account_deletion_implemented": boolean,
     "account_deletion_visible": boolean,
     "demo_mode_available": boolean
@@ -425,9 +460,24 @@ Create a JSON file with this structure:
   "user_generated_content": {
     "accepts_ugc": boolean,
     "ugc_types": ["string — text, images, videos, files, etc."],
+    "ai_generated_content": boolean,
+    "random_or_anonymous_chat": boolean,
     "moderation_system": boolean,
     "reporting_system": boolean,
     "blocking_system": boolean
+  },
+
+  "third_party_ai": {
+    "providers": ["string — SDK or endpoint host, with file:line"],
+    "user_data_sent": "string — e.g. journal text, photos of people",
+    "disclosure_and_opt_in": "string — file:line shown before the first request, or null"
+  },
+
+  "feature_flags": ["string — flag name, file:line, and the feature it gates"],
+
+  "review_prompt": {
+    "system_api": "string — file:line, or null",
+    "custom_prompt": "string — file:line, or null"
   },
 
   "push_notifications": {
@@ -499,6 +549,8 @@ As you build the profile, if you find anything unexpected or suspicious, add not
 - "External payment SDK (Stripe) found but no IAP implementation"
 - "Third-party analytics SDK imported but ATT not requested"
 - "Account deletion UI not found in code, but app has user accounts"
+- "User journal text sent to api.openai.com in SummaryService.swift:31; no disclosure or opt-in screen found"
+- "Remote flag `enable_live_bets` in FeatureFlags.swift:12 gates a betting tab the description doesn't mention"
 
 These will be important for the Guideline Auditor to investigate.
 
