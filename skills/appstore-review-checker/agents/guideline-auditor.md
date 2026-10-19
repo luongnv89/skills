@@ -131,13 +131,14 @@ Verdict rules:
 **Check:**
 1. Is IAP implemented? (`in_app_purchase.implemented`)
 2. If yes, is StoreKit properly configured? (version 1 or 2)
-3. If subscriptions: Is Restore Purchases implemented? (`in_app_purchase.restore_purchases_implemented`)
+3. If non-consumables or subscriptions (`in_app_purchase.product_types`): Is Restore Purchases implemented? (`in_app_purchase.restore_purchases_implemented`). When `product_types` is `unknown`, do not assume consumables-only: check restore anyway
 4. Are IAP products disclosed in metadata? (description mentions purchases)
 5. Is external payment used for digital goods? (`in_app_purchase.external_payment_links_found`)
 6. Where do purchase calls to action point, and in which storefronts? (`in_app_purchase.external_purchase_ctas`, `in_app_purchase.storefronts`)
 
 Verdict rules:
 - **FAIL**: App sells non-consumables or subscriptions but no Restore Purchases is implemented (consumables-only apps need no restore)
+- **WARNING**: Product types are `unknown` and no Restore Purchases is implemented (ask the user to confirm the app sells only consumables; never PASS on missing data)
 - **FAIL** (3.1.1-iap): Digital goods bought through an in-app non-IAP checkout (Stripe, PayPal SDK), unless a 3.1.3 or 3.1.4 exception covers them (reader, multiplatform, enterprise, person-to-person, stand-alone companion, ad-campaign management, hardware-specific)
 - **FAIL** (2.3.2): Metadata features a paid item without saying it costs extra
 - **PASS**: IAP properly configured and disclosed

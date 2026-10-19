@@ -117,7 +117,7 @@ If Info.plist is accessed via code:
 
 ### Fix Category 2: Restore Purchases (StoreKit)
 
-**Guideline:** 3.1.1 — Restore Purchases required if app has subscriptions or consumable IAPs
+**Guideline:** 3.1.1 — Restore Purchases required if the app sells non-consumables or subscriptions (consumables-only apps need none)
 
 **Code fix pattern:**
 

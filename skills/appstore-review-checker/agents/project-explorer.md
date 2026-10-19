@@ -142,13 +142,14 @@ Scan for StoreKit usage:
 - Import: `import StoreKit` or `#import <StoreKit/StoreKit.h>`
 - Classes: `SKPaymentQueue`, `SKPaymentTransaction`, `SKProduct`, `SKProductsRequest`
 - Look for: `addTransactionObserver`, `addPayment`, `restoreCompletedTransactions`
-- Record: Whether restore is implemented (required if app has subscriptions)
+- Record: Whether restore is implemented (required if the app sells non-consumables or subscriptions; consumables-only apps need none)
 
 **StoreKit 2 (modern):**
 - Import: `import StoreKit` (with @available(iOS 15.0, *))
 - Classes: `AppStore`, `Transaction`, `Product`, `VerificationResult`
 - Look for: Subscription groups, transaction history, receipt validation
 - Record: Subscription pricing tiers if available in code
+- Record: Each product type sold (consumable, non-consumable, auto-renewable, non-renewing), from `Product.type` checks (`.consumable`, `.nonConsumable`, `.autoRenewable`, `.nonRenewable`), a `.storekit` configuration file, App Store Connect metadata, or the user; `unknown` when none of these say (StoreKit 1's `SKProduct` exposes no type)
 
 **External Payment:**
 - Look for: Direct Stripe/Braintree/PayPal SDK checkout for digital goods inside the app
@@ -432,6 +433,7 @@ Create a JSON file with this structure:
   "in_app_purchase": {
     "implemented": boolean,
     "storekit_version": "1|2|both|none",
+    "product_types": ["consumable|non_consumable|auto_renewable|non_renewing|unknown"],
     "restore_purchases_implemented": boolean,
     "subscription_groups_found": ["string"],
     "external_payment_links_found": boolean,

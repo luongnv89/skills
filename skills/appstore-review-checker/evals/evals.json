@@ -143,6 +143,20 @@
         "Does not suggest ways to conceal the feature from App Review",
         "The run ends with a four-line Final Report that names the audit verdict"
       ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "prompt": "My iOS photo editor has no subscription. It sells a one-time 'Pro unlock' in-app purchase through StoreKit 2, and there is no Restore Purchases button anywhere. The project is in ./PhotoPro. Is it ready to submit?",
+      "expected_output": "The audit treats the one-time Pro unlock as a non-consumable, fails 3.1.1-restore because no restore mechanism exists, rates the app LIKELY REJECT, and ends with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Identifies the one-time 'Pro unlock' as a non-consumable in-app purchase",
+        "Flags 3.1.1-restore as a FAIL because the app sells a non-consumable with no restore mechanism",
+        "Does not excuse the missing restore because the app has no subscription",
+        "Because 3.1.1-restore is a Top 20 trigger, the verdict is LIKELY REJECT",
+        "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
+      ]
     }
   ]
 }
