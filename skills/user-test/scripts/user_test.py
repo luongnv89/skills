@@ -1273,7 +1273,9 @@ main{max-width:1100px;margin:0 auto;padding:24px 16px 64px}h1{font-size:1.5rem;m
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:1}
 select,input,button{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
 button{cursor:pointer}details{border:1px solid var(--line);border-radius:8px;margin:6px 0;background:var(--card)}
-summary{cursor:pointer;padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}details[open] summary{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;list-style:none}details[open] summary{border-bottom:1px solid var(--line)}
+summary::-webkit-details-marker{display:none}summary::before{content:'▸';color:var(--muted)}details[open]>summary::before{content:'▾'}
+#list>details{scroll-margin-top:var(--filters-h,72px)}
 .body{padding:8px 16px}.body dt{font-weight:600;margin-top:6px}.body dd{margin:0 0 4px}
 .missing{color:var(--muted);font-style:italic}.thumbs{display:flex;flex-wrap:wrap;gap:8px}.thumbs img{max-width:260px;max-height:180px;border:1px solid var(--line);border-radius:4px}
 table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
@@ -1327,9 +1329,12 @@ function apply(){const q=k=>document.getElementById('f-'+k).value;const t=docume
 for(const[f,n]of nodes){const ok=['severity','category','status','kind','area'].every(k=>!q(k)||(k==='status'?(f.status||'open'):f[k])===q(k))&&(!t||(f.title+' '+f.where+' '+f.id).toLowerCase().includes(t));n.hidden=!ok;if(ok)shown++}
 document.getElementById('f-count').textContent='Showing '+shown+' of '+F.length+' findings'}
 document.querySelectorAll('.filters select,#f-text').forEach(e=>e.addEventListener('input',apply));
-document.getElementById('f-reset').addEventListener('click',()=>{document.querySelectorAll('.filters select').forEach(s=>s.value='');document.getElementById('f-text').value='';apply()});apply();
+function resetFilters(){document.querySelectorAll('.filters select').forEach(s=>s.value='');document.getElementById('f-text').value='';apply()}
+document.getElementById('f-reset').addEventListener('click',resetFilters);apply();
+function reveal(id){const t=document.getElementById(id);if(!t||t.tagName!=='DETAILS')return false;if(t.hidden)resetFilters();t.open=true;
+document.documentElement.style.setProperty('--filters-h',(document.querySelector('.filters').offsetHeight+8)+'px');t.scrollIntoView({block:'start'});return true}
 const ct=document.getElementById('coverage');ct.append(el('tr',{},...['Area','Journey','Status','Reason','Findings'].map(h=>el('th',{text:h}))));
-const crow=D.coverage.map(r=>{const links=el('td');(r.findings||[]).forEach((id,i)=>{if(i)links.append(document.createTextNode(', '));const a=el('a',{href:'#'+id,text:id});a.addEventListener('click',()=>{const t=document.getElementById(id);if(t)t.open=true});links.append(a)});
+const crow=D.coverage.map(r=>{const links=el('td');(r.findings||[]).forEach((id,i)=>{if(i)links.append(document.createTextNode(', '));const a=el('a',{href:'#'+id,text:id});a.addEventListener('click',e=>{if(reveal(id)){e.preventDefault();history.pushState(null,'','#'+id)}});links.append(a)});
 const tr=el('tr',{},el('td',{text:r.area}),el('td',{text:r.journey+(r.discovered?' (discovered)':'')}),el('td',{class:r.status,text:r.status}),el('td',{},r.reason?document.createTextNode(r.reason):el('span',{class:'missing',text:'—'})),links);ct.append(tr);return[r,tr]});
 document.getElementById('c-open').addEventListener('change',e=>{for(const[r,tr]of crow)tr.hidden=e.target.checked&&r.status==='pass'});
 const pt=document.getElementById('perf');if(!D.perf.length)document.getElementById('perf-section').hidden=true;else{pt.append(el('tr',{},...['Journey','Step','Metric','Value','Threshold','Build'].map(h=>el('th',{text:h}))));
@@ -1337,7 +1342,7 @@ for(const p of D.perf){const over=p.threshold!=null&&Number(p.value)>Number(p.th
 el('td',{class:over?'over':'',text:(p.value??'—')+' '+(p.unit||'')}),el('td',{},p.threshold==null?el('span',{class:'missing',text:'none'}):document.createTextNode(String(p.threshold))),el('td',{text:p.build||'—'})))}}
 const un=document.getElementById('uncertainty');D.uncertainty.forEach(x=>un.append(el('li',{text:x})));
 const de=document.getElementById('details');D.details.forEach(x=>de.append(el('li',{text:x})));
-if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t&&t.tagName==='DETAILS')t.open=true}
+if(location.hash)reveal(decodeURIComponent(location.hash.slice(1)));
 })();
 </script></body></html>
 """
