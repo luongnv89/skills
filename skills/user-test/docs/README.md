@@ -9,7 +9,7 @@
 
 > Launch an app, API or CLI, use every feature the way a real user would, log bugs, slowness and UX problems with evidence, fix the simple and medium ones with a verified rebuild, and get one report with a plan for the rest.
 
-Version: **1.0.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.0.1** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
