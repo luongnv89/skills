@@ -262,6 +262,17 @@ class FeatureAndCollectTests(Base):
         self.assertEqual(store["findings"][0]["status"], "fix-failed")
         self.assertTrue(store["findings"][0]["fix"]["restored"])
 
+    def test_collect_reports_bad_finding_ids_without_traceback(self):
+        (self.run_dir / "findings.json").write_text(json.dumps({"findings": [{"id": ["old"]}]}))
+        no_id = {k: v for k, v in finding().items() if k != "id"}
+        self.write_area(self.run_dir, [{"journey": "todos-add", "status": "fail", "findings": [["todos-1"]]},
+                                       {"journey": "todos-share", "status": "skipped", "reason": "x"}],
+                        [no_id, dict(no_id, title="Other"), finding(id=["todos-1"])])
+        code, _, err = ut("collect", "--run-dir", self.run_dir)
+        self.assertEqual(code, 1, err)
+        self.assertNotIn("Traceback", err)
+        self.assertEqual(err.count("id must be lowercase kebab-case"), 3)
+
     def test_performance_finding_needs_metric(self):
         self.write_area(self.run_dir, [{"journey": "todos-add", "status": "fail", "findings": ["todos-1"]},
                                        {"journey": "todos-share", "status": "skipped", "reason": "x"}],
@@ -306,6 +317,18 @@ class UpdateTests(Base):
                            "--json", json.dumps(finding(id="run-1", journey=None)))
         self.assertEqual(code, 0)
         self.assertTrue((run_dir / "areas" / "_run.json").exists())
+        self.assertNotIn("ready", json.loads((run_dir / "run.json").read_text()).get("app", {}),
+                         "a non-crash finding must not mark the app as not ready")
+
+    def test_add_finding_keeps_a_ready_app_ready(self):
+        run_dir = self.init()
+        (run_dir / "evidence" / "todos").mkdir(parents=True)
+        (run_dir / "evidence" / "todos" / "blank.png").write_bytes(b"x")
+        ut("update", "--run-dir", run_dir, "--json", '{"app": {"ready": true}}')
+        code, _, err = ut("update", "--run-dir", run_dir, "--add-finding",
+                          "--json", json.dumps(finding(id="run-1", journey=None, category="crash")))
+        self.assertEqual(code, 0, err)
+        self.assertIs(json.loads((run_dir / "run.json").read_text())["app"]["ready"], True)
 
 
 class BuildCheckTests(Base):
@@ -346,6 +369,30 @@ class CheckpointTests(Base):
         self.assertEqual(src.read_text(), "a = 1\nb = 2\n")
         self.assertFalse((self.root / "src" / "new.py").exists())
         self.assertEqual(data["deleted"], ["src/new.py"])
+
+    def test_diff_is_valid_without_trailing_newline(self):
+        has_git = shutil.which("git") is not None
+        if has_git:
+            subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        run_dir = self.init()
+        (self.root / "a.txt").write_text("a\nb")
+        (self.root / "b.txt").write_text("x\n--y\n")
+        ut("checkpoint", "save", "--run-dir", run_dir, "--fix", "todos-1", "a.txt", "b.txt")
+        (self.root / "a.txt").write_text("a\nB")
+        (self.root / "b.txt").write_text("x\n++y\n")
+        code, data, err = ut("checkpoint", "diff", "--run-dir", run_dir, "--fix", "todos-1")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(data["lines_changed"], 4)
+        self.assertEqual([(f["added"], f["removed"]) for f in data["files"]], [(1, 1), (1, 1)])
+        patch = (run_dir / data["diff"]).read_text()
+        self.assertTrue(patch.endswith("\n"))
+        self.assertEqual(patch.count("\\ No newline at end of file\n"), 2)
+        self.assertIn("\n+B\n\\ No newline at end of file\n--- a/b.txt\n", patch)
+        if has_git:
+            ut("checkpoint", "restore", "--run-dir", run_dir, "--fix", "todos-1")
+            proc = subprocess.run(["git", "apply", "--check", str(run_dir / data["diff"])], cwd=self.root,
+                                  capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
 
     def test_rejects_paths_outside_project_and_in_run_dir(self):
         run_dir = self.init()
@@ -457,8 +504,27 @@ class ReportTests(Base):
         code, data, _ = ut("report", "--run-dir", self.run_dir)
         self.assertIn("committed as: abc1234", data["decision"][0])
 
-    def test_blocked_when_app_never_started(self):
-        ut("update", "--run-dir", self.run_dir, "--json", '{"app": {"ready": false}}')
+    def report_with_tests(self, baseline_test, final_test):
+        self.collect([finding()], share_status="pass")
+        ut("update", "--run-dir", self.run_dir, "--finding", "todos-1", "--json",
+           '{"plan": {"approach": "a", "effort": "S", "risk": "low"}}')
+        ut("build-check", "--run-dir", self.run_dir, "--label", "baseline", "--build", "true", "--test", baseline_test)
+        ut("build-check", "--run-dir", self.run_dir, "--label", "final", "--build", "true", "--test", final_test)
+        code, data, err = ut("report", "--run-dir", self.run_dir)
+        self.assertEqual(code, 0, err)
+        return data
+
+    def test_failing_baseline_tests_do_not_downgrade(self):
+        data = self.report_with_tests("exit 1", "exit 1")
+        self.assertEqual(data["result"], "COMPLETE")
+        self.assertIn("Baseline tests were already failing", (self.run_dir / "report.md").read_text())
+
+    def test_new_test_failure_downgrades(self):
+        data = self.report_with_tests("true", "exit 1")
+        self.assertEqual(data["result"], "PARTIAL")
+        self.assertIn("the final test check did not exit 0", data["reasons"])
+
+    def test_blocked_when_cli_launch_fails(self):
         (self.run_dir / "features.json").unlink()
         (self.run_dir / "evidence" / "_run").mkdir(parents=True)
         (self.run_dir / "evidence" / "_run" / "app.log.txt").write_text("TypeError")
