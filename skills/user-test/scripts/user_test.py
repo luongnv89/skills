@@ -1332,7 +1332,7 @@ document.querySelectorAll('.filters select,#f-text').forEach(e=>e.addEventListen
 function resetFilters(){document.querySelectorAll('.filters select').forEach(s=>s.value='');document.getElementById('f-text').value='';apply()}
 document.getElementById('f-reset').addEventListener('click',resetFilters);apply();
 function reveal(id){const t=document.getElementById(id);if(!t||t.tagName!=='DETAILS')return false;if(t.hidden)resetFilters();t.open=true;
-document.documentElement.style.setProperty('--filters-h',(document.querySelector('.filters').offsetHeight+8)+'px');t.scrollIntoView({block:'start'});return true}
+document.documentElement.style.setProperty('--filters-h',(document.querySelector('.filters').offsetHeight+8)+'px');t.scrollIntoView({block:'start'});t.querySelector('summary').focus({preventScroll:true});return true}
 const ct=document.getElementById('coverage');ct.append(el('tr',{},...['Area','Journey','Status','Reason','Findings'].map(h=>el('th',{text:h}))));
 const crow=D.coverage.map(r=>{const links=el('td');(r.findings||[]).forEach((id,i)=>{if(i)links.append(document.createTextNode(', '));const a=el('a',{href:'#'+id,text:id});a.addEventListener('click',e=>{if(reveal(id)){e.preventDefault();history.pushState(null,'','#'+id)}});links.append(a)});
 const tr=el('tr',{},el('td',{text:r.area}),el('td',{text:r.journey+(r.discovered?' (discovered)':'')}),el('td',{class:r.status,text:r.status}),el('td',{},r.reason?document.createTextNode(r.reason):el('span',{class:'missing',text:'—'})),links);ct.append(tr);return[r,tr]});

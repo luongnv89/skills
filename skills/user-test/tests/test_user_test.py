@@ -409,6 +409,7 @@ class ReportTests(Base):
         self.assertIn("scroll-margin-top", html, "anchored findings must clear the sticky filter bar")
         self.assertIn("details[open]>summary::before", html, "collapsed cards need a disclosure marker")
         self.assertIn("if(t.hidden)resetFilters()", html, "links to filtered-out findings must reveal them")
+        self.assertIn("focus({preventScroll:true})", html, "revealed findings must take keyboard focus")
         markdown = (self.run_dir / "report.md").read_text()
         self.assertTrue(markdown.startswith("# User test report: Demo"))
         self.assertIn("**Result: PARTIAL**", markdown)
