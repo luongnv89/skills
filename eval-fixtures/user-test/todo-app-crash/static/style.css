@@ -1,0 +1,14 @@
+body { font-family: system-ui, sans-serif; margin: 0; background: #f4f5f7; color: #1d2330; }
+main { width: 600px; margin: 40px auto; background: #fff; padding: 24px; border-radius: 8px; }
+h1 { margin-top: 0; }
+.add-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.add-row input { flex: 1; padding: 8px; }
+#search { width: 100%; padding: 8px; box-sizing: border-box; margin-bottom: 12px; }
+.filters button.active { font-weight: bold; text-decoration: underline; }
+ul { list-style: none; padding: 0; }
+li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eee; }
+li span { flex: 1; }
+li.done span { text-decoration: line-through; color: #8a93a2; }
+li.empty { color: #8a93a2; }
+.remove { border: none; background: none; color: #c4320a; font-size: 12px; cursor: pointer; }
+footer { display: flex; gap: 8px; align-items: center; margin-top: 12px; color: #c9ced6; }

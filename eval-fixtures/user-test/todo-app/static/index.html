@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Todo</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <h1>Todos</h1>
+    <div class="add-row">
+      <input id="new-title" placeholder="What needs doing?" autocomplete="off">
+      <button id="add">Add</button>
+    </div>
+    <input id="search" type="search" placeholder="Search">
+    <nav class="filters">
+      <button data-filter="all" class="active">All</button>
+      <button data-filter="active">Active</button>
+      <button data-filter="done">Done</button>
+    </nav>
+    <ul id="list"></ul>
+    <footer>
+      <span id="counter"></span>
+      <button id="stats-toggle">Stats</button>
+      <button id="share">Email list to team</button>
+    </footer>
+    <section id="stats" hidden>
+      <h2>Stats</h2>
+      <dl id="stats-body"></dl>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

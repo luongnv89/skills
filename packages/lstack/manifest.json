@@ -4,7 +4,7 @@
   "version": "0.6.0",
   "description": "Platform-neutral distribution of the maintained first-party Agent Skills catalog.",
   "claude": {
-    "description": "44 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+    "description": "45 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
@@ -14,7 +14,7 @@
     "marketplace_name": "lstack"
   },
   "codex": {
-    "description": "44 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
+    "description": "45 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
@@ -70,6 +70,7 @@
     {"name": "tasks-generator", "source": "skills/tasks-generator"},
     {"name": "test-coverage", "source": "skills/test-coverage"},
     {"name": "tmux-agent-comms", "source": "skills/tmux-agent-comms"},
+    {"name": "user-test", "source": "skills/user-test"},
     {"name": "ux-ax-review", "source": "skills/ux-ax-review"},
     {"name": "viral-product-evaluator", "source": "skills/viral-product-evaluator"},
     {"name": "website-agent-readiness", "source": "skills/website-agent-readiness"}

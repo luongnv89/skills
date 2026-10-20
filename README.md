@@ -57,8 +57,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.6.0](packages/lstack/README.md) packages the canonical `skills/` tree as one
-Claude Code plugin: 42 top-level definitions plus the two nested diagram-generator
-children, **44** namespaced skills in total. `skills/` is the plugin folder; the root
+Claude Code plugin: 43 top-level definitions plus the two nested diagram-generator
+children, **45** namespaced skills in total. `skills/` is the plugin folder; the root
 marketplace points at it.
 
 ```bash
@@ -220,6 +220,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [**code-review**](skills/code-review/) | 2.2.2 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**codebase-modernizer**](skills/codebase-modernizer/) | 1.4.1 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.5.0 | low | Target untested branches and edge cases |
+| [**user-test**](skills/user-test/) | 1.0.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.6.0 | medium | Usability review using Krug's principles |
 | [**ux-ax-review**](skills/ux-ax-review/) | 1.2.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
@@ -239,7 +240,7 @@ the findings into a phased sprint plan with milestones. It is read-only: depende
 planned tasks with migration steps, never a bulk `npm update`. Reach for it when returning to a
 neglected project or untangling one that has drifted.
 
-Adjacent skills: **test-coverage** (generate tests for untested branches) · **dont-make-me-think** (usability/UX review).
+Adjacent skills: **test-coverage** (generate tests for untested branches) · **user-test** (run the app and test it as a user) · **dont-make-me-think** (usability/UX review).
 
 ### Shipping
 

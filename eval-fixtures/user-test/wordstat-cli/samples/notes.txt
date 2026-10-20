@@ -1,0 +1,6 @@
+Meeting notes  for the launch
+The launch is on Friday.  The team will  ship the beta first.
+
+Open questions:
+- who writes the launch post
+- the beta  list is not final

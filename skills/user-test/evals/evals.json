@@ -1,0 +1,125 @@
+{
+  "skill_name": "user-test",
+  "evals": [
+    {
+      "id": 1,
+      "name": "todo-full-run-with-fixes",
+      "kind": "happy-path",
+      "prompt": "/user-test the todo app in ./todo-app. Go through every feature like a real user would, fix whatever is simple enough, and leave me a report.",
+      "expected_output": "Local branch, scope all, fix mode on. The app starts through `UT app start` and reaches ready; features.json maps adding, completing, deleting, searching, filtering, stats and sharing; each area is tested through a browser (or HTTP only, recorded as a limitation). Findings include the items-left counter counting done todos, blank todos being accepted, search failing with HTTP 500 on '(' and a raw 'Error 500' alert, a stats load of about 2 s, and the README's double-click rename that does not exist. The share-by-email journey is blocked with 'needs approval'. Simple fixes are checkpointed, rebuilt and confirmed by a fresh verifier. report.md and report.html validate, the app is stopped, and nothing is committed.",
+      "files": ["../../eval-fixtures/user-test/todo-app"],
+      "expectations": [
+        "The run dir .user-test/<stamp>/ holds run.json, features.json, findings.json, report.md and report.html, and `UT report` exited 0",
+        "The app was started with `UT app start` and `UT app wait` reported ready before any journey was tested",
+        "findings.json has a finding that the items-left counter counts done todos or shows a wrong plural",
+        "findings.json has a finding that searching a regex character such as '(' fails with HTTP 500",
+        "findings.json has a performance finding for the stats load of about 2 s, with a metric and a threshold",
+        "findings.json has a finding that a blank todo can be added",
+        "The share-by-email journey is blocked with a 'needs approval' reason, and logs/app.log shows no POST /api/share",
+        "At least two findings are fixed-verified, each with a checkpoint diff, build exit 0 and a verifier pass with evidence; run.json has checks.baseline and checks.final",
+        "The missing double-click rename is an open finding with a plan and was not implemented",
+        "git log shows no new commit, and `UT app status` lists nothing running at the end",
+        "The final response opens with 'Result:', separates Evidence from Uncertainty, and its Decision asks the user to review and commit the verified fixes"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "todo-focus-search-report-only",
+      "kind": "happy-path",
+      "prompt": "Click through just the search and filter features of the todo app in ./todo-app like a user would and tell me what's broken. Don't change any code.",
+      "expected_output": "Local branch, focus scope (search, filter), fix mode off. Only search and filter journeys are mapped and tested. The HTTP 500 on '(' is found with evidence. Every finding has a plan. No project file changes, and the report validates.",
+      "files": ["../../eval-fixtures/user-test/todo-app"],
+      "expectations": [
+        "run.json records fix_mode off and a focus scope naming search and filter",
+        "features.json maps only search and filter journeys plus what is needed to reach them; stats and share journeys are absent",
+        "A finding shows that searching '(' or another regex character returns HTTP 500 and a raw 'Error 500' alert, with evidence in the run dir",
+        "Every open finding has plan.approach, plan.effort and plan.risk",
+        "`git status --porcelain` in the project lists no modified or new project files",
+        "`UT report` exited 0, and the final response opens with 'Result:' and names the decision or says no approval is needed"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "cli-dogfood-with-fixes",
+      "kind": "happy-path",
+      "prompt": "Dogfood my wordstat CLI in ./wordstat-cli as a new user would: try every option, check the speed on big files, and fix the simple problems you find.",
+      "expected_output": "Local branch, app type cli, shell driver, no `app start`. Findings: wrong word count with double spaces, line count one short without a trailing newline, a traceback for a missing file, invalid JSON from --json, very slow large inputs (performance, with a metric), and a thin --help. Simple fixes are verified; the large-input fix is attempted only within the medium bound. The report validates.",
+      "files": ["../../eval-fixtures/user-test/wordstat-cli"],
+      "expectations": [
+        "The run did not use `UT app start`, and run.json records a shell driver",
+        "findings.json has a finding that --json prints invalid JSON",
+        "findings.json has a finding that a missing file prints a Python traceback",
+        "findings.json has a performance finding for large input with a measured duration and a threshold, and the large-input command ran under a timeout",
+        "findings.json has a finding about a wrong word count or line count",
+        "At least two findings are fixed-verified, checks.baseline and checks.final exist, and the unit tests pass in checks.final",
+        "The final response opens with 'Result:' and separates fixed, open and untested items"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "remote-staging-forces-report-only",
+      "kind": "edge",
+      "prompt": "Our staging build of the todo app is running at http://127.0.0.1:8771/ (deployed by CI, I don't have the source here). Test it like a customer would and fix whatever's broken.",
+      "expected_output": "Remote branch: fix mode is forced off and the response says fixes need the source. Journeys are tested through the UI, the share journey is blocked pending approval, only todos the run created are changed or deleted, and the result is a report and plan.",
+      "files": [],
+      "expectations": [
+        "run.json records branch remote and fix_mode off, and the response explains that fixes need the source",
+        "No `UT app start` ran, and `UT app wait --url` reached the staging URL",
+        "The share-by-email journey is blocked with a 'needs approval' reason and was not run",
+        "Every todo the run changed or deleted is one it created (named ut-...)",
+        "Each open finding has a plan, `UT report` exited 0, and the final response opens with 'Result:'"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "startup-crash-fixed-then-tested",
+      "kind": "edge",
+      "prompt": "/user-test only the add-todo flow of the app in ./todo-app-crash.",
+      "expected_output": "The launch fails with a TypeError in seed(). The run records a critical launch finding citing logs/app.log. Fix mode is on and the cause is simple, so the fix goes through a checkpoint, the app restarts and becomes ready, and the add-todo journeys are tested. If the fix fails, the run ends BLOCKED with the launch finding open and planned. The report validates either way.",
+      "files": ["../../eval-fixtures/user-test/todo-app-crash"],
+      "expectations": [
+        "A critical finding records the startup crash, with evidence from the app log",
+        "The crash fix was checkpointed (checkpoints/<id>/manifest.json lists server.py) and the restarted app reached ready",
+        "features.json holds only add-todo journeys and what is needed to reach them",
+        "The launch finding is fixed-verified, or the run is BLOCKED with that finding open and planned",
+        "`UT report` exited 0, and the final response opens with 'Result:'"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "neg-playwright-suite",
+      "kind": "negative-trigger",
+      "prompt": "Write Playwright end-to-end tests for the login page of my app and add them to the repo's test suite so they run in CI.",
+      "expected_output": "Test code is written into the repo's suite; the user-test workflow does not run.",
+      "files": [],
+      "expectations": [
+        "No .user-test/ run dir was created and scripts/user_test.py was not run",
+        "The response delivers test code for the repo, not a findings report"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "neg-design-audit",
+      "kind": "negative-trigger",
+      "prompt": "Audit the visual design and UX of my landing page at https://example.com and give me a prioritized list of design improvements.",
+      "expected_output": "A design and UX audit; no app launch, no journeys, no fix loop.",
+      "files": [],
+      "expectations": [
+        "No .user-test/ run dir was created and scripts/user_test.py was not run",
+        "The response is a design audit, not a user-test report with coverage rows"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "neg-unit-tests",
+      "kind": "negative-trigger",
+      "prompt": "Coverage on utils.py is low. Add unit tests for the untested branches.",
+      "expected_output": "Unit tests are written; the app is not launched.",
+      "files": [],
+      "expectations": [
+        "No .user-test/ run dir was created and scripts/user_test.py was not run",
+        "The response adds unit tests rather than driving the app"
+      ]
+    }
+  ]
+}

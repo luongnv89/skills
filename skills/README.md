@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 44 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 45 first-party Agent Skills for everyday
 engineering and product work: code review, test generation, documentation,
 diagrams, release shipping, repository cleanup, SEO and App Store audits,
 product planning, and multi-agent orchestration. Each skill is a plain-text
@@ -46,7 +46,8 @@ point. To update, run `claude plugin marketplace update lstack`, then
   `dev-machine-setup` can run remote installers (Homebrew, NodeSource, uv, Oh
   My Zsh, starship, Claude Code) and system package managers with `sudo`.
   `security-setup`, `ollama-optimizer` and `test-coverage` install tools or dev
-  dependencies they need.
+  dependencies they need. `user-test` installs a project's dependencies only from its
+  lockfile and Playwright only into its own run folder.
 - **Data leaves your machine only where the table below says.** Model-provider
   traffic depends on your own Claude Code setup and is not listed. Third-party
   services have their own terms; lstack makes no promise about how they handle
@@ -103,6 +104,7 @@ working in. That is the only network access many skills make.
 | tasks-generator | your git remote | `tasks.md` commits | commit, then push only after you approve | git, python3 |
 | test-coverage | npm registry if `npx jest`/`npx vitest` is not installed locally; package registries for coverage tools (pytest-cov, nyc, cargo-tarpaulin); your git remote | package names | creates a feature branch and commits new tests locally; installs missing coverage dev dependencies; no push | your test runner, git |
 | tmux-agent-comms | none itself; agent CLIs it launches use their own network | task text typed into local sessions | asks before ending or killing sessions | tmux, python3, bash |
+| user-test | your git remote; the app under test (localhost, or the URL you give); npm registry when it installs Playwright into its run dir; Ubuntu or npm mirrors only if you approve browser system packages | test inputs typed into the app, named `ut-<run>` | none by default: fixes stay uncommitted; asks before any payment, email or post to real people; commits only on request; never pushes | your app's start, build and test commands, python3, git, curl, Playwright or browser tools, tmux, `docker compose up/stop` for services it starts |
 | ux-ax-review | the target site's pages, robots.txt, sitemap, llms.txt and public machine-readable routes; your git remote | the target URL and paths it reads | none; no commit, form submission or publishing | browser/retrieval tools, git, python3 |
 | viral-product-evaluator | the landing-page URL via `browse`, after you confirm; competitor pricing research; your git remote | the landing-page URL | writes `viral-evaluation.md` only | browse, asm, git, python3 |
 | website-agent-readiness | isitagentready.com (`POST /api/scan`, after approval gate G1; localhost is refused); GitHub API via `gh` | the target URL, which isitagentready.com then fetches; plan tasks become GitHub issues | creates a GitHub epic and issues through `plan-to-issues` after gate G4 | curl, python3, git, gh, asm |
