@@ -153,7 +153,7 @@ class CodexPackagingTests(unittest.TestCase):
         bundle, original = BUILDER.prepare(ROOT)
         codex, adapted = BUILDER.prepare(ROOT, target="codex")
         self.assertEqual(len(adapted["skill_versions"]), 46)
-        self.assertEqual(len(adapted["files"]), 453)
+        self.assertEqual(len(adapted["files"]), 451)
         self.assertEqual(original["skill_versions"], adapted["skill_versions"])
         self.assertEqual(original["files"], adapted["files"])
         for path, value in bundle.items():

@@ -86,7 +86,7 @@ submits it.
    when the user gives only a URL. If the working directory is an unrelated git repo,
    ask once where to write `launch-kit/`.
 3. **L-day and budget:** use what the user said.
-   - The default L-day comes from `references/platform-index.md` §5.
+   - The default L-day comes from `references/plan-and-reports.md` §5.
    - The default budget is $0: free paths only, with paid upgrades listed as options.
 4. **No landing page and no codebase:** ask once for a URL or a file, and offer
    `/landing-page-generator` (see the Dependency Preflight). If there is no answer, end
@@ -175,8 +175,8 @@ checks have a result; and the Assets table lists what was found.
 
 ## Step 2: Fit table (you)
 
-1. Read `references/platform-index.md`. It holds everything this step needs, including
-   the subreddit gates.
+1. Read `references/plan-and-reports.md` §1–§5. They hold everything this step
+   needs, including the subreddit gates.
 2. Gate every row (§1), with exclusion and requirement gates as defined there.
 3. Score every eligible row (§2). Write all four components.
 4. Tier the shortlist (§3). The first matching tier row wins.
@@ -212,13 +212,13 @@ catalog values, labeled with the catalog date.
 ## Step 4: Launch Plan and approval gate (you)
 
 1. Run the Repo Sync.
-2. Build the timeline with `references/platform-index.md` §5.
-3. Read `references/reports.md`. Write `launch-kit/launch-plan.md` in its shape, with
+2. Build the timeline with `references/plan-and-reports.md` §5.
+3. Write `launch-kit/launch-plan.md` in the shape of §6 of the same file, with
    `Status: awaiting-approval`. List a second-yes action only when it applies:
    - `gh repo edit`, only when `code_public` is a public GitHub repo;
    - a sibling skill, only when its branch applies.
 4. Print the gate summary, ending with its `Result: PLAN READY — awaiting approval`
-   block, and ask the gate questions from `references/reports.md`.
+   block, and ask the gate questions from §7.
 5. **Stop, and wait for the answers.**
    - **Approve:** set `Status: approved <date>` and `Opted-in actions:`, then go to
      Step 5.
@@ -248,7 +248,7 @@ approved platforms, all in one turn.
 
 - `launch-kit/assets.md`, from the writers' `assets` returns, as a table with the columns
   asset, spec, used by, have and action.
-- `launch-kit/README.md`, from the template in `references/reports.md`.
+- `launch-kit/README.md`, from the template in `references/plan-and-reports.md` §9.
 
 Before replacing an existing kit file, list it and ask the user to confirm.
 
@@ -303,10 +303,10 @@ with its error recorded.
 1. Release the dependency session, if one was acquired.
 2. On COMPLETE, set `Status: kit-complete <date>`.
 3. Print the Step 8 Step Completion Report, then the final report from
-   `references/reports.md`.
+   `references/plan-and-reports.md` §11.
 
 After every step, print the Step Completion Report for that step, from
-`references/reports.md`.
+`references/plan-and-reports.md` §10.
 
 ## Expected output
 
@@ -344,7 +344,8 @@ Decision: No approval needed. Next for you: 2026-10-27 · create the Product Hun
 ## Resume
 
 Read the `Status:` line of `launch-kit/launch-plan.md`, then follow the Resume table in
-`references/reports.md`. Repo Sync runs before the first write, as in Step 4.
+`references/plan-and-reports.md` §8. Repo Sync runs before the first write, as in
+Step 4.
 
 ## Edge cases
 
@@ -370,8 +371,7 @@ Read the `Status:` line of `launch-kit/launch-plan.md`, then follow the Resume t
 
 | File                                     | Read by                           | Holds                                                                    |
 | ---------------------------------------- | --------------------------------- | ------------------------------------------------------------------------ |
-| `references/platform-index.md`           | you, Steps 2 and 4                | gates (with subreddits), scoring, tiers, the 53-row index, scheduling    |
-| `references/reports.md`                  | you, Steps 4, 5c, 8 and Resume    | plan template, gate questions, Resume table, README, step and final reports |
+| `references/plan-and-reports.md`         | you, Steps 2, 4, 5c, 8 and Resume | §1–§5 gates (with subreddits), scoring, tiers, the 53-row index, scheduling; §6–§11 plan template, gate questions, Resume table, README, step and final reports |
 | `references/product-profile.md`          | Step 1 explorer                   | how to read the sources, Profile, Blockers and Assets tables             |
 | `references/platforms-core.md`           | Step 3 and Step 5 workers         | Product Hunt, HN, Reddit rules, GeekNews, IH, Slashdot, Hashnode, GitHub, own channels |
 | `references/platforms-launch-boards.md`  | Step 3 and Step 5 workers         | 20 launch boards                                                         |

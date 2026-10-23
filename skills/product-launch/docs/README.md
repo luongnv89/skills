@@ -76,13 +76,12 @@ Give it a landing page URL or file, and run it from the product's repository whe
 
 | Path                                    | Description                                                                                          |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `references/platform-index.md`          | Gates, the 0–10 fit score, tiers and caps, the 53-row platform index, and the launch-week scheduling rules |
+| `references/plan-and-reports.md`        | Gates, the 0–10 fit score, tiers and caps, the 53-row platform index, the launch-week scheduling rules, then the plan template, approval question, kit README, step reports and final report |
 | `references/platforms-core.md`          | Product Hunt, Hacker News, Reddit (a 19-subreddit rules table), GeekNews, Indie Hackers, Slashdot, Hashnode, GitHub, own channels |
 | `references/platforms-launch-boards.md` | 20 launch boards: prices, queues, cadence, field limits, badge rules                                 |
 | `references/platforms-directories.md`   | Directories, review sites (G2, Capterra), AI directories, Crunchbase, Wellfound                       |
 | `references/product-profile.md`         | The explorer's contract: Profile, Launch blockers and Assets tables                                  |
 | `references/launch-kit.md`              | Kit layout, field markers, copy rules, platform-guide and founder-voice templates, writer and reviewer contracts |
-| `references/reports.md`                 | The plan template, approval question, kit README, step reports and final report                      |
 | `scripts/check_kit.py`                  | Checks field limits, placeholders, vote requests and founder-voice files (`--self-test` included)    |
 
 The platform facts were verified on 2026-10-22 from each site's own pages. Each run re-checks the sites it shortlists.
