@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>logsnap: turn noisy logs into a one-screen summary</title>
+  <meta name="description" content="logsnap is an open-source CLI that clusters log lines into templates and shows what changed since your last deploy. Runs locally.">
+  <meta property="og:title" content="logsnap: noisy logs, one screen">
+  <meta property="og:description" content="Open-source CLI that clusters log lines and shows what changed since the last deploy.">
+  <meta property="og:image" content="https://logsnap.dev/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/logo.svg">
+</head>
+<body>
+  <header><img src="../assets/logo.svg" alt="logsnap" width="48"> <a href="https://github.com/example/logsnap">GitHub</a></header>
+  <h1>Noisy logs, one screen.</h1>
+  <p>logsnap groups thousands of log lines into templates, so you see the 12 things that happened instead of 40,000 lines.</p>
+  <pre>pip install logsnap
+logsnap app.log</pre>
+  <h2>What it does</h2>
+  <ul>
+    <li>Clusters similar lines: numbers, IDs and timestamps are masked automatically.</li>
+    <li>Baselines: save a snapshot, then see only what is new after a deploy.</li>
+    <li>Works on files and stdin (kubectl, docker, journalctl).</li>
+    <li>Local only: your logs never leave your machine.</li>
+  </ul>
+  <h2>Free and open source</h2>
+  <p>MIT licensed. No account, no telemetry.</p>
+  <footer>Made by Alex Chen · <a href="https://x.com/alexbuilds">@alexbuilds</a></footer>
+</body>
+</html>

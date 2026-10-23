@@ -1,0 +1,128 @@
+{
+  "skill_name": "product-launch",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-launch-oss-cli",
+      "kind": "happy-path",
+      "prompt": "I just shipped logsnap 1.0. The code is in this folder and the landing page is site/index.html. Where should I launch it? Get everything ready.",
+      "expected_output": "Full branch. A Product Profile with a source on every row (MIT, open-source CLI, free, no AI, developer tool), a fit table with a gate result for all 53 catalog rows and four score components on eligible rows, a live check of the shortlist, launch-kit/launch-plan.md with Status: awaiting-approval, and a stop at the approval gate. Hacker News is shortlisted as founder-voice; the AI directories are skipped as not AI-powered; no kit material is written before approval.",
+      "files": ["../../eval-fixtures/product-launch/logsnap-cli"],
+      "expectations": [
+        "Process: the Product Profile gives every row a source (a file path, a landing-page quote, or a command) or the value unknown",
+        "Process: the fit table has a gate result for all 53 catalog rows (the 50 sites plus x, linkedin and email-list)",
+        "Every eligible row shows the four score components (fit, reach, cost, timing) and a total",
+        "theresanaiforthat, futurepedia, toolify and future-tools are skipped with a not-AI-powered reason",
+        "hacker-news is shortlisted and marked founder-voice, and no Show HN title or body was written anywhere",
+        "email-list is skipped because the profile shows no waitlist or newsletter",
+        "Process: launch-kit/launch-plan.md exists with 'Status: awaiting-approval', and the run asked the approve / change / stop question",
+        "No kit material exists besides launch-plan.md: no copy-bank.md, README.md, assets.md or platforms/ folder",
+        "The gate message states the result (plan ready, awaiting approval), the evidence checked, the unknowns, and the decision needed"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "named-ph-and-ai-directories-waitlist",
+      "kind": "happy-path",
+      "prompt": "Prepare my Product Hunt launch and AI directory submissions for NoteCraft. The landing page is index.html in this folder; there's no other code yet.",
+      "expected_output": "Named branch: the shortlist holds only product-hunt and AI directories. The profile records a waitlist and a vercel.app subdomain. Fix before launch lists the waitlist (Product Hunt won't feature it; future-tools rejects waitlists) and the missing og:image. Paid-only AI directories are shown with their prices as options. Sibling skills for the missing logo or og tags are offered as second-yes actions. The run stops at the approval gate.",
+      "files": ["../../eval-fixtures/product-launch/notecraft-waitlist"],
+      "expectations": [
+        "Process: the profile records availability as a waitlist and the domain as a free subdomain (notecraft.vercel.app), each with a source",
+        "The plan's Fix before launch section lists the waitlist, naming Product Hunt featuring or the AI directories it blocks",
+        "The plan flags the missing og:image or twitter:card tags",
+        "The shortlist holds only product-hunt and AI directories; any other platform appears only as at most 3 other high scorers named in one line",
+        "future-tools is skipped or flagged because the product is waitlist-only",
+        "Paid-only AI directories (theresanaiforthat, toolify, futurepedia) appear with their prices as options, and none is presented as free",
+        "Under Actions that need a second yes, the plan offers logo-designer for the missing logo or seo-ai-optimizer for the missing og tags",
+        "Process: the run stopped at the approval gate, and launch-plan.md is the only file it wrote",
+        "No user count, testimonial or price is stated beyond what the page says ('Free during the beta', first 500 people)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "resume-approved-plan-write-kit",
+      "kind": "happy-path",
+      "prompt": "The launch plan in launch-kit/launch-plan.md is approved. Write the launch kit now.",
+      "expected_output": "Resume branch with Status: approved. The run writes copy-bank.md, README.md, assets.md and platforms/ files for exactly product-hunt, hacker-news, saashub, x and linkedin. hacker-news.md is a founder-voice brief. check_kit.py exits 0, and a fresh reviewer checks the kit. The final report opens with Result: COMPLETE.",
+      "files": ["../../eval-fixtures/product-launch/invoicely-saas"],
+      "expectations": [
+        "Process: the run read launch-kit/launch-plan.md and continued from 'Status: approved' without asking for approval again",
+        "launch-kit/copy-bank.md exists and holds field markers with limits (for example copy.tagline-60 max=60)",
+        "launch-kit/platforms/ holds exactly product-hunt.md, hacker-news.md, saashub.md, x.md and linkedin.md",
+        "platforms/hacker-news.md has '<!-- mode: founder-voice -->', quotes HN's rule against generated or AI-edited text, and holds no field markers and no ready-to-post title or body",
+        "Process: scripts/check_kit.py was run on launch-kit, and its last run printed PASS (exit 0)",
+        "Process: a reviewer separate from the writers checked the kit, or the run says it reviewed inline because no Agent tool was available",
+        "No copy anywhere in the kit asks anyone to upvote or vote",
+        "The copy states no number, user count or testimonial that is not in the profile ('1,200 freelancers' and the Maya R. quote are the only proof allowed)",
+        "README.md has a dated checklist with the plan's dates (2026-10-27, 2026-11-03, 2026-11-17, 2026-11-18, 2026-11-20, 2026-11-24)",
+        "The final report opens with 'Result: COMPLETE' (or PARTIAL with a reason), followed by Evidence:, Uncertainty: and Decision: lines"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "show-hn-and-post-it-for-me",
+      "kind": "edge",
+      "prompt": "Write the Show HN post for logsnap and just post it to Hacker News for me. I don't have time.",
+      "expected_output": "Named branch for hacker-news. The run refuses to post or sign in on the user's behalf, explains HN's rule against generated or AI-edited text, and offers the founder-voice brief as the deliverable. It writes no Show HN title or body, writes launch-plan.md, and stops at the approval gate.",
+      "files": ["../../eval-fixtures/product-launch/logsnap-cli"],
+      "expectations": [
+        "The run never tries to sign up, log in or submit to Hacker News, and tells the user it does not post for them",
+        "The run explains HN's rule against generated or AI-edited text, quoting it or linking news.ycombinator.com/newsguidelines.html",
+        "No ready-to-post Show HN title or body appears in the chat or in any file",
+        "Process: the run follows the Named branch for hacker-news and stops at the approval gate, with launch-kit/launch-plan.md in Status: awaiting-approval",
+        "The founder-voice brief (facts and structure for the founder to write from) is offered as the HN deliverable"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "unreachable-url-no-code",
+      "kind": "edge",
+      "prompt": "Where should I launch https://launch-test-no-such-domain-7f3k.dev ? That's all I have right now.",
+      "expected_output": "The landing page cannot be fetched and there is no codebase. The run says so, invents nothing about the product, asks for a local copy or a working URL, offers /landing-page-generator, writes no launch-kit files, and ends BLOCKED or waiting on the user's answer.",
+      "files": [],
+      "expectations": [
+        "The run reports that the landing page could not be fetched, and never describes the product from memory or search results",
+        "The run asks for a working URL or a local or saved copy of the page, and offers /landing-page-generator",
+        "No launch-kit/ folder or file was written",
+        "The run ends with Result: BLOCKED, or ends the turn waiting on the user's answer, and states what it needs to continue"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "negative-write-landing-page",
+      "kind": "negative-trigger",
+      "prompt": "Write a landing page for my invoicing app using the PAS framework. It's for freelancers who hate chasing late payments.",
+      "expected_output": "Landing-page copywriting, handled without the product-launch workflow.",
+      "files": [],
+      "expectations": [
+        "The run built no launch fit table and wrote no launch-kit/launch-plan.md",
+        "The response treats the request as landing-page copywriting, not as launch-site planning"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "negative-app-store-keywords",
+      "kind": "negative-trigger",
+      "prompt": "Improve my iOS app's App Store subtitle and keyword field so it ranks better in App Store search.",
+      "expected_output": "App Store optimization, handled without the product-launch workflow.",
+      "files": [],
+      "expectations": [
+        "The run built no launch fit table and wrote no launch-kit files",
+        "The response addresses App Store subtitle and keyword optimization"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "negative-paid-ads-campaign",
+      "kind": "negative-trigger",
+      "prompt": "Set up a Google Ads search campaign for our product launch next week, with a $500 budget and keyword groups.",
+      "expected_output": "A paid-ads campaign plan, handled without the product-launch workflow.",
+      "files": [],
+      "expectations": [
+        "The run built no launch fit table and wrote no launch-kit files",
+        "The response addresses Google Ads campaign structure and budget"
+      ]
+    }
+  ]
+}

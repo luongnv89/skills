@@ -184,7 +184,7 @@ class PackagingTests(unittest.TestCase):
     def test_real_catalog_resource_parity_and_separate_discovery(self):
         entries, provenance = BUILDER.prepare(ROOT)
         manifest = json.loads(BUILDER.git(ROOT, "show", provenance["source_commit"] + ":packages/lstack/manifest.json"))
-        self.assertEqual(len(manifest["members"]), 45)
+        self.assertEqual(len(manifest["members"]), 46)
         # Independent expected mapping: walking each manifest source and excluding other members.
         all_paths = BUILDER.git(ROOT, "ls-tree", "-r", "--name-only", "-z", provenance["source_commit"]).decode().split("\0")
         expected = set()
