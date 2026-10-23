@@ -57,8 +57,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.6.0](packages/lstack/README.md) packages the canonical `skills/` tree as one
-Claude Code plugin: 43 top-level definitions plus the two nested diagram-generator
-children, **45** namespaced skills in total. `skills/` is the plugin folder; the root
+Claude Code plugin: 44 top-level definitions plus the two nested diagram-generator
+children, **46** namespaced skills in total. `skills/` is the plugin folder; the root
 marketplace points at it.
 
 ```bash
@@ -197,7 +197,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Prepare an app store submission | aso-marketing → appstore-assets → appstore-review-checker |
 | Harden and ship a repo | security-setup → devops-pipeline → ship (auto-push and cleanup-project for day-to-day work) |
 | Open-source a project | oss-ready → doc-manager → landing-page-generator → github-pages-publish |
-| Brand and launch | brand-name-checker → logo-designer → landing-page-generator → github-pages-publish |
+| Brand and launch | brand-name-checker → logo-designer → landing-page-generator → github-pages-publish → product-launch |
 | Run an agent fleet | herdr-agent *or* rex-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner |
 
 ### Find by Category
@@ -206,7 +206,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 |---|---|
 | [Code Quality](#code-quality) | Reviews, cleanup, testing, optimization, usability |
 | [Shipping](#shipping) | Auto push, repo cleanup, pipelines, releases, GitHub Pages publishing, security hardening |
-| [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming |
+| [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming, launch planning |
 | [Career Research](#career-research) | Tailored job discovery with employer/product due diligence |
 | [Frontend & Design](#frontend--design) | UIs, logos, diagrams, design optimization |
 | [Documentation](#documentation) | Docs gen, READMEs, SEO, OSS prep, agent config |
@@ -260,6 +260,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**product-planner**](skills/product-planner/) | 1.1.0 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
 | [**idea-validator**](skills/idea-validator/) | 1.6.0 | max | Market, feasibility, competitor checks for ideas |
 | [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.7.0 | high | Score codebase + landing page vs 32 viral principles |
+| [**product-launch**](skills/product-launch/) | 1.0.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan |
 | [**brand-name-checker**](skills/brand-name-checker/) | 1.5.0 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.5.0 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.6.0 | max | Technical architecture document from PRD |

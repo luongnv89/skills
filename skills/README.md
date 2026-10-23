@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 45 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 46 first-party Agent Skills for everyday
 engineering and product work: code review, test generation, documentation,
 diagrams, release shipping, repository cleanup, SEO and App Store audits,
 product planning, and multi-agent orchestration. Each skill is a plain-text
@@ -94,6 +94,7 @@ working in. That is the only network access many skills make.
 | opencode-runner | OpenCode Zen (opencode.ai) and its free-model providers; your git remote | the task prompt, files passed with `--file`, and repository files OpenCode reads. Free models may use this data for training | OpenCode may edit files in the working directory; the skill does not commit | opencode, git |
 | oss-ready | GitHub API via `gh repo view`; your git remote | the repository name (read-only) | creates a local branch; no commit or push | git, gh, python3 |
 | prd-generator | your ideas repo remote | `prd.md` and `README.md` commits | commit and push after asking; never force | git |
+| product-launch | the landing page you give; the public submit, pricing and rules pages of shortlisted launch sites (read-only); GitHub API via `gh` only for an opted-in metadata edit; your git remote | the landing-page URL; repo description, homepage and topics only if you confirm the `gh repo edit` command | `gh repo edit` after two confirmations; never signs up, submits, votes, pays or posts on any launch site; never commits | curl, python3, gh (optional), asm (optional), git |
 | product-planner | your git remote; member skills reach their own destinations | none itself | none itself; `idea-validator` pushes without asking, the other members ask first | git, asm, planning skills |
 | rex-agent | local Rex server socket; workers contact their own model providers | task prompts typed to worker agents | starts workers with the launcher's permission-bypass flags by default (see above); types into worker blocks; closes blocks only after confirmation | rex, python3, claude, codex, pi, gemini |
 | search-optimizer | the target site's page, robots.txt, sitemap.xml and llms.txt; isitagentready.com only through `website-agent-readiness` after you approve; your git remote | the target URL | git fetch/pull; no push | curl, python3, git, asm, delegated audit skills |

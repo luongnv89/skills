@@ -203,7 +203,7 @@ class ClaudePackagingTests(unittest.TestCase):
         repo = self.snapshot_catalog()
         bundle, original = BUILDER.prepare(repo)
         claude, adapted = BUILDER.prepare(repo, target="claude")
-        self.assertEqual(len(adapted["skill_versions"]), 45)
+        self.assertEqual(len(adapted["skill_versions"]), 46)
         self.assertEqual(adapted["skill_versions"], original["skill_versions"])
         self.assertEqual(adapted["files"], original["files"])
         for path, value in bundle.items():
@@ -224,7 +224,7 @@ class ClaudePackagingTests(unittest.TestCase):
         for flags in [("--check",), ("--target", "claude", "--check"),
                       ("--target", "codex", "--check"), ("--check-plugin-metadata",)]:
             result = json.loads(subprocess.check_output(cmd + list(flags)))
-            self.assertEqual((result["version"], result["skills"]), ("0.6.0", 45))
+            self.assertEqual((result["version"], result["skills"]), ("0.6.0", 46))
         first, second = self.artifact("catalog-one.zip"), self.artifact("catalog-two.zip")
         BUILDER.build(repo, output=first, target="claude")
         BUILDER.build(repo, output=second, target="claude")
@@ -247,7 +247,7 @@ class ClaudePackagingTests(unittest.TestCase):
 
     def test_root_metadata_projection_and_additive_discovery_exactly_once(self):
         result = BUILDER.sync_plugin_metadata(ROOT)
-        self.assertEqual((result["version"], result["skills"]), ("0.6.0", 45))
+        self.assertEqual((result["version"], result["skills"]), ("0.6.0", 46))
         plugin_root = ROOT / "skills"
         plugin = json.loads((plugin_root / ".claude-plugin/plugin.json").read_bytes())
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_bytes())
@@ -262,10 +262,10 @@ class ClaudePackagingTests(unittest.TestCase):
         self.assertEqual(market["plugins"][0]["description"], plugin["description"])
         self.assertEqual((ROOT / market["plugins"][0]["source"]).resolve(), plugin_root)
         paths = list(plugin_root.glob("*/SKILL.md"))
-        self.assertEqual(len(paths), 43)
+        self.assertEqual(len(paths), 44)
         paths += [plugin_root / source / "SKILL.md" for source in plugin["skills"][1:]]
-        self.assertEqual(len(paths), 45)
-        self.assertEqual(len({p.resolve() for p in paths}), 45)
+        self.assertEqual(len(paths), 46)
+        self.assertEqual(len({p.resolve() for p in paths}), 46)
         manifest = json.loads((ROOT / BUILDER.MANIFEST).read_bytes())
         self.assertEqual({p.parent.resolve() for p in paths},
                          {(ROOT / m["source"]).resolve() for m in manifest["members"]})

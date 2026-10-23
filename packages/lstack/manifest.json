@@ -4,7 +4,7 @@
   "version": "0.6.0",
   "description": "Platform-neutral distribution of the maintained first-party Agent Skills catalog.",
   "claude": {
-    "description": "45 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+    "description": "46 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
@@ -14,7 +14,7 @@
     "marketplace_name": "lstack"
   },
   "codex": {
-    "description": "45 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
+    "description": "46 maintained first-party skills for Codex; external tools and skill prerequisites remain required.",
     "author": {"name": "Luong NGUYEN"},
     "repository": "https://github.com/luongnv89/skills",
     "license": "MIT",
@@ -60,6 +60,7 @@
     {"name": "opencode-runner", "source": "skills/opencode-runner"},
     {"name": "oss-ready", "source": "skills/oss-ready"},
     {"name": "prd-generator", "source": "skills/prd-generator"},
+    {"name": "product-launch", "source": "skills/product-launch"},
     {"name": "product-planner", "source": "skills/product-planner"},
     {"name": "rex-agent", "source": "skills/rex-agent"},
     {"name": "search-optimizer", "source": "skills/search-optimizer"},

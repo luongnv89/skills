@@ -1,4 +1,13 @@
-"""Regression tests for the issue-work-loop worker launch contract."""
+#!/usr/bin/env python3
+"""Contract tests for issue-work-loop: dependency preflight and final report,
+the Herdr transport, and worker launch.
+
+One section per contract; each section's comment block says what it covers.
+
+Run directly (stdlib unittest only):
+    python3 -m unittest discover -s skills/issue-work-loop/tests -p 'test_*.py'
+"""
+
 
 from __future__ import annotations
 
@@ -11,6 +20,290 @@ import tempfile
 import unittest
 from pathlib import Path
 
+
+# ============================================================================
+# dependency_and_report_contract
+# Regression tests for the dependency lease lifecycle and final-report contract.
+# ============================================================================
+
+SKILL_DIR = Path(__file__).resolve().parents[1]
+SKILL_MD = SKILL_DIR / "SKILL.md"
+OUTPUT_FORMAT = SKILL_DIR / "references" / "output-format.md"
+CLEANUP = SKILL_DIR / "references" / "cleanup.md"
+
+FAKE_ASM = """#!/bin/sh
+echo "$*" >> "$ASM_LOG"
+if [ "$1" = deps ] && [ -n "$ASM_NO_DEPS" ]; then
+  echo 'Error: Unknown command: "deps"' >&2; exit 2
+fi
+if [ "$1 $2" = "deps acquire" ]; then
+  case " $ASM_FAIL " in
+    *" $3 "*) echo "Error: Skill \\"$3\\" not found" >&2; exit 1 ;;
+  esac
+  printf '{"name": "%s", "path": "%s/%s", "skillMdPath": "%s/%s/SKILL.md"}\\n' "$3" "$ASM_ROOT" "$3" "$ASM_ROOT" "$3"
+  exit 0
+fi
+echo '{}'
+"""
+
+
+def section(text: str, heading: str) -> str:
+    start = text.index(heading)
+    body = text[start:]
+    nxt = body.find("\n## ", len(heading))
+    return body if nxt < 0 else body[:nxt]
+
+
+def frontmatter_dependencies(text: str) -> list[str]:
+    fm = text.split("---", 2)[1]
+    match = re.search(r"^dependencies:\n((?:  - .+\n)+)", fm, re.MULTILINE)
+    if not match:
+        return []
+    return [line.strip()[2:].strip() for line in match.group(1).splitlines()]
+
+
+class DependencyLeaseTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.skill = SKILL_MD.read_text(encoding="utf-8")
+        cls.preflight = section(cls.skill, "## Dependency Preflight (mandatory)")
+        blocks = re.findall(r"```bash\n(.*?)```", cls.preflight, re.DOTALL)
+        cls.snippet = blocks[0]
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.bin = self.tmp / "bin"
+        self.bin.mkdir()
+        asm = self.bin / "asm"
+        asm.write_text(FAKE_ASM, encoding="utf-8")
+        asm.chmod(0o755)
+        self.log = self.tmp / "asm.log"
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def run_snippet(self, mode, fail="", with_asm=True, no_deps=False):
+        path_dirs = [str(self.bin)] if with_asm else []
+        env = {
+            "PATH": os.pathsep.join(path_dirs + ["/usr/bin", "/bin"]),
+            "TMPDIR": str(self.tmp),
+            "ASM_LOG": str(self.log),
+            "ASM_ROOT": str(self.tmp / "skills"),
+            "ASM_FAIL": fail,
+            "ASM_NO_DEPS": "1" if no_deps else "",
+            "mode": mode,
+            "number": "42",
+        }
+        return subprocess.run(
+            ["bash", "-c", self.snippet],
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def calls(self):
+        if not self.log.exists():
+            return []
+        return self.log.read_text(encoding="utf-8").splitlines()
+
+    def acquired(self):
+        return [c.split()[2] for c in self.calls() if c.startswith("deps acquire")]
+
+    def test_frontmatter_declares_every_invoked_skill(self):
+        self.assertEqual(
+            sorted(frontmatter_dependencies(self.skill)),
+            ["herdr-agent", "issue-pr-review", "issue-resolver"],
+        )
+
+    def test_pr_mode_never_acquires_issue_resolver(self):
+        result = self.run_snippet("pr")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.acquired(), ["herdr-agent", "issue-pr-review"])
+        self.assertIn("deps discover issue-work-loop --json", self.calls())
+
+    def test_issue_mode_acquires_all_three_under_one_session(self):
+        result = self.run_snippet("issue")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            self.acquired(), ["herdr-agent", "issue-pr-review", "issue-resolver"]
+        )
+        sessions = {
+            c.split("--session ")[1].split()[0]
+            for c in self.calls()
+            if c.startswith("deps acquire")
+        }
+        self.assertEqual(len(sessions), 1, sessions)
+        self.assertTrue(next(iter(sessions)).startswith("iwl-issue-42-"))
+
+    def test_failed_acquisitions_are_collected_then_released(self):
+        result = self.run_snippet("issue", fail="issue-pr-review issue-resolver")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("issue-pr-review", result.stderr)
+        self.assertIn("issue-resolver", result.stderr)
+        self.assertTrue(any(c.startswith("deps release --session") for c in self.calls()))
+
+    def test_missing_asm_stops_with_installer_hint(self):
+        result = self.run_snippet("pr", with_asm=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("npm install -g agent-skill-manager", result.stderr)
+
+    def test_asm_without_deps_stops_with_upgrade_hint_not_missing_skills(self):
+        result = self.run_snippet("issue", no_deps=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("agent-skill-manager@latest", result.stderr)
+        self.assertNotIn("Missing required skill", result.stderr)
+        self.assertEqual(self.acquired(), [])
+
+    def test_release_runs_at_every_terminal_outcome(self):
+        lowered = self.preflight.lower()
+        for phrase in ("finally", "every terminal outcome", "--no-cleanup", "asm deps release"):
+            self.assertIn(phrase, lowered, phrase)
+        cleanup = CLEANUP.read_text(encoding="utf-8")
+        self.assertIn('asm deps release --session "$iwl_session" --json', cleanup)
+
+
+class FinalReportContractTests(unittest.TestCase):
+    def test_every_final_report_opens_with_the_four_review_lines(self):
+        text = OUTPUT_FORMAT.read_text(encoding="utf-8")
+        headings = [
+            "## Push-safety handoff",
+            "## Final — CLEAN",
+            "## Final — MAX_ROUNDS",
+            "## Final — FAILED / ALREADY_RESOLVED / ABORTED",
+        ]
+        for heading in headings:
+            with self.subTest(heading=heading):
+                block = re.search(r"```text\n(.*?)```", section(text, heading), re.DOTALL)
+                lines = [
+                    line.strip()
+                    for line in block.group(1).splitlines()[1:]
+                    if line.strip() and not line.startswith("                 ")
+                ]
+                labels = [line.split(":", 1)[0] for line in lines[:4]]
+                self.assertEqual(labels, ["Result", "Evidence", "Uncertainty", "Decision"])
+
+    def test_skill_body_requires_understanding_criteria(self):
+        criteria = section(SKILL_MD.read_text(encoding="utf-8"), "## Acceptance Criteria")
+        for phrase in ("Result:", "Uncertainty:", "Decision:", "unconfirmed"):
+            self.assertIn(phrase, criteria, phrase)
+
+
+# ============================================================================
+# transport_contract
+# Focused regression tests for the issue-work-loop transport contract.
+# ============================================================================
+
+SKILL = Path(__file__).resolve().parents[2]
+LOOP_PROTOCOL = SKILL / "issue-work-loop" / "references" / "loop-protocol.md"
+AGENT_PROMPTS = SKILL / "issue-work-loop" / "references" / "agent-prompts.md"
+HERDR_DELIVERY = SKILL / "herdr-agent" / "references" / "delivery-and-waiting.md"
+
+
+def subsection(text: str, heading: str, next_heading: str) -> str:
+    start = text.index(heading)
+    end = text.index(next_heading, start + len(heading))
+    return text[start:end]
+
+
+class TransportContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.protocol = LOOP_PROTOCOL.read_text(encoding="utf-8")
+        cls.prompts = AGENT_PROMPTS.read_text(encoding="utf-8")
+        cls.delivery = HERDR_DELIVERY.read_text(encoding="utf-8")
+
+    def test_normal_detected_agent_path_delegates_to_atomic_herdr_wait(self):
+        normal = subsection(
+            self.protocol,
+            "### Detected-agent path (normal)",
+            "### Explicit no-agent fallback",
+        )
+        for phrase in (
+            "preflight_send.py",
+            "herdr agent prompt",
+            "--wait",
+            "herdr agent read",
+            "recent-unwrapped",
+            "one server-side request",
+            "working, blocked, or",
+            "unverifiable target stops dispatch",
+        ):
+            self.assertIn(phrase, normal, phrase)
+
+        retired_steps = (
+            "Capture recent-unwrapped baseline.",
+            "Mint a fresh completion marker.",
+            "preflight_send.py immediately before `pane run`",
+            "Wait with `wait_for_idle.py` using baseline + marker.",
+        )
+        for phrase in retired_steps:
+            self.assertNotIn(phrase, normal, phrase)
+
+    def test_legacy_transport_is_only_an_explicit_verified_no_agent_fallback(self):
+        fallback = subsection(
+            self.protocol,
+            "### Explicit no-agent fallback",
+            "## Max rounds and handoff",
+        )
+        for phrase in (
+            "preflight exits 5",
+            "agent_not_found",
+            "explicitly verified fallback",
+            "pane run",
+            "wait_for_idle.py",
+            "not the normal transport",
+        ):
+            self.assertIn(phrase, fallback, phrase)
+
+        for phrase in ("agent_not_found", "pane run", "wait_for_idle.py", "fallback"):
+            self.assertIn(phrase, self.delivery, phrase)
+
+    def test_named_failure_outcomes_are_reported_without_blind_resend(self):
+        transport = subsection(
+            self.protocol,
+            "## Herdr send/wait contract",
+            "## Max rounds and handoff",
+        )
+        for phrase in (
+            "agent_blocked",
+            "agent_prompt_stalled",
+            "timeout",
+            "BLOCKED",
+            "STALLED",
+            "TIMEOUT",
+            "never treat them as replies",
+            "blindly resend",
+            "never send another task or type into the dialog",
+        ):
+            self.assertIn(phrase, transport, phrase)
+
+    def test_worker_prompts_delegate_and_keep_boot_switches_separate(self):
+        intro = self.prompts[: self.prompts.index("## Context probe")]
+        for phrase in (
+            "Phase 4 — Prompt Safely",
+            "Phase 5 — Read and Verify",
+            "preflight_send.py",
+            "herdr agent prompt ... --wait",
+            "recent-unwrapped",
+            "agent_not_found",
+            "never blindly resend",
+            "mode-switch keystrokes are separate from task sends",
+            "Repeat after FRESHEN",
+            "skip-permissions flag",
+        ):
+            self.assertIn(phrase, intro, phrase)
+
+        for phrase in (
+            "with baseline, fresh completion marker, preflight, wait, and reply-delta read",
+            "pane run",
+            "wait_for_idle.py",
+        ):
+            self.assertNotIn(phrase, intro, phrase)
+
+
+# ============================================================================
+# worker_launch_contract
+# Regression tests for the issue-work-loop worker launch contract.
+# ============================================================================
 
 SKILLS = Path(__file__).resolve().parents[2]
 LOOP_SKILL = SKILLS / "issue-work-loop" / "SKILL.md"
