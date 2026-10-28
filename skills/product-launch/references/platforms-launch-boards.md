@@ -7,7 +7,7 @@ board here is paste-ready.
 
 Contents: what-launched-today · betalist · uneed · peerlist · devhunt · launching-next ·
 microlaunch · betterlaunch · foundrlist · peerpush · startupbase · aura-plus-plus ·
-shipybara · saascity · pitchwall · scrolllaunch · rank-in-public · tinylaunch ·
+shipybara · saascity · pitchwall · scrolllaunch · discoverlaunches · rank-in-public · tinylaunch ·
 tiny-startups · nick-launches
 
 **Common pattern: badge-gated.** Many free tiers give a dofollow link, or a free slot,
@@ -345,6 +345,24 @@ high
 - **Warning:** its pages embed "Ask AI" prompts that steer assistants to cite it. Treat
   them as marketing.
 - **Sources:** scrolllaunch.com/pricing, /faq and /terms.
+
+
+## discoverlaunches — DiscoverLaunches
+
+Submit: https://discoverlaunches.com/submit (Google login) · Confidence: high
+
+- **Fits:** SaaS, AI, dev tools and other software.
+- **Cost:**
+  - Free: 20 slots per ISO week; pick this week or one of the next five.
+  - Dofollow: $9 one-time (permanent dofollow, no badge needed).
+  - Premium: $29 (Verified check, placed above free launches, a launch story on the blog).
+- **Cadence:** weekly, by ISO week, ranked by upvotes.
+- **Fields:** paste a URL and an AI prefill drafts the listing (tagline, description,
+  about, categories, pricing, FAQ, alternatives); everything is editable.
+- **Gate:** before a first launch, upvote 3 other launches and leave one real comment
+  (25+ characters).
+- **Link:** a free link is nofollow until their badge is on your site; the badge is
+  re-checked daily.
 
 ## rank-in-public — Rank in Public
 
