@@ -11,9 +11,10 @@ Usage:
   python3 render.py SRC_DIR [--out OUT_DIR] [--only ID ...] [--classes CLASS,...]
                     [--chrome PATH] [--no-video] [--allow-placeholders]
 
-A full render (no --only) also deletes PNGs and videos in the class and
-creative folders that the manifest no longer lists, so a dropped frame cannot
-ship by accident. Caption color pairs from config.js brand tokens must reach
+A full render (no --only) also deletes the outputs the manifest no longer
+lists, so a dropped frame cannot ship by accident: <frame>.png in the class
+folders, and header/search/universal .png and header/search .mp4 in creative/
+and creative/<variant>/. Any other file in creative/ is reported and kept. Caption color pairs from config.js brand tokens must reach
 3:1 (headline) and 4.5:1 (supporting line) on every canvas stop, or the run fails.
 
 Videos (creatives.video.kinds in config.js) need ffmpeg and ffprobe; a config
@@ -71,6 +72,8 @@ CREATIVES = {
 }
 # Videos: the header as above; search at 3744 x 2496, the largest 3:2 size whose
 # H.264 stream stays within Level 5.2 (3840 x 2560 needs Level 6.0, beyond many decoders).
+KIT_OUTPUTS = {f"{k}.png" for k in CREATIVES} | {"header.mp4", "search.mp4"}  # what creative/ can hold
+VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # kit.js checks creatives.variants ids against the same pattern
 VIDEO_SPECS = {"header": CREATIVES["header"], "search": {"w": 1920, "h": 1280, "scale": 1.95, "px": (3744, 2496)}}
 CHROME_CANDIDATES = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -302,17 +305,32 @@ def check_contrast(pairs: list[dict]) -> list[str]:
 
 
 def prune_stale(out: Path, expected: set[Path], videos: bool) -> None:
-    patterns = ["*.png", "*/*.png"] + (["*.mp4", "*/*.mp4"] if videos else [])
-    for folder in [*CLASSES, "creative"]:
-        d = out / folder
-        if not d.is_dir():
-            continue
-        for f in [f for p in patterns for f in d.glob(p)] if folder == "creative" else d.glob("*.png"):
-            if f.resolve() not in expected:
-                f.unlink()
-                print(f"removed stale {f} (not in the current config)")
-                if f.parent != d and not any(f.parent.iterdir()):
-                    f.parent.rmdir()
+    """Delete outputs the kit wrote earlier that the current config no longer lists.
+    Only names the kit produces are candidates; anything else (a hand-made video,
+    a folder of raw art) is reported and left in place."""
+    def drop(f: Path) -> None:
+        if f.resolve() not in expected:
+            f.unlink()
+            print(f"removed stale {f} (not in the current config)")
+
+    for cls in CLASSES:
+        for f in sorted((out / cls).glob("*.png")):
+            drop(f)
+    creative = out / "creative"
+    if not creative.is_dir():
+        return
+    for entry in sorted(creative.iterdir()):
+        nested = entry.is_dir() and VARIANT_ID.fullmatch(entry.name)
+        for f in sorted(entry.iterdir()) if nested else [entry]:
+            if f.name.startswith("."):  # .DS_Store and similar
+                continue
+            if f.is_file() and f.name in KIT_OUTPUTS:
+                if videos or f.suffix != ".mp4":  # --no-video keeps existing videos
+                    drop(f)
+            else:
+                print(f"WARN: {f} not produced by the kit, left in place")
+        if nested and not any(entry.iterdir()):
+            entry.rmdir()
 
 
 def read_manifest(binary: str, index: Path) -> dict:

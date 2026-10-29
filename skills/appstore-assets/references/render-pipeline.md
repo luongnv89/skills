@@ -46,7 +46,7 @@ Pillow (`python3 -m pip install pillow`). `render.py` needs Chrome or Chromium
 | Refuses to run while `config.js` contains `TODO:` | Template text must never reach a PNG |
 | Builds a manifest first (`index.html?manifest=1` via `--dump-dom`), rendering every screen once | A broken builder, an unknown icon name or a missing image fails with its frame id instead of shipping a blank PNG |
 | Checks caption contrast from the brand tokens (3:1 headline, 4.5:1 supporting line, light and dark) | A dark frame with dark text cannot pass |
-| After a full render, deletes PNGs (and, unless `--no-video`, MP4s) no longer in `config.js` | A dropped frame, video or variant cannot ship by accident |
+| After a full render, deletes kit outputs no longer in `config.js`: `<frame>.png` in the class folders, and `header`/`search`/`universal.png` and (unless `--no-video`) `header`/`search.mp4` in `creative/` and `creative/<variant-id>/`. Any other file or folder there gets `WARN: … not produced by the kit, left in place` | A dropped frame, video or variant cannot ship by accident, and a hand-made file kept in `creative/` (an App Preview recording, raw art) is never deleted |
 | Passes the stage height explicitly (`&h=`) | Headless Chrome's viewport is about 87 px shorter than `--window-size`; a `100vh` stage gets clipped |
 | Renders `iphone-6.3` by zooming the 440 px design to 402 px | One layout serves both iPhone classes with identical proportions |
 | Flattens to RGB with Pillow | Chrome writes RGBA; App Store Connect rejects alpha |
