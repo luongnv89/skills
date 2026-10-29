@@ -7,14 +7,19 @@ exact CSS viewport and device scale factor; Pillow flattens it to RGB (App
 Store Connect rejects alpha) and the exact pixel size is verified.
 
 Usage:
-  python3 render.py --preflight [--chrome PATH]      # check Pillow + Chrome only
+  python3 render.py --preflight [--video] [--chrome PATH]   # check Pillow + Chrome (+ ffmpeg, ffprobe)
   python3 render.py SRC_DIR [--out OUT_DIR] [--only ID ...] [--classes CLASS,...]
-                    [--chrome PATH] [--allow-placeholders]
+                    [--chrome PATH] [--no-video] [--allow-placeholders]
 
-A full render (no --only) also deletes PNGs in the class and creative folders
-that the manifest no longer lists, so a dropped frame cannot ship by accident.
-Caption color pairs from config.js brand tokens must reach 3:1 (headline)
-and 4.5:1 (supporting line) on every canvas stop, or the run fails.
+A full render (no --only) also deletes PNGs and videos in the class and
+creative folders that the manifest no longer lists, so a dropped frame cannot
+ship by accident. Caption color pairs from config.js brand tokens must reach
+3:1 (headline) and 4.5:1 (supporting line) on every canvas stop, or the run fails.
+
+Videos (creatives.video.kinds in config.js) need ffmpeg and ffprobe; a config
+without video never calls them. One Chrome, driven over --remote-debugging-pipe,
+seeks the page to each frame time and captures it; ffmpeg encodes H.264 High,
+yuv420p, BT.709, constant frame rate, no audio, +faststart MP4.
 
 Outputs (OUT_DIR defaults to SRC_DIR's parent):
   iphone-6.9/<id>.png  1320 x 2868   iPhone with Dynamic Island, large display
@@ -22,19 +27,25 @@ Outputs (OUT_DIR defaults to SRC_DIR's parent):
   ipad-13/<id>.png     2064 x 2752   iPad 13-inch display
   mac/<id>.png         2880 x 1800   Mac, 16:10
   creative/header.png 3840 x 1646 · search.png 3840 x 2560 · universal.png 5244 x 2950
+  creative/header.mp4 3840 x 1646 · search.mp4 3744 x 2496 (30 or 60 fps, 5-30 s, looping)
+  creative/<variant>/... the same files per Custom Product Page variant
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import html
+import io
 import json
 import os
 import re
+import select
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 try:
@@ -57,6 +68,9 @@ CREATIVES = {
     "search": {"w": 1920, "h": 1280, "scale": 2, "px": (3840, 2560)},
     "universal": {"w": 2622, "h": 1475, "scale": 2, "px": (5244, 2950)},
 }
+# Videos: the header as above; search at 3744 x 2496, the largest 3:2 size whose
+# H.264 stream stays within Level 5.2 (3840 x 2560 needs Level 6.0, beyond many decoders).
+VIDEO_SPECS = {"header": CREATIVES["header"], "search": {"w": 1920, "h": 1280, "scale": 1.95, "px": (3744, 2496)}}
 CHROME_CANDIDATES = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
@@ -97,6 +111,162 @@ def chrome(binary: str, args: list[str], what: str) -> subprocess.CompletedProce
     raise AssertionError("unreachable")
 
 
+def find_ffmpeg() -> tuple[str, str]:
+    found = {t: os.environ.get(t.upper()) or shutil.which(t) for t in ("ffmpeg", "ffprobe")}
+    missing = [t for t, p in found.items() if not p or not os.path.exists(p)]
+    if missing:
+        fail(f"{' and '.join(missing)} not found; header and search videos (creatives.video.kinds) need them.",
+             "install ffmpeg (macOS: brew install ffmpeg; Debian/Ubuntu: sudo apt install ffmpeg), set FFMPEG and "
+             "FFPROBE to the binaries, or pass --no-video to render the stills only.")
+    return found["ffmpeg"], found["ffprobe"]
+
+
+class Browser:
+    """One headless Chrome driven over --remote-debugging-pipe (CDP: fd 3 in, fd 4 out, NUL-delimited JSON)."""
+
+    def __init__(self, binary: str):
+        import fcntl  # POSIX only, like the pipe transport itself
+        to_r, self.to_w = os.pipe()
+        self.from_r, from_w = os.pipe()
+
+        def plumb() -> None:  # runs in the child: move the pipe ends to fds 3 and 4
+            r, w = fcntl.fcntl(to_r, fcntl.F_DUPFD, 10), fcntl.fcntl(from_w, fcntl.F_DUPFD, 10)
+            os.dup2(r, 3)
+            os.dup2(w, 4)
+            os.set_inheritable(3, True)
+            os.set_inheritable(4, True)
+
+        self.profile = tempfile.mkdtemp(prefix="aa-chrome-")
+        self.proc = subprocess.Popen(
+            [binary, "--headless=new", "--remote-debugging-pipe", "--disable-gpu", "--hide-scrollbars",
+             "--allow-file-access-from-files", "--force-color-profile=srgb", "--no-first-run",
+             "--no-default-browser-check", "--disable-background-timer-throttling",
+             "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows",
+             f"--user-data-dir={self.profile}", "about:blank"],
+            preexec_fn=plumb, close_fds=False, stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        os.close(to_r)
+        os.close(from_w)
+        self.buf, self.next_id, self.session = b"", 0, None
+
+    def send(self, method: str, params: dict | None = None, timeout: float = 60) -> dict:
+        self.next_id += 1
+        msg = {"id": self.next_id, "method": method, "params": params or {}}
+        if self.session and not method.startswith(("Target.", "Browser.")):
+            msg["sessionId"] = self.session
+        try:
+            os.write(self.to_w, json.dumps(msg).encode() + b"\0")
+        except OSError:
+            fail(f"Chrome exited before {method}.", "pass --chrome with a working binary.")
+        deadline = time.monotonic() + timeout
+        while True:
+            while b"\0" not in self.buf:
+                left = deadline - time.monotonic()
+                if left <= 0 or self.proc.poll() is not None or not select.select([self.from_r], [], [], left)[0]:
+                    fail(f"Chrome stopped answering during {method}.",
+                         "pass --chrome with a current Chrome or Chromium (the pipe transport needs version 75 or later).")
+                chunk = os.read(self.from_r, 1 << 20)
+                if not chunk:
+                    fail(f"Chrome closed the debugging pipe during {method}.", "pass --chrome with a working binary.")
+                self.buf += chunk
+            raw, self.buf = self.buf.split(b"\0", 1)
+            reply = json.loads(raw)
+            if reply.get("id") == self.next_id:
+                if "error" in reply:
+                    fail(f"Chrome rejected {method}: {reply['error'].get('message')}", "pass --chrome with a current Chrome or Chromium.")
+                return reply.get("result", {})
+
+    def open(self, url: str, w: int, h: int, scale: int) -> None:
+        target = self.send("Target.createTarget", {"url": "about:blank"})["targetId"]
+        self.session = self.send("Target.attachToTarget", {"targetId": target, "flatten": True})["sessionId"]
+        self.send("Emulation.setDeviceMetricsOverride", {"width": w, "height": h, "deviceScaleFactor": scale, "mobile": False})
+        self.send("Page.navigate", {"url": url})
+        for _ in range(600):  # the page sets __ready once fonts and images have loaded
+            if self.eval("window.__ready === true"):
+                return
+            time.sleep(0.05)
+        fail(f"the page never became ready: {url}", "open the same URL in Chrome and check the console for errors.")
+
+    def eval(self, expression: str):
+        res = self.send("Runtime.evaluate", {"expression": expression, "awaitPromise": True, "returnByValue": True})
+        if "exceptionDetails" in res:
+            fail(f"page script failed: {res['exceptionDetails'].get('text')} ({expression})", "fix config.js and re-run.")
+        return res.get("result", {}).get("value")
+
+    def capture(self) -> bytes:
+        return base64.b64decode(self.send("Page.captureScreenshot", {"format": "png", "optimizeForSpeed": True})["data"])
+
+    def close(self) -> None:
+        """Quietly stop Chrome and remove its profile, whatever state it is in."""
+        try:
+            if self.proc.poll() is None:  # ask politely; no reply needed
+                os.write(self.to_w, json.dumps({"id": 0, "method": "Browser.close"}).encode() + b"\0")
+                self.proc.wait(timeout=10)
+        except (OSError, subprocess.TimeoutExpired):
+            self.proc.kill()
+            self.proc.wait()
+        finally:
+            for fd in (self.to_w, self.from_r):
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
+            shutil.rmtree(self.profile, ignore_errors=True)
+
+
+def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, video: dict, out: Path) -> None:
+    """Seek the page to each frame time, capture it, and pipe the PNGs to ffmpeg."""
+    ffmpeg, ffprobe = tools
+    fps, frames, (pw, ph) = video["fps"], video["frames"], spec["px"]
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_name(f".{out.stem}.partial.mp4")
+    enc = subprocess.Popen(
+        [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "png", "-i", "-",
+         "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv", "-c:v", "libx264", "-profile:v", "high",
+         "-preset", "veryfast", "-crf", "18", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+         "-color_range", "tv", "-r", str(fps), "-an", "-map_metadata", "-1",
+         "-fflags", "+bitexact", "-flags:v", "+bitexact", "-movflags", "+faststart", str(tmp)],
+        stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    started, browser, done = time.monotonic(), Browser(binary), False
+    try:
+        browser.open(url, spec["w"], spec["h"], spec["scale"])
+        for i in range(frames):
+            browser.eval(f"window.__seek({i / fps!r})")
+            png = browser.capture()
+            if i == 0:
+                size = Image.open(io.BytesIO(png)).size
+                if size != (pw, ph):
+                    fail(f"{out} frames render at {size[0]}x{size[1]}, expected {pw}x{ph}.",
+                         "do not change the creative stage sizes in kit.js; pass --chrome with a current build.")
+            try:
+                enc.stdin.write(png)
+            except BrokenPipeError:
+                break
+        done = True
+    finally:
+        browser.close()
+        if not done:  # a failed capture leaves no encoder or partial file behind
+            enc.kill()
+            enc.wait()
+            tmp.unlink(missing_ok=True)
+    enc.stdin.close()
+    err = enc.stderr.read().decode(errors="replace").strip()
+    if enc.wait() != 0:
+        tmp.unlink(missing_ok=True)
+        fail(f"ffmpeg failed to encode {out.name}:\n{err[-800:]}",
+             "use an ffmpeg build with libx264 (ffmpeg -encoders | grep libx264), or set FFMPEG to one.")
+    probe = json.loads(subprocess.run([ffprobe, "-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries",
+                                       "stream=width,height,nb_read_packets", "-of", "json", str(tmp)],
+                                      capture_output=True, text=True, check=True).stdout)["streams"][0]
+    if (probe["width"], probe["height"], int(probe["nb_read_packets"])) != (pw, ph, frames):
+        tmp.unlink(missing_ok=True)
+        fail(f"{out.name} encoded as {probe['width']}x{probe['height']} with {probe['nb_read_packets']} frames, "
+             f"expected {pw}x{ph} with {frames}.", "re-run; if it repeats, pass --chrome with a current build.")
+    tmp.replace(out)
+    print(f"ok  {out}  {pw}x{ph}  {fps} fps  {video['duration']} s  {frames} frames  "
+          f"{video['beats']} beat(s)  rendered in {time.monotonic() - started:.1f} s")
+
+
 def check_placeholders(config: Path) -> None:
     hits = [f"  line {n}: {line.strip()[:100]}" for n, line in
             enumerate(config.read_text(encoding="utf-8").splitlines(), 1) if "TODO:" in line]
@@ -130,15 +300,18 @@ def check_contrast(pairs: list[dict]) -> list[str]:
     return lines
 
 
-def prune_stale(out: Path, expected: set[Path]) -> None:
+def prune_stale(out: Path, expected: set[Path], videos: bool) -> None:
+    patterns = ["*.png", "*/*.png"] + (["*.mp4", "*/*.mp4"] if videos else [])
     for folder in [*CLASSES, "creative"]:
         d = out / folder
         if not d.is_dir():
             continue
-        for f in d.glob("*.png"):
+        for f in [f for p in patterns for f in d.glob(p)] if folder == "creative" else d.glob("*.png"):
             if f.resolve() not in expected:
                 f.unlink()
                 print(f"removed stale {f} (not in the current config)")
+                if f.parent != d and not any(f.parent.iterdir()):
+                    f.parent.rmdir()
 
 
 def read_manifest(binary: str, index: Path) -> dict:
@@ -178,6 +351,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("src", type=Path, nargs="?", help="asset-set src/ folder holding index.html and config.js")
     ap.add_argument("--preflight", action="store_true", help="only check that Pillow and Chrome are available, then exit")
+    ap.add_argument("--video", action="store_true", help="with --preflight: also check ffmpeg and ffprobe (needed for videos)")
+    ap.add_argument("--no-video", action="store_true", help="skip creatives.video kinds (stills only; ffmpeg not needed)")
     ap.add_argument("--out", type=Path, help="output folder (default: the src folder's parent)")
     ap.add_argument("--only", nargs="+", default=[], help="render only these frame ids or creative kinds")
     ap.add_argument("--classes", default=",".join(CLASSES), help="comma-separated device classes to render")
@@ -187,6 +362,11 @@ def main() -> None:
 
     if a.preflight:
         print(f"ok  Pillow available\nok  Chrome: {find_chrome(a.chrome)}")
+        if a.video:
+            ffmpeg, ffprobe = find_ffmpeg()
+            if "libx264" not in subprocess.run([ffmpeg, "-hide_banner", "-encoders"], capture_output=True, text=True).stdout:
+                fail(f"{ffmpeg} has no libx264 encoder.", "install an ffmpeg build with libx264 (Homebrew's and Debian's have it).")
+            print(f"ok  ffmpeg: {ffmpeg} (libx264)\nok  ffprobe: {ffprobe}")
         return
     if a.src is None:
         fail("no src folder given.", "pass the asset set's src/ folder, or --preflight to check tools only.")
@@ -204,6 +384,9 @@ def main() -> None:
     binary = find_chrome(a.chrome)
     out = (a.out or a.src.resolve().parent).resolve()
     manifest = read_manifest(binary, index)
+    if any(isinstance(c, str) for c in manifest.get("creatives", [])):
+        fail("src/kit.js is older than this render.py (its manifest lists creatives as plain names).",
+             "copy kit.js, kit.css and index.html from the skill's assets/template/ into src/ (config.js stays), then re-run.")
     for line in check_contrast(manifest.get("contrast", [])):
         print(f"ok {line.strip()}")
     if not manifest.get("fontOk", True):
@@ -223,19 +406,30 @@ def main() -> None:
             shoot(binary, f"{index.as_uri()}?{q}", spec["w"], spec["h"], spec["scale"], target, spec["px"])
             written.add(target.resolve())
             count += 1
-    for kind in manifest.get("creatives", []):
+    videos = [] if a.no_video else [v for v in manifest.get("video", []) if not a.only or v["kind"] in a.only]
+    tools = find_ffmpeg() if videos else None
+    for still in manifest.get("creatives", []):  # {kind, variant}; a variant renders into creative/<variant>/
+        kind, variant = still["kind"], still["variant"]
         if a.only and kind not in a.only:
             continue
         c = CREATIVES[kind]
-        target = out / "creative" / f"{kind}.png"
-        shoot(binary, f"{index.as_uri()}?creative={kind}", c["w"], c["h"], c["scale"], target, c["px"])
+        target = out / "creative" / (variant or "") / f"{kind}.png"
+        shoot(binary, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
+              c["w"], c["h"], c["scale"], target, c["px"])
+        written.add(target.resolve())
+        count += 1
+    for video in videos:
+        kind, variant = video["kind"], video["variant"]
+        target = out / "creative" / (variant or "") / f"{kind}.mp4"
+        render_video(binary, tools, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
+                     VIDEO_SPECS[kind], video, target)
         written.add(target.resolve())
         count += 1
     if count == 0:
         fail("nothing was rendered: no frame matched the platforms, --classes and --only filters.",
              "check platforms[] in config.js and the ids passed to --only.")
     if not a.only and a.classes == ",".join(CLASSES):
-        prune_stale(out, written)
+        prune_stale(out, written, videos=not a.no_video)
     print(f"Rendered {count} asset(s) into {out}")
 
 

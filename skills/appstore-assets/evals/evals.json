@@ -7,7 +7,9 @@
       "name": "trailmark-codebase-preauthorized",
       "prompt": "Generate the App Store screenshots for Trailmark 2.1. The Xcode project is in ../../eval-fixtures/appstore-assets/trailmark (copy it into your working folder first and work on the copy). Use an editorial light direction with the app's green accent, recreate the screens from the SwiftUI code, render iPhone and iPad, and include the header and search creatives. Don't ask me anything, just build it.",
       "expected_output": "A brief citing TARGETED_DEVICE_FAMILY = \"1,2\", a one-line plan instead of a question, an asset set built from assets/template with no TODO markers and a Source comment per screen builder, iPhone and iPad screenshots plus header/search creatives that pass check_assets.py, no Health-sync or Apple Watch overclaim, a fresh review, and a Result/Evidence/Uncertainty/Decision report.",
-      "files": ["../../eval-fixtures/appstore-assets/trailmark"],
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
       "expectations": [
         "The app brief lists iphone and ipad as platforms and cites TARGETED_DEVICE_FAMILY = \"1,2\" in project.pbxproj as evidence",
         "The run fetched Apple's screenshot specification page, or recorded that it fell back to the dated snapshot in references/apple-specs.md",
@@ -30,7 +32,9 @@
       "name": "brewlog-landing-page",
       "prompt": "Here's our landing page: ../../eval-fixtures/appstore-assets/brewlog-site/index.html. We don't have the code handy. Make App Store screenshots for Brewlog, iPhone only, a bold brand direction using the site's copper and roast colors, no creatives. Go ahead without asking.",
       "expected_output": "Landing-page branch: screens grounded only on the page's two UI mocks (recipe list, pour timer), captions drawn from the page's own claims without its © line, iPhone screenshots that pass check_assets.py, and a report flagging that the screens come from marketing mocks rather than the app.",
-      "files": ["../../eval-fixtures/appstore-assets/brewlog-site/index.html"],
+      "files": [
+        "../../eval-fixtures/appstore-assets/brewlog-site/index.html"
+      ],
       "expectations": [
         "The app brief records the input as a landing page and derives the iPhone platform from the page text ('Available on iPhone' or 'for iPhone')",
         "Every recreated screen matches one of the page's two UI mocks: the Recipes list or the pour timer",
@@ -49,7 +53,9 @@
       "name": "trailmark-iphone-five-alternating",
       "prompt": "Prepare the App Store visuals for Trailmark (the project is at ../../eval-fixtures/appstore-assets/trailmark; work on a copy). iPhone only this time: five screenshots, alternating light and brand-colored frames, no creatives, and give me a preview I can look at. You have my go-ahead on the plan.",
       "expected_output": "Exactly five iPhone frames in both iPhone classes with matching names, alternating canvas treatment, no iPad or creative output, a preview pointer, and the standard four-line report.",
-      "files": ["../../eval-fixtures/appstore-assets/trailmark"],
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
       "expectations": [
         "iphone-6.3/ and iphone-6.9/ each hold exactly 5 PNGs with identical file names, at 1206x2622 and 1320x2868",
         "No ipad-13/ or creative/ files were rendered, because the user asked for iPhone only and no creatives",
@@ -66,7 +72,9 @@
       "name": "approval-gate-stops",
       "prompt": "Generate App Store screenshots for the app in ../../eval-fixtures/appstore-assets/trailmark (work on a copy).",
       "expected_output": "The run discovers the app and presents a plan with one combined question (direction, frames, UI source, extras), and writes no asset set before an answer. Ending without an answer, it reports BLOCKED with the pending question as the Decision.",
-      "files": ["../../eval-fixtures/appstore-assets/trailmark"],
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
       "expectations": [
         "The run produced an app brief (platforms iphone and ipad) before asking anything",
         "The run asked one combined question covering direction, frame list, UI source and extras",
@@ -117,10 +125,69 @@
       "name": "review-guideline-audit",
       "prompt": "Check my app against the App Store Review Guidelines before I submit. The project is in ../../eval-fixtures/appstore-assets/trailmark.",
       "expected_output": "A compliance audit, handled without generating screenshots.",
-      "files": ["../../eval-fixtures/appstore-assets/trailmark"],
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
       "expectations": [
         "The run did not invoke scripts/render.py or copy assets/template",
         "No screenshot or creative PNGs were written"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "happy-path",
+      "name": "trailmark-header-video-preauthorized",
+      "prompt": "Make the new product page header video for Trailmark 2.1 (the Xcode project is in ../../eval-fixtures/appstore-assets/trailmark; copy it and work on the copy). iPhone frames only, editorial light with the app's green, 10 seconds at 30 fps. It plays muted, so the message has to work without sound. Don't ask me anything, just build it.",
+      "expected_output": "A one-line plan instead of a question, a grounded iPhone asset set, and creative/header.png plus creative/header.mp4 at 3840x1646, 30 fps, 10 s, H.264 yuv420p with no audio track, passing check_assets.py including the loop-seam check, with a video sheet reviewed by a fresh reviewer, captions inside the art safe area, no Health-sync or Apple Watch claim, and a Result/Evidence/Uncertainty/Decision report that records the codec as an assumption.",
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
+      "expectations": [
+        "Because the prompt pre-authorized the run, it stated the plan (including the video beats) in one line and did not stop to ask a question",
+        "The run ran render.py --preflight --video, or reported ffmpeg/ffprobe availability before rendering the video",
+        "config.js sets creatives.video with kinds including \"header\", duration 10 and fps 30, and every video beat's hero and sides name frames that exist in config.js",
+        "creative/header.mp4 exists, and check_assets.py reports it as 3840x1646, h264, yuv420p, 30 fps CFR, 10.00 s, no audio, with a PASS row",
+        "creative/header.png exists at 3840x1646 and matches the video's first frame design (same headline)",
+        "check_assets.py was run with --sheet and wrote sheets/video-header.png, and its summary line says PASS",
+        "Every video caption is on-screen text; nothing in the plan or config relies on voice-over or sound",
+        "No beat presents Apple Health sync or an Apple Watch app",
+        "A reviewer separate from the builder checked the video sheet, or the report says the review ran inline because no Agent tool was available",
+        "The report's Uncertainty: line records that Apple states no codec for creative videos and H.264 was an assumption",
+        "The final report opens with Result: and has Evidence:, Uncertainty: and Decision: lines, and states nothing was committed or uploaded"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "happy-path",
+      "name": "trailmark-search-video",
+      "prompt": "For Trailmark (project at ../../eval-fixtures/appstore-assets/trailmark, work on a copy) we only want a search results video this time, 12 seconds, showing the trail log first and then the weekly stats. Use what you think looks best and go ahead.",
+      "expected_output": "A search results video at 3:2 (3744x2496 by default), 12 s at 30 or 60 fps, H.264 yuv420p, no audio, made of two beats built from grounded TrailListView and StatsView frames, passing check_assets.py; no header video is rendered.",
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
+      "expectations": [
+        "config.js sets creatives.video.kinds to [\"search\"] only and duration 12",
+        "The first video beat uses the trail log (TrailListView) frame as hero and a later beat uses the stats (StatsView) frame, each with a // Source: comment citing Views.swift",
+        "creative/search.mp4 exists at 3744x2496 (or another 3:2 size between 1920x1280 and 3840x2560) and check_assets.py reports 30 or 60 fps CFR, 12.00 s, h264 yuv420p, with a PASS row",
+        "No creative/header.mp4 was rendered",
+        "check_assets.py printed a PASS summary line",
+        "The final report opens with Result: and has Evidence:, Uncertainty: and Decision: lines"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "name": "app-preview-redirect",
+      "prompt": "Record a 30-second App Preview video of Trailmark with a voice-over walking through starting a hike. The project is in ../../eval-fixtures/appstore-assets/trailmark.",
+      "expected_output": "The run explains that App Previews (recorded app footage with audio) are out of scope for this skill, renders no video, and offers a muted product page header or search results video built from the app's screens instead, or a handoff to screen recording on a simulator.",
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
+      "expectations": [
+        "The run did not invoke scripts/render.py and wrote no .mp4, .mov or .m4v file",
+        "The response says App Previews are out of scope (recorded app footage, not a creative video)",
+        "The response offers a header or search results creative video, or a simulator screen recording, as the alternative",
+        "The run did not produce a voice-over script presented as a deliverable of this skill"
       ]
     }
   ]

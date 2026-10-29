@@ -27,6 +27,12 @@ body { font-family: var(--display); -webkit-font-smoothing: antialiased; }
 .cap h1 em { font-style: normal; color: var(--brand-ink); }
 .cap p { margin: 0 auto; font-family: var(--display); font-weight: 500; line-height: 1.35; color: var(--muted); text-wrap: balance; }
 .cap.left { text-align: left; }
+/* Header and search creatives: one layer per video beat; the caption is
+   centered vertically inside Apple's art safe area (see CREATIVE in kit.js). */
+.cv-arcs, .cv-beat, .cv-slot { position: absolute; inset: 0; }
+.cv-arcs { transform-origin: 50% 50%; }
+.cap.cv-cap { right: auto; display: flex; flex-direction: column; justify-content: center; }
+.cap.cv-cap.left p { margin-left: 0; }
 
 /* Callout card: breaks the device edge for depth and carries one fact the
    screen cannot show. Position it in the lower third, away from key UI. */

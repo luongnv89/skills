@@ -70,6 +70,7 @@ window.APP_CONFIG = {
 
   // Creative assets (product page header, search results, universal): set
   // enabled: true only when the user asked for them or approved them.
+  // header and search keep the caption inside Apple's art safe area.
   creatives: {
     enabled: false,
     kinds: ["header", "search", "universal"],  // keep only the placements the user asked for
@@ -79,5 +80,18 @@ window.APP_CONFIG = {
     searchSub: "",
     hero: { platform: "iphone", frame: "01-hero" },
     sides: [{ platform: "iphone", frame: "02-feature" }],
+    // Looping, muted header/search videos (creative/<kind>.mp4). Keep kinds empty
+    // unless the user asked for video. Beat 0 is the still above; each extra beat
+    // reuses existing frames only. Every beat needs max(2.5 s, 1 s + words / 4).
+    video: {
+      kinds: [],              // any of "header", "search"
+      duration: 12, fps: 30,  // 5–30 s; 30 or 60 fps
+      beats: [
+        // { headline: "TODO: Second idea. <em>Accent.</em>", sub: "", hero: { platform: "iphone", frame: "02-feature" } },
+      ],
+    },
+    // Optional Custom Product Page variants (one per ad creative), rendered to
+    // creative/<id>/. Each overrides any key above, e.g. kinds, headline, hero, video.
+    variants: [],
   },
 };

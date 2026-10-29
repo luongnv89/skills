@@ -69,14 +69,39 @@ and *Review your work the next day*. Its task: review the contact sheets
 against the static polish checklist above and return a Before/After table, in
 its required format, where every After is a change to `config.js` only: the
 `css` string (which overrides `kit.css`) or a brand token. Animation advice
-does not apply to static PNGs. After applying rows, re-render (Step 5).
+does not apply: static PNGs have none and the kit fixes the video motion. After applying rows, re-render (Step 5).
 
 ## Creative composition
 
-- Center the hero device; side devices sit lower and smaller, behind it.
-- Headline above, centered; one line on 21:9, up to two on 3:2.
-- The arc motif radiates from the hero device on wide stages only.
+- **Header (21:9):** the caption sits centered in Apple's art safe area (the
+  middle 43 % × 40 %); the hero device flanks it on the right and one side
+  device on the left. On a narrow crop only the caption shows, so it must
+  carry the idea alone. One line of headline, at most one supporting line.
+- **Search (3:2):** caption on the left of the safe area, hero device on its
+  right, both inside it ("show the firsthand experience"); up to two side
+  devices flank outside it. Up to two headline lines.
+- **Universal (16:9):** hero device centered, side devices lower and smaller
+  behind it, headline above.
+- The arc motif radiates from the stage center on wide stages only.
 - For a Mac-first app, the hero is the Mac window and a phone may flank it.
 - The caption names only the devices the image shows ("for iPhone and iPad"
   needs an iPad in the composition), and `kinds` lists only the placements
   the user asked for.
+
+## Motion (header and search videos)
+
+The kit owns the motion: a slow device drift, a 2 % arc breath, caption
+fades and device screen crossfades between beats. Direction choices are the
+beats and their order, not the animation.
+
+- **Muted first.** Every beat states its idea in on-screen text; never rely
+  on a voice-over, a sound cue or "turn sound on". The kit renders no audio.
+- **Start strong.** Beat 0 is the still, the single clearest idea; frame 0
+  is the poster frame.
+- **Few beats.** Two or three beats, each one idea from one grounded frame;
+  no quick cuts. A beat that needs a new screen needs a new grounded frame
+  first.
+- **Loop.** The video ends on beat 0; never add an intro, outro or logo
+  sting that breaks the loop.
+- **One header per ad.** For paid campaigns, plan one Custom Product Page
+  variant per ad creative, with the matching headline and hero.

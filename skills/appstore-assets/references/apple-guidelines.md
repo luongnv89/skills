@@ -64,6 +64,23 @@ do. The usual sources:
   glance, and showing the firsthand experience (real UI) works best.
 - Reuse one 16:9 universal master for both placements when the composition
   survives both crops.
+- Keep text and the main subject inside the art safe area (`apple-specs.md`).
+
+## Header and search videos (blocking unless marked)
+
+Rules C1–C8 and the overclaim traps apply to every beat of a video. Also:
+
+| # | Rule | Check |
+| --- | --- | --- |
+| V1 | Works muted: every claim is on-screen text; no voice-over dependence, no "sound on" prompt | Read each beat's caption on the video sheet |
+| V2 | Poster frame (frame 0) shows the headline complete, inside the safe area | First tile of the video sheet |
+| V3 | Loops without a jump: the last frame flows into the first | Seam pair on the video sheet; `check_assets.py` seam row |
+| V4 | No blank, clipped or half-faded frame on a hold | Every tile of the video sheet |
+| V5 | Only grounded frames: a beat shows no screen the stills do not show | Compare beats with `config.js` frames |
+| V6 | Not an app preview: no device-recorded footage, no simulated gameplay or flows the app lacks | Advisory: app previews are out of scope |
+
+Each Custom Product Page can carry its own header; one variant per ad
+creative keeps the ad's promise and the page's first image the same.
 
 ## Story and captions
 

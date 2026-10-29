@@ -179,16 +179,139 @@ function renderFrame(cfg, frame, platform, stageH) {
 }
 
 // Creative assets: one idea, focal point centered so device crops keep it.
+// header and search keep the caption and hero inside Apple's "Art Safe Area"
+// (the layer in Apple's Photoshop templates: header 1646 × 661 px, search
+// 2168 × 1030 px, centered; halved here for the ×2 stage). Slots are device
+// boxes { cx, cy, w, h }; flanking slots sit outside the safe area and only
+// show on wide displays. The PNG is the video's first frame (t = 0).
 const CREATIVE = {
-  header: { w: 1920, h: 823, capTop: 70, h1: 68, sub: 24, devTop: 250, hero: 0.86, side: 0.74, dx: 330, dy: 70 },
-  search: { w: 1920, h: 1280, capTop: 92, h1: 84, sub: 28, devTop: 336, hero: 1.04, side: 0.9, dx: 400, dy: 84 },
+  header: { w: 1920, h: 823, safe: { x: 548.5, y: 246.5, w: 823, h: 330.5 }, h1: 60, sub: 24, align: "center",
+    cap: { x: 568.5, y: 246.5, w: 783, h: 330.5 },
+    slots: { hero: { cx: 1646, cy: 411.5, w: 440, h: 700 }, side0: { cx: 274, cy: 411.5, w: 440, h: 700 } } },
+  search: { w: 1920, h: 1280, safe: { x: 418, y: 382.5, w: 1084, h: 515 }, h1: 56, sub: 24, align: "left",
+    cap: { x: 438, y: 382.5, w: 640, h: 515 },
+    slots: { hero: { cx: 1270, cy: 640, w: 440, h: 480 }, side0: { cx: 1711, cy: 640, w: 300, h: 400 }, side1: { cx: 209, cy: 640, w: 300, h: 400 } } },
   universal: { w: 2622, h: 1475, capTop: 110, h1: 96, sub: 32, devTop: 372, hero: 1.2, side: 1.02, dx: 470, dy: 96 },
 };
 // A Mac or iPad hero is larger than a phone in points; normalize to phone height.
 const HERO_NORM = { iphone: 1, ipad: 874 / 1376 * 1.25, mac: 874 / 750 * 0.85 };
+const VIDEO_KINDS = ["header", "search"];
 
-function renderCreative(cfg, kind) {
-  const C = CREATIVE[kind], cr = cfg.creatives, frames = Object.fromEntries(cfg.frames.map((f) => [f.id, f]));
+// The creatives config for the default page or one Custom Product Page variant.
+function creativeConfig(cfg, variant) {
+  const cr = cfg.creatives || {};
+  if (!variant) return cr;
+  const v = (cr.variants || []).find((x) => x.id === variant);
+  if (!v) throw new Error(`creatives.variants: no variant "${variant}"`);
+  // A variant keeps the base timing but not its extra beats, and a variant
+  // headline or sub replaces the base search wording unless it sets its own.
+  const merged = { ...cr, ...v, video: { ...(cr.video || {}), beats: [], ...(v.video || {}) } };
+  if (v.headline !== undefined && v.searchHeadline === undefined) delete merged.searchHeadline;
+  if (v.sub !== undefined && v.searchSub === undefined) delete merged.searchSub;
+  return merged;
+}
+
+// ---------- Video timeline (header and search videos) ----------
+// Beat 0 is the still design (headline, sub, hero, sides); creatives.video.beats
+// adds more, each built only from existing grounded frames. Every beat holds,
+// then crossfades into the next. The last crossfade lands on beat 0 `lead`
+// seconds before the end, so the loop seam falls inside beat 0's hold and the
+// first frame (the poster frame) already shows the headline. Every value is a
+// pure function of t, so a re-render gives the same frames.
+// Dwell rule: every beat holds at least max(2.5 s, 1 s + words / 4) of its
+// headline and supporting line (about 240 words a minute plus a second to find the text).
+const VIDEO = { duration: 12, fps: 30, transition: 0.8, minHold: 2.5, wordsPerSec: 4 };
+
+function videoBeats(cr, kind) {
+  const first = { headline: (kind === "search" && cr.searchHeadline) || cr.headline,
+    sub: kind === "search" ? (cr.searchSub ?? "") : (cr.sub ?? ""), hero: cr.hero, sides: cr.sides || [] };
+  return [first, ...((cr.video && cr.video.beats) || []).map((b) => ({
+    headline: (kind === "search" && b.searchHeadline) || b.headline || first.headline,
+    sub: kind === "search" ? (b.searchSub ?? b.sub ?? "") : (b.sub ?? ""),
+    hero: b.hero || first.hero, sides: b.sides || first.sides,
+  }))];
+}
+
+function videoTimeline(cr, kind) {
+  const v = cr.video || {}, D = v.duration ?? VIDEO.duration, fps = v.fps ?? VIDEO.fps, T = v.transition ?? VIDEO.transition;
+  const beats = videoBeats(cr, kind), n = beats.length, errors = [];
+  const hold = n === 1 ? D : (D - n * T) / n, lead = n === 1 ? 0 : Math.min(0.5, hold / 4);
+  const words = (b) => `${b.headline} ${b.sub}`.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+  // Beat 0 is seen for hold - lead before the first crossfade, so it must read in that time.
+  const need = beats.map((b) => Math.max(VIDEO.minHold, 1 + words(b) / VIDEO.wordsPerSec));
+  const short = need.findIndex((x, i) => (i === 0 ? hold - lead : hold) < x - 1e-9);
+  if (!(D >= 5 && D <= 30)) errors.push(`${kind} video: duration ${D} s is outside Apple's 5–30 s`);
+  if (fps !== 30 && fps !== 60) errors.push(`${kind} video: fps ${fps} must be 30 or 60`);
+  if (Math.abs(D * fps - Math.round(D * fps)) > 1e-6) errors.push(`${kind} video: duration × fps must be a whole frame count`);
+  if (short >= 0) errors.push(`${kind} video: ${n} beats in ${D} s hold beat ${short} for ${(short === 0 ? hold - lead : hold).toFixed(2)} s, its caption needs ${need[short].toFixed(2)} s (raise creatives.video.duration, shorten the caption or drop a beat)`);
+  const segs = [];
+  let t = 0;
+  for (let i = 0; i < n; i++) {
+    const h = i === 0 ? hold - lead : hold;
+    segs.push({ beat: i, t0: t, t1: t + h }); t += h;
+    if (n > 1) { segs.push({ from: i, to: (i + 1) % n, t0: t, t1: t + T }); t += T; }
+  }
+  if (n > 1) segs.push({ beat: 0, t0: t, t1: D });
+  return { duration: D, fps, frames: Math.round(D * fps), transition: T, hold: +hold.toFixed(3), lead, beats, segs, errors };
+}
+
+const ease = (x) => { const u = Math.min(1, Math.max(0, x)); return u * u * (3 - 2 * u); };
+
+// Applies the state at time t to a rendered header/search stage.
+function seekCreative(stage, tl, t) {
+  const D = tl.duration, w = 2 * Math.PI * (((t % D) + D) % D) / D;
+  const seg = tl.segs.find((s) => t >= s.t0 && t < s.t1) || tl.segs[0];
+  const u = seg.beat === undefined ? (t - seg.t0) / (seg.t1 - seg.t0) : 0;
+  const arcs = stage.querySelector(".cv-arcs");
+  if (arcs) arcs.style.transform = `scale(${(1 + 0.02 * Math.sin(w)).toFixed(5)})`;
+  for (const beat of stage.querySelectorAll(".cv-beat")) {
+    const i = +beat.dataset.beat, on = seg.beat === i, from = seg.from === i, to = seg.to === i;
+    beat.style.visibility = on || from || to ? "visible" : "hidden";
+    beat.style.zIndex = to ? 2 : 1;
+    const cap = beat.querySelector(".cv-cap");
+    const capA = on ? 1 : from ? 1 - ease(u / 0.45) : to ? ease((u - 0.55) / 0.45) : 0;
+    cap.style.opacity = capA.toFixed(4);
+    cap.style.transform = `translateY(${(from ? -10 * (1 - capA) : to ? 10 * (1 - capA) : 0).toFixed(3)}px)`;
+    for (const slot of beat.querySelectorAll(".cv-slot")) {
+      // Same slot, same platform on both sides of a crossfade: the incoming
+      // device fades in over the outgoing one without its own shadow, so only
+      // the screen changes. Otherwise the two devices fade out and in.
+      const name = slot.dataset.slot, phase = { hero: 0, side0: 2.1, side1: 4.2 }[name];
+      const peer = from || to ? stage.querySelector(`.cv-beat[data-beat="${from ? seg.to : seg.from}"] .cv-slot[data-slot="${name}"]`) : null;
+      const same = !!peer && peer.dataset.platform === slot.dataset.platform;
+      const a = on ? 1 : to ? ease(u) : from ? (same ? 1 : 1 - ease(u)) : 0;
+      slot.style.opacity = a.toFixed(4);
+      slot.style.transform = `translateY(${(8 * Math.sin(w + phase)).toFixed(3)}px)`;
+      const body = slot.querySelector(".device, .macwin");
+      if (body) body.style.boxShadow = to && same ? "none" : "";
+    }
+  }
+}
+
+function renderSafeCreative(cfg, kind, cr) {
+  const C = CREATIVE[kind], frames = Object.fromEntries(cfg.frames.map((f) => [f.id, f])), tl = videoTimeline(cr, kind);
+  const slot = (ref, name) => {
+    const f = frames[ref.frame], S = C.slots[name];
+    if (!f || !f.screens[ref.platform]) throw new Error(`creatives: frame "${ref.frame}" has no ${ref.platform} screen`);
+    const sz = deviceSize(ref.platform, 1), s = Math.min(S.w / sz.w, S.h / sz.h);
+    return `<div class="cv-slot" data-slot="${name}" data-platform="${ref.platform}" style="z-index:${name === "hero" ? 2 : 1}">${device(ref.platform, f.screens[ref.platform](),
+      { scale: s, left: S.cx - sz.w * s / 2, top: S.cy - sz.h * s / 2, cls: name === "hero" ? "" : "side" })}</div>`;
+  };
+  const beats = tl.beats.map((b, i) => {
+    const sides = b.sides.slice(0, Object.keys(C.slots).length - 1).map((r, k) => slot(r, `side${k}`));
+    return `<div class="cv-beat" data-beat="${i}">${sides.join("")}${slot(b.hero, "hero")}
+      <div class="cap cv-cap${C.align === "left" ? " left" : ""}" style="left:${C.cap.x}px;top:${C.cap.y}px;width:${C.cap.w}px;height:${C.cap.h}px">
+        <h1 style="font-size:${C.h1}px">${b.headline}</h1>${b.sub ? `<p style="font-size:${C.sub}px;margin-top:14px">${b.sub}</p>` : ""}</div></div>`;
+  });
+  const cx = C.w / 2, cy = C.safe.y + C.safe.h / 2, r0 = C.safe.w * 0.62;
+  return `<section class="stage" data-creative="${kind}" style="width:${C.w}px;height:${C.h}px;--glow:${cfg.brand.glow}">
+    <div class="cv-arcs">${arcs(cx, cy, [r0, r0 + 90, r0 + 190], C.w, C.h, cfg.brand.brand)}</div>${beats.join("")}</section>`;
+}
+
+function renderCreative(cfg, kind, variant) {
+  const cr = creativeConfig(cfg, variant);
+  if (CREATIVE[kind].safe) return renderSafeCreative(cfg, kind, cr);
+  const C = CREATIVE[kind], frames = Object.fromEntries(cfg.frames.map((f) => [f.id, f]));
   const pick = (ref, s, dx, dy, cls) => {
     const f = frames[ref.frame];
     if (!f || !f.screens[ref.platform]) throw new Error(`creatives: frame "${ref.frame}" has no ${ref.platform} screen`);
@@ -242,10 +365,25 @@ async function renderFromQuery(cfg) {
       try { html.push(renderFrame(cfg, f, p, 1000)); } catch (e) { errors.push(`frame ${f.id} (${p}): ${e.message}`); }
       errors.push(...KIT_ERRORS.map((m) => `frame ${f.id} (${p}): ${m}`));
     }
-    const kinds = cfg.creatives?.enabled ? (cfg.creatives.kinds || Object.keys(CREATIVE)) : [];
-    for (const k of kinds.filter((x) => !CREATIVE[x])) errors.push(`creatives.kinds: unknown kind "${k}" (use header, search, universal)`);
-    for (const k of kinds.filter((x) => CREATIVE[x])) {
-      try { html.push(renderCreative(cfg, k)); } catch (e) { errors.push(`creative ${k}: ${e.message}`); }
+    const variants = cfg.creatives?.enabled ? (cfg.creatives.variants || []).map((v) => v.id) : [];
+    for (const id of variants.filter((x) => !/^[a-z0-9][a-z0-9-]*$/.test(String(x)))) errors.push(`creatives.variants: id "${id}" must be lowercase letters, digits and hyphens`);
+    const stills = [], video = [];
+    for (const variant of cfg.creatives?.enabled ? [null, ...variants] : []) {
+      const tag = variant ? ` (variant ${variant})` : "", cr = creativeConfig(cfg, variant);
+      const kinds = cr.kinds || Object.keys(CREATIVE), videoKinds = cr.video?.kinds || [];
+      for (const k of kinds.filter((x) => !CREATIVE[x])) errors.push(`creatives.kinds${tag}: unknown kind "${k}" (use header, search, universal)`);
+      for (const k of videoKinds.filter((x) => !VIDEO_KINDS.includes(x))) errors.push(`creatives.video.kinds${tag}: "${k}" has no video placement (use header, search)`);
+      stills.push(...kinds.filter((x) => CREATIVE[x]).map((kind) => ({ kind, variant })));
+      for (const k of [...new Set([...kinds, ...videoKinds])].filter((x) => CREATIVE[x])) {
+        try { html.push(renderCreative(cfg, k, variant)); } catch (e) { errors.push(`creative ${k}${tag}: ${e.message}`); }
+      }
+      for (const k of videoKinds.filter((x) => VIDEO_KINDS.includes(x))) {
+        try {
+          const { beats, segs, ...tl } = videoTimeline(creativeConfig(cfg, variant), k);
+          errors.push(...tl.errors.map((m) => m + tag));
+          video.push({ kind: k, variant, beats: beats.length, ...tl, errors: undefined });
+        } catch (e) { errors.push(`video ${k}${tag}: ${e.message}`); }
+      }
     }
     root.innerHTML = html.join("");
     await Promise.all([...root.querySelectorAll("img")].map((img) => img.complete ? null :
@@ -264,7 +402,7 @@ async function renderFromQuery(cfg) {
       app: cfg.app, version: cfg.version, platforms: cfg.platforms, fontOk, errors: [...new Set(errors)],
       contrast: pairs.map(([fg, bg, min]) => ({ fg, bg, min })),
       frames: cfg.frames.map((f) => ({ id: f.id, platforms: cfg.platforms.filter((p) => f.screens[p]) })),
-      creatives: kinds.filter((x) => CREATIVE[x]),
+      creatives: stills, video,
     });
     root.id = "manifest";
     return;
@@ -275,7 +413,20 @@ async function renderFromQuery(cfg) {
     const f = cfg.frames.find((x) => x.id === q.get("frame")), platform = (q.get("cls") || "iphone").split("-")[0];
     root.innerHTML = renderFrame(cfg, f, platform, (+q.get("h") || 956) / zoom);
   } else if (q.get("creative")) {
-    root.innerHTML = renderCreative(cfg, q.get("creative"));
+    // &variant=ID picks a Custom Product Page variant; &t=SEC shows that
+    // moment of the video. render.py seeks video frames through __seek(t).
+    const kind = q.get("creative"), variant = q.get("variant");
+    root.innerHTML = renderCreative(cfg, kind, variant);
+    if (CREATIVE[kind].safe) {
+      const stage = root.firstElementChild, tl = videoTimeline(creativeConfig(cfg, variant), kind);
+      const frame = () => new Promise((ok) => { requestAnimationFrame(() => ok()); setTimeout(ok, 100); });
+      window.__seek = async (t) => { seekCreative(stage, tl, t); await frame(); return t; };
+      seekCreative(stage, tl, +q.get("t") || 0);
+    }
+    await Promise.all([...root.querySelectorAll("img")].map((img) => img.complete ? null :
+      new Promise((ok) => { img.onload = img.onerror = ok; })));
+    await document.fonts.ready;
+    window.__ready = true;
   } else {
     root.style.cssText = "display:flex;flex-wrap:wrap;gap:24px;padding:24px;align-items:flex-start";
     root.innerHTML = cfg.platforms.flatMap((p) => cfg.frames.filter((f) => f.screens[p]).map((f) =>
