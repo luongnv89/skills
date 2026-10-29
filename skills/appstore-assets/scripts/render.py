@@ -431,6 +431,8 @@ def main() -> None:
     binary = find_chrome(a.chrome)
     out = (a.out or a.src.resolve().parent).resolve()
     manifest = read_manifest(binary, index)
+    videos = [] if a.no_video else [v for v in manifest.get("video", []) if not a.only or v["kind"] in a.only]
+    tools = find_ffmpeg() if videos else None  # before any screenshot, so a missing ffmpeg fails fast
     if any(isinstance(c, str) for c in manifest.get("creatives", [])):
         fail("src/kit.js is older than this render.py (its manifest lists creatives as plain names).",
              "copy kit.js, kit.css and index.html from the skill's assets/template/ into src/ (config.js stays), then re-run.")
@@ -453,8 +455,6 @@ def main() -> None:
             shoot(binary, f"{index.as_uri()}?{q}", spec["w"], spec["h"], spec["scale"], target, spec["px"])
             written.add(target.resolve())
             count += 1
-    videos = [] if a.no_video else [v for v in manifest.get("video", []) if not a.only or v["kind"] in a.only]
-    tools = find_ffmpeg() if videos else None
     for still in manifest.get("creatives", []):  # {kind, variant}; a variant renders into creative/<variant>/
         kind, variant = still["kind"], still["variant"]
         if a.only and kind not in a.only:
