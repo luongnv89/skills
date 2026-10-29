@@ -42,6 +42,7 @@ import os
 import re
 import select
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -347,7 +348,17 @@ def shoot(binary: str, url: str, w: int, h: int, scale: int, out: Path, expected
     print(f"ok  {out}  {img.size[0]}x{img.size[1]}")
 
 
+def stop_on_signal(signum: int, _frame) -> None:
+    """SIGTERM/SIGHUP (a closed terminal or a stopped agent) exit through the
+    normal cleanup, so no Chrome, ffmpeg or .partial.mp4 outlives the run."""
+    print(f"Error: render stopped by signal {signum}; cleaning up.", file=sys.stderr)
+    sys.exit(128 + signum)
+
+
 def main() -> None:
+    for sig in (signal.SIGTERM, getattr(signal, "SIGHUP", None)):
+        if sig is not None:
+            signal.signal(sig, stop_on_signal)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("src", type=Path, nargs="?", help="asset-set src/ folder holding index.html and config.js")
     ap.add_argument("--preflight", action="store_true", help="only check that Pillow and Chrome are available, then exit")
