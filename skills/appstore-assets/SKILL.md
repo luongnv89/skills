@@ -5,7 +5,7 @@ license: MIT
 effort: high
 dependencies:
   - frontend-design
-  - github:emilkowalski/skills:skills/emil-design-eng
+  - "github:emilkowalski/skills:skills/emil-design-eng"
   - browse
 metadata:
   version: 1.1.0
