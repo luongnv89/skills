@@ -19,7 +19,7 @@ Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
 - Plans the story with Apple's guidance: core promise in the first three frames, short captions that add to the screen
 - Uses `frontend-design` for the marketing canvas and `emil-design-eng` for a polish pass, then a fresh reviewer checks every frame
 - Verifies sizes, the RGB/no-alpha rule, per-class counts and caption contrast with a bundled checker
-- Turns the header and search creatives into looping, muted videos (header 3840 × 1646, search 3744 × 2496, 30 or 60 fps, 5–30 s): captions carry the message without sound, every frame is reproducible, the last frame flows into the first, and the key text stays inside Apple's art safe area
+- Turns the header and search creatives into looping, muted videos (header 3840 × 1646, search 3744 × 2496 at 30 fps or 3600 × 2400 at 60 fps, 5–30 s): captions carry the message without sound, every frame is reproducible, the last frame flows into the first, and the key text stays inside Apple's art safe area
 - Checks each video with ffprobe (size, constant 30/60 fps, duration, H.264 yuv420p, audio) and writes a video sheet so a reviewer can check every caption and the loop seam without playing it
 - Optional Custom Product Page variants: one header per ad creative, rendered to `creative/<variant>/`
 

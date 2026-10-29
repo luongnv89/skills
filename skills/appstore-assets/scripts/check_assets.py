@@ -10,7 +10,7 @@ contrast checks cover caption color pairs.
 Header and search videos under creative/ (and creative/<variant>/) are checked
 with ffprobe: .mov/.m4v/.mp4, exact size (header 3840x1646, search 3:2 from
 1920x1280 to 3840x2560), 30 or 60 fps at a constant rate, 5-30 s, H.264
-yuv420p, and the audio-track rule. With ffmpeg, a blank frame or a jump at the
+yuv420p (the level is reported; above 5.2 is a warning), and the audio-track rule. With ffmpeg, a blank frame or a jump at the
 loop seam also fails, and --sheet writes one video sheet per file: frames at
 most 2 s apart with Apple's art safe area outlined, plus the seam pair.
 
@@ -158,10 +158,15 @@ def inspect_video(path: Path, kind: str, ffprobe: str) -> tuple[list[str], list[
     duration = float(v.get("duration") or fmt.get("duration") or 0)
     if not 5 - 1e-3 <= duration <= 30 + 1e-3:
         problems.append(f"{duration:.2f} s is outside Apple's 5-30 s (set creatives.video.duration)")
-    codec, pix, profile = v.get("codec_name"), v.get("pix_fmt"), v.get("profile", "")
+    codec, pix, profile, level = v.get("codec_name"), v.get("pix_fmt"), v.get("profile", ""), v.get("level")
     if codec == "h264":
         if pix != "yuv420p":
             problems.append(f"H.264 with {pix}; use 8-bit 4:2:0 (-pix_fmt yuv420p)")
+        if isinstance(level, int) and level > 0:
+            profile += f" L{level // 10}.{level % 10}"
+            if level > 52:
+                notes.append(f"H.264 Level {level // 10}.{level % 10} is above 5.2; Apple states no level for creative videos, "
+                             "and the kit has not tested one above 5.2 with App Store Connect")
     elif codec == "prores":
         notes.append("ProRes: accepted for app previews (422 HQ in .mov); Apple states no codec for creative videos")
     elif codec == "hevc":

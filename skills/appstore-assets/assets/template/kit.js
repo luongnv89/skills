@@ -243,6 +243,8 @@ function videoTimeline(cr, kind) {
   if (!(D >= 5 && D <= 30)) errors.push(`${kind} video: duration ${D} s is outside Apple's 5–30 s`);
   if (fps !== 30 && fps !== 60) errors.push(`${kind} video: fps ${fps} must be 30 or 60`);
   if (Math.abs(D * fps - Math.round(D * fps)) > 1e-6) errors.push(`${kind} video: duration × fps must be a whole frame count`);
+  const searchSize = kind === "search" ? v.searchSize ?? null : null;
+  if (searchSize !== null && searchSize !== "max") errors.push(`search video: searchSize "${searchSize}" must be "max" or left out`);
   if (short >= 0) errors.push(`${kind} video: ${n} beats in ${D} s hold beat ${short} for ${(short === 0 ? hold - lead : hold).toFixed(2)} s, its caption needs ${need[short].toFixed(2)} s (raise creatives.video.duration, shorten the caption or drop a beat)`);
   const segs = [];
   let t = 0;
@@ -252,7 +254,7 @@ function videoTimeline(cr, kind) {
     if (n > 1) { segs.push({ from: i, to: (i + 1) % n, t0: t, t1: t + T }); t += T; }
   }
   if (n > 1) segs.push({ beat: 0, t0: t, t1: D });
-  return { duration: D, fps, frames: Math.round(D * fps), transition: T, hold: +hold.toFixed(3), lead, beats, segs, errors };
+  return { duration: D, fps, frames: Math.round(D * fps), transition: T, hold: +hold.toFixed(3), lead, searchSize, beats, segs, errors };
 }
 
 const ease = (x) => { const u = Math.min(1, Math.max(0, x)); return u * u * (3 - 2 * u); };

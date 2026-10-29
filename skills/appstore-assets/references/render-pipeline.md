@@ -80,7 +80,7 @@ window.APP_CONFIG = {
   creatives: { enabled /* only when requested */, kinds: ["header", "search", "universal"],
                headline, sub, searchHeadline, searchSub,
                hero: { platform, frame }, sides: [{ platform, frame }],
-               video: { kinds: ["header", "search"], duration: 12, fps: 30, transition: 0.8,
+               video: { kinds: ["header", "search"], duration: 12, fps: 30, transition: 0.8, searchSize?: "max",
                         beats: [{ headline, sub, searchHeadline?, searchSub?, hero?, sides? }] },
                variants: [{ id: "tiktok-trails", kinds?, headline?, hero?, video?: { … } }] },
 };
@@ -101,8 +101,12 @@ headless Chrome with `--remote-debugging-pipe` (CDP over fds 3/4, standard
 library only), seeks with `window.__seek(i / fps)`, captures each frame with
 `Page.captureScreenshot`, and pipes the PNGs to ffmpeg: libx264 High, CRF 18,
 yuv420p, BT.709 (tagged), constant frame rate, no audio, `+faststart`. The
-search video is 3744 × 2496 (the stage at ×1.95) so it stays within H.264
-Level 5.2; the search still stays 3840 × 2560. Open
+search video is 3744 × 2496 at 30 fps (the stage at ×1.95) and 3600 × 2400
+at 60 fps (×1.875), the largest 3:2 sizes within H.264 Level 5.2 at each
+rate; `render.py` passes the level to x264 explicitly (5.1 for the header at
+30 fps, 5.2 otherwise). `searchSize: "max"` in `creatives.video` renders
+3840 × 2560 instead, which needs Level 6.0 and is untested with App Store
+Connect. The search still stays 3840 × 2560. Open
 `src/index.html?creative=header&t=3.2` in Chrome to see any moment.
 
 Alternatives rejected: one `--screenshot` Chrome launch per frame (about a

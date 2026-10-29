@@ -67,7 +67,8 @@ Apple's words: "Images can't include alpha channels or transparencies."
 unmuted. On your product page, videos are also muted by default, but people
 can unmute them. Videos loop continuously in both placements." There is no
 16:9 universal video. The kit renders the header video at 3840 × 1646 and the
-search video at 3744 × 2496 (see the encoding decisions below).
+search video at 3744 × 2496 at 30 fps and 3600 × 2400 at 60 fps (see the
+encoding decisions below).
 
 Best practices (video): "Select an impactful poster frame" (the first image
 before playback), "Start strong", avoid quick cuts and fast-moving visuals,
@@ -96,12 +97,12 @@ same placement (assumption: the placement and its crops are the same).
 
 | Question | Apple states | Kit choice |
 | --- | --- | --- |
-| Codec and profile | Nothing for creative videos. App previews: H.264 (up to High Profile Level 4.0) or ProRes 422 HQ; no HEVC | **Assumption:** H.264 High, 8-bit yuv420p, BT.709. Level 4.0 cannot hold 3840 px frames, so x264 picks Level 5.1 or 5.2. `check_assets.py` fails other codecs, warns on HEVC and ProRes |
+| Codec and profile | Nothing for creative videos. App previews: H.264 (up to High Profile Level 4.0) or ProRes 422 HQ; no HEVC | **Assumption:** H.264 High, 8-bit yuv420p, BT.709. Level 4.0 cannot hold 3840 px frames, so `render.py` passes the lowest level that fits to x264: 5.1 for the header at 30 fps, 5.2 for the header at 60 fps and for the default search sizes, 6.0 only for the opt-in 3840 × 2560 search video. `check_assets.py` reports the level (WARN above 5.2, since Apple states none), fails other codecs, warns on HEVC and ProRes |
 | Audio track | Allowed implicitly: header audio can be unmuted, search audio never plays | **Kit rule:** render no audio track. A track in a supplied file is a WARN, never a FAIL |
 | File size | Nothing for creative videos (In-App Event images: 500 MB; app previews: 500 MB) | **Assumption:** fail above 500 MB; rendered loops are a few MB |
 | Constant frame rate | "30 fps or 60 fps" only | **Assumption:** CFR (frames piped at a fixed `-framerate`, encoded with `-r`), checked from packet timestamps |
 | Container | .mov, .m4v or .mp4 | MP4 with `+faststart`, no metadata |
-| Search video size | Any 3:2 from 1920 × 1280 to 3840 × 2560 | **Assumption:** 3744 × 2496, the largest 3:2 size within H.264 Level 5.2 (3840 × 2560 needs Level 6.0, which many hardware decoders do not support). The still stays 3840 × 2560 |
+| Search video size | Any 3:2 from 1920 × 1280 to 3840 × 2560 | **Assumption:** the largest macroblock-aligned 3:2 size within H.264 Level 5.2 at the chosen frame rate: 3744 × 2496 at 30 fps, 3600 × 2400 at 60 fps (Level 5.2 allows 36,864 macroblocks per frame and 2,073,600 per second; 3744 × 2496 at 60 fps needs 2,190,240). `creatives.video.searchSize: "max"` renders Apple's maximum 3840 × 2560, which needs Level 6.0 (38,400 macroblocks per frame) and is untested with App Store Connect. The still stays 3840 × 2560 |
 | Color | Nothing | BT.709 primaries, transfer and matrix, limited range, tagged in the stream |
 
 ## Out of scope

@@ -28,7 +28,8 @@ Outputs (OUT_DIR defaults to SRC_DIR's parent):
   ipad-13/<id>.png     2064 x 2752   iPad 13-inch display
   mac/<id>.png         2880 x 1800   Mac, 16:10
   creative/header.png 3840 x 1646 · search.png 3840 x 2560 · universal.png 5244 x 2950
-  creative/header.mp4 3840 x 1646 · search.mp4 3744 x 2496 (30 or 60 fps, 5-30 s, looping)
+  creative/header.mp4 3840 x 1646 · search.mp4 3744 x 2496 at 30 fps, 3600 x 2400 at 60 fps
+                      (30 or 60 fps, 5-30 s, looping)
   creative/<variant>/... the same files per Custom Product Page variant
 """
 
@@ -70,11 +71,15 @@ CREATIVES = {
     "search": {"w": 1920, "h": 1280, "scale": 2, "px": (3840, 2560)},
     "universal": {"w": 2622, "h": 1475, "scale": 2, "px": (5244, 2950)},
 }
-# Videos: the header as above; search at 3744 x 2496, the largest 3:2 size whose
-# H.264 stream stays within Level 5.2 (3840 x 2560 needs Level 6.0, beyond many decoders).
 KIT_OUTPUTS = {f"{k}.png" for k in CREATIVES} | {"header.mp4", "search.mp4"}  # what creative/ can hold
 VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # kit.js checks creatives.variants ids against the same pattern
-VIDEO_SPECS = {"header": CREATIVES["header"], "search": {"w": 1920, "h": 1280, "scale": 1.95, "px": (3744, 2496)}}
+# Videos: the header as above. Search defaults to the largest macroblock-aligned
+# 3:2 size within H.264 Level 5.2 at its frame rate: 3744 x 2496 at 30 fps (the
+# stage at x1.95), 3600 x 2400 at 60 fps (x1.875). creatives.video.searchSize
+# "max" opts into Apple's maximum 3840 x 2560, which needs Level 6.0.
+SEARCH_SCALE = {30: 1.95, 60: 1.875}
+# H.264 Table A-1: (level, max frame size in macroblocks, max macroblocks per second).
+H264_LEVELS = [("5.1", 36864, 983040), ("5.2", 36864, 2073600), ("6.0", 139264, 4177920)]
 CHROME_CANDIDATES = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
@@ -123,6 +128,19 @@ def find_ffmpeg() -> tuple[str, str]:
              "install ffmpeg (macOS: brew install ffmpeg; Debian/Ubuntu: sudo apt install ffmpeg), set FFMPEG and "
              "FFPROBE to the binaries, or pass --no-video to render the stills only.")
     return found["ffmpeg"], found["ffprobe"]
+
+
+def video_spec(video: dict) -> dict:
+    if video["kind"] == "header" or video.get("searchSize") == "max":
+        return CREATIVES[video["kind"]]
+    scale = SEARCH_SCALE[video["fps"]]
+    return {"w": 1920, "h": 1280, "scale": scale, "px": (round(1920 * scale), round(1280 * scale))}
+
+
+def h264_level(w: int, h: int, fps: int) -> str:
+    """The lowest of Levels 5.1, 5.2 and 6.0 that holds w x h at fps; passed to x264 explicitly."""
+    mbs = -(-w // 16) * -(-h // 16)
+    return next(level for level, max_fs, max_mbps in H264_LEVELS if mbs <= max_fs and mbs * fps <= max_mbps)
 
 
 class Browser:
@@ -227,7 +245,7 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
     enc = subprocess.Popen(
         [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "png", "-i", "-",
          "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv", "-c:v", "libx264", "-profile:v", "high",
-         "-preset", "veryfast", "-crf", "18", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+         "-level:v", h264_level(pw, ph, fps), "-preset", "veryfast", "-crf", "18", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
          "-color_range", "tv", "-r", str(fps), "-an", "-map_metadata", "-1",
          "-fflags", "+bitexact", "-flags:v", "+bitexact", "-movflags", "+faststart", str(tmp)],
         stdin=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -451,7 +469,7 @@ def main() -> None:
         kind, variant = video["kind"], video["variant"]
         target = out / "creative" / (variant or "") / f"{kind}.mp4"
         render_video(binary, tools, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
-                     VIDEO_SPECS[kind], video, target)
+                     video_spec(video), video, target)
         written.add(target.resolve())
         count += 1
     if count == 0:

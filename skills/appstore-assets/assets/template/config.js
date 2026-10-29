@@ -86,6 +86,8 @@ window.APP_CONFIG = {
     video: {
       kinds: [],              // any of "header", "search"
       duration: 12, fps: 30,  // 5–30 s; 30 or 60 fps
+      // The search video is 3744 × 2496 at 30 fps, 3600 × 2400 at 60 fps (H.264 Level 5.2).
+      // searchSize: "max",   // 3840 × 2560 instead: needs Level 6.0, untested with App Store Connect
       beats: [
         // { headline: "TODO: Second idea. <em>Accent.</em>", sub: "", hero: { platform: "iphone", frame: "02-feature" } },
       ],

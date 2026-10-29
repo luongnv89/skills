@@ -161,14 +161,14 @@
       "kind": "happy-path",
       "name": "trailmark-search-video",
       "prompt": "For Trailmark (project at ../../eval-fixtures/appstore-assets/trailmark, work on a copy) we only want a search results video this time, 12 seconds, showing the trail log first and then the weekly stats. Use what you think looks best and go ahead.",
-      "expected_output": "A search results video at 3:2 (3744x2496 by default), 12 s at 30 or 60 fps, H.264 yuv420p, no audio, made of two beats built from grounded TrailListView and StatsView frames, passing check_assets.py; no header video is rendered.",
+      "expected_output": "A search results video at 3:2 (3744x2496 at 30 fps or 3600x2400 at 60 fps by default, H.264 Level 5.2), 12 s, H.264 yuv420p, no audio, made of two beats built from grounded TrailListView and StatsView frames, passing check_assets.py; no header video is rendered.",
       "files": [
         "../../eval-fixtures/appstore-assets/trailmark"
       ],
       "expectations": [
         "config.js sets creatives.video.kinds to [\"search\"] only and duration 12",
         "The first video beat uses the trail log (TrailListView) frame as hero and a later beat uses the stats (StatsView) frame, each with a // Source: comment citing Views.swift",
-        "creative/search.mp4 exists at 3744x2496 (or another 3:2 size between 1920x1280 and 3840x2560) and check_assets.py reports 30 or 60 fps CFR, 12.00 s, h264 yuv420p, with a PASS row",
+        "creative/search.mp4 exists at 3744x2496 at 30 fps or 3600x2400 at 60 fps (3840x2560 only if the run set searchSize \"max\") and check_assets.py reports 30 or 60 fps CFR, 12.00 s, h264 yuv420p at Level 5.2 or lower, with a PASS row",
         "No creative/header.mp4 was rendered",
         "check_assets.py printed a PASS summary line",
         "The final report opens with Result: and has Evidence:, Uncertainty: and Decision: lines"
