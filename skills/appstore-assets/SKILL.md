@@ -52,9 +52,20 @@ Completion Report: `√`/`×` rows tied to commands, files or counts, then
 | --- | --- |
 | The input holds an Xcode project, `Package.swift`, Swift sources, or a Flutter/React Native app with an `ios/` or `macos/` target | **Codebase**: Steps 1–7 |
 | The input is a landing-page URL or `.html` file, with no codebase | **Landing page**: Steps 1–7; screens come only from page imagery |
-| `<out>/src/config.js` exists and the user asks for edits or a re-render | **Update**: copy `kit.js`, `kit.css` and `index.html` from `assets/template/` into `src/`, edit `config.js`, then Steps 5–7 |
+| `<out>/src/config.js` exists and the user asks for edits or a re-render | **Update**: refresh the kit files (below), edit `config.js`, then Steps 5–7 |
 | Only watchOS, tvOS or visionOS, or no Apple target | **Stop**: report BLOCKED with the reason; write nothing |
 | No input named or found | Ask for the codebase path or landing-page URL; write nothing |
+
+Update branch kit refresh: note whether `src/kit.js` predates video (no `__seek` in it), then
+copy the template's `kit.js`, `kit.css` and `index.html` into `src/`, first backing up any that
+differ as `<name>.bak-<timestamp>` so a hand edit is never lost. List the backups in the report.
+
+```bash
+grep -q __seek "<out>/src/kit.js" || echo "kit predates 1.1.0: header/search stills will be re-laid out"
+ts=$(date +%Y%m%d-%H%M%S); for f in kit.js kit.css index.html; do
+  cmp -s "<skill>/assets/template/$f" "<out>/src/$f" || { [ -e "<out>/src/$f" ] && cp "<out>/src/$f" "<out>/src/$f.bak-$ts" && echo "backup: src/$f.bak-$ts"; }
+  cp "<skill>/assets/template/$f" "<out>/src/$f"; done
+```
 
 Prerequisites: run `python3 <skill>/scripts/render.py --preflight` (add `--video` when a
 creative video is requested). It requires Pillow and Chrome or Chromium, plus ffmpeg with
@@ -211,6 +222,10 @@ Evidence: <checks that ran: render.py and check_assets.py summaries, video size/
 Uncertainty: <recreated or approximated screens to verify on a build, classes not rendered, fallbacks, assumptions (video codec, search video size, file-size cap, safe area applied to video)>
 Decision: <the approval needed next (upload, commit, a dropped frame), or "No approval needed">
 ```
+
+On the Update branch, list each `src/*.bak-<timestamp>` backup under Evidence. If the old kit
+predated 1.1.0, say under Decision that `header.png` and `search.png` changed composition (the
+caption, and the search hero, now sit in Apple's art safe area), so the user reviews them before upload.
 
 PARTIAL means assets exist but a check or blocking finding remains; BLOCKED means no assets
 were written. State that nothing was committed or uploaded, and name the recreated frames.
