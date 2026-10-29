@@ -179,11 +179,12 @@ function renderFrame(cfg, frame, platform, stageH) {
 }
 
 // Creative assets: one idea, focal point centered so device crops keep it.
-// header and search keep the caption and hero inside Apple's "Art Safe Area"
-// (the layer in Apple's Photoshop templates: header 1646 × 661 px, search
-// 2168 × 1030 px, centered; halved here for the ×2 stage). Slots are device
-// boxes { cx, cy, w, h }; flanking slots sit outside the safe area and only
-// show on wide displays. The PNG is the video's first frame (t = 0).
+// header and search keep the caption inside Apple's "Art Safe Area" (the
+// layer in Apple's Photoshop templates: header 1646 × 661 px, search
+// 2168 × 1030 px, centered; halved here for the ×2 stage); the search hero
+// sits inside it too, while the header hero flanks it on the right. Slots are
+// device boxes { cx, cy, w, h }; slots outside the safe area only show on
+// wide displays. The PNG is the video's first frame (t = 0).
 const CREATIVE = {
   header: { w: 1920, h: 823, safe: { x: 548.5, y: 246.5, w: 823, h: 330.5 }, h1: 60, sub: 24, align: "center",
     cap: { x: 568.5, y: 246.5, w: 783, h: 330.5 },

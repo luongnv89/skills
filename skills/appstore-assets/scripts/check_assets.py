@@ -10,9 +10,11 @@ contrast checks cover caption color pairs.
 Header and search videos under creative/ (and creative/<variant>/) are checked
 with ffprobe: .mov/.m4v/.mp4, exact size (header 3840x1646, search 3:2 from
 1920x1280 to 3840x2560), 30 or 60 fps at a constant rate, 5-30 s, H.264
-yuv420p (the level is reported; above 5.2 is a warning), and the audio-track rule. With ffmpeg, a blank frame or a jump at the
-loop seam also fails, and --sheet writes one video sheet per file: frames at
-most 2 s apart with Apple's art safe area outlined, plus the seam pair.
+yuv420p (the level is reported; above 5.2 is a warning), a frame count that
+matches duration x fps, and the audio-track rule. With ffmpeg, a blank frame
+(every frame is decoded at low resolution) or a jump at the loop seam also
+fails, and --sheet writes one video sheet per file: frames at most 2 s apart
+with Apple's art safe area outlined, plus the seam pair.
 
 Usage:
   python3 check_assets.py OUT_DIR --platforms iphone,ipad,mac
@@ -110,15 +112,19 @@ def tool(name: str) -> str | None:
 
 
 def probe(ffprobe: str, path: Path, *args: str) -> dict:
-    out = subprocess.run([ffprobe, "-v", "error", "-of", "json", *args, str(path)], capture_output=True, text=True)
+    out = subprocess.run([ffprobe, "-v", "error", "-of", "json", *args, str(path)], capture_output=True, text=True, check=False)
     if out.returncode != 0:
         raise ValueError(out.stderr.strip().splitlines()[-1] if out.stderr.strip() else "ffprobe failed")
     return json.loads(out.stdout)
 
 
 def rate(fraction: str) -> float:
-    num, _, den = fraction.partition("/")
-    return float(num) / float(den or 1) if float(den or 1) else 0.0
+    """ffprobe's "30/1" as a number; 0.0 for "N/A", "0/0" or anything unreadable."""
+    num, _, den = str(fraction).partition("/")
+    try:
+        return float(num) / float(den or 1) if float(den or 1) else 0.0
+    except ValueError:
+        return 0.0
 
 
 def inspect_video(path: Path, kind: str, ffprobe: str) -> tuple[list[str], list[str], dict]:
@@ -147,6 +153,8 @@ def inspect_video(path: Path, kind: str, ffprobe: str) -> tuple[list[str], list[
     if kind == "search" and not search_ok((w, h)):
         problems.append(f"{w}x{h} is not 3:2 between 1920x1280 and 3840x2560 ({VIDEO_FIX})")
     fps, avg = rate(v.get("r_frame_rate", "0/1")), rate(v.get("avg_frame_rate", "0/1"))
+    if not fps:
+        return problems + [f"frame rate {v.get('r_frame_rate')!r} is unreadable; Apple accepts exactly 30 or 60 fps ({VIDEO_FIX})"], notes, {}
     if not any(abs(fps - want) < 0.01 for want in (30, 60)):
         problems.append(f"{fps:.3f} fps; Apple accepts exactly 30 or 60 (re-encode with -r 30 or -r 60)")
     times = sorted(float(p["pts_time"]) for p in pts.get("packets", []) if p.get("pts_time") not in (None, "N/A"))
@@ -181,6 +189,9 @@ def inspect_video(path: Path, kind: str, ffprobe: str) -> tuple[list[str], list[
     if size_mb > MAX_VIDEO_MB:
         problems.append(f"{size_mb:.0f} MB; keep under {MAX_VIDEO_MB} MB (assumed cap, App Store Connect's app preview limit)")
     frames = int(v.get("nb_read_packets") or len(times))
+    if abs(frames - duration * fps) > 1:
+        problems.append(f"{frames} frames, but {duration:.2f} s at {fps:g} fps needs {round(duration * fps)}; "
+                        f"the file looks truncated ({VIDEO_FIX})")
     return problems, notes, {"w": w, "h": h, "fps": fps, "duration": duration, "frames": frames,
                              "desc": f"{w}x{h} {codec} {profile} {pix} {fps:g} fps CFR {duration:.2f} s, "
                                      f"{'no audio' if not audio else f'{len(audio)} audio'}, {size_mb:.1f} MB"}
@@ -192,7 +203,7 @@ def video_frames(ffmpeg: str, path: Path, indices: list[int], width: int) -> dic
     expr = "+".join(f"eq(n\\,{i})" for i in wanted)
     with tempfile.TemporaryDirectory() as tmp:
         run = subprocess.run([ffmpeg, "-v", "error", "-i", str(path), "-vf", f"select={expr},setpts=N/FRAME_RATE/TB,scale={width}:-2",
-                              f"{tmp}/%04d.png"], capture_output=True, text=True)
+                              f"{tmp}/%04d.png"], capture_output=True, text=True, check=False)
         files = sorted(Path(tmp).glob("*.png"))
         if run.returncode != 0 or len(files) != len(wanted):
             raise ValueError(f"ffmpeg decoded {len(files)} of {len(wanted)} sample frames "
@@ -200,11 +211,23 @@ def video_frames(ffmpeg: str, path: Path, indices: list[int], width: int) -> dic
         return {i: Image.open(f).convert("RGB") for i, f in zip(wanted, files)}
 
 
-def loop_and_blank(frames: dict[int, Image.Image], last: int) -> tuple[list[str], str]:
-    """A blank frame or a loop seam jumping more than twice the neighboring steps fails."""
+def blank_frames(ffmpeg: str, path: Path, count: int) -> list[str]:
+    """Decode every frame at 160 x 90 gray (shape is irrelevant to a flat-color test) and fail the blank ones."""
+    run = subprocess.run([ffmpeg, "-v", "error", "-i", str(path), "-vf", "scale=160:90,format=gray", "-f", "rawvideo", "-"],
+                         capture_output=True, check=False)
+    size = 160 * 90
+    decoded = len(run.stdout) // size
+    if run.returncode != 0 or decoded != count:
+        return [f"decoded {decoded} of {count} frames ({(run.stderr.decode(errors='replace').strip().splitlines() or ['no error'])[-1]})"]
+    blank = [i for i in range(decoded) if ImageStat.Stat(Image.frombytes("L", (160, 90), run.stdout[i * size:(i + 1) * size])).stddev[0] < 2]
+    return [f"{len(blank)} blank (flat color) frame(s), first at frame {blank[0]}"] if blank else []
+
+
+def loop_seam(frames: dict[int, Image.Image], last: int) -> tuple[list[str], str]:
+    """A loop seam jumping more than twice the neighboring frame steps fails."""
     gray = {i: im.convert("L").resize((480, round(480 * im.height / im.width))) for i, im in frames.items()}
     diff = lambda a, b: ImageStat.Stat(ImageChops.difference(gray[a], gray[b])).mean[0]
-    problems = [f"frame {i} is blank (flat color)" for i, g in gray.items() if ImageStat.Stat(g).stddev[0] < 2]
+    problems = []
     seam, near = diff(last, 0), max(diff(0, 1), diff(last - 1, last))
     if seam > 2 * near + 1.0:
         problems.append(f"loop seam jumps (last→first diff {seam:.2f} vs {near:.2f} between neighbors); "
@@ -296,8 +319,8 @@ def main() -> None:
             name, kind = f"{folder}/{f.relative_to(d)}", f.stem.split("-")[0]
             if not ffprobe:
                 failures += 1
-                rows.append((name, "FAIL", "ffprobe not found, so the video cannot be checked; install ffmpeg "
-                             "(brew install ffmpeg, or sudo apt install ffmpeg) or set FFPROBE"))
+                rows.append((name, "FAIL", ("ffprobe not found, so the video cannot be checked; install ffmpeg 4.1 or later "
+                                            "(brew install ffmpeg, or sudo apt install ffmpeg) or set FFPROBE")))
                 continue
             problems, notes, facts = inspect_video(f, kind, ffprobe)
             if facts and ffmpeg:
@@ -309,8 +332,9 @@ def main() -> None:
                 except ValueError as e:
                     frames = None
                     problems.append(f"frames could not be decoded for the seam check: {e}")
+                problems += blank_frames(ffmpeg, f, facts["frames"])
                 if frames:
-                    found_problems, seam = loop_and_blank(frames, last)
+                    found_problems, seam = loop_seam(frames, last)
                     problems += found_problems
                     facts["desc"] += f", {seam}"
                 if frames and a.sheet:

@@ -68,7 +68,7 @@ ts=$(date +%Y%m%d-%H%M%S); for f in kit.js kit.css index.html; do
 ```
 
 Prerequisites: run `python3 <skill>/scripts/render.py --preflight` (add `--video` when a
-creative video is requested). It requires Pillow and Chrome or Chromium, plus ffmpeg with
+creative video is requested). It requires Pillow and Chrome or Chromium, plus ffmpeg 4.1 or later with
 libx264 and ffprobe for video, and prints the fix for a missing one (use the project's venv
 when it has one). If it fails, report BLOCKED; if only the video tools are missing, build
 the stills and report PARTIAL. Without the Agent tool, run Steps 1 and 6 inline and say so.
@@ -187,7 +187,7 @@ Bar: the latest verdict is `PASS` on the latest render, or two cycles ran and th
 If the user asked for a preview, publish a gallery of the sheets with the host's page tool,
 or point to `<out>/src/index.html` opened without a query string. Never upload: offer
 `asc`, `fastlane deliver` or a manual App Store Connect upload as a next step that needs
-approval; creative images and videos can go through the Asset Library without a new build. Release the dependency session.
+approval; creative images and videos go through App Store Connect "either alongside a new app version, or in your Asset Library" (Apple's asset best practices). Release the dependency session.
 
 ## Edge Cases
 

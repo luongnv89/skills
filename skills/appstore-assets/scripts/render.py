@@ -125,8 +125,8 @@ def find_ffmpeg() -> tuple[str, str]:
     missing = [t for t, p in found.items() if not p or not os.path.exists(p)]
     if missing:
         fail(f"{' and '.join(missing)} not found; header and search videos (creatives.video.kinds) need them.",
-             "install ffmpeg (macOS: brew install ffmpeg; Debian/Ubuntu: sudo apt install ffmpeg), set FFMPEG and "
-             "FFPROBE to the binaries, or pass --no-video to render the stills only.")
+             "install ffmpeg 4.1 or later, built with libx264 (macOS: brew install ffmpeg; Debian/Ubuntu: sudo apt "
+             "install ffmpeg), set FFMPEG and FFPROBE to the binaries, or pass --no-video to render the stills only.")
     return found["ffmpeg"], found["ffprobe"]
 
 
@@ -271,20 +271,30 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
             enc.kill()
             enc.wait()
             tmp.unlink(missing_ok=True)
-    enc.stdin.close()
-    err = enc.stderr.read().decode(errors="replace").strip()
-    if enc.wait() != 0:
-        tmp.unlink(missing_ok=True)
-        fail(f"ffmpeg failed to encode {out.name}:\n{err[-800:]}",
-             "use an ffmpeg build with libx264 (ffmpeg -encoders | grep libx264), or set FFMPEG to one.")
-    probe = json.loads(subprocess.run([ffprobe, "-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries",
-                                       "stream=width,height,nb_read_packets", "-of", "json", str(tmp)],
-                                      capture_output=True, text=True, check=True).stdout)["streams"][0]
-    if (probe["width"], probe["height"], int(probe["nb_read_packets"])) != (pw, ph, frames):
-        tmp.unlink(missing_ok=True)
-        fail(f"{out.name} encoded as {probe['width']}x{probe['height']} with {probe['nb_read_packets']} frames, "
-             f"expected {pw}x{ph} with {frames}.", "re-run; if it repeats, pass --chrome with a current build.")
-    tmp.replace(out)
+    replaced = False
+    try:  # a failure or signal while finishing still leaves no encoder or partial file behind
+        try:
+            enc.stdin.close()
+        except BrokenPipeError:  # ffmpeg quit early; its exit code and stderr below say why
+            pass
+        err = enc.stderr.read().decode(errors="replace").strip()
+        if enc.wait() != 0:
+            fail(f"ffmpeg failed to encode {out.name}:\n{err[-800:]}",
+                 "use ffmpeg 4.1 or later built with libx264 (ffmpeg -encoders | grep libx264), or set FFMPEG to one.")
+        probe = json.loads(subprocess.run([ffprobe, "-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries",
+                                           "stream=width,height,nb_read_packets", "-of", "json", str(tmp)],
+                                          capture_output=True, text=True, check=True).stdout)["streams"][0]
+        if (probe["width"], probe["height"], int(probe["nb_read_packets"])) != (pw, ph, frames):
+            fail(f"{out.name} encoded as {probe['width']}x{probe['height']} with {probe['nb_read_packets']} frames, "
+                 f"expected {pw}x{ph} with {frames}.", "re-run; if it repeats, pass --chrome with a current build.")
+        tmp.replace(out)
+        replaced = True
+    finally:
+        if not replaced:
+            if enc.poll() is None:
+                enc.kill()
+                enc.wait()
+            tmp.unlink(missing_ok=True)
     print(f"ok  {out}  {pw}x{ph}  {fps} fps  {video['duration']} s  {frames} frames  "
           f"{video['beats']} beat(s)  rendered in {time.monotonic() - started:.1f} s")
 
@@ -362,9 +372,17 @@ def read_manifest(binary: str, index: Path) -> dict:
         fail("index.html produced no manifest; kit.js or config.js did not run.",
              "confirm index.html, kit.js, kit.css and config.js are all in the src folder.")
     data = json.loads(html.unescape(m.group(1)))
-    if data.get("errors"):
-        fail("the config has errors:\n  " + "\n  ".join(data["errors"]),
-             "fix each named frame in config.js (a missing helper, unknown icon, wrong image path or creatives frame id).")
+    errors = data.get("errors") or []
+    if errors:
+        dwell = [e for e in errors if "its caption needs" in e]  # the video dwell rule in kit.js
+        fixes = []
+        if dwell:
+            fixes.append("for a video beat held too briefly: raise creatives.video.duration (up to 30 s), shorten that "
+                         "beat's caption, or drop a beat; each beat needs max(2.5 s, 1 s + words / 4).")
+        if len(dwell) < len(errors):
+            fixes.append("fix each named frame in config.js (a missing helper, unknown icon, wrong image path or creatives "
+                         "frame id).")
+        fail("the config has errors:\n  " + "\n  ".join(errors), "\n     ".join(fixes))
     return data
 
 
@@ -411,8 +429,8 @@ def main() -> None:
         print(f"ok  Pillow available\nok  Chrome: {find_chrome(a.chrome)}")
         if a.video:
             ffmpeg, ffprobe = find_ffmpeg()
-            if "libx264" not in subprocess.run([ffmpeg, "-hide_banner", "-encoders"], capture_output=True, text=True).stdout:
-                fail(f"{ffmpeg} has no libx264 encoder.", "install an ffmpeg build with libx264 (Homebrew's and Debian's have it).")
+            if "libx264" not in subprocess.run([ffmpeg, "-hide_banner", "-encoders"], capture_output=True, text=True, check=False).stdout:
+                fail(f"{ffmpeg} has no libx264 encoder.", "install ffmpeg 4.1 or later built with libx264 (Homebrew's and Debian's have it).")
             print(f"ok  ffmpeg: {ffmpeg} (libx264)\nok  ffprobe: {ffprobe}")
         return
     if a.src is None:

@@ -37,7 +37,8 @@ captions are per set, so one language never overwrites another.
 
 Inside a project with a Python venv, activate it first; both scripts need
 Pillow (`python3 -m pip install pillow`). `render.py` needs Chrome or Chromium
-(`--chrome PATH` or `$CHROME` to override detection).
+(`--chrome PATH` or `$CHROME` to override detection). Videos also need ffmpeg
+4.1 or later (for `setparams` color tags) built with libx264, and ffprobe.
 
 ## What render.py does and why
 
@@ -176,6 +177,6 @@ frame keeps the same caption and device placement.
 | Captions in a system font | `fetch_font.py` was not run, or `fonts.display.file` points elsewhere |
 | A blank or black device screen | The builder returned nothing, or a capture path is wrong (paths are relative to `src/`) |
 | Text overlaps the device | Shorten the headline to two lines; do not move `LAYOUT` offsets per frame |
-| `ffmpeg and ffprobe not found` | Install ffmpeg, set `FFMPEG`/`FFPROBE`, or pass `--no-video` |
-| `beats in N s leave … per beat` | Raise `video.duration` (up to 30), shorten captions, or drop a beat |
+| `ffmpeg and ffprobe not found` | Install ffmpeg 4.1 or later with libx264, set `FFMPEG`/`FFPROBE`, or pass `--no-video` |
+| `header video: 2 beats in 5 s hold beat 0 for 1.27 s, its caption needs 3.25 s` (`<kind> video: N beats in D s hold beat i for X s, its caption needs Y s`) | Raise `video.duration` (up to 30), shorten that beat's caption, or drop a beat |
 | Chrome stops answering during a video | Pass `--chrome` with Chrome or Chromium 75+; on Linux, `chrome-headless-shell` works too |
