@@ -13,6 +13,7 @@ Header and search videos: see **Video creatives** below.
 │   └── captures/           clean real captures, when a frame uses ui.capture()
 ├── iphone-6.9/ iphone-6.3/ ipad-13/ mac/   screenshots, <frame-id>.png
 ├── creative/               header.png, search.png, universal.png; header.mp4, search.mp4 when video is on
+│   ├── .kit-outputs.json   ownership record: the files render.py wrote here and the variant folders it created
 │   └── <variant>/          the same files per Custom Product Page variant (optional)
 ├── sheets/                 contact sheets and video-*.png sheets for review (not for upload)
 └── PLAN.md                 the approved frame plan with evidence per screen
@@ -47,7 +48,7 @@ Pillow (`python3 -m pip install pillow`). `render.py` needs Chrome or Chromium
 | Refuses to run while `config.js` contains `TODO:` | Template text must never reach a PNG |
 | Builds a manifest first (`index.html?manifest=1` via `--dump-dom`), rendering every screen once | A broken builder, an unknown icon name or a missing image fails with its frame id instead of shipping a blank PNG |
 | Checks caption contrast from the brand tokens (3:1 headline, 4.5:1 supporting line, light and dark) | A dark frame with dark text cannot pass |
-| After a full render, deletes kit outputs no longer in `config.js`: `<frame>.png` in the class folders, and `header`/`search`/`universal.png` and (unless `--no-video`) `header`/`search.mp4` in `creative/` and `creative/<variant-id>/`. Any other file or folder there gets `WARN: … not produced by the kit, left in place` | A dropped frame, video or variant cannot ship by accident, and a hand-made file kept in `creative/` (an App Preview recording, raw art) is never deleted |
+| After a full render, deletes outputs no longer in `config.js`: `<frame>.png` in the class folders, and in `creative/` only files `.kit-outputs.json` lists (videos only without `--no-video`), then a variant folder it lists once that folder is empty. Every write updates the record atomically (`--only` adds to it), so it never lists a missing file. With no record (a 1.0.0 set), only root `header`/`search`/`universal.png` go, as in 1.0.0. Symlinks, hidden files and anything else in `creative/` get `WARN: … not produced by the kit, left in place` | A dropped frame, video or variant cannot ship by accident, and a file the kit did not write (an App Preview recording, raw art, `old/header.png`, an empty folder, a symlinked folder) is never deleted |
 | Passes the stage height explicitly (`&h=`) | Headless Chrome's viewport is about 87 px shorter than `--window-size`; a `100vh` stage gets clipped |
 | Renders `iphone-6.3` by zooming the 440 px design to 402 px | One layout serves both iPhone classes with identical proportions |
 | Flattens to RGB with Pillow | Chrome writes RGBA; App Store Connect rejects alpha |
@@ -179,4 +180,6 @@ frame keeps the same caption and device placement.
 | Text overlaps the device | Shorten the headline to two lines; do not move `LAYOUT` offsets per frame |
 | `ffmpeg and ffprobe not found` | Install ffmpeg 4.1 or later with libx264, set `FFMPEG`/`FFPROBE`, or pass `--no-video` |
 | `header video: 2 beats in 5 s hold beat 0 for 1.27 s, its caption needs 3.25 s` (`<kind> video: N beats in D s hold beat i for X s, its caption needs Y s`) | Raise `video.duration` (up to 30), shorten that beat's caption, or drop a beat |
+| `WARN: <path> not produced by the kit, left in place` | `render.py` keeps any file `creative/.kit-outputs.json` does not list; `check_assets.py` adds a WARN row saying not to upload it. Leave it, or move it out of `creative/` yourself |
+| A file the kit rendered earlier is no longer pruned | `.kit-outputs.json` was deleted or edited by hand; delete the stale file yourself, and the next render rebuilds the record |
 | Chrome stops answering during a video | Pass `--chrome` with Chrome or Chromium 75+; on Linux, `chrome-headless-shell` works too |

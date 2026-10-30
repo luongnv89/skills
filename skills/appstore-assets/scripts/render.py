@@ -13,8 +13,9 @@ Usage:
 
 A full render (no --only) also deletes the outputs the manifest no longer
 lists, so a dropped frame cannot ship by accident: <frame>.png in the class
-folders, and header/search/universal .png and header/search .mp4 in creative/
-and creative/<variant>/. Any other file in creative/ is reported and kept. Caption color pairs from config.js brand tokens must reach
+folders, and in creative/ only the files its ownership record
+(creative/.kit-outputs.json) says it wrote. Any other file in creative/ is
+reported and kept. Caption color pairs from config.js brand tokens must reach
 3:1 (headline) and 4.5:1 (supporting line) on every canvas stop, or the run fails.
 
 Videos (creatives.video.kinds in config.js) need ffmpeg and ffprobe; a config
@@ -73,6 +74,9 @@ CREATIVES = {
 }
 KIT_OUTPUTS = {f"{k}.png" for k in CREATIVES} | {"header.mp4", "search.mp4"}  # what creative/ can hold
 VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # kit.js checks creatives.variants ids against the same pattern
+# creative/.kit-outputs.json lists the creative files render.py wrote and the variant
+# folders it created; a full render deletes nothing else in creative/.
+RECORD = ".kit-outputs.json"
 # Videos: the header as above. Search defaults to the largest macroblock-aligned
 # 3:2 size within H.264 Level 5.2 at its frame rate: 3744 x 2496 at 30 fps (the
 # stage at x1.95), 3600 x 2400 at 60 fps (x1.875). creatives.video.searchSize
@@ -343,10 +347,43 @@ def check_contrast(pairs: list[dict]) -> list[str]:
     return lines
 
 
-def prune_stale(out: Path, expected: set[Path], videos: bool) -> None:
+def read_record(creative: Path) -> dict | None:
+    """The ownership record, or None when creative/ has none (a 1.0.0 set or a first render)."""
+    try:
+        data = json.loads((creative / RECORD).read_text(encoding="utf-8"))
+        files, variants = data["files"], data["variants"]
+    except FileNotFoundError:
+        return None
+    except (OSError, ValueError, TypeError, KeyError) as e:
+        print(f"WARN: {creative / RECORD} is unreadable ({e!r}); nothing in creative/ is pruned this run")
+        return {"files": set(), "variants": set()}
+    # Only paths render.py can write, so a hand-edited record cannot point outside creative/.
+    return {"files": {f for f in files if isinstance(f, str) and kit_path(f)},
+            "variants": {v for v in variants if isinstance(v, str) and VARIANT_ID.fullmatch(v)}}
+
+
+def kit_path(rel: str) -> bool:
+    parts = rel.split("/")
+    return parts[-1] in KIT_OUTPUTS and (len(parts) == 1 or (len(parts) == 2 and bool(VARIANT_ID.fullmatch(parts[0]))))
+
+
+def write_record(creative: Path, record: dict) -> None:
+    """Replace the record atomically, so an interrupted write never leaves half a file."""
+    tmp = creative / f"{RECORD}.tmp"
+    tmp.write_text(json.dumps({"about": "files appstore-assets render.py wrote; a full render deletes only these",
+                               "files": sorted(record["files"]), "variants": sorted(record["variants"])},
+                              indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, creative / RECORD)
+
+
+def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made: set[str], legacy: bool) -> None:
     """Delete outputs the kit wrote earlier that the current config no longer lists.
-    Only names the kit produces are candidates; anything else (a hand-made video,
-    a folder of raw art) is reported and left in place."""
+    Class folders: every <frame>.png not rendered this run, as in 1.0.0. creative/:
+    only files the ownership record lists (written by an earlier render), then a
+    recorded variant folder once it is empty; with no record (legacy), only the
+    root header/search/universal .png that 1.0.0 deleted. Symlinks, hidden files
+    and anything else (a hand-made video, a folder of raw art, an empty folder)
+    are reported and left in place."""
     def drop(f: Path) -> None:
         if f.resolve() not in expected:
             f.unlink()
@@ -358,18 +395,50 @@ def prune_stale(out: Path, expected: set[Path], videos: bool) -> None:
     creative = out / "creative"
     if not creative.is_dir():
         return
+    changed = False
+
+    def consider(f: Path, rel: str) -> None:
+        nonlocal changed
+        if f.name.startswith("."):  # .DS_Store, the record itself
+            return
+        if f.is_symlink() or not f.is_file():
+            print(f"WARN: {f} not produced by the kit, left in place")
+        elif rel in made:
+            return
+        elif rel in record["files"]:
+            if f.suffix == ".mp4" and not videos:  # --no-video keeps existing videos
+                return
+            f.unlink()
+            record["files"].discard(rel)
+            changed = True
+            print(f"removed stale {f} (not in the current config)")
+        elif legacy and rel in {f"{k}.png" for k in CREATIVES}:
+            f.unlink()
+            print(f"removed stale {f} (not in the current config)")
+        else:
+            print(f"WARN: {f} not produced by the kit, left in place")
+
+    seen = set()
     for entry in sorted(creative.iterdir()):
-        nested = entry.is_dir() and VARIANT_ID.fullmatch(entry.name)
-        for f in sorted(entry.iterdir()) if nested else [entry]:
-            if f.name.startswith("."):  # .DS_Store and similar
-                continue
-            if f.is_file() and f.name in KIT_OUTPUTS:
-                if videos or f.suffix != ".mp4":  # --no-video keeps existing videos
-                    drop(f)
-            else:
-                print(f"WARN: {f} not produced by the kit, left in place")
-        if nested and not any(entry.iterdir()):
-            entry.rmdir()
+        if entry.name.startswith("."):
+            continue
+        variant = entry.name in record["variants"]
+        if entry.is_dir() and not entry.is_symlink() and (variant or any(r.startswith(f"{entry.name}/") for r in record["files"])):
+            for f in sorted(entry.iterdir()):
+                seen.add(f"{entry.name}/{f.name}")
+                consider(f, f"{entry.name}/{f.name}")
+            if variant and not any(entry.iterdir()):
+                entry.rmdir()
+                record["variants"].discard(entry.name)
+                changed = True
+                print(f"removed empty variant folder {entry}")
+        else:
+            seen.add(entry.name)
+            consider(entry, entry.name)
+    gone = record["files"] - seen  # deleted or replaced by hand
+    if gone or changed:
+        record["files"] -= gone
+        write_record(creative, record)
 
 
 def read_manifest(binary: str, index: Path) -> dict:
@@ -472,6 +541,19 @@ def main() -> None:
               "Run fetch_font.py or remove fonts.display from config.js.", file=sys.stderr)
 
     count, written = 0, set()
+    creative = out / "creative"
+    previous = read_record(creative)
+    record = previous or {"files": set(), "variants": set()}
+    made: set[str] = set()  # creative files written this run, relative to creative/
+
+    def owned(target: Path, variant: str | None, created: bool) -> None:
+        """Record a creative file right after it is written, so the record never lists a file that is missing."""
+        made.add(target.relative_to(creative).as_posix())
+        record["files"].add(target.relative_to(creative).as_posix())
+        if created:
+            record["variants"].add(variant)
+        write_record(creative, record)
+
     for cls in [c for c in a.classes.split(",") if c]:
         spec = CLASSES[cls]
         if spec["platform"] not in manifest["platforms"]:
@@ -489,23 +571,27 @@ def main() -> None:
         if a.only and kind not in a.only:
             continue
         c = CREATIVES[kind]
-        target = out / "creative" / (variant or "") / f"{kind}.png"
+        target = creative / (variant or "") / f"{kind}.png"
+        created = bool(variant) and not target.parent.exists()
         shoot(binary, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
               c["w"], c["h"], c["scale"], target, c["px"])
+        owned(target, variant, created)
         written.add(target.resolve())
         count += 1
     for video in videos:
         kind, variant = video["kind"], video["variant"]
-        target = out / "creative" / (variant or "") / f"{kind}.mp4"
+        target = creative / (variant or "") / f"{kind}.mp4"
+        created = bool(variant) and not target.parent.exists()
         render_video(binary, tools, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
                      video_spec(video), video, target)
+        owned(target, variant, created)
         written.add(target.resolve())
         count += 1
     if count == 0:
         fail("nothing was rendered: no frame matched the platforms, --classes and --only filters.",
              "check platforms[] in config.js and the ids passed to --only.")
     if not a.only and a.classes == ",".join(CLASSES):
-        prune_stale(out, written, videos=not a.no_video)
+        prune_stale(out, written, not a.no_video, record, made, legacy=previous is None)
     print(f"Rendered {count} asset(s) into {out}")
 
 
