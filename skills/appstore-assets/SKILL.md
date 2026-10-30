@@ -173,8 +173,11 @@ hand-made asset, remove that kind from the config first; the kit will then leave
 second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes each video (size,
 30/60 fps constant, 5–30 s, H.264 yuv420p, audio) and fails a blank frame or a loop-seam jump;
 with `--sheet` it writes `sheets/video-<kind>.png`. If a script fails, apply the fix it prints
-and re-run it. A file in `creative/` the kit did not write gets a WARN row, never a FAIL: never
-move or delete it, and list it under Uncertainty. Bar: both commands exit 0.
+and re-run it. A file in `creative/` that is not a kit name gets a WARN row; list it under
+Uncertainty. A `header*`/`search*`/`universal*` file is checked as an upload asset, even if
+hand-made. If one FAILs and `.kit-outputs.json` does not list it, or lists it as changed (its
+FAIL row ends "(not written by the kit)"), never move, rename or delete it yourself: report
+BLOCKED and ask the user to fix, rename or move it. Bar: both commands exit 0.
 
 ## Step 6 — Review and polish
 
@@ -231,7 +234,7 @@ predated 1.1.0, say under Decision that `header.png` and `search.png` changed co
 caption, and the search hero, now sit in Apple's art safe area), so the user reviews them before upload.
 
 PARTIAL means assets exist but a check or blocking finding remains; BLOCKED means no assets
-were written. State that nothing was committed or uploaded, and name the recreated frames.
+were written, or a hand-made `creative/` file fails Step 5. State that nothing was committed or uploaded, and name the recreated frames.
 When grading runs, also check that a reader finds the result first, can tell verified facts
 from assumptions, can trace each claim to evidence, and sees the next decision. Without a
 human review, mark that understanding as unconfirmed.

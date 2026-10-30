@@ -18,8 +18,12 @@ with Apple's art safe area outlined, plus the seam pair.
 
 Only files the kit could have produced are checked in creative/: header*,
 search* and universal* images and videos at its root and in variant folders
-(the ones render.py's creative/.kit-outputs.json records, or any lowercase
-id folder when there is no record). Anything else there (an App Preview
+(the ones render.py's creative/.kit-outputs.json records). With no record (a
+set not yet rendered by 1.1.0), every lowercase id folder counts as a variant,
+so old/header.png is checked and can FAIL; the next render writes the record.
+A hand-made header*/search*/universal* file is checked like a kit one; when the
+record exists and does not vouch for it (unlisted, or changed since), its FAIL
+row ends with "(not written by the kit)". Anything else there (an App Preview
 recording, raw art, notes) gets a WARN row telling the user not to upload it.
 
 Usage:
@@ -32,6 +36,7 @@ Exit 0 = every check passed (WARN rows are notes). Exit 1 = at least one FAIL ro
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -293,13 +298,27 @@ def sheet(files: list[Path], out: Path, thumb_w: int = 300) -> None:
     canvas.save(out)
 
 
-def creative_split(d: Path) -> tuple[list[Path], list[tuple[str, str]]]:
-    """Split creative/ into files the kit could have produced (checked) and (path, note) WARN rows for the rest."""
+def fingerprint(f: Path) -> dict:
+    """render.py's fingerprint: size and sha256."""
+    digest = hashlib.sha256()
+    with f.open("rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(block)
+    return {"size": f.stat().st_size, "sha256": digest.hexdigest()}
+
+
+def creative_split(d: Path) -> tuple[list[Path], list[tuple[str, str]], dict | None]:
+    """Split creative/ into files the kit could have produced (checked) and (path, note) WARN rows for
+    the rest; also return the record's fingerprints by path (None with no readable record)."""
     try:
         record = json.loads((d / RECORD).read_text(encoding="utf-8"))
-        variants = set(record["variants"]) | {f.split("/")[0] for f in record["files"] if "/" in f}
+        files, listed = record["files"], record["variants"]
+        if not isinstance(files, (dict, list)) or not isinstance(listed, list):
+            raise TypeError("not a record render.py writes")
+        variants = {v for v in listed if isinstance(v, str)} | {f.split("/")[0] for f in files if isinstance(f, str) and "/" in f}
+        prints = files if isinstance(files, dict) else {}
     except (OSError, ValueError, TypeError, KeyError, AttributeError):
-        variants = None  # no record: any lowercase id folder may be a variant
+        variants, prints = None, None  # no record: any lowercase id folder may be a variant
     kit_name = lambda p: p.suffix.lower() in IMAGE_EXT + VIDEO_EXT and p.stem.split("-")[0] in KINDS
     kit, foreign = [], []
 
@@ -325,7 +344,7 @@ def creative_split(d: Path) -> tuple[list[Path], list[tuple[str, str]]]:
             kit.append(entry)
         else:
             other(entry)
-    return kit, foreign
+    return kit, foreign, prints
 
 
 def main() -> None:
@@ -348,10 +367,18 @@ def main() -> None:
     rows, failures = [], 0
     names: dict[str, list[str]] = {}
     ffprobe, ffmpeg = tool("ffprobe"), tool("ffmpeg")
+    prints = None
+
+    def stranger(f: Path) -> str:
+        """A note for a creative FAIL on a file the ownership record does not vouch for (unlisted or changed)."""
+        if prints is None:
+            return ""
+        return "" if prints.get(f.relative_to(a.out / "creative").as_posix()) == fingerprint(f) else " (not written by the kit)"
+
     for folder in [*ACCEPTED, "creative"]:
         d = a.out / folder
         if folder == "creative" and d.is_dir():  # creative/<variant>/ holds Custom Product Page sets
-            found, foreign = creative_split(d)
+            found, foreign, prints = creative_split(d)
             rows += [(name, "WARN", note) for name, note in foreign]
         else:
             found = sorted(p for p in d.glob("*") if p.is_file() and not p.name.startswith(".")) if d.is_dir() else []
@@ -364,7 +391,7 @@ def main() -> None:
             kind = f.stem.split("-")[0] if folder == "creative" else None
             ok, why = inspect(f, CREATIVE.get(kind) if folder == "creative" else ACCEPTED[folder], kind)
             failures += not ok
-            rows.append((f"{folder}/{f.relative_to(d)}", "PASS" if ok else "FAIL", why))
+            rows.append((f"{folder}/{f.relative_to(d)}", "PASS" if ok else "FAIL", why if ok or folder != "creative" else why + stranger(f)))
         for f in videos:
             name, kind = f"{folder}/{f.relative_to(d)}", f.stem.split("-")[0]
             if not ffprobe:
@@ -393,7 +420,7 @@ def main() -> None:
             elif facts:
                 notes.append("ffmpeg not found: loop-seam and blank-frame checks and the video sheet were skipped")
             failures += bool(problems)
-            rows.append((name, "FAIL" if problems else "PASS", "; ".join(problems) if problems else facts["desc"]))
+            rows.append((name, "FAIL" if problems else "PASS", "; ".join(problems) + stranger(f) if problems else facts["desc"]))
             rows += [(name, "WARN", n) for n in notes]
         if folder != "creative" and len(files) > MAX_PER_CLASS:
             failures += 1
