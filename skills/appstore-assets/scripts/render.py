@@ -121,6 +121,9 @@ def chrome(binary: str, args: list[str], what: str) -> subprocess.CompletedProce
 
 
 def find_ffmpeg() -> tuple[str, str]:
+    if os.name != "posix":  # the Chrome pipe transport needs fcntl and fd inheritance
+        fail("video rendering drives Chrome over a POSIX pipe, which Windows does not support.",
+             "render the videos on macOS, Linux or WSL, or pass --no-video to render the stills only.")
     found = {t: os.environ.get(t.upper()) or shutil.which(t) for t in ("ffmpeg", "ffprobe")}
     missing = [t for t, p in found.items() if not p or not os.path.exists(p)]
     if missing:
@@ -159,14 +162,20 @@ class Browser:
             os.set_inheritable(4, True)
 
         self.profile = tempfile.mkdtemp(prefix="aa-chrome-")
-        self.proc = subprocess.Popen(
-            [binary, "--headless=new", "--remote-debugging-pipe", "--disable-gpu", "--hide-scrollbars",
-             "--allow-file-access-from-files", "--force-color-profile=srgb", "--no-first-run",
-             "--no-default-browser-check", "--disable-background-timer-throttling",
-             "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows",
-             f"--user-data-dir={self.profile}", "about:blank"],
-            preexec_fn=plumb, close_fds=False, stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            self.proc = subprocess.Popen(
+                [binary, "--headless=new", "--remote-debugging-pipe", "--disable-gpu", "--hide-scrollbars",
+                 "--allow-file-access-from-files", "--force-color-profile=srgb", "--no-first-run",
+                 "--no-default-browser-check", "--disable-background-timer-throttling",
+                 "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows",
+                 f"--user-data-dir={self.profile}", "about:blank"],
+                preexec_fn=plumb, close_fds=False, stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except (OSError, subprocess.SubprocessError) as e:
+            for fd in (to_r, self.to_w, self.from_r, from_w):
+                os.close(fd)
+            shutil.rmtree(self.profile, ignore_errors=True)
+            fail(f"Chrome could not start: {e}", "pass --chrome with a working Chrome or Chromium binary.")
         os.close(to_r)
         os.close(from_w)
         self.buf, self.next_id, self.session = b"", 0, None
@@ -249,8 +258,9 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
          "-color_range", "tv", "-r", str(fps), "-an", "-map_metadata", "-1",
          "-fflags", "+bitexact", "-flags:v", "+bitexact", "-movflags", "+faststart", str(tmp)],
         stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-    started, browser, done = time.monotonic(), Browser(binary), False
+    started, browser, done = time.monotonic(), None, False
     try:
+        browser = Browser(binary)
         browser.open(url, spec["w"], spec["h"], spec["scale"])
         for i in range(frames):
             browser.eval(f"window.__seek({i / fps!r})")
@@ -266,7 +276,8 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
                 break
         done = True
     finally:
-        browser.close()
+        if browser:
+            browser.close()
         if not done:  # a failed capture leaves no encoder or partial file behind
             enc.kill()
             enc.wait()
