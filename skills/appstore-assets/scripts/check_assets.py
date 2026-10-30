@@ -373,7 +373,11 @@ def main() -> None:
         """A note for a creative FAIL on a file the ownership record does not vouch for (unlisted or changed)."""
         if prints is None:
             return ""
-        return "" if prints.get(f.relative_to(a.out / "creative").as_posix()) == fingerprint(f) else " (not written by the kit)"
+        try:
+            fp = fingerprint(f)
+        except OSError:  # unreadable: the FAIL row already says so; make no ownership claim
+            return ""
+        return "" if prints.get(f.relative_to(a.out / "creative").as_posix()) == fp else " (not written by the kit)"
 
     for folder in [*ACCEPTED, "creative"]:
         d = a.out / folder

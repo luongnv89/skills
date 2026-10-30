@@ -268,13 +268,17 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
             except OSError:
                 break
     tmp = out.with_name(f".{out.stem}.partial.mp4")
-    enc = subprocess.Popen(
-        [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "png", "-i", "-",
-         "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv", "-c:v", "libx264", "-profile:v", "high",
-         "-level:v", h264_level(pw, ph, fps), "-preset", "veryfast", "-crf", "18", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
-         "-color_range", "tv", "-r", str(fps), "-an", "-map_metadata", "-1",
-         "-fflags", "+bitexact", "-flags:v", "+bitexact", "-movflags", "+faststart", str(tmp)],
-        stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        enc = subprocess.Popen(
+            [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "png", "-i", "-",
+             "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv", "-c:v", "libx264", "-profile:v", "high",
+             "-level:v", h264_level(pw, ph, fps), "-preset", "veryfast", "-crf", "18", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+             "-color_range", "tv", "-r", str(fps), "-an", "-map_metadata", "-1",
+             "-fflags", "+bitexact", "-flags:v", "+bitexact", "-movflags", "+faststart", str(tmp)],
+            stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    except OSError as e:  # e.g. FFMPEG points at a file that is not executable
+        unmake_dirs()
+        fail(f"ffmpeg could not start: {e}", "point FFMPEG at a working ffmpeg 4.1 or later, or install one and re-run.")
     started, browser, done = time.monotonic(), None, False
     try:
         browser = Browser(binary)
@@ -486,6 +490,10 @@ def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made
         else:
             seen.add(entry.name)
             consider(entry, entry.name)
+    missing = {v for v in record["variants"] if not (creative / v).is_dir()}  # variant folders deleted by hand
+    if missing:  # forget them, so a folder the user later makes under that name is never the kit's
+        record["variants"] -= missing
+        changed = True
     gone = set(record["files"]) - seen  # deleted by hand since the kit wrote them
     if gone or changed:
         for rel in gone:
