@@ -163,7 +163,12 @@ def inspect_video(path: Path, kind: str, ffprobe: str) -> tuple[list[str], list[
     if fps and (abs(avg - fps) > 0.01 or odd):
         problems.append(f"variable frame rate (avg {avg:.3f} fps, {len(odd)} frame step(s) other than {1 / fps:.4f} s, "
                         f"e.g. {max(odd, key=lambda d: abs(d - 1 / fps), default=0):.4f} s); re-encode at a constant rate (ffmpeg -r 30 or -r 60)")
-    duration = float(v.get("duration") or fmt.get("duration") or 0)
+    try:
+        duration = float(v.get("duration") or fmt.get("duration") or 0)
+    except ValueError:
+        duration = 0.0
+    if duration <= 0:  # e.g. a raw H.264 stream saved as .mp4
+        return problems + [f"duration is unreadable (ffprobe reports none); use an MP4 or MOV file ({VIDEO_FIX})"], notes, {}
     if not 5 - 1e-3 <= duration <= 30 + 1e-3:
         problems.append(f"{duration:.2f} s is outside Apple's 5-30 s (set creatives.video.duration)")
     codec, pix, profile, level = v.get("codec_name"), v.get("pix_fmt"), v.get("profile", ""), v.get("level")
