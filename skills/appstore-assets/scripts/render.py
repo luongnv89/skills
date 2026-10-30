@@ -7,14 +7,22 @@ exact CSS viewport and device scale factor; Pillow flattens it to RGB (App
 Store Connect rejects alpha) and the exact pixel size is verified.
 
 Usage:
-  python3 render.py --preflight [--chrome PATH]      # check Pillow + Chrome only
+  python3 render.py --preflight [--video] [--chrome PATH]   # check Pillow + Chrome (+ ffmpeg, ffprobe)
   python3 render.py SRC_DIR [--out OUT_DIR] [--only ID ...] [--classes CLASS,...]
-                    [--chrome PATH] [--allow-placeholders]
+                    [--chrome PATH] [--no-video] [--allow-placeholders]
 
-A full render (no --only) also deletes PNGs in the class and creative folders
-that the manifest no longer lists, so a dropped frame cannot ship by accident.
-Caption color pairs from config.js brand tokens must reach 3:1 (headline)
-and 4.5:1 (supporting line) on every canvas stop, or the run fails.
+A full render (no --only) also deletes the outputs the manifest no longer
+lists, so a dropped frame cannot ship by accident: <frame>.png in the class
+folders, and in creative/ only the files its ownership record
+(creative/.kit-outputs.json) says it wrote, while their size and sha256 still
+match. Any other file in creative/, or one changed since, is reported and kept.
+Caption color pairs from config.js brand tokens must reach 3:1 (headline) and
+4.5:1 (supporting line) on every canvas stop, or the run fails.
+
+Videos (creatives.video.kinds in config.js) need ffmpeg and ffprobe; a config
+without video never calls them. One Chrome, driven over --remote-debugging-pipe,
+seeks the page to each frame time and captures it; ffmpeg encodes H.264 High,
+yuv420p, BT.709, constant frame rate, no audio, +faststart MP4.
 
 Outputs (OUT_DIR defaults to SRC_DIR's parent):
   iphone-6.9/<id>.png  1320 x 2868   iPhone with Dynamic Island, large display
@@ -22,19 +30,28 @@ Outputs (OUT_DIR defaults to SRC_DIR's parent):
   ipad-13/<id>.png     2064 x 2752   iPad 13-inch display
   mac/<id>.png         2880 x 1800   Mac, 16:10
   creative/header.png 3840 x 1646 · search.png 3840 x 2560 · universal.png 5244 x 2950
+  creative/header.mp4 3840 x 1646 · search.mp4 3744 x 2496 at 30 fps, 3600 x 2400 at 60 fps
+                      (30 or 60 fps, 5-30 s, looping)
+  creative/<variant>/... the same files per Custom Product Page variant
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import html
+import io
 import json
 import os
 import re
+import select
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 try:
@@ -57,6 +74,19 @@ CREATIVES = {
     "search": {"w": 1920, "h": 1280, "scale": 2, "px": (3840, 2560)},
     "universal": {"w": 2622, "h": 1475, "scale": 2, "px": (5244, 2950)},
 }
+KIT_OUTPUTS = {f"{k}.png" for k in CREATIVES} | {"header.mp4", "search.mp4"}  # what creative/ can hold
+VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # kit.js checks creatives.variants ids against the same pattern
+# creative/.kit-outputs.json maps each creative file render.py wrote to its size and
+# sha256, and lists the variant folders it created; a full render deletes nothing
+# else in creative/, and no file whose content changed since.
+RECORD = ".kit-outputs.json"
+# Videos: the header as above. Search defaults to the largest macroblock-aligned
+# 3:2 size within H.264 Level 5.2 at its frame rate: 3744 x 2496 at 30 fps (the
+# stage at x1.95), 3600 x 2400 at 60 fps (x1.875). creatives.video.searchSize
+# "max" opts into Apple's maximum 3840 x 2560, which needs Level 6.0.
+SEARCH_SCALE = {30: 1.95, 60: 1.875}
+# H.264 Table A-1: (level, max frame size in macroblocks, max macroblocks per second).
+H264_LEVELS = [("5.1", 36864, 983040), ("5.2", 36864, 2073600), ("6.0", 139264, 4177920)]
 CHROME_CANDIDATES = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
@@ -94,7 +124,213 @@ def chrome(binary: str, args: list[str], what: str) -> subprocess.CompletedProce
         tail = "\n".join((e.stderr or "").strip().splitlines()[-8:])
         fail(f"Chrome exited with code {e.returncode} while rendering {what}.\n{tail}",
              "run the same URL in a normal Chrome window to see the error, or pass --chrome with a working binary.")
+    except OSError as e:  # not executable, or not a program
+        fail(f"Chrome could not start: {e}", "pass --chrome with a working Chrome or Chromium binary.")
     raise AssertionError("unreachable")
+
+
+def find_ffmpeg() -> tuple[str, str]:
+    if os.name != "posix":  # the Chrome pipe transport needs fcntl and fd inheritance
+        fail("video rendering drives Chrome over a POSIX pipe, which Windows does not support.",
+             "render the videos on macOS, Linux or WSL, or pass --no-video to render the stills only.")
+    found = {t: os.environ.get(t.upper()) or shutil.which(t) for t in ("ffmpeg", "ffprobe")}
+    missing = [t for t, p in found.items() if not p or not os.path.exists(p)]
+    if missing:
+        fail(f"{' and '.join(missing)} not found; header and search videos (creatives.video.kinds) need them.",
+             "install ffmpeg 4.1 or later, built with libx264 (macOS: brew install ffmpeg; Debian/Ubuntu: sudo apt "
+             "install ffmpeg), set FFMPEG and FFPROBE to the binaries, or pass --no-video to render the stills only.")
+    return found["ffmpeg"], found["ffprobe"]
+
+
+def video_spec(video: dict) -> dict:
+    if video["kind"] == "header" or video.get("searchSize") == "max":
+        return CREATIVES[video["kind"]]
+    scale = SEARCH_SCALE[video["fps"]]
+    return {"w": 1920, "h": 1280, "scale": scale, "px": (round(1920 * scale), round(1280 * scale))}
+
+
+def h264_level(w: int, h: int, fps: int) -> str:
+    """The lowest of Levels 5.1, 5.2 and 6.0 that holds w x h at fps; passed to x264 explicitly."""
+    mbs = -(-w // 16) * -(-h // 16)
+    return next(level for level, max_fs, max_mbps in H264_LEVELS if mbs <= max_fs and mbs * fps <= max_mbps)
+
+
+class Browser:
+    """One headless Chrome driven over --remote-debugging-pipe (CDP: fd 3 in, fd 4 out, NUL-delimited JSON)."""
+
+    def __init__(self, binary: str):
+        import fcntl  # POSIX only, like the pipe transport itself
+        to_r, self.to_w = os.pipe()
+        self.from_r, from_w = os.pipe()
+
+        def plumb() -> None:  # runs in the child: move the pipe ends to fds 3 and 4
+            r, w = fcntl.fcntl(to_r, fcntl.F_DUPFD, 10), fcntl.fcntl(from_w, fcntl.F_DUPFD, 10)
+            os.dup2(r, 3)
+            os.dup2(w, 4)
+            os.set_inheritable(3, True)
+            os.set_inheritable(4, True)
+
+        self.profile = tempfile.mkdtemp(prefix="aa-chrome-")
+        try:
+            self.proc = subprocess.Popen(
+                [binary, "--headless=new", "--remote-debugging-pipe", "--disable-gpu", "--hide-scrollbars",
+                 "--allow-file-access-from-files", "--force-color-profile=srgb", "--no-first-run",
+                 "--no-default-browser-check", "--disable-background-timer-throttling",
+                 "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows",
+                 f"--user-data-dir={self.profile}", "about:blank"],
+                preexec_fn=plumb, close_fds=False, stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except (OSError, subprocess.SubprocessError) as e:
+            for fd in (to_r, self.to_w, self.from_r, from_w):
+                os.close(fd)
+            shutil.rmtree(self.profile, ignore_errors=True)
+            fail(f"Chrome could not start: {e}", "pass --chrome with a working Chrome or Chromium binary.")
+        os.close(to_r)
+        os.close(from_w)
+        self.buf, self.next_id, self.session = b"", 0, None
+
+    def send(self, method: str, params: dict | None = None, timeout: float = 60) -> dict:
+        self.next_id += 1
+        msg = {"id": self.next_id, "method": method, "params": params or {}}
+        if self.session and not method.startswith(("Target.", "Browser.")):
+            msg["sessionId"] = self.session
+        try:
+            os.write(self.to_w, json.dumps(msg).encode() + b"\0")
+        except OSError:
+            fail(f"Chrome exited before {method}.", "pass --chrome with a working binary.")
+        deadline = time.monotonic() + timeout
+        while True:
+            while b"\0" not in self.buf:
+                left = deadline - time.monotonic()
+                if left <= 0 or self.proc.poll() is not None or not select.select([self.from_r], [], [], left)[0]:
+                    fail(f"Chrome stopped answering during {method}.",
+                         "pass --chrome with a current Chrome or Chromium (the pipe transport needs version 75 or later).")
+                chunk = os.read(self.from_r, 1 << 20)
+                if not chunk:
+                    fail(f"Chrome closed the debugging pipe during {method}.", "pass --chrome with a working binary.")
+                self.buf += chunk
+            raw, self.buf = self.buf.split(b"\0", 1)
+            reply = json.loads(raw)
+            if reply.get("id") == self.next_id:
+                if "error" in reply:
+                    fail(f"Chrome rejected {method}: {reply['error'].get('message')}", "pass --chrome with a current Chrome or Chromium.")
+                return reply.get("result", {})
+
+    def open(self, url: str, w: int, h: int, scale: int) -> None:
+        target = self.send("Target.createTarget", {"url": "about:blank"})["targetId"]
+        self.session = self.send("Target.attachToTarget", {"targetId": target, "flatten": True})["sessionId"]
+        self.send("Emulation.setDeviceMetricsOverride", {"width": w, "height": h, "deviceScaleFactor": scale, "mobile": False})
+        self.send("Page.navigate", {"url": url})
+        for _ in range(600):  # the page sets __ready once fonts and images have loaded
+            if self.eval("window.__ready === true"):
+                return
+            time.sleep(0.05)
+        fail(f"the page never became ready: {url}", "open the same URL in Chrome and check the console for errors.")
+
+    def eval(self, expression: str):
+        res = self.send("Runtime.evaluate", {"expression": expression, "awaitPromise": True, "returnByValue": True})
+        if "exceptionDetails" in res:
+            fail(f"page script failed: {res['exceptionDetails'].get('text')} ({expression})", "fix config.js and re-run.")
+        return res.get("result", {}).get("value")
+
+    def capture(self) -> bytes:
+        return base64.b64decode(self.send("Page.captureScreenshot", {"format": "png", "optimizeForSpeed": True})["data"])
+
+    def close(self) -> None:
+        """Quietly stop Chrome and remove its profile, whatever state it is in."""
+        try:
+            if self.proc.poll() is None:  # ask politely; no reply needed
+                os.write(self.to_w, json.dumps({"id": 0, "method": "Browser.close"}).encode() + b"\0")
+                self.proc.wait(timeout=10)
+        except (OSError, subprocess.TimeoutExpired):
+            self.proc.kill()
+            self.proc.wait()
+        finally:
+            for fd in (self.to_w, self.from_r):
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
+            shutil.rmtree(self.profile, ignore_errors=True)
+
+
+def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, video: dict, out: Path) -> None:
+    """Seek the page to each frame time, capture it, and pipe the PNGs to ffmpeg."""
+    ffmpeg, ffprobe = tools
+    fps, frames, (pw, ph) = video["fps"], video["frames"], spec["px"]
+    new_dirs = [d for d in (out.parent, *out.parent.parents) if not d.exists()]  # deepest first
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    def unmake_dirs() -> None:  # a failed render leaves no empty creative/ or variant folder behind
+        for d in new_dirs:
+            try:
+                d.rmdir()
+            except OSError:
+                break
+    tmp = out.with_name(f".{out.stem}.partial.mp4")
+    try:
+        enc = subprocess.Popen(
+            [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "png", "-i", "-",
+             "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv", "-c:v", "libx264", "-profile:v", "high",
+             "-level:v", h264_level(pw, ph, fps), "-preset", "veryfast", "-crf", "18", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+             "-color_range", "tv", "-r", str(fps), "-an", "-map_metadata", "-1",
+             "-fflags", "+bitexact", "-flags:v", "+bitexact", "-movflags", "+faststart", str(tmp)],
+            stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    except OSError as e:  # e.g. FFMPEG points at a file that is not executable
+        unmake_dirs()
+        fail(f"ffmpeg could not start: {e}", "point FFMPEG at a working ffmpeg 4.1 or later, or install one and re-run.")
+    started, browser, done = time.monotonic(), None, False
+    try:
+        browser = Browser(binary)
+        browser.open(url, spec["w"], spec["h"], spec["scale"])
+        for i in range(frames):
+            browser.eval(f"window.__seek({i / fps!r})")
+            png = browser.capture()
+            if i == 0:
+                size = Image.open(io.BytesIO(png)).size
+                if size != (pw, ph):
+                    fail(f"{out} frames render at {size[0]}x{size[1]}, expected {pw}x{ph}.",
+                         "do not change the creative stage sizes in kit.js; pass --chrome with a current build.")
+            try:
+                enc.stdin.write(png)
+            except BrokenPipeError:
+                break
+        done = True
+    finally:
+        if browser:
+            browser.close()
+        if not done:  # a failed capture leaves no encoder or partial file behind
+            enc.kill()
+            enc.wait()
+            tmp.unlink(missing_ok=True)
+            unmake_dirs()
+    replaced = False
+    try:  # a failure or signal while finishing still leaves no encoder or partial file behind
+        try:
+            enc.stdin.close()
+        except BrokenPipeError:  # ffmpeg quit early; its exit code and stderr below say why
+            pass
+        err = enc.stderr.read().decode(errors="replace").strip()
+        if enc.wait() != 0:
+            fail(f"ffmpeg failed to encode {out.name}:\n{err[-800:]}",
+                 "use ffmpeg 4.1 or later built with libx264 (ffmpeg -encoders | grep libx264), or set FFMPEG to one.")
+        probe = json.loads(subprocess.run([ffprobe, "-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries",
+                                           "stream=width,height,nb_read_packets", "-of", "json", str(tmp)],
+                                          capture_output=True, text=True, check=True).stdout)["streams"][0]
+        if (probe["width"], probe["height"], int(probe["nb_read_packets"])) != (pw, ph, frames):
+            fail(f"{out.name} encoded as {probe['width']}x{probe['height']} with {probe['nb_read_packets']} frames, "
+                 f"expected {pw}x{ph} with {frames}.", "re-run; if it repeats, pass --chrome with a current build.")
+        tmp.replace(out)
+        replaced = True
+    finally:
+        if not replaced:
+            if enc.poll() is None:
+                enc.kill()
+                enc.wait()
+            tmp.unlink(missing_ok=True)
+            unmake_dirs()
+    print(f"ok  {out}  {pw}x{ph}  {fps} fps  {video['duration']} s  {frames} frames  "
+          f"{video['beats']} beat(s)  rendered in {time.monotonic() - started:.1f} s")
 
 
 def check_placeholders(config: Path) -> None:
@@ -130,15 +366,139 @@ def check_contrast(pairs: list[dict]) -> list[str]:
     return lines
 
 
-def prune_stale(out: Path, expected: set[Path]) -> None:
-    for folder in [*CLASSES, "creative"]:
-        d = out / folder
-        if not d.is_dir():
-            continue
-        for f in d.glob("*.png"):
-            if f.resolve() not in expected:
+def read_record(creative: Path) -> dict | None:
+    """The ownership record, or None when creative/ has none (a 1.0.0 set or a first render).
+    files maps each path to its fingerprint, or to None (a paths-only list from an unreleased
+    1.1.0 draft), which prune never deletes. A record render.py could not have written
+    (wrong types, a path or variant it never uses) is unreadable, and nothing is pruned."""
+    try:
+        data = json.loads((creative / RECORD).read_text(encoding="utf-8"))
+        files, variants = data["files"], data["variants"]
+        if isinstance(files, list):
+            files = dict.fromkeys(files)
+        if not (isinstance(files, dict) and isinstance(variants, list)
+                and all(isinstance(f, str) and kit_path(f) and (fp is None or is_fingerprint(fp)) for f, fp in files.items())
+                and all(isinstance(v, str) and VARIANT_ID.fullmatch(v) for v in variants)):
+            raise ValueError("not a record render.py writes")
+    except FileNotFoundError:
+        return None
+    except (OSError, ValueError, TypeError, KeyError) as e:
+        print(f"WARN: {creative / RECORD} is unreadable ({e!r}); nothing in creative/ is pruned this run")
+        return {"files": {}, "variants": set()}
+    return {"files": files, "variants": set(variants)}
+
+
+def fingerprint(f: Path) -> dict:
+    """Size and sha256 of a file, taken right after the kit writes it (about 0.3 s per 100 MB)."""
+    digest = hashlib.sha256()
+    with f.open("rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(block)
+    return {"size": f.stat().st_size, "sha256": digest.hexdigest()}
+
+
+def is_fingerprint(fp) -> bool:
+    return isinstance(fp, dict) and isinstance(fp.get("size"), int) and isinstance(fp.get("sha256"), str)
+
+
+def kit_path(rel: str) -> bool:
+    parts = rel.split("/")
+    return parts[-1] in KIT_OUTPUTS and (len(parts) == 1 or (len(parts) == 2 and bool(VARIANT_ID.fullmatch(parts[0]))))
+
+
+def write_record(creative: Path, record: dict) -> None:
+    """Replace the record atomically, so an interrupted write never leaves half a file."""
+    tmp = creative / f"{RECORD}.tmp"
+    tmp.write_text(json.dumps({"about": "files appstore-assets render.py wrote, with their size and sha256; a full "
+                                        "render deletes only these, and only while both still match",
+                               "files": dict(sorted(record["files"].items())), "variants": sorted(record["variants"])},
+                              indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, creative / RECORD)
+
+
+def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made: set[str], legacy: bool) -> None:
+    """Delete outputs the kit wrote earlier that the current config no longer lists.
+    Class folders: every <frame>.png not rendered this run, as in 1.0.0. creative/:
+    only files the ownership record lists (written by an earlier render) whose
+    size and sha256 still match, then a recorded variant folder once it is empty
+    (a lone .DS_Store goes with it); with no record (legacy), only the root
+    header/search/universal .png that 1.0.0 deleted. A recorded file changed since
+    is dropped from the record and kept. Hidden files are skipped; symlinks and
+    anything else (a hand-made video, a folder of raw art, an empty folder) are
+    reported and left in place."""
+    def drop(f: Path) -> None:
+        if f.resolve() not in expected:
+            f.unlink()
+            print(f"removed stale {f} (not in the current config)")
+
+    for cls in CLASSES:
+        for f in sorted((out / cls).glob("*.png")):
+            drop(f)
+    creative = out / "creative"
+    if not creative.is_dir():
+        return
+    changed = False
+
+    def consider(f: Path, rel: str) -> None:
+        nonlocal changed
+        if f.name.startswith("."):  # .DS_Store, the record itself
+            return
+        if f.is_symlink() or not f.is_file():
+            print(f"WARN: {f} not produced by the kit, left in place")
+            if rel in record["files"]:  # replaced by hand with a symlink or folder
+                del record["files"][rel]
+                changed = True
+        elif rel in made:
+            return
+        elif rel in record["files"]:
+            if f.suffix == ".mp4" and not videos:  # --no-video keeps existing videos
+                return
+            fp = record["files"].pop(rel)
+            changed = True
+            if fp is None:
+                print(f"WARN: {f} has no fingerprint in the record, left in place")
+            elif f.stat().st_size != fp["size"] or fingerprint(f) != fp:
+                print(f"WARN: {f} changed since the kit wrote it, left in place")
+            else:
                 f.unlink()
                 print(f"removed stale {f} (not in the current config)")
+        elif legacy and rel in {f"{k}.png" for k in CREATIVES}:
+            f.unlink()
+            print(f"removed stale {f} (not in the current config)")
+        else:
+            print(f"WARN: {f} not produced by the kit, left in place")
+
+    seen = set()
+    for entry in sorted(creative.iterdir()):
+        if entry.name.startswith("."):
+            continue
+        variant = entry.name in record["variants"]
+        if entry.is_dir() and not entry.is_symlink() and (variant or any(r.startswith(f"{entry.name}/") for r in record["files"])):
+            for f in sorted(entry.iterdir()):
+                seen.add(f"{entry.name}/{f.name}")
+                consider(f, f"{entry.name}/{f.name}")
+            rest = list(entry.iterdir()) if variant else []
+            if variant and all(p.name == ".DS_Store" and p.is_file() and not p.is_symlink() for p in rest):
+                for p in rest:  # Finder's .DS_Store alone does not keep a removed variant folder
+                    p.unlink()
+                entry.rmdir()
+                record["variants"].discard(entry.name)
+                changed = True
+                print(f"removed empty variant folder {entry}")
+            elif variant and not any(r.startswith(f"{entry.name}/") for r in record["files"]):
+                print(f"WARN: {entry} holds files the kit did not write, so the folder is left in place")
+        else:
+            seen.add(entry.name)
+            consider(entry, entry.name)
+    missing = {v for v in record["variants"] if not (creative / v).is_dir()}  # variant folders deleted by hand
+    if missing:  # forget them, so a folder the user later makes under that name is never the kit's
+        record["variants"] -= missing
+        changed = True
+    gone = set(record["files"]) - seen  # deleted by hand since the kit wrote them
+    if gone or changed:
+        for rel in gone:
+            del record["files"][rel]
+        write_record(creative, record)
 
 
 def read_manifest(binary: str, index: Path) -> dict:
@@ -152,14 +512,21 @@ def read_manifest(binary: str, index: Path) -> dict:
         fail("index.html produced no manifest; kit.js or config.js did not run.",
              "confirm index.html, kit.js, kit.css and config.js are all in the src folder.")
     data = json.loads(html.unescape(m.group(1)))
-    if data.get("errors"):
-        fail("the config has errors:\n  " + "\n  ".join(data["errors"]),
-             "fix each named frame in config.js (a missing helper, unknown icon, wrong image path or creatives frame id).")
+    errors = data.get("errors") or []
+    if errors:
+        dwell = [e for e in errors if "its caption needs" in e]  # the video dwell rule in kit.js
+        fixes = []
+        if dwell:
+            fixes.append("for a video beat held too briefly: raise creatives.video.duration (up to 30 s), shorten that "
+                         "beat's caption, or drop a beat; each beat needs max(2.5 s, 1 s + words / 4).")
+        if len(dwell) < len(errors):
+            fixes.append("fix each named frame in config.js (a missing helper, unknown icon, wrong image path or creatives "
+                         "frame id).")
+        fail("the config has errors:\n  " + "\n  ".join(errors), "\n     ".join(fixes))
     return data
 
 
 def shoot(binary: str, url: str, w: int, h: int, scale: int, out: Path, expected: tuple[int, int]) -> None:
-    out.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         raw = Path(tmp) / "raw.png"
         chrome(binary, [f"--force-device-scale-factor={scale}", f"--window-size={w},{h}", f"--screenshot={raw}", url], out.name)
@@ -170,14 +537,27 @@ def shoot(binary: str, url: str, w: int, h: int, scale: int, out: Path, expected
     if img.size != expected:
         fail(f"{out} rendered at {img.size[0]}x{img.size[1]}, expected {expected[0]}x{expected[1]}.",
              "do not change the stage sizes in kit.js; if Chrome ignores --window-size, pass --chrome with a current build.")
+    out.parent.mkdir(parents=True, exist_ok=True)  # only now, so a failed shot leaves no empty folder
     img.save(out, optimize=True)
     print(f"ok  {out}  {img.size[0]}x{img.size[1]}")
 
 
+def stop_on_signal(signum: int, _frame) -> None:
+    """SIGTERM/SIGHUP (a closed terminal or a stopped agent) exit through the
+    normal cleanup, so no Chrome, ffmpeg or .partial.mp4 outlives the run."""
+    print(f"Error: render stopped by signal {signum}; cleaning up.", file=sys.stderr)
+    sys.exit(128 + signum)
+
+
 def main() -> None:
+    for sig in (signal.SIGTERM, getattr(signal, "SIGHUP", None)):
+        if sig is not None:
+            signal.signal(sig, stop_on_signal)
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("src", type=Path, nargs="?", help="asset-set src/ folder holding index.html and config.js")
     ap.add_argument("--preflight", action="store_true", help="only check that Pillow and Chrome are available, then exit")
+    ap.add_argument("--video", action="store_true", help="with --preflight: also check ffmpeg and ffprobe (needed for videos)")
+    ap.add_argument("--no-video", action="store_true", help="skip creatives.video kinds (stills only; ffmpeg not needed)")
     ap.add_argument("--out", type=Path, help="output folder (default: the src folder's parent)")
     ap.add_argument("--only", nargs="+", default=[], help="render only these frame ids or creative kinds")
     ap.add_argument("--classes", default=",".join(CLASSES), help="comma-separated device classes to render")
@@ -187,6 +567,11 @@ def main() -> None:
 
     if a.preflight:
         print(f"ok  Pillow available\nok  Chrome: {find_chrome(a.chrome)}")
+        if a.video:
+            ffmpeg, ffprobe = find_ffmpeg()
+            if "libx264" not in subprocess.run([ffmpeg, "-hide_banner", "-encoders"], capture_output=True, text=True, check=False).stdout:
+                fail(f"{ffmpeg} has no libx264 encoder.", "install ffmpeg 4.1 or later built with libx264 (Homebrew's and Debian's have it).")
+            print(f"ok  ffmpeg: {ffmpeg} (libx264)\nok  ffprobe: {ffprobe}")
         return
     if a.src is None:
         fail("no src folder given.", "pass the asset set's src/ folder, or --preflight to check tools only.")
@@ -204,6 +589,11 @@ def main() -> None:
     binary = find_chrome(a.chrome)
     out = (a.out or a.src.resolve().parent).resolve()
     manifest = read_manifest(binary, index)
+    videos = [] if a.no_video else [v for v in manifest.get("video", []) if not a.only or v["kind"] in a.only]
+    tools = find_ffmpeg() if videos else None  # before any screenshot, so a missing ffmpeg fails fast
+    if any(isinstance(c, str) for c in manifest.get("creatives", [])):
+        fail("src/kit.js is older than this render.py (its manifest lists creatives as plain names).",
+             "copy kit.js, kit.css and index.html from the skill's assets/template/ into src/ (config.js stays), then re-run.")
     for line in check_contrast(manifest.get("contrast", [])):
         print(f"ok {line.strip()}")
     if not manifest.get("fontOk", True):
@@ -211,6 +601,19 @@ def main() -> None:
               "Run fetch_font.py or remove fonts.display from config.js.", file=sys.stderr)
 
     count, written = 0, set()
+    creative = out / "creative"
+    previous = read_record(creative)
+    record = previous or {"files": {}, "variants": set()}
+    made: set[str] = set()  # creative files written this run, relative to creative/
+
+    def owned(target: Path, variant: str | None, created: bool) -> None:
+        """Record a creative file and its fingerprint right after it is written, so a failed render never adds one."""
+        made.add(target.relative_to(creative).as_posix())
+        record["files"][target.relative_to(creative).as_posix()] = fingerprint(target)
+        if created:
+            record["variants"].add(variant)
+        write_record(creative, record)
+
     for cls in [c for c in a.classes.split(",") if c]:
         spec = CLASSES[cls]
         if spec["platform"] not in manifest["platforms"]:
@@ -223,19 +626,32 @@ def main() -> None:
             shoot(binary, f"{index.as_uri()}?{q}", spec["w"], spec["h"], spec["scale"], target, spec["px"])
             written.add(target.resolve())
             count += 1
-    for kind in manifest.get("creatives", []):
+    for still in manifest.get("creatives", []):  # {kind, variant}; a variant renders into creative/<variant>/
+        kind, variant = still["kind"], still["variant"]
         if a.only and kind not in a.only:
             continue
         c = CREATIVES[kind]
-        target = out / "creative" / f"{kind}.png"
-        shoot(binary, f"{index.as_uri()}?creative={kind}", c["w"], c["h"], c["scale"], target, c["px"])
+        target = creative / (variant or "") / f"{kind}.png"
+        created = bool(variant) and not target.parent.exists()
+        shoot(binary, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
+              c["w"], c["h"], c["scale"], target, c["px"])
+        owned(target, variant, created)
+        written.add(target.resolve())
+        count += 1
+    for video in videos:
+        kind, variant = video["kind"], video["variant"]
+        target = creative / (variant or "") / f"{kind}.mp4"
+        created = bool(variant) and not target.parent.exists()
+        render_video(binary, tools, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
+                     video_spec(video), video, target)
+        owned(target, variant, created)
         written.add(target.resolve())
         count += 1
     if count == 0:
         fail("nothing was rendered: no frame matched the platforms, --classes and --only filters.",
              "check platforms[] in config.js and the ids passed to --only.")
     if not a.only and a.classes == ",".join(CLASSES):
-        prune_stale(out, written)
+        prune_stale(out, written, not a.no_video, record, made, legacy=previous is None)
     print(f"Rendered {count} asset(s) into {out}")
 
 

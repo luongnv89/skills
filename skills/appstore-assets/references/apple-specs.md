@@ -8,6 +8,7 @@ Sources:
 - Screenshots: https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/
 - Creative assets: https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications/
 - Best practices: https://developer.apple.com/app-store/asset-best-practices/
+- App previews (codec reference only): https://developer.apple.com/help/app-store-connect/reference/app-information/app-preview-specifications/
 
 ## Screenshot rules that apply to every class
 
@@ -49,17 +50,66 @@ Report these as out of scope instead of approximating them:
 
 ## Creative assets (iOS 27 / iPadOS 27 App Store)
 
+Creative-asset rows re-fetched **2026-10-29** from the creative assets page,
+the best-practices page, the news post https://developer.apple.com/news/?id=ljpl7kyn
+(October 5, 2026) and Apple's Photoshop templates (linked from best practices).
+
 | Placement | Ratio | Size | Formats |
 | --- | --- | --- | --- |
-| Product page header | 21:9 | 3840 × 1646 | .jpeg, .jpg, .png |
-| Search results | 3:2 | min 1920 × 1280, max 3840 × 2560 | .jpeg, .jpg, .png |
-| Universal (header and search) | 16:9 | 5244 × 2950 | .png only |
+| Product page header image | 21:9 | 3840 × 1646 | .jpeg, .jpg, .png |
+| Search results image | 3:2 | min 1920 × 1280, max 3840 × 2560 | .jpeg, .jpg, .png |
+| Universal image (header and search) | 16:9 | 5244 × 2950 | .png only |
+| **Product page header video** | 21:9 | 3840 × 1646 | .mov, .m4v, .mp4; 30 or 60 fps; 5–30 s |
+| **Search results video** | 3:2 | min 1920 × 1280, max 3840 × 2560 | .mov, .m4v, .mp4; 30 or 60 fps; 5–30 s |
 
-No alpha. Video versions exist (5–30 s, 30 or 60 fps, muted by default, loop)
-but are out of scope for this skill. In-App Event cards (16:9, 1920 × 1080 to
-3840 × 2160) and detail pages (9:16) are also out of scope.
+Apple's words: "Images can't include alpha channels or transparencies."
+"Videos are muted by default in search results and can't currently be
+unmuted. On your product page, videos are also muted by default, but people
+can unmute them. Videos loop continuously in both placements." There is no
+16:9 universal video. The kit renders the header video at 3840 × 1646 and the
+search video at 3744 × 2496 at 30 fps and 3600 × 2400 at 60 fps (see the
+encoding decisions below).
 
-## App previews
+Best practices (video): "Select an impactful poster frame" (the first image
+before playback), "Start strong", avoid quick cuts and fast-moving visuals,
+"Loop seamlessly … without visible jumps or breaks", and audio is muted by
+default, so "your creative must work silently first"; sound, if any, is "brand
+texture rather than information delivery". Assets go through App Store Connect
+"either alongside a new app version, or in your Asset Library", and creative
+assets can be used on custom product pages.
 
-Up to three per product page; out of scope. Mention them as a possible
-follow-up only when the user asks about video.
+### Art safe area
+
+Best practices says to keep key art "within the safe area defined in each
+template" but states no size. The "Art Safe Area" layer in Apple's Photoshop
+templates (`creative_assets-product_page_header_template-static.psd`,
+`creative_assets-search_results_template-static.psd`, read 2026-10-29) is:
+
+| Template | Canvas | Art Safe Area (x, y, w × h) |
+| --- | --- | --- |
+| Product page header | 3840 × 1646 | 1097, 493, 1646 × 661 (centered) |
+| Search results | 3840 × 2560 | 836, 765, 2168 × 1030 (centered) |
+
+The templates are for stills; the kit applies the same area to videos of the
+same placement (assumption: the placement and its crops are the same).
+
+### Video encoding decisions
+
+| Question | Apple states | Kit choice |
+| --- | --- | --- |
+| Codec and profile | Nothing for creative videos. App previews: H.264 (up to High Profile Level 4.0) or ProRes 422 HQ; no HEVC | **Assumption:** H.264 High, 8-bit yuv420p, BT.709. Level 4.0 cannot hold 3840 px frames, so `render.py` passes the lowest level that fits to x264: 5.1 for the header at 30 fps, 5.2 for the header at 60 fps and for the default search sizes, 6.0 only for the opt-in 3840 × 2560 search video. `check_assets.py` reports the level (WARN above 5.2, since Apple states none), fails other codecs, warns on HEVC and ProRes |
+| Audio track | Allowed implicitly: header audio can be unmuted, search audio never plays | **Kit rule:** render no audio track. A track in a supplied file is a WARN, never a FAIL |
+| File size | Nothing for creative videos (In-App Event images: 500 MB; app previews: 500 MB) | **Assumption:** fail above 500 MB; rendered loops are a few MB |
+| Constant frame rate | "30 fps or 60 fps" only | **Assumption:** CFR (frames piped at a fixed `-framerate`, encoded with `-r`), checked from packet timestamps |
+| Container | .mov, .m4v or .mp4 | MP4 with `+faststart`, no metadata |
+| Search video size | Any 3:2 from 1920 × 1280 to 3840 × 2560 | **Assumption:** the largest macroblock-aligned 3:2 size within H.264 Level 5.2 at the chosen frame rate: 3744 × 2496 at 30 fps, 3600 × 2400 at 60 fps (Level 5.2 allows 36,864 macroblocks per frame and 2,073,600 per second; 3744 × 2496 at 60 fps needs 2,190,240). `creatives.video.searchSize: "max"` renders Apple's maximum 3840 × 2560, which needs Level 6.0 (38,400 macroblocks per frame) and is untested with App Store Connect. The still stays 3840 × 2560 |
+| Color | Nothing | BT.709 primaries, transfer and matrix, limited range, tagged in the stream |
+
+## Out of scope
+
+- **App previews** (device-recorded app footage with audio, 15–30 s, up to
+  three per product page, its own spec page): not made by this skill, even
+  when the user asks for "an App Store video". Header and search videos are
+  creative assets, not app previews.
+- **In-App Event** cards (16:9, 1920 × 1080 to 3840 × 2160) and detail pages
+  (9:16), as images or 15–30 s videos.

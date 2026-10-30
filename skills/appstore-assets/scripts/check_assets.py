@@ -7,21 +7,48 @@ channel, at most 10 screenshots per class, the required class present for each
 platform, and the same frame names across the iPhone classes. Optional WCAG
 contrast checks cover caption color pairs.
 
+Header and search videos under creative/ (and creative/<variant>/) are checked
+with ffprobe: .mov/.m4v/.mp4, exact size (header 3840x1646, search 3:2 from
+1920x1280 to 3840x2560), 30 or 60 fps at a constant rate, 5-30 s, H.264
+yuv420p (the level is reported; above 5.2 is a warning), a frame count that
+matches duration x fps, and the audio-track rule. With ffmpeg, a blank frame
+(every frame is decoded at low resolution) or a jump at the loop seam also
+fails, and --sheet writes one video sheet per file: frames at most 2 s apart
+with Apple's art safe area outlined, plus the seam pair.
+
+Only files the kit could have produced are checked in creative/: header*,
+search* and universal* images and videos at its root and in variant folders
+(the ones render.py's creative/.kit-outputs.json records). With no record (a
+set not yet rendered by 1.1.0), every lowercase id folder counts as a variant,
+so old/header.png is checked and can FAIL; the next render writes the record.
+A hand-made header*/search*/universal* file is checked like a kit one; when the
+record exists and does not vouch for it (unlisted, or changed since), its FAIL
+row ends with "(not written by the kit)". Anything else there (an App Preview
+recording, raw art, notes) gets a WARN row telling the user not to upload it.
+
 Usage:
   python3 check_assets.py OUT_DIR --platforms iphone,ipad,mac
          [--sheet SHEET_DIR] [--pair "#1d5fd6/#e6edf8@3" ...]
 
-Exit 0 = every check passed. Exit 1 = at least one FAIL row (each says why).
+Exit 0 = every check passed (WARN rows are notes). Exit 1 = at least one FAIL row (each says why).
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
+import math
+import os
+import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageStat
 except ImportError:
     print("Error: Pillow is not installed, so images cannot be inspected.\n"
           "Fix: python3 -m pip install pillow", file=sys.stderr)
@@ -43,6 +70,17 @@ ACCEPTED = {
 REQUIRED = {"iphone": "iphone-6.3", "ipad": "ipad-13", "mac": "mac"}
 CREATIVE = {"header": {(3840, 1646)}, "universal": {(5244, 2950)}}
 MAX_PER_CLASS = 10
+IMAGE_EXT, VIDEO_EXT = (".png", ".jpg", ".jpeg"), (".mov", ".m4v", ".mp4")
+# Apple's "Art Safe Area" layer in its Photoshop creative-asset templates, as
+# (x, y, w, h) fractions of the canvas: header 1646x661 and search 2168x1030, centered.
+SAFE = {"header": (1097 / 3840, 493 / 1646, 1646 / 3840, 661 / 1646),
+        "search": (836 / 3840, 765 / 2560, 2168 / 3840, 1030 / 2560)}
+# Assumption: Apple states no file-size limit for creative videos; its app preview cap is 500 MB.
+MAX_VIDEO_MB = 500
+VIDEO_FIX = "re-render with render.py from creatives.video in config.js"
+KINDS = ("header", "search", "universal")
+VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # render.py's variant ids
+RECORD = ".kit-outputs.json"  # render.py's ownership record in creative/
 
 
 def search_ok(size: tuple[int, int]) -> bool:
@@ -83,6 +121,166 @@ def inspect(path: Path, accepted: set | None, kind: str | None) -> tuple[bool, s
     return True, f"{size[0]}x{size[1]} {mode} {fmt}"
 
 
+def tool(name: str) -> str | None:
+    path = os.environ.get(name.upper()) or shutil.which(name)
+    return path if path and os.path.exists(path) else None
+
+
+def probe(ffprobe: str, path: Path, *args: str) -> dict:
+    out = subprocess.run([ffprobe, "-v", "error", "-of", "json", *args, str(path)], capture_output=True, text=True, check=False)
+    if out.returncode != 0:
+        raise ValueError(out.stderr.strip().splitlines()[-1] if out.stderr.strip() else "ffprobe failed")
+    return json.loads(out.stdout)
+
+
+def rate(fraction: str) -> float:
+    """ffprobe's "30/1" as a number; 0.0 for "N/A", "0/0" or anything unreadable."""
+    num, _, den = str(fraction).partition("/")
+    try:
+        return float(num) / float(den or 1) if float(den or 1) else 0.0
+    except ValueError:
+        return 0.0
+
+
+def inspect_video(path: Path, kind: str, ffprobe: str) -> tuple[list[str], list[str], dict]:
+    """Return (problems, notes, facts) for one creative video; any problem is a FAIL."""
+    problems, notes = [], []
+    if path.suffix.lower() not in VIDEO_EXT:
+        problems.append(f"extension {path.suffix}; use .mov, .m4v or .mp4")
+    if kind not in SAFE:
+        return problems + [f"{kind} has no video placement; only header and search take video"], notes, {}
+    try:
+        info = probe(ffprobe, path, "-show_streams", "-show_format", "-count_packets")
+        pts = probe(ffprobe, path, "-select_streams", "v:0", "-show_entries", "packet=pts_time")
+    except (ValueError, json.JSONDecodeError) as e:
+        return problems + [f"unreadable video ({e})"], notes, {}
+    fmt = info.get("format", {})
+    video = [s for s in info.get("streams", []) if s.get("codec_type") == "video"]
+    audio = [s for s in info.get("streams", []) if s.get("codec_type") == "audio"]
+    if "mov" not in fmt.get("format_name", "") and "mp4" not in fmt.get("format_name", ""):
+        problems.append(f"container {fmt.get('format_name')}; use a QuickTime/MPEG-4 file")
+    if len(video) != 1:
+        return problems + [f"{len(video)} video streams; expected exactly 1"], notes, {}
+    v = video[0]
+    w, h = int(v.get("width", 0)), int(v.get("height", 0))
+    if kind == "header" and (w, h) != (3840, 1646):
+        problems.append(f"{w}x{h}; the header video must be exactly 3840x1646 ({VIDEO_FIX})")
+    if kind == "search" and not search_ok((w, h)):
+        problems.append(f"{w}x{h} is not 3:2 between 1920x1280 and 3840x2560 ({VIDEO_FIX})")
+    fps, avg = rate(v.get("r_frame_rate", "0/1")), rate(v.get("avg_frame_rate", "0/1"))
+    if not fps:
+        return problems + [f"frame rate {v.get('r_frame_rate')!r} is unreadable; Apple accepts exactly 30 or 60 fps ({VIDEO_FIX})"], notes, {}
+    if not any(abs(fps - want) < 0.01 for want in (30, 60)):
+        problems.append(f"{fps:.3f} fps; Apple accepts exactly 30 or 60 (re-encode with -r 30 or -r 60)")
+    times = sorted(float(p["pts_time"]) for p in pts.get("packets", []) if p.get("pts_time") not in (None, "N/A"))
+    steps = [b - a for a, b in zip(times, times[1:])]
+    odd = [d for d in steps if fps and abs(d - 1 / fps) > 0.002]
+    if fps and (abs(avg - fps) > 0.01 or odd):
+        problems.append(f"variable frame rate (avg {avg:.3f} fps, {len(odd)} frame step(s) other than {1 / fps:.4f} s, "
+                        f"e.g. {max(odd, key=lambda d: abs(d - 1 / fps), default=0):.4f} s); re-encode at a constant rate (ffmpeg -r 30 or -r 60)")
+    try:
+        duration = float(v.get("duration") or fmt.get("duration") or 0)
+    except ValueError:
+        duration = 0.0
+    if duration <= 0:  # e.g. a raw H.264 stream saved as .mp4
+        return problems + [f"duration is unreadable (ffprobe reports none); use an MP4 or MOV file ({VIDEO_FIX})"], notes, {}
+    if not 5 - 1e-3 <= duration <= 30 + 1e-3:
+        problems.append(f"{duration:.2f} s is outside Apple's 5-30 s (set creatives.video.duration)")
+    codec, pix, profile, level = v.get("codec_name"), v.get("pix_fmt"), v.get("profile", ""), v.get("level")
+    if codec == "h264":
+        if pix != "yuv420p":
+            problems.append(f"H.264 with {pix}; use 8-bit 4:2:0 (-pix_fmt yuv420p)")
+        if isinstance(level, int) and level > 0:
+            profile += f" L{level // 10}.{level % 10}"
+            if level > 52:
+                notes.append(f"H.264 Level {level // 10}.{level % 10} is above 5.2; Apple states no level for creative videos, "
+                             "and the kit has not tested one above 5.2 with App Store Connect")
+    elif codec == "prores":
+        notes.append("ProRes: accepted for app previews (422 HQ in .mov); Apple states no codec for creative videos")
+    elif codec == "hevc":
+        notes.append("HEVC: Apple states no codec for creative videos and lists only H.264 and ProRes for app previews; prefer H.264")
+    else:
+        problems.append(f"codec {codec}; use H.264 ({VIDEO_FIX})")
+    if audio and kind == "search":
+        notes.append("has an audio track that never plays: search videos can't be unmuted (drop it with ffmpeg -an)")
+    elif audio:
+        notes.append("has an audio track: the header is muted by default, so the message must work without it")
+    size_mb = path.stat().st_size / 1e6
+    if size_mb > MAX_VIDEO_MB:
+        problems.append(f"{size_mb:.0f} MB; keep under {MAX_VIDEO_MB} MB (assumed cap, App Store Connect's app preview limit)")
+    frames = int(v.get("nb_read_packets") or len(times))
+    if abs(frames - duration * fps) > 1:
+        problems.append(f"{frames} frames, but {duration:.2f} s at {fps:g} fps needs {round(duration * fps)}; "
+                        f"the file looks truncated ({VIDEO_FIX})")
+    return problems, notes, {"w": w, "h": h, "fps": fps, "duration": duration, "frames": frames,
+                             "desc": f"{w}x{h} {codec} {profile} {pix} {fps:g} fps CFR {duration:.2f} s, "
+                                     f"{'no audio' if not audio else f'{len(audio)} audio'}, {size_mb:.1f} MB"}
+
+
+def video_frames(ffmpeg: str, path: Path, indices: list[int], width: int) -> dict[int, Image.Image]:
+    """Decode the given frame numbers at a reduced width."""
+    wanted = sorted(set(indices))
+    expr = "+".join(f"eq(n\\,{i})" for i in wanted)
+    with tempfile.TemporaryDirectory() as tmp:
+        run = subprocess.run([ffmpeg, "-v", "error", "-i", str(path), "-vf", f"select={expr},setpts=N/FRAME_RATE/TB,scale={width}:-2",
+                              f"{tmp}/%04d.png"], capture_output=True, text=True, check=False)
+        files = sorted(Path(tmp).glob("*.png"))
+        if run.returncode != 0 or len(files) != len(wanted):
+            raise ValueError(f"ffmpeg decoded {len(files)} of {len(wanted)} sample frames "
+                             f"({(run.stderr.strip().splitlines() or ['no error'])[-1]})")
+        return {i: Image.open(f).convert("RGB") for i, f in zip(wanted, files)}
+
+
+def blank_frames(ffmpeg: str, path: Path, count: int) -> list[str]:
+    """Decode every frame at 160 x 90 gray (shape is irrelevant to a flat-color test) and fail the blank ones."""
+    run = subprocess.run([ffmpeg, "-v", "error", "-i", str(path), "-vf", "scale=160:90,format=gray", "-f", "rawvideo", "-"],
+                         capture_output=True, check=False)
+    size = 160 * 90
+    decoded = len(run.stdout) // size
+    if run.returncode != 0 or decoded != count:
+        return [f"decoded {decoded} of {count} frames ({(run.stderr.decode(errors='replace').strip().splitlines() or ['no error'])[-1]})"]
+    blank = [i for i in range(decoded) if ImageStat.Stat(Image.frombytes("L", (160, 90), run.stdout[i * size:(i + 1) * size])).stddev[0] < 2]
+    return [f"{len(blank)} blank (flat color) frame(s), first at frame {blank[0]}"] if blank else []
+
+
+def loop_seam(frames: dict[int, Image.Image], last: int) -> tuple[list[str], str]:
+    """A loop seam jumping more than twice the neighboring frame steps fails."""
+    gray = {i: im.convert("L").resize((480, round(480 * im.height / im.width))) for i, im in frames.items()}
+    diff = lambda a, b: ImageStat.Stat(ImageChops.difference(gray[a], gray[b])).mean[0]
+    problems = []
+    seam, near = diff(last, 0), max(diff(0, 1), diff(last - 1, last))
+    if seam > 2 * near + 1.0:
+        problems.append(f"loop seam jumps (last→first diff {seam:.2f} vs {near:.2f} between neighbors); "
+                        "end the video on the state it starts with")
+    return problems, f"seam diff {seam:.2f} (neighbors {near:.2f})"
+
+
+def video_sheet(frames: dict[int, Image.Image], samples: list[int], last: int, fps: float, kind: str, out: Path) -> None:
+    try:
+        font = ImageFont.load_default(size=26)
+    except TypeError:
+        font = ImageFont.load_default()
+    tw = next(iter(frames.values())).width
+    th = next(iter(frames.values())).height
+    cols, gap, label = 3, 12, 36
+    rows = math.ceil(len(samples) / cols) + 1
+    canvas = Image.new("RGB", (cols * tw + (cols + 1) * gap, rows * (th + label) + (rows + 1) * gap), "white")
+    draw = ImageDraw.Draw(canvas)
+    tiles = [(i, f"frame {i}  t={i / fps:.2f} s", True) for i in samples] + [(None, "", False)] * (-len(samples) % cols)
+    tiles += [(last, f"seam: last frame {last}", False), (0, "seam: loops to frame 0 (poster)", False)]
+    sx, sy, sw, sh = SAFE[kind]
+    for n, (i, text, safe) in enumerate(tiles):
+        if i is None:
+            continue
+        x, y = gap + (n % cols) * (tw + gap), gap + (n // cols) * (th + label + gap)
+        canvas.paste(frames[i], (x, y + label))
+        draw.text((x, y + 4), text, fill="black", font=font)
+        if safe:  # Apple's art safe area; not part of the video
+            draw.rectangle([x + sx * tw, y + label + sy * th, x + (sx + sw) * tw, y + label + (sy + sh) * th], outline="#ff2bd6", width=3)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(out)
+
+
 def sheet(files: list[Path], out: Path, thumb_w: int = 300) -> None:
     thumbs = []
     for f in files:
@@ -98,6 +296,55 @@ def sheet(files: list[Path], out: Path, thumb_w: int = 300) -> None:
         x += t.width + gap
     out.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(out)
+
+
+def fingerprint(f: Path) -> dict:
+    """render.py's fingerprint: size and sha256."""
+    digest = hashlib.sha256()
+    with f.open("rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(block)
+    return {"size": f.stat().st_size, "sha256": digest.hexdigest()}
+
+
+def creative_split(d: Path) -> tuple[list[Path], list[tuple[str, str]], dict | None]:
+    """Split creative/ into files the kit could have produced (checked) and (path, note) WARN rows for
+    the rest; also return the record's fingerprints by path (None with no readable record)."""
+    try:
+        record = json.loads((d / RECORD).read_text(encoding="utf-8"))
+        files, listed = record["files"], record["variants"]
+        if not isinstance(files, (dict, list)) or not isinstance(listed, list):
+            raise TypeError("not a record render.py writes")
+        variants = {v for v in listed if isinstance(v, str)} | {f.split("/")[0] for f in files if isinstance(f, str) and "/" in f}
+        prints = files if isinstance(files, dict) else {}
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        variants, prints = None, None  # no record: any lowercase id folder may be a variant
+    kit_name = lambda p: p.suffix.lower() in IMAGE_EXT + VIDEO_EXT and p.stem.split("-")[0] in KINDS
+    kit, foreign = [], []
+
+    def other(p: Path) -> None:
+        rel = f"creative/{p.relative_to(d)}"
+        if p.is_symlink():
+            foreign.append((rel, "a symlink, not checked; don't upload what it points to as a creative"))
+        elif p.is_dir():
+            foreign.append((rel + "/", "not a kit variant folder; don't upload its files as creatives"))
+        elif p.suffix.lower() in VIDEO_EXT:
+            foreign.append((rel, "not a kit asset; don't upload it as a header/search video (App Previews go in the App Preview slot)"))
+        else:
+            foreign.append((rel, "not a kit asset; don't upload it as a header, search or universal creative"))
+
+    for entry in sorted(d.iterdir()):
+        if entry.name.startswith("."):  # the ownership record, .DS_Store
+            continue
+        if entry.is_dir() and not entry.is_symlink() and (entry.name in variants if variants is not None else VARIANT_ID.fullmatch(entry.name)):
+            for f in sorted(entry.iterdir()):
+                if not f.name.startswith("."):
+                    (kit.append if f.is_file() and not f.is_symlink() and kit_name(f) else other)(f)
+        elif entry.is_file() and not entry.is_symlink() and kit_name(entry):
+            kit.append(entry)
+        else:
+            other(entry)
+    return kit, foreign, prints
 
 
 def main() -> None:
@@ -119,24 +366,70 @@ def main() -> None:
 
     rows, failures = [], 0
     names: dict[str, list[str]] = {}
+    ffprobe, ffmpeg = tool("ffprobe"), tool("ffmpeg")
+    prints = None
+
+    def stranger(f: Path) -> str:
+        """A note for a creative FAIL on a file the ownership record does not vouch for (unlisted or changed)."""
+        if prints is None:
+            return ""
+        try:
+            fp = fingerprint(f)
+        except OSError:  # unreadable: the FAIL row already says so; make no ownership claim
+            return ""
+        return "" if prints.get(f.relative_to(a.out / "creative").as_posix()) == fp else " (not written by the kit)"
+
     for folder in [*ACCEPTED, "creative"]:
         d = a.out / folder
-        files = sorted(p for p in d.glob("*") if p.suffix.lower() in (".png", ".jpg", ".jpeg")) if d.is_dir() else []
-        if not files:
+        if folder == "creative" and d.is_dir():  # creative/<variant>/ holds Custom Product Page sets
+            found, foreign, prints = creative_split(d)
+            rows += [(name, "WARN", note) for name, note in foreign]
+        else:
+            found = sorted(p for p in d.glob("*") if p.is_file() and not p.name.startswith(".")) if d.is_dir() else []
+        files = [p for p in found if p.suffix.lower() in IMAGE_EXT]
+        videos = [p for p in found if p.suffix.lower() in VIDEO_EXT] if folder == "creative" else []
+        if not files and not videos:
             continue
-        names[folder] = [f.stem for f in files]
+        names[folder] = [f.stem for f in files + videos]
         for f in files:
             kind = f.stem.split("-")[0] if folder == "creative" else None
-            if folder == "creative" and kind not in ("header", "search", "universal"):
-                ok, why = False, "creative files must be named header*, search* or universal*"
-            else:
-                ok, why = inspect(f, CREATIVE.get(kind) if folder == "creative" else ACCEPTED[folder], kind)
+            ok, why = inspect(f, CREATIVE.get(kind) if folder == "creative" else ACCEPTED[folder], kind)
             failures += not ok
-            rows.append((f"{folder}/{f.name}", "PASS" if ok else "FAIL", why))
+            rows.append((f"{folder}/{f.relative_to(d)}", "PASS" if ok else "FAIL", why if ok or folder != "creative" else why + stranger(f)))
+        for f in videos:
+            name, kind = f"{folder}/{f.relative_to(d)}", f.stem.split("-")[0]
+            if not ffprobe:
+                failures += 1
+                rows.append((name, "FAIL", ("ffprobe not found, so the video cannot be checked; install ffmpeg 4.1 or later "
+                                            "(brew install ffmpeg, or sudo apt install ffmpeg) or set FFPROBE")))
+                continue
+            problems, notes, facts = inspect_video(f, kind, ffprobe)
+            if facts and ffmpeg:
+                last, fps = facts["frames"] - 1, facts["fps"]
+                step = max(1, round(facts["frames"] / math.ceil(facts["duration"] / 2)))
+                samples = list(range(0, last + 1, step))
+                try:
+                    frames = video_frames(ffmpeg, f, [0, 1, last - 1, last, *samples], 960)
+                except ValueError as e:
+                    frames = None
+                    problems.append(f"frames could not be decoded for the seam check: {e}")
+                problems += blank_frames(ffmpeg, f, facts["frames"])
+                if frames:
+                    found_problems, seam = loop_seam(frames, last)
+                    problems += found_problems
+                    facts["desc"] += f", {seam}"
+                if frames and a.sheet:
+                    variant = f"{f.parent.name}-" if f.parent != d else ""
+                    video_sheet(frames, samples, last, fps, kind, a.sheet / f"video-{variant}{f.stem}.png")
+            elif facts:
+                notes.append("ffmpeg not found: loop-seam and blank-frame checks and the video sheet were skipped")
+            failures += bool(problems)
+            rows.append((name, "FAIL" if problems else "PASS", "; ".join(problems) + stranger(f) if problems else facts["desc"]))
+            rows += [(name, "WARN", n) for n in notes]
         if folder != "creative" and len(files) > MAX_PER_CLASS:
             failures += 1
             rows.append((f"{folder}/", "FAIL", f"{len(files)} screenshots; App Store Connect allows {MAX_PER_CLASS} per class"))
-        if a.sheet:
+        if a.sheet and files:
             sheet(files, a.sheet / f"{folder}.png")
 
     for p in platforms:
@@ -168,7 +461,9 @@ def main() -> None:
         print(f"{verdict}  {name.ljust(width)}  {why}")
     if a.sheet:
         print(f"Contact sheets: {a.sheet}")
-    print(f"{'FAIL' if failures else 'PASS'}: {len(rows) - failures}/{len(rows)} checks passed")
+    warns = sum(r[1] == "WARN" for r in rows)
+    checks = len(rows) - warns
+    print(f"{'FAIL' if failures else 'PASS'}: {checks - failures}/{checks} checks passed" + (f", {warns} warning(s)" if warns else ""))
     sys.exit(1 if failures else 0)
 
 
