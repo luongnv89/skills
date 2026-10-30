@@ -16,6 +16,12 @@ matches duration x fps, and the audio-track rule. With ffmpeg, a blank frame
 fails, and --sheet writes one video sheet per file: frames at most 2 s apart
 with Apple's art safe area outlined, plus the seam pair.
 
+Only files the kit could have produced are checked in creative/: header*,
+search* and universal* images and videos at its root and in variant folders
+(the ones render.py's creative/.kit-outputs.json records, or any lowercase
+id folder when there is no record). Anything else there (an App Preview
+recording, raw art, notes) gets a WARN row telling the user not to upload it.
+
 Usage:
   python3 check_assets.py OUT_DIR --platforms iphone,ipad,mac
          [--sheet SHEET_DIR] [--pair "#1d5fd6/#e6edf8@3" ...]
@@ -29,6 +35,7 @@ import argparse
 import json
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -66,6 +73,9 @@ SAFE = {"header": (1097 / 3840, 493 / 1646, 1646 / 3840, 661 / 1646),
 # Assumption: Apple states no file-size limit for creative videos; its app preview cap is 500 MB.
 MAX_VIDEO_MB = 500
 VIDEO_FIX = "re-render with render.py from creatives.video in config.js"
+KINDS = ("header", "search", "universal")
+VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # render.py's variant ids
+RECORD = ".kit-outputs.json"  # render.py's ownership record in creative/
 
 
 def search_ok(size: tuple[int, int]) -> bool:
@@ -283,6 +293,41 @@ def sheet(files: list[Path], out: Path, thumb_w: int = 300) -> None:
     canvas.save(out)
 
 
+def creative_split(d: Path) -> tuple[list[Path], list[tuple[str, str]]]:
+    """Split creative/ into files the kit could have produced (checked) and (path, note) WARN rows for the rest."""
+    try:
+        record = json.loads((d / RECORD).read_text(encoding="utf-8"))
+        variants = set(record["variants"]) | {f.split("/")[0] for f in record["files"] if "/" in f}
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        variants = None  # no record: any lowercase id folder may be a variant
+    kit_name = lambda p: p.suffix.lower() in IMAGE_EXT + VIDEO_EXT and p.stem.split("-")[0] in KINDS
+    kit, foreign = [], []
+
+    def other(p: Path) -> None:
+        rel = f"creative/{p.relative_to(d)}"
+        if p.is_symlink():
+            foreign.append((rel, "a symlink, not checked; don't upload what it points to as a creative"))
+        elif p.is_dir():
+            foreign.append((rel + "/", "not a kit variant folder; don't upload its files as creatives"))
+        elif p.suffix.lower() in VIDEO_EXT:
+            foreign.append((rel, "not a kit asset; don't upload it as a header/search video (App Previews go in the App Preview slot)"))
+        else:
+            foreign.append((rel, "not a kit asset; don't upload it as a header, search or universal creative"))
+
+    for entry in sorted(d.iterdir()):
+        if entry.name.startswith("."):  # the ownership record, .DS_Store
+            continue
+        if entry.is_dir() and not entry.is_symlink() and (entry.name in variants if variants is not None else VARIANT_ID.fullmatch(entry.name)):
+            for f in sorted(entry.iterdir()):
+                if not f.name.startswith("."):
+                    (kit.append if f.is_file() and not f.is_symlink() and kit_name(f) else other)(f)
+        elif entry.is_file() and not entry.is_symlink() and kit_name(entry):
+            kit.append(entry)
+        else:
+            other(entry)
+    return kit, foreign
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("out", type=Path, help="asset-set folder holding iphone-6.9/, iphone-6.3/, ipad-13/, mac/, creative/")
@@ -305,8 +350,11 @@ def main() -> None:
     ffprobe, ffmpeg = tool("ffprobe"), tool("ffmpeg")
     for folder in [*ACCEPTED, "creative"]:
         d = a.out / folder
-        pattern = ["*", "*/*"] if folder == "creative" else ["*"]  # creative/<variant>/ holds Custom Product Page sets
-        found = sorted(p for g in pattern for p in d.glob(g) if p.is_file() and not p.name.startswith(".")) if d.is_dir() else []
+        if folder == "creative" and d.is_dir():  # creative/<variant>/ holds Custom Product Page sets
+            found, foreign = creative_split(d)
+            rows += [(name, "WARN", note) for name, note in foreign]
+        else:
+            found = sorted(p for p in d.glob("*") if p.is_file() and not p.name.startswith(".")) if d.is_dir() else []
         files = [p for p in found if p.suffix.lower() in IMAGE_EXT]
         videos = [p for p in found if p.suffix.lower() in VIDEO_EXT] if folder == "creative" else []
         if not files and not videos:
@@ -314,10 +362,7 @@ def main() -> None:
         names[folder] = [f.stem for f in files + videos]
         for f in files:
             kind = f.stem.split("-")[0] if folder == "creative" else None
-            if folder == "creative" and kind not in ("header", "search", "universal"):
-                ok, why = False, "creative files must be named header*, search* or universal*"
-            else:
-                ok, why = inspect(f, CREATIVE.get(kind) if folder == "creative" else ACCEPTED[folder], kind)
+            ok, why = inspect(f, CREATIVE.get(kind) if folder == "creative" else ACCEPTED[folder], kind)
             failures += not ok
             rows.append((f"{folder}/{f.relative_to(d)}", "PASS" if ok else "FAIL", why))
         for f in videos:

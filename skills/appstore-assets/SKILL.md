@@ -171,7 +171,8 @@ it removes the PNGs and videos it wrote that the config dropped, and warns about
 second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes each video (size,
 30/60 fps constant, 5–30 s, H.264 yuv420p, audio) and fails a blank frame or a loop-seam jump;
 with `--sheet` it writes `sheets/video-<kind>.png`. If a script fails, apply the fix it prints
-and re-run it. Bar: both commands exit 0.
+and re-run it. A file in `creative/` the kit did not write gets a WARN row, never a FAIL: never
+move or delete it, and list it under Uncertainty. Bar: both commands exit 0.
 
 ## Step 6 — Review and polish
 
