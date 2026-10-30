@@ -14,9 +14,10 @@ Usage:
 A full render (no --only) also deletes the outputs the manifest no longer
 lists, so a dropped frame cannot ship by accident: <frame>.png in the class
 folders, and in creative/ only the files its ownership record
-(creative/.kit-outputs.json) says it wrote. Any other file in creative/ is
-reported and kept. Caption color pairs from config.js brand tokens must reach
-3:1 (headline) and 4.5:1 (supporting line) on every canvas stop, or the run fails.
+(creative/.kit-outputs.json) says it wrote, while their size and sha256 still
+match. Any other file in creative/, or one changed since, is reported and kept.
+Caption color pairs from config.js brand tokens must reach 3:1 (headline) and
+4.5:1 (supporting line) on every canvas stop, or the run fails.
 
 Videos (creatives.video.kinds in config.js) need ffmpeg and ffprobe; a config
 without video never calls them. One Chrome, driven over --remote-debugging-pipe,
@@ -38,6 +39,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import html
 import io
 import json
@@ -74,8 +76,9 @@ CREATIVES = {
 }
 KIT_OUTPUTS = {f"{k}.png" for k in CREATIVES} | {"header.mp4", "search.mp4"}  # what creative/ can hold
 VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # kit.js checks creatives.variants ids against the same pattern
-# creative/.kit-outputs.json lists the creative files render.py wrote and the variant
-# folders it created; a full render deletes nothing else in creative/.
+# creative/.kit-outputs.json maps each creative file render.py wrote to its size and
+# sha256, and lists the variant folders it created; a full render deletes nothing
+# else in creative/, and no file whose content changed since.
 RECORD = ".kit-outputs.json"
 # Videos: the header as above. Search defaults to the largest macroblock-aligned
 # 3:2 size within H.264 Level 5.2 at its frame rate: 3744 x 2496 at 30 fps (the
@@ -121,6 +124,8 @@ def chrome(binary: str, args: list[str], what: str) -> subprocess.CompletedProce
         tail = "\n".join((e.stderr or "").strip().splitlines()[-8:])
         fail(f"Chrome exited with code {e.returncode} while rendering {what}.\n{tail}",
              "run the same URL in a normal Chrome window to see the error, or pass --chrome with a working binary.")
+    except OSError as e:  # not executable, or not a program
+        fail(f"Chrome could not start: {e}", "pass --chrome with a working Chrome or Chromium binary.")
     raise AssertionError("unreachable")
 
 
@@ -253,7 +258,15 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
     """Seek the page to each frame time, capture it, and pipe the PNGs to ffmpeg."""
     ffmpeg, ffprobe = tools
     fps, frames, (pw, ph) = video["fps"], video["frames"], spec["px"]
+    new_dirs = [d for d in (out.parent, *out.parent.parents) if not d.exists()]  # deepest first
     out.parent.mkdir(parents=True, exist_ok=True)
+
+    def unmake_dirs() -> None:  # a failed render leaves no empty creative/ or variant folder behind
+        for d in new_dirs:
+            try:
+                d.rmdir()
+            except OSError:
+                break
     tmp = out.with_name(f".{out.stem}.partial.mp4")
     enc = subprocess.Popen(
         [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "image2pipe", "-framerate", str(fps), "-c:v", "png", "-i", "-",
@@ -286,6 +299,7 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
             enc.kill()
             enc.wait()
             tmp.unlink(missing_ok=True)
+            unmake_dirs()
     replaced = False
     try:  # a failure or signal while finishing still leaves no encoder or partial file behind
         try:
@@ -310,6 +324,7 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
                 enc.kill()
                 enc.wait()
             tmp.unlink(missing_ok=True)
+            unmake_dirs()
     print(f"ok  {out}  {pw}x{ph}  {fps} fps  {video['duration']} s  {frames} frames  "
           f"{video['beats']} beat(s)  rendered in {time.monotonic() - started:.1f} s")
 
@@ -348,18 +363,38 @@ def check_contrast(pairs: list[dict]) -> list[str]:
 
 
 def read_record(creative: Path) -> dict | None:
-    """The ownership record, or None when creative/ has none (a 1.0.0 set or a first render)."""
+    """The ownership record, or None when creative/ has none (a 1.0.0 set or a first render).
+    files maps each path to its fingerprint, or to None (a paths-only list from an unreleased
+    1.1.0 draft), which prune never deletes. A record render.py could not have written
+    (wrong types, a path or variant it never uses) is unreadable, and nothing is pruned."""
     try:
         data = json.loads((creative / RECORD).read_text(encoding="utf-8"))
         files, variants = data["files"], data["variants"]
+        if isinstance(files, list):
+            files = dict.fromkeys(files)
+        if not (isinstance(files, dict) and isinstance(variants, list)
+                and all(isinstance(f, str) and kit_path(f) and (fp is None or is_fingerprint(fp)) for f, fp in files.items())
+                and all(isinstance(v, str) and VARIANT_ID.fullmatch(v) for v in variants)):
+            raise ValueError("not a record render.py writes")
     except FileNotFoundError:
         return None
     except (OSError, ValueError, TypeError, KeyError) as e:
         print(f"WARN: {creative / RECORD} is unreadable ({e!r}); nothing in creative/ is pruned this run")
-        return {"files": set(), "variants": set()}
-    # Only paths render.py can write, so a hand-edited record cannot point outside creative/.
-    return {"files": {f for f in files if isinstance(f, str) and kit_path(f)},
-            "variants": {v for v in variants if isinstance(v, str) and VARIANT_ID.fullmatch(v)}}
+        return {"files": {}, "variants": set()}
+    return {"files": files, "variants": set(variants)}
+
+
+def fingerprint(f: Path) -> dict:
+    """Size and sha256 of a file, taken right after the kit writes it (about 0.3 s per 100 MB)."""
+    digest = hashlib.sha256()
+    with f.open("rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(block)
+    return {"size": f.stat().st_size, "sha256": digest.hexdigest()}
+
+
+def is_fingerprint(fp) -> bool:
+    return isinstance(fp, dict) and isinstance(fp.get("size"), int) and isinstance(fp.get("sha256"), str)
 
 
 def kit_path(rel: str) -> bool:
@@ -370,8 +405,9 @@ def kit_path(rel: str) -> bool:
 def write_record(creative: Path, record: dict) -> None:
     """Replace the record atomically, so an interrupted write never leaves half a file."""
     tmp = creative / f"{RECORD}.tmp"
-    tmp.write_text(json.dumps({"about": "files appstore-assets render.py wrote; a full render deletes only these",
-                               "files": sorted(record["files"]), "variants": sorted(record["variants"])},
+    tmp.write_text(json.dumps({"about": "files appstore-assets render.py wrote, with their size and sha256; a full "
+                                        "render deletes only these, and only while both still match",
+                               "files": dict(sorted(record["files"].items())), "variants": sorted(record["variants"])},
                               indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, creative / RECORD)
 
@@ -379,11 +415,13 @@ def write_record(creative: Path, record: dict) -> None:
 def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made: set[str], legacy: bool) -> None:
     """Delete outputs the kit wrote earlier that the current config no longer lists.
     Class folders: every <frame>.png not rendered this run, as in 1.0.0. creative/:
-    only files the ownership record lists (written by an earlier render), then a
-    recorded variant folder once it is empty; with no record (legacy), only the
-    root header/search/universal .png that 1.0.0 deleted. Symlinks, hidden files
-    and anything else (a hand-made video, a folder of raw art, an empty folder)
-    are reported and left in place."""
+    only files the ownership record lists (written by an earlier render) whose
+    size and sha256 still match, then a recorded variant folder once it is empty
+    (a lone .DS_Store goes with it); with no record (legacy), only the root
+    header/search/universal .png that 1.0.0 deleted. A recorded file changed since
+    is dropped from the record and kept. Hidden files are skipped; symlinks and
+    anything else (a hand-made video, a folder of raw art, an empty folder) are
+    reported and left in place."""
     def drop(f: Path) -> None:
         if f.resolve() not in expected:
             f.unlink()
@@ -403,15 +441,23 @@ def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made
             return
         if f.is_symlink() or not f.is_file():
             print(f"WARN: {f} not produced by the kit, left in place")
+            if rel in record["files"]:  # replaced by hand with a symlink or folder
+                del record["files"][rel]
+                changed = True
         elif rel in made:
             return
         elif rel in record["files"]:
             if f.suffix == ".mp4" and not videos:  # --no-video keeps existing videos
                 return
-            f.unlink()
-            record["files"].discard(rel)
+            fp = record["files"].pop(rel)
             changed = True
-            print(f"removed stale {f} (not in the current config)")
+            if fp is None:
+                print(f"WARN: {f} has no fingerprint in the record, left in place")
+            elif f.stat().st_size != fp["size"] or fingerprint(f) != fp:
+                print(f"WARN: {f} changed since the kit wrote it, left in place")
+            else:
+                f.unlink()
+                print(f"removed stale {f} (not in the current config)")
         elif legacy and rel in {f"{k}.png" for k in CREATIVES}:
             f.unlink()
             print(f"removed stale {f} (not in the current config)")
@@ -427,17 +473,23 @@ def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made
             for f in sorted(entry.iterdir()):
                 seen.add(f"{entry.name}/{f.name}")
                 consider(f, f"{entry.name}/{f.name}")
-            if variant and not any(entry.iterdir()):
+            rest = list(entry.iterdir()) if variant else []
+            if variant and all(p.name == ".DS_Store" and p.is_file() and not p.is_symlink() for p in rest):
+                for p in rest:  # Finder's .DS_Store alone does not keep a removed variant folder
+                    p.unlink()
                 entry.rmdir()
                 record["variants"].discard(entry.name)
                 changed = True
                 print(f"removed empty variant folder {entry}")
+            elif variant and not any(r.startswith(f"{entry.name}/") for r in record["files"]):
+                print(f"WARN: {entry} holds files the kit did not write, so the folder is left in place")
         else:
             seen.add(entry.name)
             consider(entry, entry.name)
-    gone = record["files"] - seen  # deleted or replaced by hand
+    gone = set(record["files"]) - seen  # deleted by hand since the kit wrote them
     if gone or changed:
-        record["files"] -= gone
+        for rel in gone:
+            del record["files"][rel]
         write_record(creative, record)
 
 
@@ -467,7 +519,6 @@ def read_manifest(binary: str, index: Path) -> dict:
 
 
 def shoot(binary: str, url: str, w: int, h: int, scale: int, out: Path, expected: tuple[int, int]) -> None:
-    out.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         raw = Path(tmp) / "raw.png"
         chrome(binary, [f"--force-device-scale-factor={scale}", f"--window-size={w},{h}", f"--screenshot={raw}", url], out.name)
@@ -478,6 +529,7 @@ def shoot(binary: str, url: str, w: int, h: int, scale: int, out: Path, expected
     if img.size != expected:
         fail(f"{out} rendered at {img.size[0]}x{img.size[1]}, expected {expected[0]}x{expected[1]}.",
              "do not change the stage sizes in kit.js; if Chrome ignores --window-size, pass --chrome with a current build.")
+    out.parent.mkdir(parents=True, exist_ok=True)  # only now, so a failed shot leaves no empty folder
     img.save(out, optimize=True)
     print(f"ok  {out}  {img.size[0]}x{img.size[1]}")
 
@@ -543,13 +595,13 @@ def main() -> None:
     count, written = 0, set()
     creative = out / "creative"
     previous = read_record(creative)
-    record = previous or {"files": set(), "variants": set()}
+    record = previous or {"files": {}, "variants": set()}
     made: set[str] = set()  # creative files written this run, relative to creative/
 
     def owned(target: Path, variant: str | None, created: bool) -> None:
-        """Record a creative file right after it is written, so the record never lists a file that is missing."""
+        """Record a creative file and its fingerprint right after it is written, so a failed render never adds one."""
         made.add(target.relative_to(creative).as_posix())
-        record["files"].add(target.relative_to(creative).as_posix())
+        record["files"][target.relative_to(creative).as_posix()] = fingerprint(target)
         if created:
             record["variants"].add(variant)
         write_record(creative, record)

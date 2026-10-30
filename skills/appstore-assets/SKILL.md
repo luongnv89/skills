@@ -167,7 +167,9 @@ python3 "<skill>/scripts/check_assets.py" <out> --platforms <list> --sheet <out>
 
 `render.py` also fails on unknown icons, missing images, caption contrast below 3:1
 (headline) or 4.5:1 (supporting line), and a video beat held shorter than its caption needs;
-it removes the PNGs and videos it wrote that the config dropped, and warns about (but keeps) other files in `creative/`. Videos render last and are slow (about a
+it removes the PNGs and videos it wrote that the config dropped (unless changed since), and warns about (but keeps) other files in `creative/`.
+A kit output the user replaced by hand is overwritten while the config still lists it: to keep a
+hand-made asset, remove that kind from the config first; the kit will then leave it in place. Videos render last and are slow (about a
 second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes each video (size,
 30/60 fps constant, 5–30 s, H.264 yuv420p, audio) and fails a blank frame or a loop-seam jump;
 with `--sheet` it writes `sheets/video-<kind>.png`. If a script fails, apply the fix it prints
