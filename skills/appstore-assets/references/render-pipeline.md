@@ -106,7 +106,7 @@ yuv420p, BT.709 (tagged), constant frame rate, no audio, `+faststart`. The
 search video is 3744 × 2496 at 30 fps (the stage at ×1.95) and 3600 × 2400
 at 60 fps (×1.875), the largest 3:2 sizes within H.264 Level 5.2 at each
 rate; `render.py` passes the level to x264 explicitly (5.1 for the header at
-30 fps, 5.2 otherwise). `searchSize: "max"` in `creatives.video` renders
+30 fps, 5.2 otherwise, 6.0 for `searchSize: "max"`). `searchSize: "max"` in `creatives.video` renders
 3840 × 2560 instead, which needs Level 6.0 and is untested with App Store
 Connect. The search still stays 3840 × 2560. Open
 `src/index.html?creative=header&t=3.2` in Chrome to see any moment.
