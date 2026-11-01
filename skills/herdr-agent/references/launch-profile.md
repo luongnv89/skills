@@ -72,3 +72,9 @@ Carrying them over is never silent. The summary prints `⚠ permission bypass in
 If process-info omits full argv, `launch_profile.py` exits before calling `herdr agent start`. Update and restart the Herdr server, or retry with `--without flags` only when launching without inherited setup flags is intentional.
 
 A flag the CLI rejects makes the agent exit immediately. `herdr agent start` then waits out its whole timeout before it returns an error. `launch_profile.py` reports the failure and names the pane. Read the CLI's own message with `herdr pane read <pane> --source recent-unwrapped --lines 20`, fix or `--without` the offending field, and start again.
+
+## Relay the profile before the first split
+
+This is the Phase 2 step that runs `launch_profile.py` once per spawn wave, before the call that splits.
+
+Set `main_model` and `main_thinking` to your own model ID and thinking level, and leave either one empty rather than guess. On Claude Code, leave `main_thinking` empty, because the script reads `CLAUDE_EFFORT`. Relay the summary line to the user before the first split, including any `⚠` or `warning:` line. A worker with an `UNKNOWN` model or thinking level still starts on its config default. Missing or malformed root argv aborts a same-kind launch before the split; `--without flags` is the explicit reduced-inheritance opt-out. If the user already declined bypass for this run, pass `--without bypass` on every worker. The sections above have the source order, per-kind flags, and what never carries over.

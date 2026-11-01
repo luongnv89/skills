@@ -27,7 +27,7 @@ Format: plain text in the chat. Do not write a report file unless the user asks 
 
 ## Status rules
 
-Apply the first rule that matches. SKILL.md *Final Report* carries the same three rules.
+Apply the first rule that matches. SKILL.md *Final Report* points here for these three rules.
 
 | Order | Status | When |
 |-------|--------|------|
@@ -131,3 +131,25 @@ Judge the final report against these four checks, alongside the Acceptance Crite
 - **Next decision is clear.** `Decision:` names the approval needed, or says `No approval needed.`, and lists each value to fill and the commit left to the user.
 
 When a human reviews the report, ask whether they could find the result, separate facts from assumptions, trace each claim, and name the next decision. Without a response, human understanding is unconfirmed. Agent inspection cannot confirm it.
+
+## Example: a complete run
+
+A complete run on a TypeScript CLI with a partial `README.md` ends like this:
+
+```
+Result: COMPLETE — acme/tsgrep on feat/oss-ready
+Evidence:
+  Created: LICENSE (MIT, 2026 Jane Doe), CONTRIBUTING.md,
+           CODE_OF_CONDUCT.md (conduct@acme.dev), SECURITY.md (security@acme.dev),
+           .github/ISSUE_TEMPLATE/bug_report.md, feature_request.md,
+           .github/PULL_REQUEST_TEMPLATE.md, docs/ (4 files)
+  Updated: README.md (+ Quick Start, Usage, License badge),
+           package.json (+ license, repository), .gitignore (+ dist/, .env)
+  Acceptance criteria: 13/13 pass. Placeholder grep: no matches. No deleted files.
+Uncertainty: README commands copied from package.json scripts, not executed.
+Decision: No approval needed.
+  Remaining action: confirm both contact addresses are monitored.
+  Remaining action: review and commit feat/oss-ready.
+```
+
+Before printing, confirm each listed file exists (`test -f`).

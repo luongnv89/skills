@@ -15,3 +15,7 @@ Each row is a situation the loop must handle rather than crash on. Exact stop an
 | Autonomous mode cannot be enabled or verified | Stop before dispatch with the per-harness recovery from `error-messages.md`; never substitute skip-permissions flags |
 | Worker blocked | Surface trust/auth dialog; never type into it |
 | Max rounds | Report all remaining FINDINGS; leave PR open |
+
+## When to read this file
+
+Read this file when one of these occurs: a dependency cannot be acquired; the ISSUE implementer produces no unique open PR; a linked PR exists at ISSUE preflight; the PR is closed or missing; the issue and PR do not match; the reviewer verdict is missing or contradictory; the PR head changes mid-ROUND; fork push access is uncertain; autonomous mode cannot be verified; a worker is blocked; max rounds is reached. Each row above names the response; exact stop blocks are in `references/error-messages.md`.

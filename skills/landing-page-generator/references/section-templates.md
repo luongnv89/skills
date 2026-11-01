@@ -319,3 +319,63 @@ A/B Test Ideas:
 Conversion Tips:
 • [Specific recommendation]
 ```
+
+## Copywriting Best Practices
+
+Mode A Step 5 (SKILL.md → *Workflow*):
+
+- Active voice, present tense
+- Benefits over features
+- Specific numbers and data where available
+- Address objections directly
+- Urgency without pressure tactics
+- Short, scannable sentences
+- "You" language (customer-focused)
+- Multiple CTAs throughout the page
+
+## Expected Output Example (Mode A)
+
+Example input:
+
+```text
+Generate a landing page for AcmeDesk, a helpdesk for solo founders. Audience: indie SaaS founders.
+Primary CTA: Start free trial. Differentiator: setup in 10 minutes, shared inbox + AI drafts.
+```
+
+Expected output:
+
+```text
+LANDING PAGE COPY
+Product/Service: AcmeDesk
+Framework: PAS
+
+HERO SECTION
+Headline: Answer Every Customer Without Hiring Support
+Subheadline: AcmeDesk gives solo founders a shared inbox and AI draft replies that are ready in 10 minutes, not weeks.
+CTA Button: "Start My Free Trial"
+Trust Bar: [proof needed — add user count, testimonial, or response-time metric]
+...
+OPTIMIZATION NOTES
+A/B Test Ideas: test speed-focused vs founder-control headlines.
+
+COMPANION PAGES
+Footer links: Privacy Policy · Terms of Use · Changelog
+Skipped: Docs — hosted app; the brief names no setup step outside the app
+
+PRIVACY POLICY
+Product/Service: AcmeDesk
+Effective date: [proof needed — publication date]
+...
+
+page: built (landing-page/: index.html, privacy.html, terms.html, changelog.html)
+```
+
+## Example Triggers
+
+- "Write landing page copy for a B2B SaaS tool"
+- "Create sales page content using PAS framework"
+- "Generate hero section copy for my product"
+- "Write conversion-optimized CTAs"
+- "Help me with landing page headlines"
+- "Write the landing page, privacy policy, and changelog for my CLI tool"
+- "Write and build a landing page for my app"

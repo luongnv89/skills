@@ -9,7 +9,7 @@
 
 > Scan a live website for AI-agent readiness, turn the gaps into a reviewed plan, and file them as tracked GitHub issues — with a human approval gate before every step.
 
-Version: **1.4.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.5.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 

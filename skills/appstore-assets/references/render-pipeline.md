@@ -264,3 +264,47 @@ frame keeps the same caption and device placement.
 | `waiting for the video lock …` | Another render is encoding videos; this one waits its turn. Not a hang. A watcher reads the holder's pid and `<out>` from the message |
 | A capture harness's PNG has the wrong size or is clipped on the right | Under Chrome 156, `--screenshot` at a small `--window-size` sometimes came out at the wrong size or clipped (other runs of the same command were exact; load may play a part). Size small viewports with CDP `Emulation.setDeviceMetricsOverride` instead (`input-discovery.md` → Capture recipes). `render.py` retries a wrong-size still and fails if the last attempt is still wrong, so it never writes a clipped PNG |
 | Landscape screenshots come out portrait | `orientation` is missing from `config.js`, or `src/kit.js` predates 1.2.0 (no `setOrientation` in it): refresh the kit files |
+
+## Update branch: kit refresh and brief
+
+Moved from SKILL.md Step 0; run it on the Update branch before Steps 5–7.
+
+Update branch kit refresh: note whether `src/kit.js` predates video (no `__seek` in it), then
+copy the template's `kit.js`, `kit.css` and `index.html` into `src/`, first backing up any that
+differ as `<name>.bak-<timestamp>` so a hand edit is never lost. List the backups in the report.
+On `landscape fork`, add `orientation: "landscape"` to `config.js`, render with `render.py` itself (not
+the wrapper), and say so in the report.
+
+Update brief: read `src/brief.json`. If it is missing or lacks `orientation`, `limits` or
+`listing_findings`, run Step 1 and save its brief there. If the brief's `orientation` differs from
+`config.js`, report it and re-plan from Step 3 (every screen changes shape).
+
+```bash
+grep -q __seek "<out>/src/kit.js" || echo "kit predates 1.1.0: header/search stills will be re-laid out"
+{ grep -qs "w: 874, h: 402" "<out>/src/kit.js" || [ -e "<out>/src/render_landscape.py" ]; } && echo "landscape fork"
+ts=$(date +%Y%m%d-%H%M%S); for f in kit.js kit.css index.html; do
+  cmp -s "<skill>/assets/template/$f" "<out>/src/$f" || { [ -e "<out>/src/$f" ] && cp "<out>/src/$f" "<out>/src/$f.bak-$ts" && echo "backup: src/$f.bak-$ts"; }
+  cp "<skill>/assets/template/$f" "<out>/src/$f"; done
+```
+
+## Step 5 script behavior
+
+Moved from SKILL.md Step 5.
+
+Under load, `render.py` retries Chrome crashes (falling back to `chrome-headless-shell`), and videos
+take turns machine-wide: `waiting for the video lock` is not a hang. It also fails on unknown icons, missing images, caption contrast below 3:1
+(headline) or 4.5:1 (supporting line), and a video beat held shorter than its caption needs;
+it removes the PNGs and videos it wrote that the config dropped (unless changed since), and warns about (but keeps) other files in `creative/`
+(a hand-made file the config still lists is overwritten: see Troubleshooting above). Videos render last and are slow (about a
+second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes each video and fails a blank frame or a loop-seam jump;
+with `--sheet` it writes `sheets/video-<kind>.png`.
+
+## Final report additions
+
+Moved from SKILL.md → Final report.
+
+On the Update branch, list each `src/*.bak-<timestamp>` backup under Evidence. If the old kit
+predated 1.1.0, say under Decision that `header.png` and `search.png` changed composition (the
+caption, and the search hero, now sit in Apple's art safe area), so the user reviews them before upload.
+Name each frame `render.py` printed a `fit headline` line for: its headline shrank, so the reviewer and
+the user re-check it (`fitHeadlines: false` keeps approved sizes on a re-render only).

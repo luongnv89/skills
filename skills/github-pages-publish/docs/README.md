@@ -9,7 +9,7 @@
 
 > Publish or update a static website on GitHub Pages via GitHub Actions, in this repo or any other, and get back a URL that was checked live.
 
-Version: **1.0.2** · Author: Luong NGUYEN · License: MIT
+Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 

@@ -132,3 +132,11 @@ Apply the first row that matches. A Top 20 trigger is a guideline ID listed in *
 ## Phase 4: Offer to Fix
 
 After presenting the report, offer to help fix the identified issues. For code-level fixes (missing privacy descriptions, IAP restore button, account deletion flow), you can often implement them directly. For metadata issues, provide the exact text or configuration changes needed.
+
+## Why This Matters
+
+Apple rejects roughly 25% of all app submissions. Each rejection-resubmission cycle can cost a week or more. Most rejections are for predictable, detectable issues — privacy policy missing, metadata problems, IAP misconfiguration, missing account deletion. Catching these before submission saves significant time.
+
+## Tone and Delivery
+
+Be direct and helpful, like a senior iOS developer doing a pre-submission review for a colleague. Don't sugarcoat — a rejected app costs more time than honest feedback. Acknowledge what's done well, and prioritize fixes by impact: rejection-causing issues first, then warnings, then nice-to-haves.

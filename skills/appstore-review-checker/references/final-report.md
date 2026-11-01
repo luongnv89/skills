@@ -2,8 +2,8 @@
 
 The closing chat response of every appstore-review-checker run, stops included. It follows the
 last Step Completion Report and summarizes the run; it never replaces `APPSTORE_AUDIT.md`.
-`SKILL.md` (*Final Report*) holds the status summary and the `COMPLETE` example; this file holds
-the status table, the `PARTIAL` and `BLOCKED` examples, the fill rules, and the reader checks.
+This file holds the status summary, the `COMPLETE`, `PARTIAL` and `BLOCKED` examples, the status
+table, the fill rules, and the reader checks.
 
 ## Format
 
@@ -19,6 +19,20 @@ The run status and the audit verdict are two different values:
   fare in review.
 
 A `COMPLETE` run can report a `LIKELY REJECT` verdict.
+
+## COMPLETE example and status summary
+
+```text
+Result: COMPLETE. Audited NutriTrack (iOS 16+); wrote APPSTORE_AUDIT.md; audit verdict LIKELY REJECT (2 FAIL, 5 WARNING).
+Evidence: Read project.pbxproj, Info.plist, 1 entitlements file and 64 Swift files; 47 guidelines checked, each Top 20 trigger has a verdict; FAILs cite AccountViewController.swift:142 and LegacyBrowserViewController.swift:14.
+Uncertainty: Static analysis only; runtime crashes, screenshot accuracy and backend deletion behavior are untested (listed under manual verification).
+Decision: Approve fixes for FAIL IDs 5.1.1-v-delete and 2.5.6, or say none.
+```
+
+- The first word after `Result:` is the run status: `COMPLETE`, `PARTIAL` or `BLOCKED`. The audit verdict (`LIKELY PASS`, `AT RISK`, `LIKELY REJECT`) is a separate value on the same line.
+- Use `BLOCKED` when no `APPSTORE_AUDIT.md` (or `APPSTORE_AUDIT_v2.md`) was written.
+- Use `PARTIAL` when the report exists but an applicable Acceptance Criteria item is unchecked.
+- Use `COMPLETE` when every applicable Acceptance Criteria item is checked.
 
 ## Status
 

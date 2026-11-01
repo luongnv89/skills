@@ -68,6 +68,8 @@ rex split -s S -b <rightmost> --split=right --focus=false --label NAME -c DIR --
 - **Fail fast.** A flag the CLI rejects exits at once. `child_exited` ends the readiness wait, and `--keep-open` keeps the error on screen; the start prints its last lines.
 - **Readiness.** The worker counts as ready only on an `idle` or `done` record from its own process. A dialog at boot that reports `blocked` exits 3. A dialog that reports nothing times out, and the start never types into it.
 
+`--start` places and launches in one call: it refuses a layout that is not one row, splits the rightmost column `right` (`--focus=false --keep-open`), runs the worker as that block's command through the user's interactive shell with `REX_AGENT_ROLE=<name>` set, equalizes every column, and prints the worker's JSON only after the worker's own status reports `idle`. Exit 3 means the worker booted into a dialog: focus it and ask the human. Exit 1 means it failed; the message names the orphan block and shows its last screen lines. Add only what the user named: `--kind`, `--model`, `--thinking`, `--without bypass|flags`, `--new-window`, or native flags after `--`. Never fold the task into argv.
+
 ## Equal-width columns — verified semantics
 
 Confirmed live against Rex build g7a93ec (2026-10-15) in a throwaway session:

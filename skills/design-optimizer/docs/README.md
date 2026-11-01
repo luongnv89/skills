@@ -9,7 +9,7 @@
 
 > One run to optimize a website or app design: capture once, audit with every lens, get one prioritized report.
 
-Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.2.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 

@@ -229,3 +229,7 @@ Each phase/ROUND uses:
 ```
 
 A final CLEAN PASS is invalid unless a fresh GitHub query matches PR number, OPEN state, branch, reviewed SHA, and zero FINDINGS; SWEEP must separately account for every spawned pane and loop-created worktree.
+
+## Final report contents
+
+The Phase 5 final report is the mode-specific block above. It opens with `Result:` (`COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason`), then `Evidence:` (only checks that ran: fresh `gh pr view`, reviewed SHA, pane and worktree lists), `Uncertainty:` (untested or unverified items, such as CI not observed or a failed release), and `Decision:` (merge is the user's; name any other approval, or "No approval needed."). The PR URL, branch, head SHA, `issue_context`, rounds, verdict, remaining FINDINGS, spawned roles, and cleanup state follow.

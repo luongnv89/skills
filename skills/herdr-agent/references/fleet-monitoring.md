@@ -122,3 +122,7 @@ Replies: 2 captured, 1 blocked, 0 timed out
 Every worker ends in exactly one of: settled, blocked, stalled, timed out,
 failed, or skipped-unsafe. Take those outcomes from `broadcast.sh`'s per-target
 lines and the closing `fleet_status.py` call, not from memory of what you sent.
+
+## Why one snapshot
+
+One `herdr api snapshot` call renders every agent's status, badge and title, sorted by attention, at flat cost for any fleet size. Prefer it over per-agent `herdr agent get` polling, which costs N round trips and can report a fleet state that never existed at one instant.

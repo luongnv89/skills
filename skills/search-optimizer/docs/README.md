@@ -9,7 +9,7 @@
 
 > One run to optimize a website or app for SEO, AI-bot search and app-store search, with one merged report.
 
-Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.2.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 

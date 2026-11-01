@@ -19,3 +19,13 @@ Check these before Step 0 of SKILL.md. If one matches the repo, handle it as wri
 | Existing root `CHANGELOG.md` | Step 1 file list | Keep it; do not create `docs/CHANGELOG.md` (`not applicable`) | None |
 | Non-English README | README prose | Keep the language. Do not translate; add only structurally missing sections, in the same language | None |
 | The user stops the run | The user says stop | Print the final report | `BLOCKED` before Step 2 writes a file, otherwise `PARTIAL` |
+
+## Short version
+
+The table above, in short:
+
+- **Never overwrite** an existing non-MIT LICENSE, `.github/` file, or user content in `CODE_OF_CONDUCT.md` or `SECURITY.md`.
+- **Ask first** when the repo is private or internal, has no `origin`, or has no detectable stack.
+- **Update only the root manifest** in a monorepo, unless the user names a sub-package.
+- **Stop** on a detached HEAD, outside a git repository, or when a stash, sync or restore fails. Never discard changes.
+- **Keep** the README's language and a root `CHANGELOG.md`.

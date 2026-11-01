@@ -46,3 +46,58 @@ Uncertainty: hybrid willingness inferred, not confirmed; deduplication not verif
 Near-miss: [Company] — product pages unreadable (step 3 gate).
 Decision: No approval needed. Next: confirm two office days in Paris; apply via the links yourself.
 ```
+
+## Format choice
+
+Moved from SKILL.md → Inputs and branches.
+
+Write the text report by default. If the count is above five, or the user asks to filter roles (for example by salary or remote policy), read `interactive-report.md` and build the HTML report instead, unless the user asks for text. If HTML cannot be produced here, say so and write the text report.
+
+## Step Completion Reports
+
+Moved from SKILL.md. After each step, print one block. Its `Gate` line restates that step's **Gate**:
+
+```text
+◆ Step N of 4 — <step name>
+  <check>:  √ pass | × fail — <reason>
+  Gate:     √ met | × not met — <what is missing>
+  Status:   PASS | PARTIAL | FAIL
+```
+
+| Step | Checks |
+|---|---|
+| 1 | `Profile read`, `Fit claims sourced`, `Location rule`, `Missing constraints` |
+| 2 | `Listings opened`, `Hard rejects`, `Shortlisted` (count) |
+| 3 | `Product sources read`, `Near-misses` |
+| 4 | `Ranked`, `Acceptance criteria`, `Format` (HTML: delivery check) |
+
+Step 1's Status is PASS or FAIL on its gate. Steps 2–3 are PASS when the gate holds for the requested count, PARTIAL for fewer, FAIL for none. Step 4's gate is the Acceptance Criteria. A FAIL still continues to step 4.
+
+## Acceptance Criteria
+
+Moved from SKILL.md. Check every item before delivery. Remove from the ranking any role with a hard-reject or gate failure; label a missing soft detail "unknown".
+
+**Correctness**
+
+- The ranking has no more than the requested count.
+- Each ranked role has a verified listing and a separately read company/project source, both linked.
+- Every location statement quotes the employer's policy and shows it passes the location rule.
+- Every product assessment covers what the company builds, the role's documented duties, the interestingness verdict, and what remains unknown.
+- Every fit claim points to candidate evidence; salary, dates, traction, and language claims without a source are omitted or marked unknown.
+- No application, outreach, or tracker change was made.
+
+**Understanding**
+
+- The report's first line is the Result line, giving the status and count without expanding anything.
+- Verified facts name their source; inferences, conditional fit, and unverified items are labeled.
+- Each material claim's evidence matches its scope; a reachable apply form is never reported as eligibility.
+- The Decision line says "No approval needed" and names the candidate's remaining actions.
+
+These checks verify the report against its instructions. Only reviewer feedback confirms that a human understood it; without that feedback, report understanding as unconfirmed.
+
+## Edge Cases
+
+Moved from SKILL.md.
+
+- **An aggregator shows a role active, but its verified listing is closed or unreachable:** Reject it.
+- **No qualifying roles, or only a prior report's unchanged listings:** Report `None — 0 of N roles` with the filters applied; never pad the list or fabricate roles.

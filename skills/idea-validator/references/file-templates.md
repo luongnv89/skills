@@ -89,3 +89,14 @@ The canonical markdown structure for `idea.md` and `validate.md`. Read this when
 ## Implementation Roadmap
 [Phased approach]
 ```
+
+## Phase 3 capture fields
+
+For each competitor or OSS project found, capture:
+- **Name and URL**
+- **Type** (commercial, open-source, hybrid, adjacent, failed/abandoned)
+- **What they do** (one sentence)
+- **Pricing or license** (free, freemium, paid, enterprise, OSS license if available)
+- **Traction or health** (reviews, ratings, users, funding, GitHub stars/forks, recent commits, open issues, community activity)
+- **Key weakness or gap** the user's idea could exploit
+- **Reuse/build-on potential** for open-source options (fork, plugin, library dependency, contribution path, or not suitable)

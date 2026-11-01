@@ -15,7 +15,30 @@ Found 4 free cloud models. Pick one or accept the default.
 Note: Free models on OpenCode Zen may use collected data for model improvement.
 ```
 
+In chat, as `<options>`:
+
+> I found these free cloud models available via opencode. Pick one, or accept the default.
+>
+> 1. `opencode/deepseek-v4-flash-free` *(default — priority 1)*
+> 2. `opencode/minimax-m2.5-free`
+> 3. `opencode/nemotron-3-super-free`
+> 4. `opencode/big-pickle`
+
 ## Phase 3 — Confirmation summary
+
+In chat, before `opencode run`:
+
+> **Ready to delegate to opencode**
+>
+> - **Model:** `opencode/deepseek-v4-flash-free` (free tier)
+> - **Working directory:** `/Users/.../current-project`
+> - **Context files:** `path/to/foo.py`, `path/to/bar.py` *(or "none")*
+> - **Prompt:** *(quote the prompt verbatim, multi-line OK)*
+> - **Estimated duration:** unknown — opencode is non-deterministic; cleanup runs even on timeout
+>
+> Confirm to proceed, or tell me what to change (model, prompt, files).
+
+Compact form:
 
 ```
 Ready to delegate to opencode
@@ -37,6 +60,16 @@ Poll 2 (t+60s):  running, 4.2 KB,  last: "Editing utils/http.py …"
 Poll 3 (t+150s): done, exit 0, 7.8 KB,  last: "Done. 3 files changed, 147 lines added."
 ```
 
+## What to report between polls
+
+Phase 5 (SKILL.md → *Phase 5: Monitor with Minimum Tokens*).
+
+One short line per check, derived from the `status()` output:
+
+> *Poll 2 (t+60s): running, 4.2 KB written, last: "Editing src/foo.py …"*
+
+Do not paste the raw log. Do not summarize what opencode is "thinking" — you can't tell from a tail line. Stick to: status, elapsed, byte growth, last line.
+
 ## Phase 6 — Cleanup confirmation
 
 ```
@@ -47,6 +80,22 @@ Cleanup complete — no opencode run process remains.
 If the task fails or times out, the output instead shows which model was tried, the exit code and error message from opencode, a recommendation to retry with the next free model, and the cleanup confirmation. Every run then ends with the final report (`references/final-report.md`).
 
 ---
+
+## Step Completion Report template
+
+After each phase, emit a compact status block so pass/fail is scannable:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          × fail — [reason]
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Use `√` for pass, `×` for fail, and `—` to add brief context.
 
 ## Per-phase Step Completion Report examples
 

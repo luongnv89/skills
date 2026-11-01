@@ -53,6 +53,17 @@ Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. 
 
 A pull request takes as long as its slowest job, plus the time that job waited for a runner. Every technique below is free on a public repository and cost-neutral or cost-reducing on a private one. None of them buys a faster machine.
 
+### Generated-workflow checklist
+
+Every workflow Step 3 writes or merges applies all of these:
+
+- **Generated for the recorded visibility.** Only the guard's leg split reads visibility at run time: one leg per hook stage on public repos, otherwise one leg, commit stage first. Codecov upload, `seed-cache`, macOS legs, and the matrix trigger are written in or left out for Step 1's answer; a private repo gets a coverage summary instead of Codecov.
+- **Caches seeded from the default branch.** A pull request's caches serve only that pull request. Seed from the default-branch matrix (Minimal: a per-merge `seed-cache` on public repos), cache `~/.cache/pre-commit`, and cache `node_modules` only when measured.
+- **Blobless full history** in the guard: `fetch-depth: 0` plus `filter: blob:none`. Never shallow where history is read.
+- **`concurrency`** on the pull request number (fallback `github.run_id`) with `cancel-in-progress`.
+- **Affected-only on pull requests once the suite is too slow to run whole, full suite on the default branch**. Filters list what may be skipped; skip with job-level `if:`, not workflow `paths:`; selection fails when source changed but no test ran.
+- **Workers matched to cores** (4 public, 2 private), **`timeout-minutes`** on every job (about 3× typical; default 360), and **shards only on public repos**.
+
 ### Who pays
 
 Run `gh repo view --json visibility --jq .visibility` and record the answer in Step 1; `INTERNAL` bills like private. Generate the workflow for that answer. Only the guard's leg split reads `github.event.repository.visibility` at run time: the guard runs on `pull_request`, whose payload always carries the repository, and anything but `public` gets the single leg. Everything else is written in or left out when the workflow is generated, because a `schedule` payload carries no repository:

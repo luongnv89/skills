@@ -466,3 +466,26 @@ every FRESHEN.
 At `max_rounds` with FINDINGS: outcome `MAX_ROUNDS`, preserve findings verbatim, leave PR open, run SWEEP, and hand off USER-MERGE. Do not imply the PR is clean.
 
 SWEEP is mode-aware: ISSUE may own implementer/reviewer and issue-resolver worktrees; PR owns reviewer plus optional FIXER and its isolated worktree. A CLEAN-first PR run has no FIXER artifacts. See `references/cleanup.md`.
+
+## Phase 1 mode branches
+
+Run after the shared Phase 1 steps in SKILL.md, for the selected mode only.
+
+### ISSUE branch
+
+1. Confirm `#N` exists and is OPEN with `gh issue view N --json number,title,state,url`.
+2. Detect linked open PRs using *ISSUE preflight and linked open PRs* above.
+3. Zero linked open PRs: continue ISSUE mode.
+4. Exactly one: ask for confirmation. Accepting switches to PR mode on that PR; declining aborts. Never create a second PR.
+5. Multiple: stop with the ambiguous-PR error before spawning any worker.
+
+### PR branch
+
+1. Confirm `#M` exists and is OPEN; capture required identity, head SHA, branch, repository-owner, fork/cross-repo, and maintainer-modification facts using the rich `gh pr view` query in *PR identity query and fallback* above.
+2. If optional fields are unsupported, use the documented fallback and mark unknown facts explicitly; do not invent permission.
+3. Derive zero, one, or multiple linked issues from GitHub linkage and closing-keyword evidence. Retain all numbers as `issue_context: none | #N | #N,#K`; do not choose a canonical issue.
+4. If an explicit issue was also supplied, require it in that set or stop with the mismatch error.
+
+## Autonomous worker boot gate invariants
+
+The invariants: launch the `agent_cli` executable **bare** with only its own verified flags, then apply the per-harness post-boot switch and verify it with a bounded pane read before dispatching work. Never send an auto-mode slash command, never pass auto-mode startup flags even where a harness exposes one, and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`. Any launcher not in the matrix fails closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.

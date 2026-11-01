@@ -358,3 +358,34 @@ Decision: <the approval needed, or "No approval needed."> Next for you: <the ear
   opted-in action failed.
 - BLOCKED: no readable landing page and no codebase; a sync problem the user must resolve;
   or several products and no answer about which one.
+
+## 12. Errors and recovery
+
+| Failure                                             | Recovery                                                                                     |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| A subagent fails, or returns the wrong shape        | Re-run it once with the same input. On a second failure, run that step inline, and say so.  |
+| WebFetch fails on a page                            | Try `curl -sL -A "Mozilla/5.0"` once, then mark the page `unreachable`. Never fill it in from memory. |
+| `check_kit.py` exits 2                              | The kit path is wrong: pass the folder Step 5 wrote. Python is missing: check the limits by hand, and say so. |
+| `gh` is unauthenticated, or the permission is too low | Skip the action. Put `gh auth login` and the command in the README for the founder.        |
+| Repo Sync conflicts                                 | Abort, restore the user's changes, and stop and ask (Repo Sync, item 3).                    |
+| A dependency is missing                             | Fail-soft (Dependency Preflight, item 3).                                                   |
+
+## 13. Edge cases
+
+- **The product is not usable yet** (waitlist, invite only):
+  - "Fix before launch" lists the blocker first.
+  - The plan keeps betalist (pre-launch) and the own channels, and holds the core launch
+    until the product is usable.
+- **The product is not in English:** apply the language gates. geeknews needs a Korean
+  reviewer, and the user decides at the gate.
+- **The user asks the skill to post, submit or sign up:**
+  - Quote rule 1, and point to the guides in the kit.
+  - Only `gh repo edit` can run, through its gates.
+- **A request for a ready Show HN post:**
+  - Quote HN's rule, with the link news.ycombinator.com/newsguidelines.html.
+  - Take the Named branch. The deliverable after approval is the founder-voice brief.
+- **L-day is too close for the account gates** (product-hunt and geeknews need accounts
+  at least 7 days old): propose the earliest date that works, or flag the risk in the plan.
+- **Budget given:** propose only paid options that fit inside the budget.
+- **The live check finds a platform closed or changed:** update the fit table, and record
+  the change in the plan's "Live check" table.
