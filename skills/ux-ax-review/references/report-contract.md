@@ -73,6 +73,28 @@ measurement tasks may have empty finding_ids. Dependencies name T ids, form an a
 graph and precede dependent tasks in the array. Strings nonempty except evidence
 limitations, which may be empty; scope limitations can be empty.
 
+## Reconciliation rules (workflow step 3)
+
+SKILL.md → *3. Reconcile findings and build the plan*. "Triage bands" and "phases 0–3" are
+in *Triage* below.
+
+1. Check each reviewer claim against its cited `E` record. A claim without supporting
+   evidence becomes a `hypothesis`, not an observed finding.
+2. Merge one problem seen by both audiences into one finding: primary `aspect` plus
+   optional `related_aspects`.
+3. Resolve a contradiction by surface/state, capture time and evidence method, never by
+   voting. If it stays unresolved, keep both observations and add a verification task; the
+   disputed subcheck cannot be `pass`.
+4. Use `not-tested` when there is no reliable conclusion. Use `issues` only with a separate,
+   supported observed finding.
+5. Assign severity and priority with the contract's Triage bands. A missing optional
+   convention is not a blocker. Keep intentional crawler/training restrictions.
+6. Give every finding a concrete recommendation and a plan task with dependencies, owner
+   role, effort band, expected qualitative impact and a testable acceptance check. Cover an
+   important evidence gap with a measurement task, not a speculative fix.
+7. Order tasks by the contract's phases 0–3 (unblock/measure first, polish last). If a
+   dependency moves a task earlier, state the reason.
+
 ## Triage
 
 Severity uses verified user/task harm: critical = blocks the primary task for the relevant

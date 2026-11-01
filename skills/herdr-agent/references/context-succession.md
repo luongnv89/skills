@@ -93,3 +93,7 @@ Do not read my transcript. Everything you need is above.
 ## Done when
 
 The report records a parsed percentage or an explicit UNKNOWN fallback; any HANDOFF has a ready successor pane id, a delivered brief, a received ack, and an announced focus command; and the outgoing pane has made no write since the ack.
+
+## HANDOFF overview
+
+HANDOFF spawns a successor with the same Phase 2 machinery — `main-g<N>` in the root tab, equalized, started on the inherited launch profile so it runs your harness, model, and thinking level — then delivers a compact handoff brief through the Phase 4 cycle and waits for the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`. After the ack, that pane is the orchestrator; this pane goes read-only and announces the new one with `herdr agent focus main-g<N>`. A successor that fails to start or never acks means the HANDOFF failed: stay main, report the orphan pane, and ask before closing it.

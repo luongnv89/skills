@@ -11,9 +11,40 @@ Read this when an edge case below fires, or when you need an opencode command th
 - **Task stalls or times out (no output growth)** — see Phase 5, *Cadence*: ask the user, kill only on approval, suggest a retry, run Phase 6, and end with `PARTIAL`.
 - **User rejects or changes the Phase 3 confirmation** — see Phase 3, final paragraph: loop back and re-confirm. A cancel stops with `BLOCKED`. Never invoke `opencode run` unconfirmed.
 - **User has an interactive opencode TUI session open** — see Phase 6, Step 2: kill only `opencode run` processes and leave the TUI alone.
-- **Task prompt contains multi-line content or file references** — see Phase 4, *Handling multi-line or complex prompts*: use `--file`.
+- **Task prompt contains multi-line content or file references** — see *Multi-line or file-context prompts* below: use `--file`.
 - **opencode produces output but exits non-zero** — the last poll shows a non-zero `exit=`. Report the exit code and the last lines of output, run Phase 6, and end with `PARTIAL`. The final report's `Decision:` asks the user to check the changed files before relying on them.
 - **The wrapper was killed before opencode finished** — the last poll shows `exit=none`. Treat it as a failure: run Phase 6 and end with `PARTIAL`.
+
+## Install commands
+
+Phase 1, Step 1 message when `opencode` is not found:
+
+> opencode is not installed. Install it with one of these commands:
+>
+> ```bash
+> curl -fsSL https://opencode.ai/install | bash
+> ```
+> or
+> ```bash
+> npm i -g opencode-ai@latest
+> ```
+> or (macOS)
+> ```bash
+> brew install opencode
+> ```
+
+## Multi-line or file-context prompts
+
+Phase 4 launch variant (SKILL.md → *Phase 4: Execute the Task*). Record and reuse its `run=` value exactly as for the plain launch.
+
+For tasks that reference files or need detailed context, use the `--file` flag:
+
+```bash
+RUN=/tmp/opencode-run-$(date +%s)
+( opencode run -m "[confirmed-model-id]" --file path/to/relevant-file.py "[task description]" > "$RUN.log" 2>&1; echo $? > "$RUN.exit" ) &
+echo $! > "$RUN.pid"
+echo "opencode started: run=$RUN pid=$(cat "$RUN.pid")"
+```
 
 ## Command reference
 

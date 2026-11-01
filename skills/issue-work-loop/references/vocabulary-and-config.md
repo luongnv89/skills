@@ -30,3 +30,12 @@ Optional `.gitissue.yml` keys (defaults when absent):
 
 CLI flags override config. `--no-cleanup` sets `auto_cleanup: false` for debugging and leaves panes/worktrees. Print `○ First run — using default config` when `.gitissue.yml` is absent; do not modify the file.
 
+## Invocation
+
+```text
+/issue-work-loop 42
+/issue-work-loop 42 --max-rounds 3
+/issue-work-loop --pr 88
+/issue-work-loop pr 88 --agent-cli "pi --thinking high"
+/issue-work-loop --pr 88 --no-cleanup
+```

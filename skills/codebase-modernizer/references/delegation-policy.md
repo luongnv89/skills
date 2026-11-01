@@ -68,6 +68,11 @@ a different tool from reporting success.
 Never run the install yourself during the audit. Continue with the other dimensions and name the
 missing skill in Limitations.
 
+## Lease-owned copies
+
+Lease-owned copies live outside the target repo, so they are not target artifacts. The six *inline*
+dimensions name their skill in a plan task and never invoke it, so they need no dependency entry.
+
 ## Skill tool unavailable
 
 When the Skill tool is absent, or the session's skill list cannot be enumerated, and no

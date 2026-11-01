@@ -9,7 +9,7 @@
 
 > Generate upload-ready App Store screenshots and creative assets (header and search images and looping videos) for iPhone, iPad and Mac from an app's codebase or landing page, following Apple's asset best practices.
 
-Version: **1.2.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.3.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 

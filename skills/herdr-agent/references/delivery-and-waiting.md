@@ -210,3 +210,9 @@ lifecycle events. That needs a persistent process and is out of scope for this
 skill: `agent wait` is already event-driven server-side, and
 `scripts/fleet_status.py` covers periodic monitoring in one call. See
 https://herdr.dev/docs/socket-api/ if you build one anyway.
+
+## Phase 4 prompt guarantees
+
+The preflight refuses `working` (2), `blocked` (3), unverifiable (4), and no-agent (5) targets. The prompt then submits text plus Enter as one ordered write honoring bracketed paste, refuses a blocked target server-side before writing anything, gates on observed activity, and waits for the first settled state — all in one request. Submission and waiting are atomic, so no transcript baseline or completion marker is needed: there is no gap between send and wait to race.
+
+Do not add `--until idle --until done`; those are the `--wait` defaults. Use `--until` only for a state-specific wait such as `--until blocked`.

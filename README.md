@@ -217,12 +217,12 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 2.2.2 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
-| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.4.1 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
-| [**test-coverage**](skills/test-coverage/) | 1.5.0 | low | Target untested branches and edge cases |
-| [**user-test**](skills/user-test/) | 1.0.1 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
-| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.6.0 | medium | Usability review using Krug's principles |
-| [**ux-ax-review**](skills/ux-ax-review/) | 1.2.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
+| [**code-review**](skills/code-review/) | 2.3.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.5.0 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
+| [**test-coverage**](skills/test-coverage/) | 1.6.0 | low | Target untested branches and edge cases |
+| [**user-test**](skills/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
+| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.7.0 | medium | Usability review using Krug's principles |
+| [**ux-ax-review**](skills/ux-ax-review/) | 1.3.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
@@ -246,25 +246,25 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**auto-push**](skills/auto-push/) | 1.1.1 | low | Commit message + stage + push with secret and size checks |
-| [**cleanup-project**](skills/cleanup-project/) | 1.0.2 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
-| [**devops-pipeline**](skills/devops-pipeline/) | 2.4.0 | medium | Pre-commit + lean, fast GitHub Actions quality gates |
-| [**github-pages-publish**](skills/github-pages-publish/) | 1.0.2 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
-| [**security-setup**](skills/security-setup/) | 1.5.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
-| [**ship**](skills/ship/) | 3.0.1 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
+| [**auto-push**](skills/auto-push/) | 1.2.0 | low | Commit message + stage + push with secret and size checks |
+| [**cleanup-project**](skills/cleanup-project/) | 1.1.0 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
+| [**devops-pipeline**](skills/devops-pipeline/) | 2.5.0 | medium | Pre-commit + lean, fast GitHub Actions quality gates |
+| [**github-pages-publish**](skills/github-pages-publish/) | 1.1.0 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
+| [**security-setup**](skills/security-setup/) | 1.6.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
+| [**ship**](skills/ship/) | 3.1.0 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 
 ### Product Planning
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**product-planner**](skills/product-planner/) | 1.1.0 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
-| [**idea-validator**](skills/idea-validator/) | 1.6.0 | max | Market, feasibility, competitor checks for ideas |
-| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.7.0 | high | Score codebase + landing page vs 32 viral principles |
-| [**product-launch**](skills/product-launch/) | 1.0.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan |
-| [**brand-name-checker**](skills/brand-name-checker/) | 1.5.0 | max | Trademark, domain, social, registry conflicts |
-| [**prd-generator**](skills/prd-generator/) | 1.5.0 | max | Structured PRD from idea or validate notes |
-| [**tad-generator**](skills/tad-generator/) | 1.6.0 | max | Technical architecture document from PRD |
-| [**tasks-generator**](skills/tasks-generator/) | 1.5.0 | max | Sprint tasks and plan from PRD |
+| [**product-planner**](skills/product-planner/) | 1.2.0 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
+| [**idea-validator**](skills/idea-validator/) | 1.7.0 | max | Market, feasibility, competitor checks for ideas |
+| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.8.0 | high | Score codebase + landing page vs 32 viral principles |
+| [**product-launch**](skills/product-launch/) | 1.1.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan |
+| [**brand-name-checker**](skills/brand-name-checker/) | 1.6.0 | max | Trademark, domain, social, registry conflicts |
+| [**prd-generator**](skills/prd-generator/) | 1.6.0 | max | Structured PRD from idea or validate notes |
+| [**tad-generator**](skills/tad-generator/) | 1.7.0 | max | Technical architecture document from PRD |
+| [**tasks-generator**](skills/tasks-generator/) | 1.6.0 | max | Sprint tasks and plan from PRD |
 
 > **`plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd)** (idd#502), next to the `issue-creator` it depends on: `asm install https://github.com/luongnv89/idd --skill plan-to-issues`, or the idd Claude Code plugin.
 
@@ -272,57 +272,57 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**ai-job-scout**](skills/ai-job-scout/) | 1.1.1 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence; filterable HTML report for larger searches |
+| [**ai-job-scout**](skills/ai-job-scout/) | 1.2.0 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence; filterable HTML report for larger searches |
 
 ### Frontend & Design
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**frontend-design**](skills/frontend-design/) | 1.4.0 | high | Production UIs with usability-first approach |
-| [**logo-designer**](skills/logo-designer/) | 1.4.0 | medium | 7 SVG logo variants from project context |
-| [**diagram-generator**](skills/diagram-generator/) | 1.4.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
-| [**design-optimizer**](skills/design-optimizer/) | 1.1.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
+| [**frontend-design**](skills/frontend-design/) | 1.5.0 | high | Production UIs with usability-first approach |
+| [**logo-designer**](skills/logo-designer/) | 1.5.0 | medium | 7 SVG logo variants from project context |
+| [**diagram-generator**](skills/diagram-generator/) | 1.5.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
+| [**design-optimizer**](skills/design-optimizer/) | 1.2.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
 
 **Diagram generator engines** (install the umbrella or a single engine):
 
 | Engine | Version | What it does |
 |---|---|---|
-| drawio-generator | 1.4.0 | draw.io XML — precise, editable, C4, swimlanes |
-| excalidraw-generator | 1.5.0 | Excalidraw JSON — hand-drawn, sketch, wireframes |
+| drawio-generator | 1.5.0 | draw.io XML — precise, editable, C4, swimlanes |
+| excalidraw-generator | 1.6.0 | Excalidraw JSON — hand-drawn, sketch, wireframes |
 
 ### Documentation
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**doc-manager**](skills/doc-manager/) | 2.1.1 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**landing-page-generator**](skills/landing-page-generator/) | 1.7.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
-| [**search-optimizer**](skills/search-optimizer/) | 1.1.0 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
-| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.6.0 | high | Technical SEO + AI-bot directives |
-| [**website-agent-readiness**](skills/website-agent-readiness/) | 1.4.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
-| [**oss-ready**](skills/oss-ready/) | 1.4.0 | low | Add OSS files and templates |
-| [**agent-config**](skills/agent-config/) | 2.2.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
+| [**doc-manager**](skills/doc-manager/) | 2.2.0 | medium | Generate/update docs to match code, cited to path:line, never invented |
+| [**landing-page-generator**](skills/landing-page-generator/) | 1.8.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
+| [**search-optimizer**](skills/search-optimizer/) | 1.2.0 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.7.0 | high | Technical SEO + AI-bot directives |
+| [**website-agent-readiness**](skills/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
+| [**oss-ready**](skills/oss-ready/) | 1.5.0 | low | Add OSS files and templates |
+| [**agent-config**](skills/agent-config/) | 2.3.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
 
 ### App Store
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**aso-marketing**](skills/aso-marketing/) | 1.4.0 | max | App Store + Google Play keyword and metadata optimization |
-| [**appstore-assets**](skills/appstore-assets/) | 1.2.0 | high | Upload-ready App Store screenshots and creative assets for iPhone, iPad and Mac, including looping header and search videos, from code or a landing page |
-| [**appstore-review-checker**](skills/appstore-review-checker/) | 1.5.0 | high | Pre-submission audit vs Apple guidelines |
+| [**aso-marketing**](skills/aso-marketing/) | 1.5.0 | max | App Store + Google Play keyword and metadata optimization |
+| [**appstore-assets**](skills/appstore-assets/) | 1.3.0 | high | Upload-ready App Store screenshots and creative assets for iPhone, iPad and Mac, including looping header and search videos, from code or a landing page |
+| [**appstore-review-checker**](skills/appstore-review-checker/) | 1.6.0 | high | Pre-submission audit vs Apple guidelines |
 
 ### Tooling
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**cli-builder**](skills/cli-builder/) | 1.3.0 | high | 5-step CLI tool builder with approval gates and btop-inspired output |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.3.0 | medium | Hardware-aware Ollama tuning |
-| [**install-script-generator**](skills/install-script-generator/) | 2.3.0 | high | Cross-platform install.sh with env detection |
-| [**opencode-runner**](skills/opencode-runner/) | 1.6.0 | medium | Delegate work to opencode free cloud models |
-| [**herdr-agent**](skills/herdr-agent/) | 3.2.0 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
-| [**rex-agent**](skills/rex-agent/) | 1.0.0 | medium | Manage Rex agent fleets: equal columns, prompt/wait/read via program status, steer, `help` |
-| [**issue-work-loop**](skills/issue-work-loop/) | 1.6.0 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
-| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.4.0 | medium | Spawn, message, read CLI agents in tmux |
-| [**dev-machine-setup**](skills/dev-machine-setup/) | 0.10.0 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
+| [**cli-builder**](skills/cli-builder/) | 1.4.0 | high | 5-step CLI tool builder with approval gates and btop-inspired output |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.4.0 | medium | Hardware-aware Ollama tuning |
+| [**install-script-generator**](skills/install-script-generator/) | 2.4.0 | high | Cross-platform install.sh with env detection |
+| [**opencode-runner**](skills/opencode-runner/) | 1.7.0 | medium | Delegate work to opencode free cloud models |
+| [**herdr-agent**](skills/herdr-agent/) | 3.3.1 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
+| [**rex-agent**](skills/rex-agent/) | 1.1.0 | medium | Manage Rex agent fleets: equal columns, prompt/wait/read via program status, steer, `help` |
+| [**issue-work-loop**](skills/issue-work-loop/) | 1.7.0 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |
+| [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.5.0 | medium | Spawn, message, read CLI agents in tmux |
+| [**dev-machine-setup**](skills/dev-machine-setup/) | 0.11.0 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
 
 ---
 

@@ -9,7 +9,7 @@
 
 > One invocation takes a product idea to a sprint task list by chaining idea-validator, prd-generator, tad-generator and tasks-generator.
 
-Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.2.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 

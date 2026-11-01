@@ -39,3 +39,28 @@ must be called out prominently rather than buried, because they change what the 
 
 A branch you could not resolve is itself recorded as **Not Assessed** with the reason. Never assume
 the permissive side of a branch you did not check.
+
+## Check these two first
+
+They change what is obtainable at all:
+
+- **No Bash** → record the whole baseline **Not Assessed — no shell**, audit only what static
+  reading supports, and never fabricate a verdict.
+- **No UI detected** → UI/UX dimensions are **Not Assessed — no UI detected**. Never invent UX
+  findings.
+
+## Leading terms
+
+Used throughout SKILL.md and its references with these exact meanings:
+
+- **baseline-green** — the recorded state where the project builds and its test suite runs to a known
+  pass rate. Established in Phase 0; every P0–P4 task must assert it still holds. Pre is exempt when
+  the baseline is RED — restore-green stays on P0 / Sprint 0.
+- **finding record** — one normalized issue row with a stable **finding ID** (`F-<DIM>-<NNN>`, e.g.
+  `F-DEP-003`). The report lists them; the plan's tasks close them by ID.
+- **Not Assessed** — an explicit report verdict for a dimension that could not be checked (no tool,
+  no UI, no network). Never replaced by a guess.
+- **fail-soft** — probe whether a tool exists before using it; on absence, record **Not Assessed**
+  with the reason and continue. A missing tool never aborts the run.
+- **upgrade wave** — one batch of dependency upgrades that ships and is verified together:
+  security patches → patch/minor batch → each major on its own.

@@ -275,3 +275,23 @@ The verdict is `pass` only when the expected result occurred and the happy path 
 performance finding, `pass` means the metric is under the poor bound (§5) and at most half of its
 earlier value. If it is still over the good bound, also add the remaining gap as a new finding in
 the area file and say so in your line.
+
+## 12. Edge cases (main agent)
+
+- **Sign-in needed, no test account**: look in seed data, docs and `.env.example`, or sign up with an `example.com` address. Otherwise ask once; without an answer, block those journeys.
+- **Monorepo**: test the app the request names, with `--root` and `--cwd` set to it. If several apps exist and none is named, ask which.
+- **Baseline tests already failing**: record them and judge fixes only on new failures.
+- **Flaky failure**: record it as "intermittent (1 of 2 tries)".
+- **Native mobile or desktop app without a driver**: test the API journeys and block the UI journeys with the reason.
+- **Windows**: run the bash snippets in Git Bash or WSL, or translate them; `python` may replace `python3`.
+
+## 13. Example run (main agent)
+
+```text
+Input:  "/user-test the shop app, focus on checkout and search"
+Run:    Local · focus checkout, search · fix mode on · driver Playwright script
+        map 2 areas / 9 journeys → test → 6 findings (1 high, 3 medium, 2 low)
+        fix 4 → 3 fixed-verified, 1 fix-failed (restored) → final build 0, no new test failures
+Output: .user-test/20261020T101500Z/report.md and report.html
+        Result: COMPLETE · 9 journeys: 7 pass, 2 fail · 3 fixed and verified, 3 open with a plan
+```

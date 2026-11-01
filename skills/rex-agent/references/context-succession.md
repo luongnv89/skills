@@ -60,6 +60,8 @@ Anti-thrash: a generation may not HANDOFF until it has completed at least one fu
 
 The two-step ack and `GO` keep exactly one orchestrator at every moment: the successor does no work before `GO`, and the outgoing block writes nothing after it.
 
+In short: HANDOFF starts a successor with the Phase 2 call (`launch_profile.py --start main-g<N>`, on your own profile), delivers a compact brief through the Phase 4 cycle, and reads back the ack `HANDOFF ACCEPTED gen=<N> fleet=<k>`, after which the successor waits. This block then sends `GO gen=<N>`, goes read-only, and focuses the successor with `rex focus`. A successor that fails to start or never acks means the HANDOFF failed: stay main, report the orphan block, and ask before closing it. This file has the gate-point table, UNKNOWN fallback, full procedure, and brief template; never paste transcripts or diffs into a brief.
+
 ## Handoff brief template
 
 ```text

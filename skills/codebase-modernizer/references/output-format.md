@@ -5,7 +5,19 @@ two files the run writes follow `report-template.md` and `plan-template.md`.
 
 ## Step Completion Reports
 
-Use the block in SKILL.md (*Step Completion Reports*) with these per-phase check names:
+After each phase, emit:
+
+```text
+◆ [Phase Name] (phase N of 5 — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          × fail — [reason]
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+Use these per-phase check names:
 
 - **Baseline:** `Build probed`, `Tests probed`, `Coverage probed`, `CI probed`, `Verdict recorded`
 - **Inventory:** `Stack detected`, `Ecosystems listed`, `UI branch resolved`, `Worklist complete`

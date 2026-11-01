@@ -42,4 +42,32 @@ A complete run produces `APPSTORE_AUDIT.md` in the project root. Example snippet
 **Recommendation:** Either implement the feature before submitting or remove the claim from the description to avoid a 2.3 rejection for misleading metadata.
 ```
 
-The verdict is `LIKELY REJECT` because 5.1.1-v-delete is a Top 20 trigger (see *Verdict Criteria* in `SKILL.md`).
+The verdict is `LIKELY REJECT` because 5.1.1-v-delete is a Top 20 trigger (see *Verdict Criteria* in `references/audit-workflow.md`).
+
+## Minimal expected shape
+
+The smallest report that still meets the acceptance criteria:
+
+```markdown
+# App Store Review Audit Report
+
+**App:** NutriTrack – Meal Planner
+**Date:** 2026-04-19
+**Platform:** iOS 16+
+
+## Verdict: LIKELY REJECT
+
+- Total checks: 47 | Pass: 38 | Fail: 2 | Warning: 5 | N/A: 2
+
+## Critical Issues (FAIL)
+
+### 5.1.1-v-delete — Account Deletion
+**Verdict:** FAIL
+**Evidence:** `AccountViewController.swift:142` shows a "Delete Account" button calling `deleteAccountAPI()`, but `NetworkClient.swift:87` returns 501.
+**Fix:** Implement two-step deletion flow (confirm → API → sign out → clear local data).
+
+## Pre-Submission Checklist
+
+1. [ ] Implement account deletion flow (5.1.1-v-delete)
+2. [ ] Replace UIWebView with WKWebView (2.5.6)
+```

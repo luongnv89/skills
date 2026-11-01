@@ -49,12 +49,29 @@ Decision: Provide a URL, repository path or evidence files (and an output direct
 
 ## Step completion reports
 
-The per-step report in SKILL.md (*Completion report*) uses its own result words:
+The per-step report in SKILL.md (*Completion report*) has this shape:
+
+```text
+◆ Scope / Evidence / Plan / Delivery (step N of 4)
+  Required checks: √ met / × blocked — name the check
+  Result: PASS | PARTIAL | FAIL
+```
+
+It uses its own result words:
 
 - `PASS` — every **Done when** check of that step is met.
 - `PARTIAL` — the step ended with a recorded gap, such as a `not-tested` aspect.
 - `FAIL` — a check is blocked and the run cannot continue; the run then ends `BLOCKED` if
   no artifacts were written.
+
+## Expected output example
+
+Input: saved pricing HTML with two equally prominent purchase links, no rendered view or
+analytics. Output: an evidence-backed clarity finding (`F1`, medium), a task to make the
+primary action unambiguous (`T1`, P2, S) with a keyboard/user-test acceptance check, and
+`performance: not-tested` pending measurement, so the run ends `Result: PARTIAL`. It does
+not report a conversion uplift or invent absent robots/llms files. Full field shapes:
+`references/report-contract.md`; final response: the shapes above.
 
 ## Understanding criteria
 

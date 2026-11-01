@@ -117,3 +117,12 @@ Next:        <remaining user action> | No approval needed
   <path>`, `abandon or branch N detached commits`. Otherwise `No approval needed`. Invent no new
   gates.
 - Omit a field line whose phase was outside the scope, or mark it `— skipped by user`.
+
+## Report reader checks
+
+Moved from SKILL.md → Acceptance Criteria. The report must also be understandable:
+
+- The first line after the header gives PASS, PARTIAL or BLOCKED and the reason.
+- `Verified:` (checks run and their output) is separate from `Unverified:`.
+- Each deleted ref names its signal and its sha or PR number.
+- `Next:` names the remaining user action or says `No approval needed`.

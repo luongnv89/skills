@@ -65,3 +65,10 @@ Project Files
     ↓
 [Fixer] → Source code changes
 ```
+
+## Modes
+
+This skill has two modes:
+
+- **With Subagent Architecture (Recommended):** If the Agent tool is available, the audit runs via a 4-phase subagent workflow for maximum accuracy and depth.
+- **Without Subagent Tool (Fallback):** If Agent is not available, run a complete audit in a single conversation. The end result (`APPSTORE_AUDIT.md`) is the same.

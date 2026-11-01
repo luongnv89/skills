@@ -58,3 +58,7 @@ Log every UNKNOWN choice:
 ## Done when
 
 Before work dispatch, the report records a parsed percentage or explicit UNKNOWN fallback; any FRESHEN has a new ready pane id and compact state; current GitHub head still matches the task SHA.
+
+## Truncated verdicts
+
+A worker that exhausts its token budget mid-review returns a truncated verdict rather than an error. Context-gate the reviewer at every ROUND start for this reason.
