@@ -13,7 +13,7 @@
 
 - Detect project language and framework automatically
 - Configure language-specific linters, formatters, type checkers, and security scanners
-- Run unit tests on every commit, full test suite + E2E tests on push
+- Run the unit tests related to the changed files on every commit, full test suite + E2E tests on push
 - Enumerate all CLI commands and generate end-to-end smoke tests (for CLI tools)
 - Keep GitHub Actions lean — a diff-scoped bypass guard, matrix version testing, secrets-dependent work, and deploys only
 - Keep CI fast with free techniques only: caches seeded from the default branch, blobless checkout, superseded-run cancellation, affected-only tests with a default-branch full run, parallel jobs where they are free, everything generated for the repo's visibility, and job timeouts
@@ -48,7 +48,7 @@ graph TD
 | Check | Pre-commit commit | Pre-commit push | GitHub Actions |
 |-------|:-----------------:|:---------------:|:--------------:|
 | Format / lint / type check | ✓ | — | — |
-| Unit tests (fast) | ✓ | — | — |
+| Unit tests related to the changed files | ✓ | — | ✓ (PR guard, the diff's) |
 | Tests the push affects (whole suite when it fits) | — | ✓ | ✓ (PR guard, affected only) |
 | Full test suite + version matrix | — | — | ✓ (per merge, or nightly on a busy private repo; coverage upload on public repos) |
 | CLI end-to-end tests | — | ✓ | — |
@@ -78,6 +78,7 @@ graph TD
 - `scripts/e2e_test.sh` or `tests/e2e/test_cli.py` (for CLI tools)
 - `.github/workflows/ci.yml` — lean, fast CI: a diff-scoped bypass guard, default-branch matrix testing, secrets-dependent work, and deploys, with cache seeding, concurrency, and timeouts
 - `scripts/affected-tests.sh` (when the suite exceeds the push budget)
+- `scripts/related-tests.py` (Python projects: the unit tests related to the changed files, for the commit hook)
 - For an audit-only run: the per-job queue/setup/work split and a table of free fixes, with no file written
 - Configured and verified local pre-commit environment (both commit and push hooks)
 - A final report: `Result:` (`COMPLETE`, `PARTIAL` or `BLOCKED`), `Evidence:` with the commands that ran and their exit codes, `Uncertainty:` (always the CI workflow that has not run yet), and `Decision:` (the approval needed, or `No approval needed.`)

@@ -142,7 +142,7 @@ The run step loops `for stage in ${{ matrix.stages || 'pre-commit pre-push' }}`,
 
 ### Affected-only on pull requests, full suite on the default branch
 
-- **The guard is already diff-scoped for file-based hooks.** A test hook with `pass_filenames: false` is not, so once the suite outgrows the 60-second push budget, make it affected-aware. pre-commit exports `PRE_COMMIT_FROM_REF` and `PRE_COMMIT_TO_REF` to hooks on `pre-push` and whenever `--from-ref`/`--to-ref` is passed, so `scripts/affected-tests.sh` (in [precommit-configs.md](precommit-configs.md#fast-test-runs)) runs only the affected tests in both places, and the full suite when no range exists.
+- **The guard is already diff-scoped for file-based hooks.** That includes the commit-stage unit hook, which runs only the tests related to the diff's files ([Related tests on commit](precommit-configs.md#related-tests-on-commit)). The push-stage suite, with `pass_filenames: false`, is not, so once the suite outgrows the 60-second push budget, make it affected-aware. pre-commit exports `PRE_COMMIT_FROM_REF` and `PRE_COMMIT_TO_REF` to hooks on `pre-push` and whenever `--from-ref`/`--to-ref` is passed, so `scripts/affected-tests.sh` (in [precommit-configs.md](precommit-configs.md#fast-test-runs)) runs only the affected tests in both places, and the full suite when no range exists.
 - **Monorepos:** `nx affected -t test --base=<sha> --head=<sha>` (`nrwl/nx-set-shas` finds the last successful default-branch commit), `turbo run test --affected` (`TURBO_SCM_BASE`/`TURBO_SCM_HEAD`), or `dorny/paths-filter` outputs on job-level `if:` to skip a whole language.
 - **Filters list what may be skipped, never what must run.** An unmatched path, such as a new top-level directory or a shared config, runs everything. Vitest's `forceRerunTriggers` defaults to `package.json` and the Vite/Vitest configs; a tsconfig-only change otherwise selects no test at all, so add tsconfig files, lockfiles, and test setup files.
 - **Guard the skip logic.** `vitest run --changed` exits 0 when it selects nothing, so a broken selector reports green with zero tests. The affected script fails when source files changed and no test was selected.
@@ -258,7 +258,7 @@ jobs:
       - run: pip install pre-commit && pre-commit install-hooks
 ```
 
-The guard proves the hooks actually ran on the incoming commits — the one thing local tooling cannot prove about itself, since `--no-verify` skips hooks entirely. File-based hooks check only the diff, so they stay fast as the repository grows; project-wide hooks (type-check, test suites) run whole unless they select affected work.
+The guard proves the hooks actually ran on the incoming commits — the one thing local tooling cannot prove about itself, since `--no-verify` skips hooks entirely. File-based hooks check only the diff, so they stay fast as the repository grows; this includes the commit-stage unit hook, which runs only the tests related to the diff. Project-wide hooks (type-check, the push-stage suite) run whole unless they select affected work.
 
 ### Add a default-branch full run only with affected-test selection
 

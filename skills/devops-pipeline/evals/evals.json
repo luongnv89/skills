@@ -5,13 +5,14 @@
       "id": 1,
       "kind": "happy-path",
       "prompt": "Set up pre-commit hooks and a GitHub Actions workflow for this Python project. It uses uv, ruff, mypy and pytest, and there is no CI yet.",
-      "expected_output": "Detects the Python stack, writes .pre-commit-config.yaml with ruff, ruff-format, mypy and fast unit tests on the pre-commit stage and the full suite with coverage on pre-push, writes a lean .github/workflows/ci.yml with the diff-scoped bypass guard and a matrix gated off the per-commit path, validates and dry-runs before installing both hook types, then verifies both stages.",
+      "expected_output": "Detects the Python stack, writes .pre-commit-config.yaml with ruff, ruff-format, mypy and the unit tests related to the staged files on the pre-commit stage and the full suite with coverage on pre-push, writes a lean .github/workflows/ci.yml with the diff-scoped bypass guard and a matrix gated off the per-commit path, validates and dry-runs before installing both hook types, then verifies both stages.",
       "files": [],
       "expectations": [
         "pre-commit validate-config and pre-commit run --all-files run before pre-commit install, and both pre-commit install and pre-commit install --hook-type pre-push run.",
         "Hook stages use pre-commit and pre-push, never the deprecated commit or push names.",
         "ci.yml runs no standalone lint, format, type-check or test step that repeats a hook; its bypass guard uses fetch-depth: 0, runs only on pull_request, and runs both hook stages with --from-ref and --to-ref.",
         "If any hook or workflow runs pytest -n auto, pytest-xdist is already a dev dependency or the proposed diff adds it to the dev extras, so no generated command can fail with 'unrecognized arguments: -n'.",
+        "The commit-stage pytest hook passes the staged files (pass_filenames left on, require_serial: true) to a selection such as scripts/related-tests.py that runs only the related unit tests and exits 0 when none match, while the pre-push hook runs the whole suite; no hook id is added to SKIP.",
         "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only commands that ran with their exit codes, Uncertainty stating that the CI workflow has not run on GitHub, and Decision naming the approval needed or 'No approval needed.'"
       ]
     },
@@ -83,6 +84,7 @@
         "The bypass guard runs only on pull_request, checks out with fetch-depth: 0 and filter: blob:none, and runs both hook stages with --from-ref and --to-ref; because the repo is public, the stages run as parallel legs.",
         "The guard's npm and pre-commit caches are also saved by a job that runs on the default branch (push or schedule), not only by pull_request runs.",
         ".pre-commit-config.yaml sets default_stages: [pre-commit], so push-stage runs do not repeat the commit-stage hooks.",
+        "The commit-stage unit hook runs only the tests related to the staged files (vitest related --run with filenames passed and require_serial: true), so the guard's commit-stage leg repeats only the diff's tests; pre-push keeps the whole suite or scripts/affected-tests.sh.",
         "If the suite exceeds the 60-second push budget, tests are affected-only (scripts/affected-tests.sh or an equivalent vitest --changed selection) that fail when code changed but no test was selected, with a full-suite run on the default branch; otherwise pre-push runs the whole suite and the reply says why selection was not needed.",
         "The reply says the checks are hooks rather than an AGENTS.md instruction because agents skip steps, and linting uses Oxlint with categories set to error (ESLint kept only for rules Oxlint lacks).",
         "No third-party runner service, GitHub larger runner, or paid service is configured or recommended."
@@ -129,7 +131,8 @@
         "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes.",
         "ci.yml cancels superseded pull request runs with a concurrency group keyed on github.event.pull_request.number with a github.run_id fallback.",
         "The version matrix's push run restores and saves the same npm cache (setup-node cache: npm) and pre-commit cache key the guard restores, so it is the job that keeps pull request caches warm; no separate seeding job is added.",
-        "If a coverage summary is written, Vitest's coverage reporters include json-summary, because the summary reads coverage/coverage-summary.json."
+        "If a coverage summary is written, Vitest's coverage reporters include json-summary, because the summary reads coverage/coverage-summary.json.",
+        "The commit-stage unit hook runs only the tests related to the changed files (vitest related --run), so the single guard leg repeats only the diff's unit tests before the pre-push full suite, and no hook id is added to SKIP."
       ]
     },
     {

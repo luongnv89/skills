@@ -20,7 +20,7 @@ Every check lands in exactly one lane. This table is the single source of truth;
 
 | Lane | Time budget | What runs there |
 |------|-------------|-----------------|
-| `pre-commit` stage (every commit) | < 10s, changed files only | Format, lint, type-check (fastest free tool), offline security scans, fast unit tests, compile/import check |
+| `pre-commit` stage (every commit) | < 10s, changed files only | Format, lint, type-check (fastest free tool), offline security scans, unit tests related to the changed files, compile/import check |
 | `pre-push` stage (every push) | < 60s | Affected tests (whole suite and coverage threshold when they fit), CLI E2E, slow lint rulesets |
 | GitHub Actions, pull request | As short as the slowest guard leg | Diff-scoped bypass guard |
 | GitHub Actions, default branch | Free on public repos, billed per minute on private | Full suite and version matrix (per merge, nightly on a busy private repo), cache seeding, secrets-dependent scans, clean-VM tests, coverage upload (public repos), deploy/release |
@@ -100,6 +100,7 @@ When `pre-commit` is available, write `.pre-commit-config.yaml` for the detected
 
 - **Fastest free tool per check.** Keep the repo's tools and propose faster ones in the diff, with a benchmark. JS/TS: Oxlint, with ESLint only for rules Oxlint lacks; set Oxlint's categories to `error`, since its warnings exit 0. Type-check: TypeScript 7's `tsc`, then `bun check` or `tsrs` only if faster with the same errors. Python: Ruff, mypy as arbiter.
 - **Every hook tool is a dev dependency.** `pytest -n auto` needs `pytest-xdist`: when the dev extras lack it, add it in the same diff, or pytest fails with `unrecognized arguments: -n`.
+- **Related unit tests on commit.** The commit-stage unit hook keeps `pass_filenames` and `require_serial: true` and runs only the tests related to the staged files (`vitest related --run`, `scripts/related-tests.py`, changed Go packages), so the guard repeats only the diff's; `pre-push` runs the whole suite.
 - **Affected tests on `pre-push`** when the whole suite exceeds 60 seconds: `scripts/affected-tests.sh`, which fails when source changed but no test was selected.
 - **Hooks, not AGENTS.md lines.** An AGENTS.md instruction is advice an agent can skip; a hook blocks the commit or push. If the repo has an AGENTS.md, propose one line: hooks exist and must not be bypassed.
 - **Vitest `isolate: false`** only with the reference's per-file reset hook.
@@ -169,7 +170,8 @@ After running the skill, the repository contains:
 2. **`.github/workflows/ci.yml`** — step 3's four responsibilities with its speed techniques, generated for the repo's visibility. No standalone step duplicating a hook.
 3. **`scripts/e2e_test.sh`** (CLI projects only) — executable script exercising every CLI command/subcommand.
 4. **`scripts/affected-tests.sh`** (only when the suite exceeds the push budget) — affected-test selection that fails closed.
-5. **A final report** in the shape of [references/final-report.md](references/final-report.md).
+5. **`scripts/related-tests.py`** (Python projects) — the commit hook's selection of the unit tests related to the changed files.
+6. **A final report** in the shape of [references/final-report.md](references/final-report.md).
 
 An audit-only run writes nothing; it prints the per-job split and the proposed free fixes.
 
