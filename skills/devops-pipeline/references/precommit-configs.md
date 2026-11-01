@@ -175,8 +175,9 @@ repos:
         language: system
         pass_filenames: false
 
-      # Full suite (unit + integration) on push; pytest-xdist runs one worker
-      # per physical core.
+      # Full suite (unit + integration) on push. `-n auto` needs pytest-xdist
+      # in the dev extras (see the note below): one worker per available CPU
+      # (physical cores when psutil is installed).
       - id: pytest-full
         name: pytest full suite
         entry: pytest -n auto --tb=short -q
@@ -192,6 +193,8 @@ repos:
       #   pass_filenames: false
       #   stages: [pre-push]
 ```
+
+> **Install every hook tool as a dev dependency** (`pytest`, `pytest-xdist`, plus `pytest-cov` for CI coverage), in the project's dev extras (`[project.optional-dependencies] dev`, or `[dependency-groups] dev` with uv). `pytest -n auto` comes from pytest-xdist: when the dev extras lack it, add `pytest-xdist` to them, shown in the diff, or pytest stops with `unrecognized arguments: -n`. The CI guard and matrix install the same extras (`pip install -e ".[dev]"`), so the hook runs there too.
 
 ### Alternative: Black instead of Ruff formatter
 
@@ -594,7 +597,7 @@ export default defineConfig({
 
 pytest already runs every file in one process, so there is no per-file re-import to remove. The equivalent speedup is parallel workers:
 
-- `pytest -n auto` (pytest-xdist) starts one worker per physical core; `-n logical` one per logical core (needs `psutil`).
+- `pytest -n auto` (pytest-xdist, a dev dependency) starts one worker per available CPU (physical cores when psutil is installed); `-n logical` one per logical core (needs `psutil`).
 - `--dist loadfile` keeps each file's tests on one worker (module fixtures built once); `--dist worksteal` rebalances uneven files.
 - Avoid per-test process isolation (`pytest-forked`'s `--forked`) unless a test needs it; mark those tests and run them separately.
 

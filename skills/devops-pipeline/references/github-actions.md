@@ -144,7 +144,7 @@ The run step loops `for stage in ${{ matrix.stages || 'pre-commit pre-push' }}`,
 ### Match parallelism to the runner
 
 - Vitest's `maxWorkers` defaults to all available parallelism in run mode: 4 workers on a public Linux runner, 2 on a private one. Keep the default and benchmark half (`--maxWorkers=50%`), which can be as fast and less flaky. Never hard-code a count tuned on a laptop.
-- pytest-xdist: `-n auto` starts one worker per physical core, `-n logical` one per logical core (needs `psutil`).
+- pytest-xdist: `-n auto` starts one worker per available CPU (physical cores when psutil is installed), `-n logical` one per logical core (needs `psutil`). pytest-xdist must be a dev dependency; Step 2 adds it when missing.
 - TypeScript 7's `tsc --checkers` defaults to 4; on a 2-vCPU runner, benchmark `--checkers 2`.
 
 ### Timeouts
@@ -509,6 +509,7 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
+      # The dev extras hold every hook tool, pytest-xdist included.
       - name: Install dependencies
         run: pip install -e ".[dev]"
 
@@ -575,8 +576,8 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[dev]"
 
-      # `-n auto` (pytest-xdist, in the dev extras) starts one worker per physical
-      # core, so the worker count follows the runner (4 vCPU public, 2 private).
+      # `-n auto` comes from pytest-xdist, which Step 2 puts in the dev extras:
+      # one worker per available CPU (physical cores when psutil is installed).
       - name: Run tests with coverage
         run: pytest -n auto --cov --cov-report=xml -q
 

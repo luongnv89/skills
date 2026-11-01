@@ -11,6 +11,7 @@
         "pre-commit validate-config and pre-commit run --all-files run before pre-commit install, and both pre-commit install and pre-commit install --hook-type pre-push run.",
         "Hook stages use pre-commit and pre-push, never the deprecated commit or push names.",
         "ci.yml runs no standalone lint, format, type-check or test step that repeats a hook; its bypass guard uses fetch-depth: 0, runs only on pull_request, and runs both hook stages with --from-ref and --to-ref.",
+        "If any hook or workflow runs pytest -n auto, pytest-xdist is already a dev dependency or the proposed diff adds it to the dev extras, so no generated command can fail with 'unrecognized arguments: -n'.",
         "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only commands that ran with their exit codes, Uncertainty stating that the CI workflow has not run on GitHub, and Decision naming the approval needed or 'No approval needed.'"
       ]
     },
