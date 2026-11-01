@@ -42,6 +42,8 @@ Lanes come from the SKILL's Check Routing Table; do not re-split them here.
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -140,6 +142,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -153,20 +157,20 @@ repos:
       - id: debug-statements
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.0
+    rev: v0.17.3
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix]
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v2.4.1
     hooks:
       - id: mypy
         additional_dependencies: []  # Add type stubs as needed
 
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.7
+    rev: 1.9.4
     hooks:
       - id: bandit
         args: ["-c", "pyproject.toml"]
@@ -204,18 +208,20 @@ repos:
       #   stages: [pre-push]
 ```
 
-> **Install every hook tool as a dev dependency** (`pytest`, `pytest-xdist`, plus `pytest-cov` for CI coverage), in the project's dev extras (`[project.optional-dependencies] dev`, or `[dependency-groups] dev` with uv). `pytest -n auto` comes from pytest-xdist: when the dev extras lack it, add `pytest-xdist` to them, shown in the diff, or pytest stops with `unrecognized arguments: -n`. The CI guard and matrix install the same extras (`pip install -e ".[dev]"`; for a uv `[dependency-groups] dev`, `uv sync --locked` as in the [With uv](github-actions.md#with-uv) snippet), so the hook runs there too.
+> **Install every hook tool as a dev dependency** (`pytest`, `pytest-xdist`, plus `pytest-cov` for CI coverage), in the project's dev extras (`[project.optional-dependencies] dev`, or `[dependency-groups] dev` with uv). `pytest -n auto` comes from pytest-xdist: when the dev extras lack it, add `pytest-xdist` to them, shown in the diff, or pytest stops with `unrecognized arguments: -n`. The CI guard and matrix install the same extras (`pip install -e ".[dev]"`; for a uv `[dependency-groups] dev`, `uv sync --locked` as in the [With uv](github-actions.md#with-uv) snippet), so the hook runs there too. With Poetry, put them in `[dependency-groups] dev` or `[tool.poetry.group.dev.dependencies]`: plain `poetry install` skips a `[project.optional-dependencies] dev` extra unless it gets `--extras dev`.
+
+> **Upgrading an older config.** `ruff-pre-commit` renamed the `ruff` hook to `ruff-check`; `ruff` still works as a legacy alias. `ruff-format` now also formats Python code blocks in Markdown files, so the first run can rewrite a README. mypy 2 turns on `--local-partial-types` and `--strict-bytes` by default, so the jump from mirrors-mypy v1 can report new errors: fix them, or turn the flags off in the mypy config while you migrate.
 
 ### Alternative: Black instead of Ruff formatter
 
 ```yaml
   - repo: https://github.com/psf/black
-    rev: 24.2.0
+    rev: 26.10.1
     hooks:
       - id: black
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 9.0.2
     hooks:
       - id: isort
 ```
@@ -224,6 +230,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -292,6 +300,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -353,6 +363,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -407,6 +419,8 @@ For monorepos or projects with multiple languages. pre-commit always execs from 
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -929,3 +943,5 @@ Fetched 2026-11-01; tool versions move fast, so re-check before changing a templ
 - ty (Astral, beta): https://github.com/astral-sh/ty
 - Pyrefly (Meta, 1.4.0): https://github.com/facebook/pyrefly
 - pre-commit (`PRE_COMMIT_FROM_REF`/`PRE_COMMIT_TO_REF`, `pass_filenames`, `require_serial`, `always_run`: "this hook will run even if there are no matching files", `--from-ref`/`--to-ref` files): https://pre-commit.com/
+- Python template hook revs, each the latest release or tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest` (tags sorted by version where a repo publishes no releases), hook ids checked in each rev's `.pre-commit-hooks.yaml`: `astral-sh/ruff-pre-commit` v0.17.3 (`ruff-check`, `ruff-format`, and `ruff` as a legacy alias), `pre-commit/mirrors-mypy` v2.4.1 (`mypy`), `PyCQA/bandit` 1.9.4 (`bandit`), `psf/black` 26.10.1 (`black`), `pycqa/isort` 9.0.2 (`isort`); `pre-commit/pre-commit-hooks` v6.0.0 is still the latest
+- mypy 2.0 release notes (`--local-partial-types` and `--strict-bytes` on by default), fetched 2026-11-01: https://github.com/python/mypy/blob/master/CHANGELOG.md

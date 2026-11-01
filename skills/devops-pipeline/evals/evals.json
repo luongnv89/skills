@@ -5,7 +5,7 @@
       "id": 1,
       "kind": "happy-path",
       "prompt": "Set up pre-commit hooks and a GitHub Actions workflow for this Python project. It uses uv, ruff, mypy and pytest, and there is no CI yet.",
-      "expected_output": "Detects the Python stack, writes .pre-commit-config.yaml with ruff, ruff-format, mypy and the unit tests related to the staged files on the pre-commit stage and the full suite with coverage on pre-push, writes a lean .github/workflows/ci.yml with the diff-scoped bypass guard and a matrix gated off the per-commit path, validates and dry-runs before installing both hook types, then verifies both stages.",
+      "expected_output": "Detects the Python stack, writes .pre-commit-config.yaml with ruff-check, ruff-format, mypy and the unit tests related to the staged files on the pre-commit stage and the full suite with coverage on pre-push, writes a lean .github/workflows/ci.yml with the diff-scoped bypass guard and a matrix gated off the per-commit path, validates and dry-runs before installing both hook types, then verifies both stages.",
       "files": [],
       "expectations": [
         "pre-commit validate-config and pre-commit run --all-files run before pre-commit install, and both pre-commit install and pre-commit install --hook-type pre-push run.",
