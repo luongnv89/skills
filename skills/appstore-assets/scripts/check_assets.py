@@ -378,6 +378,7 @@ def main() -> None:
     rows, failures = [], 0
     names: dict[str, list[str]] = {}
     video_facts: list[dict] = []
+    creative_files: list[str] = []
     ffprobe, ffmpeg = tool("ffprobe"), tool("ffmpeg")
     prints = None
 
@@ -403,6 +404,8 @@ def main() -> None:
         if not files and not videos:
             continue
         names[folder] = [f.stem for f in files + videos]
+        if folder == "creative":
+            creative_files = [f.relative_to(d).as_posix() for f in files + videos]
         for f in files:
             kind = f.stem.split("-")[0] if folder == "creative" else None
             ok, why = inspect(f, CREATIVE.get(kind) if folder == "creative" else ACCEPTED[folder], kind)
@@ -492,7 +495,7 @@ def main() -> None:
         a.json.write_text(json.dumps({
             "result": "FAIL" if failures else "PASS", "checks": checks, "failed": failures, "warnings": warns,
             "screenshots": {k: len(v) for k, v in names.items() if k != "creative"},
-            "creative": names.get("creative", []), "videos": video_facts,
+            "creative": creative_files, "videos": video_facts,
             "rows": [{"path": n, "verdict": v, "detail": d} for n, v, d in rows]}, indent=2) + "\n", encoding="utf-8")
     sys.exit(1 if failures else 0)
 

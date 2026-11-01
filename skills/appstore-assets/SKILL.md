@@ -64,9 +64,12 @@ and `1.0.0` are one version). Update reuses that set's `src/` and `out`, which m
 Update branch kit refresh: note whether `src/kit.js` predates video (no `__seek` in it), then
 copy the template's `kit.js`, `kit.css` and `index.html` into `src/`, first backing up any that
 differ as `<name>.bak-<timestamp>` so a hand edit is never lost. List the backups in the report.
+On `landscape fork`, add `orientation: "landscape"` to `config.js`, render with `render.py` itself (not
+the wrapper), and say so in the report.
 
 ```bash
 grep -q __seek "<out>/src/kit.js" || echo "kit predates 1.1.0: header/search stills will be re-laid out"
+{ grep -qs "w: 874, h: 402" "<out>/src/kit.js" || [ -e "<out>/src/render_landscape.py" ]; } && echo "landscape fork"
 ts=$(date +%Y%m%d-%H%M%S); for f in kit.js kit.css index.html; do
   cmp -s "<skill>/assets/template/$f" "<out>/src/$f" || { [ -e "<out>/src/$f" ] && cp "<out>/src/$f" "<out>/src/$f.bak-$ts" && echo "backup: src/$f.bak-$ts"; }
   cp "<skill>/assets/template/$f" "<out>/src/$f"; done
@@ -122,7 +125,7 @@ Spawn the explorer. Input: `agents/app-explorer.md`, `references/input-discovery
 input path or URL, and whether `browse` is available. Output: the app brief JSON. Do not
 read the source tree yourself in this step; the explorer keeps it out of your context budget.
 
-Bar: every platform carries evidence, every screen has a `source`, and `orientation` and `limits` are filled. If `stop_reason` is set, take the Stop branch.
+Bar: every platform carries evidence, every screen has a `source`, and `orientation` and `limits` are filled (or null with a `gaps` reason). If `stop_reason` is set, take the Stop branch.
 
 ## Step 2 — Refresh Apple's specs
 
@@ -155,7 +158,7 @@ ends unanswered, report BLOCKED with the pending question as the Decision.
 ## Step 4 — Build the asset set
 
 1. Set `<out>`: the run options' or user's path; else an existing set's folder for this version; else `metadata/screenshots/<version>/` when the repo has `metadata/`; else `appstore-assets/<version>/` at the repo root (the working directory in landing-page mode). `<version>` is the brief's (Flutter: `pubspec.yaml` without `+build`); without one, use today's date. For several languages, add a `<locale>/` level per set.
-2. Run the repo sync. If `<out>` exists outside the Update branch, move it to `<out>.bak-<timestamp>` and record the move.
+2. Run the repo sync. If `<out>` exists outside the Update branch and holds more than `run.json`, `REPORT.md` and `report.json`, move it to `<out>.bak-<timestamp>` and record the move.
 3. Copy `assets/template/` to `<out>/src/`, then run `scripts/fetch_font.py "<caption face>" <out>/src`. Offline, delete `fonts.display` from `config.js` and record it.
 4. Capture with `references/input-discovery.md` → Capture recipes (Flutter harness or simulator; fixed time and date; simulator state restored; scratch files deleted). Captures go to `<out>/src/captures/` and stay in git; copy any logo the UI shows to `<out>/src/`.
 5. Open each selected screen's cited view, then rewrite `config.js` with `references/render-pipeline.md`, setting `orientation` from the brief. Put `// Source: path:line` above every screen builder.

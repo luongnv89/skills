@@ -111,7 +111,7 @@ HEADLESS_SHELL_GLOBS = [
     ".cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell",
 ]
 ATTEMPTS = max(1, int(os.environ.get("APPSTORE_ASSETS_ATTEMPTS", "4")))  # tries per Chrome step
-CHROME_TIMEOUT = 120  # seconds for one screenshot; each retry allows one more multiple of it
+CHROME_TIMEOUT = 120  # seconds for one screenshot; retries allow twice that, so a real hang fails in about 15 minutes
 
 
 def fail(msg: str, fix: str) -> None:
@@ -181,7 +181,7 @@ class Runner:
 
 
 def chrome(binary: str, args: list[str], what: str, attempt: int = 1) -> subprocess.CompletedProcess:
-    timeout = CHROME_TIMEOUT * attempt
+    timeout = CHROME_TIMEOUT * min(attempt, 2)
     try:
         return subprocess.run([binary, "--headless=new", "--disable-gpu", "--hide-scrollbars",
                                "--allow-file-access-from-files", "--force-color-profile=srgb",
