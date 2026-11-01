@@ -8,7 +8,7 @@ Header and search videos: see **Video creatives** below.
 
 ```
 <out>/                      e.g. metadata/screenshots/<version>/ or appstore-assets/<version>/
-├── src/                    copy of assets/template/ — index.html, kit.css, kit.js, config.js
+├── src/                    copy of assets/template/ — index.html, kit.css, kit.js, config.js; brief.json (Step 1's app brief)
 │   ├── fonts/              display.woff2 + LICENSE.txt (fetch_font.py)
 │   └── captures/           clean real captures, when a frame uses ui.capture(); keep them in git
 ├── iphone-6.9/ iphone-6.3/ ipad-13/ mac/   screenshots, <frame-id>.png
@@ -53,11 +53,11 @@ Pillow (`python3 -m pip install pillow`). `render.py` needs Chrome or Chromium
 | Builds a manifest first (`index.html?manifest=1` via `--dump-dom`), rendering every screen once | A broken builder, an unknown icon name or a missing image fails with its frame id instead of shipping a blank PNG |
 | Checks caption contrast from the brand tokens (3:1 headline, 4.5:1 supporting line, light and dark) | A dark frame with dark text cannot pass |
 | After a full render, deletes outputs no longer in `config.js`: `<frame>.png` in the class folders, and in `creative/` only files `.kit-outputs.json` lists (videos only without `--no-video`) whose size and sha256 still match the record, then a variant folder it lists once that folder is empty or holds only `.DS_Store` (removed with it). A listed file changed since gets `WARN: … changed since the kit wrote it, left in place` and leaves the record; a listed variant folder holding anything else is kept with a WARN. Each write records the file's fingerprint atomically right after it lands (`--only` adds to it), so a failed render never adds a file; a file deleted by hand stays listed until the next full render clears it. With no record (a 1.0.0 set), only root `header`/`search`/`universal.png` go, as in 1.0.0. Hidden files are skipped silently; symlinks and anything else in `creative/` get `WARN: … not produced by the kit, left in place`. A file the config still produces is re-rendered over whatever is there, as in 1.0.0: to keep a hand-made asset, remove that kind from the config first; the kit will then leave it in place | A dropped frame, video or variant cannot ship by accident, and a file the kit did not write or that changed since (an App Preview recording, raw art, a hand-replaced `search.png`, `old/header.png`, an empty folder, a symlinked folder) is never deleted |
-| Retries a Chrome crash, timeout (120 s per screenshot, 240 s on a retry) or silent pipe up to 4 attempts with backoff (about 4, 8, 16 s); a video resumes at the frame it lost, into the same encoder, so the file is byte-identical. After the second failure it switches to `chrome-headless-shell` when one is installed (PATH, Puppeteer or Playwright cache; macOS and Linux) for the rest of the run. `APPSTORE_ASSETS_ATTEMPTS` changes the count | Batch runs on a loaded machine crashed Chrome; a retry or the headless shell finished them. A config error, size mismatch or page script error still fails at once |
+| Retries a Chrome crash, timeout (120 s per screenshot, 240 s on a retry), silent pipe, or wrong-size screenshot or first video frame up to 4 attempts with backoff (about 4, 8, 16 s); a video resumes at the frame it lost, into the same encoder, so the file is byte-identical. After the second failure it switches to `chrome-headless-shell` when one is installed (PATH, Puppeteer or Playwright cache; macOS and Linux) for the rest of the run, unless `--chrome` or `$CHROME` named the binary. `APPSTORE_ASSETS_ATTEMPTS` changes the count | Batch runs on a loaded machine crashed Chrome or wrote wrong-size PNGs; a retry or the headless shell finished them. A size still wrong on the last attempt fails with the sizes. A manifest timeout (an infinite loop or remote asset in `config.js`) fails after 120 s with that fix, and a config or page script error fails at once |
 | Takes a machine-wide lock (`~/.cache/appstore-assets/video.lock`, `flock`) for the video step only, printing `waiting for the video lock … (held by pid N, <out>)` while another render holds it. `APPSTORE_ASSETS_VIDEO_LOCK=0` skips it; `APPSTORE_ASSETS_LOCK_DIR` moves it | Four parallel 4K video renders pushed the load average near 500; stills still render in parallel, and the lock dies with its process |
 | Renders `orientation: "landscape"` classes rotated (iPhone 956 × 440 design zoomed to 874 for 6.3"; iPad 1376 × 1032) | Landscape-only games need landscape screenshots; one kit serves both |
-| Prints `fit headline <id>: 41 -> 37 px` when kit.js shrank a headline that wrapped past two lines (down to 75 %), and a WARN when it still does not fit | A wide face (a monospace) no longer needs per-frame overrides; a config `css` rule that pins `font-size` turns the fit off for that headline, and `fitHeadlines: false` turns it off everywhere |
-| Prints `note: header: device slot(s) hero, side0 sit outside Apple's art safe area` | Decoration outside the safe area is cropped on narrow displays; the note says so once instead of a reviewer flagging it per run |
+| Prints `fit headline <id>: 41 -> 37 px` when kit.js shrank a headline that wrapped past two lines (down to 75 %), a WARN when it still does not fit, and a `note:` when a pinned size wraps past two lines | A wide face (a monospace) no longer needs per-frame overrides; a config `css` rule that pins `font-size` turns the fit off for that headline, and `fitHeadlines: false` turns it off everywhere. The fit is on by default, so a re-render of an older set can change an approved headline: the Update report names those frames |
+| Prints `note: header: device slot(s) hero, side0 sit outside Apple's art safe area`, and `WARN: header: caption spans … outside Apple's art safe area` per beat whose caption overflows it | Decoration outside the safe area is cropped on narrow displays; the note says so once instead of a reviewer flagging it per run. A caption outside it loses words: with `layout: "safe"` (a 440 px caption column) drop any `css` rule that pins `.cv-cap h1` or `p` sizes |
 | Passes the stage height explicitly (`&h=`) | Headless Chrome's viewport is about 87 px shorter than `--window-size`; a `100vh` stage gets clipped |
 | Renders `iphone-6.3` by zooming the 440 px design to 402 px | One layout serves both iPhone classes with identical proportions |
 | Flattens to RGB with Pillow | Chrome writes RGBA; App Store Connect rejects alpha |
@@ -190,7 +190,7 @@ A short prompt is then enough: "Run appstore-assets on <repo> with
 
 `preauthorized: true` makes it a pre-authorized run (Step 3.6). `out`,
 `platforms`, `orientation` (`auto` = from the brief) and `video.duration`
-(`auto` = fitted) override discovery; leave a key out to use the default.
+(`auto` = fitted; `config.js` accepts `duration: "auto"` too, or leave it out) override discovery; leave a key out to use the default.
 `captures` is `flutter-test`, `simulator`, `existing` or `none` (grounded
 screens only). The run copies the file to `<out>/run.json`, so an Update run
 reuses it.
@@ -219,7 +219,7 @@ writes `report.json` next to that file so the orchestrator still gets an answer.
 }
 ```
 
-`frames`, `videos` and `checks.check_assets` come from `check_assets.py --json`
+`frames` (0 for a required class with no PNGs), `videos` and `checks.check_assets` come from `check_assets.py --json`
 (written outside the upload folders, then deleted). `assumptions_differing`
 lists only departures from `apple-specs.md` → Known kit assumptions.
 
@@ -262,5 +262,5 @@ frame keeps the same caption and device placement.
 | A file the kit rendered earlier is no longer pruned | It changed since the kit wrote it (the render printed `changed since the kit wrote it`), or `.kit-outputs.json` was deleted, edited by hand or unreadable (`WARN: … is unreadable`); delete the stale file yourself if it is not wanted, and the next render rebuilds the record |
 | `WARN: Chrome … retry 1/3 in 5 s` | Machine load; the render continues. If every attempt fails, render fewer sets at once, or install `chrome-headless-shell` (`npx @puppeteer/browsers install chrome-headless-shell@stable`) so the fallback has a binary, or pass `--chrome` |
 | `waiting for the video lock …` | Another render is encoding videos; this one waits its turn. Not a hang. A watcher reads the holder's pid and `<out>` from the message |
-| A capture harness's PNG is 500 px wide (×scale) or clipped on the right | Chrome 156+ clamps headless `--window-size` to a 500 px minimum width. Size small viewports with CDP `Emulation.setDeviceMetricsOverride` instead (`input-discovery.md` → Capture recipes). `render.py`'s 440 and 402 px stills rendered at exact size on Chrome 156 in testing, and it fails on any size mismatch rather than writing a clipped PNG |
+| A capture harness's PNG has the wrong size or is clipped on the right | Under Chrome 156, `--screenshot` at a small `--window-size` sometimes came out at the wrong size or clipped (other runs of the same command were exact; load may play a part). Size small viewports with CDP `Emulation.setDeviceMetricsOverride` instead (`input-discovery.md` → Capture recipes). `render.py` retries a wrong-size still and fails if the last attempt is still wrong, so it never writes a clipped PNG |
 | Landscape screenshots come out portrait | `orientation` is missing from `config.js`, or `src/kit.js` predates 1.2.0 (no `setOrientation` in it): refresh the kit files |

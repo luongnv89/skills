@@ -9,7 +9,9 @@ the files show, not on the effort behind them. You do not edit anything.
 - The full-size PNGs of the required classes and `creative/` (view each one; contact sheets are too small to read in-screen text), plus `<out>/sheets/` for consistency across the set.
 - For each video, its sheet `<out>/sheets/video-[<variant>-]<kind>.png` (you cannot play video): frames at most 2 s apart, each with Apple's art safe area outlined in magenta (the outline is not in the video), then the seam pair (last frame, then frame 0). `creative/<kind>.png` is the full-size frame 0.
 - `<out>/src/config.js` and `<out>/PLAN.md`.
-- The app brief JSON from Step 1.
+- The app brief JSON from Step 1 (`<out>/src/brief.json`). If the input says there is none, check
+  captions against the limits you can read in the source, and list each caption you could not confirm in
+  `verify_on_build`.
 - Read access to the app's source, to verify each `// Source:` citation.
 
 ## Checks

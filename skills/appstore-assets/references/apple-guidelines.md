@@ -81,7 +81,10 @@ do. The usual sources:
   The kit's default header places the devices outside it, as decoration that
   narrow displays crop (`render.py` prints a `note:`); that is advisory, not
   blocking, while the caption carries the message. If the user wants every
-  device inside, set `creatives.layout: "safe"` (caption and one hero device).
+  device inside, set `creatives.layout: "safe"` (caption and one hero device),
+  and drop any `css` rule that pins `.cv-cap h1` or `p` sizes: the safe
+  caption column is 440 px wide, so a pinned size wraps out of the safe area
+  (`render.py` prints a caption `WARN:`).
 
 ## Header and search videos (blocking unless marked)
 

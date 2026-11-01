@@ -294,7 +294,7 @@ function videoTimeline(cr, kind) {
   const beats = videoBeats(cr, kind), n = beats.length, errors = [];
   const words = (b) => `${b.headline} ${b.sub}`.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
   const need = beats.map((b) => Math.max(VIDEO.minHold, 1 + words(b) / VIDEO.wordsPerSec));
-  const fits = fitDuration(need, T), auto = v.duration === undefined;
+  const fits = fitDuration(need, T), auto = v.duration === undefined || v.duration === "auto";  // run.json spells it "auto"
   const D = auto ? Math.min(VIDEO.maxDuration, Math.max(VIDEO.duration, fits)) : v.duration;
   const hold = n === 1 ? D : (D - n * T) / n, lead = n === 1 ? 0 : Math.min(0.5, hold / 4);
   // Beat 0 is seen for hold - lead before the first crossfade, so it must read in that time.
@@ -421,9 +421,13 @@ function fitHeadlines(root, cfg) {
   const out = [];
   if (cfg.fitHeadlines === false) return out;
   for (const h1 of root.querySelectorAll("h1[data-fit]")) {
-    if (getComputedStyle(h1).fontSize !== h1.style.fontSize) continue;  // config css pins the size
+    const px = () => parseFloat(getComputedStyle(h1).fontSize);
+    const lines = () => Math.round(h1.offsetHeight / (parseFloat(getComputedStyle(h1).lineHeight) || px() * 1.02));
+    if (getComputedStyle(h1).fontSize !== h1.style.fontSize) {  // config css pins the size: report, never resize
+      if (lines() > 2) out.push({ id: h1.dataset.fit, base: px(), size: px(), lines: lines(), fits: false, pinned: true });
+      continue;
+    }
     const base = parseFloat(h1.style.fontSize), floor = Math.ceil(base * 0.75);
-    const lines = () => Math.round(h1.offsetHeight / (parseFloat(getComputedStyle(h1).lineHeight) || base * 1.02));
     const over = () => lines() > 2 || h1.scrollWidth > h1.clientWidth + 1;
     let size = base;
     while (over() && size > floor) h1.style.fontSize = `${--size}px`;
@@ -461,7 +465,10 @@ async function renderFromQuery(cfg) {
       stills.push(...kinds.filter((x) => CREATIVE[x]).map((kind) => ({ kind, variant })));
       for (const k of [...new Set([...kinds, ...videoKinds])].filter((x) => CREATIVE[x])) {
         KIT_OUTSIDE.clear();
-        try { html.push(renderCreative(cfg, k, variant)); } catch (e) { errors.push(`creative ${k}${tag}: ${e.message}`); }
+        try {
+          const markup = renderCreative(cfg, k, variant);
+          html.push(CREATIVE[k].safe ? `<div data-cap-check="${k}|${variant || ""}">${markup}</div>` : markup);
+        } catch (e) { errors.push(`creative ${k}${tag}: ${e.message}`); }
         if (KIT_OUTSIDE.size) outside.push({ kind: k, variant, slots: [...KIT_OUTSIDE].sort() });
       }
       for (const k of videoKinds.filter((x) => VIDEO_KINDS.includes(x))) {
@@ -481,6 +488,21 @@ async function renderFromQuery(cfg) {
     await document.fonts.ready;
     const fontOk = !cfg.fonts?.display || document.fonts.check(`700 40px "Display"`);
     const fit = fitHeadlines(root, cfg);
+    // Captions that leave Apple's art safe area after the fit (a long headline, or
+    // a config css rule that pins its size), per beat, in stage pixels.
+    const capOutside = [];
+    for (const box of root.querySelectorAll("[data-cap-check]")) {
+      const [kind, variant] = box.dataset.capCheck.split("|"), A = CREATIVE[kind].safe;
+      const s = box.querySelector(".stage").getBoundingClientRect();
+      box.querySelectorAll(".cv-beat").forEach((beat, i) => {
+        const r = [...beat.querySelectorAll(".cv-cap > *")].map((el) => { const b = el.getBoundingClientRect();
+          return [b.left - s.left, b.top - s.top, b.left - s.left + Math.max(b.width, el.scrollWidth), b.bottom - s.top]; });
+        if (!r.length) return;
+        const [x0, y0, x1, y1] = [0, 1, 2, 3].map((k) => (k < 2 ? Math.min : Math.max)(...r.map((q) => q[k])));
+        if (x0 < A.x - 0.5 || y0 < A.y - 0.5 || x1 > A.x + A.w + 0.5 || y1 > A.y + A.h + 0.5)
+          capOutside.push({ kind, variant: variant || null, beat: i, box: [x0, y0, x1, y1].map(Math.round), safe: [A.x, A.y, A.x + A.w, A.y + A.h] });
+      });
+    }
     // Caption color pairs render.py checks: headline (large text, 3:1) and
     // supporting line (4.5:1) on both canvas stops, light and dark.
     const b = cfg.brand, pairs = [];
@@ -490,7 +512,7 @@ async function renderFromQuery(cfg) {
       app: cfg.app, version: cfg.version, platforms: cfg.platforms, orientation: ORIENT, fontOk, errors: [...new Set(errors)],
       contrast: pairs.map(([fg, bg, min]) => ({ fg, bg, min })),
       frames: cfg.frames.map((f) => ({ id: f.id, platforms: cfg.platforms.filter((p) => f.screens[p]) })),
-      creatives: stills, video, outside, fit,
+      creatives: stills, video, outside, fit, capOutside,
     });
     root.id = "manifest";
     return;

@@ -53,7 +53,7 @@ Completion Report: `√`/`×` rows tied to commands, files or counts, then
 | --- | --- |
 | The input holds an Xcode project, `Package.swift`, Swift sources, or a Flutter/React Native app with an `ios/` or `macos/` target | **Codebase**: Steps 1–7 |
 | The input is a landing-page URL or `.html` file, with no codebase | **Landing page**: Steps 1–7; screens come only from page imagery |
-| `<out>/src/config.js` exists and the user asks for edits or a re-render, or a kit set for this version already exists | **Update**: refresh the kit files (below), edit `config.js`, then Steps 5–7 |
+| `<out>/src/config.js` exists and the user asks for edits or a re-render, or a kit set for this version already exists | **Update**: refresh the kit files and the brief (below), edit `config.js`, then Steps 5–7 |
 | Only watchOS, tvOS or visionOS, or no Apple target | **Stop**: report BLOCKED with the reason; write nothing |
 | No input named or found | Ask for the codebase path or landing-page URL; write nothing |
 
@@ -66,6 +66,10 @@ copy the template's `kit.js`, `kit.css` and `index.html` into `src/`, first back
 differ as `<name>.bak-<timestamp>` so a hand edit is never lost. List the backups in the report.
 On `landscape fork`, add `orientation: "landscape"` to `config.js`, render with `render.py` itself (not
 the wrapper), and say so in the report.
+
+Update brief: read `src/brief.json`. If it is missing or lacks `orientation`, `limits` or
+`listing_findings`, run Step 1 and save its brief there. If the brief's `orientation` differs from
+`config.js`, report it and re-plan from Step 3 (every screen changes shape).
 
 ```bash
 grep -q __seek "<out>/src/kit.js" || echo "kit predates 1.1.0: header/search stills will be re-laid out"
@@ -122,7 +126,7 @@ under Uncertainty; without `browse`, use the host's web-fetch tool.
 ## Step 1 — Discover (explorer subagent)
 
 Spawn the explorer. Input: `agents/app-explorer.md`, `references/input-discovery.md`, the
-input path or URL, and whether `browse` is available. Output: the app brief JSON. Do not
+input path or URL, and whether `browse` is available. Output: the app brief JSON, saved in Step 4 as `<out>/src/brief.json` for Steps 6–7 and later Update runs. Do not
 read the source tree yourself in this step; the explorer keeps it out of your context budget.
 
 Bar: every platform carries evidence, every screen has a `source`, and `orientation` and `limits` are filled (or null with a `gaps` reason). If `stop_reason` is set, take the Stop branch.
@@ -159,7 +163,7 @@ ends unanswered, report BLOCKED with the pending question as the Decision.
 
 1. Set `<out>`: the run options' or user's path; else an existing set's folder for this version; else `metadata/screenshots/<version>/` when the repo has `metadata/`; else `appstore-assets/<version>/` at the repo root (the working directory in landing-page mode). `<version>` is the brief's (Flutter: `pubspec.yaml` without `+build`); without one, use today's date. For several languages, add a `<locale>/` level per set.
 2. Run the repo sync. If `<out>` exists outside the Update branch and holds more than `run.json`, `REPORT.md` and `report.json`, move it to `<out>.bak-<timestamp>` and record the move.
-3. Copy `assets/template/` to `<out>/src/`, then run `scripts/fetch_font.py "<caption face>" <out>/src`. Offline, delete `fonts.display` from `config.js` and record it.
+3. Copy `assets/template/` to `<out>/src/`, write the brief to `src/brief.json`, then run `scripts/fetch_font.py "<caption face>" <out>/src`. Offline, delete `fonts.display` from `config.js` and record it.
 4. Capture with `references/input-discovery.md` → Capture recipes (Flutter harness or simulator; fixed time and date; simulator state restored; scratch files deleted). Captures go to `<out>/src/captures/` and stay in git; copy any logo the UI shows to `<out>/src/`.
 5. Open each selected screen's cited view, then rewrite `config.js` with `references/render-pipeline.md`, setting `orientation` from the brief. Put `// Source: path:line` above every screen builder.
 6. Write `<out>/PLAN.md`: per frame, the id, headline, UI source, evidence, and any element left out on purpose (for example a "Coming soon" row).
@@ -177,15 +181,13 @@ python3 "<skill>/scripts/check_assets.py" <out> --platforms <list> --sheet <out>
 Under load, `render.py` retries Chrome crashes (falling back to `chrome-headless-shell`), and videos
 take turns machine-wide: `waiting for the video lock` is not a hang. It also fails on unknown icons, missing images, caption contrast below 3:1
 (headline) or 4.5:1 (supporting line), and a video beat held shorter than its caption needs;
-it removes the PNGs and videos it wrote that the config dropped (unless changed since), and warns about (but keeps) other files in `creative/`.
-A kit output the user replaced by hand is overwritten while the config still lists it: to keep a
-hand-made asset, remove that kind from the config first; the kit will then leave it in place. Videos render last and are slow (about a
-second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes each video (size,
-30/60 fps constant, 5–30 s, H.264 yuv420p, audio) and fails a blank frame or a loop-seam jump;
+it removes the PNGs and videos it wrote that the config dropped (unless changed since), and warns about (but keeps) other files in `creative/`
+(a hand-made file the config still lists is overwritten: `references/render-pipeline.md`). Videos render last and are slow (about a
+second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes each video and fails a blank frame or a loop-seam jump;
 with `--sheet` it writes `sheets/video-<kind>.png`. If a script fails, apply the fix it prints
-and re-run it. A file in `creative/` that is not a kit name gets a WARN row; list it under
-Uncertainty. A `header*`/`search*`/`universal*` file is checked as an upload asset, even if
-hand-made. If one FAILs and `.kit-outputs.json` does not list it, or lists it as changed (its
+and re-run it; fix a caption `WARN:` (outside the safe area) too. List `creative/` WARN rows under
+Uncertainty. A hand-made `header*`/`search*`/`universal*` file is checked as an upload asset:
+if one FAILs and `.kit-outputs.json` does not list it, or lists it as changed (its
 FAIL row ends "(not written by the kit)"), never move, rename or delete it yourself: report
 BLOCKED and ask the user to fix, rename or move it. Bar: both commands exit 0.
 
@@ -193,7 +195,7 @@ BLOCKED and ask the user to fix, rename or move it. Bar: both commands exit 0.
 
 1. View every sheet in `<out>/sheets/`, video sheets included. Fix text overlapping a device, clipped strings, blank screens, and a caption outside the magenta safe area.
 2. Acquire `emil-design-eng` and spawn a polish worker with the slice and task in `references/design-direction.md`. Apply its accepted rows to `config.js` only (`css` and brand tokens), then re-run Step 5.
-3. Spawn a fresh reviewer, never the builder. Input: `agents/asset-reviewer.md`, `references/apple-guidelines.md`, the full-size PNGs, the video sheets, `config.js`, `PLAN.md`, the brief, and source access.
+3. Spawn a fresh reviewer, never the builder. Input: `agents/asset-reviewer.md`, `references/apple-guidelines.md`, the full-size PNGs, the video sheets, `config.js`, `PLAN.md`, `src/brief.json`, and source access. With no brief, say so: the reviewer checks limits against the source, and its `verify_on_build` items go under Uncertainty.
 4. If the verdict is `NEEDS_FIX`, fix each blocking finding, re-run Step 5, and spawn a new reviewer. Stop after two fix cycles.
 
 Bar: the latest verdict is `PASS` on the latest render, or two cycles ran and the report is PARTIAL.
@@ -212,11 +214,9 @@ approval. List the brief's `listing_findings` as optional listing fixes; creativ
 - A feature gated by an entitlement the project lacks (CarPlay, HealthKit, Watch) is never drawn.
 - "Coming soon" and roadmap features stay out of frames and captions; record the omission in `PLAN.md`.
 - An iPhone-only app needs no iPad set, even though it runs on iPad.
-- Rendering on Linux replaces SF Pro in the UI: record it under Uncertainty.
 - An "App Store video" request is ambiguous: an App Preview (recorded footage) is out of scope; offer a header or search video, and build one only once it is chosen or pre-authorized.
 - Voice-over, music or "sound on" requests: videos ship silent (muted by default); put every message in captions and record the decision.
 - A video beat that needs a screen no frame shows needs a grounded frame first, or the beat is dropped.
-- Custom Product Pages: one `variants[]` entry per page or ad creative, only when asked; renders to `creative/<id>/`.
 - A landscape-only app (games often are) gets landscape screenshots: `orientation: "landscape"`, never a portrait set of rotated screens.
 - iPhone Duo is not rendered (`references/apple-specs.md`): say so; never stretch an iPhone frame to its size.
 
@@ -247,6 +247,8 @@ Decision: <the approval needed next (upload, commit, a dropped frame), or "No ap
 On the Update branch, list each `src/*.bak-<timestamp>` backup under Evidence. If the old kit
 predated 1.1.0, say under Decision that `header.png` and `search.png` changed composition (the
 caption, and the search hero, now sit in Apple's art safe area), so the user reviews them before upload.
+Name each frame `render.py` printed a `fit headline` line for: its headline shrank, so the reviewer and
+the user re-check it (`fitHeadlines: false` keeps approved sizes on a re-render only).
 
 PARTIAL means assets exist but a check or blocking finding remains; BLOCKED means no assets
 were written, or a hand-made `creative/` file fails Step 5. State that nothing was committed or uploaded, and name the recreated frames.

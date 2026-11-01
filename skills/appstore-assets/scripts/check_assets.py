@@ -494,7 +494,7 @@ def main() -> None:
         a.json.parent.mkdir(parents=True, exist_ok=True)
         a.json.write_text(json.dumps({
             "result": "FAIL" if failures else "PASS", "checks": checks, "failed": failures, "warnings": warns,
-            "screenshots": {k: len(v) for k, v in names.items() if k != "creative"},
+            "frames": {**{REQUIRED[p]: 0 for p in platforms}, **{k: len(v) for k, v in names.items() if k != "creative"}},
             "creative": creative_files, "videos": video_facts,
             "rows": [{"path": n, "verdict": v, "detail": d} for n, v, d in rows]}, indent=2) + "\n", encoding="utf-8")
     sys.exit(1 if failures else 0)

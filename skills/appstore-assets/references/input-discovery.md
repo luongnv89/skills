@@ -77,7 +77,10 @@ Record each as `{"src": "…/src", "out": "…", "version": "…"}`; `out` is th
 folder holding the class folders (the parent of `src/` unless `PLAN.md` or the
 class folders say otherwise). A kit set for the same version, under any
 spelling (`1.0` and `1.0.0` are the same version), means the Update branch with
-that `out`, never a second folder. Rendered PNGs with no `src/` are an older,
+that `out`, never a second folder. When two kit sets hold that version (one in
+`store/screenshots/`, one in `appstore-assets/1.0.0/`), ask which one to update; in a
+pre-authorized run, take the one whose `config.js` changed last (`ls -t`) and name
+both under Uncertainty. Rendered PNGs with no `src/` are an older,
 hand-made set: list them as captures, and back the folder up before writing
 into it.
 
@@ -118,9 +121,9 @@ iPad bottom 20, top 24 (0 when the app hides the status bar).
   and save `boundary.toImage(pixelRatio: 3)` as PNG inside `tester.runAsync`.
 - A web build (`flutter build web -t <capture main>` opened in headless Chrome)
   works too, but Flutter web reports no safe area: inject the insets through
-  `MediaQuery`. Size the viewport over CDP, not with `--window-size`: from
-  Chrome 156 headless clamps `--window-size` to a 500 px minimum width, so a
-  402 × 874 `--screenshot` comes out 500 × 787 and clipped on the right. Use
+  `MediaQuery`. Size the viewport over CDP, not with `--window-size`: under
+  Chrome 156, `--screenshot` at a small `--window-size` (402 × 874) came out at
+  the wrong size or clipped on the right in some runs and exact in others. Use
   `Emulation.setDeviceMetricsOverride` (`width: 402, height: 874,
   deviceScaleFactor: 3, mobile: false`, as `render.py`'s video path does), then
   `Page.captureScreenshot`; check the PNG is exactly 1206 × 2622 before using it.

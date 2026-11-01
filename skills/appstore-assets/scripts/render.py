@@ -26,10 +26,12 @@ yuv420p, BT.709, constant frame rate, no audio, +faststart MP4. Videos take
 turns machine-wide: a lock file (~/.cache/appstore-assets/video.lock) makes a
 parallel render wait for the video step instead of competing for the CPU.
 
-Under load Chrome can crash or stop answering. Each Chrome step is retried
-(4 attempts, backoff about 4, 8, 16 s; a video resumes at the frame it lost),
-and after the second failure the run switches to chrome-headless-shell when
-one is installed (PATH, Puppeteer or Playwright caches; macOS and Linux).
+Under load Chrome can crash, stop answering or write a wrong-size screenshot.
+Each Chrome step is retried (4 attempts, backoff about 4, 8, 16 s; a video
+resumes at the frame it lost), and after the second failure the run switches
+to chrome-headless-shell when one is installed (PATH, Puppeteer or Playwright
+caches; macOS and Linux), unless --chrome or $CHROME named the binary. A
+manifest timeout is not retried: it is almost always config.js.
 
 config.js orientation "landscape" renders the iPhone and iPad classes rotated
 (2868 x 1320, 2622 x 1206, 2752 x 2064); Mac is always landscape.
@@ -111,7 +113,7 @@ HEADLESS_SHELL_GLOBS = [
     ".cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell",
 ]
 ATTEMPTS = max(1, int(os.environ.get("APPSTORE_ASSETS_ATTEMPTS", "4")))  # tries per Chrome step
-CHROME_TIMEOUT = 120  # seconds for one screenshot; retries allow twice that, so a real hang fails in about 15 minutes
+CHROME_TIMEOUT = 120  # seconds for one screenshot; retries allow twice that (the manifest is never retried after one)
 
 
 def fail(msg: str, fix: str) -> None:
@@ -132,8 +134,12 @@ def find_chrome(explicit: str | None) -> str:
 
 
 class ChromeCrash(Exception):
-    """Chrome crashed, hung or stopped answering: often machine load, so worth a retry
-    (unlike a config error, a size mismatch or a page script exception, which fail at once)."""
+    """Chrome crashed, hung, stopped answering or wrote a wrong-size image: often machine
+    load, so worth a retry (unlike a config error or a page script exception, which fail at once)."""
+
+
+class ChromeTimeout(ChromeCrash):
+    """Chrome hit the step timeout; for the manifest that points at config.js, not load."""
 
 
 def find_headless_shell() -> str | None:
@@ -150,10 +156,11 @@ def find_headless_shell() -> str | None:
 
 class Runner:
     """Runs Chrome steps with retries and backoff, and switches to chrome-headless-shell
-    after the second failure when one is installed (sticky for the rest of the run)."""
+    after the second failure when one is installed (sticky for the rest of the run),
+    unless the user chose the binary with --chrome or $CHROME."""
 
-    def __init__(self, binary: str):
-        self.binary, self.switched = binary, "headless-shell" in Path(binary).name
+    def __init__(self, binary: str, explicit: bool = False):
+        self.binary, self.switched = binary, explicit or "headless-shell" in Path(binary).name
 
     def backoff(self, attempt: int, err: Exception, what: str) -> None:
         """Wait before attempt + 1, or fail after the last one."""
@@ -188,7 +195,7 @@ def chrome(binary: str, args: list[str], what: str, attempt: int = 1) -> subproc
                                "--virtual-time-budget=5000", *args],
                               check=True, capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
-        raise ChromeCrash(f"Chrome timed out after {timeout} s (an infinite loop or a remote asset in config.js "
+        raise ChromeTimeout(f"Chrome timed out after {timeout} s (an infinite loop or a remote asset in config.js "
                           "also does this; keep every asset local)") from None
     except subprocess.CalledProcessError as e:
         tail = " | ".join((e.stderr or "").strip().splitlines()[-3:])
@@ -397,6 +404,11 @@ def render_video(runner: Runner, tools: tuple[str, str], url: str, spec: dict, v
                     browser.open(url, spec["w"], spec["h"], spec["scale"])
                 browser.eval(f"window.__seek({i / fps!r})")
                 png = browser.capture()
+                if fresh and (size := Image.open(io.BytesIO(png)).size) != (pw, ph):  # each Chrome, the fallback too
+                    if failures + 1 >= ATTEMPTS:
+                        fail(f"{out} frames render at {size[0]}x{size[1]}, expected {pw}x{ph}, on {ATTEMPTS} attempts.",
+                             "do not change the creative stage sizes in kit.js; pass --chrome with a current build.")
+                    raise ChromeCrash(f"the first frame came out {size[0]}x{size[1]}, expected {pw}x{ph}")
             except ChromeCrash as e:
                 if browser:
                     browser.close()
@@ -404,11 +416,6 @@ def render_video(runner: Runner, tools: tuple[str, str], url: str, spec: dict, v
                 failures += 1
                 runner.backoff(failures, e, f"{out.name} frame {i}")
                 continue
-            if fresh:  # the first frame from each Chrome, so a fallback binary is checked too
-                size = Image.open(io.BytesIO(png)).size
-                if size != (pw, ph):
-                    fail(f"{out} frames render at {size[0]}x{size[1]}, expected {pw}x{ph}.",
-                         "do not change the creative stage sizes in kit.js; pass --chrome with a current build.")
             try:
                 enc.stdin.write(png)
             except BrokenPipeError:
@@ -622,8 +629,15 @@ def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made
 
 
 def read_manifest(runner: Runner, index: Path) -> dict:
-    out = runner.run("the manifest", lambda binary, attempt: chrome(binary, ["--dump-dom", f"{index.as_uri()}?manifest=1"],
-                                                                     "the manifest", attempt)).stdout
+    def step(binary: str, attempt: int) -> subprocess.CompletedProcess:
+        try:
+            return chrome(binary, ["--dump-dom", f"{index.as_uri()}?manifest=1"], "the manifest", attempt)
+        except ChromeTimeout as e:  # retrying a config.js hang only delays the answer by about 14 minutes
+            fail(f"the manifest did not finish: {e}",
+                 "look for an infinite loop or a remote URL (font, image) in config.js and keep every asset local; open "
+                 "index.html?manifest=1 in Chrome and check the console. On a heavily loaded machine, re-run when it is quieter.")
+        raise AssertionError("unreachable")
+    out = runner.run("the manifest", step).stdout
     err = re.search(r'id="render-error"[^>]*>(.*?)</div>', out, re.S)
     if err:
         fail(f"config.js failed to load: {html.unescape(err.group(1)).strip()}",
@@ -656,11 +670,14 @@ def shoot(runner: Runner, url: str, w: int, h: int, scale: int, out: Path, expec
                    out.name, attempt)
             if not raw.exists():  # a crash on exit can still report success
                 raise ChromeCrash("Chrome reported success but wrote no screenshot")
-            return Image.open(raw).convert("RGB")  # drops the alpha channel
+            img = Image.open(raw).convert("RGB")  # drops the alpha channel
+            if img.size != expected:  # seen under heavy load, so retried before it is called a real mismatch
+                if attempt < ATTEMPTS:
+                    raise ChromeCrash(f"Chrome wrote {img.size[0]}x{img.size[1]}, expected {expected[0]}x{expected[1]}")
+                fail(f"{out} rendered at {img.size[0]}x{img.size[1]}, expected {expected[0]}x{expected[1]}, on {ATTEMPTS} attempts.",
+                     "do not change the stage sizes in kit.js; if Chrome ignores --window-size, pass --chrome with a current build.")
+            return img
     img = runner.run(out.name, step)
-    if img.size != expected:
-        fail(f"{out} rendered at {img.size[0]}x{img.size[1]}, expected {expected[0]}x{expected[1]}.",
-             "do not change the stage sizes in kit.js; if Chrome ignores --window-size, pass --chrome with a current build.")
     out.parent.mkdir(parents=True, exist_ok=True)  # only now, so a failed shot leaves no empty folder
     img.save(out, optimize=True)
     print(f"ok  {out}  {img.size[0]}x{img.size[1]}")
@@ -713,7 +730,7 @@ def main() -> None:
     if not a.allow_placeholders:
         check_placeholders(config)
 
-    runner = Runner(find_chrome(a.chrome))
+    runner = Runner(find_chrome(a.chrome), explicit=bool(a.chrome or os.environ.get("CHROME")))
     out = (a.out or a.src.resolve().parent).resolve()
     manifest = read_manifest(runner, index)
     orientation = manifest.get("orientation") or {}
@@ -728,12 +745,21 @@ def main() -> None:
         print("Warning: the display font did not load; captions fell back to the system face. "
               "Run fetch_font.py or remove fonts.display from config.js.", file=sys.stderr)
     for f in manifest.get("fit", []):  # kit.js shrank a headline that wrapped past two lines
+        if f.get("pinned"):
+            print(f"note: headline {f['id']}: {f['size']:g} px, pinned by a config.js css rule, wraps to {f['lines']} lines "
+                  "and is not fitted; drop that font-size rule so the kit fits it, or shorten it")
+            continue
         print(f"{'fit ' if f['fits'] else 'WARN:'} headline {f['id']}: {f['base']:g} -> {f['size']:g} px"
               + ("" if f["fits"] else f", still {f['lines']} lines at the 75 % floor; shorten it"))
     for o in manifest.get("outside", []):
         print(f"note: {o['kind']}{' (variant ' + o['variant'] + ')' if o['variant'] else ''}: device slot(s) "
               f"{', '.join(o['slots'])} sit outside Apple's art safe area, so narrow displays crop them; keep the "
               "message in the caption" + (", or set creatives.layout: \"safe\"" if o["kind"] == "header" else ""))
+    for c in manifest.get("capOutside", []):
+        print(f"WARN: {c['kind']}{' (variant ' + c['variant'] + ')' if c['variant'] else ''}"
+              f"{' beat ' + str(c['beat']) if c['beat'] else ''}: caption spans x {c['box'][0]}-{c['box'][2]}, y {c['box'][1]}-"
+              f"{c['box'][3]}, outside Apple's art safe area (x {c['safe'][0]:g}-{c['safe'][2]:g}, y {c['safe'][1]:g}-{c['safe'][3]:g}); "
+              "shorten it, or drop a config.js css rule that pins .cv-cap h1 or p sizes")
     landscape = sorted(p for p, v in orientation.items() if v == "landscape" and p in manifest["platforms"])
     if landscape:
         print(f"ok  orientation: landscape for {', '.join(landscape)}")
