@@ -215,7 +215,7 @@ class ClaudePackagingTests(unittest.TestCase):
                         "/lstack:code-review", "issue-pr-review", "issue-resolver", "dont-make-me-think"):
             self.assertIn(command, doc)
         self.assertIn("lstack-claude-" + adapted["package_version"], doc)
-        self.assertEqual(adapted["package_version"], "0.6.0")
+        self.assertEqual(adapted["package_version"], "0.7.0")
         plugin = json.loads(claude["plugins/lstack/.claude-plugin/plugin.json"][0])
         self.assertNotIn("skills", plugin)  # Root additive paths do not exist in flattened exports.
         market = json.loads(claude[".claude-plugin/marketplace.json"][0])
@@ -224,7 +224,7 @@ class ClaudePackagingTests(unittest.TestCase):
         for flags in [("--check",), ("--target", "claude", "--check"),
                       ("--target", "codex", "--check"), ("--check-plugin-metadata",)]:
             result = json.loads(subprocess.check_output(cmd + list(flags)))
-            self.assertEqual((result["version"], result["skills"]), ("0.6.0", 46))
+            self.assertEqual((result["version"], result["skills"]), ("0.7.0", 46))
         first, second = self.artifact("catalog-one.zip"), self.artifact("catalog-two.zip")
         BUILDER.build(repo, output=first, target="claude")
         BUILDER.build(repo, output=second, target="claude")
@@ -237,7 +237,7 @@ class ClaudePackagingTests(unittest.TestCase):
                 self.assertEqual(codex["plugins/lstack/" + path], value)
         root_doc = (repo / "README.md").read_text()
         for command in ("claude plugin marketplace add luongnv89/skills",
-                        "--write-plugin-metadata", "--check-plugin-metadata", "lstack 0.6.0"):
+                        "--write-plugin-metadata", "--check-plugin-metadata", "lstack 0.7.0"):
             self.assertIn(command, root_doc)
         manifest = json.loads(bundle["manifest.json"][0])
         prerequisites = {p["name"]: p for p in manifest["external_skill_prerequisites"]}
@@ -247,7 +247,7 @@ class ClaudePackagingTests(unittest.TestCase):
 
     def test_root_metadata_projection_and_additive_discovery_exactly_once(self):
         result = BUILDER.sync_plugin_metadata(ROOT)
-        self.assertEqual((result["version"], result["skills"]), ("0.6.0", 46))
+        self.assertEqual((result["version"], result["skills"]), ("0.7.0", 46))
         plugin_root = ROOT / "skills"
         plugin = json.loads((plugin_root / ".claude-plugin/plugin.json").read_bytes())
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_bytes())

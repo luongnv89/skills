@@ -939,9 +939,9 @@
         <path class="hring" d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="currentColor"/>
         <path class="hcard" d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="#00FF41" fill-rule="evenodd"/>
       </svg>
-      <a class="pill fadeup" style="--i:0" href="https://github.com/luongnv89/skills/releases/tag/v4.2.0">
+      <a class="pill fadeup" style="--i:0" href="https://github.com/luongnv89/skills/releases/tag/v4.3.0">
         <span class="led" aria-hidden="true"></span>
-        v4.2.0 · 46 skills · MIT
+        v4.3.0 · 46 skills · MIT
         <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6h7M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <h1 class="fadeup" style="--i:1">Plug in a skill.<br>Your agent knows&nbsp;it<span class="ph">.</span></h1>
@@ -1121,7 +1121,7 @@
           </div>
         </div>
         <p class="asm-note" data-reveal>agent-skill-manager (asm) installs, searches, and audits skills across your agent tools, and scans each skill before it installs. <a href="https://github.com/luongnv89/asm">asm on GitHub ↗</a></p>
-        <p class="asm-note" data-reveal>lstack 0.6.0 downloads: <a href="https://github.com/luongnv89/skills/releases/download/v4.2.0/lstack-0.6.0.zip">standalone bundle</a>, <a href="https://github.com/luongnv89/skills/releases/download/v4.2.0/lstack-claude-0.6.0.zip">Claude Code marketplace</a>, or <a href="https://github.com/luongnv89/skills/releases/download/v4.2.0/lstack-codex-0.6.0.zip">Codex marketplace</a>.</p>
+        <p class="asm-note" data-reveal>lstack 0.7.0 downloads: <a href="https://github.com/luongnv89/skills/releases/download/v4.3.0/lstack-0.7.0.zip">standalone bundle</a>, <a href="https://github.com/luongnv89/skills/releases/download/v4.3.0/lstack-claude-0.7.0.zip">Claude Code marketplace</a>, or <a href="https://github.com/luongnv89/skills/releases/download/v4.3.0/lstack-codex-0.7.0.zip">Codex marketplace</a>.</p>
         <p class="asm-note" data-reveal>For Claude Code, run <code>claude plugin marketplace add luongnv89/skills</code>, then <code>claude plugin install lstack@lstack --scope user</code>. Start a new session and use <code>/lstack:code-review</code>. The <a href="https://github.com/luongnv89/skills/blob/main/packages/lstack/README.md">lstack installation guide</a> covers local marketplaces, Codex setup, and updates.</p>
         <p class="upgrade-note" data-reveal>Upgrading? If you load lstack from a clone with <code>claude --plugin-dir</code>, point it at the clone&rsquo;s <code>skills/</code> folder instead of the repository root. Marketplace installs run <code>claude plugin marketplace update lstack</code>, then <code>claude plugin update lstack@lstack --scope user</code>, and restart Claude Code. ZIP downloads install as before. From v3: install <code>ship</code>, replace <code>/release-manager</code> with <code>/ship</code>, and remove the obsolete installed copy; <code>/ship --no-auto</code> keeps step-by-step confirmations. Earlier changes: <code>herdr-agent-comms</code> is now <code>herdr-agent</code>, and <code>plan-to-issues</code> moved to <a href="https://github.com/luongnv89/idd">luongnv89/idd</a>. From v1, <code>docs-generator</code> is now <code>doc-manager</code>.</p>
         <a class="btn btn-secondary" data-reveal href="https://github.com/luongnv89/skills#install">All install options</a>
@@ -1153,7 +1153,7 @@
           <div class="tile" data-reveal>
             <span class="num">03</span>
             <h3>Versioned</h3>
-            <p>Each skill keeps its own version and changelog. lstack 0.6.0 packages them independently of this catalog release.</p>
+            <p>Each skill keeps its own version and changelog. lstack 0.7.0 packages them independently of this catalog release.</p>
           </div>
           <div class="tile" data-reveal style="--i:1">
             <span class="num">04</span>
@@ -1232,7 +1232,18 @@
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/ship">
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/user-test">
+            <span class="scard-in">
+              <span class="cat">Code Quality</span>
+              <span class="name">user-test</span>
+              <span class="desc">Use your app, API or CLI the way a real user would, log each problem with evidence, and fix the simple ones for your review.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/ship">
             <span class="scard-in">
               <span class="cat">Shipping</span>
               <span class="name">ship</span>
@@ -1243,7 +1254,7 @@
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/security-setup">
+          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/security-setup">
             <span class="scard-in">
               <span class="cat">Shipping</span>
               <span class="name">security-setup</span>
@@ -1254,7 +1265,7 @@
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/github-pages-publish">
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/github-pages-publish">
             <span class="scard-in">
               <span class="cat">Shipping</span>
               <span class="name">github-pages-publish</span>
@@ -1265,7 +1276,7 @@
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/prd-generator">
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/prd-generator">
             <span class="scard-in">
               <span class="cat">Product Planning</span>
               <span class="name">prd-generator</span>
@@ -1276,7 +1287,18 @@
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/logo-designer">
+          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/product-launch">
+            <span class="scard-in">
+              <span class="cat">Product Planning</span>
+              <span class="name">product-launch</span>
+              <span class="desc">Pick the launch sites that fit your product from 50, then get paste-ready posts, pitches and a dated checklist.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/logo-designer">
             <span class="scard-in">
               <span class="cat">Frontend &amp; Design</span>
               <span class="name">logo-designer</span>
@@ -1287,7 +1309,7 @@
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/doc-manager">
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/doc-manager">
             <span class="scard-in">
               <span class="cat">Documentation</span>
               <span class="name">doc-manager</span>
@@ -1298,22 +1320,33 @@
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/appstore-assets">
+          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/appstore-assets">
             <span class="scard-in">
               <span class="cat">App Store</span>
               <span class="name">appstore-assets</span>
-              <span class="desc">Upload-ready App Store screenshots for iPhone, iPad and Mac, showing only what your app ships.</span>
+              <span class="desc">Upload-ready App Store screenshots and looping header videos for iPhone, iPad and Mac, showing only what your app ships.</span>
               <span class="foot">
                 <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                 <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               </span>
             </span>
           </a>
-          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/issue-work-loop">
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/issue-work-loop">
             <span class="scard-in">
               <span class="cat">Tooling</span>
               <span class="name">issue-work-loop</span>
               <span class="desc">Resolve one GitHub issue with an implementer and reviewer loop until the review is clean.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/rex-agent">
+            <span class="scard-in">
+              <span class="cat">Tooling</span>
+              <span class="name">rex-agent</span>
+              <span class="desc">Run a team of coding agents side by side in the Rex terminal, and prompt, wait for and read each one.</span>
               <span class="foot">
                 <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                 <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -1329,23 +1362,23 @@
       <div class="container">
         <div class="section-head" data-reveal>
           <span class="eyebrow">Latest release</span>
-          <h2>v4.2.0: publish to GitHub Pages with a live check, and lstack 0.6.0.</h2>
+          <h2>v4.3.0: test like a real user, plan a launch, and lstack 0.7.0.</h2>
         </div>
         <div class="release-panel" data-reveal>
           <div class="col">
-            <h3>Publish to GitHub Pages</h3>
-            <p>Publish or update a website on GitHub Pages with <code>github-pages-publish</code>. Give it some text, a Markdown file, an HTML page or a folder of ready files, and it hands back the live link only after checking that the site serves what it published.</p>
+            <h3>Test like a real user</h3>
+            <p>Test your app, API or command-line tool the way a real user would with <code>user-test</code>. It explores every feature, records evidence for each problem, and fixes the simple ones for you to review.</p>
           </div>
           <div class="col">
-            <h3>You stay in control</h3>
-            <p>It asks before it creates a public repository, publishes from a private one, turns on GitHub Actions, or replaces a workflow that already builds your site. A dry run shows the plan without changing or pushing anything. Updates record every file they remove and commit only the files that changed.</p>
+            <h3>Plan a launch</h3>
+            <p>Plan a product launch across 50 launch sites and your own channels with <code>product-launch</code>. It hands you ready-to-paste posts, pitches and a dated checklist, and never posts or submits anything for you.</p>
           </div>
           <div class="col">
-            <h3>lstack 0.6.0</h3>
-            <p><code>lstack</code> 0.6.0 adds <code>github-pages-publish</code> and gets its own icon in the Claude Code plugin directory. Download it as one bundle or as a Claude Code or Codex plugin to get every skill in the catalog.</p>
+            <h3>lstack 0.7.0</h3>
+            <p><code>lstack</code> 0.7.0 adds <code>user-test</code>, <code>product-launch</code> and <code>rex-agent</code>, which runs a team of coding agents side by side in the Rex terminal. Download it as one bundle or as a Claude Code or Codex plugin to get all 46 skills.</p>
           </div>
         </div>
-        <a class="btn btn-secondary release-more" data-reveal href="https://github.com/luongnv89/skills/releases/tag/v4.2.0">Read the release notes</a>
+        <a class="btn btn-secondary release-more" data-reveal href="https://github.com/luongnv89/skills/releases/tag/v4.3.0">Read the release notes</a>
       </div>
     </section>
 
@@ -1428,7 +1461,7 @@
           <h4>Project</h4>
           <ul>
             <li><a href="https://github.com/luongnv89/skills">GitHub</a></li>
-            <li><a href="https://github.com/luongnv89/skills/releases/tag/v4.2.0">Release v4.2.0</a></li>
+            <li><a href="https://github.com/luongnv89/skills/releases/tag/v4.3.0">Release v4.3.0</a></li>
             <li><a href="https://github.com/luongnv89/skills/blob/main/CHANGELOG.md">Changelog</a></li>
             <li><a href="https://github.com/luongnv89/skills/blob/main/CONTRIBUTING.md">Contribute</a></li>
           </ul>

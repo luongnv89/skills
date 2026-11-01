@@ -19,14 +19,19 @@ Skills are independent files. Works with Claude Code, Cursor, Windsurf, GitHub C
 
 ---
 
-## What's New in 4.2.0
+## What's New in 4.3.0
 
-This catalog release adds [github-pages-publish](skills/github-pages-publish/), which publishes or updates a static site on GitHub Pages through GitHub Actions in any repo, asks before creating a public repo, publishing from a private one or enabling Actions, and reports the URL only after the live site serves the committed files. Before release, its 1.0.2 stopped deleting just-published pages when a moved site overlaps the old one, learned to rewrite unquoted root-absolute links that minifiers emit, and gained a unit test suite that runs in CI. [lstack](packages/lstack/README.md) 0.6.0 adds it for 43 skills and gives the plugin an icon for its Claude Code plugin directory listing. Eval fixtures move to `eval-fixtures/<skill>/` at the repository root, which keeps the `skills/` plugin folder under the directory's 512-file limit. Individual skills keep their own versions; the catalog release does not reset them to 4.2.0.
+This catalog release adds three skills. [user-test](skills/user-test/) tests an app, API or CLI end to end through its real interface, records evidence for every finding, and fixes simple and medium findings behind checkpoints that a fresh verifier confirms, leaving the fixes uncommitted. [product-launch](skills/product-launch/) scores 50 launch sites for your product, checks each shortlisted site's live submit, pricing and rules pages, and after you approve the plan writes paste-ready posts, pitches and a dated checklist; it never signs up, submits, votes, pays or posts for you. [rex-agent](skills/rex-agent/) brings herdr-agent's fleet workflow to the Rex terminal. Every skill also gains an optional, propose-only `## Self-Improve` check that suggests one edit to itself when a run shows a lasting mismatch with how you work, and changes nothing until you say yes. [devops-pipeline](skills/devops-pipeline/) now sets up and audits fast CI at no extra cost, [appstore-assets](skills/appstore-assets/) renders the looping App Store header and search videos and landscape sets, [landing-page-generator](skills/landing-page-generator/) ends with a built static site and its Privacy, Terms, Changelog and Docs pages, and [appstore-review-checker](skills/appstore-review-checker/) follows Apple's App Review Guidelines of October 16, 2026. [lstack](packages/lstack/README.md) 0.7.0 adds the three new skills for 46. Individual skills keep their own versions; the catalog release does not reset them to 4.3.0.
 
-**Upgrading from 4.1.0:**
+**Upgrading from 4.2.0:**
 
-- Add the new skill: `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill github-pages-publish`. Skills you already installed are unchanged.
-- If you installed lstack from this repository's marketplace, run `claude plugin marketplace update lstack`, then `claude plugin update lstack@lstack --scope user`, and restart Claude Code to get 0.6.0. ZIP users download `lstack-0.6.0.zip`, `lstack-claude-0.6.0.zip` or `lstack-codex-0.6.0.zip` from the [v4.2.0 release](https://github.com/luongnv89/skills/releases/tag/v4.2.0) and install them as before.
+- Add the new skills: `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill user-test --skill product-launch --skill rex-agent`. Skills you already installed are unchanged; reinstall them to get the `## Self-Improve` section and the other updates.
+- If you installed lstack from this repository's marketplace, run `claude plugin marketplace update lstack`, then `claude plugin update lstack@lstack --scope user`, and restart Claude Code to get 0.7.0. ZIP users download `lstack-0.7.0.zip`, `lstack-claude-0.7.0.zip` or `lstack-codex-0.7.0.zip` from the [v4.3.0 release](https://github.com/luongnv89/skills/releases/tag/v4.3.0) and install them as before.
+- Contributors: the `skills/` plugin folder now holds 512 files, the plugin directory's limit, so a change that adds a file under `skills/` must merge or remove another one (eval fixtures still go in `eval-fixtures/<skill>/`; see [CONTRIBUTING.md](CONTRIBUTING.md)).
+
+**Earlier upgrade guidance (from 4.1.0):**
+
+- Add github-pages-publish: `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill github-pages-publish`.
 - Contributors: put eval input fixtures in `eval-fixtures/<skill>/`, never under `skills/`, and point `evals/evals.json` `files` entries at `../../eval-fixtures/<skill>/` (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 **Earlier upgrade guidance (from 4.0.0):**
@@ -56,7 +61,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 
 ### lstack: direct Claude Code plugin
 
-[lstack 0.6.0](packages/lstack/README.md) packages the canonical `skills/` tree as one
+[lstack 0.7.0](packages/lstack/README.md) packages the canonical `skills/` tree as one
 Claude Code plugin: 44 top-level definitions plus the two nested diagram-generator
 children, **46** namespaced skills in total. `skills/` is the plugin folder; the root
 marketplace points at it.

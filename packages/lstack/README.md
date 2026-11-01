@@ -1,6 +1,6 @@
 # lstack
 
-**lstack 0.6.0** exposes this repository's maintained first-party Agent Skills
+**lstack 0.7.0** exposes this repository's maintained first-party Agent Skills
 as a native Claude Code plugin directly from the canonical `skills/` tree, which
 is itself the plugin folder.
 Optional platform-neutral, Claude and Codex ZIP exports remain available. It is
@@ -90,7 +90,7 @@ member becomes a separately discoverable `skills/<name>/SKILL.md` directory;
 the exported umbrella excludes the children's subtrees to avoid duplication.
 
 Exported files keep their original bytes and Git executable modes: `SKILL.md`,
-references, scripts, agents, assets and human-facing docs. Package version 0.6.0
+references, scripts, agents, assets and human-facing docs. Package version 0.7.0
 is independent of both the catalog release and member versions. Generated
 `provenance.json` records the full source commit, manifest/builder SHA-256,
 original member versions, and source/destination/hash/mode for every member file.
@@ -120,7 +120,7 @@ python3 scripts/build-lstack.py --check
 python3 scripts/build-lstack.py
 ```
 
-The default output is `dist/lstack-0.6.0.zip` (ignored by Git). The JSON result
+The default output is `dist/lstack-0.7.0.zip` (ignored by Git). The JSON result
 prints the exact commit, skill/file counts, output path and archive SHA-256.
 Inputs come **entirely from the selected committed Git tree**, never from local
 edits or installed skills. Commit intended packaging/member changes before
@@ -148,14 +148,14 @@ Inspect and extract a **trusted, locally built** archive into a new staging
 folder, not directly over an existing agent installation:
 
 ```bash
-python3 -m zipfile -l dist/lstack-0.6.0.zip
-python3 -m zipfile -e dist/lstack-0.6.0.zip /tmp/lstack-staging
+python3 -m zipfile -l dist/lstack-0.7.0.zip
+python3 -m zipfile -e dist/lstack-0.7.0.zip /tmp/lstack-staging
 ```
 
 Layout:
 
 ```text
-lstack-0.6.0/
+lstack-0.7.0/
   README.md
   LICENSE
   manifest.json
@@ -173,7 +173,7 @@ and its relative resources to a skill-capable agent, or manually install the
 **whole member directory** at that agent's documented skill location. For the
 existing member preflights this is commonly `~/.claude/skills/<name>/` or
 `~/.agents/skills/<name>/`. Review any existing copy and back it up before
-replacing it; don't nest the entire `lstack-0.6.0` directory as one skill. For
+replacing it; don't nest the entire `lstack-0.7.0` directory as one skill. For
 example, after installing `code-review`, ask the agent to review the target
 repository using that skill and verify it loaded the intended definition.
 There is no `/lstack` entry point or automatic dependency installation.
@@ -194,8 +194,8 @@ register its marketplace. The following uses ignored `dist/` under the clone:
 ```bash
 python3 scripts/build-lstack.py --target claude --check
 python3 scripts/build-lstack.py --target claude
-python3 -m zipfile -e dist/lstack-claude-0.6.0.zip dist/claude-staging
-marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.6.0"
+python3 -m zipfile -e dist/lstack-claude-0.7.0.zip dist/claude-staging
+marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.7.0"
 plugin="$marketplace/plugins/lstack"
 claude plugin validate "$plugin"
 claude plugin validate "$marketplace"
@@ -206,10 +206,10 @@ files. The result JSON reports `marketplace_root` and `plugin_root` relative to
 the extraction directory. Its layout is:
 
 ```text
-lstack-claude-0.6.0/
+lstack-claude-0.7.0/
   .claude-plugin/marketplace.json   # lstack, source ./plugins/lstack
   plugins/lstack/
-    .claude-plugin/plugin.json     # name lstack, version 0.6.0
+    .claude-plugin/plugin.json     # name lstack, version 0.7.0
     .claude-plugin/icon.png        # plugin directory listing icon
     README.md
     LICENSE
@@ -312,8 +312,8 @@ committed inputs, never selected by the installed Codex version.
 ```bash
 python3 scripts/build-lstack.py --target codex --check
 python3 scripts/build-lstack.py --target codex
-python3 -m zipfile -e dist/lstack-codex-0.6.0.zip dist/codex-staging
-marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.6.0"
+python3 -m zipfile -e dist/lstack-codex-0.7.0.zip dist/codex-staging
+marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.7.0"
 codex plugin marketplace add "$marketplace"
 codex plugin marketplace list
 codex
@@ -335,10 +335,10 @@ codex plugin list --json --marketplace lstack-local
 The generated archive is self-contained:
 
 ```text
-lstack-codex-0.6.0/
+lstack-codex-0.7.0/
   .agents/plugins/marketplace.json  # lstack-local
   plugins/lstack/
-    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.6.0
+    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.7.0
     README.md
     LICENSE
     manifest.json
