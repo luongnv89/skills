@@ -819,6 +819,9 @@ jobs:
 
     strategy:
       matrix:
+        # Public repos: both OSes, free. Private repos: macOS minutes bill at
+        # about 10x Linux, so generate `os: [ubuntu-latest]`, and when macOS
+        # matters, a separate macOS job on release tags or a nightly schedule.
         os: [ubuntu-latest, macos-latest]
         rust: [stable, beta]
 
@@ -933,7 +936,7 @@ jobs:
 
 ## Multi-language
 
-For monorepos, use path filters to only run relevant jobs:
+For monorepos, use path filters to set up only the toolchains a pull request needs:
 
 ```yaml
 name: CI
@@ -951,31 +954,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      frontend: ${{ steps.changes.outputs.frontend }}
-      backend: ${{ steps.changes.outputs.backend }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            frontend:
-              - 'frontend/**'
-            backend:
-              - 'backend/**'
-
   # ONE guard job, not one per language. A hook set is a single config: splitting
   # the guard across per-language jobs makes each one run every hook, so the
   # backend job would try to execute the eslint hook with no Node toolchain.
   # Per-language `files:` filters in .pre-commit-config.yaml already do the
-  # scoping; the paths-filter below decides which BUILD jobs run, not which
-  # hooks do. `files:` does not change cwd: Node entries must `--prefix frontend`.
+  # scoping; the paths-filter step below decides which toolchains this job sets
+  # up, not which hooks run. `files:` does not change cwd: Node entries must
+  # `--prefix frontend`.
   hooks:
-    needs: changes
     name: Verify hooks were not bypassed
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -986,18 +972,30 @@ jobs:
           fetch-depth: 0
           filter: blob:none
 
+      # A step, not a separate `changes` job: that job would bill its own
+      # rounded minute on every private run. On pull requests the filter reads
+      # the changed files from the REST API.
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
       # Toolchains `language: system` hooks shell out to. Gate Node on the
       # frontend filter: `cache: npm` requires a lockfile, and this template's
       # lives at `frontend/package-lock.json`, not the repo root — a backend-only
       # PR would otherwise fail the guard with "Dependencies lock file is not found".
       - name: Setup Node.js
-        if: needs.changes.outputs.frontend == 'true'
+        if: steps.changes.outputs.frontend == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-      - if: needs.changes.outputs.frontend == 'true'
+      - if: steps.changes.outputs.frontend == 'true'
         working-directory: frontend
         run: npm ci
 
@@ -1005,7 +1003,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - if: needs.changes.outputs.backend == 'true'
+      - if: steps.changes.outputs.backend == 'true'
         run: pip install -e "backend/[dev]"
 
       - name: Run both hook stages over the PR diff
@@ -1017,10 +1015,11 @@ jobs:
 
   # The per-language jobs carry CI-lane work only — a version matrix. They must not
   # re-run the test suite at a single version: the pre-push hook already did that,
-  # and duplicating it here is exactly what the routing table forbids.
+  # and duplicating it here is exactly what the routing table forbids. They run on
+  # every merge, whichever language changed, since gating them would need the
+  # separate `changes` job again.
   frontend:
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true' && github.event_name == 'push'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -1042,8 +1041,7 @@ jobs:
         run: npm run build
 
   backend:
-    needs: changes
-    if: needs.changes.outputs.backend == 'true' && github.event_name == 'push'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -1058,6 +1056,8 @@ jobs:
       - run: pip install -e "backend/[dev]"
       - run: pytest -q
 ```
+
+When most merges touch only one language, move each language's matrix into its own workflow with `on: push: paths: ['frontend/**']`. A push-only workflow is never a required pull request check, so its path filter cannot leave a check Pending.
 
 ---
 
