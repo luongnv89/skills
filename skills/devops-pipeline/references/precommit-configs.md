@@ -99,11 +99,13 @@ repos:
 
       # Full test suite on push while it fits the 60-second budget. Past that,
       # swap in the affected-tests hook below (see "Fast test runs").
+      # always_run: a deletion-only push passes no file, and would skip it.
       - id: test-full
         name: full test suite
         entry: npm test
         language: system
         pass_filenames: false
+        always_run: true
         stages: [pre-push]
 
       # - id: test-affected
@@ -111,6 +113,7 @@ repos:
       #   entry: bash scripts/affected-tests.sh
       #   language: system
       #   pass_filenames: false
+      #   always_run: true
       #   stages: [pre-push]
 
       # The build on push: the matrix runs on the default branch only, so
@@ -186,12 +189,14 @@ repos:
 
       # Full suite (unit + integration) on push. `-n auto` needs pytest-xdist
       # in the dev extras (see the note below): one worker per available CPU
-      # (physical cores when psutil is installed).
+      # (physical cores when psutil is installed). always_run: a deletion-only
+      # push passes no file, and would skip it.
       - id: pytest-full
         name: pytest full suite
         entry: pytest -n auto --tb=short -q
         language: system
         pass_filenames: false
+        always_run: true
         stages: [pre-push]
 
       # CLI E2E tests on push (if this is a CLI tool)
@@ -273,12 +278,13 @@ repos:
         exclude: (^|/)(testdata|vendor)/
         require_serial: true
 
-      # Full tests (including integration) on push
+      # Full tests (including integration) on push, deletion-only pushes too
       - id: go-test-full
         name: go full test suite
         entry: go test -race ./...
         language: system
         pass_filenames: false
+        always_run: true
         stages: [pre-push]
 
       # CLI E2E on push (if this is a CLI tool)
@@ -335,12 +341,13 @@ repos:
         types: [rust]
         pass_filenames: false
 
-      # All tests (unit + integration + doc tests) on push
+      # All tests (unit + integration + doc tests) on push, deletion-only pushes too
       - id: cargo-test-full
         name: cargo full test suite
         entry: cargo test --all-features
         language: system
         pass_filenames: false
+        always_run: true
         stages: [pre-push]
 
       # CLI E2E on push (if this is a CLI tool)
@@ -396,12 +403,13 @@ repos:
         types: [java]
         pass_filenames: false
 
-      # Full tests on push
+      # Full tests on push, deletion-only pushes too
       - id: test-full
         name: full test suite
         entry: mvn test -q
         language: system
         pass_filenames: false
+        always_run: true
         stages: [pre-push]
 ```
 
@@ -451,6 +459,9 @@ repos:
         files: ^frontend/.*\.(js|jsx|ts|tsx|mjs|cjs|mts|cts)$
         require_serial: true
 
+      # No always_run on the push suites here: it would override `files:`, so a
+      # backend-only push would run the frontend suite too. The path-filtered
+      # default-branch matrices catch what a deletion-only change breaks.
       - id: test-full
         name: frontend full test suite
         entry: npm --prefix frontend test
@@ -542,11 +553,11 @@ A line in AGENTS.md such as "run lint and typecheck before pushing" is advice. A
 
 The commit-stage unit hook keeps `pass_filenames` on, so it gets the staged files, and runs only the tests related to them. In the CI guard's `--from-ref`/`--to-ref` run the same hook gets the files changed in the pull request, so its repeat of the unit tests shrinks to the diff, and no hook id goes into `SKIP`. The push stage still runs the whole suite (or `scripts/affected-tests.sh` past the 60-second budget), locally and in the guard: it is the gate, and the commit hook is fast feedback. So the commit hook exits 0 when nothing is related, while `affected-tests.sh` fails closed, because the default-branch run is the only thing behind it.
 
-- **Deletion-only changes.** When a change only deletes the files in a hook's scope, no file reaches that hook. pre-commit then skips the commit hook and the push-stage full suite too (`pass_filenames: false` without `always_run` reports `(no files to check)`), so what a deletion breaks is caught by the default-branch full run, not by the hooks. The Minimal workflow without affected-test selection has no default-branch run, so there nothing catches it until the next change that touches a file; add the `full` job if deletions matter.
+- **Deletion-only changes.** pre-commit passes no deleted file to a hook, so when a change deletes the only files in a hook's scope, every hook without `always_run` reports `(no files to check)` and is skipped, the commit hook included. The push-stage suite of the JS/TS, Python, Go, Rust, and Java templates has `always_run: true`, so it still runs, on `git push` and in the guard's push stage (the Minimal workflow's too), and fails on what the deletion broke. `scripts/affected-tests.sh` runs the whole suite when the diff deletes code, so removing dead code passes. `always_run` also runs the suite over an empty range; a docs-only push already ran it, since it has no `files:` filter. Multi-language leaves `always_run` off: it overrides `files: ^frontend/`, so a backend-only push would also run the frontend suite (twice the push time, and more billed guard minutes on a private repository), and the guard skips `npm ci` for it. There, a deletion-only change is caught after merge by that language's path-filtered default-branch matrix. Type-check and build hooks still skip a deletion-only change: a deleted module that only an `import type` uses passes until the next change.
 - **`require_serial: true` on every related-test hook.** Without it, pre-commit splits the file list into parallel runs: on a 2-CPU machine a five-file diff started two Vitest runs, and one test file ran in both.
 - **Budget.** A commit to a module that most tests import selects most of the suite. When the related run passes 10 seconds, move the hook to `pre-push`, as for any commit-stage check.
 
-| Language | Hook | Selects | Misses (caught by the push stage or the default-branch full run, except where noted; Minimal has no default-branch run unless it selects affected tests) |
+| Language | Hook | Selects | Misses (caught by the push-stage suite, which runs on deletion-only changes too, or, past the push budget, by `affected-tests.sh`'s full run on deletions and the default-branch full run; in Multi-language a deletion-only change waits for that language's default-branch matrix) |
 |---|---|---|---|
 | JS/TS | `vitest related --run --passWithNoTests --no-fsModuleCache` | Tests whose static imports reach a staged file | Dynamic `import()`, files read at run time, changes the `files:` filter drops, deleted modules |
 | Python | `scripts/related-tests.py` (below) | Changed test files; `test_<module>.py` and `<module>_test.py` for a changed module; the whole test directory for a `conftest.py` | Tests that reach a module through another one or are named differently, deleted modules, data files |
@@ -605,13 +616,14 @@ Checked with pre-commit 4.7.0, Vitest 5.0.5, pytest 9.2.0, and Go 1.27.3. In eac
 
 ### Affected tests on push and in the CI guard (Vitest)
 
-Use it when the whole suite no longer fits the 60-second push budget. pre-commit exports `PRE_COMMIT_FROM_REF` and `PRE_COMMIT_TO_REF` to hooks on `pre-push`, and in the CI guard's `--from-ref`/`--to-ref` run. This script runs only the tests that range affects, runs everything when there is no range, and fails closed:
+Use it when the whole suite no longer fits the 60-second push budget. pre-commit exports `PRE_COMMIT_FROM_REF` and `PRE_COMMIT_TO_REF` to hooks on `pre-push`, and in the CI guard's `--from-ref`/`--to-ref` run. This script runs only the tests that range affects, runs everything when there is no range or the range deletes code, and fails closed. Its hook keeps `always_run: true`, as in the JS/TS template:
 
 ```bash
 #!/usr/bin/env bash
 # scripts/affected-tests.sh: run the tests a push or PR affects, and fail closed.
 # `vitest run --changed` exits 0 when it selects nothing, so a broken selection
-# would otherwise report green with zero tests.
+# would otherwise report green with zero tests. --no-fsModuleCache: a stale
+# on-disk module cache selects too few tests.
 set -euo pipefail
 # Paths that may change without selecting a test. Everything else is code.
 skip_re='^(docs/|\.github/)|\.md$'
@@ -620,20 +632,26 @@ to="$(git rev-parse "${PRE_COMMIT_TO_REF:-HEAD}")"
 # No range (a push that includes the root commit, the default-branch --all-files run),
 # or a push of a branch other than the checked-out one: run everything.
 if [ -z "$base" ] || [ "$to" != "$(git rev-parse HEAD)" ]; then
-  exec npx vitest run
+  exec npx vitest run --no-fsModuleCache
 fi
-code_changed="$(git diff --name-only "$base" "$to" | grep -Ev "$skip_re" || true)"
-selected="$(npx vitest list --changed "$base" --filesOnly | wc -l)"
+# A deleted (or renamed) code file selects no test, and what it breaks may
+# import it from anywhere: run everything.
+deleted="$(git diff --name-only --no-renames --diff-filter=D "$base" "$to" | grep -Ev "$skip_re" || true)"
+if [ -n "$deleted" ]; then
+  exec npx vitest run --no-fsModuleCache
+fi
+code_changed="$(git diff --name-only --diff-filter=d "$base" "$to" | grep -Ev "$skip_re" || true)"
+selected="$(npx vitest list --changed "$base" --filesOnly --no-fsModuleCache | wc -l)"
 if [ -n "$code_changed" ] && [ "$selected" -eq 0 ]; then
   echo "affected-tests: these changed files selected no test:" >&2
   echo "$code_changed" >&2
   echo "Add a test that imports them, add them to forceRerunTriggers, or extend skip_re." >&2
   exit 1
 fi
-exec npx vitest run --changed "$base" --passWithNoTests
+exec npx vitest run --changed "$base" --passWithNoTests --no-fsModuleCache
 ```
 
-`skip_re` lists what may be skipped, never what must run: a new directory or config file counts as code until someone adds it. Verified with Vitest 5.0.5: a change to an untested module selects no test and `vitest run --changed` exits 0 (the script exits 1 instead), and a tsconfig-only change selects no test unless tsconfig files are in `forceRerunTriggers`. The script catches an empty selection, not a partial one (untracked local test files also count as changed for Vitest); the default-branch full run catches the rest. Monorepos use `nx affected` or `turbo run test --affected` the same way; see [github-actions.md](github-actions.md#affected-only-on-pull-requests-full-suite-on-the-default-branch).
+`skip_re` lists what may be skipped, never what must run: a new directory or config file counts as code until someone adds it. Verified with Vitest 5.0.5: a change to an untested module selects no test and `vitest run --changed` exits 0 (the script exits 1 instead), and a tsconfig-only change selects no test unless tsconfig files are in `forceRerunTriggers`. The script catches an empty selection, not a partial one (untracked local test files also count as changed for Vitest); the default-branch full run catches the rest. Checked again with pre-commit 4.7.0 and Vitest 5.0.5 under a stale module cache (a suite run while `src/math.ts` was missing): with the cache on, `vitest list --changed` selected 2 of the 3 affected test files and a broken `math.ts` passed; with `--no-fsModuleCache` it selected all 3 and the push failed. Deleting an imported module fails the push, and deleting dead code runs the whole suite and passes. Monorepos use `nx affected` or `turbo run test --affected` the same way; see [github-actions.md](github-actions.md#affected-only-on-pull-requests-full-suite-on-the-default-branch).
 
 ### Vitest: `isolate: false`
 
@@ -924,6 +942,6 @@ Fetched 2026-11-01; tool versions move fast, so re-check before changing a templ
 - pytest-xdist distribution modes and `-n auto`/`-n logical`: https://pytest-xdist.readthedocs.io/en/stable/distribution.html
 - ty (Astral, beta): https://github.com/astral-sh/ty
 - Pyrefly (Meta, 1.4.0): https://github.com/facebook/pyrefly
-- pre-commit (`PRE_COMMIT_FROM_REF`/`PRE_COMMIT_TO_REF`, `pass_filenames`, `require_serial`, `--from-ref`/`--to-ref` files): https://pre-commit.com/
+- pre-commit (`PRE_COMMIT_FROM_REF`/`PRE_COMMIT_TO_REF`, `pass_filenames`, `require_serial`, `always_run`: "this hook will run even if there are no matching files", `--from-ref`/`--to-ref` files): https://pre-commit.com/
 - Python template hook revs, each the latest release or tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest` (tags sorted by version where a repo publishes no releases), hook ids checked in each rev's `.pre-commit-hooks.yaml`: `astral-sh/ruff-pre-commit` v0.17.3 (`ruff-check`, `ruff-format`, and `ruff` as a legacy alias), `pre-commit/mirrors-mypy` v2.4.1 (`mypy`), `PyCQA/bandit` 1.9.4 (`bandit`), `psf/black` 26.10.1 (`black`), `pycqa/isort` 9.0.2 (`isort`); `pre-commit/pre-commit-hooks` v6.0.0 is still the latest
 - mypy 2.0 release notes (`--local-partial-types` and `--strict-bytes` on by default), fetched 2026-11-01: https://github.com/python/mypy/blob/master/CHANGELOG.md
