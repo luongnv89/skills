@@ -295,7 +295,7 @@ Under load, `render.py` retries Chrome crashes (falling back to `chrome-headless
 take turns machine-wide: `waiting for the video lock` is not a hang. It also fails on unknown icons, missing images, caption contrast below 3:1
 (headline) or 4.5:1 (supporting line), and a video beat held shorter than its caption needs;
 it removes the PNGs and videos it wrote that the config dropped (unless changed since), and warns about (but keeps) other files in `creative/`
-(a hand-made file the config still lists is overwritten: see Troubleshooting above). Videos render last and are slow (about a
+(a hand-made file the config still lists is overwritten: see *What render.py does and why* above). Videos render last and are slow (about a
 second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes each video and fails a blank frame or a loop-seam jump;
 with `--sheet` it writes `sheets/video-<kind>.png`.
 

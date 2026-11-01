@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.3.0
+  version: 3.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -91,7 +91,7 @@ python3 "$here/launch_profile.py" --root-pane "$root_pane" \
   --main-model "$main_model" --main-thinking "$main_thinking" >/dev/null
 ```
 
-Set `main_model` and `main_thinking`, then relay the summary to the user before the first split: `references/launch-profile.md` → _Relay the profile before the first split_.
+Set `main_model` and `main_thinking`, then relay the summary to the user before the first split: `references/launch-profile.md` → _Relay the profile before the first split_. If the user already declined bypass for this run, pass `--without bypass` on every worker.
 
 Use the canonical `spawn_sub` workflow in `references/herdr-recipes.md`:
 
