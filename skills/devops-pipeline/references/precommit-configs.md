@@ -90,7 +90,7 @@ repos:
       # diff's files); see "Related tests on commit".
       - id: test-unit
         name: unit tests (related to changed files)
-        entry: npx vitest related --run --passWithNoTests
+        entry: npx vitest related --run --passWithNoTests --no-fsModuleCache
         language: system
         files: \.(js|jsx|ts|tsx|mjs|cjs|mts|cts)$
         require_serial: true
@@ -259,7 +259,7 @@ repos:
       # the PR diff's packages); see "Related tests on commit".
       - id: go-test-unit
         name: go unit tests (changed packages)
-        entry: bash -c 'dirs=(); for f in "$@"; do dirs+=("./$(dirname "$f")"); done; pkgs=$(go list -e -f "{{if or .GoFiles .TestGoFiles .XTestGoFiles}}{{.ImportPath}}{{end}}" "${dirs[@]}"); [ -z "$pkgs" ] || xargs go test -short <<< "$pkgs"' --
+        entry: bash -c 'dirs=(); for f in "$@"; do dirs+=("./$(dirname "$f")"); done; pkgs=$(go list -e -f "{{if or .GoFiles .TestGoFiles .XTestGoFiles}}{{.ImportPath}}{{end}}" "${dirs[@]}") || exit; [ -z "$pkgs" ] || xargs go test -short <<< "$pkgs"' --
         language: system
         types: [go]
         exclude: (^|/)(testdata|vendor)/
@@ -432,7 +432,7 @@ repos:
       # Vitest resolves `related` paths against its root, so strip `frontend/`.
       - id: test-unit
         name: frontend unit tests (related to changed files)
-        entry: bash -c 'cd frontend && npx vitest related --run --passWithNoTests "${@#frontend/}"' --
+        entry: bash -c 'cd frontend && npx vitest related --run --passWithNoTests --no-fsModuleCache "${@#frontend/}"' --
         language: system
         files: ^frontend/.*\.(js|jsx|ts|tsx|mjs|cjs|mts|cts)$
         require_serial: true
@@ -528,18 +528,21 @@ A line in AGENTS.md such as "run lint and typecheck before pushing" is advice. A
 
 The commit-stage unit hook keeps `pass_filenames` on, so it gets the staged files, and runs only the tests related to them. In the CI guard's `--from-ref`/`--to-ref` run the same hook gets the files changed in the pull request, so its repeat of the unit tests shrinks to the diff, and no hook id goes into `SKIP`. The push stage still runs the whole suite (or `scripts/affected-tests.sh` past the 60-second budget), locally and in the guard: it is the gate, and the commit hook is fast feedback. So the commit hook exits 0 when nothing is related, while `affected-tests.sh` fails closed, because the default-branch run is the only thing behind it.
 
+- **Deletion-only changes.** A commit or pull request that only deletes files passes no file to any hook. pre-commit then skips the commit hook and the push-stage full suite too (`pass_filenames: false` without `always_run` reports `(no files to check)`), so what a deletion breaks is caught by the default-branch full run, not by the hooks.
 - **`require_serial: true` on every related-test hook.** Without it, pre-commit splits the file list into parallel runs: on a 2-CPU machine a five-file diff started two Vitest runs, and one test file ran in both.
 - **Budget.** A commit to a module that most tests import selects most of the suite. When the related run passes 10 seconds, move the hook to `pre-push`, as for any commit-stage check.
 
-| Language | Hook | Selects | Misses (the push-stage full suite catches them) |
+| Language | Hook | Selects | Misses (caught by the push stage or the default-branch full run, except where noted) |
 |---|---|---|---|
-| JS/TS | `vitest related --run --passWithNoTests` | Tests whose static imports reach a staged file | Dynamic `import()`, files read at run time, changes the `files:` filter drops |
+| JS/TS | `vitest related --run --passWithNoTests --no-fsModuleCache` | Tests whose static imports reach a staged file | Dynamic `import()`, files read at run time, changes the `files:` filter drops, deleted modules |
 | Python | `scripts/related-tests.py` (below) | Changed test files; `test_<module>.py` and `<module>_test.py` for a changed module; the whole test directory for a `conftest.py` | Tests that reach a module through another one or are named differently, deleted modules, data files |
-| Go | `go test -short` on the changed files' directories that hold a package for this build | The changed packages' own tests (Go drops duplicate package arguments) | Packages that import a changed package; directories with no package for this build (all files behind a build tag, a nested module) are skipped, not failed |
+| Go | `go test -short` on the changed files' directories that hold a package for this build | The changed packages' own tests (Go drops duplicate package arguments) | Packages that import a changed package; deleted files; directories with no package for this build (all files behind a build tag) are skipped, not failed. A nested module is skipped here and `go test ./...` never enters it either, so give it its own hook or CI step |
 | Rust, Java | Whole suite | — | Nothing. Cargo builds and tests the whole crate; Maven compiles the whole module first; mapping files to `-p` crates or `-Dtest` classes is not simple enough to be correct, so these stay whole until they pass 10 seconds. They run only when a Rust or Java file changed. |
 
 - **Vitest.** The `files:` filter passes only JS/TS files: `README.md` alone selects nothing, and `package.json` is one of Vitest's `forceRerunTriggers`, which would run the whole suite on commit. A `vitest.config.*` change still runs everything, which is right for a config change. Vitest 5.0.5 already defaults `related` to `passWithNoTests`; the flag keeps that explicit.
+- **Module cache.** Vitest 5 caches transformed modules on disk by default (`fsModuleCache`, in `node_modules/.vitest-cache`). After a run while an imported module was missing (a checkout of a branch that deletes it, then a switch back), the cached graph no longer links that module to its tests: `related` selects nothing and the hook passes a commit whose tests fail. `--no-fsModuleCache` makes the hook build the graph fresh.
 - **Paths.** Vitest resolves `related` paths against its root. In a subdirectory package, `--root frontend frontend/src/x.ts` selects no test and exits 0; the Multi-language template runs `cd frontend` and strips the prefix instead.
+- **`--tests`.** Set it to the repo's real unit-test directory (`tests/unit` is only the default). The script fails when that directory is missing, so a flat `tests/` layout can't silently select nothing.
 - **Why not pytest-testmon.** It selects tests from a coverage database (`.testmondata`) that only a prior full `--testmon` run creates. The guard starts without one, so the CI repeat would stay the whole suite. It also ignores the file list pre-commit passes. Locally it is a free option; add `.testmondata` to `.gitignore`.
 
 ```python
@@ -560,6 +563,8 @@ args = sys.argv[1:]
 tests = Path("tests/unit")
 if args[:1] == ["--tests"]:
     tests, args = Path(args[1]), args[2:]
+if not tests.is_dir():
+    sys.exit(f"related-tests: {tests} not found; pass --tests <the unit test directory>")
 
 selected = set()
 for f in map(Path, args):
@@ -898,7 +903,7 @@ Fetched 2026-11-01; tool versions move fast, so re-check before changing a templ
 - Vitest `forceRerunTriggers` (defaults; full run with `--changed`): https://vitest.dev/config/forcereruntriggers
 - Vitest `restoreMocks` (async concurrent caveat): https://vitest.dev/config/restoremocks
 - Vitest improving performance (pools, isolation, sharding): https://vitest.dev/guide/improving-performance
-- Vitest CLI (`vitest related`: static imports only, paths relative to the root, `--run`; `--passWithNoTests`): https://vitest.dev/guide/cli
+- Vitest CLI (`vitest related`: static imports only, paths relative to the root, `--run`; `--passWithNoTests`; `--no-fsModuleCache`): https://vitest.dev/guide/cli
 - pytest-testmon (`.testmondata`, needs a full `--testmon` run before it can select): https://testmon.org/
 - pytest-xdist distribution modes and `-n auto`/`-n logical`: https://pytest-xdist.readthedocs.io/en/stable/distribution.html
 - ty (Astral, beta): https://github.com/astral-sh/ty
