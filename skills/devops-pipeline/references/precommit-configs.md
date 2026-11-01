@@ -12,6 +12,7 @@ pre-commit migrate-config
 
 ## Table of Contents
 
+- [Tool selection by language](#tool-selection-by-language)
 - [JavaScript/TypeScript](#javascripttypescript)
 - [Python](#python)
 - [Go](#go)
@@ -24,6 +25,18 @@ pre-commit migrate-config
 - [CLI End-to-End Testing](#cli-end-to-end-testing)
 - [Common Options](#common-options)
 - [Sources](#sources)
+
+## Tool selection by language
+
+| Language | Formatter | Linter | Type Check | Security | Tests |
+|----------|-----------|--------|------------|----------|-------|
+| JS/TS | Prettier | Oxlint (+ ESLint for rules it lacks) | tsc 7 (benchmark `bun check`, `tsrs`) | npm audit | Vitest |
+| Python | Ruff/Black | Ruff | mypy (benchmark Pyrefly, ty) | Bandit + detect-secrets | pytest + pytest-xdist (a dev dependency) |
+| Go | gofmt | golangci-lint | built-in | gosec | go test |
+| Rust | rustfmt | Clippy | built-in | cargo-audit | cargo test |
+| Java | google-java-format | Checkstyle | - | SpotBugs | mvn test |
+
+Lanes come from the SKILL's Check Routing Table; do not re-split them here.
 
 ## JavaScript/TypeScript
 

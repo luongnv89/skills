@@ -56,3 +56,17 @@ A run's final report passes review when a reader can:
 4. **See the next decision** — `Decision:` names the approval needed, or states `No approval needed.`, and lists each remaining user action.
 
 Human understanding stays unconfirmed until a user answers these checks. Agent inspection alone cannot confirm it.
+
+## Step report checks per phase
+
+The check names each Step Completion Report prints, per phase:
+
+**Phase: Project Analysis** — checks: `Project detection`, `Existing tooling scan`, `Visibility`, `CLI detection`, `Command enumeration`
+
+**Phase: Pre-commit Configuration** — checks: `Pre-commit setup`, `Commit-stage hooks installed`, `Push-stage hooks installed`, `Modern stage names used`, `E2E script created (if CLI)`
+
+**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `CI limited to the four responsibilities`, `Bypass guard runs both stages`, `Matrix off the per-commit path`, `Speed techniques`, `No paid speedups`
+
+**Phase: CI Speed Audit** — checks: `Runs analysed`, `Queue/setup/work split`, `Cache scope checked`, `Free fixes only`
+
+**Phase: Pipeline Verification** — checks: `Commit-stage hooks pass`, `Push-stage hooks pass`, `E2E tests pass (if CLI)`, `Workflow lint`, `No check duplicated across lanes`
