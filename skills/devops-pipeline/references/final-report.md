@@ -24,7 +24,7 @@ Evidence:
   Stack: Python 3.12, uv, ruff + mypy + pytest; CLI with 4 subcommands (from --help)
   Wrote: .pre-commit-config.yaml (new), .github/workflows/ci.yml (new), scripts/e2e_test.sh (new)
   pre-commit validate-config: exit 0
-  pre-commit run --all-files: exit 0 (ruff, ruff-format, mypy, pytest-fast)
+  pre-commit run --all-files: exit 0 (ruff-check, ruff-format, mypy, pytest-fast)
   pre-commit run --all-files --hook-stage pre-push: exit 0 (pytest-full, e2e-cli)
   pre-commit install; pre-commit install --hook-type pre-push: both hooks installed
   bash scripts/e2e_test.sh: exit 0

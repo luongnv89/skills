@@ -589,7 +589,9 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.12', '3.13', '3.14']
+        # The floor and the two newest supported versions. Each leg is a billed
+        # job on a private repo; a public repo can add '3.13' at no cost.
+        python-version: ['3.12', '3.14', '3.15']
 
     steps:
       - uses: actions/checkout@v7
@@ -609,7 +611,8 @@ jobs:
         run: pytest -n auto --cov --cov-report=xml -q
 
       # The 3.12 leg also seeds the guard's pre-commit cache from the default
-      # branch (same interpreter, same key).
+      # branch (same interpreter, same key). The guard runs at the floor, so a
+      # pull request's hooks catch code only a newer Python accepts.
       - if: matrix.python-version == '3.12'
         uses: actions/cache@v6
         with:
@@ -647,23 +650,38 @@ jobs:
 
 ### With Poetry
 
+These steps replace `Install dependencies`, after `Set up Python` (Poetry installs with the interpreter on `PATH`).
+
 ```yaml
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 1.7.1
+          version: 2.5.1
           virtualenvs-create: true
           virtualenvs-in-project: true
 
+      # pythonLocation holds the patch version: a venv keyed on '3.12' alone
+      # would link to a removed interpreter after the image's next patch.
       - name: Load cached venv
         uses: actions/cache@v6
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/poetry.lock') }}
 
+      # Later steps call pytest and pre-commit by name, so put the venv on PATH.
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: |
+          poetry install --no-interaction
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 ```
+
+Poetry 2 changes what CI sees (checked with Poetry 2.5.1):
+
+- **Dev tools.** `poetry install` installs the root package and every non-optional group (`[tool.poetry.group.dev.dependencies]` or PEP 735 `[dependency-groups]`), but not `[project.optional-dependencies]`: a `dev` extra needs `poetry install --extras dev`. An `optional = true` group needs `--with <group>`.
+- **No package.** With no package to install, Poetry 2 fails where 1.x warned: set `package-mode = false` or pass `--no-root`.
+- **Stale lock.** `poetry install` exits 1 when `pyproject.toml` changed since the lock (`Run poetry lock to fix the lock file`). `poetry check --lock` checks the same thing, without installing.
+- **Removed and moved.** `poetry lock --no-update` is gone (`poetry lock` no longer updates by default); `install --sync` is deprecated for `poetry sync`; `poetry export` and `poetry shell` are plugins (snok's `plugins:` input installs one).
+- **Lock file.** Poetry 2 installs a 1.8 lock (`lock-version` 2.0) and writes 2.1, which Poetry 1.8.5 still installs. Pin the same Poetry locally and in CI anyway.
 
 ---
 
@@ -1085,7 +1103,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        python-version: ['3.12', '3.13', '3.14']
+        # Same legs as the Python matrix: a public repo can add '3.13' free.
+        python-version: ['3.12', '3.14', '3.15']
     steps:
       - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
@@ -1301,7 +1320,9 @@ Fetched 2026-11-01. Re-check them when a template changes; runner specs and pric
 - Action majors pinned in the templates, each the `releases/latest` tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest`: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/setup-python` v7.1.0, `actions/cache` v6.1.0, `actions/setup-go` v7.0.0, `actions/setup-java` v6.1.0, `actions/github-script` v9.0.0, `codecov/codecov-action` v7.1.1, `dorny/paths-filter` v4.0.3, `pnpm/action-setup` v6.1.0 (pinned as the exact release, since its floating v6 tag is stale, pnpm/action-setup#289), `astral-sh/setup-uv` v10.3.3 (no floating major tag), `snok/install-poetry` v1.4.2, `Swatinem/rust-cache` v2.9.3; `dtolnay/rust-toolchain` is pinned by its `stable` and `master` branches, as its README shows. `pre-commit/action`, mentioned in the opening section, is at v3.0.1. The templates pin the major tag; pinning a full commit SHA is the stricter option. Every pinned JavaScript action runs on Node 24 and needs runner v2.327.1 or newer, which GitHub-hosted runners have; update self-hosted runners first.
 - Release notes for each major crossed: `actions/cache` v5 to v6 (Node 24, ESM; a read-only cache token, as on fork pull requests, makes the save warn instead of fail), `actions/setup-java` v5 to v6 (Maven key adds `.mvn/extensions.xml`; legacy Adopt distributions removed), `actions/setup-go` v6 to v7 (toolchain selection reworked in v6), `codecov/codecov-action` v5 to v7 (`file` deprecated for `files`; `use_oidc`), `actions/github-script` v8 to v9 (`require('@actions/github')` removed; injected `getOctokit`), `pnpm/action-setup` v3 to v6 (v2 stopped working on newer Node; since v4 a `version` that differs from `packageManager` fails; v6 supports pnpm 11 and 12), each at `https://github.com/<owner>/<repo>/releases`, fetched 2026-11-01
 - Node.js release schedule (18 ended 2025-04-30, 20 ended 2026-04-30; 22, 24 and 26 supported), fetched 2026-11-01: https://github.com/nodejs/Release/blob/main/schedule.json
-- Python supported versions (3.10 reached end of life on 2026-10-01; 3.11 to 3.15 supported), fetched 2026-11-01: https://devguide.python.org/versions/
+- Python supported versions (3.10 reached end of life on 2026-10-01; 3.11 to 3.15 supported; 3.15.0 released 2026-10-09), fetched 2026-11-01: https://devguide.python.org/versions/ and https://peps.python.org/api/release-cycle.json
+- `actions/setup-python` can install 3.15: `actions/python-versions` `versions-manifest.json` lists 3.15.0, 3.15.1 and 3.15.2 as stable with `linux-24.04-x64` builds, and `ubuntu-latest` is Ubuntu 24.04 (its image README already lists 3.15.1), fetched 2026-11-01: https://github.com/actions/python-versions/blob/main/versions-manifest.json and https://github.com/actions/runner-images
+- Poetry 2.5.1 (PyPI, 2026-09-20; `requires_python >=3.10`), fetched 2026-11-01: https://pypi.org/pypi/poetry/json. The Poetry 2 points in [With Poetry](#with-poetry) were run with Poetry 2.5.1 and 1.8.5 on scratch projects; `snok/install-poetry` v1.4.2 README (tested on Poetry 1.8 and newer, `version` and `plugins` inputs): https://github.com/snok/install-poetry
 - Control workflow concurrency (the `github.head_ref || github.run_id` fallback cancels on pull requests only; the templates key on the pull request number instead, which is unique across forks): https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 - Workflow syntax (`timeout-minutes` default 360; `cancel-in-progress` accepts expressions): https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
 - Events that trigger workflows (`schedule`: default branch's latest commit, cron in UTC unless `timezone:` is set, delays at the top of the hour, disabled after 60 days without activity in public repositories; the `schedule` payload carries no repository): https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
