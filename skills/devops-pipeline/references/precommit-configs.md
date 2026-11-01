@@ -42,6 +42,8 @@ Lanes come from the SKILL's Check Routing Table; do not re-split them here.
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -137,6 +139,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -199,9 +203,9 @@ repos:
       #   stages: [pre-push]
 ```
 
-> **Install every hook tool as a dev dependency** (`pytest`, `pytest-xdist`, plus `pytest-cov` for CI coverage), in the project's dev extras (`[project.optional-dependencies] dev`, or `[dependency-groups] dev` with uv). `pytest -n auto` comes from pytest-xdist: when the dev extras lack it, add `pytest-xdist` to them, shown in the diff, or pytest stops with `unrecognized arguments: -n`. The CI guard and matrix install the same extras (`pip install -e ".[dev]"`; for a uv `[dependency-groups] dev`, `uv sync --locked` as in the [With uv](github-actions.md#with-uv) snippet), so the hook runs there too.
+> **Install every hook tool as a dev dependency** (`pytest`, `pytest-xdist`, plus `pytest-cov` for CI coverage), in the project's dev extras (`[project.optional-dependencies] dev`, or `[dependency-groups] dev` with uv). `pytest -n auto` comes from pytest-xdist: when the dev extras lack it, add `pytest-xdist` to them, shown in the diff, or pytest stops with `unrecognized arguments: -n`. The CI guard and matrix install the same extras (`pip install -e ".[dev]"`; for a uv `[dependency-groups] dev`, `uv sync --locked` as in the [With uv](github-actions.md#with-uv) snippet), so the hook runs there too. With Poetry, put them in `[dependency-groups] dev` or `[tool.poetry.group.dev.dependencies]`: plain `poetry install` skips a `[project.optional-dependencies] dev` extra unless it gets `--extras dev`.
 
-> **Upgrading an older config.** `ruff-pre-commit` renamed the `ruff` hook to `ruff-check`; `ruff` still works as a legacy alias. mypy 2 turns on `--local-partial-types` and `--strict-bytes` by default, so the jump from mirrors-mypy v1 can report new errors: fix them, or turn the flags off in the mypy config while you migrate.
+> **Upgrading an older config.** `ruff-pre-commit` renamed the `ruff` hook to `ruff-check`; `ruff` still works as a legacy alias. `ruff-format` now also formats Python code blocks in Markdown files, so the first run can rewrite a README. mypy 2 turns on `--local-partial-types` and `--strict-bytes` by default, so the jump from mirrors-mypy v1 can report new errors: fix them, or turn the flags off in the mypy config while you migrate.
 
 ### Alternative: Black instead of Ruff formatter
 
@@ -221,6 +225,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -288,6 +294,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -348,6 +356,8 @@ repos:
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -401,6 +411,8 @@ For monorepos or projects with multiple languages. pre-commit always execs from 
 
 ```yaml
 # Hooks with no `stages:` run in EVERY stage; this keeps them on commit only.
+# Hooks whose own manifest sets `stages:` (e.g. trailing-whitespace, end-of-file-fixer,
+# check-added-large-files, isort) keep theirs and also run on push.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

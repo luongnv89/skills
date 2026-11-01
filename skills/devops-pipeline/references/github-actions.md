@@ -591,6 +591,9 @@ jobs:
       matrix:
         # The floor and the two newest supported versions. Each leg is a billed
         # job on a private repo; a public repo can add '3.13' at no cost.
+        # fail-fast (the default) cancels the 3.12 leg, which seeds the caches
+        # and uploads coverage, when 3.15 fails first; that saves billed
+        # minutes, and a public repo can set `fail-fast: false`.
         python-version: ['3.12', '3.14', '3.15']
 
     steps:
@@ -666,7 +669,7 @@ These steps replace `Install dependencies`, after `Set up Python` (Poetry instal
         uses: actions/cache@v6
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ env.ImageOS }}-${{ env.pythonLocation }}-${{ hashFiles('**/poetry.lock') }}
 
       # Later steps call pytest and pre-commit by name, so put the venv on PATH.
       - name: Install dependencies
@@ -679,7 +682,7 @@ Poetry 2 changes what CI sees (checked with Poetry 2.5.1):
 
 - **Dev tools.** `poetry install` installs the root package and every non-optional group (`[tool.poetry.group.dev.dependencies]` or PEP 735 `[dependency-groups]`), but not `[project.optional-dependencies]`: a `dev` extra needs `poetry install --extras dev`. An `optional = true` group needs `--with <group>`.
 - **No package.** With no package to install, Poetry 2 fails where 1.x warned: set `package-mode = false` or pass `--no-root`.
-- **Stale lock.** `poetry install` exits 1 when `pyproject.toml` changed since the lock (`Run poetry lock to fix the lock file`). `poetry check --lock` checks the same thing, without installing.
+- **Stale lock (unchanged from 1.8).** `poetry install` exits 1 when `pyproject.toml` changed since the lock (`Run poetry lock to fix the lock file`). `poetry check --lock` checks the same thing, without installing.
 - **Removed and moved.** `poetry lock --no-update` is gone (`poetry lock` no longer updates by default); `install --sync` is deprecated for `poetry sync`; `poetry export` and `poetry shell` are plugins (snok's `plugins:` input installs one).
 - **Lock file.** Poetry 2 installs a 1.8 lock (`lock-version` 2.0) and writes 2.1, which Poetry 1.8.5 still installs. Pin the same Poetry locally and in CI anyway.
 
