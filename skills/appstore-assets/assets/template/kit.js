@@ -58,7 +58,8 @@ const esc = (s) => String(s);
 
 // ---------- iOS primitives ----------
 const ui = {
-  screen: (body, { bg = "white", dark = false, w = 402, h = 874 } = {}) =>
+  // Size defaults to the platform's screen in the config's orientation (iPhone unless platform: "ipad").
+  screen: (body, { bg = "white", dark = false, platform = "iphone", w = dev(platform).w, h = dev(platform).h } = {}) =>
     `<div class="screen ${bg}${dark ? " dark" : ""}" style="width:${w}px;height:${h}px">${body}</div>`,
   statusBar: ({ onDark = false, pad = false } = {}) =>
     `<div class="statusbar${pad ? " pad" : ""}${onDark ? " on-dark" : ""}"><span>9:41</span><span class="sb-right">${sym("signal")}${sym("wifi")}${sym("battery")}</span></div>`,
@@ -110,11 +111,26 @@ const macui = {
 };
 
 // ---------- Devices ----------
-// Native point sizes: iPhone 17 Pro 402×874 (corner 55), iPad Pro 13" 1032×1376 (corner 18).
+// Native point sizes in portrait: iPhone 17 Pro 402×874 (corner 55), iPad Pro 13" 1032×1376 (corner 18).
 const DEVICE = {
   iphone: { w: 402, h: 874, corner: 55, bezel: 14, island: true },
   ipad: { w: 1032, h: 1376, corner: 18, bezel: 22, island: false },
 };
+// config.js orientation: "portrait" (default), "landscape", or per platform
+// { iphone: "landscape", ipad: "portrait" }. Mac is always landscape. Set at boot.
+let ORIENT = { iphone: "portrait", ipad: "portrait" };
+const landscape = (platform) => ORIENT[platform] === "landscape";
+function setOrientation(cfg) {
+  const o = cfg.orientation || "portrait", pick = (p) => (typeof o === "string" ? o : o[p]) || "portrait";
+  ORIENT = { iphone: pick("iphone"), ipad: pick("ipad") };
+  return Object.entries(ORIENT).filter(([, v]) => v !== "portrait" && v !== "landscape")
+    .map(([p, v]) => `orientation (${p}): "${v}" must be "portrait" or "landscape"`);
+}
+// The device in the current orientation: landscape swaps the screen's width and height.
+function dev(platform) {
+  const d = DEVICE[platform];
+  return landscape(platform) ? { ...d, w: d.h, h: d.w } : d;
+}
 
 function device(platform, screenHTML, { scale, left, top, cls = "" }) {
   if (platform === "mac") {
@@ -122,11 +138,12 @@ function device(platform, screenHTML, { scale, left, top, cls = "" }) {
     return `<div class="macwin ${cls}" style="left:${left}px;top:${top}px;width:${w * scale}px;height:${h * scale}px">
       <div class="screen-scale" style="width:${w}px;height:${h}px;transform:scale(${scale})">${screenHTML}</div></div>`;
   }
-  const d = DEVICE[platform], bz = d.bezel * scale, inner = d.corner * scale;
+  const d = dev(platform), bz = d.bezel * scale, inner = d.corner * scale;
   const W = d.w * scale + bz * 2, H = d.h * scale + bz * 2;
-  // iPhone: Dynamic Island inside the screen. iPad: camera dot centered in the top bezel.
-  const island = d.island
-    ? `<div class="island" style="top:${11 * scale}px;width:${124 * scale}px;height:${36 * scale}px;margin-left:${-62 * scale}px"></div>` : "";
+  // iPhone: Dynamic Island inside the screen (top edge; left edge in landscape). iPad: camera dot centered in the top bezel.
+  const island = !d.island ? "" : landscape(platform)
+    ? `<div class="island" style="left:${11 * scale}px;top:50%;width:${36 * scale}px;height:${124 * scale}px;margin-top:${-62 * scale}px"></div>`
+    : `<div class="island" style="top:${11 * scale}px;width:${124 * scale}px;height:${36 * scale}px;margin-left:${-62 * scale}px"></div>`;
   const camera = d.island ? "" : `<div class="camera" style="top:${bz / 2 - 4}px"></div>`;
   return `<div class="device ${cls}" style="--bz:${bz}px;--inner:${inner}px;--outer:${inner + bz}px;left:${left}px;top:${top}px;width:${W}px;height:${H}px">
     <div class="device-screen"><div class="screen-scale" style="width:${d.w}px;height:${d.h}px;transform:scale(${scale})">${screenHTML}</div>${island}</div>${camera}</div>`;
@@ -134,7 +151,7 @@ function device(platform, screenHTML, { scale, left, top, cls = "" }) {
 // Rendered width/height of a device at a given scale (used to center it).
 function deviceSize(platform, scale) {
   if (platform === "mac") return { w: 1200 * scale, h: 750 * scale };
-  const d = DEVICE[platform];
+  const d = dev(platform);
   return { w: (d.w + d.bezel * 2) * scale, h: (d.h + d.bezel * 2) * scale };
 }
 
@@ -152,25 +169,36 @@ function arcs(cx, cy, radii, W, H, color) {
 // ---------- Layouts ----------
 // Stage widths in CSS px per platform; render.py supplies the height and zoom.
 const STAGE_W = { iphone: 440, ipad: 1032, mac: 1440 };
+// Landscape stages are the portrait ones rotated (the iPhone 6.9" class, 956 × 440 pt).
+const STAGE_W_LANDSCAPE = { iphone: 956, ipad: 1376 };
+const stageW = (platform) => (landscape(platform) ? STAGE_W_LANDSCAPE : STAGE_W)[platform];
+// Design-size stage height per platform, for the contact sheet (render.py passes the real one).
+const stageH = (platform) => (landscape(platform) ? { iphone: 440, ipad: 1032 } : { iphone: 956, ipad: 1376, mac: 900 })[platform];
 // Caption and device placement per platform, tuned so text and device never overlap.
 const LAYOUT = {
   iphone: { capTop: 54, h1: 41, sub: 16, subGap: 12, subMax: 340, devTop: 236, scale: 0.78, calloutW: 340, calloutTop: 806 },
   ipad: { capTop: 70, h1: 66, sub: 25, subGap: 16, subMax: 760, devTop: 300, scale: 0.72, calloutW: 460, calloutTop: 1150 },
   mac: { capTop: 58, h1: 54, sub: 21, subGap: 12, subMax: 900, devTop: 236, scale: 0.84, calloutW: 420, calloutTop: 700 },
 };
+// Landscape iPhone and iPad (from a landscape-only game's asset set): a short caption band over a wide device.
+const LAYOUT_LANDSCAPE = {
+  iphone: { capTop: 22, h1: 34, sub: 15, subGap: 6, subMax: 760, devTop: 100, scale: 0.735, calloutW: 340, calloutTop: 330 },
+  ipad: { capTop: 52, h1: 62, sub: 26, subGap: 10, subMax: 1100, devTop: 196, scale: 0.735, calloutW: 460, calloutTop: 820 },
+};
+const layout = (platform) => (landscape(platform) ? LAYOUT_LANDSCAPE : LAYOUT)[platform];
 
 function callout(c, top, width, stageW) {
   return `<div class="callout" style="top:${top}px;width:${width}px;left:${(stageW - width) / 2}px"><span class="ci">${sym(c.icon)}</span><div><b>${c.title}</b><span class="t">${c.text}</span></div></div>`;
 }
 
 function renderFrame(cfg, frame, platform, stageH) {
-  const L = LAYOUT[platform], W = STAGE_W[platform];
+  const L = layout(platform), W = stageW(platform);
   const size = deviceSize(platform, L.scale);
   const screen = frame.screens[platform]();
   const showCallout = frame.callout && (!frame.callout.platforms || frame.callout.platforms.includes(platform));
   return `<section class="stage${frame.dark ? " dark" : ""}" style="width:${W}px;height:${stageH}px">
     <div class="cap" style="top:${L.capTop}px;padding:0 ${Math.round(W * 0.06)}px">
-      <h1 style="font-size:${L.h1}px">${frame.headline}</h1>
+      <h1 data-fit="frame ${frame.id} (${platform})" style="font-size:${L.h1}px">${frame.headline}</h1>
       ${frame.sub ? `<p style="font-size:${L.sub}px;margin-top:${L.subGap}px;max-width:${L.subMax}px">${frame.sub}</p>` : ""}
     </div>
     ${device(platform, screen, { scale: L.scale, left: (W - size.w) / 2, top: L.devTop })}
@@ -184,16 +212,34 @@ function renderFrame(cfg, frame, platform, stageH) {
 // 2168 × 1030 px, centered; halved here for the ×2 stage); the search hero
 // sits inside it too, while the header hero flanks it on the right. Slots are
 // device boxes { cx, cy, w, h }; slots outside the safe area only show on
-// wide displays. The PNG is the video's first frame (t = 0).
+// wide displays. The PNG is the video's first frame (t = 0). `landscape`
+// overrides apply when an iPhone or iPad platform is landscape; the header's
+// `safeLayout` (creatives.layout: "safe") keeps the caption and one hero device
+// inside the safe area, with no side device.
 const CREATIVE = {
   header: { w: 1920, h: 823, safe: { x: 548.5, y: 246.5, w: 823, h: 330.5 }, h1: 60, sub: 24, align: "center",
     cap: { x: 568.5, y: 246.5, w: 783, h: 330.5 },
-    slots: { hero: { cx: 1646, cy: 411.5, w: 440, h: 700 }, side0: { cx: 274, cy: 411.5, w: 440, h: 700 } } },
+    slots: { hero: { cx: 1646, cy: 411.5, w: 440, h: 700 }, side0: { cx: 274, cy: 411.5, w: 440, h: 700 } },
+    landscape: { slots: { hero: { cx: 1630, cy: 411.5, w: 560, h: 600 }, side0: { cx: 290, cy: 411.5, w: 560, h: 600 } } },
+    safeLayout: { h1: 50, sub: 22, align: "left", cap: { x: 568.5, y: 246.5, w: 440, h: 330.5 },
+      slots: { hero: { cx: 1196, cy: 411.5, w: 330, h: 306 } } } },
   search: { w: 1920, h: 1280, safe: { x: 418, y: 382.5, w: 1084, h: 515 }, h1: 56, sub: 24, align: "left",
     cap: { x: 438, y: 382.5, w: 640, h: 515 },
-    slots: { hero: { cx: 1270, cy: 640, w: 440, h: 480 }, side0: { cx: 1711, cy: 640, w: 300, h: 400 }, side1: { cx: 209, cy: 640, w: 300, h: 400 } } },
-  universal: { w: 2622, h: 1475, capTop: 110, h1: 96, sub: 32, devTop: 372, hero: 1.2, side: 1.02, dx: 470, dy: 96 },
+    slots: { hero: { cx: 1270, cy: 640, w: 440, h: 480 }, side0: { cx: 1711, cy: 640, w: 300, h: 400 }, side1: { cx: 209, cy: 640, w: 300, h: 400 } },
+    landscape: { h1: 50, cap: { x: 438, y: 382.5, w: 540, h: 515 },
+      slots: { hero: { cx: 1240, cy: 640, w: 500, h: 480 }, side0: { cx: 1711, cy: 640, w: 380, h: 400 }, side1: { cx: 209, cy: 640, w: 380, h: 400 } } } },
+  universal: { w: 2622, h: 1475, capTop: 110, h1: 96, sub: 32, devTop: 372, hero: 1.2, side: 1.02, dx: 470, dy: 96,
+    landscape: { devTop: 420, hero: 1.0, side: 0.8, dx: 700, dy: 150 } },
 };
+// The layout of one creative for this config: base, landscape, or the header's safe layout.
+function creativeLayout(cfg, kind, cr) {
+  const C = CREATIVE[kind];
+  if (kind === "header" && cr.layout === "safe") return { ...C, ...C.safeLayout };
+  return cfg.platforms.some((p) => p !== "mac" && landscape(p)) && C.landscape ? { ...C, ...C.landscape } : C;
+}
+// Device slots that leave Apple's art safe area in the creative last rendered
+// (the manifest reports them; cropped on narrow displays).
+const KIT_OUTSIDE = new Set();
 // A Mac or iPad hero is larger than a phone in points; normalize to phone height.
 const HERO_NORM = { iphone: 1, ipad: 874 / 1376 * 1.25, mac: 874 / 750 * 0.85 };
 const VIDEO_KINDS = ["header", "search"];
@@ -221,7 +267,17 @@ function creativeConfig(cfg, variant) {
 // pure function of t, so a re-render gives the same frames.
 // Dwell rule: every beat holds at least max(2.5 s, 1 s + words / 4) of its
 // headline and supporting line (about 240 words a minute plus a second to find the text).
-const VIDEO = { duration: 12, fps: 30, transition: 0.8, minHold: 2.5, wordsPerSec: 4 };
+// Without video.duration the length comes from the beats: the shortest whole
+// half-second that holds every beat, at least 12 s and at most 30 s.
+const VIDEO = { duration: 12, maxDuration: 30, fps: 30, transition: 0.8, minHold: 2.5, wordsPerSec: 4 };
+
+// The duration n beats need: every hold equal, beat 0 seen `lead` (0.5 s) less before its first crossfade.
+function fitDuration(need, T) {
+  const n = need.length;
+  if (n === 1) return Math.max(VIDEO.duration, Math.ceil(need[0] * 2) / 2);
+  const hold = Math.max(need[0] + 0.5, ...need.slice(1));
+  return Math.ceil(n * (hold + T) * 2 - 1e-9) / 2;
+}
 
 function videoBeats(cr, kind) {
   const first = { headline: (kind === "search" && cr.searchHeadline) || cr.headline,
@@ -234,19 +290,22 @@ function videoBeats(cr, kind) {
 }
 
 function videoTimeline(cr, kind) {
-  const v = cr.video || {}, D = v.duration ?? VIDEO.duration, fps = v.fps ?? VIDEO.fps, T = v.transition ?? VIDEO.transition;
+  const v = cr.video || {}, fps = v.fps ?? VIDEO.fps, T = v.transition ?? VIDEO.transition;
   const beats = videoBeats(cr, kind), n = beats.length, errors = [];
-  const hold = n === 1 ? D : (D - n * T) / n, lead = n === 1 ? 0 : Math.min(0.5, hold / 4);
   const words = (b) => `${b.headline} ${b.sub}`.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
-  // Beat 0 is seen for hold - lead before the first crossfade, so it must read in that time.
   const need = beats.map((b) => Math.max(VIDEO.minHold, 1 + words(b) / VIDEO.wordsPerSec));
+  const fits = fitDuration(need, T), auto = v.duration === undefined || v.duration === "auto";  // run.json spells it "auto"
+  const D = auto ? Math.min(VIDEO.maxDuration, Math.max(VIDEO.duration, fits)) : v.duration;
+  const hold = n === 1 ? D : (D - n * T) / n, lead = n === 1 ? 0 : Math.min(0.5, hold / 4);
+  // Beat 0 is seen for hold - lead before the first crossfade, so it must read in that time.
   const short = need.findIndex((x, i) => (i === 0 ? hold - lead : hold) < x - 1e-9);
   if (!(D >= 5 && D <= 30)) errors.push(`${kind} video: duration ${D} s is outside Apple's 5–30 s`);
   if (fps !== 30 && fps !== 60) errors.push(`${kind} video: fps ${fps} must be 30 or 60`);
   if (Math.abs(D * fps - Math.round(D * fps)) > 1e-6) errors.push(`${kind} video: duration × fps must be a whole frame count`);
   const searchSize = kind === "search" ? v.searchSize ?? null : null;
   if (searchSize !== null && searchSize !== "max") errors.push(`search video: searchSize "${searchSize}" must be "max" or left out`);
-  if (short >= 0) errors.push(`${kind} video: ${n} beats in ${D} s hold beat ${short} for ${(short === 0 ? hold - lead : hold).toFixed(2)} s, its caption needs ${need[short].toFixed(2)} s (raise creatives.video.duration, shorten the caption or drop a beat)`);
+  if (short >= 0) errors.push(`${kind} video: ${n} beats in ${D} s hold beat ${short} for ${(short === 0 ? hold - lead : hold).toFixed(2)} s, its caption needs ${need[short].toFixed(2)} s (` +
+    (fits <= VIDEO.maxDuration ? `${fits} s fits every beat: remove creatives.video.duration to fit it automatically, or set it to ${fits}; or shorten the caption` : `even ${VIDEO.maxDuration} s is too short: shorten the captions or drop a beat`) + ")");
   const segs = [];
   let t = 0;
   for (let i = 0; i < n; i++) {
@@ -255,7 +314,7 @@ function videoTimeline(cr, kind) {
     if (n > 1) { segs.push({ from: i, to: (i + 1) % n, t0: t, t1: t + T }); t += T; }
   }
   if (n > 1) segs.push({ beat: 0, t0: t, t1: D });
-  return { duration: D, fps, frames: Math.round(D * fps), transition: T, hold: +hold.toFixed(3), lead, searchSize, beats, segs, errors };
+  return { duration: D, auto, fps, frames: Math.round(D * fps), transition: T, hold: +hold.toFixed(3), lead, searchSize, beats, segs, errors };
 }
 
 const ease = (x) => { const u = Math.min(1, Math.max(0, x)); return u * u * (3 - 2 * u); };
@@ -292,19 +351,21 @@ function seekCreative(stage, tl, t) {
 }
 
 function renderSafeCreative(cfg, kind, cr) {
-  const C = CREATIVE[kind], frames = Object.fromEntries(cfg.frames.map((f) => [f.id, f])), tl = videoTimeline(cr, kind);
+  const C = creativeLayout(cfg, kind, cr), frames = Object.fromEntries(cfg.frames.map((f) => [f.id, f])), tl = videoTimeline(cr, kind);
   const slot = (ref, name) => {
     const f = frames[ref.frame], S = C.slots[name];
     if (!f || !f.screens[ref.platform]) throw new Error(`creatives: frame "${ref.frame}" has no ${ref.platform} screen`);
     const sz = deviceSize(ref.platform, 1), s = Math.min(S.w / sz.w, S.h / sz.h);
+    const left = S.cx - sz.w * s / 2, top = S.cy - sz.h * s / 2, A = C.safe;
+    if (left < A.x - 0.5 || top < A.y - 0.5 || left + sz.w * s > A.x + A.w + 0.5 || top + sz.h * s > A.y + A.h + 0.5) KIT_OUTSIDE.add(name);
     return `<div class="cv-slot" data-slot="${name}" data-platform="${ref.platform}" style="z-index:${name === "hero" ? 2 : 1}">${device(ref.platform, f.screens[ref.platform](),
-      { scale: s, left: S.cx - sz.w * s / 2, top: S.cy - sz.h * s / 2, cls: name === "hero" ? "" : "side" })}</div>`;
+      { scale: s, left, top, cls: name === "hero" ? "" : "side" })}</div>`;
   };
   const beats = tl.beats.map((b, i) => {
     const sides = b.sides.slice(0, Object.keys(C.slots).length - 1).map((r, k) => slot(r, `side${k}`));
     return `<div class="cv-beat" data-beat="${i}">${sides.join("")}${slot(b.hero, "hero")}
       <div class="cap cv-cap${C.align === "left" ? " left" : ""}" style="left:${C.cap.x}px;top:${C.cap.y}px;width:${C.cap.w}px;height:${C.cap.h}px">
-        <h1 style="font-size:${C.h1}px">${b.headline}</h1>${b.sub ? `<p style="font-size:${C.sub}px;margin-top:14px">${b.sub}</p>` : ""}</div></div>`;
+        <h1 data-fit="${kind} beat ${i}" style="font-size:${C.h1}px">${b.headline}</h1>${b.sub ? `<p style="font-size:${C.sub}px;margin-top:14px">${b.sub}</p>` : ""}</div></div>`;
   });
   const cx = C.w / 2, cy = C.safe.y + C.safe.h / 2, r0 = C.safe.w * 0.62;
   return `<section class="stage" data-creative="${kind}" style="width:${C.w}px;height:${C.h}px;--glow:${cfg.brand.glow}">
@@ -314,7 +375,7 @@ function renderSafeCreative(cfg, kind, cr) {
 function renderCreative(cfg, kind, variant) {
   const cr = creativeConfig(cfg, variant);
   if (CREATIVE[kind].safe) return renderSafeCreative(cfg, kind, cr);
-  const C = CREATIVE[kind], frames = Object.fromEntries(cfg.frames.map((f) => [f.id, f]));
+  const C = creativeLayout(cfg, kind, cr), frames = Object.fromEntries(cfg.frames.map((f) => [f.id, f]));
   const pick = (ref, s, dx, dy, cls) => {
     const f = frames[ref.frame];
     if (!f || !f.screens[ref.platform]) throw new Error(`creatives: frame "${ref.frame}" has no ${ref.platform} screen`);
@@ -328,7 +389,7 @@ function renderCreative(cfg, kind, variant) {
   const sub = kind === "search" ? (cr.searchSub ?? "") : (cr.sub ?? "");
   return `<section class="stage" style="width:${C.w}px;height:${C.h}px;--glow:${cfg.brand.glow}">
     ${arcs(C.w / 2, cy, [r0, r0 + 90 * C.side, r0 + 190 * C.side], C.w, C.h, cfg.brand.brand)}
-    <div class="cap" style="top:${C.capTop}px"><h1 style="font-size:${C.h1}px">${headline}</h1>${sub ? `<p style="font-size:${C.sub}px;margin-top:14px">${sub}</p>` : ""}</div>
+    <div class="cap" style="top:${C.capTop}px"><h1 data-fit="${kind}" style="font-size:${C.h1}px">${headline}</h1>${sub ? `<p style="font-size:${C.sub}px;margin-top:14px">${sub}</p>` : ""}</div>
     ${sides.join("")}${hero.html}
   </section>`;
 }
@@ -352,16 +413,40 @@ function applyBrand(cfg) {
   document.head.appendChild(extra);
 }
 
+// A headline that wraps past two lines (a wide face such as a monospace) or
+// overflows its box shrinks by whole pixels, down to 75 % of its layout size.
+// Runs after the fonts load and before any zoom, so every class gets the same fit.
+// Returns each headline it changed, or could not fit, for render.py to print.
+function fitHeadlines(root, cfg) {
+  const out = [];
+  if (cfg.fitHeadlines === false) return out;
+  for (const h1 of root.querySelectorAll("h1[data-fit]")) {
+    const px = () => parseFloat(getComputedStyle(h1).fontSize);
+    const lines = () => Math.round(h1.offsetHeight / (parseFloat(getComputedStyle(h1).lineHeight) || px() * 1.02));
+    if (getComputedStyle(h1).fontSize !== h1.style.fontSize) {  // config css pins the size: report, never resize
+      if (lines() > 2) out.push({ id: h1.dataset.fit, base: px(), size: px(), lines: lines(), fits: false, pinned: true });
+      continue;
+    }
+    const base = parseFloat(h1.style.fontSize), floor = Math.ceil(base * 0.75);
+    const over = () => lines() > 2 || h1.scrollWidth > h1.clientWidth + 1;
+    let size = base;
+    while (over() && size > floor) h1.style.fontSize = `${--size}px`;
+    if (size !== base || over()) out.push({ id: h1.dataset.fit, base, size, lines: lines(), fits: !over() });
+  }
+  return out;
+}
+
 // ?manifest=1 → JSON for render.py; ?frame=ID&cls=iphone-6.3&h=874&zoom=… → one
 // screenshot; ?creative=header|search|universal → one creative; no query → contact sheet.
 async function renderFromQuery(cfg) {
+  const orientationErrors = setOrientation(cfg);
   applyBrand(cfg);
   const q = new URLSearchParams(location.search), root = document.getElementById("root");
   if (q.get("manifest")) {
     // Build every screen and creative once, into the page, so a broken builder,
     // an unknown icon or a missing image fails here with its frame id instead
     // of rendering a blank or broken PNG.
-    const errors = [], html = [];
+    const errors = [...orientationErrors], html = [], outside = [];
     for (const f of cfg.frames) for (const p of cfg.platforms) {
       if (!f.screens[p]) continue;
       KIT_ERRORS.length = 0;
@@ -376,9 +461,15 @@ async function renderFromQuery(cfg) {
       const kinds = cr.kinds || Object.keys(CREATIVE), videoKinds = cr.video?.kinds || [];
       for (const k of kinds.filter((x) => !CREATIVE[x])) errors.push(`creatives.kinds${tag}: unknown kind "${k}" (use header, search, universal)`);
       for (const k of videoKinds.filter((x) => !VIDEO_KINDS.includes(x))) errors.push(`creatives.video.kinds${tag}: "${k}" has no video placement (use header, search)`);
+      if (cr.layout !== undefined && cr.layout !== "safe") errors.push(`creatives.layout${tag}: "${cr.layout}" must be "safe" or left out`);
       stills.push(...kinds.filter((x) => CREATIVE[x]).map((kind) => ({ kind, variant })));
       for (const k of [...new Set([...kinds, ...videoKinds])].filter((x) => CREATIVE[x])) {
-        try { html.push(renderCreative(cfg, k, variant)); } catch (e) { errors.push(`creative ${k}${tag}: ${e.message}`); }
+        KIT_OUTSIDE.clear();
+        try {
+          const markup = renderCreative(cfg, k, variant);
+          html.push(CREATIVE[k].safe ? `<div data-cap-check="${k}|${variant || ""}">${markup}</div>` : markup);
+        } catch (e) { errors.push(`creative ${k}${tag}: ${e.message}`); }
+        if (KIT_OUTSIDE.size) outside.push({ kind: k, variant, slots: [...KIT_OUTSIDE].sort() });
       }
       for (const k of videoKinds.filter((x) => VIDEO_KINDS.includes(x))) {
         try {
@@ -396,25 +487,43 @@ async function renderFromQuery(cfg) {
     }
     await document.fonts.ready;
     const fontOk = !cfg.fonts?.display || document.fonts.check(`700 40px "Display"`);
+    const fit = fitHeadlines(root, cfg);
+    // Captions that leave Apple's art safe area after the fit (a long headline, or
+    // a config css rule that pins its size), per beat, in stage pixels.
+    const capOutside = [];
+    for (const box of root.querySelectorAll("[data-cap-check]")) {
+      const [kind, variant] = box.dataset.capCheck.split("|"), A = CREATIVE[kind].safe;
+      const s = box.querySelector(".stage").getBoundingClientRect();
+      box.querySelectorAll(".cv-beat").forEach((beat, i) => {
+        const r = [...beat.querySelectorAll(".cv-cap > *")].map((el) => { const b = el.getBoundingClientRect();
+          return [b.left - s.left, b.top - s.top, b.left - s.left + Math.max(b.width, el.scrollWidth), b.bottom - s.top]; });
+        if (!r.length) return;
+        const [x0, y0, x1, y1] = [0, 1, 2, 3].map((k) => (k < 2 ? Math.min : Math.max)(...r.map((q) => q[k])));
+        if (x0 < A.x - 0.5 || y0 < A.y - 0.5 || x1 > A.x + A.w + 0.5 || y1 > A.y + A.h + 0.5)
+          capOutside.push({ kind, variant: variant || null, beat: i, box: [x0, y0, x1, y1].map(Math.round), safe: [A.x, A.y, A.x + A.w, A.y + A.h] });
+      });
+    }
     // Caption color pairs render.py checks: headline (large text, 3:1) and
     // supporting line (4.5:1) on both canvas stops, light and dark.
     const b = cfg.brand, pairs = [];
     for (const bg of [b.canvas1, b.canvas2]) pairs.push([b.ink, bg, 3], [b.brandInk, bg, 3], [b.muted, bg, 4.5]);
     if (cfg.frames.some((f) => f.dark)) for (const bg of [b.darkCanvas1, b.darkCanvas2]) pairs.push([b.darkInk, bg, 3], [b.darkAccent, bg, 3], [b.darkMuted, bg, 4.5]);
     root.textContent = JSON.stringify({
-      app: cfg.app, version: cfg.version, platforms: cfg.platforms, fontOk, errors: [...new Set(errors)],
+      app: cfg.app, version: cfg.version, platforms: cfg.platforms, orientation: ORIENT, fontOk, errors: [...new Set(errors)],
       contrast: pairs.map(([fg, bg, min]) => ({ fg, bg, min })),
       frames: cfg.frames.map((f) => ({ id: f.id, platforms: cfg.platforms.filter((p) => f.screens[p]) })),
-      creatives: stills, video,
+      creatives: stills, video, outside, fit, capOutside,
     });
     root.id = "manifest";
     return;
   }
   const zoom = +q.get("zoom") || 1;
-  if (zoom !== 1) document.documentElement.style.zoom = zoom;
   if (q.get("frame")) {
     const f = cfg.frames.find((x) => x.id === q.get("frame")), platform = (q.get("cls") || "iphone").split("-")[0];
-    root.innerHTML = renderFrame(cfg, f, platform, (+q.get("h") || 956) / zoom);
+    root.innerHTML = renderFrame(cfg, f, platform, (+q.get("h") || stageH(platform)) / zoom);
+    await document.fonts.ready;
+    fitHeadlines(root, cfg);  // at design size, before the zoom, so both iPhone classes match
+    if (zoom !== 1) document.documentElement.style.zoom = zoom;
   } else if (q.get("creative")) {
     // &variant=ID picks a Custom Product Page variant; &t=SEC shows that
     // moment of the video. render.py seeks video frames through __seek(t).
@@ -429,10 +538,11 @@ async function renderFromQuery(cfg) {
     await Promise.all([...root.querySelectorAll("img")].map((img) => img.complete ? null :
       new Promise((ok) => { img.onload = img.onerror = ok; })));
     await document.fonts.ready;
+    fitHeadlines(root, cfg);
     window.__ready = true;
   } else {
     root.style.cssText = "display:flex;flex-wrap:wrap;gap:24px;padding:24px;align-items:flex-start";
     root.innerHTML = cfg.platforms.flatMap((p) => cfg.frames.filter((f) => f.screens[p]).map((f) =>
-      `<div style="zoom:${p === "iphone" ? 0.6 : 0.3}">${renderFrame(cfg, f, p, p === "iphone" ? 956 : p === "ipad" ? 1376 : 900)}</div>`)).join("");
+      `<div style="zoom:${p === "iphone" ? 0.6 : 0.3}">${renderFrame(cfg, f, p, stageH(p))}</div>`)).join("");
   }
 }

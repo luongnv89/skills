@@ -1,0 +1,17 @@
+// !$*UTF8*$!
+// Trimmed fixture: only the build settings the appstore-assets explorer reads.
+{
+	objects = {
+		97C147061CF9000F007C117D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = Runner/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.lanternreef;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+			};
+			name = Release;
+		};
+	};
+}

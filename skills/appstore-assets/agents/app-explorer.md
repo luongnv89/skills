@@ -23,6 +23,16 @@ agent sees, so every field must stand on its own evidence.
 6. Stop early with `stop_reason` when the input has no Apple target, or ships
    only watchOS, tvOS or visionOS.
 7. For a landing page, record who publishes the app in `publisher`.
+8. Record `orientation` per platform from `Info.plist` and, for Flutter,
+   `SystemChrome.setPreferredOrientations`.
+9. Record `limits` for every feature a caption could name: what is free and
+   what is paid, fallback paths that skip a check, exceptions to a rule, and
+   real counts. A caption can only be as strong as its narrowest limit.
+10. Compare the listing copy with the code and list unsupported sentences in
+    `listing_findings` (an optional check; nobody edits the listing here).
+11. List existing asset sets (`existing_sets`) with the commands in
+    `references/input-discovery.md`, and take the version from `pubspec.yaml`
+    for Flutter.
 
 ## Output
 
@@ -35,10 +45,14 @@ Return only this JSON object, no prose:
   "subtitle": {"value": "…", "evidence": "…"},
   "version": {"value": "…", "evidence": "…"},
   "platforms": [{"platform": "iphone|ipad|mac", "evidence": "…"}],
+  "orientation": {"iphone": "portrait|landscape", "ipad": "portrait|landscape", "evidence": "…"},
   "out_of_scope_platforms": [{"platform": "watchos|tvos|visionos", "evidence": "…"}],
   "brand": {"accent": "#rrggbb", "accent_evidence": "…", "colors": ["#rrggbb"], "fonts": ["…"], "logo_files": ["…"]},
   "listing_copy": {"description": "…", "keywords": "…", "evidence": "…"},
   "claims": [{"claim": "…", "supported_by": "path:line or null"}],
+  "limits": [{"feature": "…", "free": "what a new user gets", "paid": "what a purchase adds, or null", "exceptions": ["fallback path or excluded case, with path:line"], "count": "real number, or null", "evidence": "path:line"}],
+  "listing_findings": [{"text": "listing sentence", "source": "store/listing-en-US.md:12", "finding": "what the code does instead, with path:line"}],
+  "existing_sets": [{"src": "…/src or null", "out": "…", "version": "…"}],
   "sensitive": [{"feature": "…", "present": true, "evidence": "…", "approved_wording": "…"}],
   "screens": [{"name": "…", "source": "path:line", "purpose": "…", "elements": ["visible string or control"], "colors": ["#rrggbb"]}],
   "captures": [{"path": "…", "size": "WxH", "clean": false, "reasons": ["…"]}],
