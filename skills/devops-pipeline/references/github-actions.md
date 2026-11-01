@@ -87,7 +87,7 @@ Run `gh repo view --json visibility --jq .visibility` and record the answer in S
 | Slow suite sharded across standard runners | Yes, below the concurrency limit | No | `--shard` |
 | Test workers matched to runner cores | 4 | 2 | Runner default |
 
-The JavaScript/TypeScript, Python, and Minimal templates carry the full set; affected-test selection exists for Vitest (`scripts/affected-tests.sh`) and for monorepo tools, so other suites run whole in the guard, in parallel. Go, Rust, Java, and Multi-language carry the universal ones (concurrency, blobless guard, timeouts) and keep the matrix on every merge; on a private repository, move it to `schedule:` the same way when the default branch gets 30 or more commits a month.
+The JavaScript/TypeScript, Python, and Minimal templates carry the full set; affected-test selection exists for Vitest (`scripts/affected-tests.sh`) and for monorepo tools, so other suites run whole in the guard, in parallel. Go, Rust, Java, and Multi-language carry the universal ones (concurrency, blobless guard, timeouts) and keep the matrix on every merge (Multi-language: every merge that touches that language); on a private repository, move it to `schedule:` the same way when the default branch gets 30 or more commits a month.
 
 ### Cancel superseded runs
 
@@ -936,14 +936,12 @@ jobs:
 
 ## Multi-language
 
-For monorepos, use path filters to set up only the toolchains a pull request needs:
+For monorepos, path filters decide what runs, at no extra job: a step in the guard picks the toolchains a pull request needs, and each language's version matrix lives in its own push-only workflow that GitHub starts only when that language changed. `.github/workflows/ci.yml`:
 
 ```yaml
 name: CI
 
 on:
-  push:
-    branches: [main, master]
   pull_request:
     branches: [main, master]
 
@@ -1012,14 +1010,27 @@ jobs:
           base="${{ github.event.pull_request.base.sha }}"
           pre-commit run --from-ref "$base" --to-ref HEAD
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
+```
 
-  # The per-language jobs carry CI-lane work only — a version matrix. They must not
-  # re-run the test suite at a single version: the pre-push hook already did that,
-  # and duplicating it here is exactly what the routing table forbids. They run on
-  # every merge, whichever language changed, since gating them would need the
-  # separate `changes` job again.
+The per-language workflows carry CI-lane work only — a version matrix. They must not re-run the test suite at a single version: the pre-push hook already did that, and duplicating it is exactly what the routing table forbids. `.github/workflows/frontend-matrix.yml`:
+
+```yaml
+name: Frontend matrix
+
+# Push-only and path-filtered: a merge that touches only backend/ starts no
+# frontend run, so a private repo pays for no idle legs and needs no separate
+# `changes` job. A push-only workflow is never a required pull request check,
+# so its path filter cannot leave a check Pending. On a private repo with 30+
+# default-branch commits a month, replace `push` with a nightly `schedule:`
+# (which ignores `paths:` and runs every night).
+on:
+  push:
+    branches: [main, master]
+    paths: ['frontend/**']
+  workflow_dispatch:
+
+jobs:
   frontend:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -1039,9 +1050,21 @@ jobs:
         run: npm test
       - working-directory: frontend
         run: npm run build
+```
 
+`.github/workflows/backend-matrix.yml`, on the same rule:
+
+```yaml
+name: Backend matrix
+
+on:
+  push:
+    branches: [main, master]
+    paths: ['backend/**']
+  workflow_dispatch:
+
+jobs:
   backend:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -1057,7 +1080,7 @@ jobs:
       - run: pytest -q
 ```
 
-When most merges touch only one language, move each language's matrix into its own workflow with `on: push: paths: ['frontend/**']`. A push-only workflow is never a required pull request check, so its path filter cannot leave a check Pending.
+A filter lists what may trigger a run, so add shared paths a language depends on (a root lockfile, shared config) to its `paths:`. Deploy jobs that run on every merge go in a workflow without `paths:`.
 
 ---
 
