@@ -53,7 +53,7 @@ graph TD
 | Full test suite + version matrix | — | — | ✓ (per merge, or nightly on a busy private repo; coverage upload on public repos) |
 | CLI end-to-end tests | — | ✓ | — |
 | Bypass guard (both hook stages, PR diff only) | — | — | ✓ |
-| Cache seeding from the default branch | — | — | ✓ |
+| Cache seeding from the default branch (when the template has a default-branch job; private Minimal has none) | — | — | ✓ |
 | Deploy | — | — | ✓ |
 
 ## Usage

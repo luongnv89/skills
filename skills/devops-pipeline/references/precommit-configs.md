@@ -195,7 +195,7 @@ repos:
       #   stages: [pre-push]
 ```
 
-> **Install every hook tool as a dev dependency** (`pytest`, `pytest-xdist`, plus `pytest-cov` for CI coverage), in the project's dev extras (`[project.optional-dependencies] dev`, or `[dependency-groups] dev` with uv). `pytest -n auto` comes from pytest-xdist: when the dev extras lack it, add `pytest-xdist` to them, shown in the diff, or pytest stops with `unrecognized arguments: -n`. The CI guard and matrix install the same extras (`pip install -e ".[dev]"`), so the hook runs there too.
+> **Install every hook tool as a dev dependency** (`pytest`, `pytest-xdist`, plus `pytest-cov` for CI coverage), in the project's dev extras (`[project.optional-dependencies] dev`, or `[dependency-groups] dev` with uv). `pytest -n auto` comes from pytest-xdist: when the dev extras lack it, add `pytest-xdist` to them, shown in the diff, or pytest stops with `unrecognized arguments: -n`. The CI guard and matrix install the same extras (`pip install -e ".[dev]"`; for a uv `[dependency-groups] dev`, `uv sync --locked` as in the [With uv](github-actions.md#with-uv) snippet), so the hook runs there too.
 
 ### Alternative: Black instead of Ruff formatter
 

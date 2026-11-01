@@ -127,7 +127,23 @@
         "The version matrix, and any default-branch full run, triggers on push to the default branch (plus optional workflow_dispatch), and ci.yml has no schedule: trigger, because the repo has under 30 default-branch commits a month.",
         "No step uses codecov/codecov-action; if coverage is reported in CI, it is written to $GITHUB_STEP_SUMMARY.",
         "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes.",
-        "ci.yml cancels superseded pull request runs with a concurrency group keyed on github.event.pull_request.number with a github.run_id fallback."
+        "ci.yml cancels superseded pull request runs with a concurrency group keyed on github.event.pull_request.number with a github.run_id fallback.",
+        "The version matrix's push run restores and saves the same npm cache (setup-node cache: npm) and pre-commit cache key the guard restores, so it is the job that keeps pull request caches warm; no separate seeding job is added.",
+        "If a coverage summary is written, Vitest's coverage reporters include json-summary, because the summary reads coverage/coverage-summary.json."
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "happy-path",
+      "prompt": "Set up pre-commit hooks and GitHub Actions for our private TypeScript API (Node 24, npm, Vitest). About 60 PRs merge to main every month, there's no CI yet, and Actions minutes are billed to us, so the bill must not grow.",
+      "expected_output": "Records the repo as private with 30 or more default-branch commits a month and generates ci.yml for that: the bypass guard runs on pull requests as a single leg (commit stage first); the version matrix, and any default-branch full run, moves from push to a nightly schedule: (plus workflow_dispatch) with an odd-minute cron that is noted as UTC (or sets timezone:); no Codecov step and no seed-cache job; every job runs on ubuntu-latest with timeout-minutes. Nothing paid is configured or recommended.",
+      "files": [],
+      "expectations": [
+        "The bypass guard runs on pull_request only, as one leg that runs the pre-commit stage before the pre-push stage.",
+        "The version matrix (and any default-branch full run) triggers on a nightly schedule: plus optional workflow_dispatch, not on every push, because the repo has 30 or more default-branch commits a month.",
+        "The schedule uses a cron with a minute other than 0, and the output says the cron runs in UTC or sets the optional timezone: key.",
+        "No step uses codecov/codecov-action and there is no seed-cache job; coverage, if reported, goes to $GITHUB_STEP_SUMMARY.",
+        "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes."
       ]
     }
   ]

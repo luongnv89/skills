@@ -72,7 +72,7 @@ This skill writes config into someone else's repository and installs git hooks:
 Detect project characteristics:
 
 ```bash
-ls -la package.json pyproject.toml Cargo.toml go.mod pom.xml build.gradle *.csproj 2>/dev/null
+ls -la package.json pyproject.toml Cargo.toml go.mod pom.xml build.gradle ./*.csproj 2>/dev/null
 ls -la .eslintrc* .oxlintrc* .prettierrc* tsconfig.json mypy.ini setup.cfg ruff.toml 2>/dev/null
 ls -la .pre-commit-config.yaml .github/workflows/*.yml 2>/dev/null
 gh repo view --json visibility --jq .visibility   # PUBLIC or PRIVATE
@@ -183,7 +183,7 @@ A run passes when **all** of the following are true:
 - [ ] Both hook types are installed: `pre-commit install` **and** `pre-commit install --hook-type pre-push`.
 - [ ] At least one `.github/workflows/*.yml` exists and carries only the four CI responsibilities from step 3.
 - [ ] CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
-- [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by a default-branch job; with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
+- [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by the template's default-branch job when it has one (private Minimal has none by design); with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
 - [ ] No paid runner, larger runner, private-repo shard, private-repo Codecov step, or cache above 10 GB; parallel guard legs and shards only on public repos.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).
 - [ ] For CLI projects, the E2E script is wired to the `pre-push` stage per the language reference files.

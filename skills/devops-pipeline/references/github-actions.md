@@ -63,7 +63,7 @@ Run `gh repo view --json visibility --jq .visibility` and record the answer in S
 | Version matrix, and Minimal's `full` (only with affected-test selection) | Every merge | Every merge under 30 default-branch commits a month; nightly from 30 |
 | Codecov upload | One matrix leg, no run-time visibility test | Left out; coverage summary in `$GITHUB_STEP_SUMMARY` |
 | `seed-cache` (Minimal only) | Every merge | Left out |
-| Rust macOS legs | In the matrix | Left out; a macOS job on release tags or nightly when needed |
+| Rust macOS legs | In the matrix | Left out; a macOS job only when the user asks for it (opt-in, billed at about 10× Linux), preferably on release tags |
 
 | | Public repository | Private repository |
 |---|---|---|
@@ -87,7 +87,7 @@ Run `gh repo view --json visibility --jq .visibility` and record the answer in S
 | Slow suite sharded across standard runners | Yes, below the concurrency limit | No | `--shard` |
 | Test workers matched to runner cores | 4 | 2 | Runner default |
 
-The JavaScript/TypeScript, Python, and Minimal templates carry the full set; affected-test selection exists for Vitest (`scripts/affected-tests.sh`) and for monorepo tools, so other suites run whole in the guard, in parallel. Go, Rust, Java, and Multi-language carry the universal ones (concurrency, blobless guard, timeouts) and keep the matrix on every merge (Multi-language: every merge that touches that language); on a private repository, move it to `schedule:` the same way when the default branch gets 30 or more commits a month.
+The JavaScript/TypeScript, Python, and Minimal templates carry the full set; affected-test selection exists for Vitest (`scripts/affected-tests.sh`) and for monorepo tools, so other suites run whole in the guard, in parallel. Go, Rust, Java, and Multi-language carry the universal ones (concurrency, blobless guard, timeouts) and keep the matrix on every merge (Multi-language: every merge that touches that language); on a private repository, move it to `schedule:` the same way when the default branch gets 30 or more commits a month. Multi-language counts each language's paths separately (`git rev-list --count --first-parent --since=30.days origin/main -- frontend/`): a nightly schedule runs every night whatever changed, so it saves minutes only for a language that itself gets 30 or more merges a month.
 
 ### Cancel superseded runs
 
@@ -820,8 +820,8 @@ jobs:
     strategy:
       matrix:
         # Public repos: both OSes, free. Private repos: macOS minutes bill at
-        # about 10x Linux, so generate `os: [ubuntu-latest]`, and when macOS
-        # matters, a separate macOS job on release tags or a nightly schedule.
+        # about 10x Linux, so generate `os: [ubuntu-latest]`. Add a macOS job
+        # only when the user asks for one (opt-in, billed), preferably on release tags.
         os: [ubuntu-latest, macos-latest]
         rust: [stable, beta]
 
@@ -972,7 +972,9 @@ jobs:
 
       # A step, not a separate `changes` job: that job would bill its own
       # rounded minute on every private run. On pull requests the filter reads
-      # the changed files from the REST API.
+      # the changed files from the REST API. Keep each filter a superset of
+      # that language's hook `files:` patterns, so every hook that can fire
+      # finds its toolchain.
       - uses: dorny/paths-filter@v3
         id: changes
         with:
@@ -1020,13 +1022,13 @@ name: Frontend matrix
 # Push-only and path-filtered: a merge that touches only backend/ starts no
 # frontend run, so a private repo pays for no idle legs and needs no separate
 # `changes` job. A push-only workflow is never a required pull request check,
-# so its path filter cannot leave a check Pending. On a private repo with 30+
-# default-branch commits a month, replace `push` with a nightly `schedule:`
-# (which ignores `paths:` and runs every night).
+# so its path filter cannot leave a check Pending. On a private repo, replace
+# `push` with a nightly `schedule:` only when frontend/ itself gets 30+ merges
+# a month: a schedule ignores `paths:` and runs every night.
 on:
   push:
     branches: [main, master]
-    paths: ['frontend/**']
+    paths: ['frontend/**', '.github/workflows/frontend-matrix.yml']
   workflow_dispatch:
 
 jobs:
@@ -1060,7 +1062,7 @@ name: Backend matrix
 on:
   push:
     branches: [main, master]
-    paths: ['backend/**']
+    paths: ['backend/**', '.github/workflows/backend-matrix.yml']
   workflow_dispatch:
 
 jobs:
@@ -1080,7 +1082,7 @@ jobs:
       - run: pytest -q
 ```
 
-A filter lists what may trigger a run, so add shared paths a language depends on (a root lockfile, shared config) to its `paths:`. Deploy jobs that run on every merge go in a workflow without `paths:`.
+A filter lists what may trigger a run, so add shared paths a language depends on (a root lockfile, shared config) to its `paths:`, along with the workflow file itself so a change to the matrix is tested on merge. Never mark these push-only workflows as required checks: they never run on a pull request, so a required one stays Pending forever. GitHub matches `paths:` against at most the first 300 changed files, so a very large merge can skip a matrix; start it by hand with `workflow_dispatch`. Deploy jobs that run on every merge go in a workflow without `paths:`.
 
 ---
 
