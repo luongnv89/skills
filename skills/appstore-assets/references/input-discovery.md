@@ -118,7 +118,13 @@ iPad bottom 20, top 24 (0 when the app hides the status bar).
   and save `boundary.toImage(pixelRatio: 3)` as PNG inside `tester.runAsync`.
 - A web build (`flutter build web -t <capture main>` opened in headless Chrome)
   works too, but Flutter web reports no safe area: inject the insets through
-  `MediaQuery`.
+  `MediaQuery`. Size the viewport over CDP, not with `--window-size`: from
+  Chrome 156 headless clamps `--window-size` to a 500 px minimum width, so a
+  402 × 874 `--screenshot` comes out 500 × 787 and clipped on the right. Use
+  `Emulation.setDeviceMetricsOverride` (`width: 402, height: 874,
+  deviceScaleFactor: 3, mobile: false`, as `render.py`'s video path does), then
+  `Page.captureScreenshot`; check the PNG is exactly 1206 × 2622 before using it.
+  One batch run measured a 0.02 % difference from a known-good capture.
 
 **Simulator.** Record the state before changing it and restore it after, even
 when the run stops early:
