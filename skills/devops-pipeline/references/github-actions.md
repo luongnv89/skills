@@ -104,7 +104,7 @@ The pull request number exists only on `pull_request` events, so an agent's new 
 A cache saved by a `pull_request` run belongs to `refs/pull/<n>/merge`: later runs of that pull request can restore it, and other pull requests cannot. Every run can restore caches from its own branch, its base branch, and the default branch. A workflow with no default-branch job therefore never writes a cache a new pull request can use, and every pull request's first run installs cold.
 
 - `actions/setup-node` keys its cache on OS, architecture, package manager, and lockfile hash (`node-cache-<os>-<arch>-<pm>-<hash>`), not on the Node version, so any default-branch job with `cache: npm` seeds the key the guard restores, whichever matrix leg saved it. It passes no restore keys (Yarn Berry aside), so `cache-hit` means an exact match. `actions/setup-python` adds the resolved Python version (for example `3.12.16`) and, on Linux, the OS release to its key: seed with the version input the guard uses. Its restore key keeps that version, and `cache-hit` is true only on an exact key match.
-- Since setup-node v6, a job with no `cache:` input still caches npm when `package.json` names npm in `packageManager` or `devEngines.packageManager`; set `package-manager-cache: false` to opt out. The templates set `cache:` explicitly.
+- Since setup-node v6 (v5 for every package manager), a job with no `cache:` input still caches npm when `package.json` names npm in `packageManager` or `devEngines.packageManager`; set `package-manager-cache: false` to opt out. The templates set `cache:` explicitly.
 - The templates seed from the default-branch `matrix-test`, which runs anyway: per merge, or nightly on a busy private repository. One leg also restores and saves the pre-commit cache. The Minimal template has no matrix, so on a public repository it gets a `seed-cache` job on every merge that installs only on a cache miss. On a private repository that job would cost a rounded minute per merge, so it is left out.
 - Cache the pre-commit hook environments too: `~/.cache/pre-commit`, keyed on the Python interpreter (`env.pythonLocation`, set by `setup-python`) and the hash of `.pre-commit-config.yaml`, as `pre-commit/action` does. Without the interpreter in the key, a Python patch update leaves broken environments behind an exact key match that is never re-saved.
 - Caches unused for 7 days are evicted, and the free allowance is 10 GB per repository. Never raise the limit: usage above 10 GB is billed.
@@ -469,10 +469,13 @@ jobs:
 
 ```yaml
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        # Drop `with:` when package.json sets `packageManager` (or
-        # `devEngines.packageManager`): since v4 the action fails when that
-        # and `version` name different pnpm versions.
+        # The floating `v6` tag still points to v6.0.10, which predates pnpm 12
+        # support (pnpm/action-setup#289), so pin the release. `@v6` is fine
+        # again once that tag moves.
+        uses: pnpm/action-setup@v6.1.0
+        # Drop `with:` when package.json sets `packageManager` or
+        # `devEngines.packageManager`. Since v4 the action fails when `version`
+        # and `packageManager` name different pnpm versions.
         with:
           version: 12              # the repo's pnpm major; 12 is current
 
@@ -1109,11 +1112,11 @@ Codecov's team use on private repositories is paid, so write the upload in only 
           token: ${{ secrets.CODECOV_TOKEN }}
 ```
 
-The upload still needs the token on a public repository: since v5, only pull requests from forks upload tokenless, unless the Codecov organization opts out of the token. `use_oidc: true` replaces the secret but needs `permissions: id-token: write` on the job.
+The upload still needs the token on a public repository: since v5, only pull requests from forks upload tokenless, unless the Codecov organization opts out of the token. `use_oidc: true` replaces the secret but needs `permissions: id-token: write` on the job. That block must also list `contents: read`, since a job-level `permissions:` drops every scope it does not name.
 
 ### PR status comment
 
-Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token.
+Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token. The job also needs `pull-requests: write` to post the comment.
 
 ```yaml
       - name: Comment PR
@@ -1291,10 +1294,10 @@ Fetched 2026-11-01. Re-check them when a template changes; runner specs and pric
 - Actions limits (concurrent jobs per plan; 6-hour job limit): https://docs.github.com/en/actions/reference/limits
 - Dependency caching reference (restore scope: current branch, base branch, default branch; pull request caches scoped to `refs/pull/.../merge`; 7-day eviction; 10 GB default): https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching
 - `actions/cache` examples (caching `node_modules` not recommended: breaks across Node versions, incompatible with `npm ci`): https://github.com/actions/cache/blob/main/examples.md
-- `actions/setup-node` v7.1.0 README (`cache` does not cache `node_modules`; `package-manager-cache`), `src/cache-restore.ts` (key `node-cache-<platform>-<arch>-<pm>-<hash>` with no Node version; no restore keys except Yarn Berry, so `cache-hit` is an exact match; `cache-primary-key` and `cache-matched-key` outputs since v7) and `src/main.ts` (npm auto-caching from `packageManager` or `devEngines.packageManager` since v6): https://github.com/actions/setup-node
+- `actions/setup-node` v7.1.0 README (`cache` does not cache `node_modules`; `package-manager-cache`), `src/cache-restore.ts` (key `node-cache-<platform>-<arch>-<pm>-<hash>` with no Node version; no restore keys except Yarn Berry, so `cache-hit` is an exact match; `cache-primary-key` and `cache-matched-key` outputs since v7) and `src/main.ts` (npm auto-caching from `packageManager` or `devEngines.packageManager`; v5 auto-cached every package manager, v6 limited it to npm): https://github.com/actions/setup-node
 - `actions/setup-python` v7.1.0 `src/cache-distributions/pip-cache.ts` (key `setup-python-<os>-<arch>[-<linux release>]-python-<resolved version>-pip-<hash>`; the restore key keeps the version) and `cache-distributor.ts` (`cache-hit` is true only on an exact key match); `src/find-python.ts` still exports `pythonLocation`: https://github.com/actions/setup-python
 - `actions/checkout` v7.0.1 README (`filter`, `fetch-depth`, `persist-credentials`; since v6 the token lives in a `$RUNNER_TEMP` file that `.git/config` includes; since v7 fork pull request code is refused under `pull_request_target` and `workflow_run`), `src/git-source-provider.ts` and `src/git-command-manager.ts` (with `fetch-depth: 0` the filter is passed and the depth omitted): https://github.com/actions/checkout
-- Action majors pinned in the templates, each the `releases/latest` tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest`: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/setup-python` v7.1.0, `actions/cache` v6.1.0, `actions/setup-go` v7.0.0, `actions/setup-java` v6.1.0, `actions/github-script` v9.0.0, `codecov/codecov-action` v7.1.1, `dorny/paths-filter` v4.0.3, `pnpm/action-setup` v6.1.0, `astral-sh/setup-uv` v10.3.3 (no floating major tag), `snok/install-poetry` v1.4.2, `Swatinem/rust-cache` v2.9.3, `pre-commit/action` v3.0.1; `dtolnay/rust-toolchain` is pinned by its `stable` and `master` branches, as its README shows. The templates pin the major tag; pinning a full commit SHA is the stricter option. Every major from v4 on runs on Node 24 and needs runner v2.327.1 or newer, which GitHub-hosted runners have; update self-hosted runners first.
+- Action majors pinned in the templates, each the `releases/latest` tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest`: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/setup-python` v7.1.0, `actions/cache` v6.1.0, `actions/setup-go` v7.0.0, `actions/setup-java` v6.1.0, `actions/github-script` v9.0.0, `codecov/codecov-action` v7.1.1, `dorny/paths-filter` v4.0.3, `pnpm/action-setup` v6.1.0 (pinned as the exact release, since its floating v6 tag is stale, pnpm/action-setup#289), `astral-sh/setup-uv` v10.3.3 (no floating major tag), `snok/install-poetry` v1.4.2, `Swatinem/rust-cache` v2.9.3; `dtolnay/rust-toolchain` is pinned by its `stable` and `master` branches, as its README shows. `pre-commit/action`, mentioned in the opening section, is at v3.0.1. The templates pin the major tag; pinning a full commit SHA is the stricter option. Every pinned JavaScript action runs on Node 24 and needs runner v2.327.1 or newer, which GitHub-hosted runners have; update self-hosted runners first.
 - Release notes for each major crossed: `actions/cache` v5 to v6 (Node 24, ESM; a read-only cache token, as on fork pull requests, makes the save warn instead of fail), `actions/setup-java` v5 to v6 (Maven key adds `.mvn/extensions.xml`; legacy Adopt distributions removed), `actions/setup-go` v6 to v7 (toolchain selection reworked in v6), `codecov/codecov-action` v5 to v7 (`file` deprecated for `files`; `use_oidc`), `actions/github-script` v8 to v9 (`require('@actions/github')` removed; injected `getOctokit`), `pnpm/action-setup` v3 to v6 (v2 stopped working on newer Node; since v4 a `version` that differs from `packageManager` fails; v6 supports pnpm 11 and 12), each at `https://github.com/<owner>/<repo>/releases`, fetched 2026-11-01
 - Node.js release schedule (18 ended 2025-04-30, 20 ended 2026-04-30; 22, 24 and 26 supported), fetched 2026-11-01: https://github.com/nodejs/Release/blob/main/schedule.json
 - Python supported versions (3.10 reached end of life on 2026-10-01; 3.11 to 3.15 supported), fetched 2026-11-01: https://devguide.python.org/versions/
