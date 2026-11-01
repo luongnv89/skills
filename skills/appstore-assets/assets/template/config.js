@@ -8,6 +8,10 @@ window.APP_CONFIG = {
   version: "TODO: 1.0.0",
   // Only platforms the app actually ships: any of "iphone", "ipad", "mac".
   platforms: ["iphone", "ipad", "mac"],
+  // The app's orientation (Info.plist UISupportedInterfaceOrientations, Flutter
+  // setPreferredOrientations): "portrait", "landscape", or { iphone: "landscape", ipad: "portrait" }.
+  // Landscape renders the rotated sizes (2868 × 1320 …); build screens with ui.screen(…, { platform }).
+  orientation: "portrait",
 
   // Marketing canvas tokens. render.py checks every caption pair: headline
   // colors need 3:1 and the supporting line 4.5:1 on both canvas stops.
@@ -45,7 +49,7 @@ window.APP_CONFIG = {
           ui.statusBar({ pad: true }) + ui.split(
             ui.largeTitle("TODO: Title") + ui.sideItem("TODO: Section", "list", true) + ui.sideItem("TODO: Section", "star"),
             ui.navBar({ title: "TODO: Detail title" }) + ui.grid2([ui.card(ui.stat("TODO: 42", "TODO: Label")), ui.card(ui.stat("TODO: 7", "TODO: Label"))])),
-          { bg: "grouped", w: 1032, h: 1376 }),
+          { bg: "grouped", platform: "ipad" }),
         // Source: TODO: path/to/MacContentView.swift:20
         mac: () => macui.window({
           title: "TODO: Window title", tools: ["search", "plus"],
@@ -80,12 +84,14 @@ window.APP_CONFIG = {
     searchSub: "",
     hero: { platform: "iphone", frame: "01-hero" },
     sides: [{ platform: "iphone", frame: "02-feature" }],
+    // layout: "safe",  // header: caption and hero inside Apple's art safe area, no side device
     // Looping, muted header/search videos (creative/<kind>.mp4). Keep kinds empty
     // unless the user asked for video. Beat 0 is the still above; each extra beat
     // reuses existing frames only. Every beat needs max(2.5 s, 1 s + words / 4).
     video: {
       kinds: [],              // any of "header", "search"
-      duration: 12, fps: 30,  // 5–30 s; 30 or 60 fps
+      fps: 30,                // 30 or 60
+      // duration: 15,        // 5–30 s; leave it out to fit the beats (12 s minimum, 30 s cap)
       // The search video is 3744 × 2496 at 30 fps, 3600 × 2400 at 60 fps (H.264 Level 5.2).
       // searchSize: "max",   // 3840 × 2560 instead: needs Level 6.0, untested with App Store Connect
       beats: [

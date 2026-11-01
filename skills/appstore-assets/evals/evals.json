@@ -138,7 +138,7 @@
       "kind": "happy-path",
       "name": "trailmark-header-video-preauthorized",
       "prompt": "Make the new product page header video for Trailmark 2.1 (the Xcode project is in ../../eval-fixtures/appstore-assets/trailmark; copy it and work on the copy). iPhone frames only, editorial light with the app's green, 10 seconds at 30 fps. It plays muted, so the message has to work without sound. Don't ask me anything, just build it.",
-      "expected_output": "A one-line plan instead of a question, a grounded iPhone asset set, and creative/header.png plus creative/header.mp4 at 3840x1646, 30 fps, 10 s, H.264 yuv420p with no audio track, passing check_assets.py including the loop-seam check, with a video sheet reviewed by a fresh reviewer, captions inside the art safe area, no Health-sync or Apple Watch claim, and a Result/Evidence/Uncertainty/Decision report that records the codec as an assumption.",
+      "expected_output": "A one-line plan instead of a question, a grounded iPhone asset set, and creative/header.png plus creative/header.mp4 at 3840x1646, 30 fps, 10 s, H.264 yuv420p with no audio track, passing check_assets.py including the loop-seam check, with a video sheet reviewed by a fresh reviewer, captions inside the art safe area, no Health-sync or Apple Watch claim, and a Result/Evidence/Uncertainty/Decision report that cites the known kit assumptions (codec included) instead of re-listing them.",
       "files": [
         "../../eval-fixtures/appstore-assets/trailmark"
       ],
@@ -152,7 +152,7 @@
         "Every video caption is on-screen text; nothing in the plan or config relies on voice-over or sound",
         "No beat presents Apple Health sync or an Apple Watch app",
         "A reviewer separate from the builder checked the video sheet, or the report says the review ran inline because no Agent tool was available",
-        "The report's Uncertainty: line records that Apple states no codec for creative videos and H.264 was an assumption",
+        "The report cites references/apple-specs.md → Known kit assumptions once for the codec (H.264 is an assumption; Apple states no codec for creative videos) and does not re-list each kit assumption",
         "The final report opens with Result: and has Evidence:, Uncertainty: and Decision: lines, and states nothing was committed or uploaded"
       ]
     },
@@ -188,6 +188,29 @@
         "The response says App Previews are out of scope (recorded app footage, not a creative video)",
         "The response offers a header or search results creative video, or a simulator screen recording, as the alternative",
         "The run did not produce a voice-over script presented as a deliverable of this skill"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "happy-path",
+      "name": "lanternreef-landscape-batch-run",
+      "prompt": "Batch run, no questions. Make the App Store screenshots and the header image for Lantern Reef. The Flutter project is in ../../eval-fixtures/appstore-assets/lanternreef; copy it and work on the copy. Run options:\n```appstore-assets-run\n{\"preauthorized\": true, \"platforms\": [\"iphone\", \"ipad\"], \"orientation\": \"auto\", \"creatives\": [\"header\"], \"video\": {\"kinds\": []}, \"captures\": \"none\", \"upload\": \"none\"}\n```",
+      "expected_output": "Without asking, the run detects a landscape-only app, renders landscape iPhone 6.9\"/6.3\" and iPad 13\" sets plus creative/header.png from grounded screens into appstore-assets/1.3.0/ (the pubspec version without +7), keeps every caption inside the code's limits (paid seas disclosed, no price, no claim that every creature can be collected), lists the unsupported 'about two minutes' listing sentence as an optional listing fix without editing it, and writes REPORT.md and report.json.",
+      "files": [
+        "../../eval-fixtures/appstore-assets/lanternreef"
+      ],
+      "expectations": [
+        "The run did not stop to ask a question; it stated the plan in one line",
+        "config.js sets orientation to \"landscape\" (or landscape for both iphone and ipad), and the brief or PLAN.md cites ios/Runner/Info.plist UISupportedInterfaceOrientations or the setPreferredOrientations call in lib/main.dart",
+        "check_assets.py reports iphone-6.9 PNGs at 2868x1320, iphone-6.3 at 2622x1206 and ipad-13 at 2752x2064, and its summary line says PASS",
+        "The output folder is named for version 1.3.0 (from pubspec.yaml without the +7 build number), not $(FLUTTER_BUILD_NAME) or a date",
+        "No caption, supporting line or callout presents all nine reefs as free; any frame that shows Twilight or Midnight reefs says they need Deep Pass, and no price appears anywhere",
+        "No caption claims that every creature can be collected (stingrays are never collected)",
+        "The report lists the listing sentence 'Every reef takes about two minutes' as unsupported by the code, as an optional listing fix, and store/listing-en-US.md is unchanged",
+        "REPORT.md and report.json exist in the output folder; report.json has result, out, frames per class, reviewer verdict and decisions fields",
+        "Each step's completion report ends with a 'Step N:' line; the only line starting with 'Result:' is the first line of the final report",
+        "The report's Uncertainty: line does not re-list the kit's video or safe-area assumptions; it names only departures from Known kit assumptions, if any",
+        "The final report states nothing was committed, pushed or uploaded"
       ]
     }
   ]

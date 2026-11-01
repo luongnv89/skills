@@ -5,7 +5,7 @@ the files show, not on the effort behind them. You do not edit anything.
 
 ## Input
 
-- This file and `references/apple-guidelines.md` (rules C1–C8, V1–V6, overclaim traps, quality rules).
+- This file and `references/apple-guidelines.md` (rules C1–C9, V1–V6, overclaim traps, quality rules).
 - The full-size PNGs of the required classes and `creative/` (view each one; contact sheets are too small to read in-screen text), plus `<out>/sheets/` for consistency across the set.
 - For each video, its sheet `<out>/sheets/video-[<variant>-]<kind>.png` (you cannot play video): frames at most 2 s apart, each with Apple's art safe area outlined in magenta (the outline is not in the video), then the seam pair (last frame, then frame 0). `creative/<kind>.png` is the full-size frame 0.
 - `<out>/src/config.js` and `<out>/PLAN.md`.
@@ -14,20 +14,29 @@ the files show, not on the effort behind them. You do not edit anything.
 
 ## Checks
 
-1. **Content rules C1–C8.** Read every caption, callout and visible in-screen
+1. **Content rules C1–C9.** Read every caption, callout and visible in-screen
    string on the full-size PNGs. Any hit is blocking.
 2. **Overclaims.** For each frame, compare what the screen and caption show
    with the brief's `claims`, `sensitive` and `screens`. Open the cited source
    for any element you cannot match. A feature without evidence is blocking.
-3. **Accuracy.** Each recreated screen must match its cited view: labels,
+   Then check every caption, supporting line and callout against the brief's
+   `limits`: a count that is not the real count, or that includes paid content
+   without saying so; an absolute ("every", "all", "always") with a recorded
+   exception; a guarantee a fallback path skips. Each is blocking.
+3. **Paid content (C9).** A screen showing content a free user cannot open
+   needs a caption or supporting line that says it costs extra; any price is
+   blocking. Locked items drawn as locked are fine.
+4. **Accuracy.** Each recreated screen must match its cited view: labels,
    control types, order, colors. An element left out on purpose and recorded
    in `PLAN.md` (for example a "Coming soon" row) is not an accuracy finding. A recreated system surface (Siri,
    notifications) is advisory; it must be listed for checking against a build.
-4. **Story.** The first three frames carry the core promise; captions add to
+5. **Story.** The first three frames carry the core promise; captions add to
    the screen instead of describing it. Advisory.
-5. **Legibility and consistency.** Captions readable at sheet size, the same
+6. **Legibility and consistency.** Captions readable at sheet size, the same
    caption placement on every frame, focal point in the middle third. Advisory.
-6. **Videos (V1–V6).** On each video sheet: every beat's caption reads on its
+   A headline the kit fitted for a wide face passes the size rule. Devices
+   outside the creative safe area are advisory while the caption carries the message.
+7. **Videos (V1–V6).** On each video sheet: every beat's caption reads on its
    own with no sound and sits inside the magenta safe area; frame 0 shows the
    headline complete; no tile is blank, clipped or mid-fade on a hold; the
    seam pair matches; every device screen is one of the frames in `config.js`.

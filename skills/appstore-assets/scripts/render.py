@@ -22,7 +22,17 @@ Caption color pairs from config.js brand tokens must reach 3:1 (headline) and
 Videos (creatives.video.kinds in config.js) need ffmpeg and ffprobe; a config
 without video never calls them. One Chrome, driven over --remote-debugging-pipe,
 seeks the page to each frame time and captures it; ffmpeg encodes H.264 High,
-yuv420p, BT.709, constant frame rate, no audio, +faststart MP4.
+yuv420p, BT.709, constant frame rate, no audio, +faststart MP4. Videos take
+turns machine-wide: a lock file (~/.cache/appstore-assets/video.lock) makes a
+parallel render wait for the video step instead of competing for the CPU.
+
+Under load Chrome can crash or stop answering. Each Chrome step is retried
+(4 attempts, backoff about 4, 8, 16 s; a video resumes at the frame it lost),
+and after the second failure the run switches to chrome-headless-shell when
+one is installed (PATH, Puppeteer or Playwright caches; macOS and Linux).
+
+config.js orientation "landscape" renders the iPhone and iPad classes rotated
+(2868 x 1320, 2622 x 1206, 2752 x 2064); Mac is always landscape.
 
 Outputs (OUT_DIR defaults to SRC_DIR's parent):
   iphone-6.9/<id>.png  1320 x 2868   iPhone with Dynamic Island, large display
@@ -44,6 +54,7 @@ import html
 import io
 import json
 import os
+import random
 import re
 import select
 import shutil
@@ -92,6 +103,15 @@ CHROME_CANDIDATES = [
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
     "google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome",
 ]
+# chrome-headless-shell, the fallback when Chrome keeps crashing: PATH, then the
+# Puppeteer and Playwright download caches (newest version first).
+HEADLESS_SHELL_GLOBS = [
+    ".cache/puppeteer/chrome-headless-shell/*/chrome-headless-shell-*/chrome-headless-shell",
+    "Library/Caches/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell",
+    ".cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell",
+]
+ATTEMPTS = max(1, int(os.environ.get("APPSTORE_ASSETS_ATTEMPTS", "4")))  # tries per Chrome step
+CHROME_TIMEOUT = 120  # seconds for one screenshot; each retry allows one more multiple of it
 
 
 def fail(msg: str, fix: str) -> None:
@@ -111,19 +131,68 @@ def find_chrome(explicit: str | None) -> str:
     return ""
 
 
-def chrome(binary: str, args: list[str], what: str) -> subprocess.CompletedProcess:
+class ChromeCrash(Exception):
+    """Chrome crashed, hung or stopped answering: often machine load, so worth a retry
+    (unlike a config error, a size mismatch or a page script exception, which fail at once)."""
+
+
+def find_headless_shell() -> str | None:
+    found = shutil.which("chrome-headless-shell")
+    if found:
+        return found
+    home = Path.home()
+    for pattern in HEADLESS_SHELL_GLOBS:
+        hits = [p for p in home.glob(pattern) if os.access(p, os.X_OK)]
+        if hits:  # version folders sort lexically; take the newest by its version numbers
+            return str(max(hits, key=lambda p: [int(n) for n in re.findall(r"\d+", p.as_posix().split("/")[-3])]))
+    return None
+
+
+class Runner:
+    """Runs Chrome steps with retries and backoff, and switches to chrome-headless-shell
+    after the second failure when one is installed (sticky for the rest of the run)."""
+
+    def __init__(self, binary: str):
+        self.binary, self.switched = binary, "headless-shell" in Path(binary).name
+
+    def backoff(self, attempt: int, err: Exception, what: str) -> None:
+        """Wait before attempt + 1, or fail after the last one."""
+        if attempt >= ATTEMPTS:
+            fail(f"Chrome failed {attempt} time(s) while rendering {what}: {err}",
+                 "lower the load (fewer renders in parallel) and re-run; or install chrome-headless-shell "
+                 "(npx @puppeteer/browsers install chrome-headless-shell@stable) or pass --chrome with another build.")
+        if attempt >= 2 and not self.switched:
+            self.switched = True
+            shell = find_headless_shell()
+            if shell:
+                print(f"WARN: Chrome failed {attempt} times; using chrome-headless-shell for the rest of this run: {shell}")
+                self.binary = shell
+        delay = min(60.0, 4.0 * 2 ** (attempt - 1)) * (1 + random.random() / 4)
+        print(f"WARN: {err} ({what}); retry {attempt}/{ATTEMPTS - 1} in {delay:.0f} s")
+        time.sleep(delay)
+
+    def run(self, what: str, step):
+        for attempt in range(1, ATTEMPTS + 1):
+            try:
+                return step(self.binary, attempt)
+            except ChromeCrash as e:
+                self.backoff(attempt, e, what)
+        raise AssertionError("unreachable")
+
+
+def chrome(binary: str, args: list[str], what: str, attempt: int = 1) -> subprocess.CompletedProcess:
+    timeout = CHROME_TIMEOUT * attempt
     try:
         return subprocess.run([binary, "--headless=new", "--disable-gpu", "--hide-scrollbars",
                                "--allow-file-access-from-files", "--force-color-profile=srgb",
                                "--virtual-time-budget=5000", *args],
-                              check=True, capture_output=True, text=True, timeout=120)
+                              check=True, capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
-        fail(f"Chrome timed out after 120 s while rendering {what}.",
-             "check config.js for an infinite loop or a remote asset that never loads; keep every asset local.")
+        raise ChromeCrash(f"Chrome timed out after {timeout} s (an infinite loop or a remote asset in config.js "
+                          "also does this; keep every asset local)") from None
     except subprocess.CalledProcessError as e:
-        tail = "\n".join((e.stderr or "").strip().splitlines()[-8:])
-        fail(f"Chrome exited with code {e.returncode} while rendering {what}.\n{tail}",
-             "run the same URL in a normal Chrome window to see the error, or pass --chrome with a working binary.")
+        tail = " | ".join((e.stderr or "").strip().splitlines()[-3:])
+        raise ChromeCrash(f"Chrome exited with code {e.returncode}: {tail}") from None
     except OSError as e:  # not executable, or not a program
         fail(f"Chrome could not start: {e}", "pass --chrome with a working Chrome or Chromium binary.")
     raise AssertionError("unreachable")
@@ -147,6 +216,44 @@ def video_spec(video: dict) -> dict:
         return CREATIVES[video["kind"]]
     scale = SEARCH_SCALE[video["fps"]]
     return {"w": 1920, "h": 1280, "scale": scale, "px": (round(1920 * scale), round(1280 * scale))}
+
+
+def class_spec(cls: str, orientation: dict) -> dict:
+    """A class's viewport and pixels in the config's orientation: landscape swaps width and height,
+    and the smaller iPhone class zooms the rotated 956 x 440 design to its own width."""
+    spec = CLASSES[cls]
+    if orientation.get(spec["platform"]) != "landscape":
+        return spec
+    design = next(s for s in CLASSES.values() if s["platform"] == spec["platform"] and s["zoom"] is None)
+    return {**spec, "w": spec["h"], "h": spec["w"], "px": spec["px"][::-1],
+            "zoom": None if spec["zoom"] is None else spec["h"] / design["h"]}
+
+
+def video_lock(out: Path):
+    """Hold the machine-wide video lock, waiting for another render's video step to finish.
+    flock is released when the process exits, however it exits, so no lock goes stale.
+    APPSTORE_ASSETS_VIDEO_LOCK=0 skips it; APPSTORE_ASSETS_LOCK_DIR moves it."""
+    if os.environ.get("APPSTORE_ASSETS_VIDEO_LOCK") == "0":
+        return None
+    import fcntl  # POSIX only, like video rendering itself
+    folder = Path(os.environ.get("APPSTORE_ASSETS_LOCK_DIR") or Path.home() / ".cache" / "appstore-assets")
+    folder.mkdir(parents=True, exist_ok=True)
+    fh = (folder / "video.lock").open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        fh.seek(0)
+        holder = fh.read().strip() or "another render"
+        print(f"waiting for the video lock {folder / 'video.lock'} (held by {holder}); 4K videos render one at a time "
+              "per machine, stills are done", flush=True)
+        started = time.monotonic()
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        print(f"video lock acquired after {time.monotonic() - started:.0f} s", flush=True)
+    fh.seek(0)
+    fh.truncate()
+    fh.write(f"pid {os.getpid()}, {out}\n")
+    fh.flush()
+    return fh
 
 
 def h264_level(w: int, h: int, fps: int) -> str:
@@ -197,17 +304,16 @@ class Browser:
         try:
             os.write(self.to_w, json.dumps(msg).encode() + b"\0")
         except OSError:
-            fail(f"Chrome exited before {method}.", "pass --chrome with a working binary.")
+            raise ChromeCrash(f"Chrome exited before {method}") from None
         deadline = time.monotonic() + timeout
         while True:
             while b"\0" not in self.buf:
                 left = deadline - time.monotonic()
                 if left <= 0 or self.proc.poll() is not None or not select.select([self.from_r], [], [], left)[0]:
-                    fail(f"Chrome stopped answering during {method}.",
-                         "pass --chrome with a current Chrome or Chromium (the pipe transport needs version 75 or later).")
+                    raise ChromeCrash(f"Chrome stopped answering during {method} (it needs version 75 or later)")
                 chunk = os.read(self.from_r, 1 << 20)
                 if not chunk:
-                    fail(f"Chrome closed the debugging pipe during {method}.", "pass --chrome with a working binary.")
+                    raise ChromeCrash(f"Chrome closed the debugging pipe during {method}")
                 self.buf += chunk
             raw, self.buf = self.buf.split(b"\0", 1)
             reply = json.loads(raw)
@@ -221,11 +327,12 @@ class Browser:
         self.session = self.send("Target.attachToTarget", {"targetId": target, "flatten": True})["sessionId"]
         self.send("Emulation.setDeviceMetricsOverride", {"width": w, "height": h, "deviceScaleFactor": scale, "mobile": False})
         self.send("Page.navigate", {"url": url})
-        for _ in range(600):  # the page sets __ready once fonts and images have loaded
+        deadline = time.monotonic() + 90  # the page sets __ready once fonts and images have loaded
+        while time.monotonic() < deadline:
             if self.eval("window.__ready === true"):
                 return
             time.sleep(0.05)
-        fail(f"the page never became ready: {url}", "open the same URL in Chrome and check the console for errors.")
+        raise ChromeCrash(f"the page never became ready within 90 s: {url} (if it repeats, open it in Chrome and check the console)")
 
     def eval(self, expression: str):
         res = self.send("Runtime.evaluate", {"expression": expression, "awaitPromise": True, "returnByValue": True})
@@ -254,8 +361,9 @@ class Browser:
             shutil.rmtree(self.profile, ignore_errors=True)
 
 
-def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, video: dict, out: Path) -> None:
-    """Seek the page to each frame time, capture it, and pipe the PNGs to ffmpeg."""
+def render_video(runner: Runner, tools: tuple[str, str], url: str, spec: dict, video: dict, out: Path) -> None:
+    """Seek the page to each frame time, capture it, and pipe the PNGs to ffmpeg. Frames are a pure
+    function of t, so when Chrome crashes a new one resumes at the lost frame into the same encoder."""
     ffmpeg, ffprobe = tools
     fps, frames, (pw, ph) = video["fps"], video["frames"], spec["px"]
     new_dirs = [d for d in (out.parent, *out.parent.parents) if not d.exists()]  # deepest first
@@ -279,14 +387,24 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
     except OSError as e:  # e.g. FFMPEG points at a file that is not executable
         unmake_dirs()
         fail(f"ffmpeg could not start: {e}", "point FFMPEG at a working ffmpeg 4.1 or later, or install one and re-run.")
-    started, browser, done = time.monotonic(), None, False
+    started, browser, done, i, failures = time.monotonic(), None, False, 0, 0
     try:
-        browser = Browser(binary)
-        browser.open(url, spec["w"], spec["h"], spec["scale"])
-        for i in range(frames):
-            browser.eval(f"window.__seek({i / fps!r})")
-            png = browser.capture()
-            if i == 0:
+        while i < frames:
+            try:
+                fresh = browser is None
+                if fresh:
+                    browser = Browser(runner.binary)
+                    browser.open(url, spec["w"], spec["h"], spec["scale"])
+                browser.eval(f"window.__seek({i / fps!r})")
+                png = browser.capture()
+            except ChromeCrash as e:
+                if browser:
+                    browser.close()
+                browser = None
+                failures += 1
+                runner.backoff(failures, e, f"{out.name} frame {i}")
+                continue
+            if fresh:  # the first frame from each Chrome, so a fallback binary is checked too
                 size = Image.open(io.BytesIO(png)).size
                 if size != (pw, ph):
                     fail(f"{out} frames render at {size[0]}x{size[1]}, expected {pw}x{ph}.",
@@ -295,6 +413,7 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
                 enc.stdin.write(png)
             except BrokenPipeError:
                 break
+            i += 1
         done = True
     finally:
         if browser:
@@ -329,8 +448,9 @@ def render_video(binary: str, tools: tuple[str, str], url: str, spec: dict, vide
                 enc.wait()
             tmp.unlink(missing_ok=True)
             unmake_dirs()
-    print(f"ok  {out}  {pw}x{ph}  {fps} fps  {video['duration']} s  {frames} frames  "
-          f"{video['beats']} beat(s)  rendered in {time.monotonic() - started:.1f} s")
+    print(f"ok  {out}  {pw}x{ph}  {fps} fps  {video['duration']} s{' (fitted to the beats)' if video.get('auto') else ''}  "
+          f"{frames} frames  {video['beats']} beat(s)  rendered in {time.monotonic() - started:.1f} s"
+          + (f"  after {failures} Chrome restart(s)" if failures else ""))
 
 
 def check_placeholders(config: Path) -> None:
@@ -501,8 +621,9 @@ def prune_stale(out: Path, expected: set[Path], videos: bool, record: dict, made
         write_record(creative, record)
 
 
-def read_manifest(binary: str, index: Path) -> dict:
-    out = chrome(binary, ["--dump-dom", f"{index.as_uri()}?manifest=1"], "the manifest").stdout
+def read_manifest(runner: Runner, index: Path) -> dict:
+    out = runner.run("the manifest", lambda binary, attempt: chrome(binary, ["--dump-dom", f"{index.as_uri()}?manifest=1"],
+                                                                     "the manifest", attempt)).stdout
     err = re.search(r'id="render-error"[^>]*>(.*?)</div>', out, re.S)
     if err:
         fail(f"config.js failed to load: {html.unescape(err.group(1)).strip()}",
@@ -517,8 +638,9 @@ def read_manifest(binary: str, index: Path) -> dict:
         dwell = [e for e in errors if "its caption needs" in e]  # the video dwell rule in kit.js
         fixes = []
         if dwell:
-            fixes.append("for a video beat held too briefly: raise creatives.video.duration (up to 30 s), shorten that "
-                         "beat's caption, or drop a beat; each beat needs max(2.5 s, 1 s + words / 4).")
+            fixes.append("for a video beat held too briefly: remove creatives.video.duration so the kit fits the beats "
+                         "(12-30 s), set the length the error names, shorten that beat's caption, or drop a beat; each "
+                         "beat needs max(2.5 s, 1 s + words / 4).")
         if len(dwell) < len(errors):
             fixes.append("fix each named frame in config.js (a missing helper, unknown icon, wrong image path or creatives "
                          "frame id).")
@@ -526,14 +648,16 @@ def read_manifest(binary: str, index: Path) -> dict:
     return data
 
 
-def shoot(binary: str, url: str, w: int, h: int, scale: int, out: Path, expected: tuple[int, int]) -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        raw = Path(tmp) / "raw.png"
-        chrome(binary, [f"--force-device-scale-factor={scale}", f"--window-size={w},{h}", f"--screenshot={raw}", url], out.name)
-        if not raw.exists():
-            fail(f"Chrome reported success but wrote no screenshot for {out.name}.",
-                 "upgrade Chrome; --screenshot needs a version with --headless=new support.")
-        img = Image.open(raw).convert("RGB")  # drops the alpha channel
+def shoot(runner: Runner, url: str, w: int, h: int, scale: int, out: Path, expected: tuple[int, int]) -> None:
+    def step(binary: str, attempt: int) -> Image.Image:
+        with tempfile.TemporaryDirectory() as tmp:
+            raw = Path(tmp) / "raw.png"
+            chrome(binary, [f"--force-device-scale-factor={scale}", f"--window-size={w},{h}", f"--screenshot={raw}", url],
+                   out.name, attempt)
+            if not raw.exists():  # a crash on exit can still report success
+                raise ChromeCrash("Chrome reported success but wrote no screenshot")
+            return Image.open(raw).convert("RGB")  # drops the alpha channel
+    img = runner.run(out.name, step)
     if img.size != expected:
         fail(f"{out} rendered at {img.size[0]}x{img.size[1]}, expected {expected[0]}x{expected[1]}.",
              "do not change the stage sizes in kit.js; if Chrome ignores --window-size, pass --chrome with a current build.")
@@ -567,6 +691,9 @@ def main() -> None:
 
     if a.preflight:
         print(f"ok  Pillow available\nok  Chrome: {find_chrome(a.chrome)}")
+        shell = find_headless_shell()
+        print(f"ok  crash fallback: {shell}" if shell else "note: no chrome-headless-shell for the crash fallback "
+              "(optional: npx @puppeteer/browsers install chrome-headless-shell@stable)")
         if a.video:
             ffmpeg, ffprobe = find_ffmpeg()
             if "libx264" not in subprocess.run([ffmpeg, "-hide_banner", "-encoders"], capture_output=True, text=True, check=False).stdout:
@@ -586,9 +713,10 @@ def main() -> None:
     if not a.allow_placeholders:
         check_placeholders(config)
 
-    binary = find_chrome(a.chrome)
+    runner = Runner(find_chrome(a.chrome))
     out = (a.out or a.src.resolve().parent).resolve()
-    manifest = read_manifest(binary, index)
+    manifest = read_manifest(runner, index)
+    orientation = manifest.get("orientation") or {}
     videos = [] if a.no_video else [v for v in manifest.get("video", []) if not a.only or v["kind"] in a.only]
     tools = find_ffmpeg() if videos else None  # before any screenshot, so a missing ffmpeg fails fast
     if any(isinstance(c, str) for c in manifest.get("creatives", [])):
@@ -599,6 +727,16 @@ def main() -> None:
     if not manifest.get("fontOk", True):
         print("Warning: the display font did not load; captions fell back to the system face. "
               "Run fetch_font.py or remove fonts.display from config.js.", file=sys.stderr)
+    for f in manifest.get("fit", []):  # kit.js shrank a headline that wrapped past two lines
+        print(f"{'fit ' if f['fits'] else 'WARN:'} headline {f['id']}: {f['base']:g} -> {f['size']:g} px"
+              + ("" if f["fits"] else f", still {f['lines']} lines at the 75 % floor; shorten it"))
+    for o in manifest.get("outside", []):
+        print(f"note: {o['kind']}{' (variant ' + o['variant'] + ')' if o['variant'] else ''}: device slot(s) "
+              f"{', '.join(o['slots'])} sit outside Apple's art safe area, so narrow displays crop them; keep the "
+              "message in the caption" + (", or set creatives.layout: \"safe\"" if o["kind"] == "header" else ""))
+    landscape = sorted(p for p, v in orientation.items() if v == "landscape" and p in manifest["platforms"])
+    if landscape:
+        print(f"ok  orientation: landscape for {', '.join(landscape)}")
 
     count, written = 0, set()
     creative = out / "creative"
@@ -615,7 +753,7 @@ def main() -> None:
         write_record(creative, record)
 
     for cls in [c for c in a.classes.split(",") if c]:
-        spec = CLASSES[cls]
+        spec = class_spec(cls, orientation)
         if spec["platform"] not in manifest["platforms"]:
             continue
         for frame in manifest["frames"]:
@@ -623,7 +761,7 @@ def main() -> None:
                 continue
             q = f"frame={frame['id']}&cls={cls}&h={spec['h']}" + (f"&zoom={spec['zoom']:.6f}" if spec["zoom"] else "")
             target = out / cls / f"{frame['id']}.png"
-            shoot(binary, f"{index.as_uri()}?{q}", spec["w"], spec["h"], spec["scale"], target, spec["px"])
+            shoot(runner, f"{index.as_uri()}?{q}", spec["w"], spec["h"], spec["scale"], target, spec["px"])
             written.add(target.resolve())
             count += 1
     for still in manifest.get("creatives", []):  # {kind, variant}; a variant renders into creative/<variant>/
@@ -633,20 +771,23 @@ def main() -> None:
         c = CREATIVES[kind]
         target = creative / (variant or "") / f"{kind}.png"
         created = bool(variant) and not target.parent.exists()
-        shoot(binary, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
+        shoot(runner, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
               c["w"], c["h"], c["scale"], target, c["px"])
         owned(target, variant, created)
         written.add(target.resolve())
         count += 1
+    lock = video_lock(out) if videos else None  # stills are done; take turns for the slow 4K step
     for video in videos:
         kind, variant = video["kind"], video["variant"]
         target = creative / (variant or "") / f"{kind}.mp4"
         created = bool(variant) and not target.parent.exists()
-        render_video(binary, tools, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
+        render_video(runner, tools, f"{index.as_uri()}?creative={kind}" + (f"&variant={variant}" if variant else ""),
                      video_spec(video), video, target)
         owned(target, variant, created)
         written.add(target.resolve())
         count += 1
+    if lock:
+        lock.close()
     if count == 0:
         fail("nothing was rendered: no frame matched the platforms, --classes and --only filters.",
              "check platforms[] in config.js and the ids passed to --only.")

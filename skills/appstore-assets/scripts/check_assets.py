@@ -26,9 +26,16 @@ record exists and does not vouch for it (unlisted, or changed since), its FAIL
 row ends with "(not written by the kit)". Anything else there (an App Preview
 recording, raw art, notes) gets a WARN row telling the user not to upload it.
 
+iphone-duo-outer/ and iphone-duo-inner/ (iPhone Duo, required from April 2027
+for apps built with the iOS 27.1 SDK) are checked when present; render.py does
+not make them yet. A class folder mixing portrait and landscape gets a WARN.
+
 Usage:
   python3 check_assets.py OUT_DIR --platforms iphone,ipad,mac
-         [--sheet SHEET_DIR] [--pair "#1d5fd6/#e6edf8@3" ...]
+         [--sheet SHEET_DIR] [--pair "#1d5fd6/#e6edf8@3" ...] [--json FILE]
+
+--json writes the result for report.json: verdict, counts, screenshots per
+class, each video's facts, and every row.
 
 Exit 0 = every check passed (WARN rows are notes). Exit 1 = at least one FAIL row (each says why).
 """
@@ -66,6 +73,9 @@ ACCEPTED = {
     "iphone-6.3": both((1206, 2622), (1179, 2556)),
     "ipad-13": both((2064, 2752), (2048, 2732)),
     "mac": {(1280, 800), (1440, 900), (2560, 1600), (2880, 1800)},
+    # iPhone Duo (apple-specs.md): not rendered by the kit; hand-made sets are checked.
+    "iphone-duo-outer": both((1398, 2034)),
+    "iphone-duo-inner": both((2007, 2853)),
 }
 REQUIRED = {"iphone": "iphone-6.3", "ipad": "ipad-13", "mac": "mac"}
 CREATIVE = {"header": {(3840, 1646)}, "universal": {(5244, 2950)}}
@@ -353,6 +363,7 @@ def main() -> None:
     ap.add_argument("--platforms", required=True, help="platforms the app ships, e.g. iphone or iphone,ipad,mac")
     ap.add_argument("--sheet", type=Path, help="write one contact sheet per folder here for visual review")
     ap.add_argument("--pair", action="append", default=[], help='caption color pair "FG/BG[@MIN]", MIN defaults to 4.5')
+    ap.add_argument("--json", type=Path, help="also write the result as JSON here (for report.json)")
     a = ap.parse_args()
 
     if not a.out.is_dir():
@@ -366,6 +377,7 @@ def main() -> None:
 
     rows, failures = [], 0
     names: dict[str, list[str]] = {}
+    video_facts: list[dict] = []
     ffprobe, ffmpeg = tool("ffprobe"), tool("ffmpeg")
     prints = None
 
@@ -425,7 +437,18 @@ def main() -> None:
                 notes.append("ffmpeg not found: loop-seam and blank-frame checks and the video sheet were skipped")
             failures += bool(problems)
             rows.append((name, "FAIL" if problems else "PASS", "; ".join(problems) + stranger(f) if problems else facts["desc"]))
+            video_facts.append({"file": name, "verdict": "FAIL" if problems else "PASS",
+                                **{k: facts.get(k) for k in ("w", "h", "fps", "duration", "frames", "desc")}})
             rows += [(name, "WARN", n) for n in notes]
+        shapes = set()
+        for f in files if folder not in ("creative", "mac") else []:
+            try:
+                with Image.open(f) as im:
+                    shapes.add("landscape" if im.width > im.height else "portrait")
+            except OSError:  # the size row above already FAILs it
+                pass
+        if len(shapes) > 1:
+            rows.append((f"{folder}/", "WARN", "mixes portrait and landscape screenshots; use the app's orientation (config.js orientation)"))
         if folder != "creative" and len(files) > MAX_PER_CLASS:
             failures += 1
             rows.append((f"{folder}/", "FAIL", f"{len(files)} screenshots; App Store Connect allows {MAX_PER_CLASS} per class"))
@@ -464,6 +487,13 @@ def main() -> None:
     warns = sum(r[1] == "WARN" for r in rows)
     checks = len(rows) - warns
     print(f"{'FAIL' if failures else 'PASS'}: {checks - failures}/{checks} checks passed" + (f", {warns} warning(s)" if warns else ""))
+    if a.json:
+        a.json.parent.mkdir(parents=True, exist_ok=True)
+        a.json.write_text(json.dumps({
+            "result": "FAIL" if failures else "PASS", "checks": checks, "failed": failures, "warnings": warns,
+            "screenshots": {k: len(v) for k, v in names.items() if k != "creative"},
+            "creative": names.get("creative", []), "videos": video_facts,
+            "rows": [{"path": n, "verdict": v, "detail": d} for n, v, d in rows]}, indent=2) + "\n", encoding="utf-8")
     sys.exit(1 if failures else 0)
 
 

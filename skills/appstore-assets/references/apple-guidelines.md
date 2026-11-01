@@ -17,6 +17,7 @@ the frame unshippable; an **advisory** rule is a quality note.
 | C6 | Every screen shows the app in use, and only what the shipped build does (Guideline 2.3) | The screen traces to a source view or a clean capture; see the overclaim traps |
 | C7 | No placeholder or QA data on screen: "lorem", "test", "Unknown", "0.00s", debug labels, an open keyboard covering content | Read every visible string |
 | C8 | Third-party brand logos appear only where the app itself shows them, at in-app size | Logos inside recreated UI: allowed; a logo enlarged as a marketing graphic: blocking |
+| C9 | In-app purchases and locked content (Guideline 2.3.2: screenshots say which featured items, levels or subscriptions cost extra). Capture free content by default: the state a new player or user sees. A frame that shows paid content (an unlocked "All Chapters" list, premium items, a subscriber-only screen) says so in its caption or supporting line ("Chapter 1 is free; one purchase opens the rest"). Never show a price, a sale or a "Buy" amount, in a caption or on screen (C1) | Compare each screen with the brief's `limits` (free vs paid). Paid content shown without disclosure, or any price: blocking. Locked items drawn as locked are fine |
 
 ## Overclaim traps (blocking, Guideline 2.3)
 
@@ -33,6 +34,15 @@ do. The usual sources:
   devices" frame needs iCloud/CloudKit in the code.
 - **Copy that outruns the metadata.** A caption claim ("200+ models", "works
   offline") must already appear in, or be supported by, the description or code.
+- **Claims that outrun the code's limits.** The brief's `limits` record where a
+  feature stops: paid-only content, a fallback path, an exception, the real
+  count. Check every caption against them. Counts must match the content a
+  player can reach, saying which part is paid ("Nine dives" fails when six of
+  them need a purchase and the frame does not say so). Absolutes ("every",
+  "always", "never", "all") fail when the code has one exception ("Every
+  critter is a step" when spikebacks cannot be stomped). A guarantee ("checked
+  to be solvable") fails when a fallback path skips the check. Say the
+  narrower true thing ("Stomp critters into steps").
 - **Fidelity.** A recreated system surface (Siri, notifications, share sheet)
   is an approximation; the final report lists it for checking against a build.
 
@@ -48,8 +58,11 @@ do. The usual sources:
   composition so device crops never cut it.
 - **Short text that adds to the visual.** Two-line headline, at most one
   supporting sentence. Never caption what the screen already says.
-- **Legible at search size.** Headlines at least about 9 % of the frame width;
-  WCAG contrast at least 3:1 for headline text and 4.5:1 for the supporting line.
+- **Legible at search size.** Headlines at the kit's layout size (about 9 % of
+  the frame width), or the size its fit chose for a wide face: `render.py`
+  prints `fit headline …` when it shrank one to keep two lines, down to 75 %
+  (about 7 %), and that fitted size passes. WCAG contrast at least 3:1 for
+  headline text and 4.5:1 for the supporting line.
 - **Consistent set.** Same palette, type, device frame, and caption position on
   every frame; the creative assets reuse the same look.
 - **Current UI.** Show the latest UI and a full status bar at 9:41 with full
@@ -65,10 +78,14 @@ do. The usual sources:
 - Reuse one 16:9 universal master for both placements when the composition
   survives both crops.
 - Keep text and the main subject inside the art safe area (`apple-specs.md`).
+  The kit's default header places the devices outside it, as decoration that
+  narrow displays crop (`render.py` prints a `note:`); that is advisory, not
+  blocking, while the caption carries the message. If the user wants every
+  device inside, set `creatives.layout: "safe"` (caption and one hero device).
 
 ## Header and search videos (blocking unless marked)
 
-Rules C1–C8 and the overclaim traps apply to every beat of a video. Also:
+Rules C1–C9 and the overclaim traps apply to every beat of a video. Also:
 
 | # | Rule | Check |
 | --- | --- | --- |

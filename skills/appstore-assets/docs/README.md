@@ -9,7 +9,7 @@
 
 > Generate upload-ready App Store screenshots and creative assets (header and search images and looping videos) for iPhone, iPad and Mac from an app's codebase or landing page, following Apple's asset best practices.
 
-Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.2.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -22,6 +22,10 @@ Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
 - Turns the header and search creatives into looping, muted videos (header 3840 × 1646, search 3744 × 2496 at 30 fps or 3600 × 2400 at 60 fps, 5–30 s): captions carry the message without sound, every frame is reproducible, the last frame flows into the first, and the key text stays inside Apple's art safe area
 - Checks each video with ffprobe (size, constant 30/60 fps, duration, H.264 yuv420p, audio) and writes a video sheet so a reviewer can check every caption and the loop seam without playing it
 - Optional Custom Product Page variants: one header per ad creative, rendered to `creative/<variant>/`
+- Landscape apps (`orientation: "landscape"`, read from `Info.plist` or Flutter's `setPreferredOrientations`) render the rotated sizes from the same kit
+- Video length fitted to the planned beats (12 s minimum, 30 s cap), and headlines in wide faces shrink to fit two lines
+- Built for batch runs: Chrome crashes are retried (with a `chrome-headless-shell` fallback), 4K videos take turns machine-wide, a `run.json` carries the run's decisions, and each run writes `REPORT.md` plus a machine-readable `report.json`
+- Checks every caption against the code's limits (free versus paid content, fallback paths, exceptions), never shows a price, and flags listing text the code does not support
 
 ## When to Use
 
@@ -33,6 +37,8 @@ Version: **1.1.0** · Author: Luong NGUYEN · License: MIT
 | "Change the third headline and re-render" | Edit the existing asset set's config and re-render only what changed |
 | "Make the product page header video, 10 seconds, muted" | Render `creative/header.mp4` from the approved header design and grounded screens, then verify it |
 | "We need a search results video and one header per TikTok ad" | Render `search.mp4` plus a header per Custom Product Page variant |
+| "Run appstore-assets on these 8 game repos with run.json" | Read each repo's run options, render, and leave `REPORT.md` and `report.json` per set |
+| "Our game is landscape only" | Detect the orientation and render 2868 × 1320 / 2752 × 2064 sets |
 | "Record an App Preview of the app" | Decline: App Previews are recorded app footage; offers a header video instead |
 
 ## How It Works

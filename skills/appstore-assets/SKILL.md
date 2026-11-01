@@ -8,7 +8,7 @@ dependencies:
   - "github:emilkowalski/skills:skills/emil-design-eng"
   - browse
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -27,7 +27,8 @@ Terms used throughout:
 - **grounded screen**: a recreated screen whose elements trace to a cited view (`path:line`) or a landing-page image.
 - **clean capture**: a real screenshot that passes the checklist in `references/input-discovery.md`.
 - **overclaim**: anything a frame shows that the shipped build cannot do.
-- **pre-authorized run**: the request fixes the direction, frames and UI source, or delegates them ("just build it", "pick whatever looks good", "don't ask").
+- **pre-authorized run**: the request fixes the direction, frames and UI source, or delegates them ("just build it", "pick whatever looks good", "don't ask"), or its run options say `preauthorized: true`.
+- **run options**: a batch run's decisions in a `run.json` file or an `appstore-assets-run` prompt block (`references/render-pipeline.md` → Batch runs and reports). Read them before Step 1; each key fixes its decision.
 - **creative video**: a looping, muted product page header or search results video (`creative/<kind>.mp4`) made from the still creative and grounded frames. An **App Preview** (recorded app footage with audio) is not one.
 
 ## When to Use
@@ -44,7 +45,7 @@ audits, app icons, or Google Play assets.
 Step 0 branch → 1 discover → 2 refresh specs → 3 plan and approve → 4 build →
 5 render and verify → 6 review → 7 hand off. After each step, print a Step
 Completion Report: `√`/`×` rows tied to commands, files or counts, then
-`Result: PASS | FAIL | PARTIAL`.
+`Step N: PASS | FAIL | PARTIAL`. Never write `Result:` there: that line opens only the final report.
 
 ## Step 0 — Select the branch
 
@@ -52,9 +53,13 @@ Completion Report: `√`/`×` rows tied to commands, files or counts, then
 | --- | --- |
 | The input holds an Xcode project, `Package.swift`, Swift sources, or a Flutter/React Native app with an `ios/` or `macos/` target | **Codebase**: Steps 1–7 |
 | The input is a landing-page URL or `.html` file, with no codebase | **Landing page**: Steps 1–7; screens come only from page imagery |
-| `<out>/src/config.js` exists and the user asks for edits or a re-render | **Update**: refresh the kit files (below), edit `config.js`, then Steps 5–7 |
+| `<out>/src/config.js` exists and the user asks for edits or a re-render, or a kit set for this version already exists | **Update**: refresh the kit files (below), edit `config.js`, then Steps 5–7 |
 | Only watchOS, tvOS or visionOS, or no Apple target | **Stop**: report BLOCKED with the reason; write nothing |
 | No input named or found | Ask for the codebase path or landing-page URL; write nothing |
+
+Find existing sets first with the commands in `references/input-discovery.md` → Existing
+asset sets (`store/screenshots/`, `fastlane/screenshots/`, `metadata/`, `appstore-assets/`; `1.0`
+and `1.0.0` are one version). Update reuses that set's `src/` and `out`, which may differ.
 
 Update branch kit refresh: note whether `src/kit.js` predates video (no `__seek` in it), then
 copy the template's `kit.js`, `kit.css` and `index.html` into `src/`, first backing up any that
@@ -117,7 +122,7 @@ Spawn the explorer. Input: `agents/app-explorer.md`, `references/input-discovery
 input path or URL, and whether `browse` is available. Output: the app brief JSON. Do not
 read the source tree yourself in this step; the explorer keeps it out of your context budget.
 
-Bar: every platform carries evidence and every screen has a `source`. If `stop_reason` is set, take the Stop branch.
+Bar: every platform carries evidence, every screen has a `source`, and `orientation` and `limits` are filled. If `stop_reason` is set, take the Stop branch.
 
 ## Step 2 — Refresh Apple's specs
 
@@ -140,19 +145,20 @@ app's brand as the explicit brief.
 4. Remove every overclaim. For sensitive features, reuse the brief's `approved_wording`.
 5. Ask one combined question: direction (2–3 options), frame list, UI source, extras (creative images, header/search videos with their beats and length, Custom Product Page variants, preview page).
 6. If the run is pre-authorized, state the plan in one line and continue. Extras stay off unless requested.
-7. For a video, plan beats: beat 0 is the still creative; each extra beat is one caption plus one grounded frame. Default 12 s at 30 fps; it must read with the sound off (`references/design-direction.md` → Motion).
-8. If the brief has no screens (no readable views and no page UI), ask for simulator captures instead.
+7. For a video, plan beats: beat 0 is the still creative; each extra beat is one caption plus one grounded frame. Leave `duration` out unless the user set a length: the kit fits it to the beats (12–30 s) at 30 fps. It must read with the sound off (`references/design-direction.md` → Motion).
+8. Check every caption against the brief's `limits`: show free content by default, and say so when a frame shows paid content (rule C9).
+9. If the brief has no screens (no readable views and no page UI), ask for simulator captures instead.
 
 Bar: the plan is approved or pre-authorized, and nothing was written before that. If the run
 ends unanswered, report BLOCKED with the pending question as the Decision.
 
 ## Step 4 — Build the asset set
 
-1. Set `<out>`: the user's path; else `metadata/screenshots/<version>/` when the repo has `metadata/`; else `appstore-assets/<version>/` at the repo root (the working directory in landing-page mode). Without a version, use today's date. For several languages, add a `<locale>/` level per set.
+1. Set `<out>`: the run options' or user's path; else an existing set's folder for this version; else `metadata/screenshots/<version>/` when the repo has `metadata/`; else `appstore-assets/<version>/` at the repo root (the working directory in landing-page mode). `<version>` is the brief's (Flutter: `pubspec.yaml` without `+build`); without one, use today's date. For several languages, add a `<locale>/` level per set.
 2. Run the repo sync. If `<out>` exists outside the Update branch, move it to `<out>.bak-<timestamp>` and record the move.
 3. Copy `assets/template/` to `<out>/src/`, then run `scripts/fetch_font.py "<caption face>" <out>/src`. Offline, delete `fonts.display` from `config.js` and record it.
-4. Copy clean captures to `<out>/src/captures/` and any logo the UI shows to `<out>/src/`.
-5. Open each selected screen's cited view, then rewrite `config.js` with `references/render-pipeline.md`. Put `// Source: path:line` above every screen builder.
+4. Capture with `references/input-discovery.md` → Capture recipes (Flutter harness or simulator; fixed time and date; simulator state restored; scratch files deleted). Captures go to `<out>/src/captures/` and stay in git; copy any logo the UI shows to `<out>/src/`.
+5. Open each selected screen's cited view, then rewrite `config.js` with `references/render-pipeline.md`, setting `orientation` from the brief. Put `// Source: path:line` above every screen builder.
 6. Write `<out>/PLAN.md`: per frame, the id, headline, UI source, evidence, and any element left out on purpose (for example a "Coming soon" row).
 
 Bar: `grep -c "TODO:" <out>/src/config.js` prints `0`, every screen builder cites a source, and
@@ -165,7 +171,8 @@ python3 "<skill>/scripts/render.py" <out>/src
 python3 "<skill>/scripts/check_assets.py" <out> --platforms <list> --sheet <out>/sheets
 ```
 
-`render.py` also fails on unknown icons, missing images, caption contrast below 3:1
+Under load, `render.py` retries Chrome crashes (falling back to `chrome-headless-shell`), and videos
+take turns machine-wide: `waiting for the video lock` is not a hang. It also fails on unknown icons, missing images, caption contrast below 3:1
 (headline) or 4.5:1 (supporting line), and a video beat held shorter than its caption needs;
 it removes the PNGs and videos it wrote that the config dropped (unless changed since), and warns about (but keeps) other files in `creative/`.
 A kit output the user replaced by hand is overwritten while the config still lists it: to keep a
@@ -191,9 +198,10 @@ Bar: the latest verdict is `PASS` on the latest render, or two cycles ran and th
 ## Step 7 — Hand off
 
 If the user asked for a preview, publish a gallery of the sheets with the host's page tool,
-or point to `<out>/src/index.html` opened without a query string. Never upload: offer
-`asc`, `fastlane deliver` or a manual App Store Connect upload as a next step that needs
-approval; creative images and videos go through App Store Connect "either alongside a new app version, or in your Asset Library" (Apple's asset best practices). Release the dependency session.
+or point to `<out>/src/index.html` opened without a query string. Never upload. Read the
+project's `AGENTS.md`, `CLAUDE.md` and `store/README.md` first, then offer only the upload routes
+they allow (`asc`, `fastlane deliver`, or a manual App Store Connect upload) as a next step that needs
+approval. List the brief's `listing_findings` as optional listing fixes; creative images and videos go through App Store Connect "either alongside a new app version, or in your Asset Library" (Apple's asset best practices). Release the dependency session.
 
 ## Edge Cases
 
@@ -206,6 +214,8 @@ approval; creative images and videos go through App Store Connect "either alongs
 - Voice-over, music or "sound on" requests: videos ship silent (muted by default); put every message in captions and record the decision.
 - A video beat that needs a screen no frame shows needs a grounded frame first, or the beat is dropped.
 - Custom Product Pages: one `variants[]` entry per page or ad creative, only when asked; renders to `creative/<id>/`.
+- A landscape-only app (games often are) gets landscape screenshots: `orientation: "landscape"`, never a portrait set of rotated screens.
+- iPhone Duo is not rendered (`references/apple-specs.md`): say so; never stretch an iPhone frame to its size.
 
 ## Acceptance Criteria
 
@@ -216,16 +226,18 @@ A run is COMPLETE only when you verify every item:
 - [ ] Each requested video passes `check_assets.py` (exact size, 30/60 fps CFR, 5–30 s, H.264 yuv420p, no blank frame or seam jump), and its sheet shows every caption inside the safe area.
 - [ ] `config.js` holds no `TODO:` and every screen builder cites `// Source:`.
 - [ ] The latest reviewer verdict is `PASS`, with no blocking finding.
-- [ ] Nothing was committed, pushed or uploaded.
+- [ ] Simulator state is restored and scratch files are deleted (or listed as kept).
+- [ ] `REPORT.md` and `report.json` are in `<out>`, and nothing was committed, pushed or uploaded.
 
 ## Final report
 
-Expected output: open with the result and keep the four labels.
+Expected output: open with the result and keep the four labels. Write it to `<out>/REPORT.md` and
+`<out>/report.json` (`references/render-pipeline.md` → Batch runs and reports), then print it.
 
 ```
 Result: COMPLETE | PARTIAL | BLOCKED — <what was produced, where, frames per class>
 Evidence: <checks that ran: render.py and check_assets.py summaries, video size/fps/duration/seam rows, lowest contrast, reviewer verdict, spec refresh, sync>
-Uncertainty: <recreated or approximated screens to verify on a build, classes not rendered, fallbacks, assumptions (video codec, search video size, file-size cap, safe area applied to video)>
+Uncertainty: <recreated or approximated screens to verify on a build, classes not rendered, fallbacks; kit assumptions only where this run departs from apple-specs.md → Known kit assumptions>
 Decision: <the approval needed next (upload, commit, a dropped frame), or "No approval needed">
 ```
 

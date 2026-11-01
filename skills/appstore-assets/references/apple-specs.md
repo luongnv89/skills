@@ -35,13 +35,16 @@ Sources:
 | `ipad-13/` | iPad Pro (M5, M4), iPad Air 13" | 2064 × 2752 | 2048 × 2732 |
 | `mac/` | Mac | 2880 × 1800 | 1280 × 800, 1440 × 900, 2560 × 1600 |
 
+Landscape apps (`orientation: "landscape"` in `config.js`) render the
+rotations: 2868 × 1320, 2622 × 1206 and 2752 × 2064. Mac is always landscape.
+
 ## Classes the kit does not render
 
 Report these as out of scope instead of approximating them:
 
 | Class | Size | Note |
 | --- | --- | --- |
-| iPhone Duo | 1398 × 2034 (outer), 2007 × 2853 (inner) | Required from April 2027 for apps built with the iOS 27.1 SDK or later |
+| iPhone Duo | 1398 × 2034 (outer), 2007 × 2853 (inner) | Required from April 2027 for apps built with the iOS 27.1 SDK or later. Not rendered yet: the kit has no Duo device frame or two-display layout, and drawing one now would mean guessing the hardware. `check_assets.py` checks hand-made sets in `iphone-duo-outer/` and `iphone-duo-inner/` (either orientation). Until April 2027, say in the report that the class is not rendered; after it, a build on the iOS 27.1 SDK needs it, so report PARTIAL |
 | iPhone 6.5" / 6.1" / 5.5" / 4.7" | 1284 × 2778 … 750 × 1334 | Scaled from the classes above |
 | iPad 11" / 12.9" / 10.5" / 9.7" | 1668 × 2420 … | Scaled from 13" |
 | Apple TV | 1920 × 1080, 3840 × 2160 | Required for tvOS apps |
@@ -104,6 +107,22 @@ same placement (assumption: the placement and its crops are the same).
 | Container | .mov, .m4v or .mp4 | MP4 with `+faststart`, no metadata |
 | Search video size | Any 3:2 from 1920 × 1280 to 3840 × 2560 | **Assumption:** the largest macroblock-aligned 3:2 size within H.264 Level 5.2 at the chosen frame rate: 3744 × 2496 at 30 fps, 3600 × 2400 at 60 fps (Level 5.2 allows 36,864 macroblocks per frame and 2,073,600 per second; 3744 × 2496 at 60 fps needs 2,190,240). `creatives.video.searchSize: "max"` renders Apple's maximum 3840 × 2560, which needs Level 6.0 (38,400 macroblocks per frame) and is untested with App Store Connect. The still stays 3840 × 2560 |
 | Color | Nothing | BT.709 primaries, transfer and matrix, limited range, tagged in the stream |
+
+## Known kit assumptions
+
+Apple states nothing about these points for creative assets, so the kit
+decides them the same way on every run. A final report never repeats this
+list: it cites this section once and names only a run that differs from it
+(for example `searchSize: "max"`, 60 fps, or a hand-made video).
+
+| # | Assumption | Where it is decided |
+| --- | --- | --- |
+| A1 | Videos are H.264 High, 8-bit yuv420p, BT.709, at the lowest level that fits (5.1 or 5.2) | Video encoding decisions |
+| A2 | The search video is 3744 × 2496 at 30 fps, 3600 × 2400 at 60 fps; the search still is 3840 × 2560 | Video encoding decisions |
+| A3 | Videos fail above 500 MB (the app preview cap); rendered loops are a few MB | Video encoding decisions |
+| A4 | The still templates' art safe area also applies to the header and search videos | Art safe area |
+| A5 | Videos are CFR, MP4 with `+faststart`, no audio track, no metadata | Video encoding decisions |
+| A6 | Side devices outside the art safe area are decoration that narrow displays crop; the caption carries the message (`creatives.layout: "safe"` keeps every device inside) | Art safe area |
 
 ## Out of scope
 
