@@ -86,12 +86,14 @@ repos:
         language: system
         pass_filenames: false
 
-      # Unit tests run on every commit (keep them fast)
+      # Only the tests that import the staged files (in the CI guard, the PR
+      # diff's files); see "Related tests on commit".
       - id: test-unit
-        name: unit tests
-        entry: npm run test:unit
+        name: unit tests (related to changed files)
+        entry: npx vitest related --run --passWithNoTests
         language: system
-        pass_filenames: false
+        files: \.(js|jsx|ts|tsx|mjs|cjs|mts|cts)$
+        require_serial: true
 
       # Full test suite on push while it fits the 60-second budget. Past that,
       # swap in the affected-tests hook below (see "Fast test runs").
@@ -127,7 +129,7 @@ repos:
       #   stages: [pre-push]
 ```
 
-> **Note on unit vs full tests**: split your test script into `test:unit` (fast, no I/O) and `test` (all). If you can't split them, run all tests on commit — slow feedback is still better than no feedback.
+> **Note on unit vs full tests**: the commit hook runs the tests that import the staged files, and `test` runs them all on push. If slow integration tests share the Vitest config, put them in their own Vitest project and add `--project unit` to the commit hook's entry.
 
 > **Install every hook tool as a devDependency** (`prettier`, `oxlint`, `typescript`, `vitest`). `npx` then resolves the local copy instead of downloading the tool on every run, and the CI guard's npm cache covers it.
 
@@ -169,12 +171,14 @@ repos:
 
   - repo: local
     hooks:
-      # Unit tests on every commit
+      # Unit tests related to the staged files by name (in the CI guard, the PR
+      # diff's files); see "Related tests on commit" for scripts/related-tests.py.
       - id: pytest-unit
-        name: pytest unit tests
-        entry: pytest tests/unit -x -q
+        name: pytest unit tests (related to changed files)
+        entry: python3 scripts/related-tests.py --tests tests/unit
         language: system
-        pass_filenames: false
+        types: [python]
+        require_serial: true
 
       # Full suite (unit + integration) on push. `-n auto` needs pytest-xdist
       # in the dev extras (see the note below): one worker per available CPU
@@ -251,12 +255,15 @@ repos:
         language: system
         pass_filenames: false
 
-      # Fast unit tests on every commit
+      # Short tests of the packages the staged files belong to (in the CI guard,
+      # the PR diff's packages); see "Related tests on commit".
       - id: go-test-unit
-        name: go unit tests
-        entry: go test -short ./...
+        name: go unit tests (changed packages)
+        entry: bash -c 'dirs=(); for f in "$@"; do dirs+=("./$(dirname "$f")"); done; go test -short "${dirs[@]}"' --
         language: system
-        pass_filenames: false
+        types: [go]
+        exclude: (^|/)(testdata|vendor)/
+        require_serial: true
 
       # Full tests (including integration) on push
       - id: go-test-full
@@ -310,7 +317,7 @@ repos:
         language: system
         pass_filenames: false
 
-      # Unit tests on every commit
+      # Unit tests on every commit: the whole crate (see "Related tests on commit")
       - id: cargo-test-unit
         name: cargo unit tests
         entry: cargo test --lib
@@ -368,7 +375,7 @@ repos:
         language: system
         pass_filenames: false
 
-      # Unit tests on commit
+      # Unit tests on commit: the whole module (see "Related tests on commit")
       - id: test-unit
         name: unit tests
         entry: mvn test -pl . -Dtest="**/unit/**" -q
@@ -420,12 +427,13 @@ repos:
         files: ^frontend/
         pass_filenames: false
 
+      # Vitest resolves `related` paths against its root, so strip `frontend/`.
       - id: test-unit
-        name: frontend unit tests
-        entry: npm --prefix frontend run test:unit
+        name: frontend unit tests (related to changed files)
+        entry: bash -c 'cd frontend && npx vitest related --run --passWithNoTests "${@#frontend/}"' --
         language: system
-        files: ^frontend/
-        pass_filenames: false
+        files: ^frontend/.*\.(js|jsx|ts|tsx|mjs|cjs|mts|cts)$
+        require_serial: true
 
       - id: test-full
         name: frontend full test suite
@@ -436,11 +444,12 @@ repos:
         stages: [pre-push]
 
       - id: pytest-unit
-        name: pytest unit tests
-        entry: pytest backend/tests/unit -x -q
+        name: pytest unit tests (related to changed files)
+        entry: python3 scripts/related-tests.py --tests backend/tests/unit
         language: system
         files: ^backend/
-        pass_filenames: false
+        types: [python]
+        require_serial: true
 
       - id: pytest-full
         name: pytest full suite
@@ -512,6 +521,64 @@ A line in AGENTS.md such as "run lint and typecheck before pushing" is advice. A
 - Keep the budgets: commit stage under 10 seconds on changed files, push stage under 60 seconds. When a commit-stage check outgrows its budget, such as a type-check over 10 seconds, move it to `pre-push` rather than dropping it. On `pre-push`, file-based hooks receive only the files changed in the pushed range, so they stay fast.
 
 ## Fast test runs
+
+### Related tests on commit
+
+The commit-stage unit hook keeps `pass_filenames` on, so it gets the staged files, and runs only the tests related to them. In the CI guard's `--from-ref`/`--to-ref` run the same hook gets the files changed in the pull request, so its repeat of the unit tests shrinks to the diff, and no hook id goes into `SKIP`. The push stage still runs the whole suite (or `scripts/affected-tests.sh` past the 60-second budget), locally and in the guard: it is the gate, and the commit hook is fast feedback. So the commit hook exits 0 when nothing is related, while `affected-tests.sh` fails closed, because the default-branch run is the only thing behind it.
+
+- **`require_serial: true` on every related-test hook.** Without it, pre-commit splits the file list into parallel runs: on a 2-CPU machine a five-file diff started two Vitest runs, and one test file ran in both.
+- **Budget.** A commit to a module that most tests import selects most of the suite. When the related run passes 10 seconds, move the hook to `pre-push`, as for any commit-stage check.
+
+| Language | Hook | Selects | Misses (the push-stage full suite catches them) |
+|---|---|---|---|
+| JS/TS | `vitest related --run --passWithNoTests` | Tests whose static imports reach a staged file | Dynamic `import()`, files read at run time, changes the `files:` filter drops |
+| Python | `scripts/related-tests.py` (below) | Changed test files; `test_<module>.py` and `<module>_test.py` for a changed module; the whole test directory for a `conftest.py` | Tests that reach a module through another one or are named differently, deleted modules, data files |
+| Go | `go test -short` on the changed files' directories | The changed packages' own tests (Go drops duplicate package arguments) | Packages that import a changed package |
+| Rust, Java | Whole suite | — | Nothing. Cargo builds and tests the whole crate; Maven compiles the whole module first; mapping files to `-p` crates or `-Dtest` classes is not simple enough to be correct, so these stay whole until they pass 10 seconds |
+
+- **Vitest.** The `files:` filter passes only JS/TS files: `README.md` alone selects nothing, and `package.json` is one of Vitest's `forceRerunTriggers`, which would run the whole suite on commit. A `vitest.config.*` change still runs everything, which is right for a config change. Vitest 5.0.5 already defaults `related` to `passWithNoTests`; the flag keeps that explicit.
+- **Paths.** Vitest resolves `related` paths against its root. In a subdirectory package, `--root frontend frontend/src/x.ts` selects no test and exits 0; the Multi-language template runs `cd frontend` and strips the prefix instead.
+- **Why not pytest-testmon.** It selects tests from a coverage database (`.testmondata`) that only a prior full `--testmon` run creates. The guard starts without one, so the CI repeat would stay the whole suite. It also ignores the file list pre-commit passes. Locally it is a free option; add `.testmondata` to `.gitignore`.
+
+```python
+"""scripts/related-tests.py: run the unit tests related to the files pre-commit passes.
+
+pre-commit passes the staged files on commit, and the PR diff's files in the CI
+guard's --from-ref/--to-ref run. A changed test file runs itself; a changed module
+foo.py (or pkg/__init__.py) runs test_foo.py and foo_test.py (test_pkg.py) under the
+test directory; a changed conftest.py runs the whole directory. Nothing related
+exits 0, because the push-stage full suite is the gate.
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+args = sys.argv[1:]
+tests = Path("tests/unit")
+if args[:1] == ["--tests"]:
+    tests, args = Path(args[1]), args[2:]
+
+selected = set()
+for f in map(Path, args):
+    is_test = f.name.startswith("test_") or f.stem.endswith("_test")
+    if f.name == "conftest.py":
+        selected.add(str(tests))
+    elif is_test and tests in f.parents:
+        selected.add(str(f))
+    else:
+        stem = f.parent.name if f.stem == "__init__" else f.stem
+        for pattern in (f"test_{stem}.py", f"{stem}_test.py"):
+            selected.update(str(t) for t in tests.rglob(pattern))
+
+if not selected:
+    print("related-tests: no unit test matches these files; pre-push runs them all.")
+    sys.exit(0)
+code = subprocess.call([sys.executable, "-m", "pytest", "-x", "-q", *sorted(selected)])
+sys.exit(0 if code == 5 else code)  # 5: the selected files collected no test
+```
+
+Checked with pre-commit 4.7.0, Vitest 5.0.5, pytest 9.2.0, and Go 1.27.3. In each case the guard's commit stage ran only the related tests, the push stage ran the full suite, and a diff that touched only an untested module passed with zero tests. A Python change that broke only an integration test passed the commit stage and failed the push stage.
 
 ### Affected tests on push and in the CI guard (Vitest)
 
@@ -829,7 +896,9 @@ Fetched 2026-11-01; tool versions move fast, so re-check before changing a templ
 - Vitest `forceRerunTriggers` (defaults; full run with `--changed`): https://vitest.dev/config/forcereruntriggers
 - Vitest `restoreMocks` (async concurrent caveat): https://vitest.dev/config/restoremocks
 - Vitest improving performance (pools, isolation, sharding): https://vitest.dev/guide/improving-performance
+- Vitest CLI (`vitest related`: static imports only, paths relative to the root, `--run`; `--passWithNoTests`): https://vitest.dev/guide/cli
+- pytest-testmon (`.testmondata`, needs a full `--testmon` run before it can select): https://testmon.org/
 - pytest-xdist distribution modes and `-n auto`/`-n logical`: https://pytest-xdist.readthedocs.io/en/stable/distribution.html
 - ty (Astral, beta): https://github.com/astral-sh/ty
 - Pyrefly (Meta, 1.4.0): https://github.com/facebook/pyrefly
-- pre-commit (`PRE_COMMIT_FROM_REF`/`PRE_COMMIT_TO_REF`): https://pre-commit.com/
+- pre-commit (`PRE_COMMIT_FROM_REF`/`PRE_COMMIT_TO_REF`, `pass_filenames`, `require_serial`, `--from-ref`/`--to-ref` files): https://pre-commit.com/
