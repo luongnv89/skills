@@ -12,7 +12,7 @@
         "Hook stages use pre-commit and pre-push, never the deprecated commit or push names.",
         "ci.yml runs no standalone lint, format, type-check or test step that repeats a hook; its bypass guard uses fetch-depth: 0, runs only on pull_request, and runs both hook stages with --from-ref and --to-ref.",
         "If any hook or workflow runs pytest -n auto, pytest-xdist is already a dev dependency or the proposed diff adds it to the dev extras, so no generated command can fail with 'unrecognized arguments: -n'.",
-        "The commit-stage pytest hook passes the staged files (pass_filenames left on, require_serial: true) to a selection such as scripts/related-tests.py that runs only the related unit tests and exits 0 when none match, while the pre-push hook runs the whole suite; no hook id is added to SKIP.",
+        "The commit-stage pytest hook passes the staged files (pass_filenames left on, require_serial: true) to a selection such as scripts/related-tests.py that runs only the related unit tests and exits 0 when none match, while the pre-push hook runs the whole suite with always_run: true, so a deletion-only push still runs it; no hook id is added to SKIP.",
         "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only commands that ran with their exit codes, Uncertainty stating that the CI workflow has not run on GitHub, and Decision naming the approval needed or 'No approval needed.'"
       ]
     },
@@ -85,7 +85,7 @@
         "The guard's npm and pre-commit caches are also saved by a job that runs on the default branch (push or schedule), not only by pull_request runs.",
         ".pre-commit-config.yaml sets default_stages: [pre-commit], so push-stage runs do not repeat the commit-stage hooks.",
         "The commit-stage unit hook runs only the tests related to the staged files (vitest related --run with filenames passed and require_serial: true), so the guard's commit-stage leg repeats only the diff's tests; pre-push keeps the whole suite or scripts/affected-tests.sh.",
-        "If the suite exceeds the 60-second push budget, tests are affected-only (scripts/affected-tests.sh or an equivalent vitest --changed selection) that fail when code changed but no test was selected, with a full-suite run on the default branch; otherwise pre-push runs the whole suite and the reply says why selection was not needed.",
+        "If the suite exceeds the 60-second push budget, tests are affected-only (scripts/affected-tests.sh or an equivalent vitest --changed selection) that fail when code changed but no test was selected and run the whole suite when the diff deletes code, with a full-suite run on the default branch; otherwise pre-push runs the whole suite and the reply says why selection was not needed.",
         "The reply says the checks are hooks rather than an AGENTS.md instruction because agents skip steps, and linting uses Oxlint with categories set to error (ESLint kept only for rules Oxlint lacks).",
         "No third-party runner service, GitHub larger runner, or paid service is configured or recommended."
       ]
