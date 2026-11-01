@@ -100,8 +100,8 @@ When `pre-commit` is available, write `.pre-commit-config.yaml` for the detected
 
 - **Fastest free tool per check.** Keep the repo's tools and propose faster ones in the diff, with a benchmark. JS/TS: Oxlint, with ESLint only for rules Oxlint lacks; set Oxlint's categories to `error`, since its warnings exit 0. Type-check: TypeScript 7's `tsc`, then `bun check` or `tsrs` only if faster with the same errors. Python: Ruff, mypy as arbiter.
 - **Every hook tool is a dev dependency.** `pytest -n auto` needs `pytest-xdist`: when the dev extras lack it, add it in the same diff, or pytest fails with `unrecognized arguments: -n`.
-- **Related unit tests on commit.** The commit-stage unit hook keeps `pass_filenames` and `require_serial: true` and runs only the tests related to the staged files (`vitest related --run`, `scripts/related-tests.py`, changed Go packages), so the guard repeats only the diff's; `pre-push` runs the whole suite.
-- **Affected tests on `pre-push`** when the whole suite exceeds 60 seconds: `scripts/affected-tests.sh`, which fails when source changed but no test was selected.
+- **Related unit tests on commit.** The commit-stage unit hook keeps `pass_filenames` and `require_serial: true` and runs only the tests related to the staged files (`vitest related --run`, `scripts/related-tests.py`, changed Go packages), so the guard repeats only the diff's; `pre-push` runs the whole suite, with `always_run: true` so a deletion-only change still runs it (not in Multi-language, where the path-filtered matrices catch deletions).
+- **Affected tests on `pre-push`** when the whole suite exceeds 60 seconds: `scripts/affected-tests.sh`, which fails when source changed but no test was selected, and runs the whole suite when the diff deletes code.
 - **Hooks, not AGENTS.md lines.** An AGENTS.md instruction is advice an agent can skip; a hook blocks the commit or push. If the repo has an AGENTS.md, propose one line: hooks exist and must not be bypassed.
 - **Vitest `isolate: false`** only with the reference's per-file reset hook.
 
