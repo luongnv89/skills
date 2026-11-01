@@ -1096,7 +1096,7 @@ jobs:
       - run: pytest -q
 ```
 
-A filter lists what may trigger a run, so add shared paths a language depends on (a root lockfile, shared config) to its `paths:`, along with the workflow file itself so a change to the matrix is tested on merge. Never mark these push-only workflows as required checks: they never run on a pull request, so a required one stays Pending forever. GitHub matches `paths:` against at most the first 300 changed files, so a very large merge can skip a matrix; start it by hand with `workflow_dispatch`. Deploy jobs that run on every merge go in a workflow without `paths:`.
+A filter lists what may trigger a run, so add shared paths a language depends on (a root lockfile, shared config) to its `paths:`, along with the workflow file itself so a change to the matrix is tested on merge. Never mark these push-only workflows as required checks: they never run on a pull request, so a required one stays Pending forever. GitHub matches `paths:` against at most the first 3,000 changed files, so a very large merge can skip a matrix; start it by hand with `workflow_dispatch`. A push of more than 1,000 commits, or a diff that times out, always runs. Deploy jobs that run on every merge go in a workflow without `paths:`.
 
 **These matrices are the deletion backstop.** The Multi-language push suites keep their `files:` filters and no `always_run`, which would run the frontend suite on a backend-only pull request (in a guard that skipped `npm ci` for it). So a pull request that only deletes one language's files skips that language's suite in the guard, and its matrix catches the breakage on merge: `paths:` is evaluated against the push's two-dot diff, and a deleted file is in that diff.
 
