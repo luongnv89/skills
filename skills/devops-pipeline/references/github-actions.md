@@ -1,6 +1,6 @@
 # GitHub Actions Workflow Templates
 
-Philosophy: **lean, fast CI**. pre-commit already handles format, lint, type-check, unit tests, and E2E tests locally, so GitHub Actions carries only the four responsibilities the SKILL's Check Routing Table assigns it: a diff-scoped bypass guard, multi-version matrix testing (which doubles as the nightly full-suite run), secrets-dependent work, and deployment. Each job is also tuned for feedback speed, with free techniques only: an agent that pushes, waits for CI, fixes, and pushes again spends most of its loop waiting on the slowest job.
+Philosophy: **lean, fast CI**. pre-commit already handles format, lint, type-check, unit tests, and E2E tests locally, so GitHub Actions carries only the four responsibilities the SKILL's Check Routing Table assigns it: a diff-scoped bypass guard, multi-version matrix testing (which doubles as the default-branch full-suite run), secrets-dependent work, and deployment. Each job is also tuned for feedback speed, with free techniques only: an agent that pushes, waits for CI, fixes, and pushes again spends most of its loop waiting on the slowest job.
 
 ## The one rule every template here follows
 
@@ -55,7 +55,15 @@ A pull request takes as long as its slowest job, plus the time that job waited f
 
 ### Who pays
 
-Run `gh repo view --json visibility --jq .visibility` and record the answer in Step 1; `INTERNAL` bills like private. The templates read `github.event.repository.visibility` and treat anything but `public` as paying, including a scheduled run, whose payload may not carry the repository: an unknown visibility gets the cheap path.
+Run `gh repo view --json visibility --jq .visibility` and record the answer in Step 1; `INTERNAL` bills like private. Generate the workflow for that answer. Only the guard's leg split reads `github.event.repository.visibility` at run time: the guard runs on `pull_request`, whose payload always carries the repository, and anything but `public` gets the single leg. Everything else is written in or left out when the workflow is generated, because a `schedule` payload carries no repository:
+
+| Generated piece | Public repository | Private repository |
+|---|---|---|
+| Guard legs (run-time split) | One per hook stage | One, commit stage first |
+| Version matrix, and Minimal's `full` (only with affected-test selection) | Every merge | Every merge under 30 default-branch commits a month; nightly from 30 |
+| Codecov upload | One matrix leg, no run-time visibility test | Left out; coverage summary in `$GITHUB_STEP_SUMMARY` |
+| `seed-cache` (Minimal only) | Every merge | Left out |
+| Rust macOS legs | In the matrix | Left out; a macOS job on release tags or nightly when needed |
 
 | | Public repository | Private repository |
 |---|---|---|
@@ -71,15 +79,15 @@ Run `gh repo view --json visibility --jq .visibility` and record the answer in S
 | Technique | Public | Private | Where |
 |---|---|---|---|
 | Cancel superseded pull request runs | Yes | Yes | `concurrency:` |
-| Seed dependency caches from the default branch | Every merge | The nightly job seeds them | `seed-cache`, `matrix-test` |
+| Seed dependency caches from the default branch | Every merge | Per merge, or nightly on a busy repository | `matrix-test`; Minimal: `seed-cache` |
 | Blobless full-history checkout in the guard | Yes | Yes | `filter: blob:none` |
 | `timeout-minutes` on every job | Yes | Yes | Each job |
-| Affected-only tests once the suite is slow, full suite on the default branch | Yes | Yes | `scripts/affected-tests.sh`, `schedule:` |
+| Affected-only tests once the suite is slow, full suite on the default branch | Yes | Yes | `scripts/affected-tests.sh`, `matrix-test` or `full` |
 | Guard split into parallel jobs by hook stage | Yes | No: one job, commit stage first | `matrix.stages` |
 | Slow suite sharded across standard runners | Yes, below the concurrency limit | No | `--shard` |
 | Test workers matched to runner cores | 4 | 2 | Runner default |
 
-The JavaScript/TypeScript, Python, and Minimal templates carry the full set; affected-test selection exists for Vitest (`scripts/affected-tests.sh`) and for monorepo tools, so other suites run whole in the guard, in parallel. Go, Rust, Java, and Multi-language carry the universal ones (concurrency, blobless guard, timeouts) and keep the matrix on every merge; move it to `schedule:` the same way when the default branch gets 30 or more commits a month.
+The JavaScript/TypeScript, Python, and Minimal templates carry the full set; affected-test selection exists for Vitest (`scripts/affected-tests.sh`) and for monorepo tools, so other suites run whole in the guard, in parallel. Go, Rust, Java, and Multi-language carry the universal ones (concurrency, blobless guard, timeouts) and keep the matrix on every merge; on a private repository, move it to `schedule:` the same way when the default branch gets 30 or more commits a month.
 
 ### Cancel superseded runs
 
@@ -96,7 +104,7 @@ The pull request number exists only on `pull_request` events, so an agent's new 
 A cache saved by a `pull_request` run belongs to `refs/pull/<n>/merge`: later runs of that pull request can restore it, and other pull requests cannot. Every run can restore caches from its own branch, its base branch, and the default branch. A workflow with no default-branch job therefore never writes a cache a new pull request can use, and every pull request's first run installs cold.
 
 - `actions/setup-node` keys its cache on OS, architecture, package manager, and lockfile hash, not on the Node version, so any default-branch job with `cache: npm` seeds the key the guard restores. `actions/setup-python` adds the Python version to its key: seed with the version the guard uses.
-- The templates seed from the nightly `matrix-test`, which runs anyway (one leg also restores and saves the pre-commit cache), and, on public repositories only, from a `seed-cache` job on every merge that installs only on a cache miss. On a private repository that job would cost a rounded minute per merge, so it is skipped there.
+- The templates seed from the default-branch `matrix-test`, which runs anyway: per merge, or nightly on a busy private repository. One leg also restores and saves the pre-commit cache. The Minimal template has no matrix, so on a public repository it gets a `seed-cache` job on every merge that installs only on a cache miss. On a private repository that job would cost a rounded minute per merge, so it is left out.
 - Cache the pre-commit hook environments too: `~/.cache/pre-commit`, keyed on the Python interpreter (`env.pythonLocation`, set by `setup-python`) and the hash of `.pre-commit-config.yaml`, as `pre-commit/action` does. Without the interpreter in the key, a Python patch update leaves broken environments behind an exact key match that is never re-saved.
 - Caches unused for 7 days are evicted, and the free allowance is 10 GB per repository. Never raise the limit: usage above 10 GB is billed.
 
@@ -131,15 +139,16 @@ On a public repository, split the guard's two hook stages into parallel matrix l
 
 The run step loops `for stage in ${{ matrix.stages || 'pre-commit pre-push' }}`, so every stage runs in some leg, and a copy of the step in a job without the matrix still runs both. A matrix renames the check (`Verify hooks were not bypassed (pre-commit)`): when merging this into an existing workflow, list the branch's required status checks that need updating in the diff summary. Keep side work, such as a build or a migration check, out of the slowest leg.
 
-### Affected-only on pull requests, full suite nightly
+### Affected-only on pull requests, full suite on the default branch
 
 - **The guard is already diff-scoped for file-based hooks.** A test hook with `pass_filenames: false` is not, so once the suite outgrows the 60-second push budget, make it affected-aware. pre-commit exports `PRE_COMMIT_FROM_REF` and `PRE_COMMIT_TO_REF` to hooks on `pre-push` and whenever `--from-ref`/`--to-ref` is passed, so `scripts/affected-tests.sh` (in [precommit-configs.md](precommit-configs.md#fast-test-runs)) runs only the affected tests in both places, and the full suite when no range exists.
 - **Monorepos:** `nx affected -t test --base=<sha> --head=<sha>` (`nrwl/nx-set-shas` finds the last successful default-branch commit), `turbo run test --affected` (`TURBO_SCM_BASE`/`TURBO_SCM_HEAD`), or `dorny/paths-filter` outputs on job-level `if:` to skip a whole language.
 - **Filters list what may be skipped, never what must run.** An unmatched path, such as a new top-level directory or a shared config, runs everything. Vitest's `forceRerunTriggers` defaults to `package.json` and the Vite/Vitest configs; a tsconfig-only change otherwise selects no test at all, so add tsconfig files, lockfiles, and test setup files.
 - **Guard the skip logic.** `vitest run --changed` exits 0 when it selects nothing, so a broken selector reports green with zero tests. The affected script fails when source files changed and no test was selected.
 - **Skip with job-level `if:`, never workflow-level `paths:`, on a required workflow.** A workflow skipped by a path filter leaves its required checks Pending and blocks the merge; a job skipped by `if:` reports Success.
-- **Backstop:** the full suite runs nightly on the default branch. In the templates the version matrix is that run, on `schedule:` plus `workflow_dispatch`. Pick an odd minute, because the top of the hour is delayed under load. Scheduled runs use the default branch's latest commit, and a public repository's schedules are disabled after 60 days without activity; a private repository's never are.
-- **Nightly or per merge on a private repository.** Count the default branch's commits over the last 30 days: `git rev-list --count --first-parent --since=30.days <default-branch>` (for example `origin/main`). Under 30, run the matrix on `push` to the default branch instead (`if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'`) and drop the `schedule:` trigger: nightly would be more runs. On a public repository both are free; nightly also keeps the matrix's legs out of the agents' concurrent-job slots.
+- **Backstop:** the full suite runs on the default branch. In the JavaScript/TypeScript and Python templates the version matrix is that run; in Minimal it is the `full` job, added only once a hook selects affected tests.
+- **Per merge or nightly.** Per merge on a public repository: it is free, it uploads coverage on every merge, and a public repository's schedules are disabled after 60 days without activity. On a private repository, count the default branch's commits over the last 30 days: `git rev-list --count --first-parent --since=30.days <default-branch>` (for example `origin/main`). Under 30, run it per merge (`if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'`), since nightly would be more runs; from 30, nightly (`schedule:` plus `workflow_dispatch`). A private repository's schedules are never disabled.
+- **Schedules** use the default branch's latest commit. Cron is UTC; the optional `timezone:` key (an IANA name such as `Europe/Paris`) puts "nightly" in the team's night. Pick an odd minute, because the top of the hour is delayed under load.
 
 ### Match parallelism to the runner
 
@@ -159,7 +168,10 @@ The time between a job's creation and its start is time the agent waits, and the
 
 ## Minimal (pre-commit already covers everything)
 
-If your pre-commit setup runs format, lint, type-check, unit tests, and E2E tests, CI shrinks to the bypass guard plus two cheap default-branch jobs. On a private repository the `push` trigger starts a run whose jobs are all skipped, which bills nothing; `seed-cache` runs on public repositories only, where it is free.
+If your pre-commit setup runs format, lint, type-check, unit tests, and E2E tests, CI shrinks to the bypass guard, plus a cheap cache-seeding job on a public repository. Generate it for the visibility Step 1 recorded:
+
+- **Public:** as shown.
+- **Private:** drop the `push` trigger and the `seed-cache` job. The workflow then runs on pull requests only, with one guard leg.
 
 ```yaml
 name: CI
@@ -167,11 +179,8 @@ name: CI
 on:
   pull_request:
     branches: [main, master]
-  push:
-    branches: [main, master]   # public repos: refresh the caches every PR restores
-  schedule:
-    - cron: '27 3 * * *'       # nightly full run; an odd minute avoids top-of-hour delays
-  workflow_dispatch:
+  push:                        # public repos only: seed-cache below
+    branches: [main, master]
 
 # A new push to a PR cancels its superseded run. Other events have no PR number,
 # fall back to their unique run ID, and are never cancelled.
@@ -190,8 +199,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Public repos run free: one parallel leg per stage. Anything not provably
-        # public pays per job (setup + per-job rounding): one leg, commit stage first.
+        # The one run-time visibility test: a pull_request payload always carries
+        # the repository. Public repos run free: one parallel leg per stage.
+        # Anything not provably public pays per job: one leg, commit stage first.
         stages: ${{ fromJSON(github.event.repository.visibility == 'public' && '["pre-commit", "pre-push"]' || '["pre-commit pre-push"]') }}
     steps:
       - uses: actions/checkout@v4
@@ -228,10 +238,11 @@ jobs:
             pre-commit run --hook-stage "$stage" --from-ref "$base" --to-ref HEAD
           done
 
-  # PR caches are scoped to refs/pull/<n>/merge; only default-branch caches reach
-  # every PR. Free on public repos; private repos are seeded by the nightly job.
+  # Public repos only: leave it out on a private repo, where it would bill a
+  # rounded minute per merge. PR caches are scoped to refs/pull/<n>/merge; only
+  # default-branch caches reach every PR.
   seed-cache:
-    if: github.event_name == 'push' && github.event.repository.visibility == 'public'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -244,13 +255,41 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
       - run: pip install pre-commit && pre-commit install-hooks
+```
 
+The guard proves the hooks actually ran on the incoming commits — the one thing local tooling cannot prove about itself, since `--no-verify` skips hooks entirely. File-based hooks check only the diff, so they stay fast as the repository grows; project-wide hooks (type-check, test suites) run whole unless they select affected work.
+
+### Add a default-branch full run only with affected-test selection
+
+Without affected-test selection, the guard already ran the whole suite, so the template above has no full run and no `schedule:`. Once a hook selects affected tests (`scripts/affected-tests.sh`, `nx affected`, or `turbo run --affected`), add the `full` job as its backstop, on the same rule as the version matrix:
+
+- **Public repository, or private with under 30 default-branch commits a month:** per merge. Keep the `push` trigger (add it back on a private repository) and add `workflow_dispatch:`. On a public repository `full` saves the same caches as `seed-cache`, so drop `seed-cache`.
+- **Private with 30 or more:** nightly. Add `schedule:` and `workflow_dispatch:`, and use the commented nightly `if:`.
+
+```yaml
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+  # Private repo with 30+ default-branch commits a month: nightly instead of
+  # per merge (and drop `push` unless another job uses it).
+  # schedule:
+  #   - cron: '27 3 * * *'       # UTC unless `timezone:` is set; odd minute
+  #     timezone: 'Europe/Paris' # optional IANA time zone
+```
+
+```yaml
   # The backstop for hooks that select affected tests: with no ref range,
   # scripts/affected-tests.sh runs the whole suite. Runs on the default branch,
-  # so its cache save also seeds private repos.
+  # so its cache save also seeds the caches every PR restores.
   full:
-    name: Nightly full run
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    name: Default-branch full run
+    # Per merge. A private repo with 30+ default-branch commits a month runs
+    # it nightly instead:
+    #   if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -270,13 +309,15 @@ jobs:
           pre-commit run --all-files --hook-stage pre-push
 ```
 
-The guard proves the hooks actually ran on the incoming commits — the one thing local tooling cannot prove about itself, since `--no-verify` skips hooks entirely. File-based hooks check only the diff, so they stay fast as the repository grows; project-wide hooks (type-check, test suites) run whole unless they select affected work. Drop `full` and the `schedule:` trigger when no hook selects affected tests: the guard then already ran the whole suite.
-
 ---
 
 ## JavaScript/TypeScript
 
-Add matrix version testing — the part pre-commit can't do locally — as the nightly full-suite run, with the guard tuned for fast feedback:
+Add matrix version testing — the part pre-commit can't do locally — as the default-branch full-suite run, with the guard tuned for fast feedback. Generate it for the visibility Step 1 recorded:
+
+- **Public:** as shown. The matrix runs on every merge (free), seeds the caches every pull request restores, and uploads coverage to Codecov from one leg.
+- **Private, under 30 default-branch commits a month:** as shown, with the Codecov step replaced by the commented coverage summary.
+- **Private, 30 or more:** also switch the matrix to its commented nightly `if:` and add the commented `schedule:` trigger; keep `push` only when another job, such as a deploy, runs on it.
 
 ```yaml
 name: CI
@@ -286,9 +327,12 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  schedule:
-    - cron: '27 3 * * *'       # nightly full suite; an odd minute avoids top-of-hour delays
   workflow_dispatch:
+  # Private repo with 30+ default-branch commits a month: the matrix runs
+  # nightly instead of per merge. Cron is UTC unless `timezone:` is set.
+  # schedule:
+  #   - cron: '27 3 * * *'       # an odd minute avoids top-of-hour delays
+  #     timezone: 'Europe/Paris' # optional IANA time zone
 
 # A new push to a PR cancels its superseded run. Other events have no PR number,
 # fall back to their unique run ID, and are never cancelled.
@@ -307,8 +351,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Public repos run free: one parallel leg per stage. Anything not provably
-        # public pays per job (setup + per-job rounding): one leg, commit stage first.
+        # The one run-time visibility test: a pull_request payload always carries
+        # the repository. Public repos run free: one parallel leg per stage.
+        # Anything not provably public pays per job: one leg, commit stage first.
         stages: ${{ fromJSON(github.event.repository.visibility == 'public' && '["pre-commit", "pre-push"]' || '["pre-commit pre-push"]') }}
     steps:
       - uses: actions/checkout@v4
@@ -321,8 +366,8 @@ jobs:
           filter: blob:none
 
       # The project toolchain: `language: system` hooks shell out to it.
-      # The npm cache key ignores the Node version, so the nightly matrix and
-      # seed-cache below both seed the key this job restores.
+      # The npm cache key ignores the Node version, so the default-branch
+      # matrix below seeds the key this job restores.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -357,36 +402,13 @@ jobs:
             pre-commit run --hook-stage "$stage" --from-ref "$base" --to-ref HEAD
           done
 
-  # PR caches are scoped to refs/pull/<n>/merge; only default-branch caches reach
-  # every PR. Free on public repos; private repos are seeded by the nightly matrix.
-  seed-cache:
-    if: github.event_name == 'push' && github.event.repository.visibility == 'public'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        id: node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: 'npm'
-      # Install only when the lockfile changed; the post step then saves the new key.
-      - if: steps.node.outputs.cache-hit != 'true'
-        run: npm ci
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
-      - run: pip install pre-commit && pre-commit install-hooks
-
-  # The nightly full suite: the backstop for affected-only PR runs. A private repo
-  # that merges less than once a day runs it on push instead (fewer runs).
+  # The full suite on the default branch: the backstop for affected-only PR
+  # runs, and the job that seeds the caches every PR restores.
   matrix-test:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Per merge. A private repo with 30+ default-branch commits a month runs
+    # it nightly instead:
+    #   if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -407,13 +429,13 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test            # must write coverage for the upload below
+        run: npm test            # must write coverage for the step below
 
       - name: Build
         run: npm run build
 
-      # Private repos have no seed-cache job: this leg seeds the guard's
-      # pre-commit cache from the default branch (same interpreter, same key).
+      # One leg also seeds the guard's pre-commit cache from the default
+      # branch (same interpreter, same key).
       - if: matrix.node-version == 24
         uses: actions/setup-python@v5
         with:
@@ -426,11 +448,18 @@ jobs:
       - if: matrix.node-version == 24
         run: pip install pre-commit && pre-commit install-hooks
 
+      # Public repos only, written in from Step 1's visibility, not tested at
+      # run time. Codecov's team use on private repos is paid, so a private
+      # repo gets this step instead. It reads coverage/coverage-summary.json:
+      # add 'json-summary' to Vitest's `coverage.reporter` in vitest.config.
+      # - name: Coverage summary
+      #   if: matrix.node-version == 24
+      #   run: |
+      #     jq -r '.total | "Lines \(.lines.pct)%, branches \(.branches.pct)%"' \
+      #       coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        # Once, and only on public repos: Codecov's free use is for public
-        # repositories. Private repos keep coverage in the job summary.
-        if: matrix.node-version == 24 && github.event.repository.visibility == 'public'
+        if: matrix.node-version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 ```
@@ -459,6 +488,12 @@ With a warm store, pnpm links packages from it instead of downloading them. Meas
 
 ## Python
 
+Generate the workflow for the visibility Step 1 recorded:
+
+- **Public:** as shown. The matrix runs on every merge (free), seeds the caches every pull request restores, and uploads coverage to Codecov from one leg.
+- **Private, under 30 default-branch commits a month:** as shown, with the Codecov step replaced by the commented coverage summary (`coverage report --format=markdown`).
+- **Private, 30 or more:** also switch the matrix to its commented nightly `if:` and add the commented `schedule:` trigger; keep `push` only when another job, such as a deploy, runs on it.
+
 ```yaml
 name: CI
 
@@ -467,9 +502,12 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  schedule:
-    - cron: '27 3 * * *'       # nightly full suite; an odd minute avoids top-of-hour delays
   workflow_dispatch:
+  # Private repo with 30+ default-branch commits a month: the matrix runs
+  # nightly instead of per merge. Cron is UTC unless `timezone:` is set.
+  # schedule:
+  #   - cron: '27 3 * * *'       # an odd minute avoids top-of-hour delays
+  #     timezone: 'Europe/Paris' # optional IANA time zone
 
 # A new push to a PR cancels its superseded run. Other events have no PR number,
 # fall back to their unique run ID, and are never cancelled.
@@ -488,8 +526,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Public repos run free: one parallel leg per stage. Anything not provably
-        # public pays per job (setup + per-job rounding): one leg, commit stage first.
+        # The one run-time visibility test: a pull_request payload always carries
+        # the repository. Public repos run free: one parallel leg per stage.
+        # Anything not provably public pays per job: one leg, commit stage first.
         stages: ${{ fromJSON(github.event.repository.visibility == 'public' && '["pre-commit", "pre-push"]' || '["pre-commit pre-push"]') }}
     steps:
       - uses: actions/checkout@v4
@@ -501,8 +540,8 @@ jobs:
           # Blobless: every commit and tree, file contents only for this commit.
           filter: blob:none
 
-      # The pip cache key includes the Python version: the nightly matrix's
-      # 3.12 leg and seed-cache below seed the key this job restores.
+      # The pip cache key includes the Python version: the default-branch
+      # matrix's 3.12 leg seeds the key this job restores.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -530,33 +569,13 @@ jobs:
             pre-commit run --hook-stage "$stage" --from-ref "$base" --to-ref HEAD
           done
 
-  # PR caches are scoped to refs/pull/<n>/merge; only default-branch caches reach
-  # every PR. Free on public repos; private repos are seeded by the nightly matrix.
-  seed-cache:
-    if: github.event_name == 'push' && github.event.repository.visibility == 'public'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        id: python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-      # Install only when the dependency files changed; the post step saves the new key.
-      - if: steps.python.outputs.cache-hit != 'true'
-        run: pip install -e ".[dev]"
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
-      - run: pip install pre-commit && pre-commit install-hooks
-
-  # The nightly full suite: the backstop for affected-only PR runs. A private repo
-  # that merges less than once a day runs it on push instead (fewer runs).
+  # The full suite on the default branch: the backstop for affected-only PR
+  # runs, and the job that seeds the caches every PR restores.
   matrix-test:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Per merge. A private repo with 30+ default-branch commits a month runs
+    # it nightly instead:
+    #   if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -581,8 +600,8 @@ jobs:
       - name: Run tests with coverage
         run: pytest -n auto --cov --cov-report=xml -q
 
-      # Private repos have no seed-cache job: the 3.12 leg seeds the guard's
-      # pre-commit cache from the default branch (same interpreter, same key).
+      # The 3.12 leg also seeds the guard's pre-commit cache from the default
+      # branch (same interpreter, same key).
       - if: matrix.python-version == '3.12'
         uses: actions/cache@v4
         with:
@@ -591,10 +610,15 @@ jobs:
       - if: matrix.python-version == '3.12'
         run: pip install pre-commit && pre-commit install-hooks
 
+      # Public repos only, written in from Step 1's visibility, not tested at
+      # run time. Codecov's team use on private repos is paid, so a private
+      # repo gets this step instead:
+      # - name: Coverage summary
+      #   if: matrix.python-version == '3.12'
+      #   run: coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        # Once, and only on public repos (Codecov's free use is for public repositories).
-        if: matrix.python-version == '3.12' && github.event.repository.visibility == 'public'
+        if: matrix.python-version == '3.12'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 ```
@@ -717,9 +741,12 @@ jobs:
       - name: Build
         run: go build ./...
 
+      # Public repos only, written in from Step 1's visibility: Codecov's team
+      # use on private repos is paid. A private repo writes
+      # `go tool cover -func=coverage.out | tail -n 1` to $GITHUB_STEP_SUMMARY instead.
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        if: matrix.go-version == '1.22' && github.event.repository.visibility == 'public'
+        if: matrix.go-version == '1.22'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.out
@@ -1038,11 +1065,10 @@ jobs:
 
 ### Upload coverage to Codecov
 
-Codecov's free use covers public repositories; team use on private repositories is a paid plan, so the upload is gated on visibility. On a private repository, print the coverage summary to `$GITHUB_STEP_SUMMARY` instead. A scheduled run's payload may carry no repository, so the gate skips the upload there; `workflow_dispatch` and `push` runs carry it.
+Codecov's team use on private repositories is paid, so write the upload in only for a public repository, from Step 1's visibility. Never gate it at run time: a scheduled run's payload carries no repository, so a runtime visibility test would skip every nightly upload. On a private repository, write the coverage summary to `$GITHUB_STEP_SUMMARY` instead (`coverage report --format=markdown` for coverage.py; for Vitest, add `json-summary` to `coverage.reporter` and read `coverage/coverage-summary.json` with `jq`).
 
 ```yaml
-      - name: Upload coverage to Codecov
-        if: github.event.repository.visibility == 'public'
+      - name: Upload coverage to Codecov   # public repositories only
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -1070,14 +1096,14 @@ Codecov's free use covers public repositories; team use on private repositories 
 on a job that was skipped skips the dependent too — listing it here would mean main never
 deploys. The guard already gated the pull request that produced this merge.
 
-The same rule applies to `matrix-test`. In the Go, Rust, and Java templates it runs on every
-merge, so `needs: [matrix-test]` is safe there. In the JavaScript/TypeScript and Python
-templates it runs nightly: drop the `needs:` line, or deploy from a release tag after a green
-nightly run, or move the matrix back to `push` when every merge deploys.
+The same rule applies to `matrix-test`. It runs on every merge, so `needs: [matrix-test]` is
+safe, except on a private repository with 30 or more default-branch commits a month, where it
+runs nightly: there, drop the `needs:` line, or deploy from a release tag after a green nightly
+run, or move the matrix back to `push` when every merge deploys.
 
 ```yaml
   deploy:
-    # needs: [matrix-test]   # Go, Rust, Java templates only: there it runs on push
+    # needs: [matrix-test]   # only when the matrix runs per merge, not nightly
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -1104,7 +1130,7 @@ Skip sparingly. Every skipped hook is a check that now runs nowhere, since the g
 
 ### Keeping the matrix off the hot path
 
-Every template here keeps `matrix-test` off pull requests: the JavaScript/TypeScript and Python templates run it nightly (`schedule:` and `workflow_dispatch`), and the Go, Rust, and Java templates on merges to the default branch (`if: github.event_name == 'push'`). Keep it there. A three-version matrix on every pull request commit triples the bill on a private repository, and on any repository it takes three of the plan's concurrent-job slots from the agents' pull request runs, to re-confirm a signal the hooks already gave locally. Nightly is the cheaper default when the default branch gets 30 or more commits a month; per merge is cheaper below that. For a library where version skew is the main risk, widen it to `pull_request` only on the release branch, never on every push to a feature branch.
+Every template here keeps `matrix-test` off pull requests: it runs on merges to the default branch, or nightly (`schedule:` and `workflow_dispatch`) on a private repository with 30 or more default-branch commits a month. Keep it there. A three-version matrix on every pull request commit triples the bill on a private repository, and on any repository it takes three of the plan's concurrent-job slots from the agents' pull request runs, to re-confirm a signal the hooks already gave locally. On a public repository, if the audit shows queue waits at the concurrent-job limit, move it to nightly too; the generated Codecov upload then runs nightly. For a library where version skew is the main risk, widen it to `pull_request` only on the release branch, never on every push to a feature branch.
 
 ---
 
@@ -1180,11 +1206,11 @@ done
 |---|---|---|
 | `queue` above about 30 s | The plan's concurrent-job limit, hit by matrices, shards, or superseded runs | `concurrency` cancel; matrix off pull requests; fewer legs |
 | `setup` larger than `work` | Cold caches, full-history checkout, slow install | Seed caches from the default branch; blobless checkout; pre-commit environment cache; measure a `node_modules` cache |
-| No cache under `refs/heads/<default>` | No job runs on the default branch | `seed-cache` (public) or the nightly job (private) |
+| No cache under `refs/heads/<default>` | No job runs on the default branch | A default-branch matrix or full run (Minimal on a public repository: `seed-cache`) |
 | Pull request runs miss while the lockfile matches the default branch | Key mismatch: OS, tool version, or lockfile path | Identical setup step and version in the seeding job and the guard |
 | One job is always the slowest | It is the critical path | Split by stage (public); move side work out; affected-only tests; shard (public only) |
 | The same step in several jobs | Duplicated work | Run it once; hook checks belong to the guard |
-| Matrix legs on `pull_request` | Version matrix on the hot path | Nightly `schedule:` |
+| Matrix legs on `pull_request` | Version matrix on the hot path | Default branch only: per merge, or nightly on a busy private repository |
 | No `timeout-minutes` | 360-minute default | About three times the typical duration |
 
 Measure before cutting. Deleting tests is rarely the fix: in the report that prompted this section, the time was never in the tests, and in the example below the time *is* in the slowest job's work. The split says which case you are in. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests.
@@ -1210,7 +1236,7 @@ caches: refs/heads/main 4 entries; last 5 pull request runs restored=12 missed=0
 |---|---|---|
 | The critical path is end-to-end test work, not setup | `e2e-node (26)`: 76 s of 96 s is work | Affected-only selection for e2e, or shard e2e across standard runners (public repository, so free) |
 | Caches are already seeded and restored | 4 caches under `refs/heads/main`; 0 misses in 5 pull request runs | None needed |
-| Version matrix runs on every pull request | 3 legs each of `unit-tests` and `e2e-node` per pull request run | Nightly matrix; one version on pull requests. Queue is 2 s today, so this frees concurrent-job slots rather than time |
+| Version matrix runs on every pull request | 3 legs each of `unit-tests` and `e2e-node` per pull request run | Matrix on merges to the default branch; one version on pull requests. Queue is 2 s today, so this frees concurrent-job slots rather than time |
 
 ---
 
@@ -1229,7 +1255,7 @@ Fetched 2026-11-01. Re-check them when a template changes; runner specs and pric
 - `actions/checkout` README (`filter`, `fetch-depth`, `persist-credentials`) and `src/git-source-provider.ts` (with `fetch-depth: 0` the filter is passed and the depth omitted): https://github.com/actions/checkout
 - Control workflow concurrency (the `github.head_ref || github.run_id` fallback cancels on pull requests only; the templates key on the pull request number instead, which is unique across forks): https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 - Workflow syntax (`timeout-minutes` default 360; `cancel-in-progress` accepts expressions): https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
-- Events that trigger workflows (`schedule`: default branch's latest commit, delays at the top of the hour, disabled after 60 days without activity in public repositories): https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
+- Events that trigger workflows (`schedule`: default branch's latest commit, cron in UTC unless `timezone:` is set, delays at the top of the hour, disabled after 60 days without activity in public repositories; the `schedule` payload carries no repository): https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 - Troubleshooting required status checks (a workflow skipped by path filtering stays Pending; a job skipped by a conditional reports Success): https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
 - Nx affected (`nx affected -t`, `--base`/`--head`, `nrwl/nx-set-shas`, lockfile changes affect every task by default): https://nx.dev/docs/features/ci-features/affected
 - Turborepo run reference (`--affected`, `TURBO_SCM_BASE`/`TURBO_SCM_HEAD`, too-shallow checkouts mark every package changed, `--filter` git ranges): https://turborepo.dev/docs/reference/run

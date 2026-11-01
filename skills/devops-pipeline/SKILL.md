@@ -22,8 +22,8 @@ Every check lands in exactly one lane. This table is the single source of truth;
 |------|-------------|-----------------|
 | `pre-commit` stage (every commit) | < 10s, changed files only | Format, lint, type-check (fastest free tool), offline security scans, fast unit tests, compile/import check |
 | `pre-push` stage (every push) | < 60s | Affected tests (whole suite and coverage threshold when they fit), CLI E2E, slow lint rulesets |
-| GitHub Actions, pull request | What the agent waits for | Diff-scoped bypass guard |
-| GitHub Actions, default branch | Free on public repos, billed per minute on private | Full suite and version matrix (nightly or per merge), cache seeding, secrets-dependent scans, clean-VM tests, coverage upload, deploy/release |
+| GitHub Actions, pull request | As short as the slowest guard leg | Diff-scoped bypass guard |
+| GitHub Actions, default branch | Free on public repos, billed per minute on private | Full suite and version matrix (per merge, nightly on a busy private repo), cache seeding, secrets-dependent scans, clean-VM tests, coverage upload (public repos), deploy/release |
 
 A check that fits an earlier lane must not be repeated in a later one; the only deliberate overlaps are the bypass guard and the default-branch full run that backstops affected-test selection. CI re-running the whole hook set on every push is the failure mode this skill exists to prevent.
 
@@ -83,7 +83,7 @@ Identify:
 - **Frameworks**: React, Next.js, Django, FastAPI, etc.
 - **Build system**: npm, yarn, pnpm, pip, poetry, cargo, go, maven, gradle
 - **Existing tooling**: Linters, formatters, type checkers already configured
-- **Visibility**: public (standard runners free, 4 vCPU) or private, `INTERNAL` included (billed per minute, each job rounded up, 2 vCPU). It decides parallel jobs and shards in Step 3; if `gh` cannot read it, ask, and assume private meanwhile. For a private repo, count default-branch commits over 30 days: `git rev-list --count --first-parent --since=30.days <default-branch>`.
+- **Visibility**: public (standard runners free, 4 vCPU) or private, `INTERNAL` included (billed per minute, each job rounded up, 2 vCPU). Step 3 generates the workflow for it; if `gh` cannot read it, ask, and assume private meanwhile. For a private repo, count default-branch commits over 30 days: `git rev-list --count --first-parent --since=30.days <default-branch>`.
 - **Is this a CLI tool?** — if yes, enumerate all commands/subcommands (check README, `--help`, `click`/`argparse`/`cobra` source) to build an E2E test suite
 
 If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the language, build system, existing tooling, existing config files, visibility, and CLI status (with its command list) are recorded.
@@ -126,7 +126,7 @@ If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the 
 CI runs exactly four kinds of thing:
 
 1. **Bypass guard** — re-runs both hook stages over the pull request's diff. The one deliberate overlap with pre-commit, because `--no-verify` otherwise makes local gates optional.
-2. **Version matrix** — the only lane needing several runners, doubling as the full-suite backstop. Nightly, or per merge on a private repo with under 30 default-branch commits a month (and in the Go, Rust, Java templates).
+2. **Version matrix** — the only lane needing several runners, doubling as the full-suite backstop. Per merge; nightly only on a private repo with 30 or more default-branch commits a month.
 3. **Secrets-dependent work** — scans and uploads needing tokens a laptop should not hold.
 4. **Deploy / release** — on merge to the default branch.
 
@@ -134,8 +134,8 @@ The guard's four load-bearing details are explained with its template: **both** 
 
 **Make it fast, free techniques only** (reference: "Fast CI at no extra cost"):
 
-- **Parallel where free.** Public repo: one guard leg per hook stage. Otherwise one leg, commit stage first, since each extra job adds setup and minute rounding to the bill.
-- **Caches seeded from the default branch.** A pull request's caches serve only that pull request. Seed from the default-branch matrix (plus a per-merge `seed-cache` on public repos), cache `~/.cache/pre-commit`, and cache `node_modules` only when measured.
+- **Generated for the recorded visibility.** Only the guard's leg split reads visibility at run time: one leg per hook stage on public repos, otherwise one leg, commit stage first. Codecov upload, `seed-cache`, macOS legs, and the matrix trigger are written in or left out for Step 1's answer; a private repo gets a coverage summary instead of Codecov.
+- **Caches seeded from the default branch.** A pull request's caches serve only that pull request. Seed from the default-branch matrix (Minimal: a per-merge `seed-cache` on public repos), cache `~/.cache/pre-commit`, and cache `node_modules` only when measured.
 - **Blobless full history** in the guard: `fetch-depth: 0` plus `filter: blob:none`. Never shallow where history is read.
 - **`concurrency`** on the pull request number (fallback `github.run_id`) with `cancel-in-progress`.
 - **Affected-only on pull requests once the suite is too slow to run whole, full suite on the default branch**. Filters list what may be skipped; skip with job-level `if:`, not workflow `paths:`; selection fails when source changed but no test ran.
@@ -166,7 +166,7 @@ After the last Step Completion Report, print the final report from [references/f
 After running the skill, the repository contains:
 
 1. **`.pre-commit-config.yaml`** — hooks on both stages, placed per the Check Routing Table.
-2. **`.github/workflows/ci.yml`** — only step 3's four responsibilities, plus `concurrency`, a blobless guard, default-branch cache seeding, job timeouts, and a default-branch full suite. No standalone step duplicating a hook.
+2. **`.github/workflows/ci.yml`** — step 3's four responsibilities with its speed techniques, generated for the repo's visibility. No standalone step duplicating a hook.
 3. **`scripts/e2e_test.sh`** (CLI projects only) — executable script exercising every CLI command/subcommand.
 4. **`scripts/affected-tests.sh`** (only when the suite exceeds the push budget) — affected-test selection that fails closed.
 5. **A final report** in the shape of [references/final-report.md](references/final-report.md).
@@ -184,7 +184,7 @@ A run passes when **all** of the following are true:
 - [ ] At least one `.github/workflows/*.yml` exists and carries only the four CI responsibilities from step 3.
 - [ ] CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
 - [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by a default-branch job; with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
-- [ ] No paid runner, larger runner, private-repo shard, or cache above 10 GB; parallel guard legs and shards only on public repos.
+- [ ] No paid runner, larger runner, private-repo shard, private-repo Codecov step, or cache above 10 GB; parallel guard legs and shards only on public repos.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).
 - [ ] For CLI projects, the E2E script is wired to the `pre-push` stage per the language reference files.
 - [ ] The final report passes the four reader checks in [references/final-report.md](references/final-report.md); without user feedback, human understanding stays unconfirmed.
@@ -195,7 +195,7 @@ A run passes when **all** of the following are true:
 - **Existing `.pre-commit-config.yaml`**: Use the Safety Rails merge procedure; preserve user hooks and pinned revs.
 - **Monorepo with multiple languages**: One config with per-language sections and `files:` filters. Local `language: system` entries must also target the package dir (`npm --prefix frontend`, `pytest backend/tests`): `files:` does not change cwd.
 - **No `origin` remote**: Stop and ask the user whether a local-only setup with no repo sync is acceptable; do not proceed automatically.
-- **Tests take >60 seconds**: Select affected tests on `pre-push` (nightly full run as backstop) or demote to the next lane; record the measured time in a hook comment.
+- **Tests take >60 seconds**: Select affected tests on `pre-push` (default-branch full run as backstop) or demote to the next lane; record the measured time in a hook comment.
 - **User asks for a faster paid runner**: Decline (it raises the bill) and offer step 3's free techniques, starting with the audit.
 - **Audit without `gh` auth or run history**: Review the workflow statically; say under `Uncertainty:` that no runs were measured.
 - **Team bypasses hooks with `--no-verify`**: Local gates cannot stop this. Keep the CI bypass guard, and report the bypass rate rather than adding more hooks.

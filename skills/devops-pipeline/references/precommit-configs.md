@@ -109,7 +109,8 @@ repos:
       #   pass_filenames: false
       #   stages: [pre-push]
 
-      # The build on push: with the matrix nightly, nothing else builds a PR.
+      # The build on push: the matrix runs on the default branch only, so
+      # nothing else builds a PR.
       - id: build
         name: build
         entry: npm run build
@@ -526,7 +527,7 @@ set -euo pipefail
 skip_re='^(docs/|\.github/)|\.md$'
 base="${PRE_COMMIT_FROM_REF:-}"
 to="$(git rev-parse "${PRE_COMMIT_TO_REF:-HEAD}")"
-# No range (a push that includes the root commit, the nightly --all-files run),
+# No range (a push that includes the root commit, the default-branch --all-files run),
 # or a push of a branch other than the checked-out one: run everything.
 if [ -z "$base" ] || [ "$to" != "$(git rev-parse HEAD)" ]; then
   exec npx vitest run
@@ -542,7 +543,7 @@ fi
 exec npx vitest run --changed "$base" --passWithNoTests
 ```
 
-`skip_re` lists what may be skipped, never what must run: a new directory or config file counts as code until someone adds it. Verified with Vitest 5.0.5: a change to an untested module selects no test and `vitest run --changed` exits 0 (the script exits 1 instead), and a tsconfig-only change selects no test unless tsconfig files are in `forceRerunTriggers`. The script catches an empty selection, not a partial one (untracked local test files also count as changed for Vitest); the nightly full run catches the rest. Monorepos use `nx affected` or `turbo run test --affected` the same way; see [github-actions.md](github-actions.md#affected-only-on-pull-requests-full-suite-nightly).
+`skip_re` lists what may be skipped, never what must run: a new directory or config file counts as code until someone adds it. Verified with Vitest 5.0.5: a change to an untested module selects no test and `vitest run --changed` exits 0 (the script exits 1 instead), and a tsconfig-only change selects no test unless tsconfig files are in `forceRerunTriggers`. The script catches an empty selection, not a partial one (untracked local test files also count as changed for Vitest); the default-branch full run catches the rest. Monorepos use `nx affected` or `turbo run test --affected` the same way; see [github-actions.md](github-actions.md#affected-only-on-pull-requests-full-suite-on-the-default-branch).
 
 ### Vitest: `isolate: false`
 

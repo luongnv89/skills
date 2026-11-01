@@ -107,7 +107,7 @@
       "id": 9,
       "kind": "edge",
       "prompt": "CI is too slow. Move our GitHub Actions jobs to Blacksmith runners, or to GitHub's 16-core larger runners, so the tests finish faster.",
-      "expected_output": "Declines the switch because both options raise the CI bill, in a sentence or two, and offers the free route instead: the CI speed audit, caches seeded from the default branch, concurrency cancel, blobless checkout, affected-only tests with a nightly full run, workers matched to the runner, and parallel legs or shards only on a public repo.",
+      "expected_output": "Declines the switch because both options raise the CI bill, in a sentence or two, and offers the free route instead: the CI speed audit, caches seeded from the default branch, concurrency cancel, blobless checkout, affected-only tests with a default-branch full run, workers matched to the runner, and parallel legs or shards only on a public repo.",
       "files": [],
       "expectations": [
         "No workflow gets a third-party runner label or a GitHub larger-runner label, and no runner service is configured.",
