@@ -12,7 +12,7 @@ Philosophy: **lean, fast CI**. pre-commit already handles format, lint, type-che
     if: github.event_name == 'pull_request'   # avoids the all-zeros `github.event.before`
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0                      # `--from-ref` needs the base SHA locally
           filter: blob:none                   # full history, file contents fetched on demand
@@ -103,7 +103,8 @@ The pull request number exists only on `pull_request` events, so an agent's new 
 
 A cache saved by a `pull_request` run belongs to `refs/pull/<n>/merge`: later runs of that pull request can restore it, and other pull requests cannot. Every run can restore caches from its own branch, its base branch, and the default branch. A workflow with no default-branch job therefore never writes a cache a new pull request can use, and every pull request's first run installs cold.
 
-- `actions/setup-node` keys its cache on OS, architecture, package manager, and lockfile hash, not on the Node version, so any default-branch job with `cache: npm` seeds the key the guard restores. `actions/setup-python` adds the Python version to its key: seed with the version the guard uses.
+- `actions/setup-node` keys its cache on OS, architecture, package manager, and lockfile hash (`node-cache-<os>-<arch>-<pm>-<hash>`), not on the Node version, so any default-branch job with `cache: npm` seeds the key the guard restores, whichever matrix leg saved it. It passes no restore keys (Yarn Berry aside), so `cache-hit` means an exact match. `actions/setup-python` adds the resolved Python version (for example `3.12.16`) and, on Linux, the OS release to its key: seed with the version input the guard uses. Its restore key keeps that version, and `cache-hit` is true only on an exact key match.
+- Since setup-node v6, a job with no `cache:` input still caches npm when `package.json` names npm in `packageManager` or `devEngines.packageManager`; set `package-manager-cache: false` to opt out. The templates set `cache:` explicitly.
 - The templates seed from the default-branch `matrix-test`, which runs anyway: per merge, or nightly on a busy private repository. One leg also restores and saves the pre-commit cache. The Minimal template has no matrix, so on a public repository it gets a `seed-cache` job on every merge that installs only on a cache miss. On a private repository that job would cost a rounded minute per merge, so it is left out.
 - Cache the pre-commit hook environments too: `~/.cache/pre-commit`, keyed on the Python interpreter (`env.pythonLocation`, set by `setup-python`) and the hash of `.pre-commit-config.yaml`, as `pre-commit/action` does. Without the interpreter in the key, a Python patch update leaves broken environments behind an exact key match that is never re-saved.
 - Caches unused for 7 days are evicted, and the free allowance is 10 GB per repository. Never raise the limit: usage above 10 GB is billed.
@@ -111,7 +112,7 @@ A cache saved by a `pull_request` run belongs to `refs/pull/<n>/merge`: later ru
 **`node_modules`.** `setup-node`'s `cache:` restores the package manager's download cache, not `node_modules`, so `npm ci` still runs on every job. Caching `node_modules` itself can be faster, but GitHub's cache examples advise against it: it breaks across Node versions, and `npm ci` deletes it. Adopt it only when the audit shows install time dominating and a measured restore beats the install. Then key on OS, Node version, and lockfile hash, set no `restore-keys`, and install only on an exact miss:
 
 ```yaml
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         id: node-modules
         with:
           path: node_modules
@@ -124,7 +125,7 @@ A cache saved by a `pull_request` run belongs to `refs/pull/<n>/merge`: later ru
 
 `actions/checkout` fetches one commit by default. The guard needs history (`--from-ref` dies on a missing base SHA), and so do `nx affected`, `turbo --affected`, and `vitest --changed`. `fetch-depth: 0` provides it, but it also downloads every past version of every file. Adding `filter: blob:none` keeps every commit and tree, fetches file contents only for the checked-out commit, and lets git download an older blob on demand. checkout applies the filter together with full history: with `fetch-depth: 0` it drops the depth argument and keeps the filter.
 
-Keep `persist-credentials` at its default so on-demand fetches can authenticate on a private repository. Never speed up a history reader with a shallow clone: `--from-ref` fails, and Turborepo treats a too-shallow checkout as "every package changed". Jobs that read no history keep the default single-commit fetch.
+Keep `persist-credentials` at its default so on-demand fetches can authenticate on a private repository. Since checkout v6 the token sits in a file under `$RUNNER_TEMP` that `.git/config` includes, so later git commands in the job still authenticate. Never speed up a history reader with a shallow clone: `--from-ref` fails, and Turborepo treats a too-shallow checkout as "every package changed". Jobs that read no history keep the default single-commit fetch.
 
 ### Parallel jobs on public repositories, one job on private ones
 
@@ -204,7 +205,7 @@ jobs:
         # Anything not provably public pays per job: one leg, commit stage first.
         stages: ${{ fromJSON(github.event.repository.visibility == 'public' && '["pre-commit", "pre-push"]' || '["pre-commit pre-push"]') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # A diff-scoped run needs BOTH endpoints in the object store, and
           # checkout defaults to fetch-depth 1 — without this the base SHA is
@@ -217,12 +218,12 @@ jobs:
       # `language: system` hooks shell out to them ...
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
       - name: Cache pre-commit environments
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -246,11 +247,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -293,12 +294,12 @@ on:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # ... the same project toolchain and install steps as the guard ...
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -356,7 +357,7 @@ jobs:
         # Anything not provably public pays per job: one leg, commit stage first.
         stages: ${{ fromJSON(github.event.repository.visibility == 'public' && '["pre-commit", "pre-push"]' || '["pre-commit pre-push"]') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # A diff-scoped run needs BOTH endpoints in the object store, and
           # checkout defaults to fetch-depth 1 — without this the base SHA is
@@ -369,7 +370,7 @@ jobs:
       # The npm cache key ignores the Node version, so the default-branch
       # matrix below seeds the key this job restores.
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'npm'
@@ -380,12 +381,12 @@ jobs:
       # pre-commit is a Python tool; the runner's system Python can refuse
       # `pip install` under PEP 668.
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
       - name: Cache pre-commit environments
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -417,10 +418,10 @@ jobs:
         node-version: [22, 24, 26]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -437,11 +438,11 @@ jobs:
       # One leg also seeds the guard's pre-commit cache from the default
       # branch (same interpreter, same key).
       - if: matrix.node-version == 24
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - if: matrix.node-version == 24
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -458,7 +459,7 @@ jobs:
       #     jq -r '.total | "Lines \(.lines.pct)%, branches \(.branches.pct)%"' \
       #       coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         if: matrix.node-version == 24
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -468,12 +469,15 @@ jobs:
 
 ```yaml
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v6
+        # Drop `with:` when package.json sets `packageManager` (or
+        # `devEngines.packageManager`): since v4 the action fails when that
+        # and `version` name different pnpm versions.
         with:
-          version: 8
+          version: 12              # the repo's pnpm major; 12 is current
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'pnpm'
@@ -531,7 +535,7 @@ jobs:
         # Anything not provably public pays per job: one leg, commit stage first.
         stages: ${{ fromJSON(github.event.repository.visibility == 'public' && '["pre-commit", "pre-push"]' || '["pre-commit pre-push"]') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # A diff-scoped run needs BOTH endpoints in the object store, and
           # checkout defaults to fetch-depth 1 — without this the base SHA is
@@ -543,7 +547,7 @@ jobs:
       # The pip cache key includes the Python version: the default-branch
       # matrix's 3.12 leg seeds the key this job restores.
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -553,7 +557,7 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Cache pre-commit environments
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -584,10 +588,10 @@ jobs:
         python-version: ['3.12', '3.13', '3.14']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -603,7 +607,7 @@ jobs:
       # The 3.12 leg also seeds the guard's pre-commit cache from the default
       # branch (same interpreter, same key).
       - if: matrix.python-version == '3.12'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -617,7 +621,7 @@ jobs:
       #   if: matrix.python-version == '3.12'
       #   run: coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         if: matrix.python-version == '3.12'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -648,7 +652,7 @@ jobs:
           virtualenvs-in-project: true
 
       - name: Load cached venv
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
@@ -685,7 +689,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # A diff-scoped run needs BOTH endpoints in the object store, and
           # checkout defaults to fetch-depth 1 — without this the base SHA is
@@ -695,7 +699,7 @@ jobs:
 
       # The project toolchain: `language: system` hooks shell out to it.
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: '1.22'
           cache: true
@@ -703,7 +707,7 @@ jobs:
       # pre-commit is a Python tool; the runner's system Python can refuse
       # `pip install` under PEP 668.
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -727,10 +731,10 @@ jobs:
         go-version: ['1.21', '1.22']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go-version }}
           cache: true
@@ -745,7 +749,7 @@ jobs:
       # use on private repos is paid. A private repo writes
       # `go tool cover -func=coverage.out | tail -n 1` to $GITHUB_STEP_SUMMARY instead.
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         if: matrix.go-version == '1.22'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -780,7 +784,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # A diff-scoped run needs BOTH endpoints in the object store, and
           # checkout defaults to fetch-depth 1 — without this the base SHA is
@@ -800,7 +804,7 @@ jobs:
       # pre-commit is a Python tool; the runner's system Python can refuse
       # `pip install` under PEP 668.
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -828,7 +832,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Rust ${{ matrix.rust }}
         uses: dtolnay/rust-toolchain@master
@@ -873,7 +877,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # A diff-scoped run needs BOTH endpoints in the object store, and
           # checkout defaults to fetch-depth 1 — without this the base SHA is
@@ -883,7 +887,7 @@ jobs:
 
       # The project toolchain: `language: system` hooks shell out to it.
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -892,7 +896,7 @@ jobs:
       # pre-commit is a Python tool; the runner's system Python can refuse
       # `pip install` under PEP 668.
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -916,10 +920,10 @@ jobs:
         java-version: ['17', '21']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up JDK ${{ matrix.java-version }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
@@ -964,8 +968,14 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # paths-filter lists a pull request's files through the REST API, which
+    # needs `pull-requests: read`; a job-level block drops every scope it does
+    # not name, so checkout's `contents: read` is listed too.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: blob:none
@@ -975,7 +985,7 @@ jobs:
       # the changed files from the REST API. Keep each filter a superset of
       # that language's hook `files:` patterns, so every hook that can fire
       # finds its toolchain.
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
@@ -990,9 +1000,9 @@ jobs:
       # PR would otherwise fail the guard with "Dependencies lock file is not found".
       - name: Setup Node.js
         if: steps.changes.outputs.frontend == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
       - if: steps.changes.outputs.frontend == 'true'
@@ -1000,7 +1010,7 @@ jobs:
         run: npm ci
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - if: steps.changes.outputs.backend == 'true'
@@ -1037,11 +1047,11 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [22, 24, 26]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -1071,11 +1081,11 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.12', '3.13', '3.14']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e "backend/[dev]"
@@ -1094,16 +1104,20 @@ Codecov's team use on private repositories is paid, so write the upload in only 
 
 ```yaml
       - name: Upload coverage to Codecov   # public repositories only
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 ```
 
+The upload still needs the token on a public repository: since v5, only pull requests from forks upload tokenless, unless the Codecov organization opts out of the token. `use_oidc: true` replaces the secret but needs `permissions: id-token: write` on the job.
+
 ### PR status comment
+
+Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token.
 
 ```yaml
       - name: Comment PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         if: github.event_name == 'pull_request'
         with:
           script: |
@@ -1133,7 +1147,7 @@ run, or move the matrix back to `push` when every merge deploys.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Add deployment steps
 ```
 
@@ -1277,16 +1291,20 @@ Fetched 2026-11-01. Re-check them when a template changes; runner specs and pric
 - Actions limits (concurrent jobs per plan; 6-hour job limit): https://docs.github.com/en/actions/reference/limits
 - Dependency caching reference (restore scope: current branch, base branch, default branch; pull request caches scoped to `refs/pull/.../merge`; 7-day eviction; 10 GB default): https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching
 - `actions/cache` examples (caching `node_modules` not recommended: breaks across Node versions, incompatible with `npm ci`): https://github.com/actions/cache/blob/main/examples.md
-- `actions/setup-node` README (`cache` does not cache `node_modules`) and `src/cache-restore.ts` (key `node-cache-<platform>-<arch>-<pm>-<hash>`, `cache-hit` output): https://github.com/actions/setup-node
-- `actions/setup-python` `src/cache-distributions/pip-cache.ts` (key includes the Python version; `cache-hit` means an exact key match): https://github.com/actions/setup-python
-- `actions/checkout` README (`filter`, `fetch-depth`, `persist-credentials`) and `src/git-source-provider.ts` (with `fetch-depth: 0` the filter is passed and the depth omitted): https://github.com/actions/checkout
+- `actions/setup-node` v7.1.0 README (`cache` does not cache `node_modules`; `package-manager-cache`), `src/cache-restore.ts` (key `node-cache-<platform>-<arch>-<pm>-<hash>` with no Node version; no restore keys except Yarn Berry, so `cache-hit` is an exact match; `cache-primary-key` and `cache-matched-key` outputs since v7) and `src/main.ts` (npm auto-caching from `packageManager` or `devEngines.packageManager` since v6): https://github.com/actions/setup-node
+- `actions/setup-python` v7.1.0 `src/cache-distributions/pip-cache.ts` (key `setup-python-<os>-<arch>[-<linux release>]-python-<resolved version>-pip-<hash>`; the restore key keeps the version) and `cache-distributor.ts` (`cache-hit` is true only on an exact key match); `src/find-python.ts` still exports `pythonLocation`: https://github.com/actions/setup-python
+- `actions/checkout` v7.0.1 README (`filter`, `fetch-depth`, `persist-credentials`; since v6 the token lives in a `$RUNNER_TEMP` file that `.git/config` includes; since v7 fork pull request code is refused under `pull_request_target` and `workflow_run`), `src/git-source-provider.ts` and `src/git-command-manager.ts` (with `fetch-depth: 0` the filter is passed and the depth omitted): https://github.com/actions/checkout
+- Action majors pinned in the templates, each the `releases/latest` tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest`: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/setup-python` v7.1.0, `actions/cache` v6.1.0, `actions/setup-go` v7.0.0, `actions/setup-java` v6.1.0, `actions/github-script` v9.0.0, `codecov/codecov-action` v7.1.1, `dorny/paths-filter` v4.0.3, `pnpm/action-setup` v6.1.0, `astral-sh/setup-uv` v10.3.3 (no floating major tag), `snok/install-poetry` v1.4.2, `Swatinem/rust-cache` v2.9.3, `pre-commit/action` v3.0.1; `dtolnay/rust-toolchain` is pinned by its `stable` and `master` branches, as its README shows. The templates pin the major tag; pinning a full commit SHA is the stricter option. Every major from v4 on runs on Node 24 and needs runner v2.327.1 or newer, which GitHub-hosted runners have; update self-hosted runners first.
+- Release notes for each major crossed: `actions/cache` v5 to v6 (Node 24, ESM; a read-only cache token, as on fork pull requests, makes the save warn instead of fail), `actions/setup-java` v5 to v6 (Maven key adds `.mvn/extensions.xml`; legacy Adopt distributions removed), `actions/setup-go` v6 to v7 (toolchain selection reworked in v6), `codecov/codecov-action` v5 to v7 (`file` deprecated for `files`; `use_oidc`), `actions/github-script` v8 to v9 (`require('@actions/github')` removed; injected `getOctokit`), `pnpm/action-setup` v3 to v6 (v2 stopped working on newer Node; since v4 a `version` that differs from `packageManager` fails; v6 supports pnpm 11 and 12), each at `https://github.com/<owner>/<repo>/releases`, fetched 2026-11-01
+- Node.js release schedule (18 ended 2025-04-30, 20 ended 2026-04-30; 22, 24 and 26 supported), fetched 2026-11-01: https://github.com/nodejs/Release/blob/main/schedule.json
+- Python supported versions (3.10 reached end of life on 2026-10-01; 3.11 to 3.15 supported), fetched 2026-11-01: https://devguide.python.org/versions/
 - Control workflow concurrency (the `github.head_ref || github.run_id` fallback cancels on pull requests only; the templates key on the pull request number instead, which is unique across forks): https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 - Workflow syntax (`timeout-minutes` default 360; `cancel-in-progress` accepts expressions): https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
 - Events that trigger workflows (`schedule`: default branch's latest commit, cron in UTC unless `timezone:` is set, delays at the top of the hour, disabled after 60 days without activity in public repositories; the `schedule` payload carries no repository): https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 - Troubleshooting required status checks (a workflow skipped by path filtering stays Pending; a job skipped by a conditional reports Success): https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
 - Nx affected (`nx affected -t`, `--base`/`--head`, `nrwl/nx-set-shas`, lockfile changes affect every task by default): https://nx.dev/docs/features/ci-features/affected
 - Turborepo run reference (`--affected`, `TURBO_SCM_BASE`/`TURBO_SCM_HEAD`, too-shallow checkouts mark every package changed, `--filter` git ranges): https://turborepo.dev/docs/reference/run
-- `dorny/paths-filter` README (v4 is current and needs the Node 24 runtime; the Multi-language template still pins v3; pull requests use the REST API, so no checkout is needed; MIT): https://github.com/dorny/paths-filter
+- `dorny/paths-filter` v4.0.3 README (v4 moved to the Node 24 runtime; pull requests use the REST API, which needs `pull-requests: read`, so no checkout is needed; MIT): https://github.com/dorny/paths-filter
 - `pre-commit/action` `action.yml` (cache key `pre-commit-3|${{ env.pythonLocation }}|<config hash>`): https://github.com/pre-commit/action
 - pre-commit (CI cache of `~/.cache/pre-commit`; `default_stages` defaults to all stages; `PRE_COMMIT_FROM_REF`/`PRE_COMMIT_TO_REF`, also set by `--from-ref`/`--to-ref` in `pre_commit/commands/run.py`): https://pre-commit.com/
 - `astral-sh/setup-uv` README (`enable-cache`, default `auto`): https://github.com/astral-sh/setup-uv
