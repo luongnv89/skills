@@ -79,7 +79,7 @@
       "expected_output": "Writes hooks with the fastest free tools (Oxlint with categories at error, TypeScript 7 tsc) and default_stages: [pre-commit], explains why the checks live in hooks rather than an AGENTS.md line, and writes a ci.yml whose guard is split into parallel legs by hook stage (public repo), uses a blobless full-history checkout, restores caches that a default-branch job seeds, cancels superseded PR runs, and sets timeouts. Tests are affected-only with a skip guard once the suite outgrows the 60-second push budget, backed by a full run on the default branch. No paid or larger runner appears.",
       "files": [],
       "expectations": [
-        "ci.yml has a concurrency group keyed on the pull request (github.event.pull_request.number or github.head_ref) with a github.run_id fallback and cancel-in-progress: true, and every job sets timeout-minutes.",
+        "ci.yml has a concurrency group keyed on the pull request number (github.event.pull_request.number, not github.head_ref) with a github.run_id fallback and cancel-in-progress: true, and every job sets timeout-minutes.",
         "The bypass guard runs only on pull_request, checks out with fetch-depth: 0 and filter: blob:none, and runs both hook stages with --from-ref and --to-ref; because the repo is public, the stages run as parallel legs.",
         "The guard's npm and pre-commit caches are also saved by a job that runs on the default branch (push or schedule), not only by pull_request runs.",
         ".pre-commit-config.yaml sets default_stages: [pre-commit], so push-stage runs do not repeat the commit-stage hooks.",
@@ -113,6 +113,21 @@
         "No workflow gets a third-party runner label or a GitHub larger-runner label, and no runner service is configured.",
         "The reply says paid runners are out of scope because they raise the bill, and offers the CI speed audit and at least three free techniques from the skill instead.",
         "The final report's Decision asks whether to run the audit or apply the free techniques."
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "happy-path",
+      "prompt": "Set up pre-commit hooks and GitHub Actions for our TypeScript service (Node 24, npm, Vitest). The repo is private, gets about 15 merges to main a month, and has no CI yet. We pay for Actions minutes and the bill must not grow.",
+      "expected_output": "Records the repo as private with under 30 default-branch commits a month and generates ci.yml for that: the bypass guard runs as a single leg (commit stage first), there is no seed-cache job, the version matrix (and any default-branch full run) triggers on push to the default branch rather than a nightly schedule, no Codecov step is written (a coverage summary goes to the job summary instead), and every job runs on ubuntu-latest. Nothing paid is configured or recommended.",
+      "files": [],
+      "expectations": [
+        "The bypass guard runs on pull_request only and, for this private repo, as one leg that runs the pre-commit stage before the pre-push stage: either the run-time visibility split resolving to a single 'pre-commit pre-push' leg, or one job running both stages.",
+        "ci.yml has no seed-cache job and no job gated on github.event.repository.visibility other than the guard's leg split.",
+        "The version matrix, and any default-branch full run, triggers on push to the default branch (plus optional workflow_dispatch), and ci.yml has no schedule: trigger, because the repo has under 30 default-branch commits a month.",
+        "No step uses codecov/codecov-action; if coverage is reported in CI, it is written to $GITHUB_STEP_SUMMARY.",
+        "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes.",
+        "ci.yml cancels superseded pull request runs with a concurrency group keyed on github.event.pull_request.number with a github.run_id fallback."
       ]
     }
   ]

@@ -1140,7 +1140,7 @@ Audit mode for an existing pipeline. The audit is read-only: it needs an authent
 
 ### 1. Split every job into queue, setup, and work
 
-Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audit.sh OWNER/REPO ci.yml 150`. Each run costs one API call; 50 runs take about a minute.
+Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audit.sh OWNER/REPO ci.yml 150`. Each run costs one API call; 50 runs take about a minute. Only runs and jobs that ended in success or failure count: a run cancelled by a newer push would drag the medians down.
 
 ```bash
 #!/usr/bin/env bash
@@ -1150,13 +1150,14 @@ Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audi
 set -euo pipefail
 repo="$1"; workflow="$2"; limit="${3:-150}"
 gh run list --repo "$repo" --workflow "$workflow" --status completed --limit "$limit" \
-  --json databaseId,event,createdAt,updatedAt > runs.json
+  --json databaseId,event,conclusion,createdAt,updatedAt |
+  jq '[.[] | select(.conclusion == "success" or .conclusion == "failure")]' > runs.json
 jq -r '.[] | "\(.databaseId) \(.event)"' runs.json | while read -r run_id event; do
   gh api "repos/$repo/actions/runs/$run_id/jobs?per_page=100" --paginate |
   jq -c --arg ev "$event" '
     def secs: if . == null then 0 else fromdateiso8601 end;
     def dur: (.completed_at | secs) - (.started_at | secs);
-    .jobs[] | select(.conclusion != "skipped" and .started_at != null) |
+    .jobs[] | select((.conclusion == "success" or .conclusion == "failure") and .started_at != null) |
     ([.steps[]? | select(.name | test("^(Post |Complete job)|set ?up|checkout|cache|restore|install|npm ci|pnpm i|yarn|pip |uv sync"; "i")) | dur] | add // 0) as $setup |
     {run: .run_id, event: $ev, job: .name, conclusion,
      queue: ((.started_at | secs) - (.created_at | secs)),
@@ -1188,12 +1189,13 @@ The setup/work split matches step names, so it is a heuristic. Before trusting i
 
 ```bash
 repo=OWNER/REPO
+workflow=ci.yml   # the workflow file the audit measured
 # Which refs own the caches? No refs/heads/<default> entry means nothing seeds them.
 gh cache list --repo "$repo" --limit 100 --json key,ref,sizeInBytes |
   jq -r 'group_by(.ref) | .[] | "\(.[0].ref)\t\(length) entries\t\((map(.sizeInBytes) | add) / 1e6 | floor) MB"'
 gh api "repos/$repo/actions/cache/usage" --jq '"\(.active_caches_count) caches, \(.active_caches_size_in_bytes / 1e9) GB of the free 10 GB"'
 # Restores and misses in the latest pull request runs (setup-* and actions/cache log lines).
-for id in $(gh run list --repo "$repo" --workflow ci.yml --event pull_request --status completed \
+for id in $(gh run list --repo "$repo" --workflow "$workflow" --event pull_request --status completed \
     --limit 10 --json databaseId --jq '.[].databaseId'); do
   log="$(gh run view --repo "$repo" "$id" --log 2>/dev/null)"
   echo "run $id: restored=$(grep -c 'Cache restored from key' <<<"$log") missed=$(grep -ci -E 'cache not found|cache is not found' <<<"$log")"
