@@ -40,7 +40,7 @@ Decision: No approval needed.
 Result: BLOCKED — pre-commit is not installed; no file was written
 Evidence:
   command -v pre-commit: not found
-  Stack: Node 20, pnpm, eslint + prettier + vitest (from package.json)
+  Stack: Node 24, pnpm, eslint + prettier + vitest (from package.json)
 Uncertainty: none
 Decision: No approval needed.
   Remaining action: install pre-commit (pip install pre-commit or brew install pre-commit), then re-run.

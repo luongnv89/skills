@@ -474,8 +474,9 @@ jobs:
         # again once that tag moves.
         uses: pnpm/action-setup@v6.1.0
         # Drop `with:` when package.json sets `packageManager` or
-        # `devEngines.packageManager`. Since v4 the action fails when `version`
-        # and `packageManager` name different pnpm versions.
+        # `devEngines.packageManager`. Since v4 the action fails unless `version`
+        # equals the `packageManager` version string exactly (`12` is not
+        # `12.16.1`); with `devEngines.packageManager`, `version` silently wins.
         with:
           version: 12              # the repo's pnpm major; 12 is current
 
@@ -704,7 +705,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version: '1.22'
+          go-version: '1.27'   # newest supported release (go.dev/dl)
           cache: true
 
       # pre-commit is a Python tool; the runner's system Python can refuse
@@ -731,7 +732,7 @@ jobs:
 
     strategy:
       matrix:
-        go-version: ['1.21', '1.22']
+        go-version: ['1.26', '1.27']   # the two supported Go releases
 
     steps:
       - uses: actions/checkout@v7
@@ -753,7 +754,7 @@ jobs:
       # `go tool cover -func=coverage.out | tail -n 1` to $GITHUB_STEP_SUMMARY instead.
       - name: Upload coverage
         uses: codecov/codecov-action@v7
-        if: matrix.go-version == '1.22'
+        if: matrix.go-version == '1.27'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.out
@@ -1116,7 +1117,7 @@ The upload still needs the token on a public repository: since v5, only pull req
 
 ### PR status comment
 
-Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token. The job also needs `pull-requests: write` to post the comment.
+Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token. The job also needs `pull-requests: write` to post the comment; on pull requests from forks `GITHUB_TOKEN` stays read-only whatever `permissions:` says, so the comment cannot post there.
 
 ```yaml
       - name: Comment PR
