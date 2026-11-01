@@ -7,10 +7,10 @@ A **repository write** is any of: writing or merging `.pre-commit-config.yaml`, 
 ## Four required parts, in this order
 
 1. **`Result:`** — the status word first, then one line on what changed or was found.
-   - `COMPLETE` — every requested file was written or merged with the user's confirmation, both hook types are installed, and every Step 4 command exited 0. An audit-only run that writes nothing is `COMPLETE` when every Acceptance Criteria item was checked against the existing files.
+   - `COMPLETE` — every requested file was written or merged with the user's confirmation, both hook types are installed, and every Step 4 command exited 0. An audit-only run that writes nothing is `COMPLETE` when every Acceptance Criteria item was checked against the existing files. A CI speed audit is `COMPLETE` when the per-job split comes from real runs, or when the static review is done and the report states why no runs were measured; it writes nothing and runs no hooks.
    - `PARTIAL — <reason>` — the run made at least one repository write, and then one of these happened: `pre-commit validate-config` failed, a Step 4 command exited non-zero, or the user declined a merge or a new file. A check demoted to a later lane under the 60-second rule does not make the run partial; list it under `Uncertainty:`.
-   - `BLOCKED — <reason>` — the run stopped before its first repository write: `pre-commit` is not installed, the stack is undetected and the user gave no answer, `origin` is missing and the user did not approve a local-only setup, or Repo Sync hit a conflict.
-2. **`Evidence:`** — only checks that ran, each with its command or file and the observed result: the detected stack, each file written or merged (with its `.bak` path), the `validate-config` exit code, the exit code of each `pre-commit run` stage, the two `pre-commit install` calls, and the `scripts/e2e_test.sh` exit code for a CLI project. In an audit-only run, list each Acceptance Criteria item with pass or fail and the file that shows it. Never list a check that did not run.
+   - `BLOCKED — <reason>` — the run stopped before its first repository write: `pre-commit` is not installed, the stack is undetected and the user gave no answer, `origin` is missing and the user did not approve a local-only setup, Repo Sync hit a conflict, or the request needs a paid option the skill declines (`BLOCKED — out of scope: paid runner`, with the free alternatives under `Decision:`).
+2. **`Evidence:`** — only checks that ran, each with its command or file and the observed result: the detected stack, each file written or merged (with its `.bak` path), the `validate-config` exit code, the exit code of each `pre-commit run` stage, the two `pre-commit install` calls, and the `scripts/e2e_test.sh` exit code for a CLI project. In an audit-only run, list each Acceptance Criteria item with pass or fail and the file that shows it. A CI speed audit also lists the audit command with the number of runs it read, the per-job queue/setup/work table, the cache check, and one row per finding with its free fix; under `Uncertainty:`, note that the setup/work split matches step names. Never list a check that did not run.
 3. **`Uncertainty:`** — what is unknown or untested, labeled apart from verified facts. Always state that the GitHub Actions workflow was not run: the bypass guard, matrix, and deploy jobs first run on the next pull request or push. Also list each foreign hook moved to `<hook>.legacy`, each check demoted with its measured time, each failing hook left open, and each tool or stack choice the user did not confirm.
 4. **`Decision:`** — the action that needs the user's approval, or `No approval needed.` Pending approvals include: confirming a merge diff, deleting a `<file>.bak`, deleting a `<hook>.legacy`, and deciding how to fix a failing hook. Name each other remaining user action on its own line, such as committing the new files and opening a pull request to exercise CI.
 
@@ -56,3 +56,17 @@ A run's final report passes review when a reader can:
 4. **See the next decision** — `Decision:` names the approval needed, or states `No approval needed.`, and lists each remaining user action.
 
 Human understanding stays unconfirmed until a user answers these checks. Agent inspection alone cannot confirm it.
+
+## Step report checks per phase
+
+The check names each Step Completion Report prints, per phase:
+
+**Phase: Project Analysis** — checks: `Project detection`, `Existing tooling scan`, `Visibility`, `CLI detection`, `Command enumeration`
+
+**Phase: Pre-commit Configuration** — checks: `Pre-commit setup`, `Commit-stage hooks installed`, `Push-stage hooks installed`, `Modern stage names used`, `E2E script created (if CLI)`
+
+**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `CI limited to the four responsibilities`, `Bypass guard runs both stages`, `Matrix off the per-commit path`, `Speed techniques`, `No paid speedups`
+
+**Phase: CI Speed Audit** — checks: `Runs analysed`, `Queue/setup/work split`, `Cache scope checked`, `Free fixes only`
+
+**Phase: Pipeline Verification** — checks: `Commit-stage hooks pass`, `Push-stage hooks pass`, `E2E tests pass (if CLI)`, `Workflow lint`, `No check duplicated across lanes`

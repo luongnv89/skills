@@ -1,0 +1,29 @@
+# Fixture for devops-pipeline eval 8 (CI speed audit). A deliberately slow
+# workflow from a private TypeScript repo; every inefficiency is intentional.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22, 24, 26]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npx eslint .
+      - run: npx tsc --noEmit
+      - run: npx vitest run --maxWorkers=8
+      - run: npm run build
+      - run: npm run db:migrate:check

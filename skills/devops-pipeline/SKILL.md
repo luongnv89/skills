@@ -1,32 +1,31 @@
 ---
 name: devops-pipeline
-description: "Configure pre-commit hooks and lean GitHub Actions for shift-left quality assurance. Use when adding or auditing CI/CD to maximize local test coverage and minimize CI cost. Skip for Terraform/K8s, deployment pipelines, or non-GitHub CI providers."
+description: "Configure pre-commit hooks and lean, fast GitHub Actions for shift-left QA. Use when adding, auditing or speeding up CI/CD: maximize local checks, keep CI quick at no extra cost. Skip for Terraform/K8s, deployment pipelines, or non-GitHub CI."
 license: MIT
 effort: medium
 metadata:
-  version: 2.3.0
+  version: 2.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # DevOps Pipeline
 
-Implement comprehensive DevOps quality gates adapted to project type, with a **shift-left philosophy**: run as many checks as possible locally via pre-commit so developers get fast feedback and CI is a safety net rather than the primary gate.
+Implement DevOps quality gates adapted to the project, **shift-left**: run as many checks as possible locally via pre-commit, so feedback is fast and CI is a safety net, not the primary gate. What remains in CI is tuned for speed, because coding agents push, wait, fix, and push again.
 
-**Core principle**: if a check can run on a developer's machine, it runs there. GitHub Actions runs only what a laptop genuinely cannot — matrix version testing, secrets-dependent scans, deployment, coverage publishing — plus one cheap job proving the hooks were not bypassed.
+**Core principle**: if a check can run on a developer's machine, it runs there. GitHub Actions runs only what a laptop genuinely cannot — matrix version testing, secrets-dependent scans, deployment, coverage publishing — plus one cheap job proving the hooks were not bypassed. Speed comes only from free techniques.
 
 ## Check Routing Table
 
-Every check lands in exactly one lane. This table is the single source of truth: workflow steps 2 and 3, the reference files, and any config this skill generates must agree with it.
+Every check lands in exactly one lane. This table is the single source of truth; steps 2–3, the references, and generated config must agree with it.
 
 | Lane | Time budget | What runs there |
 |------|-------------|-----------------|
-| `pre-commit` stage (every commit) | < 10s, changed files only | Format, lint, type-check, offline security scans, fast unit tests, compile/import check |
-| `pre-push` stage (every push) | < 60s, whole repo | Full test suite, CLI E2E, coverage threshold, slow lint rulesets |
-| GitHub Actions | billed per minute | Version matrix, secrets-dependent scans, coverage upload, deploy/release, bypass guard |
+| `pre-commit` stage (every commit) | < 10s, changed files only | Format, lint, type-check (fastest free tool), offline security scans, fast unit tests, compile/import check |
+| `pre-push` stage (every push) | < 60s | Affected tests (whole suite and coverage threshold when they fit), CLI E2E, slow lint rulesets |
+| GitHub Actions, pull request | As short as the slowest guard leg | Diff-scoped bypass guard |
+| GitHub Actions, default branch | Free on public repos, billed per minute on private | Full suite and version matrix (per merge, nightly on a busy private repo), cache seeding, secrets-dependent scans, clean-VM tests, coverage upload (public repos), deploy/release |
 
-A check that fits an earlier lane must not be repeated in a later one. CI re-running the whole hook set on every push is the failure mode this skill exists to prevent.
-
-To stay within the agent's context budget, this SKILL keeps templates short and links to `references/*.md` for language-specific configs, workflow templates, and the CLI E2E script.
+A check that fits an earlier lane must not be repeated in a later one; the only deliberate overlaps are the bypass guard and the default-branch full run that backstops affected-test selection. CI re-running the whole hook set on every push is the failure mode this skill exists to prevent.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -50,20 +49,21 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 
 ## Safety Rails
 
-This skill writes config into someone else's repository and installs git hooks. Observe all of these:
+This skill writes config into someone else's repository and installs git hooks:
 
-- **Never overwrite an existing `.pre-commit-config.yaml` or `.github/workflows/*.yml`.** If the target file exists, follow this merge procedure:
+- **Never overwrite an existing file this skill writes** (`.pre-commit-config.yaml`, workflows, `.oxlintrc.json`, `vitest.config.*`, scripts, AGENTS.md). If the target file exists, follow this merge procedure:
   1. Copy the file to `<file>.bak`.
   2. Prepare the merged content. Keep user-defined hooks, jobs, and pinned `rev:` values.
   3. Show the user the diff between `<file>.bak` and the merged content.
   4. If the user confirms, write the merged file. If the user declines, leave the original file unchanged and record the merge as declined.
   5. Keep `<file>.bak` until the user confirms the written result.
-- **Show every new file before writing it.** Present a new `.pre-commit-config.yaml` or workflow as a diff. Never write a file the user has not seen.
-- **Validate and dry-run before installing hooks.** Step 2 runs `pre-commit validate-config` and `pre-commit run --all-files` before `pre-commit install`, so findings surface without blocking any commit.
-- **Check for an existing git hook before installing.** `pre-commit install` preserves a foreign hook by moving it to `.git/hooks/<hook>.legacy` and running in migration mode. Never pass `-f`/`--overwrite`, which removes that hook silently. If the user wants the foreign hook deleted, get explicit confirmation first.
+- **Show every new file as a diff before writing it.**
+- **Validate and dry-run before installing hooks**, in Step 2's order, so findings surface without blocking any commit.
+- **Check for an existing git hook before installing.** `pre-commit install` moves a foreign hook to `<hook>.legacy` and runs it in migration mode. Never pass `-f`/`--overwrite`, which deletes it silently; deleting it needs the user's explicit confirmation.
 - **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf.** A failing hook is a finding to report, not an obstacle to route around.
-- **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, or lower a coverage threshold to turn a run green. Report the failure and let the user decide.
-- **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Edge Cases for each.
+- **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, lower a coverage threshold, or delete or skip a test to turn a run green or make it faster. Report the failure and let the user decide.
+- **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid service such as Codecov on a private repo. Faster third-party runners exist; they are paid and out of scope.
+- **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Step 1 and Edge Cases.
 
 ## Workflow
 
@@ -72,10 +72,10 @@ This skill writes config into someone else's repository and installs git hooks. 
 Detect project characteristics:
 
 ```bash
-# Check for package files and configs
-ls -la package.json pyproject.toml Cargo.toml go.mod pom.xml build.gradle *.csproj 2>/dev/null
-ls -la .eslintrc* .prettierrc* tsconfig.json mypy.ini setup.cfg ruff.toml 2>/dev/null
+ls -la package.json pyproject.toml Cargo.toml go.mod pom.xml build.gradle ./*.csproj 2>/dev/null
+ls -la .eslintrc* .oxlintrc* .prettierrc* tsconfig.json mypy.ini setup.cfg ruff.toml 2>/dev/null
 ls -la .pre-commit-config.yaml .github/workflows/*.yml 2>/dev/null
+gh repo view --json visibility --jq .visibility   # PUBLIC or PRIVATE
 ```
 
 Identify:
@@ -83,191 +83,127 @@ Identify:
 - **Frameworks**: React, Next.js, Django, FastAPI, etc.
 - **Build system**: npm, yarn, pnpm, pip, poetry, cargo, go, maven, gradle
 - **Existing tooling**: Linters, formatters, type checkers already configured
+- **Visibility**: public (standard runners free, 4 vCPU) or private, `INTERNAL` included (billed per minute, each job rounded up, 2 vCPU). Step 3 generates the workflow for it; if `gh` cannot read it, ask, and assume private meanwhile. For a private repo, count default-branch commits over 30 days: `git rev-list --count --first-parent --since=30.days <default-branch>`.
 - **Is this a CLI tool?** — if yes, enumerate all commands/subcommands (check README, `--help`, `click`/`argparse`/`cobra` source) to build an E2E test suite
 
-If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the language, build system, existing tooling, existing config files, and CLI status (with its command list) are recorded.
+If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the language, build system, existing tooling, existing config files, visibility, and CLI status (with its command list) are recorded.
 
 ### 2. Configure Pre-commit Hooks (maximize local coverage)
 
-If `pre-commit` is absent, show the install command and stop — see [Edge Cases](#edge-cases). Do not install it automatically.
+If `pre-commit` is absent, show the install command and stop — see [Edge Cases](#edge-cases).
 
 ```bash
 pip install pre-commit  # or brew install pre-commit
 ```
 
-When `pre-commit` is available, write `.pre-commit-config.yaml` for the detected stack. If the file exists, use the Safety Rails merge procedure. See [references/precommit-configs.md](references/precommit-configs.md) for language-specific configurations.
+When `pre-commit` is available, write `.pre-commit-config.yaml` for the detected stack, each check in its routing-table lane, with `default_stages: [pre-commit]` (a hook with no `stages:` otherwise also runs on every push). If the file exists, use the Safety Rails merge procedure. See [references/precommit-configs.md](references/precommit-configs.md) for tool choice and configs per language, and fast test runs.
 
-**`pre-commit` stage — every commit, under 10 seconds on changed files:**
-- Format checks (Prettier, Black/Ruff, gofmt, rustfmt)
-- Lint (ESLint, Ruff, golangci-lint, Clippy)
-- Type checks (tsc, mypy)
-- Security scans that work offline (Bandit, cargo-audit, gosec, `detect-secrets`)
-- Fast unit tests
-- Build/compile verification (catches import errors, compile failures early)
+- **Fastest free tool per check.** Keep the repo's tools and propose faster ones in the diff, with a benchmark. JS/TS: Oxlint, with ESLint only for rules Oxlint lacks; set Oxlint's categories to `error`, since its warnings exit 0. Type-check: TypeScript 7's `tsc`, then `bun check` or `tsrs` only if faster with the same errors. Python: Ruff, mypy as arbiter.
+- **Every hook tool is a dev dependency.** `pytest -n auto` needs `pytest-xdist`: when the dev extras lack it, add it in the same diff, or pytest fails with `unrecognized arguments: -n`.
+- **Affected tests on `pre-push`** when the whole suite exceeds 60 seconds: `scripts/affected-tests.sh`, which fails when source changed but no test was selected.
+- **Hooks, not AGENTS.md lines.** An AGENTS.md instruction is advice an agent can skip; a hook blocks the commit or push. If the repo has an AGENTS.md, propose one line: hooks exist and must not be bypassed.
+- **Vitest `isolate: false`** only with the reference's per-file reset hook.
 
-**`pre-push` stage — every `git push`, under 60 seconds:**
-- Full test suite (unit + integration)
-- **End-to-end tests for every CLI command** (see below)
-- Coverage threshold enforcement
-- Slower linters (full golangci-lint ruleset)
-
-**GitHub Actions only — what a laptop cannot do:**
-- Matrix version testing (multiple Node/Python/Go versions)
-- Secrets-based scans (Snyk, SAST tools needing tokens)
-- Deployment / release workflows
-- Coverage upload to an external service
-- Flaky or environment-sensitive tests that need a clean VM
-
-**Use the modern stage names.** pre-commit 3.2 renamed `commit` to `pre-commit` and `push` to `pre-push`; the old names emit a deprecation warning on 4.x and are scheduled for removal. Always emit the new names, and run `pre-commit migrate-config` against any pre-existing config still using the old ones.
+**Modern stage names only** (`pre-commit`, `pre-push`); run `pre-commit migrate-config` on a config still using the deprecated `commit` or `push`.
 
 #### CLI End-to-End Testing
 
-If the project is a CLI tool, create `scripts/e2e_test.sh` that exercises every command/subcommand to verify the CLI works end-to-end (not just compiles). Wire it into pre-commit on the `pre-push` stage.
-
-See [references/cli-e2e.md](references/cli-e2e.md) for command discovery patterns, the script template, and the pre-commit hook snippet.
+If the project is a CLI tool, create `scripts/e2e_test.sh` exercising every command/subcommand end-to-end (not just compiling), wired to the `pre-push` stage. See [references/cli-e2e.md](references/cli-e2e.md) for command discovery, the script template, and the hook snippet.
 
 Validate the config, dry-run it, then install the hooks, in this order:
 
-1. Run `pre-commit validate-config .pre-commit-config.yaml`. If it exits non-zero, report the error and stop before installing any hook.
-2. Run `pre-commit run --all-files`. This dry run executes the commit-stage hooks without installing them. Record each failing hook id as a finding.
-3. Check `pre-commit` and `pre-push` in the directory `git rev-parse --git-path hooks` prints (not always `.git/hooks`). If either exists and does not contain `File generated by pre-commit`, tell the user it will move to `<hook>.legacy`.
-4. Run `pre-commit install`.
-5. Run `pre-commit install --hook-type pre-push`. `pre-commit install` alone does not install pre-push hooks.
+1. Run `pre-commit validate-config .pre-commit-config.yaml`. On a non-zero exit, report the error and install nothing.
+2. Stage the files this run wrote (`--all-files` sees tracked files only), then dry-run `pre-commit run --all-files`. Fixers may rewrite files, so report `git diff --stat`; record each failing hook id as a finding.
+3. If `pre-commit` or `pre-push` exists in the directory `git rev-parse --git-path hooks` prints (not always `.git/hooks`) without `File generated by pre-commit`, tell the user it will move to `<hook>.legacy`.
+4. Run `pre-commit install`, then `pre-commit install --hook-type pre-push`; the first alone installs no pre-push hooks.
 
-`git commit --no-verify` and `git push --no-verify` skip every hook, and nothing local can prevent that. The CI bypass guard in step 3 is what keeps these gates enforceable — do not drop it when trimming CI.
+Nothing local can stop `--no-verify` on a commit or push; the CI bypass guard keeps these gates enforceable, so never drop it when trimming CI.
 
-### 3. Create GitHub Actions Workflows (lean CI)
+### 3. Create GitHub Actions Workflows (lean, fast CI)
 
-If no workflow exists, write `.github/workflows/ci.yml`. If one exists, use the Safety Rails merge procedure, and list each existing step that duplicates a hook as a proposed removal in the diff. Remove a step only after the user confirms. Keep CI thin: the hooks already ran everything that runs locally, so CI covers the third lane of the routing table plus one guard. See [references/github-actions.md](references/github-actions.md) for workflow templates.
+If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the CI Speed Audit first, then use the Safety Rails merge procedure, listing each step that duplicates a hook as a proposed removal; remove it only after the user confirms. Templates, for example the guard: [references/github-actions.md](references/github-actions.md).
 
 CI runs exactly four kinds of thing:
 
-1. **Bypass guard** — re-runs both hook stages, scoped to the pull request's diff so it costs seconds, not minutes. This is the one deliberate overlap with pre-commit, and it exists because `--no-verify` otherwise makes local gates optional.
-2. **Version matrix** — the only lane that genuinely needs several runners.
+1. **Bypass guard** — re-runs both hook stages over the pull request's diff. The one deliberate overlap with pre-commit, because `--no-verify` otherwise makes local gates optional.
+2. **Version matrix** — the only lane needing several runners, doubling as the full-suite backstop. Per merge; nightly only on a private repo with 30 or more default-branch commits a month.
 3. **Secrets-dependent work** — scans and uploads needing tokens a laptop should not hold.
 4. **Deploy / release** — on merge to the default branch.
 
-The bypass guard, in full:
+The guard's four load-bearing details are explained with its template: **both** stages (`pre-commit run` alone skips `pre-push` hooks), `fetch-depth: 0`, `pull_request` only, and the project toolchain in the same job.
 
-```yaml
-  hooks:
-    name: Verify hooks were not bypassed
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      # ... set up the project toolchain and Python here ...
-      - name: Run both hook stages over the PR diff
-        run: |
-          pip install pre-commit
-          base="${{ github.event.pull_request.base.sha }}"
-          pre-commit run --from-ref "$base" --to-ref HEAD
-          pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
-```
+**Make it fast, free techniques only** (reference: "Fast CI at no extra cost"):
 
-Four details are load-bearing; drop any one and the job fails on its first run:
+- **Generated for the recorded visibility.** Only the guard's leg split reads visibility at run time: one leg per hook stage on public repos, otherwise one leg, commit stage first. Codecov upload, `seed-cache`, macOS legs, and the matrix trigger are written in or left out for Step 1's answer; a private repo gets a coverage summary instead of Codecov.
+- **Caches seeded from the default branch.** A pull request's caches serve only that pull request. Seed from the default-branch matrix (Minimal: a per-merge `seed-cache` on public repos), cache `~/.cache/pre-commit`, and cache `node_modules` only when measured.
+- **Blobless full history** in the guard: `fetch-depth: 0` plus `filter: blob:none`. Never shallow where history is read.
+- **`concurrency`** on the pull request number (fallback `github.run_id`) with `cancel-in-progress`.
+- **Affected-only on pull requests once the suite is too slow to run whole, full suite on the default branch**. Filters list what may be skipped; skip with job-level `if:`, not workflow `paths:`; selection fails when source changed but no test ran.
+- **Workers matched to cores** (4 public, 2 private), **`timeout-minutes`** on every job (about 3× typical; default 360), and **shards only on public repos**.
 
-- **Both `pre-commit run` lines.** The first executes commit-stage hooks *only* — the full suite and the CLI E2E tests live on `pre-push` and are silently skipped without the second. `pre-commit/action@v3.0.1` shares this blind spot, so call the CLI directly.
-- **`fetch-depth: 0`.** `actions/checkout` clones at depth 1, so the base SHA is absent and `--from-ref` dies on a bad object.
-- **`if: github.event_name == 'pull_request'`.** On a `push` event `github.event.before` is all zeros for a branch's first push and stale after a force-push.
-- **The project toolchain in the same job.** Hooks declared `language: system` shell out to `npm`, `mypy`, `go`, or `cargo`.
+#### CI Speed Audit (existing pipelines)
 
-Keep the matrix off the hot path: gate it on `push` to the default branch or on a release tag, not on every PR commit. A three-version matrix on every push is triple the bill for a signal the hooks already gave locally.
+Run it before changing an existing workflow, or alone when the user asks why CI is slow. It is read-only and runs no hooks; follow [references/github-actions.md](references/github-actions.md#ci-speed-audit). Done when each job's queue/setup/work split comes from real runs, or the report says why none were measured.
 
 ### 4. Verify Pipeline
 
-1. Run `pre-commit run --all-files`. Expected: exit 0.
-2. Run `pre-commit run --all-files --hook-stage pre-push`. Expected: exit 0. The first command does not run push-stage hooks (full suite, E2E).
-3. If the project is a CLI tool, run `bash scripts/e2e_test.sh`. Expected: exit 0.
-4. If a command exits non-zero, record the failing hook id and its output as a finding. Do not edit the config, add `SKIP`, or lower a threshold to make it pass.
+Each command below is expected to exit 0:
 
-Step 4 is done when each command has a recorded exit code. The workflow from step 3 is not run here; it first runs on GitHub with the next pull request.
+1. Stage the workflow too, then run `pre-commit run --all-files`.
+2. Run `pre-commit run --all-files --hook-stage pre-push`; the first command skips push-stage hooks (full suite, E2E).
+3. For a CLI tool, run `bash scripts/e2e_test.sh`.
+4. Run `actionlint` on each written workflow, or parse its YAML when actionlint is absent.
+5. Record any non-zero exit, with its hook id and output, as a finding; never edit the config, add `SKIP`, or lower a threshold to pass.
+
+Step 4 is done when each command has a recorded exit code. The workflow first runs on GitHub with the next pull request, not here.
 
 ## Write the Final Report
 
-After the last Step Completion Report, print the final report from [references/final-report.md](references/final-report.md): `Result:` first (`COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason`), then `Evidence:` (only commands that ran, with exit codes), `Uncertainty:` (always the unrun CI workflow), and `Decision:` (the pending approval, or `No approval needed.`). An audit-only run uses the same report.
-
-## Tool Selection by Language
-
-| Language | Formatter | Linter | Type Check | Security | Tests |
-|----------|-----------|--------|------------|----------|-------|
-| JS/TS | Prettier | ESLint | tsc | npm audit | Jest/Vitest |
-| Python | Ruff/Black | Ruff | mypy | Bandit + detect-secrets | pytest |
-| Go | gofmt | golangci-lint | built-in | gosec | go test |
-| Rust | rustfmt | Clippy | built-in | cargo-audit | cargo test |
-| Java | google-java-format | Checkstyle | - | SpotBugs | mvn test |
-
-Which lane each of these belongs to is fixed by the Check Routing Table above — do not re-split checks differently here.
+After the last Step Completion Report, print the final report from [references/final-report.md](references/final-report.md): `Result:` (`COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason`), `Evidence:` (only commands that ran, with exit codes), `Uncertainty:` (always the unrun CI workflow), and `Decision:`. An audit-only run uses the same report.
 
 ## Expected Output
 
 After running the skill, the repository contains:
 
-1. **`.pre-commit-config.yaml`** — formatting, linting, type-checking, and fast unit tests on the `pre-commit` stage; full test suite, coverage threshold, and E2E tests on the `pre-push` stage.
-2. **`.github/workflows/ci.yml`** — CI carrying only the four responsibilities from step 3: diff-scoped bypass guard, version matrix, secrets-dependent work, deploy. No standalone lint, format, type-check, or test steps duplicating a hook.
+1. **`.pre-commit-config.yaml`** — hooks on both stages, placed per the Check Routing Table.
+2. **`.github/workflows/ci.yml`** — step 3's four responsibilities with its speed techniques, generated for the repo's visibility. No standalone step duplicating a hook.
 3. **`scripts/e2e_test.sh`** (CLI projects only) — executable script exercising every CLI command/subcommand.
-4. **A final report** in the shape of [references/final-report.md](references/final-report.md).
+4. **`scripts/affected-tests.sh`** (only when the suite exceeds the push budget) — affected-test selection that fails closed.
+5. **A final report** in the shape of [references/final-report.md](references/final-report.md).
 
-Example `.pre-commit-config.yaml` snippet for a Python project:
-```yaml
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
-    hooks:
-      - id: ruff
-        stages: [pre-commit]
-      - id: ruff-format
-        stages: [pre-commit]
-  - repo: local
-    hooks:
-      - id: mypy
-        name: mypy type check
-        entry: mypy src/
-        language: system
-        stages: [pre-commit]
-      - id: pytest-fast
-        name: fast unit tests
-        entry: pytest tests/unit -x -q
-        language: system
-        stages: [pre-commit]
-      - id: pytest-full
-        name: full test suite
-        entry: pytest --cov=src --cov-report=xml
-        language: system
-        stages: [pre-push]
-```
+An audit-only run writes nothing; it prints the per-job split and the proposed free fixes.
 
 ## Acceptance Criteria
 
 A run passes when **all** of the following are true:
 
 - [ ] `.pre-commit-config.yaml` exists at the repo root and lists at least one hook for the detected primary language (formatter, linter, or type checker).
-- [ ] Every check sits in exactly one lane of the Check Routing Table: no hook `id` from `.pre-commit-config.yaml` appears in a workflow `run:` step other than the bypass guard, and no check runnable on a laptop is CI-only.
+- [ ] Every check sits in exactly one lane of the Check Routing Table: no hook `id` from `.pre-commit-config.yaml` appears in a workflow `run:` step other than the bypass guard and the default-branch full run, and no check runnable on a laptop is CI-only.
 - [ ] Hook `stages:` use the modern names (`pre-commit`, `pre-push`, `manual`); no generated config emits the deprecated `commit` or `push`.
 - [ ] Both hook types are installed: `pre-commit install` **and** `pre-commit install --hook-type pre-push`.
 - [ ] At least one `.github/workflows/*.yml` exists and carries only the four CI responsibilities from step 3.
-- [ ] CI's sole overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
+- [ ] CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
+- [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by the template's default-branch job when it has one (private Minimal has none by design); with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
+- [ ] No paid runner, larger runner, private-repo shard, private-repo Codecov step, or cache above 10 GB; parallel guard legs and shards only on public repos.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).
 - [ ] For CLI projects, the E2E script is wired to the `pre-push` stage per the language reference files.
-- [ ] The final report passes the four reader checks in [references/final-report.md](references/final-report.md): the result is in the first line, verified facts are separate from assumptions, each claim names its command or file, and the next decision is named. Without user feedback, human understanding stays unconfirmed.
+- [ ] The final report passes the four reader checks in [references/final-report.md](references/final-report.md); without user feedback, human understanding stays unconfirmed.
 
 ## Edge Cases
 
-- **No package manager detected**: Prompt the user for the language/build system before generating hooks; never guess silently.
-- **Pre-commit not installed**: Show the install command (`pip install pre-commit` or `brew install pre-commit`) and stop; do not install it automatically or generate config files.
-- **Existing `.pre-commit-config.yaml`**: Merge new hooks into the existing file rather than overwriting; preserve user-defined hooks and pinned revs.
-- **Monorepo with multiple languages**: Generate one config with per-language hook sections and `files:` path filters so hooks only run on relevant subdirectories. Local `language: system` entries must also target the package dir (`npm --prefix frontend`, `pytest backend/tests`) — `files:` only filters which files trigger the hook, not cwd.
+- **Pre-commit not installed**: Show the install command and stop; do not install it or generate config files.
+- **Existing `.pre-commit-config.yaml`**: Use the Safety Rails merge procedure; preserve user hooks and pinned revs.
+- **Monorepo with multiple languages**: One config with per-language sections and `files:` filters. Local `language: system` entries must also target the package dir (`npm --prefix frontend`, `pytest backend/tests`): `files:` does not change cwd.
 - **No `origin` remote**: Stop and ask the user whether a local-only setup with no repo sync is acceptable; do not proceed automatically.
-- **Tests take >60 seconds**: Demote to the next lane — `pre-commit` to `pre-push`, or `pre-push` to CI — and record the reason in a comment on the hook so the next reader knows it was measured, not guessed.
-- **Legacy config with deprecated stage names**: Run `pre-commit migrate-config` before merging new hooks in, so the file does not end up half-migrated.
+- **Tests take >60 seconds**: Select affected tests on `pre-push` (default-branch full run as backstop) or demote to the next lane; record the measured time in a hook comment.
+- **User asks for a faster paid runner**: Decline (it raises the bill) and offer step 3's free techniques, starting with the audit.
+- **Audit without `gh` auth or run history**: Review the workflow statically; say under `Uncertainty:` that no runs were measured.
 - **Team bypasses hooks with `--no-verify`**: Local gates cannot stop this. Keep the CI bypass guard, and report the bypass rate rather than adding more hooks.
 - **Windows-only repo**: Substitute PowerShell-compatible hook entries and flag any Unix-specific commands.
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After each major step, print:
 
 ```
 ◆ [Step Name] ([step N of M] — [context])
@@ -275,27 +211,16 @@ After completing each major step, output a status report in this format:
   [Check 1]:          √ pass
   [Check 2]:          √ pass (note if relevant)
   [Check 3]:          × fail — [reason]
-  [Check 4]:          √ pass
   [Criteria]:         √ N/M met
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
-
-### Skill-specific checks per phase
-
-**Phase: Project Analysis** — checks: `Project detection`, `Existing tooling scan`, `CLI detection`, `Command enumeration`
-
-**Phase: Pre-commit Configuration** — checks: `Pre-commit setup`, `Commit-stage hooks installed`, `Push-stage hooks installed`, `Modern stage names used`, `E2E script created (if CLI)`
-
-**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `CI limited to the four responsibilities`, `Bypass guard runs both stages`, `Matrix off the per-commit path`
-
-**Phase: Pipeline Verification** — checks: `Commit-stage hooks pass`, `Push-stage hooks pass`, `E2E tests pass (if CLI)`, `No check duplicated across lanes`
+Adapt the check names per step ([check names per phase](references/final-report.md#step-report-checks-per-phase)); `Criteria` counts the acceptance criteria met.
 
 ## Resources
 
-- [references/precommit-configs.md](references/precommit-configs.md) — pre-commit configs by language, with `pre-push` tests and E2E hooks
-- [references/github-actions.md](references/github-actions.md) — GitHub Actions templates: bypass guard, matrix, deploy
+- [references/precommit-configs.md](references/precommit-configs.md) — tool choice and hook configs by language, fast tools, fast test runs
+- [references/github-actions.md](references/github-actions.md) — fast workflow templates and the CI speed audit
 - [references/cli-e2e.md](references/cli-e2e.md) — CLI command discovery, the E2E script template, and its `pre-push` hook
-- [references/final-report.md](references/final-report.md) — final report parts, status rules, examples, and reader checks
+- [references/final-report.md](references/final-report.md) — final report parts, status rules, examples, reader checks, and step report check names

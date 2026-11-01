@@ -11,6 +11,7 @@
         "pre-commit validate-config and pre-commit run --all-files run before pre-commit install, and both pre-commit install and pre-commit install --hook-type pre-push run.",
         "Hook stages use pre-commit and pre-push, never the deprecated commit or push names.",
         "ci.yml runs no standalone lint, format, type-check or test step that repeats a hook; its bypass guard uses fetch-depth: 0, runs only on pull_request, and runs both hook stages with --from-ref and --to-ref.",
+        "If any hook or workflow runs pytest -n auto, pytest-xdist is already a dev dependency or the proposed diff adds it to the dev extras, so no generated command can fail with 'unrecognized arguments: -n'.",
         "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only commands that ran with their exit codes, Uncertainty stating that the CI workflow has not run on GitHub, and Decision naming the approval needed or 'No approval needed.'"
       ]
     },
@@ -69,6 +70,80 @@
       "files": [],
       "expectations": [
         "devops-pipeline is not applied: no .pre-commit-config.yaml or .github/workflows file is written and no pre-commit command runs."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "happy-path",
+      "prompt": "Set up pre-commit hooks and GitHub Actions for our TypeScript app (Node 24, npm, Vitest, ESLint, public repo, no CI yet). Coding agents open most pull requests and push several times per PR while they wait on CI, so feedback has to be fast. We don't pay for CI and want to keep it that way.",
+      "expected_output": "Writes hooks with the fastest free tools (Oxlint with categories at error, TypeScript 7 tsc) and default_stages: [pre-commit], explains why the checks live in hooks rather than an AGENTS.md line, and writes a ci.yml whose guard is split into parallel legs by hook stage (public repo), uses a blobless full-history checkout, restores caches that a default-branch job seeds, cancels superseded PR runs, and sets timeouts. Tests are affected-only with a skip guard once the suite outgrows the 60-second push budget, backed by a full run on the default branch. No paid or larger runner appears.",
+      "files": [],
+      "expectations": [
+        "ci.yml has a concurrency group keyed on the pull request number (github.event.pull_request.number, not github.head_ref) with a github.run_id fallback and cancel-in-progress: true, and every job sets timeout-minutes.",
+        "The bypass guard runs only on pull_request, checks out with fetch-depth: 0 and filter: blob:none, and runs both hook stages with --from-ref and --to-ref; because the repo is public, the stages run as parallel legs.",
+        "The guard's npm and pre-commit caches are also saved by a job that runs on the default branch (push or schedule), not only by pull_request runs.",
+        ".pre-commit-config.yaml sets default_stages: [pre-commit], so push-stage runs do not repeat the commit-stage hooks.",
+        "If the suite exceeds the 60-second push budget, tests are affected-only (scripts/affected-tests.sh or an equivalent vitest --changed selection) that fail when code changed but no test was selected, with a full-suite run on the default branch; otherwise pre-push runs the whole suite and the reply says why selection was not needed.",
+        "The reply says the checks are hooks rather than an AGENTS.md instruction because agents skip steps, and linting uses Oxlint with categories set to error (ESLint kept only for rules Oxlint lacks).",
+        "No third-party runner service, GitHub larger runner, or paid service is configured or recommended."
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "happy-path",
+      "prompt": "Our CI is slow and the agents keep waiting on it. Audit the attached workflow for speed and tell me what to change. The repo is private. Don't change anything yet.",
+      "expected_output": "Runs the CI speed audit in read-only mode: tries gh run list and the jobs API to split each job into queue, setup, and work (or states that no runs could be measured), then reviews the workflow and reports each finding with its evidence and a free fix that suits a private repo. Writes nothing.",
+      "files": [
+        "../../eval-fixtures/devops-pipeline/slow-ci.yml"
+      ],
+      "expectations": [
+        "No file is written or modified, and the run ends with a final report whose Decision asks which fixes to apply.",
+        "The audit runs gh run list and gh api .../actions/runs/{id}/jobs to split jobs into queue, setup, and work, or states under Uncertainty that no runs could be measured and why.",
+        "Findings cover: no concurrency cancel, duplicate push and pull_request runs for PR branches, no dependency cache (setup-node without cache, npm install), fetch-depth: 0 with no history need and no filter, the three-version matrix repeating lint, type-check, and tests on every PR, --maxWorkers=8 on a 2-vCPU private runner, the migration check inside the slowest job, and no timeout-minutes.",
+        "Every proposed fix is cost-neutral or cost-reducing for a private repo: no sharding, no extra parallel jobs that add billed setup minutes, no paid or larger runner, and no deleting or skipping tests."
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "CI is too slow. Move our GitHub Actions jobs to Blacksmith runners, or to GitHub's 16-core larger runners, so the tests finish faster.",
+      "expected_output": "Declines the switch because both options raise the CI bill, in a sentence or two, and offers the free route instead: the CI speed audit, caches seeded from the default branch, concurrency cancel, blobless checkout, affected-only tests with a default-branch full run, workers matched to the runner, and parallel legs or shards only on a public repo.",
+      "files": [],
+      "expectations": [
+        "No workflow gets a third-party runner label or a GitHub larger-runner label, and no runner service is configured.",
+        "The reply says paid runners are out of scope because they raise the bill, and offers the CI speed audit and at least three free techniques from the skill instead.",
+        "The final report's Decision asks whether to run the audit or apply the free techniques."
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "happy-path",
+      "prompt": "Set up pre-commit hooks and GitHub Actions for our TypeScript service (Node 24, npm, Vitest). The repo is private, gets about 15 merges to main a month, and has no CI yet. We pay for Actions minutes and the bill must not grow.",
+      "expected_output": "Records the repo as private with under 30 default-branch commits a month and generates ci.yml for that: the bypass guard runs as a single leg (commit stage first), there is no seed-cache job, the version matrix (and any default-branch full run) triggers on push to the default branch rather than a nightly schedule, no Codecov step is written (a coverage summary goes to the job summary instead), and every job runs on ubuntu-latest. Nothing paid is configured or recommended.",
+      "files": [],
+      "expectations": [
+        "The bypass guard runs on pull_request only and, for this private repo, as one leg that runs the pre-commit stage before the pre-push stage: either the run-time visibility split resolving to a single 'pre-commit pre-push' leg, or one job running both stages.",
+        "ci.yml has no seed-cache job and no job gated on github.event.repository.visibility other than the guard's leg split.",
+        "The version matrix, and any default-branch full run, triggers on push to the default branch (plus optional workflow_dispatch), and ci.yml has no schedule: trigger, because the repo has under 30 default-branch commits a month.",
+        "No step uses codecov/codecov-action; if coverage is reported in CI, it is written to $GITHUB_STEP_SUMMARY.",
+        "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes.",
+        "ci.yml cancels superseded pull request runs with a concurrency group keyed on github.event.pull_request.number with a github.run_id fallback.",
+        "The version matrix's push run restores and saves the same npm cache (setup-node cache: npm) and pre-commit cache key the guard restores, so it is the job that keeps pull request caches warm; no separate seeding job is added.",
+        "If a coverage summary is written, Vitest's coverage reporters include json-summary, because the summary reads coverage/coverage-summary.json."
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "happy-path",
+      "prompt": "Set up pre-commit hooks and GitHub Actions for our private TypeScript API (Node 24, npm, Vitest). About 60 PRs merge to main every month, there's no CI yet, and Actions minutes are billed to us, so the bill must not grow.",
+      "expected_output": "Records the repo as private with 30 or more default-branch commits a month and generates ci.yml for that: the bypass guard runs on pull requests as a single leg (commit stage first); the version matrix, and any default-branch full run, moves from push to a nightly schedule: (plus workflow_dispatch) with an odd-minute cron that is noted as UTC (or sets timezone:); no Codecov step and no seed-cache job; every job runs on ubuntu-latest with timeout-minutes. Nothing paid is configured or recommended.",
+      "files": [],
+      "expectations": [
+        "The bypass guard runs on pull_request only, as one leg that runs the pre-commit stage before the pre-push stage.",
+        "The version matrix (and any default-branch full run) triggers on a nightly schedule: plus optional workflow_dispatch, not on every push, because the repo has 30 or more default-branch commits a month.",
+        "The schedule uses a cron with a minute other than 0, and the output says the cron runs in UTC or sets the optional timezone: key.",
+        "No step uses codecov/codecov-action and there is no seed-cache job; coverage, if reported, goes to $GITHUB_STEP_SUMMARY.",
+        "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes."
       ]
     }
   ]
