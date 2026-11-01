@@ -528,16 +528,16 @@ A line in AGENTS.md such as "run lint and typecheck before pushing" is advice. A
 
 The commit-stage unit hook keeps `pass_filenames` on, so it gets the staged files, and runs only the tests related to them. In the CI guard's `--from-ref`/`--to-ref` run the same hook gets the files changed in the pull request, so its repeat of the unit tests shrinks to the diff, and no hook id goes into `SKIP`. The push stage still runs the whole suite (or `scripts/affected-tests.sh` past the 60-second budget), locally and in the guard: it is the gate, and the commit hook is fast feedback. So the commit hook exits 0 when nothing is related, while `affected-tests.sh` fails closed, because the default-branch run is the only thing behind it.
 
-- **Deletion-only changes.** A commit or pull request that only deletes files passes no file to any hook. pre-commit then skips the commit hook and the push-stage full suite too (`pass_filenames: false` without `always_run` reports `(no files to check)`), so what a deletion breaks is caught by the default-branch full run, not by the hooks.
+- **Deletion-only changes.** When a change only deletes the files in a hook's scope, no file reaches that hook. pre-commit then skips the commit hook and the push-stage full suite too (`pass_filenames: false` without `always_run` reports `(no files to check)`), so what a deletion breaks is caught by the default-branch full run, not by the hooks. The Minimal workflow without affected-test selection has no default-branch run, so there nothing catches it until the next change that touches a file; add the `full` job if deletions matter.
 - **`require_serial: true` on every related-test hook.** Without it, pre-commit splits the file list into parallel runs: on a 2-CPU machine a five-file diff started two Vitest runs, and one test file ran in both.
 - **Budget.** A commit to a module that most tests import selects most of the suite. When the related run passes 10 seconds, move the hook to `pre-push`, as for any commit-stage check.
 
-| Language | Hook | Selects | Misses (caught by the push stage or the default-branch full run, except where noted) |
+| Language | Hook | Selects | Misses (caught by the push stage or the default-branch full run, except where noted; Minimal has no default-branch run unless it selects affected tests) |
 |---|---|---|---|
 | JS/TS | `vitest related --run --passWithNoTests --no-fsModuleCache` | Tests whose static imports reach a staged file | Dynamic `import()`, files read at run time, changes the `files:` filter drops, deleted modules |
 | Python | `scripts/related-tests.py` (below) | Changed test files; `test_<module>.py` and `<module>_test.py` for a changed module; the whole test directory for a `conftest.py` | Tests that reach a module through another one or are named differently, deleted modules, data files |
 | Go | `go test -short` on the changed files' directories that hold a package for this build | The changed packages' own tests (Go drops duplicate package arguments) | Packages that import a changed package; deleted files; directories with no package for this build (all files behind a build tag) are skipped, not failed. A nested module is skipped here and `go test ./...` never enters it either, so give it its own hook or CI step |
-| Rust, Java | Whole suite | — | Nothing. Cargo builds and tests the whole crate; Maven compiles the whole module first; mapping files to `-p` crates or `-Dtest` classes is not simple enough to be correct, so these stay whole until they pass 10 seconds. They run only when a Rust or Java file changed. |
+| Rust, Java | Whole suite | — | Nothing but deletion-only changes. Cargo builds and tests the whole crate; Maven compiles the whole module first; mapping files to `-p` crates or `-Dtest` classes is not simple enough to be correct, so these stay whole until they pass 10 seconds. They run only when a Rust or Java file changed. |
 
 - **Vitest.** The `files:` filter passes only JS/TS files: `README.md` alone selects nothing, and `package.json` is one of Vitest's `forceRerunTriggers`, which would run the whole suite on commit. A `vitest.config.*` change still runs everything, which is right for a config change. Vitest 5.0.5 already defaults `related` to `passWithNoTests`; the flag keeps that explicit.
 - **Module cache.** Vitest 5 caches transformed modules on disk by default (`fsModuleCache`, in `node_modules/.vitest-cache`). After a run while an imported module was missing (a checkout of a branch that deletes it, then a switch back), the cached graph no longer links that module to its tests: `related` selects nothing and the hook passes a commit whose tests fail. `--no-fsModuleCache` makes the hook build the graph fresh.
@@ -564,7 +564,9 @@ tests = Path("tests/unit")
 if args[:1] == ["--tests"]:
     tests, args = Path(args[1]), args[2:]
 if not tests.is_dir():
-    sys.exit(f"related-tests: {tests} not found; pass --tests <the unit test directory>")
+    sys.exit(
+        f"related-tests: {tests} not found; pass --tests <the unit test directory>"
+    )
 
 selected = set()
 for f in map(Path, args):
