@@ -259,7 +259,7 @@ repos:
       # the PR diff's packages); see "Related tests on commit".
       - id: go-test-unit
         name: go unit tests (changed packages)
-        entry: bash -c 'dirs=(); for f in "$@"; do dirs+=("./$(dirname "$f")"); done; go test -short "${dirs[@]}"' --
+        entry: bash -c 'dirs=(); for f in "$@"; do dirs+=("./$(dirname "$f")"); done; pkgs=$(go list -e -f "{{if or .GoFiles .TestGoFiles .XTestGoFiles}}{{.ImportPath}}{{end}}" "${dirs[@]}"); [ -z "$pkgs" ] || xargs go test -short <<< "$pkgs"' --
         language: system
         types: [go]
         exclude: (^|/)(testdata|vendor)/
@@ -322,6 +322,7 @@ repos:
         name: cargo unit tests
         entry: cargo test --lib
         language: system
+        types: [rust]
         pass_filenames: false
 
       # All tests (unit + integration + doc tests) on push
@@ -380,6 +381,7 @@ repos:
         name: unit tests
         entry: mvn test -pl . -Dtest="**/unit/**" -q
         language: system
+        types: [java]
         pass_filenames: false
 
       # Full tests on push
@@ -533,8 +535,8 @@ The commit-stage unit hook keeps `pass_filenames` on, so it gets the staged file
 |---|---|---|---|
 | JS/TS | `vitest related --run --passWithNoTests` | Tests whose static imports reach a staged file | Dynamic `import()`, files read at run time, changes the `files:` filter drops |
 | Python | `scripts/related-tests.py` (below) | Changed test files; `test_<module>.py` and `<module>_test.py` for a changed module; the whole test directory for a `conftest.py` | Tests that reach a module through another one or are named differently, deleted modules, data files |
-| Go | `go test -short` on the changed files' directories | The changed packages' own tests (Go drops duplicate package arguments) | Packages that import a changed package |
-| Rust, Java | Whole suite | — | Nothing. Cargo builds and tests the whole crate; Maven compiles the whole module first; mapping files to `-p` crates or `-Dtest` classes is not simple enough to be correct, so these stay whole until they pass 10 seconds |
+| Go | `go test -short` on the changed files' directories that hold a package for this build | The changed packages' own tests (Go drops duplicate package arguments) | Packages that import a changed package; directories with no package for this build (all files behind a build tag, a nested module) are skipped, not failed |
+| Rust, Java | Whole suite | — | Nothing. Cargo builds and tests the whole crate; Maven compiles the whole module first; mapping files to `-p` crates or `-Dtest` classes is not simple enough to be correct, so these stay whole until they pass 10 seconds. They run only when a Rust or Java file changed. |
 
 - **Vitest.** The `files:` filter passes only JS/TS files: `README.md` alone selects nothing, and `package.json` is one of Vitest's `forceRerunTriggers`, which would run the whole suite on commit. A `vitest.config.*` change still runs everything, which is right for a config change. Vitest 5.0.5 already defaults `related` to `passWithNoTests`; the flag keeps that explicit.
 - **Paths.** Vitest resolves `related` paths against its root. In a subdirectory package, `--root frontend frontend/src/x.ts` selects no test and exits 0; the Multi-language template runs `cd frontend` and strips the prefix instead.
