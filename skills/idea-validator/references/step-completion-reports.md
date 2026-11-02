@@ -59,7 +59,7 @@ A sync or push that did not happen (skipped, blocked, or waiting on the user) is
 ◆ Gather Technical Context (step 4 of 8 — [idea name])
 ··································································
   Context sources identified: √ pass ([N] inputs collected)
-  Technical feasibility assessed: √ pass | × fail — [gaps noted]
+  Technical constraints recorded: √ pass (stack, timeline and team, budget, assets: [N] answered, [M] unknown) | × fail — [item neither answered nor marked unknown]
   idea.md technical section updated: √ pass | × fail — [missing fields]
   ____________________________
   Result:             PASS | FAIL | PARTIAL
@@ -92,7 +92,7 @@ A sync or push that did not happen (skipped, blocked, or waiting on the user) is
   Feasibility scored: √ pass ([score]/10)
   Market assessed:    √ pass (reused Phase 3 evidence; [N] gap-fill queries) | × fail — [gaps in analysis]
   Verdict rule:       √ pass ([verdict], rule [1-3])
-  Phase 4 shape:      √ pass (6 area headings, ratings table with reasons, rule line under ## Why) | × fail — [missing part]
+  Phase 4 shape:      √ pass (6 area headings, Plans to charge line, risks labelled hard or soft, ratings table with reasons, rule line under ## Why) | × fail — [missing part]
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```

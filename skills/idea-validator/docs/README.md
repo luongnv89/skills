@@ -73,7 +73,7 @@ asm install github:luongnv89/skills:skills/idea-validator
 ## Output
 
 - `idea.md` with concept, clarifications, and technical context
-- `validate.md` with commercial/OSS competitive landscape (including Market Players & Share, pricing tiers, market size, and a per-side Research Log), a Phase 4 evaluation with one heading per area, ratings with a reason each, the verdict with the rule that produced it, reuse recommendation, and improvement roadmap
+- `validate.md` with commercial/OSS competitive landscape (including Market Players & Share, pricing tiers, market size, and a per-side Research Log), a Phase 4 evaluation with one heading per area (each technical risk labelled hard or soft), ratings with a reason each, the verdict with the rule that produced it, reuse recommendation, and improvement roadmap
 - Updated README ideas index table, when the README Maintenance trigger in SKILL.md matches
 - A commit of only the files the run wrote, pushed to the current branch (skipped when the ideas folder is not a git repository)
-- A final summary with `Result:`, `Evidence:` (GitHub links and commit hash), `Uncertainty:`, `Decision:` and `Next step:` lines
+- A final summary with `Result:`, `Evidence:` (GitHub links, or repo-relative paths when the remote is not on GitHub, and the commit hash), `Uncertainty:`, `Decision:` and `Next step:` lines
