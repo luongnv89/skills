@@ -84,13 +84,13 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - Loot boxes or gacha mechanics without probability disclosure
 
 ### Paywall Red Flags
-FAIL only where the evidence shows a claim is false; a claim that can't be checked is a WARNING. A paywall selling only a lifetime or one-time unlock cites 5.6 and 2.3.1-a instead of 3.1.2.
+FAIL only where the evidence shows a claim is false; a claim that can't be checked is a WARNING. A paywall selling only non-subscription products (a lifetime or one-time unlock) cites 5.6 for misleading claims and 2.3.1-a for a false or hidden price instead of 3.1.2; these FAILs still count as Top 20 trigger 16.
 - Promised results stated as guaranteed ("Clear skin in 14 days, guaranteed") (3.1.2-scam FAIL); other outcome claims are a WARNING to substantiate
 - Social proof that is randomly generated, invented, or contradicts App Store data, such as a "4.9★" when the listing shows 3.8 (3.1.2-scam FAIL); hardcoded user counts, ratings, or testimonials with no evidence either way are a WARNING: confirm they are true and current
 - Countdowns, "limited time" banners, or discounts produced by `Int.random`, reset on every launch, or with no real expiry (3.1.2-scam FAIL); a countdown to a fixed real end date is a WARNING: confirm the offer is real
 - Abandoned-checkout or exit offers (shown on dismissing the paywall) that misstate the price or the deal (3.1.2-scam FAIL)
 - The billed price smaller or fainter than a per-day or per-week breakdown, or missing (3.1.2-disclosure FAIL)
-- Terms of Use (EULA) or Privacy Policy link missing from the app itself, shown by local code (3.1.2-disclosure FAIL); links elsewhere in the app but not on the paywall are a WARNING (best practice, practitioner advice); a remote paywall (RevenueCat, Superwall, Adapty) is `unknown` and a WARNING to check by hand, never a FAIL
+- Terms of Use (EULA) or Privacy Policy link missing from the app itself, shown by local code (3.1.2-disclosure FAIL); links elsewhere in the app but not on the paywall are a WARNING (best practice, practitioner advice); a remote paywall (RevenueCat, Superwall, Adapty) is `unknown` and a WARNING to check by hand, never a FAIL; a StoreKit `SubscriptionStoreView` shows the links from App Store Connect, so it is `unknown` (or `yes` with `subscriptionStorePolicyDestination`), never a FAIL unless the policy buttons are hidden
 
 ### Metadata Red Flags
 - Keywords containing "free", "best", "#1", "top", "sale"

@@ -180,8 +180,8 @@
       "files": [],
       "expectations": [
         "Flags 3.1.2-scam as a FAIL for the guaranteed outcome ('Clear skin in 14 days, guaranteed'), citing PaywallView.swift",
-        "Flags 3.1.2-scam as a FAIL for the 'Join 2,000,000 happy users' count because it contradicts the app's roughly 3,000 downloads, not because the string is hardcoded",
-        "Flags 3.1.2-scam as a FAIL for the '70% off' countdown because it restarts every launch, not merely because it uses a timer",
+        "Flags 3.1.2-scam as a FAIL for the 'Join 2,000,000 happy users' count and gives its contradiction with the app's roughly 3,000 downloads as the reason",
+        "Flags 3.1.2-scam as a FAIL for the '70% off' countdown and gives its restart on every launch as the reason",
         "Flags 5.1.1-iv as a FAIL for the pre-permission button labeled 'Allow' and recommends a neutral label such as 'Continue' or 'Next'",
         "Says the earlier approval does not show the app is compliant and does not mark any row PASS because of it",
         "Because 3.1.2-scam is a Top 20 trigger, the verdict is LIKELY REJECT",

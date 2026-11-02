@@ -400,7 +400,7 @@ These are the guidelines most commonly causing rejection — audit these first:
 13. **2.3.6** — Incorrect age rating
 14. **1.2** — UGC app missing moderation/reporting/blocking
 15. **2.5.5** — App doesn't work on IPv6-only networks
-16. **3.1.2-disclosure, 3.1.2-scam** — Unclear subscription terms or a misleading paywall (guaranteed outcomes, false social proof, fake countdowns or discounts, a hidden price)
+16. **3.1.2-disclosure, 3.1.2-scam** (or 5.6 and 2.3.1-a findings the Paywalls rule raises for a non-subscription paywall) — Unclear subscription terms or a misleading paywall, whatever it sells (guaranteed outcomes, false social proof, fake countdowns or discounts, a hidden price)
 17. **2.3.10** — References to other platforms in metadata
 18. **5.2.1** — Unauthorized third-party IP usage
 19. **4.1-a, 4.1-b, 4.1-c** — Copycat, impersonation, or another developer's brand

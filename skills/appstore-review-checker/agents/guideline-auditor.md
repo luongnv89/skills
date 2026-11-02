@@ -215,17 +215,17 @@ Applies when `paywall.locations` is non-empty. FAIL only where the evidence show
 - **WARNING**: `paywall.source` is `remote`, or `billed_price_most_prominent`, `terms_and_privacy_links` or `terms_and_privacy_in_app` is `unknown`; list the paywall under "requires manual verification" and ask the user to check the links and prices by hand
 - **Precedence**: a FAIL needs local evidence (a `no` or a false claim found in the code); otherwise the remote-paywall WARNING applies, and `unknown` never becomes a FAIL. The row takes the most severe verdict any entry gets
 - **PASS**: A local paywall with none of the above
-- **Non-subscription paywall** (`has_subscriptions` is false; a lifetime or one-time unlock): 3.1.2 covers subscriptions only, so report the same misleading-claim findings under 5.6 ("trick them into making unwanted purchases") and 2.3.1-a ("promoting a false price") with the same FAIL and WARNING levels, mark 3.1.2-scam and 3.1.2-disclosure N/A, and leave the privacy policy link to 5.1.1-i
+- **Non-subscription paywall** (a paywall that sells only non-consumable, consumable or non-renewing products, from `Product.type`, the StoreKit configuration or the paywall code; when the types are `unknown`, treat it as a subscription paywall): 3.1.2 covers subscriptions only, so report each misleading-claim finding under 5.6 ("trick them into making unwanted purchases") and only a false or hidden price under 2.3.1-a ("promoting a false price"), with the same FAIL and WARNING levels. Start each such finding's note with "Non-subscription paywall:"; these FAILs count as Top 20 trigger 16. Mark 3.1.2-scam and 3.1.2-disclosure N/A for that paywall, and leave the privacy policy link to 5.1.1-i
 
 #### Pre-Permission Screens (Guideline 5.1.1-iv)
 
-For each `pre_permission_screens` entry: **FAIL** when `button_title` is "Allow", "Enable", "Grant access", or similar wording (HIG › Privacy and App Review's 5.1.1 rejection wording; not in the guideline text), or `reward_for_granting` is true (5.1.1-iv and 5.1.2-i: apps "may not require users to enable system functionalities … to … receive monetary or other compensation"); the fix is a neutral "Continue" or "Next". **PASS** otherwise.
+For each `pre_permission_screens` entry: **FAIL** when `button_title` is "Allow", "Enable", "Grant access", or similar wording (HIG › Privacy and App Review's 5.1.1 rejection wording; not in the guideline text), or `reward_for_granting` is true (report it under 5.1.1-iv; 5.1.2-i is the supporting quote: apps "may not require users to enable system functionalities … to … receive monetary or other compensation"); the fix is a neutral "Continue" or "Next". **PASS** otherwise.
 
 #### OTA Updates and Promotional Messaging (Guidelines 2.5.2, 4.5.3, 4.5.4)
 
 - **WARNING** (2.5.2): Any `ota_updates` entry; the developer confirms pushes are interpreted JS or assets that don't change the app's primary purpose or add unreviewed features (2.5.2; DPLA 3.3.1(B)), and native changes go through App Review
 - **FAIL** (4.5.3): A `push_notifications.live_activities` entry promotes or advertises anything (HIG › Live Activities: "Don't use a Live Activity to display ads or promotions")
-- **FAIL** (4.5.4): `used_for_marketing` is true and both `marketing_consent` and `marketing_opt_out` are null; **WARNING** when only one of them is null
+- **FAIL** (4.5.4): `used_for_marketing` is true and both `marketing_consent` and `marketing_opt_out` are null; **WARNING** when only one of them is null, or when both are null but the push SDK can serve in-app messages remotely (OneSignal, Braze, Airship, Customer.io), so the consent text may live outside the code
 
 #### Review Prompts (Guideline 5.6.1)
 
