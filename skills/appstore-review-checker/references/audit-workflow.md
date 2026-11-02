@@ -55,6 +55,7 @@ Important principles:
 - Be specific about evidence. Don't say "might have privacy issues" — say "Found `CLLocationManager` usage in `LocationService.swift:42` but no `NSLocationWhenInUseUsageDescription` in Info.plist"
 - Check what you can verify from code and config. For things you can't verify (like "does the app crash?"), note them as requiring manual verification
 - Cross-reference entitlements with actual usage — requested capabilities that aren't used raise flags, and used capabilities without entitlements will crash
+- A past approval is not evidence. Apple removes live apps that passed review months earlier, so never mark a row PASS because an earlier build was approved; audit a live app as strictly as a new one
 
 ## Phase 3: Generate the Report
 

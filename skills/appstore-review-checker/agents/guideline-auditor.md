@@ -205,6 +205,24 @@ If `third_party_ai.providers` is non-empty and user data is sent:
 
 For each `feature_flags` entry: **WARNING** when the gated feature is user-facing, unless the review notes say it is enabled and reachable for review (features must be accessible for review under 2.3.1-a); **FAIL** when the evidence shows the flag hides functionality from App Review, such as a feature or business model meant to switch on only after approval.
 
+#### Paywalls (Guidelines 3.1.2-scam, 3.1.2-disclosure)
+
+Applies when `paywall.locations` is non-empty.
+- **FAIL** (3.1.2-scam): `outcome_claims` promise a specific result, `social_proof` is hardcoded, or `urgency_or_discounts` are fake (random, timer-driven, or reset on every launch)
+- **FAIL** (3.1.2-disclosure): `billed_price_most_prominent` is `no`, or `terms_and_privacy_links` is false
+- **WARNING**: `paywall.source` is `remote`, or `billed_price_most_prominent` is `unknown`; list the paywall under "requires manual verification"
+- **PASS**: A local paywall with none of the above
+
+#### Pre-Permission Screens (Guideline 5.1.1-iv)
+
+For each `pre_permission_screens` entry: **FAIL** when `button_title` is "Allow", "Enable", "Grant access", or similar wording, or `reward_for_granting` is true; the fix is a neutral "Continue" or "Next". **PASS** otherwise.
+
+#### OTA Updates and Promotional Messaging (Guidelines 2.5.2, 4.5.3, 4.5.4)
+
+- **WARNING** (2.5.2): Any `ota_updates` entry; the developer confirms OTA pushes only fix bugs, and anything that adds features or changes the app's purpose ships through App Review
+- **FAIL** (4.5.3): A `push_notifications.live_activities` entry promotes or advertises anything
+- **FAIL** (4.5.4): `used_for_marketing` is true and `marketing_consent_and_opt_out` is null; **WARNING** when only one of the two is cited
+
 #### Review Prompts (Guideline 5.6.1)
 
 - **PASS**: Only the system API (`review_prompt.system_api`)

@@ -4,7 +4,7 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.6.0
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -116,11 +116,11 @@ Its four lines are `Result:` (run status `COMPLETE`, `PARTIAL` or `BLOCKED`, plu
 
 ## Edge Cases
 
-See `references/edge-cases.md` for: no source code available, metadata-only audit, existing rejection notice, Kids Category app, StoreKit-without-IAP, multiple targets, macOS/Catalyst, a request to hide a feature from App Review, unknown storefronts for external purchase links.
+See `references/edge-cases.md` for: no source code available, metadata-only audit, existing rejection notice, a live app already approved, Kids Category app, StoreKit-without-IAP, multiple targets, macOS/Catalyst, a request to hide a feature from App Review, unknown storefronts for external purchase links.
 
 ## Common Red Flags
 
-Quick-reference watch lists for privacy, IAP, metadata, and design red flags are in `references/quality-checks.md` (section "Common Patterns to Watch For"). Load it during Phase 2 to speed up triage.
+Quick-reference watch lists for privacy, IAP, paywall, metadata, and design red flags are in `references/quality-checks.md` (section "Common Patterns to Watch For"). Load it during Phase 2 to speed up triage.
 
 ## Tone and Delivery
 

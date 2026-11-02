@@ -60,6 +60,8 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - Actual IPv6 network behavior
 - Subscription flow user experience
 - Content moderation system effectiveness
+- Paywall copy, prices, and offers served remotely (RevenueCat Paywalls, Superwall, Adapty, a homegrown config endpoint)
+- What an OTA update SDK will push after approval
 
 ## Common Patterns to Watch For
 
@@ -70,6 +72,9 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - No privacy policy URL in project or metadata
 - Account creation exists but no account deletion flow
 - User data sent to a third-party AI API with no disclosure and opt-in (5.1.2-i-ai)
+- Attribution SDKs (MMPs such as AppsFlyer, Adjust, Branch, Singular, Kochava) or ad SDKs sending data with no ATT prompt, or data the privacy policy doesn't name (5.1.2-i, 5.1.1-i-content)
+- A pre-permission screen whose button says "Allow", "Enable", or "Grant access" instead of "Continue" or "Next" (5.1.1-iv)
+- Purpose strings that don't say which feature uses the data ("This app needs camera access") (5.1.1-ii)
 
 ### IAP Red Flags
 - `StoreKit` imported but no restore purchases mechanism
@@ -77,6 +82,14 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - Digital goods bought through an in-app non-IAP checkout (Stripe, PayPal)
 - External purchase links shown outside the US storefront without an entitlement (3.1.1a)
 - Loot boxes or gacha mechanics without probability disclosure
+
+### Paywall Red Flags
+- Promised results or outcomes ("Get rid of acne in 7 days", "Lose 10 kg") (3.1.2-scam)
+- Hardcoded social proof: user counts, star ratings, or testimonials as string literals (3.1.2-scam)
+- Countdown timers, "limited time" banners, or discounts produced by `Int.random`, a timer, or a reset on every launch (3.1.2-scam)
+- Abandoned-checkout or exit offers (shown on dismissing the paywall) that misstate the price or the deal (3.1.2-scam)
+- The billed price smaller or fainter than a per-day or per-week breakdown, or missing (3.1.2-disclosure)
+- No Terms of Use (EULA) or Privacy Policy links on the paywall itself (3.1.2-disclosure)
 
 ### Metadata Red Flags
 - Keywords containing "free", "best", "#1", "top", "sale"
@@ -93,3 +106,8 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - Multiple targets producing nearly identical apps (spam/copycat risk)
 - Remote feature flags gating features absent from the review notes (2.5.19)
 - Custom rating dialog instead of the system review prompt (5.6.1)
+- "Coming soon" labels, disabled teaser buttons, or placeholder screens (2.1-a)
+- An OTA update SDK (expo-updates, CodePush, Shorebird, Capgo, Hot Updater) that could change features after approval (2.5.2, 2.5.19)
+- Promotional or marketing content in a Live Activity (4.5.3), or marketing pushes with no in-app consent and opt-out (4.5.4)
+- Interstitial ads so frequent they interrupt core use, such as after every tap or every few seconds (2.5.18)
+- An icon or name resembling a large company's brand (Google, Meta, OpenAI) (4.1-c, 5.2.1)

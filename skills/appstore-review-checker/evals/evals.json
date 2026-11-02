@@ -171,6 +171,21 @@
         "Because 3.1.1-iap is a Top 20 trigger, the verdict is LIKELY REJECT",
         "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
       ]
+    },
+    {
+      "id": 13,
+      "kind": "edge",
+      "prompt": "Quick check before I resubmit my iOS acne-tracker app. The paywall in PaywallView.swift says 'Clear skin in 14 days, guaranteed', shows 'Join 2,000,000 happy users' and a '70% off, ends in 09:59' countdown that restarts every launch, and the onboarding screen before the camera prompt has a big 'Allow' button. It was approved last year, so it should be fine, right? The project is in the current directory.",
+      "expected_output": "The audit fails 3.1.2-scam for the promised outcome, the hardcoded social proof and the fake countdown, fails 5.1.1-iv for the 'Allow' pre-permission button, says the earlier approval is not evidence of compliance, rates the app LIKELY REJECT, and ends with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Flags 3.1.2-scam as a FAIL for the promised outcome ('Clear skin in 14 days'), the hardcoded user count, and the countdown that restarts every launch, citing PaywallView.swift",
+        "Flags 5.1.1-iv as a FAIL for the pre-permission button labeled 'Allow' and recommends a neutral label such as 'Continue' or 'Next'",
+        "Says the earlier approval does not show the app is compliant and does not mark any row PASS because of it",
+        "Because 3.1.2-scam is a Top 20 trigger, the verdict is LIKELY REJECT",
+        "Does not edit PaywallView.swift or any other file before the user approves specific FAIL IDs",
+        "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
+      ]
     }
   ]
 }

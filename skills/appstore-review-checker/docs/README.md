@@ -13,6 +13,8 @@
 
 - Checks your app against all 5 sections of Apple's Review Guidelines (Safety, Performance, Business, Design, Legal)
 - Prioritizes the Top 20 most common rejection triggers first
+- Catches misleading paywalls (promised outcomes, fake social proof, fake countdowns, a hidden price), "Allow" buttons on pre-permission screens, OTA update SDKs, and "Coming soon" features
+- Treats a past approval as no evidence: live apps get the same audit as new ones
 - Provides per-guideline verdicts: PASS, FAIL, WARNING, or N/A
 - Gives specific fix suggestions with file paths and code references
 - Generates an actionable pre-submission checklist
