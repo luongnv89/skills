@@ -65,15 +65,15 @@ asm install github:luongnv89/skills:skills/idea-validator
 
 | Path | Description |
 |---|---|
-| `references/file-templates.md` | Header structure for `idea.md` and `validate.md`, plus the Phase 3 query patterns, capture fields, and market players & share method |
-| `references/step-completion-reports.md` | Per-step status blocks for Setup and Phases 1-5 |
+| `references/file-templates.md` | Header structure for `idea.md` and `validate.md` (including the Phase 4 shape), plus the Phase 3 query patterns, capture fields, and market players & share method |
+| `references/step-completion-reports.md` | Status blocks for all 8 steps, Repo Sync through Commit and Push, with skip reporting |
 | `references/final-report.md` | Example final summary, fill rules for each line, and reader checks |
 | `evals/evals.json` | Scenario evals: happy paths, edge cases, and negative triggers |
 
 ## Output
 
 - `idea.md` with concept, clarifications, and technical context
-- `validate.md` with commercial/OSS competitive landscape (including Market Players & Share, pricing tiers, market size, and a per-side Research Log), verdict, ratings, market analysis, reuse recommendation, and improvement roadmap
-- Updated README ideas index table, when run inside an ideas repo
+- `validate.md` with commercial/OSS competitive landscape (including Market Players & Share, pricing tiers, market size, and a per-side Research Log), a Phase 4 evaluation with one heading per area (each technical risk labelled hard or soft), ratings with a reason each, the verdict with the rule that produced it, reuse recommendation, and improvement roadmap
+- Updated README ideas index table, when the README Maintenance trigger in SKILL.md matches
 - A commit of only the files the run wrote, pushed to the current branch (skipped when the ideas folder is not a git repository)
-- A final summary with `Result:`, `Evidence:` (GitHub links and commit hash), `Uncertainty:`, `Decision:` and `Next step:` lines
+- A final summary with `Result:`, `Evidence:` (GitHub links, or repo-relative paths when the remote is not on GitHub, and the commit hash), `Uncertainty:`, `Decision:` and `Next step:` lines
