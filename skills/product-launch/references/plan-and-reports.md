@@ -49,7 +49,12 @@ user decides at the approval gate.
 ### Subreddits (reddit gets one fit-table row, listing the subreddits that pass)
 
 Pick at most 3 subreddits that pass, highest audience fit first. Their full rules are in
-`platforms-core.md`, which only the writers read.
+`platforms-core.md`, which only the writers read. Each chosen subreddit gets its own post:
+never plan one text for several subreddits, and say so when the user asks for the same
+post everywhere. Plan mod mail for each chosen subreddit whose Allowed day confines
+promotion to a stickied thread or megathread (r/startups, r/selfhosted, r/MacApps), or
+whose row says "rules unverified" (r/artificial). "Unverified" means this catalog label,
+never Step 3's live check, which always reports Reddit as unreachable.
 
 | Subreddit             | Passes when                                                                                  | Allowed day                            |
 | --------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------- |
@@ -172,7 +177,9 @@ exactly one mode.
    product-hunt and geeknews, Reddit history, and the shorter free queues.
 2. **Account setup:** today, for every account with an age, karma or verification gate:
    product-hunt (7 days), geeknews (7 days), peerlist (verified profile and a 100%
-   project), and each chosen subreddit's karma gate.
+   project), and each chosen subreddit's karma gate. Reddit participation starts the same
+   day and repeats weekly until the last Reddit post day. The founder sends mod mail this
+   week to each chosen subreddit that §1 marks for it.
 3. **Queue submissions:** submit each free-queue platform today. Its expected go-live is
    today plus its free wait.
    - A weekly board goes on the Monday of launch week when its free wait allows. Otherwise
