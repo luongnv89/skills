@@ -143,6 +143,22 @@
         "Uncertainty: lists the bottom-up market-size proxy and the unproven willingness to pay",
         "The verdict is not Build it while willingness to pay has no evidence"
       ]
+    },
+    {
+      "id": 11,
+      "name": "dominated-market-verdict",
+      "kind": "edge",
+      "prompt": "Validate my idea: an ad-supported general web search engine for consumers. (Phase 3 finds one search engine with about 90% of worldwide search share on a free public tracker, at least 3x the next player; the user names no differentiator.)",
+      "expected_output": "Labels the market Dominated on a named basis with a confidence label from the first matching confidence row. With structure confidence medium or high and no genuine differentiator, the verdict is Skip it under rule 1; if the structure confidence comes out low, the dominated clause counts toward rule 2 and the verdict is Maybe instead. Never Build it.",
+      "files": [],
+      "expectations": [
+        "The Market structure line says Dominated, names the basis, and shows the leader at about half or more, or at least 3x the next player, on that basis",
+        "The leader's share appears as a percentage only with a linked source that states it",
+        "The structure carries a confidence label equal to the lowest confidence among the Market Players & Share rows it rests on",
+        "If the structure confidence is medium or high, the verdict is Skip it and cites rule 1's dominated-market clause",
+        "If the structure confidence is low, the verdict does not use rule 1's dominated-market clause; it is Maybe and cites rule 2, unless another named rule-1 condition applies",
+        "The verdict is not Build it"
+      ]
     }
   ]
 }

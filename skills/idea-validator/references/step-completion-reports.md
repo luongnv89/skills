@@ -46,12 +46,12 @@ Read this file when emitting the Step Completion Report for a given phase (SKILL
 ```
 ◆ Competitive Landscape (step 4 of 6 — [idea name])
 ··································································
-  Web searches executed:  √ pass ([N] live queries: [a] open source, [b] paid & market, [c] adjacent, [d] failed)
+  Web searches executed:  √ pass ([N] live queries: [a] open source, [b] paid & market ([p] players + [s] share/size), [c] adjacent, [d] failed)
   Per-side minimums met:  √ pass | × fail — [side below its minimum]
   Open-source coverage:   √ pass ([N] OSS options found or no credible result documented)
   Paid players mapped:    √ pass (leader, [N] challengers, long tail) | √ pass (none found, queries logged)
-  Share & structure:      √ pass ([structure], confidence [label]) | × fail — [share stated without a source]
-  Pricing tiers compared: √ pass ([N] players) | × fail — [pricing pages not checked]
+  Share & structure:      √ pass ([structure], confidence [label]) | √ pass (skipped — no paid players) | × fail — [share stated without a source]
+  Pricing tiers compared: √ pass ([N] players) | √ pass (skipped — no paid players) | × fail — [pricing pages not checked]
   Market size:            √ pass ([figure], [source], [year]) | √ pass (bottom-up proxy) | × fail — [no figure]
   Competitors found:      √ pass ([N] direct + [N] adjacent)
   Failed attempts checked:√ pass | × fail — [no results or skipped]

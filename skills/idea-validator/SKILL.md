@@ -64,7 +64,7 @@ If `origin` is missing, the pull fails, or the rebase or stash pop conflicts, st
 
    Ask again only when the user asks to change the location.
 3. **Create the project folder** under the ideas root. If a folder with the same date and name already exists, reuse it and update its files instead of creating a second one.
-4. **Create `idea.md`** with the idea and the clarifications.
+4. **Create `idea.md`** with the idea; Phase 1 adds the clarifications.
 5. **Create `validate.md`** for the evaluation and recommendations.
 6. **Echo the absolute project folder path** in your response, so downstream skills can pick it up.
 
@@ -135,8 +135,8 @@ Evaluate honestly and update `validate.md`, reusing Phase 3's evidence instead o
 **Ratings (1-10):** Creativity, Feasibility, Market Impact, Technical Execution. Give each score a one-line reason.
 
 **Verdict.** Take the first rule that matches:
-1. `Skip it` — Phase 3 found a near-identical product or a dominated market and the user named no genuine differentiator, or a hard blocker exists that the stated team and budget cannot remove.
-2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market where the differentiator has no evidence users would switch, demand or willingness to pay with no evidence, or a Feasibility score below 6.
+1. `Skip it` — Phase 3 found a near-identical product, or a dominated market at `medium` or `high` structure confidence, and the user named no genuine differentiator; or a hard blocker exists that the stated team and budget cannot remove.
+2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market where the differentiator is missing (at `low` structure confidence) or has no evidence users would switch, demand or willingness to pay with no evidence, or a Feasibility score below 6.
 3. `Build it` — none of the above.
 
 Write the verdict with the rule that produced it and a 2-3 sentence rationale.
