@@ -123,6 +123,23 @@
         "The run built no launch fit table and wrote no launch-kit files",
         "The response addresses Google Ads campaign structure and budget"
       ]
+    },
+    {
+      "id": 9,
+      "name": "named-reddit-participation-first",
+      "kind": "happy-path",
+      "prompt": "Plan the Reddit side of the logsnap launch. Same post everywhere is fine, just get it into as many subreddits as possible.",
+      "expected_output": "Named branch for reddit. The run pushes back on cross-posting one text to many subreddits, picks at most 3 subreddits that pass their gates (such as r/coolgithubprojects, r/opensource or r/SideProject for this MIT CLI on GitHub), and schedules them one a day on their allowed days. The timeline starts weekly Reddit participation (no product name or link) on the account-setup day and sends mod mail to any chosen subreddit whose promotion rule is gated or unverified. It never fetches Reddit, never posts, writes launch-plan.md and stops at the approval gate.",
+      "files": ["../../eval-fixtures/product-launch/logsnap-cli"],
+      "expectations": [
+        "The response declines the same-post-everywhere approach and says each subreddit gets its own post",
+        "The plan lists at most 3 subreddits, each of which passes its gate in the subreddit table",
+        "The timeline puts the chosen subreddits on separate days, each on its allowed day",
+        "The timeline starts weekly Reddit participation on the account-setup day, with no product name or link",
+        "The timeline sends mod mail before posting to every chosen subreddit whose promotion rule is gated, unclear or unverified, or says none needs it",
+        "Process: the run never fetches reddit.com, and the Uncertainty line says the Reddit rules must be re-read on posting day",
+        "Process: the run never posts, comments or messages on Reddit, and stops at the approval gate with launch-kit/launch-plan.md in Status: awaiting-approval"
+      ]
     }
   ]
 }

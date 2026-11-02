@@ -133,7 +133,22 @@ The family file's sources, plus the live-check result.
 
 **reddit.md:** one section per chosen paste-ready subreddit, each with its allowed day, flair, title
 format, karma gate, post body and a line saying "re-read the rules and pinned posts the
-day you post". The rules in the catalog are dated captures. r/programming, when chosen,
+day you post". The rules in the catalog are dated captures. Each section also has:
+
+- the six-item posting-day check from `platforms-core.md`, as a checklist;
+- a title and body written for that subreddit alone. No title or body sentence repeats
+  across sections; reuse copy-bank facts, not copy-bank sentences. The body opens with
+  the problem and a lesson, and names the product only after that, with the disclosure;
+- `reddit.<subreddit>.reply` (max=600): the answer for when someone asks what the founder
+  uses or whether they built a tool, opening with the disclosure;
+- `reddit.<subreddit>.modmail` (max=1000), only when that subreddit's promotion rule is
+  gated, unclear or unverified: who the founder is, what they build, what they plan to
+  post, and a question asking whether it is acceptable.
+
+The file opens with a **Participation plan** section with no field markers: one weekly
+block from the setup date to L-day in the chosen subreddits (answer questions, share
+lessons, no product name or link), and 4–6 post ideas the founder writes in their own
+words, each pointing to a founder story prompt or a Top → This month format to check. r/programming, when chosen,
 gets its own founder-voice file, `reddit-programming.md`. In the same way, `github.md`
 holds repo metadata, README notes and release notes, while awesome-list pull requests go
 in a founder-voice `github-awesome.md`. Every file has exactly one mode.
@@ -204,6 +219,8 @@ Blocking checks:
    dates, fields or a brief, launch-day steps with timezones, rules and sources.
 5. **Dates:** dates and times match the plan's timeline.
 6. **Disclosure:** community posts (Reddit, Indie Hackers, GeekNews) disclose the maker.
+7. **Reddit:** no title or body sentence repeats across `reddit.md` sections, no body opens
+   with the product or a link, and the Participation plan names no product or link.
 
 Minor checks: tone (superlatives, hype), unverified facts without a label, duplicated
-text that should reuse copy-bank values.
+text that should reuse copy-bank values (except across Reddit sections, see check 7).

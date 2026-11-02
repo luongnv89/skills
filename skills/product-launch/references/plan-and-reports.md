@@ -172,7 +172,9 @@ exactly one mode.
    product-hunt and geeknews, Reddit history, and the shorter free queues.
 2. **Account setup:** today, for every account with an age, karma or verification gate:
    product-hunt (7 days), geeknews (7 days), peerlist (verified profile and a 100%
-   project), and each chosen subreddit's karma gate.
+   project), and each chosen subreddit's karma gate. Reddit participation starts the same
+   day and repeats weekly until L-day. Mod mail goes out this week to each chosen
+   subreddit whose promotion rule is gated, unclear or unverified.
 3. **Queue submissions:** submit each free-queue platform today. Its expected go-live is
    today plus its free wait.
    - A weekly board goes on the Monday of launch week when its free wait allows. Otherwise

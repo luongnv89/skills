@@ -124,6 +124,14 @@ subreddit that bans LLM-written posts is founder-voice · Confidence: medium
   per-subreddit: r/LocalLLaMA needs 10 karma to comment and 5 subreddit karma to post,
   and r/MacApps needs 10 local karma before you promote in comments. Many subreddits
   also run hidden AutoModerator thresholds (unverified).
+  - **Participate first:** from account setup to L-day, the founder spends time each week
+    in the chosen subreddits answering questions and sharing what they learned, with no
+    product name or link. Help people who will never be customers too. Showing up weekly
+    beats posting often.
+  - **Mod mail:** for a chosen subreddit whose promotion rule is gated, unclear or
+    unverified, the founder writes to its moderators before posting: what they build,
+    what they plan to share, and whether that is acceptable. State ownership plainly;
+    hiding it to get around a rule can cost the founder that subreddit.
 - **Cost:** free. Reddit's own advice for accounts that mostly post their own links is
   to buy ads.
 - **Rules (sitewide):** "Participate authentically in communities where you have a
@@ -133,12 +141,27 @@ subreddit that bans LLM-written posts is founder-voice · Confidence: medium
   link masking; multiple accounts; vote manipulation.
 - **Link:** nofollow (unverified).
 - **Do:**
-  - Post only where and when each subreddit allows it.
-  - Disclose that you are the maker.
+  - Post only where and when each subreddit allows it. On posting day, check six things:
+    whether self-promotion is allowed, whether external links are allowed, whether you
+    may name your own product, the required flair, whether promotion belongs in a
+    dedicated thread, and any limit on how often you post.
+  - Write each subreddit its own post. The same text across subreddits reads as spam to
+    members and moderators, and the same post that works on X or LinkedIn reads as an ad
+    on Reddit, where people are anonymous and blunt.
+  - Lead with the problem the subreddit discusses and what you learned solving it. The
+    product comes after the useful part, never as the opening line or a bare link.
+  - Let people ask. When a commenter or a DM asks what you use or whether you built a
+    tool, answer then, and say you are the maker.
+  - Disclose that you are the maker whenever the product is named.
   - Lead with substance in the body, and put any blog link at the end.
   - Keep self-promotion a small share of the account's activity.
-- **Sources:** redditinc.com/policies/reddit-rules, and the Reddit Help "Spam" article
-  (360043504051).
+- **Post ideas (practitioner advice):** sort each subreddit by Top → This month and note
+  which formats work there; most other posts are how-tos built from real events in the
+  company, such as a hiring round that went wrong. They need the founder's own story.
+- **Sources:** redditinc.com/policies/reddit-rules, the Reddit Help "Spam" article
+  (360043504051), and a founder's Reddit playbook
+  (x.com/namanyayg/status/2116954266640519242, 2026-11-01; practitioner advice, not
+  Reddit rules).
 
 | subreddit             | fits                            | self-promotion rule (rules as of capture date)                                                                                                                                                                                              |
 | --------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
