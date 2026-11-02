@@ -73,11 +73,11 @@ A sync or push that did not happen (skipped, blocked, or waiting on the user) is
   Per-side minimums met:  √ pass | × fail — [side below its minimum]
   Open-source coverage:   √ pass ([N] OSS options found or no credible result documented)
   Paid players mapped:    √ pass (leader, [N] challengers, long tail) | √ pass (none found, queries logged)
-  Share & structure:      √ pass ([structure], confidence [label]) | √ pass (skipped — no paid players) | × fail — [share stated without a source]
-  Pricing tiers compared: √ pass ([N] players) | √ pass (skipped — no paid players) | × fail — [pricing pages not checked]
+  Share & structure:      √ pass ([structure], confidence [label]) | ○ skip — no paid players | × fail — [share stated without a source]
+  Pricing tiers compared: √ pass ([N] players) | ○ skip — no paid players | × fail — [pricing pages not checked]
   Market size:            √ pass ([figure], [source], [year]) | √ pass (bottom-up proxy) | × fail — [no figure]
   Competitors found:      √ pass ([N] direct + [N] adjacent)
-  Near-identical check:   √ pass (none found; closest [Name] misses [element]) | √ pass ([Name] is near-identical; showed it and asked the user)
+  Near-identical check:   √ pass (none found; closest: [Name] misses [element], one per product missing only one element) | √ pass ([Name] is near-identical; showed it and asked the user)
   Failed attempts checked:√ pass | × fail — [no results or skipped]
   Reuse potential assessed: √ pass | × fail — [OSS build-on/fork path missing]
   validate.md updated:    √ pass | × fail — [missing sections]
@@ -101,7 +101,7 @@ A sync or push that did not happen (skipped, blocked, or waiting on the user) is
 ```
 ◆ Improve (step 7 of 8 — [idea name])
 ··································································
-  Enhancements identified:    √ pass ([N] improvements listed)
+  Enhancements identified:    √ pass ([N] improvements listed) | ○ skip — [Edge Cases row that skips Phase 5]
   Recommendations added:      √ pass | × fail — [what's missing] | ○ skip — [Edge Cases row that skips Phase 5]
   ____________________________
   Result:                     PASS | FAIL | PARTIAL | SKIPPED

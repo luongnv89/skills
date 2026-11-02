@@ -28,7 +28,7 @@ Terms used throughout:
 - **Ideas root** — the directory that holds every idea folder (resolved in Setup step 2).
 - **Project folder** — `<ideas root>/YYYY_MM_DD_<short_snake_case_name>/`, holding this idea's `idea.md` and `validate.md`.
 - **Status** — the run outcome, `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in Final Report.
-- **Near-identical product** — an existing product that does the idea's core job for the same target user, through the same delivery model (web, mobile, browser extension, CLI, API, self-hosted), and already covers the differentiator the user named in Phase 1, if any. Missing any one makes it merely similar. A **genuine** differentiator is one the compared product (the near-identical product, or a dominant leader) lacks.
+- **Near-identical product** — an existing product that does the idea's core job for the same target user, through the same delivery model (e.g. web, mobile, desktop, browser extension, CLI, API, self-hosted), and already covers the differentiator the user named in Phase 1, if any. Missing any one makes it merely similar. A **genuine** differentiator is one the compared product (the near-identical product, or a dominant leader) lacks.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -137,7 +137,7 @@ Evaluate honestly, reusing Phase 3's evidence instead of repeating its research;
 
 **Verdict.** Take the first rule that matches:
 1. `Skip it` — Phase 3 found a near-identical product (see Terms), or a dominated market at `medium` or `high` structure confidence, and the user named no genuine differentiator; or a hard blocker exists that the stated team and budget cannot remove.
-2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market where the differentiator is missing (at `low` structure confidence) or has no evidence users would switch, demand or willingness to pay with no evidence, or a Feasibility score below 6.
+2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market with no genuine differentiator (see Terms; at `low` structure confidence) or one with no evidence users would switch, demand or willingness to pay with no evidence, or a Feasibility score below 6.
 3. `Build it` — none of the above.
 
 ## Phase 5: Improvements
@@ -160,7 +160,7 @@ Update `validate.md` with:
 
 ## Step Completion Reports
 
-After each step, print its status block from `references/step-completion-reports.md`, numbered `step N of 8` in run order: Repo Sync, Setup, Phases 1-5, Commit and Push. One line per check (`√` pass, `×` fail, `○` skipped, with its reason), then `Result:`. A skipped or blocked push or sync is `○`, never `√`.
+After each step, print its status block from `references/step-completion-reports.md`, numbered `step N of 8` in the order the reports print: Repo Sync, Setup, Phases 1-5, Commit and Push. One line per check (`√` pass, `×` fail, `○` skipped, with its reason), then `Result:`. A skipped or blocked push or sync is `○`, never `√`.
 
 ## Tone
 

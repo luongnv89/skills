@@ -192,7 +192,7 @@
         "The first non-empty line under ## Quick Verdict is exactly one of **Build it**, **Maybe** or **Skip it**, with nothing else on that line",
         "## Why opens with a **Rule N:** line whose clause matches the verdict rule in SKILL.md, followed by a 2-3 sentence rationale",
         "validate.md has a ## Evaluation section with the ### headings Market, Demand, Feasibility, Monetization, Technical Risk and Duplication / Reuse Risk, in that order",
-        "Each Evaluation area cites the Phase 3 evidence it reuses (a section name or a link)",
+        "Each Evaluation area cites the Phase 3 evidence it reuses (a section name or a link), or says none found",
         "Duplication / Reuse Risk opens with a Near-identical product line naming a product and the elements it matches, or none found with the closest product and the element it misses",
         "## Ratings is a table with Creativity, Feasibility, Market Impact and Technical Execution, each scored out of 10 with a one-line reason",
         "validate.md keeps the headings ## Quick Verdict, ## Why, ## Ratings, ## Strengths, ## Concerns, ## Competitive Landscape, ## Enhanced Version and ## Implementation Roadmap"
@@ -233,10 +233,10 @@
       "name": "relative-size-only-dominated",
       "kind": "edge",
       "prompt": "Validate my idea: a scheduling app for independent dog groomers that fills cancelled slots from a waitlist. (Use these Phase 3 findings as given. Phase 3 finds no near-identical product. No public market total exists, and no basis is shared by most of the four named players, so no share can be derived: the leader states about 40,000 paying salons, about 9,000 app-store reviews and about 600 employees; Challenger A states only about 6,000 paying salons; Challenger B has only about 900 app-store reviews; Challenger C states only about 50 employees. The long tail has no figures. The leader is a desktop suite built for multi-chair salons, so it is not near-identical, but it already offers a waitlist, so the user's angle is not a genuine differentiator, and the user names no other.)",
-      "expected_output": "Gives relative sizes, not shares: the leader is about 7x Challenger A by paying salons, about 10x Challenger B by reviews and about 12x Challenger C by employees, so it is about 5x or more every other listed player with a figure, each compared on one basis. The market is labelled Dominated at low structure confidence, so rule 1's dominated clause cannot fire, and the verdict is Maybe under rule 2 because the differentiator is missing.",
+      "expected_output": "Gives relative sizes, not shares: the leader is about 6.7x Challenger A by paying salons, about 10x Challenger B by reviews and about 12x Challenger C by employees, so it is about 5x or more every other listed player with a figure, each compared on one basis. The market is labelled Dominated at low structure confidence, so rule 1's dominated clause cannot fire, and the verdict is Maybe under rule 2 because the differentiator is missing.",
       "files": [],
       "expectations": [
-        "The Market Players & Share table gives relative sizes (about 7x by paying salons, 10x by reviews, 12x by employees) and states no percentage share",
+        "The Market Players & Share table gives relative sizes (about 6.7x (≈7x) by paying salons, 10x by reviews, 12x by employees) and states no percentage share",
         "The Market structure line reads Dominated with confidence low, and names the basis of each comparison",
         "The Market structure line and the Final Report's Uncertainty: line say shares not comparable",
         "The long tail without figures is not treated as blocking the Dominated label",
@@ -253,6 +253,7 @@
       "files": [],
       "expectations": [
         "The Market structure line reads Fragmented and says shares not comparable",
+        "The Market structure line gives confidence low",
         "No percentage share is inferred from the relative sizes",
         "The market is not labelled Dominated or Oligopoly",
         "The Final Report's Uncertainty: line says the shares were not comparable"

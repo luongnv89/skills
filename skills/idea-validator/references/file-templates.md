@@ -113,7 +113,7 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 [...]
 
 ### Duplication / Reuse Risk
-**Near-identical product:** [[Name](URL): same core job, target user and delivery model, and covers the named differentiator] or [none found; closest: [Name](URL), differs on [the element it misses]]
+**Near-identical product:** [[Name](URL): same core job, target user and delivery model, and covers the named differentiator] or [none found; closest: [Name](URL), differs on [the element it misses]; one entry per product that misses only one element]
 [...]
 
 ## Strengths
@@ -146,7 +146,7 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 Phase 4 writes these `validate.md` sections, keeping each heading name exactly as shown in the template above:
 - `## Quick Verdict`: the bold verdict alone on the first line under the heading, with no rule or reason on that line. `product-planner` reads the verdict from this line.
 - `## Why`: the `**Rule N:**` line naming the first verdict rule that matched and its matching clause, then the 2-3 sentence rationale.
-- `## Evaluation`: one `###` heading per evaluation area, in the order shown in the template (Market, Demand, Feasibility, Monetization, Technical Risk, Duplication / Reuse Risk). Each area cites the Phase 3 evidence it reuses; write `none found` rather than dropping a heading. Duplication / Reuse Risk opens with the near-identical verdict: name the product and the elements it matches, or write `none found` and name the closest product (the one matching the most elements) and the element it misses.
+- `## Evaluation`: one `###` heading per evaluation area, in the order shown in the template (Market, Demand, Feasibility, Monetization, Technical Risk, Duplication / Reuse Risk). Each area cites the Phase 3 evidence it reuses; write `none found` rather than dropping a heading. Duplication / Reuse Risk opens with the near-identical verdict: name the product and the elements it matches, or write `none found` and name every product that misses only one element (or, if none does, the one matching the most), with the element each misses.
 - `## Strengths` and `## Concerns`: the lists the Final Report takes its top 3 from.
 - `## Ratings`: the four-row table, each score out of 10 with a one-line reason.
 
@@ -212,13 +212,13 @@ If no row matches (for example, credible sources disagree on the share), use `me
 | Oligopoly | No single player holds about half, and 2-4 players together hold most of the market | Expect feature-matching; win on a segment, price point, or distribution channel they ignore |
 | Fragmented | Anything else: no clear leader, or many small players | Entry is open, but willingness to pay may be low and distribution is the bottleneck |
 
-**Relative size only.** When the shares fall back to relative size (no common basis), neither share signal can be checked, so use this rule instead of the table. Whichever label applies, write `shares not comparable` on the Market structure line and on the Final Report's `Uncertainty:` line.
+**Relative size only.** When the shares fall back to relative size (no common basis), neither share signal can be checked, so use this rule instead of the table. Whichever label applies, the structure confidence is always `low`, whatever the rows' labels, and you write `shares not comparable` on the Market structure line and on the Final Report's `Uncertainty:` line.
 - The leader is the player the comparisons show as largest.
-- **Dominated**, only when the leader is about 5x or more (at least 4.5x) every other listed player, each comparison made on one basis: the same kind of figure for both players, named. The long-tail row counts only when it has a figure, compared as its combined total. The structure confidence is then always `low`, whatever the rows' labels.
+- **Dominated**, only when the leader is about 5x or more (at least 4.5x) every other listed player, each comparison made on one basis: the same kind of figure for both players, named. When the two players share more than one basis, compare on the first in the basis order above (revenue, paying customers, users, downloads or reviews, traffic or employees). The long-tail row counts only when it has a figure, compared as its combined total.
 - **Fragmented** otherwise, including when a listed player other than the long tail has no figure on a basis the leader also has.
 - Never Oligopoly: it needs shares.
 
-The verdict rules read the label with its confidence: `Dominated` at `medium` or `high` can trigger rule 1 (`Skip it`); at `low` it can trigger only rule 2 (`Maybe`), when the differentiator is missing or unevidenced. A Dominated label from relative size alone is therefore never a rule 1 trigger.
+The verdict rules read the label with its confidence: `Dominated` at `medium` or `high` can trigger rule 1 (`Skip it`); at `low` it can trigger only rule 2 (`Maybe`), when there is no genuine differentiator or it is unevidenced. A Dominated label from relative size alone is therefore never a rule 1 trigger.
 
 **Market size.** Give TAM, or a credible proxy for it (a public report's segment figure, the leader's revenue as a floor), with the source and year, labelled an estimate. If sources disagree, show the range and both sources. Label a broad category figure (for example "all IT operations software") as a ceiling, not the idea's TAM. If no credible figure exists, write so, then build a bottom-up proxy: target buyers (sourced count) × annual price (from the pricing table) ≈ size, with every input shown. When no count of the exact target buyers is public, use the closest broader sourced count as a ceiling and label the narrowing an assumption.
 
