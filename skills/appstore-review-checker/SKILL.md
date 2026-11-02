@@ -4,7 +4,7 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.6.0
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -37,7 +37,7 @@ Load only the reference you need for the current step — keep the working conte
 - `references/subagent-architecture.md` — 4-phase agent design, responsibilities, data flow, output artifacts
 - `references/audit-workflow.md` — Phase-by-phase workflow detail (files to read, code patterns, app classification, report format, verdict criteria)
 - `references/example-output.md` — Example `APPSTORE_AUDIT.md` snippet showing FAIL/WARNING entries
-- `references/edge-cases.md` — Handling no-source, metadata-only, existing rejection, Kids Category, Catalyst, multi-target
+- `references/edge-cases.md` — Handling no-source, metadata-only, existing rejection, a live app already approved, Kids Category, Catalyst, multi-target
 - `references/quality-checks.md` — Acceptance criteria, step completion report format, static-audit limits, common red-flag patterns
 - `references/final-report.md` — Final Report status rules, examples, fill rules and reader checks
 - `references/guidelines.md` — Full 150+ App Store guideline checklist, synced to Apple's October 16, 2026 revision, plus Top 20 Rejection Triggers
@@ -116,11 +116,11 @@ Its four lines are `Result:` (run status `COMPLETE`, `PARTIAL` or `BLOCKED`, plu
 
 ## Edge Cases
 
-See `references/edge-cases.md` for: no source code available, metadata-only audit, existing rejection notice, Kids Category app, StoreKit-without-IAP, multiple targets, macOS/Catalyst, a request to hide a feature from App Review, unknown storefronts for external purchase links.
+See `references/edge-cases.md` for: no source code available, metadata-only audit, existing rejection notice, a live app already approved, Kids Category app, StoreKit-without-IAP, multiple targets, macOS/Catalyst, a request to hide a feature from App Review, unknown storefronts for external purchase links.
 
 ## Common Red Flags
 
-Quick-reference watch lists for privacy, IAP, metadata, and design red flags are in `references/quality-checks.md` (section "Common Patterns to Watch For"). Load it during Phase 2 to speed up triage.
+Quick-reference watch lists for privacy, IAP, paywall, metadata, and design red flags are in `references/quality-checks.md` (section "Common Patterns to Watch For"). Load it during Phase 2 to speed up triage.
 
 ## Tone and Delivery
 

@@ -134,6 +134,10 @@ Scan for imports and usage:
 - Usage: `ATTrackingManager.requestTrackingAuthorization`, `ASIdentifierManager.shared().advertisingIdentifier`
 - Record: Whether ATT dialog is requested; whether IDFA is used
 
+**Pre-permission screens:**
+- Look for: Custom screens shown just before a system permission request (onboarding "enable notifications" or "allow camera" pages)
+- Record: file:line, the permission, the button title ("Continue" and "Next" are safe; "Allow", "Enable", and "Grant access" are 5.1.1-iv red flags), and any reward offered for granting
+
 ### Step 2b: Payment and Subscription Handling
 
 Scan for StoreKit usage:
@@ -155,6 +159,11 @@ Scan for StoreKit usage:
 - Look for: Direct Stripe/Braintree/PayPal SDK checkout for digital goods inside the app
 - Look for: Buttons, links, or calls to action that send users to buy outside the app (web checkout URLs, "Subscribe on our website")
 - Record: Each call to action's file:line and destination, whether code gates it by storefront (`Storefront.current?.countryCode`, `SKPaymentQueue.default().storefront`), any `com.apple.developer.storekit.external*` entitlement, and the storefronts the app ships in when metadata or the user states them (otherwise `unknown`)
+
+**Paywall Screens:**
+- Look for: The subscription or purchase screen and any exit, "special offer", or abandoned-checkout screen; paywall SDKs (RevenueCat Paywalls, Superwall, Adapty) whose content is served remotely
+- Record: file:line of promised results or outcomes, and whether each is stated as guaranteed; social proof (user counts, ratings, testimonials), how each is produced (string literal, fetched, or randomly generated), and any evidence it is false, such as a rating that contradicts the App Store listing or a count the user or metadata contradicts; countdowns and discounts, and whether each uses random values, resets on every launch, has no real expiry, or ends on a fixed real date; how the billed price is displayed next to any per-day or per-week breakdown; whether Terms of Use and Privacy Policy links sit on the paywall, and whether both are reachable anywhere else in the app (settings, account, about screens). Find links via SwiftUI `Link(destination:)`, `openURL`, `SFSafariViewController` or `WKWebView` loads, and URL constants; a URL loaded from remote config is `unknown`. A StoreKit `SubscriptionStoreView` shows Terms and Privacy buttons from App Store Connect unless `.storeButton(.hidden, for: .policies)` hides them: record both link fields `yes` when `subscriptionStorePolicyDestination` URLs are set in code, otherwise `unknown`, never `no`
+- A remotely served paywall is recorded as `remote`, with `unknown` for anything only the remote content would show; don't record a link or claim as missing unless the local code shows it
 
 ### Step 2c: Authentication and Account Management
 
@@ -213,7 +222,11 @@ Scan for:
 
 **Marketing Use:**
 - Look for: Push tokens sent to analytics/marketing SDKs
-- Record: Whether push is used for marketing or only transactional
+- Record: Whether push is used for marketing or only transactional, and for marketing, the file:line of the in-app consent text (`marketing_consent`) and of the in-app opt-out (`marketing_opt_out`) separately
+
+**Live Activities:**
+- Look for: `import ActivityKit`, `Activity.request`, `ActivityAttributes`
+- Record: What each Live Activity shows; promotional or marketing content is a 4.5.3 red flag
 
 ### Step 2f: Web Views
 
@@ -283,6 +296,14 @@ From Podfile/Package.swift and code imports, catalog all third-party SDKs:
 - Firebase Remote Config, LaunchDarkly, Statsig, Optimizely, ConfigCat, or a homegrown flag endpoint
 - Record: Each flag that turns a user-facing feature on or off, with file:line and the feature it gates
 
+**Attribution (MMP) SDKs:**
+- AppsFlyer, Adjust, Branch, Singular, Kochava, Tenjin, etc.
+- Record: Which ones, whether ATT is requested before they track, and whether the privacy policy names them
+
+**Over-the-Air (OTA) Update SDKs:**
+- expo-updates, react-native-code-push (CodePush), Shorebird, Capgo, Hot Updater, or a homegrown JS bundle download
+- Record: Which one and file:line; an OTA channel can change features after approval (2.5.2, 2.5.19)
+
 **Other Popular SDKs:**
 - Video streaming (YouTube, Vimeo, Twitch), mapping (Google Maps, Mapbox), chat/messaging libraries, etc.
 
@@ -309,6 +330,11 @@ Scan for:
 - Look for: `SKStoreReviewController`, `AppStore.requestReview`, SwiftUI `requestReview`
 - Look for: Custom rating dialogs ("Rate us", star pickers, "Enjoying the app?" alerts)
 - Record: file:line for each
+
+### Step 2k: Unfinished Features
+
+- Look for: "Coming soon", "TODO", "Lorem ipsum", "placeholder" in user-facing strings; disabled buttons or screens that tease features not yet built
+- Record: file:line for each under `findings.suspicious_patterns` (2.1-a)
 
 ## Phase 3: Build the app-profile.json
 
@@ -486,8 +512,33 @@ Create a JSON file with this structure:
     "implemented": boolean,
     "registration_required": boolean,
     "used_for_marketing": boolean,
-    "used_for_transactional": boolean
+    "used_for_transactional": boolean,
+    "marketing_consent": "string — file:line of the in-app consent text for marketing pushes, or null",
+    "marketing_opt_out": "string — file:line of the in-app opt-out from marketing pushes, or null",
+    "live_activities": ["string — what each shows, file:line, and whether it promotes anything"]
   },
+
+  "pre_permission_screens": [
+    {
+      "location": "string — file:line",
+      "permission": "string",
+      "button_title": "string",
+      "reward_for_granting": boolean
+    }
+  ],
+
+  "paywall": {
+    "locations": ["string — file:line of each paywall and exit or special-offer screen"],
+    "source": "local|remote|none",
+    "outcome_claims": ["string — text and file:line, noting whether it is stated as guaranteed"],
+    "social_proof": ["string — text and file:line, how it is produced (literal, fetched, random), and any evidence it is false"],
+    "urgency_or_discounts": ["string — countdowns or discounts with file:line, noting random values, a reset on every launch, no real expiry, or a fixed real end date"],
+    "billed_price_most_prominent": "yes|no|unknown",
+    "terms_and_privacy_links": "yes|no|unknown — both links on the paywall itself; unknown when the paywall is remote or can't be inspected",
+    "terms_and_privacy_in_app": "yes|no|unknown — both links reachable somewhere in the app; no only when local code shows one missing from every screen, the paywall included; unknown when the paywall is remote or a screen can't be inspected"
+  },
+
+  "ota_updates": ["string — SDK and file:line"],
 
   "web_views": [
     {
@@ -511,6 +562,7 @@ Create a JSON file with this structure:
     "crash_reporting": ["string"],
     "social_login": ["string"],
     "payment_processors": ["string"],
+    "attribution": ["string — MMPs such as AppsFlyer or Adjust"],
     "video_streaming": ["string"],
     "other": ["string"]
   },
