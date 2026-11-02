@@ -12,7 +12,8 @@
 ## Highlights
 
 - Multi-phase evaluation: clarify idea, gather context, research competitors, critical analysis, improvements
-- Live web search for commercial competitors, open-source alternatives, and failed predecessors to avoid reinventing the wheel
+- Live web search for commercial competitors, open-source alternatives, and failed predecessors to avoid reinventing the wheel, with a minimum number of queries for each side
+- Market players and share for paid products: leader, challengers and long tail with sourced figures and confidence labels, a pricing-tier comparison, the market structure, and a sourced market-size estimate, all from free public sources
 - Rate creativity, feasibility, impact, technical execution, and whether to build from scratch or base on existing OSS
 - Deliver a clear verdict: Build it, Maybe, or Skip it, chosen by three stated rules
 - Generate improvement suggestions and enhanced roadmap
@@ -64,7 +65,7 @@ asm install github:luongnv89/skills:skills/idea-validator
 
 | Path | Description |
 |---|---|
-| `references/file-templates.md` | Header structure for `idea.md` and `validate.md` |
+| `references/file-templates.md` | Header structure for `idea.md` and `validate.md`, plus the Phase 3 query patterns, capture fields, and market players & share method |
 | `references/step-completion-reports.md` | Per-step status blocks for Setup and Phases 1-5 |
 | `references/final-report.md` | Example final summary, fill rules for each line, and reader checks |
 | `evals/evals.json` | Scenario evals: happy paths, edge cases, and negative triggers |
@@ -72,7 +73,7 @@ asm install github:luongnv89/skills:skills/idea-validator
 ## Output
 
 - `idea.md` with concept, clarifications, and technical context
-- `validate.md` with commercial/OSS competitive landscape, verdict, ratings, market analysis, reuse recommendation, and improvement roadmap
+- `validate.md` with commercial/OSS competitive landscape (including Market Players & Share, pricing tiers, market size, and a per-side Research Log), verdict, ratings, market analysis, reuse recommendation, and improvement roadmap
 - Updated README ideas index table, when run inside an ideas repo
 - A commit of only the files the run wrote, pushed to the current branch (skipped when the ideas folder is not a git repository)
 - A final summary with `Result:`, `Evidence:` (GitHub links and commit hash), `Uncertainty:`, `Decision:` and `Next step:` lines

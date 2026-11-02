@@ -5,11 +5,11 @@
       "id": 1,
       "kind": "happy-path",
       "prompt": "Validate my idea: a habit tracker built for night-shift nurses that adapts reminders to rotating shift schedules. I'm a solo developer, side project, React Native. (Run in an ideas git repo with origin and live web search available.)",
-      "expected_output": "Runs Setup, Phases 1-5 and Commit and Push in order, runs at least 4 live web queries covering commercial and open-source options, writes idea.md and validate.md, commits only those files (plus README.md when README Maintenance changed it), pushes, and ends with a COMPLETE Final Report.",
+      "expected_output": "Runs Setup, Phases 1-5 and Commit and Push in order, runs at least 6 live web queries (2+ open source, 2+ paid and market, 1+ adjacent, 1+ failed), writes idea.md and validate.md, commits only those files (plus README.md when README Maintenance changed it), pushes, and ends with a COMPLETE Final Report.",
       "files": [],
       "expectations": [
         "Skipped the Phase 1 and Phase 2 questions that the prompt already answers (stack, team size, budget)",
-        "Ran at least 4 live web search queries before Phase 4, including at least one open-source query",
+        "Ran at least 6 live web search queries before Phase 4: at least 2 open-source, at least 2 paid players and market share or size, at least 1 adjacent and at least 1 failed-attempt query",
         "validate.md has a Competitive Landscape table and an Open-source Alternatives & Reuse Potential section",
         "The verdict names the verdict rule (1, 2 or 3) that produced it",
         "Staged files by path and did not run git add -A",
@@ -104,6 +104,77 @@
       "expectations": [
         "Did not create idea.md or validate.md",
         "Did not give a Build it / Maybe / Skip it verdict"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "market-players-and-share",
+      "kind": "happy-path",
+      "prompt": "Validate my idea: a self-hosted uptime monitor with AI incident summaries for small SaaS teams. Solo developer, side project, TypeScript. (Run in an ideas git repo with live web search available.)",
+      "expected_output": "Phase 3 maps both sides: the open-source monitors to build on (with a build-on/fork/contribute/differentiate decision) and the paid market (leader, challengers, long tail with sourced, linked figures; share or relative size with confidence labels and derivation; market structure; pricing tiers; a market-size estimate with source and year or a bottom-up proxy). The Research Log and the Final Report give query counts per side.",
+      "files": [],
+      "expectations": [
+        "Ran at least 2 open-source queries and at least 2 paid-player or market share/size queries, plus at least 1 adjacent and 1 failed-attempt query, before Phase 4",
+        "validate.md has a Market Players & Share table with a leader, challengers and a long-tail row",
+        "Each figure in the Market Players & Share table has a link and a year (or is marked undated with a low rating), and each share or relative size has a confidence label (high, medium or low) and names what it was derived from",
+        "No share is written as a precise percentage unless a linked source states it",
+        "validate.md has a pricing-tier comparison (free, entry, pro, enterprise) with links to pricing pages",
+        "validate.md names the market structure (dominated, oligopoly or fragmented) and what it means for a newcomer",
+        "validate.md has a market-size line with a source and year marked as an estimate, or says no credible figure exists and shows a bottom-up proxy with its inputs",
+        "validate.md has the Open-source Alternatives & Reuse Potential analysis with license and a health signal, and a Build vs. Base Recommendation",
+        "validate.md has a Research Log with the queries grouped by side and a count per side",
+        "Every cited source is free and public; the run neither uses nor claims a paid data service",
+        "Phase 4's market analysis reuses the Phase 3 market evidence instead of re-running the same searches",
+        "The Final Report's Evidence: line gives the live query count per side"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "no-paid-players",
+      "kind": "edge",
+      "prompt": "Validate my idea: a CLI that converts Nix flakes into Bazel build files for monorepo teams. (Phase 3 finds no paid product and no public market-size figure.)",
+      "expected_output": "Logs the paid-side queries and writes none found in the Market Players & Share table, invents no share or structure, builds a bottom-up market-size proxy with its inputs, still produces the open-source reuse analysis, and treats willingness to pay as unproven, so the verdict is not Build it on demand grounds.",
+      "files": [],
+      "expectations": [
+        "The Research Log lists at least 2 paid-side queries even though they found no paid product",
+        "The Market Players & Share table says none found and states no share or market structure",
+        "The market-size line says no credible public figure was found and shows a bottom-up proxy with its inputs",
+        "validate.md still has the Open-source Alternatives & Reuse Potential analysis",
+        "Uncertainty: lists the bottom-up market-size proxy and the unproven willingness to pay",
+        "The verdict is not Build it while willingness to pay has no evidence"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "dominated-market-skip",
+      "kind": "edge",
+      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Use these Phase 3 findings as given. Phase 3 finds no near-identical product. The leader of US do-it-yourself tax software holds about 60% of category revenue, more than 3x the next player; both shares are stated by the same two credible sources: the leader's annual filing and a news report. The leader's self-employed edition already covers per-diem and fuel deductions, so the trucker and ELD angle is not a genuine differentiator. Asked what makes the idea different, the user names no differentiator.)",
+      "expected_output": "Finds no near-identical product, so Phase 3 does not stop at the duplicate-idea question. Labels the market Dominated on revenue at medium or high confidence (two credible sources state both shares), and gives Skip it under rule 1's dominated-market clause because the user named no genuine differentiator. Phase 5 still runs.",
+      "files": [],
+      "expectations": [
+        "validate.md states that no near-identical product was found",
+        "The run did not stop to ask the duplicate-idea question",
+        "The Market structure line reads Dominated on revenue, with confidence medium or high",
+        "The leader's share in the Market Players & Share table links at least two credible sources, such as the company's filing and a news report",
+        "The verdict is Skip it and cites rule 1's dominated-market clause, not its near-identical-product clause",
+        "The verdict rationale says the user named no genuine differentiator",
+        "validate.md has the Phase 5 sections (How to Strengthen, Enhanced Version, Implementation Roadmap)"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "dominated-market-low-confidence",
+      "kind": "edge",
+      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Use these Phase 3 findings as given. Phase 3 finds no near-identical product. No player publishes revenue, customer, user, download or review figures; the only share figure is one website-traffic tracker putting the leader at about 70% of category visits, more than 3x the next player. The leader's self-employed edition already covers per-diem and fuel deductions, so the trucker and ELD angle is not a genuine differentiator. Asked what makes the idea different, the user names no differentiator.)",
+      "expected_output": "Labels the market Dominated on traffic at low confidence (a single third-party proxy), so rule 1's dominated-market clause cannot fire. The verdict is Maybe under rule 2, because the dominated market is at low structure confidence and the differentiator is missing.",
+      "files": [],
+      "expectations": [
+        "validate.md states that no near-identical product was found",
+        "The Market structure line reads Dominated on traffic, with confidence low",
+        "The leader's figure is labelled an estimate of its share of traffic (visits), cites the single tracker, and is not described as a share of market revenue",
+        "The verdict is Maybe and cites rule 2",
+        "The verdict rationale names the low-confidence dominated market with no differentiator as a rule 2 reason",
+        "The verdict is not Skip it"
       ]
     }
   ]

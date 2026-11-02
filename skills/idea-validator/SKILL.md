@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -17,7 +17,7 @@ Critically evaluate ideas with honest feedback on market viability, technical fe
 Trigger this skill when the user asks to:
 - Evaluate, validate, or score an app idea or startup concept
 - Get honest feedback on whether an idea is worth building
-- Research what competitors already exist in a space, including commercial tools/services and open-source alternatives
+- Research what competitors already exist in a space: paid products with their market share, and open-source alternatives to build on
 - Turn a vague concept into a structured validation report
 
 ## Instructions
@@ -64,13 +64,13 @@ If `origin` is missing, the pull fails, or the rebase or stash pop conflicts, st
 
    Ask again only when the user asks to change the location.
 3. **Create the project folder** under the ideas root. If a folder with the same date and name already exists, reuse it and update its files instead of creating a second one.
-4. **Create `idea.md`** with the idea and the clarifications.
+4. **Create `idea.md`** with the idea; Phase 1 adds the clarifications.
 5. **Create `validate.md`** for the evaluation and recommendations.
 6. **Echo the absolute project folder path** in your response, so downstream skills can pick it up.
 
 If the ideas root cannot be created or written, stop with status `BLOCKED` and name the path.
 
-Read `references/file-templates.md` when creating either file or updating a section named in Phases 1-5. That file owns header names and order; the phase instructions own the content.
+Read `references/file-templates.md` when creating either file or updating a section named in Phases 1-5. That file owns header names and order, plus the Phase 3 method; the phase instructions own the content.
 
 ## Phase 1: Clarify the Idea
 
@@ -94,70 +94,49 @@ Update the `idea.md` Technical Context section. Write `unknown` for each unanswe
 
 ## Phase 3: Competitive Landscape Research
 
-Before evaluating the idea, perform live web research to find what already exists in the space. Do not rely on memory or training data for market, pricing, traction, competitor, or open-source claims — web search is mandatory so the report reflects current information.
+Web search is mandatory here: market, pricing, share and open-source facts go stale, so never take them from memory. Query patterns, capture fields, and the share and sizing rules live in `references/file-templates.md`.
 
-Use the available web search tool (`WebSearch`, `web_search`, or equivalent) to run at least 4 varied queries covering:
+**3a. Search.** Run 6+ varied queries with the web search tool (`WebSearch`, `web_search`, or equivalent), meeting each side's minimum:
 
-**Commercial tools/services** — SaaS products, mobile apps, enterprise platforms, paid APIs, agencies, marketplaces, and other commercial offerings solving the same or adjacent problem. Search the core problem statement plus keywords like "app", "tool", "platform", "SaaS", "startup", "pricing", "alternative", and audience-specific terms.
+| Side | Min. | Finds |
+|---|---|---|
+| Open source | 2 | Repos, self-hosted tools and libraries to build on |
+| Paid & market | 2 | Paid products and pricing (1+), market share or size (1+) |
+| Adjacent | 1 | How the audience copes today |
+| Failed attempts | 1 | Products or projects that stalled or shut down |
 
-**Open-source solutions** — GitHub/GitLab repositories, self-hosted tools, packages, frameworks, templates, and OSS alternatives that solve the same problem or provide a strong foundation. Search with terms like "open source", "GitHub", "self-hosted", "OSS", "alternative", "library", and relevant package registry names. If no credible OSS option is found, document the queries tried and state that no maintained open-source baseline was found.
+Log every query with its side; a side with no credible result still logs its queries and says `none found`.
 
-**Adjacent solutions** — products or projects that solve a related problem or serve the same audience differently. These reveal how users currently cope without the proposed solution.
+**3b. Capture** the _Phase 3 capture fields_ for 3-8 competitors. Fewer than 3 credible results is a signal to record: a niche market, terms to refine, or unfamiliar framing.
 
-**Failed attempts** — startups, products, or OSS projects that tried something similar and stalled, shut down, or were abandoned. Search for "[concept] startup failed", "[concept] post-mortem", "[concept] abandoned GitHub", or check product directories.
+**3c. Open-source reuse.** When an open-source project already solves a meaningful part of the idea, compare license fit, maintenance health, architecture, extensibility, deployment burden and community before recommending a greenfield build. Decide whether the user should build on it, fork it, contribute to it, or differentiate sharply.
 
-For each competitor or OSS project found, capture the fields in `references/file-templates.md` → _Phase 3 capture fields_.
+**3d. Market players & share (paid products).** Show who already earns money here and how much room is left, following the _Market players & share method_:
+1. Rank the main paid players as leader, challengers and long tail, with sourced figures (revenue or ARR, users, funding, employees, app-store ranks, traffic), pricing tiers, positioning and segment.
+2. Estimate each player's share or relative size, with a confidence label and its derivation. State a precise share only when a source states it.
+3. Judge the market structure (dominated, oligopoly or fragmented) and what it means for a newcomer.
+4. Give a market-size estimate (TAM or a credible proxy) with source and year, or say none is credible and build a bottom-up proxy.
 
-Aim for 3-8 total competitors, with at least one commercial and one open-source search path. If fewer than 3 credible results are found, record that in validate.md as a signal: the market is niche, the terms need refining, or the idea is framed in unfamiliar language.
+Use only free, public sources; never use a paid data service or claim one was used.
 
-When an open-source solution already solves a meaningful part of the idea, compare license fit, maintenance health, architecture, extensibility, deployment burden, and community before recommending a greenfield build. Decide whether the user should build on it, fork it, contribute to it, or differentiate sharply.
-
-Update `validate.md` with a **## Competitive Landscape** section containing:
-1. A summary table of commercial and open-source competitors found
-2. An **Open-source Alternatives & Reuse Potential** analysis
-3. A "white space" analysis — what's missing in the current market
-4. Honest assessment: is the user's differentiation real or imagined given what exists?
-5. A build-vs-base recommendation when OSS foundations exist
-
-If web search is unavailable or blocked, stop and ask the user whether to continue without it. If the user says yes, label the Competitive Landscape section `Not verified by live search` and set the status to `PARTIAL`. If the user says no, stop with status `BLOCKED`. Never silently replace live research with general knowledge.
+**3e. Write** `validate.md`'s **## Competitive Landscape** section: the competitors table; **Market Players & Share** (players table, pricing-tier comparison, market structure, market-size line); **Open-source Alternatives & Reuse Potential** with a build-vs-base recommendation; the white space; an honest assessment of whether the differentiation is real; and the **Research Log** with per-side query counts.
 
 ## Phase 4: Critical Evaluation
 
-Evaluate honestly and update `validate.md`:
+Evaluate honestly and update `validate.md`, reusing Phase 3's evidence instead of repeating its research; search again only to fill a gap, and log that query.
 
-**Market Analysis:**
-- Similar commercial products and open-source solutions
-- Market size and competition
-- Unique differentiation
-
-**Demand Assessment:**
-- Evidence people will pay
-- Problem urgency level
-
-**Feasibility:**
-- Can this ship in 2-4 weeks MVP?
-- Minimum viable features
-- Complex dependencies?
-- Could an existing OSS project be reused, forked, extended, or used as a reference instead of starting from scratch?
-
-**Monetization:**
-- Clear revenue path?
-- Willingness to pay?
-
-**Technical Risk:**
-- Buildable with stated constraints?
-- Key technical risks?
-- License, maintenance, and dependency risks if building on open source?
-
-**Duplication / Reuse Risk:**
-- Is the idea mostly a reimplementation of an existing commercial or OSS solution?
-- Is there a credible build-on, plugin, fork, or contribution path that would reduce risk?
+- **Market:** paid and open-source players, market size and structure (from Market Players & Share), differentiation.
+- **Demand:** evidence people will pay (such as paid players' revenue), problem urgency.
+- **Feasibility:** a 2-4 week MVP? Minimum features, complex dependencies, and whether an OSS project could be reused, forked, extended or used as a reference.
+- **Monetization:** revenue path and willingness to pay, against the pricing tiers.
+- **Technical risk:** buildable with the stated constraints? Key risks, plus the license, maintenance and dependency risks of an OSS base.
+- **Duplication / reuse risk:** mostly a reimplementation of a paid or OSS product? A credible build-on, plugin, fork or contribution path?
 
 **Ratings (1-10):** Creativity, Feasibility, Market Impact, Technical Execution. Give each score a one-line reason.
 
 **Verdict.** Take the first rule that matches:
-1. `Skip it` — Phase 3 found a near-identical product and the user named no genuine differentiator, or a hard blocker exists that the stated team and budget cannot remove.
-2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, demand or willingness to pay with no evidence, or a Feasibility score below 6.
+1. `Skip it` — Phase 3 found a near-identical product, or a dominated market at `medium` or `high` structure confidence, and the user named no genuine differentiator; or a hard blocker exists that the stated team and budget cannot remove.
+2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market where the differentiator is missing (at `low` structure confidence) or has no evidence users would switch, demand or willingness to pay with no evidence, or a Feasibility score below 6.
 3. `Build it` — none of the above.
 
 Write the verdict with the rule that produced it and a 2-3 sentence rationale.
@@ -176,24 +155,13 @@ Update `validate.md` with:
 - **Duplicate idea already exists**: If Phase 3 finds a near-identical product, show it immediately with evidence (URL, feature comparison) and ask whether the user wants to proceed. Continue only if the user names a genuine differentiator. If the user stops, run Phase 4 with the verdict `Skip it` (rule 1), skip Phase 5, and set the status to `PARTIAL`.
 - **Open-source solution already exists**: If Phase 3 finds a maintained OSS project that covers much of the idea, treat "build from scratch" as a higher-risk recommendation. Decide whether to build on, fork, contribute to, or differentiate from the project before giving a `Build it` verdict.
 - **Technical feasibility unclear**: If the idea needs unproven technology, undisclosed APIs, or capabilities the stated team cannot build, flag it as a hard blocker in Phase 4 and lower the Feasibility score. The verdict rules then exclude `Build it`.
-- **Web search unavailable**: follow the last paragraph of Phase 3.
+- **Web search unavailable or blocked**: stop Phase 3 and ask the user whether to continue without it. Yes → label the Competitive Landscape section `Not verified by live search` and set the status to `PARTIAL`. No → stop with status `BLOCKED`. Never silently replace live research with general knowledge.
 - **Ideas root is not a git repository**: write the files, skip Repo Sync and Commit and Push, and set the status to `PARTIAL`. Do not run `git init` unless the user asks.
 - **Push still fails after one retry**: stop and ask the user (Commit and Push). Report the commit hash and set the status to `PARTIAL`.
 
 ## Step Completion Reports
 
-After completing each step from Setup through Phase 5, output a status report in this format:
-
-```
-◆ [Step Name] ([step N of 6] — [idea name])
-··································································
-  [Check 1]:          √ pass
-  [Check 2]:          × fail — [reason]
-  ____________________________
-  Result:             PASS | FAIL | PARTIAL
-```
-
-Use `√` for pass, `×` for fail, and `—` to add brief context. The per-phase check blocks live in `references/step-completion-reports.md`; read the block matching the step you just completed.
+After each step from Setup through Phase 5, print that step's status block from `references/step-completion-reports.md`: one line per check (`√` pass, `×` fail, `—` brief context), then `Result: PASS | FAIL | PARTIAL`.
 
 ## Tone
 
@@ -204,17 +172,14 @@ Use `√` for pass, `×` for fail, and `—` to add brief context. The per-phase
 
 ## README Maintenance (when running inside ideas repo)
 
-Run this when the ideas root contains a `README.md` and at least two `YYYY_MM_DD_*` idea folders. After each update to `idea.md` or `validate.md`, insert or update an `## Ideas index` table in that `README.md` with one row per idea:
-- link to the idea's `idea.md`
-- PRD/tasks status: `PRD` if a `prd.md` exists in the folder, `tasks` if a `tasks.md` exists, else `none`
-- verdict, linked to the idea's `validate.md`
+Run this when the ideas root contains a `README.md` and at least two `YYYY_MM_DD_*` idea folders. After each update to `idea.md` or `validate.md`, insert or update an `## Ideas index` table in that `README.md`, one row per idea: a link to its `idea.md`; its PRD/tasks status (`PRD` if `prd.md` exists, `tasks` if `tasks.md` exists, else `none`); its verdict, linked to its `validate.md`.
 
 ## Commit and Push (mandatory)
 
 Skip this step when the ideas root is not a git repository (see Edge Cases). Otherwise, run it after Phase 5, or at an earlier stop (see Instructions):
 
 1. Stage only the files this run wrote: `git add <project folder>/idea.md <project folder>/validate.md`, plus `README.md` when README Maintenance changed it. Never run `git add -A`.
-2. Run `git diff --cached --name-only` to confirm that only those files are staged. If another file is staged, unstage it with `git restore --staged <file>`.
+2. Run `git diff --cached --name-only` to confirm only those files are staged; unstage any other with `git restore --staged <file>`.
 3. Commit with the message `docs(ideas): validate <short_snake_case_name>`.
 4. Push to the current branch.
 5. If the push is rejected, rebase and retry once: `branch="$(git rev-parse --abbrev-ref HEAD)" && git fetch origin && git rebase "origin/$branch" && git push`.
@@ -224,28 +189,20 @@ Invoking this skill authorizes the commit and push. Do not ask for push permissi
 
 ## Final Report
 
-The expected output of every run, stops included, is one summary in concise chat text: the main result stays visible without opening a file, and the full detail lives in `validate.md`. Honor a different format only if the user asks for one. Take the status from the first rule that matches:
+The expected output of every run, stops included, is one concise chat summary that shows the result without opening a file; the detail lives in `validate.md`. Use another format only if the user asks. Take the status from the first rule that matches:
 
 1. `BLOCKED` — no idea description, the ideas root cannot be written, or the user declined to continue without web search.
 2. `PARTIAL` — a step was skipped or stopped early, Phase 3 ran without live search, or the files were not committed and pushed.
 3. `COMPLETE` — Setup through Commit and Push all finished.
 
-The summary carries these lines, in order:
-- `Result:` the status, then the verdict and the four ratings when Phase 4 ran; for `PARTIAL` or `BLOCKED`, the step where the run stopped and why.
-- `Evidence:` the project folder path; the GitHub links to `idea.md`, `validate.md` and, when changed, `README.md`; the commit hash; the number of live queries run and competitors found. Cite only checks that ran.
-- `Strengths:` and `Concerns:` the top 3 of each.
-- `Uncertainty:` each `unknown` answer, each claim that rests on an assumption instead of a source, and each skipped check. Write `none within the checks run` when there are none.
-- `Decision:` `No approval needed.` (commit and push are authorized by invocation), or the question the run stopped on.
-- `Next step:` the single most important action for the user.
-
-Build each GitHub link from `git remote get-url origin` and the current branch: `https://github.com/<owner>/<repo>/blob/<branch>/<relative-path>`. The example summary and the fill rules live in `references/final-report.md`.
+The summary carries these lines, in order: `Result:` (status, verdict, ratings), `Evidence:` (paths, GitHub links, commit hash, live queries per side, competitors found), `Strengths:`, `Concerns:`, `Uncertainty:`, `Decision:` and `Next step:`. Read `references/final-report.md` for each line's fill rule, how to build the GitHub links, and a filled example.
 
 ## Acceptance Criteria
 
 - [ ] Setup, Phases 1-5, and Commit and Push run in order, or the run stops on an Edge Cases row with the matching status
-- [ ] Competitive landscape research is performed via live web search with at least 4 varied queries
-- [ ] Commercial tools/services and open-source solutions are both checked; if no credible OSS option is found, the attempted OSS queries are documented
-- [ ] Competitors table and Open-source Alternatives & Reuse Potential analysis are populated in `validate.md`
+- [ ] Phase 3 runs 6+ live queries (2+ open source, 2+ paid and market, 1+ adjacent, 1+ failed), listed per side in the Research Log
+- [ ] `validate.md` has the competitors table; Market Players & Share (leader, challengers, long tail; linked figures; share or relative size with confidence; structure; pricing tiers; market size with source and year, or a bottom-up proxy); and the Open-source Alternatives & Reuse Potential analysis
+- [ ] Market figures come only from free, public sources
 - [ ] The verdict (`Build it` / `Maybe` / `Skip it`) names the verdict rule that produced it and a rationale
 - [ ] All four ratings (Creativity, Feasibility, Market Impact, Technical Execution) are provided as scores out of 10
 - [ ] Only the files this run wrote are committed, and the commit is pushed (or the status is `PARTIAL`)

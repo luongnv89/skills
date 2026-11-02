@@ -1,6 +1,15 @@
 # Step Completion Reports — phase-specific checks
 
-Read this file when emitting the Step Completion Report for a given phase (see SKILL.md → Step Completion Reports for the generic template and symbol legend). Use the block matching the phase you just completed.
+Read this file when emitting the Step Completion Report for a given phase (SKILL.md → Step Completion Reports). Use the block matching the phase you just completed. Every block follows this generic template: `√` pass, `×` fail, `—` brief context.
+
+```
+◆ [Step Name] ([step N of 6] — [idea name])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          × fail — [reason]
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
 
 **Setup**
 ```
@@ -37,9 +46,13 @@ Read this file when emitting the Step Completion Report for a given phase (see S
 ```
 ◆ Competitive Landscape (step 4 of 6 — [idea name])
 ··································································
-  Web searches executed:  √ pass ([N] live queries run)
-  Commercial coverage:    √ pass ([N] tools/services found)
+  Web searches executed:  √ pass ([N] live queries: [a] open source, [b] paid & market ([p] players + [s] share/size), [c] adjacent, [d] failed)
+  Per-side minimums met:  √ pass | × fail — [side below its minimum]
   Open-source coverage:   √ pass ([N] OSS options found or no credible result documented)
+  Paid players mapped:    √ pass (leader, [N] challengers, long tail) | √ pass (none found, queries logged)
+  Share & structure:      √ pass ([structure], confidence [label]) | √ pass (skipped — no paid players) | × fail — [share stated without a source]
+  Pricing tiers compared: √ pass ([N] players) | √ pass (skipped — no paid players) | × fail — [pricing pages not checked]
+  Market size:            √ pass ([figure], [source], [year]) | √ pass (bottom-up proxy) | × fail — [no figure]
   Competitors found:      √ pass ([N] direct + [N] adjacent)
   Failed attempts checked:√ pass | × fail — [no results or skipped]
   Reuse potential assessed: √ pass | × fail — [OSS build-on/fork path missing]
@@ -53,7 +66,7 @@ Read this file when emitting the Step Completion Report for a given phase (see S
 ◆ Evaluate (step 5 of 6 — [idea name])
 ··································································
   Feasibility scored: √ pass ([score]/10)
-  Market assessed:    √ pass | × fail — [gaps in analysis]
+  Market assessed:    √ pass (reused Phase 3 evidence; [N] gap-fill queries) | × fail — [gaps in analysis]
   Verdict rule:       √ pass ([verdict], rule [1-3])
   validate.md updated:√ pass | × fail — [missing sections]
   ____________________________
