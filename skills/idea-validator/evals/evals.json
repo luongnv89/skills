@@ -146,7 +146,8 @@
         "validate.md still has the Open-source Alternatives & Reuse Potential analysis",
         "validate.md's Monetization opens with Plans to charge: unknown, treated as yes",
         "Uncertainty: lists the bottom-up market-size proxy, the unproven willingness to pay, and the charging plan as unknown and treated as charging",
-        "The verdict is not Build it while willingness to pay has no evidence"
+        "The verdict is not Build it while willingness to pay has no evidence",
+        "If the verdict is Maybe, the Rule 2 line under ## Why names willingness to pay with no evidence"
       ]
     },
     {
@@ -191,13 +192,14 @@
       "files": [],
       "expectations": [
         "The first non-empty line under ## Quick Verdict is exactly one of **Build it**, **Maybe** or **Skip it**, with nothing else on that line",
-        "## Why opens with a **Rule N:** line whose clause matches the verdict rule in SKILL.md, followed by a 2-3 sentence rationale",
+        "## Why opens with a **Rule N:** line whose clauses match the verdict rule in SKILL.md, followed by a 2-3 sentence rationale",
         "validate.md has a ## Evaluation section with the ### headings Market, Demand, Feasibility, Monetization, Technical Risk and Duplication / Reuse Risk, in that order",
         "Each Evaluation area cites the Phase 3 evidence it reuses (a section name or a link), or says none found",
         "Monetization opens with a Plans to charge line, and Technical Risk opens with a Hard blockers line, then labels each risk hard or soft",
         "Duplication / Reuse Risk opens with a Near-identical product line naming a product and the elements it matches, or none found with the closest product and the element it misses",
         "## Ratings is a table with Creativity, Feasibility, Market Impact and Technical Execution, each scored out of 10 with a one-line reason",
-        "validate.md keeps the headings ## Quick Verdict, ## Why, ## Ratings, ## Strengths, ## Concerns, ## Competitive Landscape, ## Enhanced Version and ## Implementation Roadmap"
+        "validate.md keeps the headings ## Quick Verdict, ## Why, ## Ratings, ## Strengths, ## Concerns, ## Competitive Landscape, ## Enhanced Version and ## Implementation Roadmap",
+        "When the timeline is recorded as unknown, Uncertainty: names the 4-week MVP assumed for the risk labels"
       ]
     },
     {
@@ -274,6 +276,7 @@
         "The Demand area cites the typosquatting incidents and the upvoted GitHub issue as demand evidence",
         "Technical Risk reads Hard blockers: none and labels the rate limit soft, with the cache as its mitigation",
         "Neither ## Why nor the Final Report gives missing willingness-to-pay evidence as a reason for the verdict",
+        "The market-size line uses a count of target users rather than buyers × price",
         "Feasibility is rated 6/10 or higher",
         "The verdict is Build it and cites rule 3"
       ]

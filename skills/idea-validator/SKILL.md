@@ -30,7 +30,7 @@ Terms used throughout:
 - **Status** — the run outcome, `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in Final Report.
 - **Near-identical product** — an existing product that does the idea's core job for the same target user, through the same delivery model (e.g. web, mobile, desktop, browser extension, CLI, API, self-hosted), and already covers the differentiator the user named in Phase 1, if any. Missing any one makes it merely similar. A **genuine** differentiator is one the compared product (the near-identical product, or a dominant leader) lacks.
 - **Plans to charge** — someone will pay for it, in any tier, now or later (freemium counts; ads or donations alone do not). `unknown` counts as charging.
-- **Hard technical risk** — a risk that, if it materializes, stops the MVP from working as described, and has no mitigation within the stated team, budget and timeline; any other risk is **soft**. An obstacle certain to stop the MVP that the stated team and budget cannot remove is a **hard blocker** (rule 1), not a risk.
+- **Hard technical risk** — a risk that, if it materializes, stops the MVP from working as described, and has no mitigation within the stated team, budget and timeline; any other risk is **soft**. An obstacle certain to stop the MVP that the stated team and budget cannot remove, however long it takes, is a **hard blocker** (rule 1), not a risk.
 
 ## Repo Sync Before Edits (mandatory)
 
