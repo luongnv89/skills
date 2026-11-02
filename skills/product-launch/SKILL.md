@@ -9,7 +9,7 @@ dependencies:
   - logo-designer
   - seo-ai-optimizer
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
