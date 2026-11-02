@@ -146,18 +146,35 @@
     },
     {
       "id": 11,
-      "name": "dominated-market-verdict",
+      "name": "dominated-market-skip",
       "kind": "edge",
-      "prompt": "Validate my idea: an ad-supported general web search engine for consumers. (Phase 3 finds one search engine with about 90% of worldwide search share on a free public tracker, at least 3x the next player; the user names no differentiator.)",
-      "expected_output": "Labels the market Dominated on a named basis with a confidence label from the first matching confidence row. With structure confidence medium or high and no genuine differentiator, the verdict is Skip it under rule 1; if the structure confidence comes out low, the dominated clause counts toward rule 2 and the verdict is Maybe instead. Never Build it.",
+      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Phase 3 finds no near-identical product. The leader of US do-it-yourself tax software holds about 60% of category revenue, more than 3x the next player, as stated by two credible sources: the leader's annual filing and a news report. Asked what makes the idea different, the user names no differentiator.)",
+      "expected_output": "Finds no near-identical product, so Phase 3 does not stop at the duplicate-idea question. Labels the market Dominated on revenue at high confidence (two credible sources agree), and gives Skip it under rule 1's dominated-market clause because the user named no genuine differentiator. Phase 5 still runs.",
       "files": [],
       "expectations": [
-        "The Market structure line says Dominated, names the basis, and shows the leader at about half or more, or at least 3x the next player, on that basis",
-        "The leader's share appears as a percentage only with a linked source that states it",
-        "The structure carries a confidence label equal to the lowest confidence among the Market Players & Share rows it rests on",
-        "If the structure confidence is medium or high, the verdict is Skip it and cites rule 1's dominated-market clause",
-        "If the structure confidence is low, the verdict does not use rule 1's dominated-market clause; it is Maybe and cites rule 2, unless another named rule-1 condition applies",
-        "The verdict is not Build it"
+        "validate.md states that no near-identical product was found",
+        "The run did not stop to ask the duplicate-idea question",
+        "The Market structure line reads Dominated on revenue, with confidence medium or high",
+        "The leader's share in the Market Players & Share table links at least two credible sources, such as the company's filing and a news report",
+        "The verdict is Skip it and cites rule 1's dominated-market clause, not its near-identical-product clause",
+        "The verdict rationale says the user named no genuine differentiator",
+        "validate.md has the Phase 5 sections (How to Strengthen, Enhanced Version, Implementation Roadmap)"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "dominated-market-low-confidence",
+      "kind": "edge",
+      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Phase 3 finds no near-identical product. No player publishes revenue, customer or user figures; the only share figure is one website-traffic tracker putting the leader at about 70% of category visits, more than 3x the next player. Asked what makes the idea different, the user names no differentiator.)",
+      "expected_output": "Labels the market Dominated on traffic at low confidence (a single third-party proxy), so rule 1's dominated-market clause cannot fire. The verdict is Maybe under rule 2, because the dominated market is at low structure confidence and the differentiator is missing.",
+      "files": [],
+      "expectations": [
+        "validate.md states that no near-identical product was found",
+        "The Market structure line reads Dominated on traffic, with confidence low",
+        "The leader's figure is labelled an estimate of its share of traffic (visits), cites the single tracker, and is not described as a share of market revenue",
+        "The verdict is Maybe and cites rule 2",
+        "The verdict rationale names the low-confidence dominated market with no differentiator as a rule 2 reason",
+        "The verdict is not Skip it"
       ]
     }
   ]

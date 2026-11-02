@@ -48,7 +48,7 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 
 | Role | Player | Positioning & segment | Sourced figures | Est. share / relative size | Confidence | Derived from |
 |---|---|---|---|---|---|---|
-| Leader | [Name](URL) | [Who it targets, how] | [Figure, year ([source](URL)); one per signal] | [~N% of basis, or "~3x next player"] | [high / medium / low] | [Revenue / customers / downloads / reviews / traffic] |
+| Leader | [Name](URL) | [Who it targets, how] | [Figure, year ([source](URL)); one per signal] | [~N% of basis, or "~3x next player"] | [high / medium / low] | [Revenue / paying customers / users / downloads or reviews / traffic or employees] |
 | Challenger | [Name](URL) | ... | ... | ... | ... | ... |
 | Long tail | [Names](URLs) | [Shared pattern] | [Representative figure or "no public figures"] | [Small, combined] | [label] | [basis] |
 
@@ -58,7 +58,7 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 |---|---|---|---|---|---|---|
 | [Name] | [Limits or —] | [Price/mo, listed currency] | [Price/mo] | [Price or Contact sales] | [per seat / per monitor / flat] | [pricing page](URL) |
 
-**Market structure:** [Dominated / Oligopoly / Fragmented] — [evidence]. **For a newcomer:** [what it means].
+**Market structure:** [Dominated / Oligopoly / Fragmented] on [basis], confidence [label] — [evidence]. **For a newcomer:** [what it means].
 
 **Market size (estimate):** [Figure] [TAM / proxy: what it measures], [source](URL), [year] — confidence [label]. [Or: No credible public figure found; bottom-up proxy: [buyers] × [annual price] ≈ [figure], inputs: [sources].]
 
@@ -156,25 +156,25 @@ For each player in the Market Players & Share table, also capture:
 **Share or relative size.** Pick the first basis in this order that most players have: revenue, then paying customers, then users, then downloads or reviews, then traffic or employees. Name it in "Derived from". Rank roles (leader, challenger, long tail) on the same basis as the shares; a sub-market qualifier names a segment, not a basis.
 - Write a precise share (`32%`) only when a source states it, and link that source.
 - Otherwise derive it: player's figure ÷ the market-size estimate (share of market) or ÷ the sum over listed players (share of listed players; say so). Round to a range or `~N%`; never use decimals.
-- When players lack a common basis, give relative size instead (`~3x the next player by customers`, `smallest of the four by reviews`).
+- When players lack a common basis, give relative size instead (`~3x the next player by paying customers`, `smallest of the four by reviews`).
 
-**Confidence labels.** Take the first row that matches, top to bottom, so the lowest applicable label wins.
+**Confidence labels.** Take the first row that matches, top to bottom, so the lowest applicable label wins. A credible source is the first two tiers of the **Figures** order (the company's own statement, or reputable news reporting it); a third-party estimate is the third tier, and so is a market-research firm's free public summary unless a credible source corroborates it.
 
 | Label | Use when |
 |---|---|
 | `low` | Any of: the basis is a mixed or partial proxy (traffic, reviews, employees, funding); a key figure is undated or older than 3 years; the share rests on one uncorroborated third-party estimate |
-| `medium` | Any of: one credible source states the share; most players have figures on a comparable basis; the share is derived from a sourced market-size estimate; a key figure is a paid provider's figure quoted by a free page |
+| `medium` | Any of: exactly one credible source states the share; most, but not all, players have figures on a comparable basis; the share is derived from a sourced market-size estimate; a key figure is a paid provider's figure quoted by a free page |
 | `high` | Two or more credible sources agree on the share, or every listed player has a figure on the same basis from the same year |
 
-**Market structure.** Judge it on the same basis as the shares, and state any different reading another basis gives. Its confidence is the lowest confidence among the Market Players & Share rows it rests on. Take the first row that matches, top to bottom.
+**Market structure.** Judge it on the same basis as the shares, and state any different reading another basis gives. Its confidence is the lowest confidence among the Market Players & Share rows the signal compares (Dominated: the leader and the next player; otherwise every row with a figure). Take the first row that matches, top to bottom.
 
 | Structure | Signal | For a newcomer |
 |---|---|---|
-| Dominated | One player holds about half or more, or is about 3x or more the next | Compete only on a segment the leader underserves, or integrate with it; head-on entry needs a real differentiator |
+| Dominated | The leader holds about half or more, or holds at least about a third and is about 3x or more the next player | Compete only on a segment the leader underserves, or integrate with it; head-on entry needs a real differentiator |
 | Oligopoly | No single player holds about half, and 2-4 players together hold most of the market | Expect feature-matching; win on a segment, price point, or distribution channel they ignore |
-| Fragmented | No clear leader; many small players | Entry is open, but willingness to pay may be low and distribution is the bottleneck |
+| Fragmented | Anything else: no clear leader, or many small players | Entry is open, but willingness to pay may be low and distribution is the bottleneck |
 
-The verdict rules read the label with its confidence: `Dominated` at `medium` or `high` can trigger rule 1 (`Skip it`); at `low` it counts toward rule 2 (`Maybe`) instead.
+The verdict rules read the label with its confidence: `Dominated` at `medium` or `high` can trigger rule 1 (`Skip it`); at `low` it can trigger only rule 2 (`Maybe`), when the differentiator is missing or unevidenced.
 
 **Market size.** Give TAM, or a credible proxy for it (a public report's segment figure, the leader's revenue as a floor), with the source and year, labelled an estimate. If sources disagree, show the range and both sources. Label a broad category figure (for example "all IT operations software") as a ceiling, not the idea's TAM. If no credible figure exists, write so, then build a bottom-up proxy: target buyers (sourced count) × annual price (from the pricing table) ≈ size, with every input shown. When no count of the exact target buyers is public, use the closest broader sourced count as a ceiling and label the narrowing an assumption.
 
