@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.8.0
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -22,12 +22,13 @@ Trigger this skill when the user asks to:
 
 ## Instructions
 
-Run the steps in this order: Setup → Phase 1 Clarify → Phase 2 Technical Context → Phase 3 Competitive Landscape → Phase 4 Evaluate → Phase 5 Improve → Commit and Push → Final Report. Do not skip or reorder a step, except where an Edge Cases row says to stop. A stop after Setup step 4 still runs Commit and Push on the files written so far, then the Final Report. If the ideas root is the root of an `ideas` repo, also run README Maintenance after each file update (detection rule in that section).
+Run the steps in this order: Setup steps 1-2 → Repo Sync → Setup steps 3-6 → Phase 1 Clarify → Phase 2 Technical Context → Phase 3 Competitive Landscape → Phase 4 Evaluate → Phase 5 Improve → Commit and Push → Final Report. Do not skip or reorder a step, except where an Edge Cases row says to stop. A stop after Setup step 4 still runs Commit and Push on the files written so far, then the Final Report. Run README Maintenance only when its trigger (defined in that section) matches.
 
 Terms used throughout:
 - **Ideas root** — the directory that holds every idea folder (resolved in Setup step 2).
 - **Project folder** — `<ideas root>/YYYY_MM_DD_<short_snake_case_name>/`, holding this idea's `idea.md` and `validate.md`.
 - **Status** — the run outcome, `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in Final Report.
+- **Near-identical product** — an existing product that does the idea's core job for the same target user, through the same delivery model (web, mobile, browser extension, CLI, API, self-hosted), and already covers the differentiator the user named in Phase 1, if any. Missing any one makes it merely similar. A **genuine** differentiator is one the compared product (the near-identical product, or a dominant leader) lacks.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -112,18 +113,18 @@ Log every query with its side; a side with no credible result still logs its que
 **3c. Open-source reuse.** When an open-source project already solves a meaningful part of the idea, compare license fit, maintenance health, architecture, extensibility, deployment burden and community before recommending a greenfield build. Decide whether the user should build on it, fork it, contribute to it, or differentiate sharply.
 
 **3d. Market players & share (paid products).** Show who already earns money here and how much room is left, following the _Market players & share method_:
-1. Rank the main paid players as leader, challengers and long tail, with sourced figures (revenue or ARR, users, funding, employees, app-store ranks, traffic), pricing tiers, positioning and segment.
+1. Rank the main paid players as leader, challengers and long tail, with sourced figures, pricing tiers, positioning and segment.
 2. Estimate each player's share or relative size, with a confidence label and its derivation. State a precise share only when a source states it.
 3. Judge the market structure (dominated, oligopoly or fragmented) and what it means for a newcomer.
 4. Give a market-size estimate (TAM or a credible proxy) with source and year, or say none is credible and build a bottom-up proxy.
 
 Use only free, public sources; never use a paid data service or claim one was used.
 
-**3e. Write** `validate.md`'s **## Competitive Landscape** section: the competitors table; **Market Players & Share** (players table, pricing-tier comparison, market structure, market-size line); **Open-source Alternatives & Reuse Potential** with a build-vs-base recommendation; the white space; an honest assessment of whether the differentiation is real; and the **Research Log** with per-side query counts.
+**3e. Write** `validate.md`'s **## Competitive Landscape** section in the template's shape, including the build-vs-base recommendation, an honest assessment of whether the differentiation is real, and the **Research Log** with per-side query counts.
 
 ## Phase 4: Critical Evaluation
 
-Evaluate honestly and update `validate.md`, reusing Phase 3's evidence instead of repeating its research; search again only to fill a gap, and log that query.
+Evaluate honestly, reusing Phase 3's evidence instead of repeating its research; search again only to fill a gap, and log that query. Write the result in `validate.md`'s Phase 4 shape (`references/file-templates.md` → *Phase 4 shape*): one heading per area below, the ratings table, and the verdict with its rule.
 
 - **Market:** paid and open-source players, market size and structure (from Market Players & Share), differentiation.
 - **Demand:** evidence people will pay (such as paid players' revenue), problem urgency.
@@ -135,11 +136,9 @@ Evaluate honestly and update `validate.md`, reusing Phase 3's evidence instead o
 **Ratings (1-10):** Creativity, Feasibility, Market Impact, Technical Execution. Give each score a one-line reason.
 
 **Verdict.** Take the first rule that matches:
-1. `Skip it` — Phase 3 found a near-identical product, or a dominated market at `medium` or `high` structure confidence, and the user named no genuine differentiator; or a hard blocker exists that the stated team and budget cannot remove.
+1. `Skip it` — Phase 3 found a near-identical product (see Terms), or a dominated market at `medium` or `high` structure confidence, and the user named no genuine differentiator; or a hard blocker exists that the stated team and budget cannot remove.
 2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market where the differentiator is missing (at `low` structure confidence) or has no evidence users would switch, demand or willingness to pay with no evidence, or a Feasibility score below 6.
 3. `Build it` — none of the above.
-
-Write the verdict with the rule that produced it and a 2-3 sentence rationale.
 
 ## Phase 5: Improvements
 
@@ -152,7 +151,7 @@ Update `validate.md` with:
 ## Edge Cases
 
 - **No clear target user**: If the idea is too broad (e.g., "an app for everyone"), push back in Phase 1: ask the user to name one specific person who has this pain today. Do not start Phase 3 until a user segment is defined. If the user still names none, stop with status `PARTIAL` and save `idea.md`.
-- **Duplicate idea already exists**: If Phase 3 finds a near-identical product, show it immediately with evidence (URL, feature comparison) and ask whether the user wants to proceed. Continue only if the user names a genuine differentiator. If the user stops, run Phase 4 with the verdict `Skip it` (rule 1), skip Phase 5, and set the status to `PARTIAL`.
+- **Duplicate idea already exists**: If Phase 3 finds a near-identical product (see Terms), show it immediately with evidence (URL, feature comparison) and ask whether the user wants to proceed. Continue only if the user names a genuine differentiator. If the user stops, run Phase 4 with the verdict `Skip it` (rule 1), skip Phase 5, and set the status to `PARTIAL`.
 - **Open-source solution already exists**: If Phase 3 finds a maintained OSS project that covers much of the idea, treat "build from scratch" as a higher-risk recommendation. Decide whether to build on, fork, contribute to, or differentiate from the project before giving a `Build it` verdict.
 - **Technical feasibility unclear**: If the idea needs unproven technology, undisclosed APIs, or capabilities the stated team cannot build, flag it as a hard blocker in Phase 4 and lower the Feasibility score. The verdict rules then exclude `Build it`.
 - **Web search unavailable or blocked**: stop Phase 3 and ask the user whether to continue without it. Yes → label the Competitive Landscape section `Not verified by live search` and set the status to `PARTIAL`. No → stop with status `BLOCKED`. Never silently replace live research with general knowledge.
@@ -161,7 +160,7 @@ Update `validate.md` with:
 
 ## Step Completion Reports
 
-After each step from Setup through Phase 5, print that step's status block from `references/step-completion-reports.md`: one line per check (`√` pass, `×` fail, `—` brief context), then `Result: PASS | FAIL | PARTIAL`.
+After each step, print its status block from `references/step-completion-reports.md`, numbered `step N of 8` in run order: Repo Sync, Setup, Phases 1-5, Commit and Push. One line per check (`√` pass, `×` fail, `○` skipped, with its reason), then `Result:`. A skipped or blocked push or sync is `○`, never `√`.
 
 ## Tone
 
@@ -170,9 +169,9 @@ After each step from Setup through Phase 5, print that step's status block from 
 - **Specific**: Back each claim with a competitor, number, or quoted user answer
 - **Balanced**: List strengths alongside weaknesses
 
-## README Maintenance (when running inside ideas repo)
+## README Maintenance
 
-Run this when the ideas root contains a `README.md` and at least two `YYYY_MM_DD_*` idea folders. After each update to `idea.md` or `validate.md`, insert or update an `## Ideas index` table in that `README.md`, one row per idea: a link to its `idea.md`; its PRD/tasks status (`PRD` if `prd.md` exists, `tasks` if `tasks.md` exists, else `none`); its verdict, linked to its `validate.md`.
+After each update to `idea.md` or `validate.md`, check the trigger, defined only here: the ideas root contains a `README.md` and at least two `YYYY_MM_DD_*` idea folders, this run's included. If it matches, insert or update an `## Ideas index` table in that `README.md`, one row per idea: a link to its `idea.md`; its PRD/tasks status (`PRD` if `prd.md` exists, `tasks` if `tasks.md` exists, else `none`); its verdict (or `no verdict`), linked to its `validate.md`.
 
 ## Commit and Push (mandatory)
 
@@ -201,13 +200,12 @@ The summary carries these lines, in order: `Result:` (status, verdict, ratings),
 
 - [ ] Setup, Phases 1-5, and Commit and Push run in order, or the run stops on an Edge Cases row with the matching status
 - [ ] Phase 3 runs 6+ live queries (2+ open source, 2+ paid and market, 1+ adjacent, 1+ failed), listed per side in the Research Log
-- [ ] `validate.md` has the competitors table; Market Players & Share (leader, challengers, long tail; linked figures; share or relative size with confidence; structure; pricing tiers; market size with source and year, or a bottom-up proxy); and the Open-source Alternatives & Reuse Potential analysis
+- [ ] `validate.md` follows the template: competitors table, Market Players & Share, Open-source Alternatives & Reuse Potential, and the Phase 4 shape
 - [ ] Market figures come only from free, public sources
-- [ ] The verdict (`Build it` / `Maybe` / `Skip it`) names the verdict rule that produced it and a rationale
-- [ ] All four ratings (Creativity, Feasibility, Market Impact, Technical Execution) are provided as scores out of 10
+- [ ] The verdict (`Build it` / `Maybe` / `Skip it`) names the rule that produced it, and all four ratings are scores out of 10 with a reason
 - [ ] Only the files this run wrote are committed, and the commit is pushed (or the status is `PARTIAL`)
 - [ ] The Final Report opens with `Result:` and the status, and carries `Evidence:`, `Uncertainty:` and `Decision:` lines
-- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear (`references/final-report.md` → *Reader checks*; scenario cases in `evals/evals.json`)
+- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear (`references/final-report.md` → *Reader checks*)
 
 ## Self-Improve
 
