@@ -124,12 +124,13 @@ subreddit that bans LLM-written posts is founder-voice · Confidence: medium
   per-subreddit: r/LocalLLaMA needs 10 karma to comment and 5 subreddit karma to post,
   and r/MacApps needs 10 local karma before you promote in comments. Many subreddits
   also run hidden AutoModerator thresholds (unverified).
-  - **Participate first:** from account setup to L-day, the founder spends time each week
+  - **Participate first:** from account setup to the last Reddit post day, the founder spends time each week
     in the chosen subreddits answering questions and sharing what they learned, with no
     product name or link. Help people who will never be customers too. Showing up weekly
     beats posting often.
-  - **Mod mail:** for a chosen subreddit whose promotion rule is gated, unclear or
-    unverified, the founder writes to its moderators before posting: what they build,
+  - **Mod mail:** for a chosen subreddit whose promotion is confined to a stickied thread
+    or megathread, or whose rules are unverified (the plan lists which), the founder writes
+    to its moderators before posting: what they build,
     what they plan to share, and whether that is acceptable. State ownership plainly;
     hiding it to get around a rule can cost the founder that subreddit.
 - **Cost:** free. Reddit's own advice for accounts that mostly post their own links is
