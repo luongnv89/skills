@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.9.0
+  version: 1.10.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -29,6 +29,8 @@ Terms used throughout:
 - **Project folder** — `<ideas root>/YYYY_MM_DD_<short_snake_case_name>/`, holding this idea's `idea.md` and `validate.md`.
 - **Status** — the run outcome, `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in Final Report.
 - **Near-identical product** — an existing product that does the idea's core job for the same target user, through the same delivery model (e.g. web, mobile, desktop, browser extension, CLI, API, self-hosted), and already covers the differentiator the user named in Phase 1, if any. Missing any one makes it merely similar. A **genuine** differentiator is one the compared product (the near-identical product, or a dominant leader) lacks.
+- **Plans to charge** — someone will pay for it, in any tier, now or later (freemium counts; ads or donations alone do not). `unknown` counts as charging.
+- **Hard technical risk** — a risk that, if it materializes, stops the MVP from working as described, and has no mitigation within the stated team, budget and timeline; any other risk is **soft**. An obstacle certain to stop the MVP that the stated team and budget cannot remove is a **hard blocker** (rule 1), not a risk.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -80,6 +82,7 @@ Ask the user these questions with the question tool (`AskUserQuestion` or equiva
 - Who is your target user? Be specific.
 - What makes this different from existing solutions?
 - What does success look like in 6-12 months?
+- Will anyone pay for it, or is it free?
 
 Update `idea.md` with the responses. Write `unknown` for each question the user declines or cannot answer, and list it under Uncertainty in the Final Report. The target-user question is the exception: see Edge Cases.
 
@@ -106,19 +109,13 @@ Web search is mandatory here: market, pricing, share and open-source facts go st
 | Adjacent | 1 | How the audience copes today |
 | Failed attempts | 1 | Products or projects that stalled or shut down |
 
-Log every query with its side; a side with no credible result still logs its queries and says `none found`.
+Log every query with its side; only web-search calls count as queries. A side with no credible result still logs its queries and says `none found`.
 
 **3b. Capture** the _Phase 3 capture fields_ for 3-8 competitors. Fewer than 3 credible results is a signal to record: a niche market, terms to refine, or unfamiliar framing.
 
 **3c. Open-source reuse.** When an open-source project already solves a meaningful part of the idea, compare license fit, maintenance health, architecture, extensibility, deployment burden and community before recommending a greenfield build. Decide whether the user should build on it, fork it, contribute to it, or differentiate sharply.
 
-**3d. Market players & share (paid products).** Show who already earns money here and how much room is left, following the _Market players & share method_:
-1. Rank the main paid players as leader, challengers and long tail, with sourced figures, pricing tiers, positioning and segment.
-2. Estimate each player's share or relative size, with a confidence label and its derivation. State a precise share only when a source states it.
-3. Judge the market structure (dominated, oligopoly or fragmented) and what it means for a newcomer.
-4. Give a market-size estimate (TAM or a credible proxy) with source and year, or say none is credible and build a bottom-up proxy.
-
-Use only free, public sources; never use a paid data service or claim one was used.
+**3d. Market players & share (paid products).** Show who already earns money here and how much room is left: rank the paid players (leader, challengers, long tail), estimate each one's share or relative size with a confidence label, judge the market structure, and size the market, all by the _Market players & share method_. Use only free, public sources; never use a paid data service or claim one was used.
 
 **3e. Write** `validate.md`'s **## Competitive Landscape** section in the template's shape, including the build-vs-base recommendation, an honest assessment of whether the differentiation is real, and the **Research Log** with per-side query counts.
 
@@ -127,17 +124,17 @@ Use only free, public sources; never use a paid data service or claim one was us
 Evaluate honestly, reusing Phase 3's evidence instead of repeating its research; search again only to fill a gap, and log that query. Write the result in `validate.md`'s Phase 4 shape (`references/file-templates.md` → *Phase 4 shape*): one heading per area below, the ratings table, and the verdict with its rule.
 
 - **Market:** paid and open-source players, market size and structure (from Market Players & Share), differentiation.
-- **Demand:** evidence people will pay (such as paid players' revenue), problem urgency.
+- **Demand:** evidence people want it (usage, requests, paid players' revenue), problem urgency.
 - **Feasibility:** a 2-4 week MVP? Minimum features, complex dependencies, and whether an OSS project could be reused, forked, extended or used as a reference.
-- **Monetization:** revenue path and willingness to pay, against the pricing tiers.
-- **Technical risk:** buildable with the stated constraints? Key risks, plus the license, maintenance and dependency risks of an OSS base.
+- **Monetization:** revenue path; if the idea plans to charge (see Terms), willingness to pay, against the pricing tiers.
+- **Technical risk:** buildable with the stated constraints? Hard blockers, then key risks labelled `hard` or `soft` (see Terms), plus an OSS base's license, maintenance and dependency risks.
 - **Duplication / reuse risk:** mostly a reimplementation of a paid or OSS product? A credible build-on, plugin, fork or contribution path?
 
 **Ratings (1-10):** Creativity, Feasibility, Market Impact, Technical Execution. Give each score a one-line reason.
 
 **Verdict.** Take the first rule that matches:
 1. `Skip it` — Phase 3 found a near-identical product (see Terms), or a dominated market at `medium` or `high` structure confidence, and the user named no genuine differentiator; or a hard blocker exists that the stated team and budget cannot remove.
-2. `Maybe` — any of: an unresolved hard technical risk, a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market with no genuine differentiator (see Terms; at `low` structure confidence) or one with no evidence users would switch, demand or willingness to pay with no evidence, or a Feasibility score below 6.
+2. `Maybe` — any of: a `hard` technical risk (see Terms), a maintained OSS project that covers most of the idea with no chosen build-on path, a dominated market with no genuine differentiator (see Terms; at `low` structure confidence) or one with no evidence users would switch, demand with no evidence, willingness to pay with no evidence for an idea that plans to charge, or a Feasibility score below 6.
 3. `Build it` — none of the above.
 
 ## Phase 5: Improvements
@@ -153,14 +150,14 @@ Update `validate.md` with:
 - **No clear target user**: If the idea is too broad (e.g., "an app for everyone"), push back in Phase 1: ask the user to name one specific person who has this pain today. Do not start Phase 3 until a user segment is defined. If the user still names none, stop with status `PARTIAL` and save `idea.md`.
 - **Duplicate idea already exists**: If Phase 3 finds a near-identical product (see Terms), show it immediately with evidence (URL, feature comparison) and ask whether the user wants to proceed. Continue only if the user names a genuine differentiator. If the user stops, run Phase 4 with the verdict `Skip it` (rule 1), skip Phase 5, and set the status to `PARTIAL`.
 - **Open-source solution already exists**: If Phase 3 finds a maintained OSS project that covers much of the idea, treat "build from scratch" as a higher-risk recommendation. Decide whether to build on, fork, contribute to, or differentiate from the project before giving a `Build it` verdict.
-- **Technical feasibility unclear**: If the idea needs unproven technology, undisclosed APIs, or capabilities the stated team cannot build, flag it as a hard blocker in Phase 4 and lower the Feasibility score. The verdict rules then exclude `Build it`.
+- **Technical feasibility unclear**: If the idea needs unproven technology, undisclosed APIs, or capabilities the stated team cannot build, record each in Phase 4's Technical Risk area (see Terms) and lower the Feasibility score.
 - **Web search unavailable or blocked**: stop Phase 3 and ask the user whether to continue without it. Yes → label the Competitive Landscape section `Not verified by live search` and set the status to `PARTIAL`. No → stop with status `BLOCKED`. Never silently replace live research with general knowledge.
 - **Ideas root is not a git repository**: write the files, skip Repo Sync and Commit and Push, and set the status to `PARTIAL`. Do not run `git init` unless the user asks.
 - **Push still fails after one retry**: stop and ask the user (Commit and Push). Report the commit hash and set the status to `PARTIAL`.
 
 ## Step Completion Reports
 
-After each step, print its status block from `references/step-completion-reports.md`, numbered `step N of 8` in the order the reports print: Repo Sync, Setup, Phases 1-5, Commit and Push. One line per check (`√` pass, `×` fail, `○` skipped, with its reason), then `Result:`. A skipped or blocked push or sync is `○`, never `√`.
+After each step, print its status block from `references/step-completion-reports.md`, which sets the `step N of 8` numbering, the check marks and the `Result:` line. A skipped or blocked push or sync is `○`, never `√`.
 
 ## Tone
 

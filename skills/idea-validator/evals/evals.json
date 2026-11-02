@@ -136,15 +136,16 @@
       "id": 10,
       "name": "no-paid-players",
       "kind": "edge",
-      "prompt": "Validate my idea: a CLI that converts Nix flakes into Bazel build files for monorepo teams. (Phase 3 finds no paid product and no public market-size figure.)",
-      "expected_output": "Logs the paid-side queries and writes none found in the Market Players & Share table, invents no share or structure, builds a bottom-up market-size proxy with its inputs, still produces the open-source reuse analysis, and treats willingness to pay as unproven, so the verdict is not Build it on demand grounds.",
+      "prompt": "Validate my idea: a CLI that converts Nix flakes into Bazel build files for monorepo teams. (Phase 3 finds no paid product and no public market-size figure. Asked whether anyone will pay for it or it is free, the user answers 'not sure yet'.)",
+      "expected_output": "Logs the paid-side queries and writes none found in the Market Players & Share table, invents no share or structure, builds a bottom-up market-size proxy with its inputs, still produces the open-source reuse analysis, and treats willingness to pay as unproven. The unknown charging plan counts as charging, so rule 2's willingness-to-pay clause applies and the verdict is not Build it.",
       "files": [],
       "expectations": [
         "The Research Log lists at least 2 paid-side queries even though they found no paid product",
         "The Market Players & Share table says none found and states no share or market structure",
         "The market-size line says no credible public figure was found and shows a bottom-up proxy with its inputs",
         "validate.md still has the Open-source Alternatives & Reuse Potential analysis",
-        "Uncertainty: lists the bottom-up market-size proxy and the unproven willingness to pay",
+        "validate.md's Monetization opens with Plans to charge: unknown, treated as yes",
+        "Uncertainty: lists the bottom-up market-size proxy, the unproven willingness to pay, and the charging plan as unknown and treated as charging",
         "The verdict is not Build it while willingness to pay has no evidence"
       ]
     },
@@ -193,6 +194,7 @@
         "## Why opens with a **Rule N:** line whose clause matches the verdict rule in SKILL.md, followed by a 2-3 sentence rationale",
         "validate.md has a ## Evaluation section with the ### headings Market, Demand, Feasibility, Monetization, Technical Risk and Duplication / Reuse Risk, in that order",
         "Each Evaluation area cites the Phase 3 evidence it reuses (a section name or a link), or says none found",
+        "Monetization opens with a Plans to charge line, and Technical Risk opens with a Hard blockers line, then labels each risk hard or soft",
         "Duplication / Reuse Risk opens with a Near-identical product line naming a product and the elements it matches, or none found with the closest product and the element it misses",
         "## Ratings is a table with Creativity, Feasibility, Market Impact and Technical Execution, each scored out of 10 with a one-line reason",
         "validate.md keeps the headings ## Quick Verdict, ## Why, ## Ratings, ## Strengths, ## Concerns, ## Competitive Landscape, ## Enhanced Version and ## Implementation Roadmap"
@@ -257,6 +259,40 @@
         "No percentage share is inferred from the relative sizes",
         "The market is not labelled Dominated or Oligopoly",
         "The Final Report's Uncertainty: line says the shares were not comparable"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "free-product-demand-evidence",
+      "kind": "edge",
+      "prompt": "Validate my idea: a free browser extension that warns developers, before they run an npm install command copied from a web page, when a named package was first published less than 30 days ago. It stays free, with no paid tier. Solo developer, side project, TypeScript, 4-week timeline. (Use these Phase 3 findings as given. Phase 3 finds no paid product, no near-identical product, and no maintained open-source project that covers most of the idea. Demand evidence: security press reported two npm typosquatting incidents in the past year, and a GitHub issue asking npm for this warning has about 400 upvotes. No willingness-to-pay evidence exists. The npm registry's public metadata gives each package's first-publish date; the only technical risk is the registry's rate limit, which a local 24-hour cache absorbs. The MVP is one content script plus a registry lookup, about two weeks' work.)",
+      "expected_output": "Records from the idea text that it will not charge, so the charge question is skipped. Demand is evidenced, so rule 2's demand clause does not fire, and its willingness-to-pay clause does not apply to a free idea even though willingness to pay is unproven. The rate-limit risk is soft, because the cache mitigates it within the stated team, budget and timeline. No rule 1 or rule 2 input matches, so Build it is reachable, and the verdict is Build it under rule 3.",
+      "files": [],
+      "expectations": [
+        "Did not ask whether anyone will pay, because the idea says it stays free",
+        "idea.md and validate.md's Monetization record Plans to charge as no (free), and Monetization says willingness to pay is not assessed",
+        "The Demand area cites the typosquatting incidents and the upvoted GitHub issue as demand evidence",
+        "Technical Risk reads Hard blockers: none and labels the rate limit soft, with the cache as its mitigation",
+        "Neither ## Why nor the Final Report gives missing willingness-to-pay evidence as a reason for the verdict",
+        "Feasibility is rated 6/10 or higher",
+        "The verdict is Build it and cites rule 3"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "hard-technical-risk",
+      "kind": "edge",
+      "prompt": "Validate my idea: a mobile sleep coach for rotating-shift workers that times naps and caffeine from overnight heart-rate data. Two-person team, bootstrapped, React Native, 6-week timeline; it will charge $6 a month. (Use these Phase 3 findings as given. Phase 3 finds no near-identical product, no maintained open-source project that covers most of the idea, and a fragmented paid market at medium confidence: three paid sleep-coaching apps at $5-10 a month report about 300,000 subscribers combined, and a forum thread asking for shift-work sleep coaching has about 1,200 upvotes. The MVP needs raw overnight heart-rate data, which only one wearable maker exposes to third parties, through a partner programme that approves apps case by case; the user has applied and has no decision yet. No other data source exists, and the team's skills and budget cover no hardware of its own. The maker's API allows one sync per user per night, which the nightly sync design fits.)",
+      "expected_output": "The partner decision is pending, so losing access is a risk, not a certain obstacle: Hard blockers is none and rule 1 does not fire. If access is refused, the MVP has no data and stops working as described, and no mitigation fits the stated team, budget and timeline, so that risk is labelled hard. The sync limit is soft. Demand and willingness to pay are both evidenced, so the verdict is Maybe under rule 2's hard technical risk clause.",
+      "files": [],
+      "expectations": [
+        "Technical Risk labels the partner-access risk hard, with mitigation none",
+        "If Technical Risk lists the one-sync-per-night limit, it is labelled soft",
+        "Technical Risk reads Hard blockers: none, because the partner decision is pending, not refused",
+        "Monetization records Plans to charge as yes ($6 a month) and cites the paid apps' subscribers as willingness-to-pay evidence",
+        "## Concerns names the hard partner-access risk",
+        "The verdict is not Skip it and does not cite rule 1",
+        "The verdict is Maybe, and the Rule 2 line under ## Why names the hard technical risk"
       ]
     }
   ]

@@ -11,6 +11,7 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 
 ## Clarified Understanding
 [After Phase 1]
+- Plans to charge: [yes: who pays, pricing model / no: free, or ads or donations only / unknown]
 
 ## Target Audience
 [Specific user profile]
@@ -21,7 +22,9 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 ## Technical Context
 - Stack:
 - Timeline:
+- Team:
 - Budget:
+- Existing assets:
 - Constraints:
 
 ## Discussion Notes
@@ -29,6 +32,9 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 ```
 
 ### validate.md
+
+Each section has one owning phase: Phase 3 writes `## Competitive Landscape` and its subsections, Phase 4 the sections in _Phase 4 shape_ (plus its gap-fill row in the Research Log), and Phase 5 `## How to Strengthen`, `## Enhanced Version` and `## Implementation Roadmap`. Add no other section.
+
 ```markdown
 # Validation: [Name]
 
@@ -36,7 +42,7 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 **[Build it / Maybe / Skip it]**
 
 ## Why
-**Rule [1 / 2 / 3]:** [the clause of that verdict rule that matched]
+**Rule [1 / 2 / 3]:** [each clause of that verdict rule that matched]
 [2-3 sentence rationale]
 
 ## Competitive Landscape
@@ -70,7 +76,7 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 [What's missing in the current market]
 
 ### Differentiation Assessment
-[Is the proposed differentiation real or imagined given existing commercial and open-source competitors?]
+[The differentiator the user named in Phase 1, or `none named`; is it real or imagined given existing commercial and open-source competitors?]
 
 ### Build vs. Base Recommendation
 [Whether to build from scratch, build on existing OSS, fork, contribute, or narrow the idea]
@@ -80,7 +86,9 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 
 ### Research Log
 
-| Side | Queries run | Count |
+A query is one web-search call. Page fetches that read a result support its query but are never logged or counted as queries.
+
+| Side | Web-search queries run | Count |
 |---|---|---|
 | Open source | "[query]"; "[query]" | [N] |
 | Paid & market | Players: "[query]". Share/size: "[query]" | [N] ([p] players + [s] share/size) |
@@ -88,12 +96,6 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 | Failed attempts | "[query]" | [N] |
 | Phase 4 gap-fill | "[query]" or none | [N] |
 | **Total** | | **[N]** |
-
-## Similar Products
-[Competitors]
-
-## Differentiation
-[Unique angle]
 
 ## Evaluation
 
@@ -107,10 +109,12 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 [...]
 
 ### Monetization
+**Plans to charge:** [yes: who pays, pricing model / no: free, or ads or donations only / unknown, treated as yes]
 [...]
 
 ### Technical Risk
-[...]
+**Hard blockers:** [blocker: why it is certain, and why the stated team and budget cannot remove it] or none
+- `[hard / soft]` [risk]: [what stops working if it materializes]; mitigation within the stated team, budget and timeline: [mitigation or none]
 
 ### Duplication / Reuse Risk
 **Near-identical product:** [[Name](URL): same core job, target user and delivery model, and covers the named differentiator] or [none found; closest: [Name](URL), differs on [the element it misses]; one entry per product that misses only one element]
@@ -145,9 +149,11 @@ The canonical markdown structure for `idea.md` and `validate.md`, plus the Phase
 
 Phase 4 writes these `validate.md` sections, keeping each heading name exactly as shown in the template above:
 - `## Quick Verdict`: the bold verdict alone on the first line under the heading, with no rule or reason on that line. `product-planner` reads the verdict from this line.
-- `## Why`: the `**Rule N:**` line naming the first verdict rule that matched and its matching clause, then the 2-3 sentence rationale.
+- `## Why`: the `**Rule N:**` line naming the first verdict rule that matched and every clause of it that matched, then the 2-3 sentence rationale.
 - `## Evaluation`: one `###` heading per evaluation area, in the order shown in the template (Market, Demand, Feasibility, Monetization, Technical Risk, Duplication / Reuse Risk). Each area cites the Phase 3 evidence it reuses; write `none found` rather than dropping a heading. Duplication / Reuse Risk opens with the near-identical verdict: name the product and the elements it matches, or write `none found` and name every product that misses only one element (or, if none does, the one matching the most), with the element each misses.
-- `## Strengths` and `## Concerns`: the lists the Final Report takes its top 3 from.
+  - Monetization opens with the `Plans to charge` line, copied from `idea.md` (SKILL.md → Terms). For `no`, still give the revenue path, and write `Willingness to pay: not assessed, the idea does not charge`; verdict rule 2's willingness-to-pay clause then does not apply, and its demand clause still does.
+  - Technical Risk opens with the `Hard blockers` line, then gives every risk its own line with a label. Take the first match: certain to stop the MVP, and the stated team and budget cannot remove it however long it takes → move it to `Hard blockers` (verdict rule 1); would stop the MVP from working as described if it materializes, with no mitigation within the stated team, budget and timeline → `hard` (rule 2); anything else → `soft` (no verdict effect). A mitigation counts only if it fits the team, budget and timeline as `idea.md` records them; one that depends on an `unknown` constraint does not count.
+- `## Strengths` and `## Concerns`: the lists the Final Report takes its top 3 from. `## Concerns` names every hard blocker and `hard` risk.
 - `## Ratings`: the four-row table, each score out of 10 with a one-line reason.
 
 `prd-generator` and `product-planner` read `## Quick Verdict`, `## Why`, `## Ratings`, `## Strengths`, `## Concerns`, `## Competitive Landscape`, `## Enhanced Version` and `## Implementation Roadmap`; never rename or drop them. When a stop skips a phase, keep its headings and write `Not run — [reason]` under each.
@@ -220,8 +226,8 @@ If no row matches (for example, credible sources disagree on the share), use `me
 
 The verdict rules read the label with its confidence: `Dominated` at `medium` or `high` can trigger rule 1 (`Skip it`); at `low` it can trigger only rule 2 (`Maybe`), when there is no genuine differentiator or it is unevidenced. A Dominated label from relative size alone is therefore never a rule 1 trigger.
 
-**Market size.** Give TAM, or a credible proxy for it (a public report's segment figure, the leader's revenue as a floor), with the source and year, labelled an estimate. If sources disagree, show the range and both sources. Label a broad category figure (for example "all IT operations software") as a ceiling, not the idea's TAM. If no credible figure exists, write so, then build a bottom-up proxy: target buyers (sourced count) × annual price (from the pricing table) ≈ size, with every input shown. When no count of the exact target buyers is public, use the closest broader sourced count as a ceiling and label the narrowing an assumption.
+**Market size.** Give TAM, or a credible proxy for it (a public report's segment figure, the leader's revenue as a floor), with the source and year, labelled an estimate. If sources disagree, show the range and both sources. Label a broad category figure (for example "all IT operations software") as a ceiling, not the idea's TAM. If no credible figure exists, write so, then build a bottom-up proxy: target buyers (sourced count) × annual price (from the pricing table) ≈ size, with every input shown. For an idea that does not plan to charge, the proxy is the sourced count of target users. When no count of the exact target buyers is public, use the closest broader sourced count as a ceiling and label the narrowing an assumption.
 
-**No paid players found.** Write `none found` in the players table with the paid queries tried, skip share and structure, still give a bottom-up market-size proxy, and treat willingness to pay as unproven in Phase 4.
+**No paid players found.** Write `none found` in the players table with the paid queries tried, skip share and structure, still give a bottom-up market-size proxy, and treat willingness to pay as unproven in Phase 4 (it counts toward the verdict only for an idea that plans to charge).
 
 **Size.** List up to 6 rows: the leader, the main challengers, and the long tail rolled up into one row. When the paid side splits into sub-markets the idea straddles, qualify the role per sub-market (`Leader (incident response)`), never per basis (not `Leader (reach)`).
