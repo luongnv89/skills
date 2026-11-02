@@ -148,8 +148,8 @@
       "id": 11,
       "name": "dominated-market-skip",
       "kind": "edge",
-      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Phase 3 finds no near-identical product. The leader of US do-it-yourself tax software holds about 60% of category revenue, more than 3x the next player, as stated by two credible sources: the leader's annual filing and a news report. Asked what makes the idea different, the user names no differentiator.)",
-      "expected_output": "Finds no near-identical product, so Phase 3 does not stop at the duplicate-idea question. Labels the market Dominated on revenue at high confidence (two credible sources agree), and gives Skip it under rule 1's dominated-market clause because the user named no genuine differentiator. Phase 5 still runs.",
+      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Use these Phase 3 findings as given. Phase 3 finds no near-identical product. The leader of US do-it-yourself tax software holds about 60% of category revenue, more than 3x the next player; both shares are stated by the same two credible sources: the leader's annual filing and a news report. The leader's self-employed edition already covers per-diem and fuel deductions, so the trucker and ELD angle is not a genuine differentiator. Asked what makes the idea different, the user names no differentiator.)",
+      "expected_output": "Finds no near-identical product, so Phase 3 does not stop at the duplicate-idea question. Labels the market Dominated on revenue at medium or high confidence (two credible sources state both shares), and gives Skip it under rule 1's dominated-market clause because the user named no genuine differentiator. Phase 5 still runs.",
       "files": [],
       "expectations": [
         "validate.md states that no near-identical product was found",
@@ -165,7 +165,7 @@
       "id": 12,
       "name": "dominated-market-low-confidence",
       "kind": "edge",
-      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Phase 3 finds no near-identical product. No player publishes revenue, customer or user figures; the only share figure is one website-traffic tracker putting the leader at about 70% of category visits, more than 3x the next player. Asked what makes the idea different, the user names no differentiator.)",
+      "prompt": "Validate my idea: a tax-filing web app for US owner-operator truck drivers that imports per-diem days and fuel receipts from their ELD logbook devices. (Use these Phase 3 findings as given. Phase 3 finds no near-identical product. No player publishes revenue, customer, user, download or review figures; the only share figure is one website-traffic tracker putting the leader at about 70% of category visits, more than 3x the next player. The leader's self-employed edition already covers per-diem and fuel deductions, so the trucker and ELD angle is not a genuine differentiator. Asked what makes the idea different, the user names no differentiator.)",
       "expected_output": "Labels the market Dominated on traffic at low confidence (a single third-party proxy), so rule 1's dominated-market clause cannot fire. The verdict is Maybe under rule 2, because the dominated market is at low structure confidence and the differentiator is missing.",
       "files": [],
       "expectations": [

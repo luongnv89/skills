@@ -151,7 +151,7 @@ For each player in the Market Players & Share table, also capture:
 
 **Sources.** Use only free, public sources: company sites, pricing pages, press releases, funding announcements and news, app-store listings, GitHub, public filings, and public reports or articles. A data provider's public page counts only when it is readable without payment, a trial, or a login. A paid report's free public summary counts for its headline figure: cite the summary page and never imply the full report was read. A figure from a paid provider quoted by a free page is cited as `[provider] via [free page]`, links the free page, and caps that row at `medium`. Never use a paid data service, and never write that one was used. Cite every figure with its link and year. A figure with no link is an assumption: it goes on the Final Report's `Uncertainty:` line and stays out of the Sourced figures column. The year is the one the source attaches to the figure; a page-modified or fetch date is not. When the source gives no year, keep the link, write `undated (checked YYYY-MM-DD)`, and rate that row `low`.
 
-**Figures.** Prefer, in order: the company's own statement (press release, about page, investor letter); reputable news reporting it; third-party estimates (app-store ranks, traffic estimators, review counts). Label a third-party figure as an estimate. Do not average or divide figures from different years or bases (for example, 2026 users against 2024 developers).
+**Figures.** Prefer, in order: the company's own statement (annual filing, press release, about page, investor letter); reputable news reporting it; third-party estimates (app-store ranks, traffic estimators, review counts). Label a third-party figure as an estimate. Do not average or divide figures from different years or bases (for example, 2026 users against 2024 developers).
 
 **Share or relative size.** Pick the first basis in this order that most players have: revenue, then paying customers, then users, then downloads or reviews, then traffic or employees. Name it in "Derived from". Rank roles (leader, challenger, long tail) on the same basis as the shares; a sub-market qualifier names a segment, not a basis.
 - Write a precise share (`32%`) only when a source states it, and link that source.
@@ -163,8 +163,10 @@ For each player in the Market Players & Share table, also capture:
 | Label | Use when |
 |---|---|
 | `low` | Any of: the basis is a mixed or partial proxy (traffic, reviews, employees, funding); a key figure is undated or older than 3 years; the share rests on one uncorroborated third-party estimate |
-| `medium` | Any of: exactly one credible source states the share; most, but not all, players have figures on a comparable basis; the share is derived from a sourced market-size estimate; a key figure is a paid provider's figure quoted by a free page |
+| `medium` | Any of: exactly one credible source states the share; this row's share is derived over listed players, most but not all of whom have figures on a comparable basis; the share is derived from a sourced market-size estimate; a key figure is a paid provider's figure quoted by a free page |
 | `high` | Two or more credible sources agree on the share, or every listed player has a figure on the same basis from the same year |
+
+If no row matches (for example, credible sources disagree on the share), use `medium`.
 
 **Market structure.** Judge it on the same basis as the shares, and state any different reading another basis gives. Its confidence is the lowest confidence among the Market Players & Share rows the signal compares (Dominated: the leader and the next player; otherwise every row with a figure). Take the first row that matches, top to bottom.
 
