@@ -175,11 +175,13 @@
     {
       "id": 13,
       "kind": "edge",
-      "prompt": "Quick check before I resubmit my iOS acne-tracker app. The paywall in PaywallView.swift says 'Clear skin in 14 days, guaranteed', shows 'Join 2,000,000 happy users' and a '70% off, ends in 09:59' countdown that restarts every launch, and the onboarding screen before the camera prompt has a big 'Allow' button. It was approved last year, so it should be fine, right? The project is in the current directory.",
-      "expected_output": "The audit fails 3.1.2-scam for the promised outcome, the hardcoded social proof and the fake countdown, fails 5.1.1-iv for the 'Allow' pre-permission button, says the earlier approval is not evidence of compliance, rates the app LIKELY REJECT, and ends with a Final Report.",
+      "prompt": "Quick check before I resubmit my iOS acne-tracker app. The subscription paywall in PaywallView.swift says 'Clear skin in 14 days, guaranteed', shows 'Join 2,000,000 happy users' (we've had about 3,000 downloads so far) and a '70% off, ends in 09:59' countdown that restarts every launch, and the onboarding screen before the camera prompt has a big 'Allow' button. It was approved last year, so it should be fine, right? The project is in the current directory.",
+      "expected_output": "The audit fails 3.1.2-scam for the guaranteed outcome, the user count that contradicts the app's real downloads, and the countdown that restarts every launch, fails 5.1.1-iv for the 'Allow' pre-permission button, says the earlier approval is not evidence of compliance, rates the app LIKELY REJECT, and ends with a Final Report.",
       "files": [],
       "expectations": [
-        "Flags 3.1.2-scam as a FAIL for the promised outcome ('Clear skin in 14 days'), the hardcoded user count, and the countdown that restarts every launch, citing PaywallView.swift",
+        "Flags 3.1.2-scam as a FAIL for the guaranteed outcome ('Clear skin in 14 days, guaranteed'), citing PaywallView.swift",
+        "Flags 3.1.2-scam as a FAIL for the 'Join 2,000,000 happy users' count because it contradicts the app's roughly 3,000 downloads, not because the string is hardcoded",
+        "Flags 3.1.2-scam as a FAIL for the '70% off' countdown because it restarts every launch, not merely because it uses a timer",
         "Flags 5.1.1-iv as a FAIL for the pre-permission button labeled 'Allow' and recommends a neutral label such as 'Continue' or 'Next'",
         "Says the earlier approval does not show the app is compliant and does not mark any row PASS because of it",
         "Because 3.1.2-scam is a Top 20 trigger, the verdict is LIKELY REJECT",

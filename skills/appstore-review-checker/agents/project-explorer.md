@@ -162,7 +162,8 @@ Scan for StoreKit usage:
 
 **Paywall Screens:**
 - Look for: The subscription or purchase screen and any exit, "special offer", or abandoned-checkout screen; paywall SDKs (RevenueCat Paywalls, Superwall, Adapty) whose content is served remotely
-- Record: file:line of promised results or outcomes, hardcoded social proof (user counts, ratings, testimonials), countdown timers or discounts produced by `random`, a timer, or a per-launch reset, how the billed price is displayed next to any per-day or per-week breakdown, and whether Terms of Use and Privacy Policy links sit on the paywall; a remotely served paywall is recorded as `remote` for manual verification
+- Record: file:line of promised results or outcomes, and whether each is stated as guaranteed; social proof (user counts, ratings, testimonials), how each is produced (string literal, fetched, or randomly generated), and any evidence it is false, such as a rating that contradicts the App Store listing or a count the user or metadata contradicts; countdowns and discounts, and whether each uses random values, resets on every launch, has no real expiry, or ends on a fixed real date; how the billed price is displayed next to any per-day or per-week breakdown; whether Terms of Use and Privacy Policy links sit on the paywall, and whether both are reachable anywhere else in the app (settings, account, about screens)
+- A remotely served paywall is recorded as `remote`, with `unknown` for anything only the remote content would show; don't record a link or claim as missing unless the local code shows it
 
 ### Step 2c: Authentication and Account Management
 
@@ -221,7 +222,7 @@ Scan for:
 
 **Marketing Use:**
 - Look for: Push tokens sent to analytics/marketing SDKs
-- Record: Whether push is used for marketing or only transactional, and for marketing, the file:line of the in-app consent text and the in-app opt-out
+- Record: Whether push is used for marketing or only transactional, and for marketing, the file:line of the in-app consent text (`marketing_consent`) and of the in-app opt-out (`marketing_opt_out`) separately
 
 **Live Activities:**
 - Look for: `import ActivityKit`, `Activity.request`, `ActivityAttributes`
@@ -512,7 +513,8 @@ Create a JSON file with this structure:
     "registration_required": boolean,
     "used_for_marketing": boolean,
     "used_for_transactional": boolean,
-    "marketing_consent_and_opt_out": "string — file:line of each, or null",
+    "marketing_consent": "string — file:line of the in-app consent text for marketing pushes, or null",
+    "marketing_opt_out": "string — file:line of the in-app opt-out from marketing pushes, or null",
     "live_activities": ["string — what each shows, file:line, and whether it promotes anything"]
   },
 
@@ -528,11 +530,12 @@ Create a JSON file with this structure:
   "paywall": {
     "locations": ["string — file:line of each paywall and exit or special-offer screen"],
     "source": "local|remote|none",
-    "outcome_claims": ["string — text and file:line"],
-    "social_proof": ["string — text and file:line, noting whether it is hardcoded"],
-    "urgency_or_discounts": ["string — countdowns or discounts and how they are produced, with file:line"],
+    "outcome_claims": ["string — text and file:line, noting whether it is stated as guaranteed"],
+    "social_proof": ["string — text and file:line, how it is produced (literal, fetched, random), and any evidence it is false"],
+    "urgency_or_discounts": ["string — countdowns or discounts with file:line, noting random values, a reset on every launch, no real expiry, or a fixed real end date"],
     "billed_price_most_prominent": "yes|no|unknown",
-    "terms_and_privacy_links": boolean
+    "terms_and_privacy_links": "yes|no|unknown — both links on the paywall itself; unknown when the paywall is remote or can't be inspected",
+    "terms_and_privacy_in_app": "yes|no|unknown — both links reachable somewhere in the app; no only when local code shows one missing from every screen, the paywall included; unknown when the paywall is remote or a screen can't be inspected"
   },
 
   "ota_updates": ["string — SDK and file:line"],

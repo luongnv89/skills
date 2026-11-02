@@ -207,21 +207,25 @@ For each `feature_flags` entry: **WARNING** when the gated feature is user-facin
 
 #### Paywalls (Guidelines 3.1.2-scam, 3.1.2-disclosure)
 
-Applies when `paywall.locations` is non-empty.
-- **FAIL** (3.1.2-scam): `outcome_claims` promise a specific result, `social_proof` is hardcoded, or `urgency_or_discounts` are fake (random, timer-driven, or reset on every launch)
-- **FAIL** (3.1.2-disclosure): `billed_price_most_prominent` is `no`, or `terms_and_privacy_links` is false
-- **WARNING**: `paywall.source` is `remote`, or `billed_price_most_prominent` is `unknown`; list the paywall under "requires manual verification"
+Applies when `paywall.locations` is non-empty. FAIL only where the evidence shows a claim is false; a claim that can't be checked is a WARNING.
+- **FAIL** (3.1.2-scam): an `outcome_claims` entry states a result as guaranteed; a `social_proof` entry is randomly generated, invented, or contradicts App Store data or a figure the user or metadata gives; an `urgency_or_discounts` entry uses random values, resets on every launch, or has no real expiry; or an exit or abandoned-checkout offer misstates the price or the deal
+- **WARNING** (3.1.2-scam): hardcoded social proof with no evidence either way, a countdown or discount with a fixed real end date, or an outcome claim not stated as guaranteed; the fix is "confirm it is true and current"
+- **FAIL** (3.1.2-disclosure): `billed_price_most_prominent` is `no`, or `terms_and_privacy_in_app` is `no`. Apple's subscriptions page: "your app and App Store metadata must include links to your Terms of Use and Privacy Policy"
+- **WARNING** (3.1.2-disclosure): `terms_and_privacy_in_app` is `yes` but `terms_and_privacy_links` is `no`; putting both links on the paywall is best practice (practitioner advice, not Apple's rule)
+- **WARNING**: `paywall.source` is `remote`, or `billed_price_most_prominent`, `terms_and_privacy_links` or `terms_and_privacy_in_app` is `unknown`; list the paywall under "requires manual verification" and ask the user to check the links and prices by hand
+- **Precedence**: a FAIL needs local evidence (a `no` or a false claim found in the code); otherwise the remote-paywall WARNING applies, and `unknown` never becomes a FAIL. The row takes the most severe verdict any entry gets
 - **PASS**: A local paywall with none of the above
+- **Non-subscription paywall** (`has_subscriptions` is false; a lifetime or one-time unlock): 3.1.2 covers subscriptions only, so report the same misleading-claim findings under 5.6 ("trick them into making unwanted purchases") and 2.3.1-a ("promoting a false price") with the same FAIL and WARNING levels, mark 3.1.2-scam and 3.1.2-disclosure N/A, and leave the privacy policy link to 5.1.1-i
 
 #### Pre-Permission Screens (Guideline 5.1.1-iv)
 
-For each `pre_permission_screens` entry: **FAIL** when `button_title` is "Allow", "Enable", "Grant access", or similar wording, or `reward_for_granting` is true; the fix is a neutral "Continue" or "Next". **PASS** otherwise.
+For each `pre_permission_screens` entry: **FAIL** when `button_title` is "Allow", "Enable", "Grant access", or similar wording (HIG › Privacy and App Review's 5.1.1 rejection wording; not in the guideline text), or `reward_for_granting` is true (5.1.1-iv and 5.1.2-i: apps "may not require users to enable system functionalities … to … receive monetary or other compensation"); the fix is a neutral "Continue" or "Next". **PASS** otherwise.
 
 #### OTA Updates and Promotional Messaging (Guidelines 2.5.2, 4.5.3, 4.5.4)
 
-- **WARNING** (2.5.2): Any `ota_updates` entry; the developer confirms OTA pushes only fix bugs, and anything that adds features or changes the app's purpose ships through App Review
-- **FAIL** (4.5.3): A `push_notifications.live_activities` entry promotes or advertises anything
-- **FAIL** (4.5.4): `used_for_marketing` is true and `marketing_consent_and_opt_out` is null; **WARNING** when only one of the two is cited
+- **WARNING** (2.5.2): Any `ota_updates` entry; the developer confirms pushes are interpreted JS or assets that don't change the app's primary purpose or add unreviewed features (2.5.2; DPLA 3.3.1(B)), and native changes go through App Review
+- **FAIL** (4.5.3): A `push_notifications.live_activities` entry promotes or advertises anything (HIG › Live Activities: "Don't use a Live Activity to display ads or promotions")
+- **FAIL** (4.5.4): `used_for_marketing` is true and both `marketing_consent` and `marketing_opt_out` are null; **WARNING** when only one of them is null
 
 #### Review Prompts (Guideline 5.6.1)
 

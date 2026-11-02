@@ -37,7 +37,7 @@ Load only the reference you need for the current step — keep the working conte
 - `references/subagent-architecture.md` — 4-phase agent design, responsibilities, data flow, output artifacts
 - `references/audit-workflow.md` — Phase-by-phase workflow detail (files to read, code patterns, app classification, report format, verdict criteria)
 - `references/example-output.md` — Example `APPSTORE_AUDIT.md` snippet showing FAIL/WARNING entries
-- `references/edge-cases.md` — Handling no-source, metadata-only, existing rejection, Kids Category, Catalyst, multi-target
+- `references/edge-cases.md` — Handling no-source, metadata-only, existing rejection, a live app already approved, Kids Category, Catalyst, multi-target
 - `references/quality-checks.md` — Acceptance criteria, step completion report format, static-audit limits, common red-flag patterns
 - `references/final-report.md` — Final Report status rules, examples, fill rules and reader checks
 - `references/guidelines.md` — Full 150+ App Store guideline checklist, synced to Apple's October 16, 2026 revision, plus Top 20 Rejection Triggers

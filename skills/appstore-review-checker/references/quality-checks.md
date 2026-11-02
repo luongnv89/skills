@@ -73,7 +73,7 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - Account creation exists but no account deletion flow
 - User data sent to a third-party AI API with no disclosure and opt-in (5.1.2-i-ai)
 - Attribution SDKs (MMPs such as AppsFlyer, Adjust, Branch, Singular, Kochava) or ad SDKs sending data with no ATT prompt, or data the privacy policy doesn't name (5.1.2-i, 5.1.1-i-content)
-- A pre-permission screen whose button says "Allow", "Enable", or "Grant access" instead of "Continue" or "Next" (5.1.1-iv)
+- A pre-permission screen whose button says "Allow", "Enable", or "Grant access" instead of "Continue" or "Next" (5.1.1-iv FAIL; HIG › Privacy and App Review's 5.1.1 rejection wording; not in the guideline text), or that offers a reward for granting (5.1.1-iv, 5.1.2-i)
 - Purpose strings that don't say which feature uses the data ("This app needs camera access") (5.1.1-ii)
 
 ### IAP Red Flags
@@ -84,12 +84,13 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - Loot boxes or gacha mechanics without probability disclosure
 
 ### Paywall Red Flags
-- Promised results or outcomes ("Get rid of acne in 7 days", "Lose 10 kg") (3.1.2-scam)
-- Hardcoded social proof: user counts, star ratings, or testimonials as string literals (3.1.2-scam)
-- Countdown timers, "limited time" banners, or discounts produced by `Int.random`, a timer, or a reset on every launch (3.1.2-scam)
-- Abandoned-checkout or exit offers (shown on dismissing the paywall) that misstate the price or the deal (3.1.2-scam)
-- The billed price smaller or fainter than a per-day or per-week breakdown, or missing (3.1.2-disclosure)
-- No Terms of Use (EULA) or Privacy Policy links on the paywall itself (3.1.2-disclosure)
+FAIL only where the evidence shows a claim is false; a claim that can't be checked is a WARNING. A paywall selling only a lifetime or one-time unlock cites 5.6 and 2.3.1-a instead of 3.1.2.
+- Promised results stated as guaranteed ("Clear skin in 14 days, guaranteed") (3.1.2-scam FAIL); other outcome claims are a WARNING to substantiate
+- Social proof that is randomly generated, invented, or contradicts App Store data, such as a "4.9★" when the listing shows 3.8 (3.1.2-scam FAIL); hardcoded user counts, ratings, or testimonials with no evidence either way are a WARNING: confirm they are true and current
+- Countdowns, "limited time" banners, or discounts produced by `Int.random`, reset on every launch, or with no real expiry (3.1.2-scam FAIL); a countdown to a fixed real end date is a WARNING: confirm the offer is real
+- Abandoned-checkout or exit offers (shown on dismissing the paywall) that misstate the price or the deal (3.1.2-scam FAIL)
+- The billed price smaller or fainter than a per-day or per-week breakdown, or missing (3.1.2-disclosure FAIL)
+- Terms of Use (EULA) or Privacy Policy link missing from the app itself, shown by local code (3.1.2-disclosure FAIL); links elsewhere in the app but not on the paywall are a WARNING (best practice, practitioner advice); a remote paywall (RevenueCat, Superwall, Adapty) is `unknown` and a WARNING to check by hand, never a FAIL
 
 ### Metadata Red Flags
 - Keywords containing "free", "best", "#1", "top", "sale"
@@ -107,7 +108,7 @@ Be transparent about the limits of a static audit. Flag these as "requires manua
 - Remote feature flags gating features absent from the review notes (2.5.19)
 - Custom rating dialog instead of the system review prompt (5.6.1)
 - "Coming soon" labels, disabled teaser buttons, or placeholder screens (2.1-a)
-- An OTA update SDK (expo-updates, CodePush, Shorebird, Capgo, Hot Updater) that could change features after approval (2.5.2, 2.5.19)
-- Promotional or marketing content in a Live Activity (4.5.3), or marketing pushes with no in-app consent and opt-out (4.5.4)
-- Interstitial ads so frequent they interrupt core use, such as after every tap or every few seconds (2.5.18)
+- An OTA update SDK (expo-updates, CodePush, Shorebird, Capgo, Hot Updater) that could change features after approval (2.5.2, 2.5.19; WARNING: pushes stay interpreted JS or assets that don't change the primary purpose, per DPLA 3.3.1(B))
+- Promotional or marketing content in a Live Activity (4.5.3; HIG › Live Activities), or marketing pushes with no in-app consent (`marketing_consent`) or opt-out (`marketing_opt_out`) (4.5.4)
+- Interstitial ads so frequent they interrupt core use, such as after every tap or every few seconds (practitioner advice; 2.5.18 doesn't set a frequency, so WARNING only)
 - An icon or name resembling a large company's brand (Google, Meta, OpenAI) (4.1-c, 5.2.1)
