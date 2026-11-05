@@ -634,10 +634,10 @@ def cmd_fetch(args) -> int:
         exclude = set(cfg.get("exclude_apps") or [])
         only = {a.strip() for a in (args.apps or "").split(",") if a.strip()}
         known_ids = {a["id"] for a in apps}
+        write_json(home / "raw" / "account_apps.json", apps)  # every app in the account; config validates ids against it
         bad = (include | only) - known_ids
         if bad:
             raise unknown_apps_error(bad, apps)
-        write_json(home / "raw" / "account_apps.json", apps)  # every app in the account; config validates ids against it
         apps = [a for a in apps if (not include or a["id"] in include) and a["id"] not in exclude]
         write_json(home / "raw" / "apps.json", apps)  # the tracked scope, even when --apps narrows this run
         if only:
@@ -1828,8 +1828,9 @@ def cmd_demo(args) -> int:
         raise TrackerError("demo needs an explicit --data-dir.",
                            "Run `tracker.py --data-dir /path/to/new-dir demo`; it never writes into the real data dir.")
     home = resolve_home(args.data_dir)
-    if home.exists() and not home.is_dir():
-        raise TrackerError(f"{home} is a file, not a directory.", "Pass a new or empty directory path as --data-dir.")
+    existing = next(p for p in (home, *home.parents) if p.exists())  # a file anywhere on the path blocks mkdir
+    if not existing.is_dir():
+        raise TrackerError(f"{existing} is a file, not a directory.", "Pass a new or empty directory path as --data-dir.")
     if not 30 <= args.days <= MAX_BACKFILL:
         raise TrackerError(f"--days {args.days} is out of range.", f"Use 30-{MAX_BACKFILL}; the demo shows a release 30 days back.")
     if home.exists() and any(home.iterdir()):
