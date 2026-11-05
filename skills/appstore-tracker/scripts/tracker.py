@@ -50,11 +50,18 @@ try:
 except ImportError:  # pragma: no cover - Windows
     fcntl = None
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL_DIR / "assets" / "dashboard.html"
 DEFAULT_HOME = "~/.appstore-tracker"
 MAX_BACKFILL = 365  # Apple keeps daily Sales and Trends reports for about a year
+ISO_CURRENCIES = set(  # ISO 4217 codes; config checks a base currency against these before the first FX fetch
+    "AED AFN ALL AMD ANG AOA ARS AUD AWG AZN BAM BBD BDT BGN BHD BIF BMD BND BOB BRL BSD BTN BWP BYN BZD CAD CDF CHF "
+    "CLP CNY COP CRC CUP CVE CZK DJF DKK DOP DZD EGP ERN ETB EUR FJD FKP GBP GEL GHS GIP GMD GNF GTQ GYD HKD HNL HTG "
+    "HUF IDR ILS INR IQD IRR ISK JMD JOD JPY KES KGS KHR KMF KPW KRW KWD KYD KZT LAK LBP LKR LRD LSL LYD MAD MDL MGA "
+    "MKD MMK MNT MOP MRU MUR MVR MWK MXN MYR MZN NAD NGN NIO NOK NPR NZD OMR PAB PEN PGK PHP PKR PLN PYG QAR RON RSD "
+    "RUB RWF SAR SBD SCR SDG SEK SGD SHP SLE SOS SRD SSP STN SVC SYP SZL THB TJS TMT TND TOP TRY TTD TWD TZS UAH UGX "
+    "USD UYU UZS VED VES VND VUV WST XAF XCD XOF XPF YER ZAR ZMW ZWG ZWL SLL".split())
 PENDING_DAYS = 3  # a missing report this recent may still be published
 WINDOWS = [7, 28, 90, 365]
 FX_URL = "https://open.er-api.com/v6/latest/USD"
@@ -136,7 +143,7 @@ def day_range(first: date, last: date) -> list[date]:
     return [first + timedelta(days=i) for i in range((last - first).days + 1)]
 
 
-def read_json(path: Path, default=None):
+def read_json(path: Path, default=None, fix: str | None = None, code: int = 1):
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
@@ -144,8 +151,19 @@ def read_json(path: Path, default=None):
     except json.JSONDecodeError as exc:
         raise TrackerError(
             f"{path} is not valid JSON (line {exc.lineno}, column {exc.colno}: {exc.msg}).",
-            f"Fix or delete {path}; `fetch` recreates raw files on its next run.",
+            fix or f"Fix or delete {path}; `fetch` recreates raw files on its next run.",
+            code,
         )
+
+
+# An insights file is written by the agent, never by fetch; a broken one exits 2 like a schema error.
+INSIGHTS_FIX = "Rewrite it as valid JSON from data/digest.json (schema: references/analysis-playbook.md > Insights file), then rerun."
+
+
+def unknown_apps_error(bad, apps) -> "TrackerError":
+    valid = ", ".join(f"{a['id']} ({a.get('name') or '?'})" for a in sorted(apps, key=lambda a: a["id"])) or "none"
+    return TrackerError(f"app id(s) not in this account: {', '.join(sorted(bad))}.",
+                        f"Use ids from this account: {valid}. `tracker.py fetch` refreshes this list.")
 
 
 def write_json(path: Path, data) -> None:
@@ -618,8 +636,8 @@ def cmd_fetch(args) -> int:
         known_ids = {a["id"] for a in apps}
         bad = (include | only) - known_ids
         if bad:
-            raise TrackerError(f"app id(s) not in this account: {', '.join(sorted(bad))}.",
-                               "Run `asc apps list --output table` to see valid ids.")
+            raise unknown_apps_error(bad, apps)
+        write_json(home / "raw" / "account_apps.json", apps)  # every app in the account; config validates ids against it
         apps = [a for a in apps if (not include or a["id"] in include) and a["id"] not in exclude]
         write_json(home / "raw" / "apps.json", apps)  # the tracked scope, even when --apps narrows this run
         if only:
@@ -1152,7 +1170,7 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
     insights_dir = home / "insights"
     runs = []
     for p in sorted((home / "history").glob("*.html")):
-        ins = read_json(insights_dir / f"{p.stem}.json", None) if (insights_dir / f"{p.stem}.json").exists() else None
+        ins = read_json(insights_dir / f"{p.stem}.json", None, INSIGHTS_FIX, 2) if (insights_dir / f"{p.stem}.json").exists() else None
         runs.append({"date": p.stem, "file": p.name, "headline": (ins or {}).get("headline") if isinstance(ins, dict) else None})
     return {
         "meta": {
@@ -1633,7 +1651,7 @@ def cmd_render(args) -> int:
         if args.no_insights:
             pass  # numbers-only run: ignore any insights file written earlier today
         elif ins_path.exists():
-            insights = read_json(ins_path)
+            insights = read_json(ins_path, None, INSIGHTS_FIX, 2)
             problems = validate_insights(insights, model)
             if problems:
                 log(f"Error: {ins_path} failed validation ({len(problems)} problem(s)):")
@@ -1768,11 +1786,22 @@ def cmd_config(args) -> int:
     if args.base_currency is not None:
         if not re.fullmatch(r"[A-Za-z]{3}", args.base_currency):
             raise TrackerError(f"currency '{args.base_currency}' is not an ISO code.", "Use a 3-letter code such as USD or EUR.")
+        fx_files = sorted((home / "raw" / "fx").glob("*.json"))
+        rates = ((read_json(fx_files[-1], {}) or {}).get("rates") or {}) if fx_files else {}
+        if args.base_currency.upper() not in (rates or ISO_CURRENCIES):
+            raise TrackerError(f"currency '{args.base_currency}' has no exchange rate.",
+                               ("Use a code from the cached rates: " + ", ".join(sorted(rates)) + ".") if rates
+                               else "Use an ISO 4217 code such as USD or EUR.")
         setv("base_currency", args.base_currency.upper())
     if args.backfill_days is not None:
         if not 1 <= args.backfill_days <= MAX_BACKFILL:
             raise TrackerError(f"--backfill-days {args.backfill_days} is out of range.", f"Use 1-{MAX_BACKFILL}; Apple keeps about a year of daily reports.")
         setv("backfill_days", args.backfill_days)
+    if args.include_apps is not None and args.include_apps.lower() not in ("none", "default", ""):
+        account = read_json(home / "raw" / "account_apps.json", None)
+        bad = {x.strip() for x in args.include_apps.split(",") if x.strip()} - {a["id"] for a in account or []}
+        if account is not None and bad:
+            raise unknown_apps_error(bad, account)
     setv("include_apps", args.include_apps, lambda v: [x.strip() for x in v.split(",") if x.strip()] or None)
     setv("exclude_apps", args.exclude_apps, lambda v: [x.strip() for x in v.split(",") if x.strip()])
     if changed:
@@ -1799,6 +1828,10 @@ def cmd_demo(args) -> int:
         raise TrackerError("demo needs an explicit --data-dir.",
                            "Run `tracker.py --data-dir /path/to/new-dir demo`; it never writes into the real data dir.")
     home = resolve_home(args.data_dir)
+    if home.exists() and not home.is_dir():
+        raise TrackerError(f"{home} is a file, not a directory.", "Pass a new or empty directory path as --data-dir.")
+    if not 30 <= args.days <= MAX_BACKFILL:
+        raise TrackerError(f"--days {args.days} is out of range.", f"Use 30-{MAX_BACKFILL}; the demo shows a release 30 days back.")
     if home.exists() and any(home.iterdir()):
         cfg = read_json(home / "config.json", {}) or {}
         if not cfg.get("demo"):
@@ -1817,6 +1850,7 @@ def cmd_demo(args) -> int:
     ]
     write_json(home / "config.json", dict(DEFAULT_CONFIG, demo=True, vendor_number="00000000"))
     write_json(home / "raw" / "apps.json", apps)
+    write_json(home / "raw" / "account_apps.json", apps)
     countries = [("US", "USD", 0.45), ("JP", "JPY", 0.18), ("FR", "EUR", 0.12), ("DE", "EUR", 0.08),
                  ("GB", "GBP", 0.07), ("VN", "USD", 0.06), ("BR", "BRL", 0.04)]
     fx = {"USD": 1, "EUR": 0.92, "JPY": 150.0, "GBP": 0.79, "BRL": 5.0}
