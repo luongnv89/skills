@@ -31,7 +31,7 @@ State these in the insights when they affect a claim:
 - **Privacy threshold.** App Analytics withholds values below Apple's threshold; those days are unknown, not zero.
 - **Pending and unknown days.** Apple publishes a day's report the next morning, Pacific time. Missing days are `pending` (retried) until a later day is published; corrupt files count as unknown. `known_days` below full means a window has gaps, and trend signals are then withheld.
 - **Small numbers.** A signal with `low_volume: true`, or windows under about 20 units, is noise. Say so instead of calling it a trend.
-- **Public ratings.** A count of 0 with written reviews present means Apple shows no public rating, not zero ratings. Apple hides ratings below a threshold, and the public lookup returns none for Mac apps.
+- **Public ratings.** A count of 0 with written reviews present means Apple shows no public rating, not zero ratings. Apple hides ratings below a threshold, and the public lookup returns none for Mac apps. Say "not shown publicly".
 - **Versions.** `created` is when the version record was made in App Store Connect, not its release date. `first_seen` (the first day the version appears in download rows) is the closest release proxy. The store's `released` date covers only the live version. In update rows, `Version` is the version users upgraded *from*.
 - **Funnel.** Page-view conversion is first-time downloads ÷ product page views, computed by the tracker; tap-through is page views ÷ impressions. Apple's own conversion rate uses unique impressions, so the numbers differ: name the one you quote. Without `funnel_available`, make no funnel claim. Apple Ads, retention and crashes are not collected.
 - **History depth.** Apple keeps about 365 days of daily reports. Public ratings and prices exist only for the days the tracker ran.
@@ -94,6 +94,15 @@ Pick actions from the signals present. Rank them by expected sales impact for th
 ## Insights file
 
 Write `insights/<run date>.json` (the path is in `digest.insights_file`). `render` validates it and refuses to build on any error.
+
+**Same-day runs.** When the file already exists, read it and merge, so the day's archive keeps the earlier report. For a one-app follow-up:
+
+- Replace or add only the asked app's `apps.<id>` entry and that app's actions.
+- Keep `date`, `headline`, `summary`, the portfolio actions and the other apps' entries.
+- Drop or re-cite any kept action whose signal id is no longer in today's digest, since a refetch can change the signals.
+- Re-rank the actions and keep at most 5.
+
+A full report (no single app asked) rewrites `headline`, `summary` and the portfolio actions from today's digest, and keeps each app entry it does not rewrite.
 
 ```json
 {

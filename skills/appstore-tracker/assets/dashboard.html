@@ -738,7 +738,7 @@ function dailyLogCard(P) {
 
 function runsCard() {
   const runs = (D.runs || []).slice().sort((a, b) => a.date < b.date ? 1 : -1);
-  return h('section', {class: 'card'}, h('h2', {text: 'Report history'}), h('p', {class: 'hint', text: 'Each run saves a dated copy of this dashboard next to the data.'}),
+  return h('section', {class: 'card'}, h('h2', {text: 'Report history'}), h('p', {class: 'hint', text: 'Each day keeps one dated copy of this dashboard next to the data. A numbers-only refresh keeps that day\'s report.'}),
     runs.length ? h('div', {class: 'scroll'}, table([
       {key: 'd', label: 'Run', cell: r => h('a', {href: (D.meta.link_prefix || '') + r.file, text: fmtDate(r.date)})},
       {key: 'h', label: 'Headline', cell: r => r.headline || h('span', {class: 'muted', text: 'signals only'})},

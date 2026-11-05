@@ -4,7 +4,7 @@ description: "Analyze App Store apps via the asc CLI: sales, downloads, reviews 
 license: MIT
 effort: high
 metadata:
-  version: 1.0.0
+  version: 1.0.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -30,8 +30,8 @@ Collect every app's App Store Connect data with the `asc` CLI, keep a daily hist
 | The user wants | Run |
 | --- | --- |
 | A report, a dashboard, or how the apps are doing (default) | Steps 0–5 |
-| One app ("how is TextWiz doing?") | Steps 0–5. Step 5 answers for that app and links `dashboard.html#view=<app id>` |
-| Fresh numbers without new insights | Steps 0–2, then step 4 with `--no-insights` |
+| One app ("how is TextWiz doing?") | Steps 0–5. Step 5 answers from that app's `kpis_7d`/`kpis_28d`/`kpis_90d` matching the asked period (365/all: `kpis_90d`, labelled) and links `dashboard.html#view=<app id>&period=<7|28|90|365|all>` ("this week": 7) |
+| Fresh numbers without new insights | Steps 0–2, then steps 4–5 with `--no-insights` |
 | Setup, or a failing check | Step 0, then the fix it names |
 | Replies to reviews | Steps 0–5 with a reply draft for every unanswered review in the digest. Never post them |
 | A preview without an App Store account | `T --data-dir <new dir> demo`, then steps 2–5 on that dir. Label every number as demo data |
@@ -66,6 +66,8 @@ Read `references/analysis-playbook.md`, then the digest. Write the insights file
 - review themes, plus reply drafts for unanswered negative reviews
 - assumptions and data gaps
 
+If that file exists, merge per the playbook's *Same-day runs*.
+
 **Verify:** every action cites at least one signal id from the digest, and every claim without a signal sits in `assumptions`.
 
 ## Step 4 — Render
@@ -74,10 +76,12 @@ Run `T render`. It validates the insights file, then writes `dashboard.html` (th
 
 ```json
 {"dashboard": "~/.appstore-tracker/dashboard.html", "archive": "~/.appstore-tracker/history/2026-11-05.html",
- "as_of": "2026-11-04", "insights": "embedded", "apps": 9}
+ "archive_written": true, "as_of": "2026-11-04", "insights": "embedded", "apps": 9}
 ```
 
-**Verify:** the exit code is 0, and the output names the dashboard path with `"insights": "embedded"`.
+One archive per day; `--no-insights` keeps one holding insights (`"archive_written": false`).
+
+**Verify:** the exit code is 0, and the output names the dashboard path with `"insights": "embedded"` (`none` under `--no-insights`).
 
 ## Step 5 — Report
 
@@ -89,6 +93,8 @@ Answer in this order:
 4. **Uncertainty:** the data gaps and the inferences.
 5. **Decision:** "No approval needed", or the access step only the user can take, such as creating a Sales-role key.
 
+**Numbers only:** no headline or Actions; with `"archive_written": false`, name `history/<run date>.html` as today's report.
+
 ## Edge cases
 
 | Situation | Handling |
@@ -97,10 +103,8 @@ Answer in this order:
 | `auth` fails with kind `timeout` | A macOS Keychain dialog is waiting. Ask the user to click "Always Allow" for `asc`, then rerun `T status`. Do not fetch. |
 | `sales_ready` false (403 or no vendor number) | Continue: App Analytics supplies volume when a web session exists. Cite `portfolio/sales_unavailable` or `portfolio/sales_stale`; with a second key, run `T config --sales-profile NAME`. |
 | Fetch reports `no_web_session` | Ask the user to run `! asc web auth login` themselves. Never log in for them. |
-| A rejected app | Read the guidelines in its `not_listed` signal first. On 4.3 spam, never advise resubmitting it or its sibling apps (`references/analysis-playbook.md`). |
-| Recent days missing | `fetch` retries them. Never report them as zero. |
-| App not on the store | Its `not_listed` signal names the version state, such as REJECTED. Treat it as a blocker, not as a slow app. |
-| Public rating count 0 with written reviews | Apple hides small counts and all Mac App Store counts. Say "not shown publicly". |
+| App not on the store, or rejected | A blocker, not a slow app: read its `not_listed` signal's state and guidelines. On 4.3 spam, never advise resubmitting it or its sibling apps (`references/analysis-playbook.md`). |
+| Missing days, hidden ratings | Unknown, not zero (playbook *Data caveats*). |
 | `render` rejects the insights file | Fix each listed problem and rerun, at most 3 rounds. |
 
 ## Acceptance criteria
