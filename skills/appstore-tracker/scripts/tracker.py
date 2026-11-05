@@ -50,7 +50,7 @@ try:
 except ImportError:  # pragma: no cover - Windows
     fcntl = None
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL_DIR / "assets" / "dashboard.html"
 DEFAULT_HOME = "~/.appstore-tracker"
@@ -1648,17 +1648,24 @@ def cmd_render(args) -> int:
         history = home / "history"
         history.mkdir(parents=True, exist_ok=True)
         archive = history / f"{run_date}.html"
+        # One archive per day. A numbers-only refresh never replaces a report that today's insights built.
+        keep_archive = bool(args.no_insights and archive.exists()
+                            and (home / "insights" / f"{run_date}.json").exists())
         if not any(r["date"] == run_date for r in model["runs"]):
             model["runs"].append({"date": run_date, "file": archive.name, "headline": (insights or {}).get("headline")})
-        else:
+        elif not keep_archive:  # a kept archive keeps the headline build_model read from its insights file
             for r in model["runs"]:
                 if r["date"] == run_date:
                     r["headline"] = (insights or {}).get("headline")
         latest = home / "dashboard.html"
         latest.write_text(render_html(model, insights, "history/"), encoding="utf-8")
-        archive.write_text(render_html(model, insights, ""), encoding="utf-8")
+        if not keep_archive:
+            archive.write_text(render_html(model, insights, ""), encoding="utf-8")
     print(json.dumps({
-        "dashboard": str(latest), "archive": str(archive), "as_of": model["meta"]["as_of"],
+        "dashboard": str(latest), "archive": str(archive),
+        "archive_written": not keep_archive,
+        **({"archive_note": "kept: it holds today's report with insights"} if keep_archive else {}),
+        "as_of": model["meta"]["as_of"],
         "insights": "embedded" if insights else "none (signals only)", "apps": len(model["apps"]),
         "signals": len(model["signals"]), "size_kb": round(latest.stat().st_size / 1024),
         "open": f"open '{latest}'",

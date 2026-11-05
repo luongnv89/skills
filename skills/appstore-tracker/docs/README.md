@@ -55,4 +55,4 @@ Needs the `asc` CLI (`brew install asc`) signed in with an App Store Connect API
 
 ## Output
 
-`~/.appstore-tracker/dashboard.html` (the latest) and `history/<date>.html` (one per run), built from the raw reports, snapshots and insights kept beside them. The chat answer gives the headline, the key numbers, the ranked actions and the data gaps. The files hold private sales data and reviews: keep them local.
+`~/.appstore-tracker/dashboard.html` (the latest) and `history/<date>.html` (one per day; a numbers-only refresh keeps that day's report), built from the raw reports, snapshots and insights kept beside them. The chat answer gives the headline, the key numbers, the ranked actions and the data gaps. The files hold private sales data and reviews: keep them local.
