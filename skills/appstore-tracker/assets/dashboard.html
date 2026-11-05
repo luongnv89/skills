@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>App Store Tracker</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  --other: #a3a29b; --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --up: #006300; --down: #b42f2f; --accent: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --other: #6b6a64; --up: #0ca30c; --down: #e66767; --accent: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --other: #6b6a64; --up: #0ca30c; --down: #e66767; --accent: #3987e5;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--page); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--accent); }
+button, select, input { font: inherit; color: inherit; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+header.top { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; padding: 20px 0 8px; }
+header.top h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+.sub { color: var(--ink-2); margin: 2px 0 0; font-size: 13px; }
+.btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.btn:hover { background: var(--wash); }
+.btn[aria-pressed="true"] { border-color: var(--ink-2); font-weight: 600; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 8px 0 16px; position: sticky; top: 0; z-index: 5; background: var(--page); border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; max-width: 100%; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 6px 12px; cursor: pointer; border-right: 1px solid var(--border); white-space: nowrap; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--wash); font-weight: 650; }
+.filters label { color: var(--ink-2); display: inline-flex; gap: 8px; align-items: center; }
+select, input[type="search"] { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; max-width: 100%; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; min-width: 0; }
+.card h2 { font-size: 15px; margin: 0 0 2px; }
+.card .hint { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+.card-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid2 > .card, .grid3 > .card { margin-bottom: 0; }
+.stack { display: grid; gap: 16px; margin-bottom: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; min-width: 0; }
+.tile .label { color: var(--ink-2); font-size: 12px; }
+.tile .value { font-size: 22px; font-weight: 650; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .delta { font-size: 12px; color: var(--ink-2); }
+.tile .delta.up-good, .delta.up-good { color: var(--up); }
+.tile .delta.down-bad, .delta.down-bad { color: var(--down); }
+.tile svg { display: block; margin-top: 6px; }
+.insight-head { font-size: 19px; font-weight: 650; margin: 4px 0 8px; letter-spacing: -0.01em; }
+ul.tight { margin: 6px 0; padding-left: 18px; }
+ul.tight li { margin: 3px 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; font-size: 12px; color: var(--ink-2); background: var(--surface); white-space: nowrap; }
+button.chip { cursor: pointer; }
+button.chip[aria-pressed="true"] { border-color: var(--ink-2); color: var(--ink); font-weight: 600; }
+.sev { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.sev i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.sev.critical i { background: var(--critical); } .sev.warning i { background: var(--warning); }
+.sev.good i { background: var(--good); } .sev.info i { background: var(--axis); }
+.banner { border-left: 4px solid var(--critical); }
+.banner.warning { border-left-color: var(--warning); }
+.table-wrap { overflow-x: auto; max-width: 100%; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 12px; white-space: nowrap; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--ink); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: var(--wash); }
+.scroll { max-height: 420px; overflow: auto; }
+.app-cell { display: flex; gap: 8px; align-items: center; min-width: 180px; }
+.icon { width: 28px; height: 28px; border-radius: 7px; flex: none; background: var(--wash); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--ink-2); overflow: hidden; border: 1px solid var(--border); }
+.icon img { width: 100%; height: 100%; display: block; }
+.icon.lg { width: 56px; height: 56px; border-radius: 13px; font-size: 18px; }
+.swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0 0; font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend .line-key { width: 14px; height: 2px; display: inline-block; border-radius: 2px; }
+.chart { position: relative; width: 100%; outline: none; }
+.chart:focus-visible { box-shadow: 0 0 0 2px var(--accent); border-radius: 6px; }
+.chart svg { display: block; overflow: visible; }
+.chart text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart .marker-label { fill: var(--ink-2); }
+.empty { color: var(--ink-2); padding: 18px; text-align: center; border: 1px dashed var(--border); border-radius: 10px; }
+.bars { display: grid; gap: 6px; }
+.bar-row { display: grid; grid-template-columns: minmax(64px, 120px) 1fr auto; gap: 8px; align-items: center; font-size: 13px; }
+.bar-row .track { height: 14px; position: relative; }
+.bar-row .fill { height: 14px; background: var(--accent); border-radius: 0 4px 4px 0; min-width: 2px; }
+.bar-row .val { font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+.segbar { display: flex; gap: 2px; height: 8px; margin: 8px 0; }
+.segbar span { border-radius: 4px; min-width: 2px; }
+.review { border-bottom: 1px solid var(--grid); padding: 10px 0; }
+.review:last-child { border-bottom: 0; }
+.review .meta { color: var(--muted); font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.review .title { font-weight: 600; margin: 2px 0; }
+.review .body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.review .resp { margin-top: 6px; padding: 6px 10px; border-left: 2px solid var(--axis); color: var(--ink-2); font-size: 13px; }
+.stars { letter-spacing: 1px; color: var(--ink); }
+.draft { background: var(--wash); border-radius: 8px; padding: 8px 10px; margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0 12px; }
+.app-head { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.app-head h2 { font-size: 20px; margin: 0; }
+.kv { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--ink-2); font-size: 13px; margin-top: 4px; }
+.tip { position: fixed; z-index: 50; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 24px rgba(0,0,0,0.18); max-width: 280px; }
+.tip-title { color: var(--ink-2); margin-bottom: 4px; }
+.tip-row { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+.tip-row .key { width: 12px; height: 2px; border-radius: 2px; flex: none; }
+.tip-row strong { font-variant-numeric: tabular-nums; }
+.tip-row .tip-name { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; }
+footer { color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
+.muted { color: var(--muted); }
+.nowrap { white-space: nowrap; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } }
+@media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } header.top { flex-direction: column; } .tile .value { font-size: 19px; } }
+@media (max-width: 480px) { .seg button { padding: 6px 8px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="page-title">App Store Tracker</h1>
+      <p class="sub" id="meta-line"></p>
+    </div>
+    <div><button class="btn" id="theme-btn" type="button">Theme: auto</button></div>
+  </header>
+  <nav class="filters" aria-label="Dashboard filters">
+    <div class="seg" role="group" aria-label="Period" id="period"></div>
+    <label for="view-select">View <select id="view-select"></select></label>
+    <span class="muted" id="range-line"></span>
+  </nav>
+  <main id="main"></main>
+  <footer id="footer"></footer>
+</div>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script>const DATA = /*__APPSTORE_DATA__*/null;</script>
+<script>
+(() => {
+'use strict';
+const D = DATA;
+const main = document.getElementById('main');
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'text') e.textContent = v;
+    else if (k === 'style') e.style.cssText = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat(Infinity)) {
+    if (kid == null || kid === false) continue;
+    e.append(kid instanceof Node ? kid : String(kid));
+  }
+  return e;
+}
+function s(tag, attrs) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) if (v != null) e.setAttribute(k, v);
+  return e;
+}
+
+if (!D) {
+  main.append(h('div', {class: 'card'}, h('h2', {text: 'No data embedded'}),
+    h('p', {text: 'This is the dashboard template. Run `tracker.py render` to produce dashboard.html with your data.'})));
+  return;
+}
+
+// ---------- formatting ----------
+const BASE = D.meta.base_currency || 'USD';
+const VOL = !!D.meta.volume_source, SALES = !!VOL, FUNNEL = !!D.meta.funnel_available;
+const SRC = D.meta.volume_source === 'analytics' ? 'App Analytics' : 'Sales reports';
+const nf0 = new Intl.NumberFormat(undefined, {maximumFractionDigits: 0});
+const nf2 = new Intl.NumberFormat(undefined, {maximumFractionDigits: 2});
+const nfc = new Intl.NumberFormat(undefined, {notation: 'compact', maximumFractionDigits: 1});
+let moneyFmt;
+try { moneyFmt = new Intl.NumberFormat(undefined, {style: 'currency', currency: BASE, maximumFractionDigits: 2}); }
+catch (e) { moneyFmt = {format: v => BASE + ' ' + v.toFixed(2)}; }
+const fmtInt = v => v == null ? '—' : (Math.abs(v) >= 10000 ? nfc.format(v) : nf0.format(v));
+const ASREP = D.meta.volume_source === 'analytics';  // App Analytics proceeds have no currency field
+const fmtMoney = v => v == null ? '—' : (ASREP ? nf2.format(v) : moneyFmt.format(v));
+const CUR = ASREP ? 'as reported' : '≈ ' + BASE;
+const fmtMoneyShort = v => v == null ? '—' : (Math.abs(v) >= 10000 ? (ASREP ? '' : BASE + ' ') + nfc.format(v) : fmtMoney(v));
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const parseD = t => { const [y, m, d] = t.slice(0, 10).split('-').map(Number); return {y, m, d}; };
+const fmtDay = t => { if (!t) return '—'; const p = parseD(t); return `${MONTHS[p.m - 1]} ${p.d}`; };
+const fmtDate = t => { if (!t) return '—'; const p = parseD(t); return `${MONTHS[p.m - 1]} ${p.d}, ${p.y}`; };
+function delta(cur, prev, upGood = true) {
+  if (prev == null || cur == null) return {text: 'no prior period', cls: ''};
+  if (prev === 0) return cur === 0 ? {text: 'flat vs prior', cls: ''} : {text: 'new vs 0 prior', cls: cur > 0 === upGood ? 'up-good' : 'down-bad'};
+  const p = (cur - prev) / Math.abs(prev) * 100;
+  if (Math.abs(p) < 0.5) return {text: 'flat vs prior', cls: ''};
+  const up = p > 0;
+  return {text: `${up ? '▲' : '▼'} ${Math.abs(p).toFixed(Math.abs(p) < 10 ? 1 : 0)}% vs prior`, cls: up === upGood ? 'up-good' : 'down-bad'};
+}
+function starDeltaPct(cur, prev) {
+  const d = (cur - prev) * 100;
+  if (Math.abs(d) < 0.05) return {text: 'flat vs prior', cls: ''};
+  return {text: `${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(1)} pts vs prior`, cls: d > 0 ? 'up-good' : 'down-bad'};
+}
+function starDelta(cur, prev) {
+  if (prev == null) return {text: 'no reviews in prior period', cls: ''};
+  const d = cur - prev;
+  if (Math.abs(d) < 0.05) return {text: 'flat vs prior', cls: ''};
+  return {text: `${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(2)}★ vs prior`, cls: d > 0 ? 'up-good' : 'down-bad'};
+}
+const SEV_LABEL = {critical: 'Critical', warning: 'Warning', good: 'Good', info: 'Info'};
+const sevTag = sev => h('span', {class: 'sev ' + sev}, h('i', {'aria-hidden': 'true'}), SEV_LABEL[sev] || sev);
+const color = slot => slot >= 1 && slot <= 8 ? `var(--s${slot})` : 'var(--other)';
+function safeUrl(u, hosts) {
+  try { const x = new URL(u); return x.protocol === 'https:' && hosts.some(hh => x.hostname === hh || x.hostname.endsWith('.' + hh)) ? x.href : null; }
+  catch (e) { return null; }
+}
+
+// ---------- state ----------
+const PERIODS = [['7', '7 days'], ['28', '28 days'], ['90', '90 days'], ['365', '365 days'], ['all', 'All']];
+const state = {view: 'portfolio', period: '28', sev: 'all', rv: {stars: new Set(), territory: '', resp: 'all', q: ''}};
+const appById = Object.fromEntries(D.apps.map(a => [a.id, a]));
+const sigById = Object.fromEntries(D.signals.map(x => [x.id, x]));
+(function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  if (p.get('view') && (p.get('view') === 'portfolio' || appById[p.get('view')])) state.view = p.get('view');
+  if (PERIODS.some(x => x[0] === p.get('period'))) state.period = p.get('period');
+})();
+function writeHash() { history.replaceState(null, '', '#view=' + encodeURIComponent(state.view) + '&period=' + state.period); }
+
+// ---------- theme ----------
+const root = document.documentElement;
+const themeBtn = document.getElementById('theme-btn');
+function applyTheme(t) {
+  if (t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', t);
+  themeBtn.textContent = 'Theme: ' + t;
+  themeBtn.setAttribute('aria-label', 'Color theme: ' + t + '. Click to change.');
+}
+let theme = root.getAttribute('data-theme') || 'auto';
+try { theme = localStorage.getItem('ast-theme') || theme; } catch (e) {}
+applyTheme(theme);
+themeBtn.addEventListener('click', () => {
+  theme = theme === 'auto' ? 'light' : theme === 'light' ? 'dark' : 'auto';
+  try { localStorage.setItem('ast-theme', theme); } catch (e) {}
+  applyTheme(theme);
+});
+
+// ---------- tooltip ----------
+const tip = document.getElementById('tip');
+function showTip(evt, title, rows) {
+  tip.replaceChildren(h('div', {class: 'tip-title', text: title}),
+    ...rows.map(r => h('div', {class: 'tip-row'}, h('span', {class: 'key', style: 'background:' + r.color}),
+      h('strong', {text: r.value}), h('span', {class: 'tip-name', text: r.name}))));
+  tip.hidden = false;
+  const pad = 14, w = tip.offsetWidth, ht = tip.offsetHeight;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  if (x + w > innerWidth - 8) x = evt.clientX - w - pad;
+  if (y + ht > innerHeight - 8) y = evt.clientY - ht - pad;
+  tip.style.left = Math.max(8, x) + 'px';
+  tip.style.top = Math.max(8, y) + 'px';
+}
+const hideTip = () => { tip.hidden = true; };
+
+// ---------- scales ----------
+function niceNum(x, round) {
+  if (x <= 0) return 1;
+  const e = Math.floor(Math.log10(x)), f = x / Math.pow(10, e);
+  const nfv = round ? (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) : (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10);
+  return nfv * Math.pow(10, e);
+}
+function niceScale(lo, hi, integer) {
+  if (hi <= lo) hi = lo + (integer ? 4 : 1);
+  let step = niceNum(niceNum(hi - lo, false) / 4, true);
+  if (integer) step = Math.max(1, Math.round(step));
+  return {lo: Math.floor(lo / step) * step, hi: Math.ceil(hi / step) * step, step};
+}
+function xTicks(n, max = 6) { const k = Math.max(1, Math.ceil(n / max)); const out = []; for (let i = 0; i < n; i += k) out.push(i); return out; }
+
+function observe(wrap, draw) {
+  let last = 0, queued = false;
+  const ro = new ResizeObserver(() => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; const w = wrap.clientWidth; if (w && Math.abs(w - last) > 4) { last = w; draw(w); } });
+  });
+  ro.observe(wrap);
+}
+
+// ---------- line chart (crosshair + one tooltip for every series) ----------
+function lineChart({labels, titles, series, height = 220, fmt = fmtInt, integer = true, markers = [], area = false, label}) {
+  const wrap = h('div', {class: 'chart', tabindex: '0', role: 'img', 'aria-label': label || 'Line chart'});
+  let focusIdx = labels.length - 1;
+  const draw = W => {
+    W = Math.max(260, W);
+    const m = {l: 52, r: 16, t: markers.length ? 22 : 12, b: 26}, H = height, n = labels.length;
+    const vals = series.flatMap(x => x.values.filter(v => v != null));
+    const sc = niceScale(Math.min(0, ...vals), Math.max(0, ...vals, integer ? 1 : 0.01), integer);
+    const X = i => m.l + (n <= 1 ? (W - m.l - m.r) / 2 : i * (W - m.l - m.r) / (n - 1));
+    const Y = v => m.t + (sc.hi - v) / (sc.hi - sc.lo) * (H - m.t - m.b);
+    const svg = s('svg', {width: W, height: H, viewBox: `0 0 ${W} ${H}`});
+    for (let v = sc.lo; v <= sc.hi + 1e-9; v += sc.step) {
+      svg.append(s('line', {x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), style: `stroke:${v === 0 ? 'var(--axis)' : 'var(--grid)'};stroke-width:1`}));
+      const t = s('text', {x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end'}); t.textContent = fmt === fmtInt ? fmtInt(v) : fmtMoneyShort(v); svg.append(t);
+    }
+    for (const i of xTicks(n, Math.max(2, Math.floor(W / 110)))) {
+      const t = s('text', {x: X(i), y: H - 6, 'text-anchor': i === 0 ? 'start' : 'middle'}); t.textContent = fmtDay(labels[i]); svg.append(t);
+    }
+    for (const mk of markers) {
+      if (mk.i < 0 || mk.i >= n) continue;
+      svg.append(s('line', {x1: X(mk.i), x2: X(mk.i), y1: m.t - 4, y2: H - m.b, style: 'stroke:var(--axis);stroke-width:1'}));
+      const t = s('text', {x: X(mk.i) + 3, y: m.t - 8, class: 'marker-label'}); t.textContent = mk.label; svg.append(t);
+    }
+    for (const se of series) {
+      let d = '', open = false, firstI = null, lastI = null;
+      se.values.forEach((v, i) => {
+        if (v == null) { open = false; return; }
+        d += (open ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1);
+        open = true; if (firstI == null) firstI = i; lastI = i;
+      });
+      if (!d) continue;
+      if (area && series.length === 1) {
+        let a = '', run = [];
+        const flush = () => { if (run.length) { a += `M${X(run[0]).toFixed(1)} ${Y(0)}` + run.map(i => `L${X(i).toFixed(1)} ${Y(se.values[i]).toFixed(1)}`).join('') + `L${X(run[run.length - 1]).toFixed(1)} ${Y(0)}Z`; run = []; } };
+        se.values.forEach((v, i) => { if (v == null) flush(); else run.push(i); }); flush();
+        svg.append(s('path', {d: a, style: `fill:${se.color};opacity:0.10`}));
+      }
+      svg.append(s('path', {d, style: `fill:none;stroke:${se.color};stroke-width:2;stroke-linejoin:round;stroke-linecap:round`}));
+      if (lastI != null) svg.append(s('circle', {cx: X(lastI), cy: Y(se.values[lastI]), r: 4, style: `fill:${se.color};stroke:var(--surface);stroke-width:2`}));
+    }
+    const cross = s('line', {y1: m.t, y2: H - m.b, style: 'stroke:var(--ink-2);stroke-width:1;display:none'});
+    const dots = series.map(se => s('circle', {r: 4, style: `fill:${se.color};stroke:var(--surface);stroke-width:2;display:none`}));
+    svg.append(cross, ...dots);
+    const hit = s('rect', {x: m.l, y: 0, width: Math.max(1, W - m.l - m.r), height: H, style: 'fill:transparent'});
+    svg.append(hit);
+    const show = (i, evt) => {
+      i = Math.max(0, Math.min(n - 1, i)); focusIdx = i;
+      cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i)); cross.style.display = '';
+      series.forEach((se, k) => { const v = se.values[i]; if (v == null) { dots[k].style.display = 'none'; return; } dots[k].setAttribute('cx', X(i)); dots[k].setAttribute('cy', Y(v)); dots[k].style.display = ''; });
+      showTip(evt, titles ? titles[i] : fmtDate(labels[i]), series.map(se => ({color: se.color, name: se.name, value: se.values[i] == null ? 'not published' : fmt(se.values[i])})));
+    };
+    const hide = () => { cross.style.display = 'none'; dots.forEach(d => d.style.display = 'none'); hideTip(); };
+    hit.addEventListener('pointermove', e => { const r = svg.getBoundingClientRect(); show(Math.round((e.clientX - r.left - m.l) / Math.max(1e-9, (W - m.l - m.r)) * (n - 1)), e); });
+    hit.addEventListener('pointerleave', hide);
+    wrap.onkeydown = e => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') { if (e.key === 'Escape') hide(); return; }
+      e.preventDefault(); const r = svg.getBoundingClientRect();
+      const i = focusIdx + (e.key === 'ArrowRight' ? 1 : -1);
+      show(i, {clientX: r.left + X(Math.max(0, Math.min(n - 1, i))), clientY: r.top + m.t + 10});
+    };
+    wrap.onblur = hide;
+    wrap.replaceChildren(svg);
+  };
+  observe(wrap, draw);
+  return wrap;
+}
+
+// ---------- stacked columns (per-column hit target) ----------
+function stackedColumns({labels, titles, series, height = 240, fmt = fmtInt, integer = true, label, total = true}) {
+  const wrap = h('div', {class: 'chart', tabindex: '0', role: 'img', 'aria-label': label || 'Column chart'});
+  let focusIdx = labels.length - 1;
+  const draw = W => {
+    W = Math.max(260, W);
+    const m = {l: 52, r: 12, t: 12, b: 26}, H = height, n = labels.length;
+    const sums = labels.map((_, i) => series.reduce((acc, se) => acc + Math.max(0, se.values[i] || 0), 0));
+    const sc = niceScale(0, Math.max(...sums, integer ? 1 : 0.01), integer);
+    const band = (W - m.l - m.r) / Math.max(1, n);
+    const bw = Math.max(1, Math.min(24, band - 2));
+    const X = i => m.l + i * band + (band - bw) / 2;
+    const Y = v => m.t + (sc.hi - v) / (sc.hi - sc.lo) * (H - m.t - m.b);
+    const svg = s('svg', {width: W, height: H, viewBox: `0 0 ${W} ${H}`});
+    for (let v = sc.lo; v <= sc.hi + 1e-9; v += sc.step) {
+      svg.append(s('line', {x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), style: `stroke:${v === 0 ? 'var(--axis)' : 'var(--grid)'};stroke-width:1`}));
+      const t = s('text', {x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end'}); t.textContent = fmt === fmtInt ? fmtInt(v) : fmtMoneyShort(v); svg.append(t);
+    }
+    for (const i of xTicks(n, Math.max(2, Math.floor(W / 110)))) {
+      const t = s('text', {x: X(i) + bw / 2, y: H - 6, 'text-anchor': i === 0 ? 'start' : 'middle'}); t.textContent = fmtDay(labels[i]); svg.append(t);
+    }
+    const hover = s('rect', {y: m.t, height: H - m.t - m.b, width: band, style: 'fill:var(--wash);display:none'});
+    svg.append(hover);
+    for (let i = 0; i < n; i++) {
+      let y0 = Y(0);
+      const parts = series.map(se => Math.max(0, se.values[i] || 0));
+      const topK = parts.reduce((t, v, k) => v > 0 ? k : t, -1);
+      parts.forEach((v, k) => {
+        if (v <= 0) return;
+        const hgt = (Y(0) - Y(v));
+        const top = y0 - hgt;
+        const gap = k === topK ? 0 : Math.min(2, hgt / 2);
+        const segH = Math.max(0.5, hgt - gap);
+        if (k === topK) {
+          const r = Math.min(4, bw / 2, segH);
+          const x = X(i), y = top, w = bw, b = y0;
+          svg.append(s('path', {d: `M${x} ${b}V${y + r}Q${x} ${y} ${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${b}Z`, style: `fill:${series[k].color}`}));
+        } else {
+          svg.append(s('rect', {x: X(i), y: top + gap, width: bw, height: segH, style: `fill:${series[k].color}`}));
+        }
+        y0 = top;
+      });
+    }
+    const hit = s('rect', {x: m.l, y: 0, width: Math.max(1, W - m.l - m.r), height: H, style: 'fill:transparent'});
+    svg.append(hit);
+    const show = (i, evt) => {
+      i = Math.max(0, Math.min(n - 1, i)); focusIdx = i;
+      hover.setAttribute('x', m.l + i * band); hover.style.display = '';
+      const rows = series.filter(se => (se.values[i] || 0) !== 0).map(se => ({color: se.color, name: se.name, value: fmt(se.values[i])}));
+      if (total && series.length > 1) rows.unshift({color: 'transparent', name: 'total', value: fmt(sums[i])});
+      showTip(evt, titles ? titles[i] : fmtDate(labels[i]), rows.length ? rows : [{color: 'transparent', name: '', value: 'none'}]);
+    };
+    const hide = () => { hover.style.display = 'none'; hideTip(); };
+    hit.addEventListener('pointermove', e => { const r = svg.getBoundingClientRect(); show(Math.floor((e.clientX - r.left - m.l) / band), e); });
+    hit.addEventListener('pointerleave', hide);
+    wrap.onkeydown = e => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') { if (e.key === 'Escape') hide(); return; }
+      e.preventDefault(); const r = svg.getBoundingClientRect();
+      const i = Math.max(0, Math.min(n - 1, focusIdx + (e.key === 'ArrowRight' ? 1 : -1)));
+      show(i, {clientX: r.left + X(i) + bw / 2, clientY: r.top + m.t + 10});
+    };
+    wrap.onblur = hide;
+    wrap.replaceChildren(svg);
+  };
+  observe(wrap, draw);
+  return wrap;
+}
+
+function sparkline(values, w = 120, hgt = 26) {
+  const pts = values.map((v, i) => [i, v]).filter(p => p[1] != null);
+  const svg = s('svg', {width: w, height: hgt, viewBox: `0 0 ${w} ${hgt}`, 'aria-hidden': 'true'});
+  if (pts.length < 2) return svg;
+  const max = Math.max(...pts.map(p => p[1])), min = Math.min(0, ...pts.map(p => p[1]));
+  const n = values.length;
+  const X = i => 2 + i * (w - 6) / Math.max(1, n - 1), Y = v => hgt - 3 - (v - min) / Math.max(1e-9, max - min) * (hgt - 6);
+  svg.append(s('path', {d: pts.map((p, k) => (k ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(''), style: 'fill:none;stroke:var(--other);stroke-width:1.5;stroke-linejoin:round'}));
+  const last = pts[pts.length - 1];
+  svg.append(s('circle', {cx: X(last[0]), cy: Y(last[1]), r: 2.5, style: 'fill:var(--accent)'}));
+  return svg;
+}
+
+function hBars(items, fmt = fmtInt, extra) {
+  if (!items.length) return h('div', {class: 'empty', text: 'No data in this period.'});
+  const max = Math.max(...items.map(x => x.value), 1);
+  return h('div', {class: 'bars'}, items.map(it => {
+    const row = h('div', {class: 'bar-row', tabindex: '0'},
+      h('span', {class: 'nowrap', text: it.label}),
+      h('div', {class: 'track'}, h('div', {class: 'fill', style: `width:${Math.max(0.5, it.value / max * 100)}%`})),
+      h('span', {class: 'val', text: fmt(it.value) + (extra ? extra(it) : '')}));
+    return row;
+  }));
+}
+
+function table(cols, rows, {sortKey = null, desc = true, rowClick, caption} = {}) {
+  let key = sortKey, dir = desc;
+  const tbl = h('table');
+  if (caption) tbl.append(h('caption', {class: 'sr-only', text: caption}));
+  const thead = h('thead'), tbody = h('tbody');
+  const headRow = h('tr');
+  cols.forEach(c => {
+    const th = h('th', {class: (c.num ? 'num ' : '') + (c.sort ? 'sortable' : ''), scope: 'col', text: c.label});
+    if (c.sort) {
+      th.tabIndex = 0;
+      const act = () => { if (key === c.key) dir = !dir; else { key = c.key; dir = true; } paint(); };
+      th.addEventListener('click', act);
+      th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+    }
+    headRow.append(th);
+  });
+  thead.append(headRow);
+  const paint = () => {
+    const sorted = rows.slice();
+    if (key) {
+      const c = cols.find(x => x.key === key);
+      sorted.sort((a, b) => { const va = c.sort(a), vb = c.sort(b); const r = va == null ? 1 : vb == null ? -1 : (va < vb ? -1 : va > vb ? 1 : 0); return dir ? -r : r; });
+    }
+    headRow.querySelectorAll('th').forEach((th, i) => th.setAttribute('aria-sort', cols[i].key === key ? (dir ? 'descending' : 'ascending') : 'none'));
+    tbody.replaceChildren(...sorted.map(r => {
+      const tr = h('tr', {class: rowClick ? 'click' : ''}, cols.map(c => { const v = c.cell(r); return h('td', {class: c.num ? 'num' : ''}, v); }));
+      if (rowClick) { tr.addEventListener('click', () => rowClick(r)); tr.tabIndex = 0; tr.addEventListener('keydown', e => { if (e.key === 'Enter') rowClick(r); }); }
+      return tr;
+    }));
+  };
+  paint();
+  tbl.append(thead, tbody);
+  return h('div', {class: 'table-wrap'}, tbl);
+}
+
+function chartCard(title, hint, chart, tableFn, legend) {
+  const body = h('div', {}, chart);
+  let showingTable = false;
+  const btn = h('button', {class: 'btn', type: 'button', 'aria-pressed': 'false', text: 'Table'});
+  btn.addEventListener('click', () => {
+    showingTable = !showingTable; btn.setAttribute('aria-pressed', String(showingTable));
+    body.replaceChildren(showingTable ? tableFn() : chart);
+  });
+  return h('section', {class: 'card'}, h('div', {class: 'card-head'}, h('div', {}, h('h2', {text: title}), hint ? h('p', {class: 'hint', text: hint}) : null), tableFn ? btn : null), legend || null, body);
+}
+function legend(items, line = false) {
+  return h('div', {class: 'legend'}, items.map(it => h('span', {}, h('i', {class: line ? 'line-key' : 'swatch', style: 'background:' + it.color}), it.name)));
+}
+
+// ---------- data helpers ----------
+const N = D.days.length;
+function rangeIdx() { const w = state.period === 'all' ? N : Math.min(N, Number(state.period)); return [N - w, N - 1]; }
+function sliceSeries(arr) { const [lo, hi] = rangeIdx(); return arr.slice(lo, hi + 1).map((v, k) => D.known[lo + k] ? v : null); }
+function labelsNow() { const [lo, hi] = rangeIdx(); return D.days.slice(lo, hi + 1); }
+// Over 92 days, daily marks get too thin: sum into 7-day buckets that end on
+// the last day, so the newest bucket is always complete (only the oldest can be short).
+function weekly(labels, seriesList) {
+  if (labels.length <= 92) return {labels, titles: labels.map(fmtDate), series: seriesList, weekly: false};
+  const buckets = [];
+  for (let end = labels.length - 1; end >= 0; end -= 7) buckets.unshift([Math.max(0, end - 6), end]);
+  const titles = buckets.map(([a, b]) => `${fmtDay(labels[a])} – ${fmtDate(labels[b])}` + (b - a + 1 < 7 ? ` (${b - a + 1} days)` : ''));
+  return {labels: buckets.map(([a]) => labels[a]), titles, weekly: true, series: seriesList.map(se => ({...se, values: buckets.map(([a, b]) => {
+    let sum = 0, any = false;
+    for (let i = a; i <= b; i++) if (se.values[i] != null) { sum += se.values[i]; any = true; }
+    return any ? Math.round(sum * 100) / 100 : null; })}))};
+}
+function seriesTable(wk, fmt) {
+  return table([{key: 'd', label: wk.weekly ? '7 days' : 'Day', cell: r => r.d}, ...wk.series.map((se, k) => ({key: 'v' + k, label: se.name, num: true, cell: r => fmt(r.v[k])}))],
+    wk.labels.map((d, i) => ({d: wk.titles[i], v: wk.series.map(se => se.values[i])})).reverse());
+}
+const win = obj => obj.windows[state.period];
+function iconFor(app, lg) {
+  const box = h('span', {class: 'icon' + (lg ? ' lg' : ''), 'aria-hidden': 'true'});
+  const src = safeUrl(app.store && app.store.artworkUrl100, ['mzstatic.com']);
+  const initials = app.name.split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+  if (src) { const img = h('img', {src, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer'}); img.onerror = () => box.replaceChildren(initials); box.append(img); }
+  else box.append(initials);
+  return box;
+}
+const ratingText = a => {
+  const r = a.ratings || {};
+  if (!a.listed || r.listed === false) return 'not on the store';
+  if (!r.count) return a.reviews.count ? 'not shown publicly' : 'no ratings yet';
+  return `${nf2.format(r.average)}★ (${fmtInt(r.count)})`;
+};
+
+// ---------- shared sections ----------
+function funnelCard(obj) {
+  const labels = labelsNow();
+  const series = [{name: 'Product page views', color: 'var(--s1)', values: sliceSeries(obj.series.page_views)}, {name: 'First-time downloads', color: 'var(--s2)', values: sliceSeries(obj.series.downloads)}];
+  const wk = weekly(labels, series);
+  return chartCard('Product page views and downloads', 'App Analytics; impressions are in the tiles above', lineChart({labels: wk.labels, titles: wk.titles, series: wk.series, label: 'Product page views and downloads'}), () => seriesTable(wk, fmtInt), legend(series, true));
+}
+function kpiTiles(obj, seriesObj) {
+  const w = win(obj), k = w.kpis, p = w.prev, salesOk = VOL;
+  const sp = m => sparkline(sliceSeries(seriesObj[m]).slice(-Math.min(90, rangeIdx()[1] - rangeIdx()[0] + 1)));
+  const tile = (label, val, d, spark, note) => h('div', {class: 'tile'}, h('div', {class: 'label', text: label}),
+    h('div', {class: 'value', text: val, title: val}), h('div', {class: 'delta ' + (d ? d.cls : ''), text: d ? d.text : (note || '')}), spark || null);
+  const sales = (label, m, money, upGood = true) => salesOk
+    ? tile(label, money ? (ASREP ? '' : '≈ ') + fmtMoneyShort(k[m]) : fmtInt(k[m]), delta(k[m], p ? p[m] : null, upGood), sp(m))
+    : tile(label, '—', null, null, 'sales data unavailable');
+  const pv = k.page_views, ppv = p ? p.page_views : null;
+  const conv = pv ? k.downloads / pv : null, pconv = ppv ? p.downloads / ppv : null;
+  const rv = w.reviews;
+  return h('div', {class: 'kpis'},
+    sales(ASREP ? 'Proceeds (as reported)' : 'Proceeds', 'proceeds', true),
+    sales('First-time downloads', 'downloads'),
+    sales('In-app purchases', 'iap'),
+    SALES ? sales('Subscriptions', 'subs') : tile('Subscriptions', '—', null, null, 'needs Sales reports'),
+    sales('Redownloads', 'redownloads'),
+    sales('Updates', 'updates'),
+    SALES ? sales('Refunds', 'refunds', false, false) : tile('Refunds', '—', null, null, 'needs Sales reports'),
+    FUNNEL ? tile('Impressions', fmtInt(k.impressions), delta(k.impressions, p ? p.impressions : null), sp('impressions')) : null,
+    FUNNEL ? tile('Product page views', fmtInt(pv), delta(pv, ppv), sp('page_views')) : null,
+    FUNNEL ? tile('Page view → download', conv == null ? '—' : (conv * 100).toFixed(1) + '%', conv == null || pconv == null ? null : starDeltaPct(conv, pconv)) : null,
+    tile('New reviews', fmtInt(rv.count), delta(rv.count, rv.prev_count)),
+    tile('Avg rating, new reviews', rv.avg == null ? '—' : nf2.format(rv.avg) + '★', rv.avg == null ? null : starDelta(rv.avg, rv.prev_avg), null, rv.avg == null ? 'no reviews in period' : ''));
+}
+
+function insightsCard(appId) {
+  const ins = D.insights;
+  const card = h('section', {class: 'card'});
+  if (!ins) {
+    card.append(h('h2', {text: 'Insights'}), h('p', {class: 'hint', text: 'No written insights for this run. The signals further down come from fixed rules.'}));
+    return card;
+  }
+  const actions = (ins.actions || []).filter(a => !appId || a.app_id === appId).sort((a, b) => a.priority - b.priority);
+  if (appId) {
+    const block = (ins.apps || {})[appId] || {};
+    card.append(h('h2', {text: 'Insights for this app'}), h('p', {class: 'hint', text: 'Written on ' + fmtDate(ins.date) + ' from the numbers on this page'}));
+    if (block.summary) card.append(h('p', {text: block.summary}));
+    if (!block.summary && !actions.length) card.append(h('p', {class: 'muted', text: 'No app-specific insight in this run.'}));
+  } else {
+    card.append(h('p', {class: 'hint', text: 'Insights · ' + fmtDate(ins.date)}), h('div', {class: 'insight-head', text: ins.headline}));
+    if ((ins.summary || []).length) card.append(h('ul', {class: 'tight'}, ins.summary.map(t => h('li', {text: t}))));
+  }
+  if (actions.length) {
+    card.append(h('h2', {style: 'margin-top:12px', text: 'Recommended actions'}));
+    card.append(table([
+      {key: 'p', label: '#', num: true, cell: a => String(a.priority), sort: a => -a.priority},
+      ...(appId ? [] : [{key: 'app', label: 'App', cell: a => a.app_id === 'portfolio' ? 'All apps' : (appById[a.app_id] || {}).name || a.app_id}]),
+      {key: 'a', label: 'Action', cell: a => h('div', {}, h('strong', {text: a.action}), h('div', {class: 'muted', text: a.why}))},
+      {key: 'e', label: 'Evidence', cell: a => h('div', {style: 'display:flex;flex-wrap:wrap;gap:4px'}, (a.evidence || []).map(id => {
+        const sg = sigById[id];
+        if (!sg) return h('span', {class: 'chip', text: id});
+        const who = sg.scope !== a.app_id && appById[sg.scope] ? appById[sg.scope].name + ': ' : '';
+        return h('span', {class: 'chip', title: sg.detail, text: who + sg.title}); }))},
+      {key: 'i', label: 'Impact', cell: a => a.impact},
+      {key: 'f', label: 'Effort', cell: a => a.effort},
+    ], actions, {caption: 'Recommended actions'}));
+  }
+  if (!appId) {
+    if ((ins.assumptions || []).length) card.append(h('h2', {style: 'margin-top:12px', text: 'Assumptions and inferences'}), h('ul', {class: 'tight'}, ins.assumptions.map(t => h('li', {text: t}))));
+    if ((ins.data_gaps || []).length) card.append(h('h2', {style: 'margin-top:12px', text: 'What this run could not see'}), h('ul', {class: 'tight'}, ins.data_gaps.map(t => h('li', {text: t}))));
+  }
+  return card;
+}
+
+function signalsCard(list, title) {
+  const counts = {all: list.length};
+  list.forEach(x => counts[x.severity] = (counts[x.severity] || 0) + 1);
+  const body = h('div');
+  const chips = h('div', {class: 'toolbar', role: 'group', 'aria-label': 'Filter signals by severity'});
+  const order = ['critical', 'warning', 'good', 'info'];
+  const paint = () => {
+    chips.replaceChildren(...['all', ...order].filter(k => k === 'all' || counts[k]).map(k => {
+      const b = h('button', {class: 'chip', type: 'button', 'aria-pressed': String(state.sev === k), text: (k === 'all' ? 'All' : SEV_LABEL[k]) + ' ' + (counts[k] || 0)});
+      b.addEventListener('click', () => { state.sev = k; paint(); }); return b;
+    }));
+    const shown = list.filter(x => state.sev === 'all' || x.severity === state.sev)
+      .sort((a, b) => order.indexOf(a.severity) - order.indexOf(b.severity));
+    body.replaceChildren(shown.length ? table([
+      {key: 'sev', label: 'Severity', cell: x => sevTag(x.severity), sort: x => 3 - order.indexOf(x.severity)},
+      {key: 'scope', label: 'Scope', cell: x => x.scope === 'portfolio' ? 'All apps' : (appById[x.scope] || {}).name || x.scope},
+      {key: 'title', label: 'Signal', cell: x => h('div', {}, h('strong', {text: x.title}), h('div', {class: 'muted', text: x.detail}))},
+      {key: 'id', label: 'Id', cell: x => h('code', {class: 'muted', text: x.id})},
+    ], shown, {caption: 'Signals'}) : h('div', {class: 'empty', text: 'No signal at this severity.'}));
+  };
+  paint();
+  return h('section', {class: 'card'}, h('h2', {text: title}), h('p', {class: 'hint', text: 'Computed by fixed rules from the data; recommended actions cite these ids.'}), chips, body);
+}
+
+function gapsCard() {
+  const g = D.gaps || [];
+  const cov = D.meta;
+  return h('section', {class: 'card'}, h('h2', {text: 'Data coverage and gaps'}),
+    h('p', {class: 'hint', text: `Sales: ${cov.known_days} of ${cov.total_days} days known (${fmtDate(cov.first_day)} – ${fmtDate(cov.as_of)}, Pacific time). Proceeds ≈ ${BASE} at ${cov.fx && cov.fx.source ? cov.fx.source : 'no'} rates${cov.fx && cov.fx.date ? ' of ' + fmtDate(cov.fx.date) : ''}.`}),
+    g.length ? h('ul', {class: 'tight'}, g.map(x => h('li', {}, h('strong', {text: x.source + (x.app ? ' · ' + ((appById[x.app] || {}).name || x.app) : '') + ': '}), x.message, h('div', {class: 'muted', text: x.fix || ''})))) : h('p', {text: 'No gaps recorded.'}));
+}
+
+// ---------- portfolio view ----------
+function portfolioView() {
+  const P = D.portfolio, out = [];
+  if (!SALES) {
+    const s0 = D.signals.find(x => x.kind === 'sales_unavailable');
+    const g = (D.gaps || []).find(x => x.source === 'sales');
+    out.push(h('section', {class: 'card banner' + (VOL ? ' warning' : '')}, h('div', {}, sevTag(VOL ? 'warning' : 'critical'), ' ', h('strong', {text: VOL ? 'No Sales reports: downloads and proceeds come from App Analytics' : 'No sales data'})),
+      h('p', {text: s0 ? s0.detail : 'Sales reports are unavailable.'}), g && g.fix ? h('p', {class: 'muted', text: 'Fix: ' + g.fix}) : null));
+  }
+  out.push(insightsCard(null));
+  out.push(kpiTiles(P, P.series));
+  const labels = labelsNow();
+  if (VOL) {
+    const groups = new Map();
+    D.apps.forEach(a => { const key = a.slot ? a.id : '_other'; if (!groups.has(key)) groups.set(key, {name: a.slot ? a.name : 'Other apps', color: color(a.slot), values: new Array(labels.length).fill(0), slot: a.slot || 99}); const g = groups.get(key); sliceSeries(a.series.downloads).forEach((v, i) => { g.values[i] = v == null ? null : (g.values[i] || 0) + v; }); });
+    if (P.unattributed) { const g = groups.get('_other') || {name: 'Other apps', color: color(0), values: new Array(labels.length).fill(0), slot: 99}; sliceSeries(P.unattributed.series.downloads).forEach((v, i) => { g.values[i] = v == null ? null : (g.values[i] || 0) + v; }); groups.set('_other', g); }
+    const series = [...groups.values()].filter(g => g.values.some(v => v)).sort((a, b) => a.slot - b.slot);
+    const wk = weekly(labels, series);
+    out.push(series.length ? chartCard('First-time downloads by app', wk.weekly ? 'Weekly totals' : 'Per day, Pacific time', stackedColumns({labels: wk.labels, titles: wk.titles, series: wk.series, label: 'First-time downloads by app'}),
+      () => seriesTable(wk, fmtInt), legend(wk.series))
+      : h('section', {class: 'card'}, h('h2', {text: 'First-time downloads by app'}), h('div', {class: 'empty', text: 'No first-time downloads in this period.'})));
+    const wp = weekly(labels, [{name: 'Proceeds', color: 'var(--s1)', values: sliceSeries(P.series.proceeds)}]);
+    out.push(chartCard(`Proceeds (${CUR})`, (wp.weekly ? 'Weekly totals' : 'Per day') + '; refunds subtract', lineChart({labels: wp.labels, titles: wp.titles, series: wp.series, fmt: fmtMoney, integer: false, area: true, label: 'Proceeds over time'}),
+      () => seriesTable(wp, fmtMoney)));
+    if (FUNNEL) out.push(funnelCard(P));
+  }
+  // apps table
+  const rows = D.apps.map(a => ({a, w: win(a)}));
+  out.push(h('section', {class: 'card'}, h('h2', {text: 'Apps'}), h('p', {class: 'hint', text: 'Click a row for the app view. Deltas compare with the previous period of the same length.'}),
+    table([
+      {key: 'name', label: 'App', cell: r => h('div', {class: 'app-cell'}, iconFor(r.a), h('div', {}, h('div', {}, h('strong', {text: r.a.name})), h('div', {class: 'muted', text: r.a.platform + (r.a.listed ? '' : ' · not on store')}))), sort: r => r.a.name.toLowerCase()},
+      {key: 'dl', label: 'Downloads', num: true, cell: r => VOL ? fmtInt(r.w.kpis.downloads) : '—', sort: r => r.w.kpis.downloads},
+      {key: 'dld', label: 'Δ', num: true, cell: r => { if (!VOL) return '—'; const d = delta(r.w.kpis.downloads, r.w.prev && r.w.prev.downloads); return h('span', {class: 'delta ' + d.cls, text: d.text.replace(' vs prior', '')}); }},
+      {key: 'pr', label: 'Proceeds', num: true, cell: r => VOL ? fmtMoney(r.w.kpis.proceeds) : '—', sort: r => r.w.kpis.proceeds},
+      {key: 'iap', label: 'IAP + subs', num: true, cell: r => VOL ? fmtInt(r.w.kpis.iap + r.w.kpis.subs) : '—', sort: r => r.w.kpis.iap + r.w.kpis.subs},
+      {key: 'rf', label: 'Refunds', num: true, cell: r => VOL ? fmtInt(r.w.kpis.refunds) : '—', sort: r => r.w.kpis.refunds},
+      {key: 'rv', label: 'Reviews (all)', num: true, cell: r => r.a.reviews.count ? `${nf2.format(r.a.reviews.avg)}★ · ${r.a.reviews.count}` : '—', sort: r => r.a.reviews.count},
+      {key: 'un', label: 'Unanswered', num: true, cell: r => String(r.a.reviews.unanswered), sort: r => r.a.reviews.unanswered},
+      {key: 'pub', label: 'Public rating', cell: r => ratingText(r.a)},
+      {key: 'ver', label: 'Store version', cell: r => r.a.store.version ? `${r.a.store.version} · ${fmtDate(r.a.store.currentVersionReleaseDate)}` : '—'},
+      {key: 'tr', label: 'Trend', cell: r => VOL ? sparkline(sliceSeries(r.a.series.downloads), 90, 22) : '—'},
+    ], rows, {sortKey: VOL ? 'pr' : 'rv', rowClick: r => go(r.a.id), caption: 'Apps'})));
+  // countries + reviews
+  const pw = win(P);
+  out.push(h('div', {class: 'grid2'},
+    h('section', {class: 'card'}, h('h2', {text: 'Top countries'}), h('p', {class: 'hint', text: 'First-time downloads in the period; proceeds in brackets'}),
+      SALES ? hBars(pw.countries.slice(0, 10).map(c => ({label: c[0], value: c[1], p: c[2]})), fmtInt, it => '  (' + fmtMoneyShort(it.p) + ')') : h('div', {class: 'empty', text: 'Needs sales data.'})),
+    reviewSummaryCard(P.reviews, 'Reviews across all apps')));
+  out.push(signalsCard(D.signals, 'Signals'));
+  out.push(dailyLogCard(P));
+  out.push(runsCard());
+  out.push(gapsCard());
+  return out;
+}
+
+function reviewSummaryCard(rv, title) {
+  const items = ['5', '4', '3', '2', '1'].map(k => ({label: k + '★', value: rv.dist[k] || 0}));
+  return h('section', {class: 'card'}, h('h2', {text: title}),
+    h('p', {class: 'hint', text: rv.count ? `${rv.count} written reviews · average ${nf2.format(rv.avg)}★ · ${rv.unanswered} unanswered (${rv.unanswered_negative} of 3★ or less)` : 'No written reviews yet.'}),
+    rv.count ? hBars(items, fmtInt) : null);
+}
+
+function dailyLogCard(P) {
+  const [lo, hi] = rangeIdx();
+  const rows = [];
+  for (let i = hi; i >= lo; i--) rows.push({i, d: D.days[i], k: D.known[i]});
+  const v = (r, m) => r.k ? P.series[m][r.i] : null;
+  return h('section', {class: 'card'}, h('h2', {text: 'Daily log'}), h('p', {class: 'hint', text: 'One row per day of the selected period. "—" marks a day Apple has not published yet.'}),
+    h('div', {class: 'scroll'}, table([
+      {key: 'd', label: 'Day', cell: r => fmtDate(r.d), sort: r => r.d},
+      {key: 'dl', label: 'Downloads', num: true, cell: r => fmtInt(v(r, 'downloads')), sort: r => v(r, 'downloads')},
+      {key: 'rd', label: 'Redownloads', num: true, cell: r => fmtInt(v(r, 'redownloads'))},
+      {key: 'up', label: 'Updates', num: true, cell: r => fmtInt(v(r, 'updates'))},
+      {key: 'ia', label: 'IAP + subs', num: true, cell: r => r.k ? fmtInt(P.series.iap[r.i] + P.series.subs[r.i]) : '—'},
+      {key: 'rf', label: 'Refunds', num: true, cell: r => fmtInt(v(r, 'refunds'))},
+      {key: 'pr', label: 'Proceeds', num: true, cell: r => fmtMoney(v(r, 'proceeds')), sort: r => v(r, 'proceeds')},
+      {key: 'nr', label: 'New reviews', num: true, cell: r => fmtInt(P.reviews.daily_new[r.i])},
+    ], VOL ? rows : rows.map(r => ({...r, k: 0})), {caption: 'Daily log'})));
+}
+
+function runsCard() {
+  const runs = (D.runs || []).slice().sort((a, b) => a.date < b.date ? 1 : -1);
+  return h('section', {class: 'card'}, h('h2', {text: 'Report history'}), h('p', {class: 'hint', text: 'Each run saves a dated copy of this dashboard next to the data.'}),
+    runs.length ? h('div', {class: 'scroll'}, table([
+      {key: 'd', label: 'Run', cell: r => h('a', {href: (D.meta.link_prefix || '') + r.file, text: fmtDate(r.date)})},
+      {key: 'h', label: 'Headline', cell: r => r.headline || h('span', {class: 'muted', text: 'signals only'})},
+    ], runs, {caption: 'Report history'})) : h('p', {class: 'muted', text: 'This is the first saved run.'}),
+    D.meta.link_prefix === '' ? h('p', {}, h('a', {href: '../dashboard.html', text: 'Open the latest dashboard'})) : null);
+}
+
+// ---------- app view ----------
+function appView(a) {
+  const out = [];
+  const st = a.store || {};
+  const store = safeUrl(st.trackViewUrl, ['apps.apple.com', 'itunes.apple.com']);
+  out.push(h('section', {class: 'card'}, h('div', {class: 'app-head'}, iconFor(a, true), h('div', {},
+    h('h2', {text: a.name}),
+    h('div', {class: 'kv'}, h('span', {text: a.platform}), h('span', {text: a.listed ? 'Live on the App Store' : 'Not found on the public App Store'}),
+      st.formattedPrice ? h('span', {text: 'Price ' + st.formattedPrice}) : null, st.primaryGenreName ? h('span', {text: st.primaryGenreName}) : null,
+      st.version ? h('span', {text: `Store version ${st.version} · released ${fmtDate(st.currentVersionReleaseDate)}`}) : null,
+      h('span', {text: 'Public rating: ' + ratingText(a)}),
+      store ? h('a', {href: store, target: '_blank', rel: 'noopener noreferrer', text: 'App Store page'}) : null),
+    h('div', {class: 'kv'}, h('span', {class: 'muted', text: `App ID ${a.id} · SKU ${a.sku || '—'} · ${a.bundle_id || ''}`}))))));
+  out.push(insightsCard(a.id));
+  const block = ((D.insights || {}).apps || {})[a.id] || {};
+  if ((block.review_themes || []).length || (block.reply_drafts || []).length) out.push(themesCard(a, block));
+  out.push(kpiTiles(a, a.series));
+  const labels = labelsNow();
+  if (VOL) {
+    const [lo] = rangeIdx();
+    const marks = [];
+    (a.versions || []).forEach(v => { if (v.first_seen) { const i = D.days.indexOf(v.first_seen) - lo; if (i >= 0 && i < labels.length) marks.push({i, label: 'v' + v.version}); } });
+    const series = [{name: 'First-time downloads', color: 'var(--s1)', values: sliceSeries(a.series.downloads)}, {name: 'Redownloads', color: 'var(--s2)', values: sliceSeries(a.series.redownloads)}];
+    const wk = weekly(labels, series);
+    const wMarks = wk.weekly ? marks.map(mk => ({...mk, i: wk.labels.reduce((acc, l, k) => l <= labels[mk.i] ? k : acc, 0)})) : marks;
+    out.push(chartCard('Downloads', (wk.weekly ? 'Weekly totals' : 'Per day') + '; a marker shows the first day a version appears in sales',
+      lineChart({labels: wk.labels, titles: wk.titles, series: wk.series, markers: wMarks, label: 'Downloads over time'}),
+      () => seriesTable(wk, fmtInt), legend(series, true)));
+    const ps = [{name: 'Paid downloads', color: 'var(--s1)', values: sliceSeries(a.series.proceeds_app)}, {name: 'In-app and subscriptions', color: 'var(--s2)', values: sliceSeries(a.series.proceeds_iap)}];
+    if (ps.some(x => x.values.some(v => v))) {
+      const wp = weekly(labels, ps.map(x => ({...x, values: x.values.map(v => v == null ? null : Math.max(0, v))})));
+      const wfull = weekly(labels, ps);
+      out.push(chartCard(`Proceeds by source (${CUR})`, (wp.weekly ? 'Weekly' : 'Per day') + '; a refund-heavy day draws at 0 here and shows in full in the table',
+        stackedColumns({labels: wp.labels, titles: wp.titles, series: wp.series, fmt: fmtMoney, integer: false, label: 'Proceeds by source'}),
+        () => seriesTable(wfull, fmtMoney), legend(ps)));
+    } else out.push(h('section', {class: 'card'}, h('h2', {text: `Proceeds (${CUR})`}), h('div', {class: 'empty', text: 'No proceeds in this period.'})));
+    if (FUNNEL) out.push(funnelCard(a));
+    const w = win(a);
+    const devTotal = w.devices.reduce((t, d) => t + d[1], 0);
+    if (SALES) out.push(h('div', {class: 'grid3'},
+      h('section', {class: 'card'}, h('h2', {text: 'Countries'}), h('p', {class: 'hint', text: 'First-time downloads; proceeds in brackets'}),
+        hBars(w.countries.slice(0, 10).map(c => ({label: c[0], value: c[1], p: c[2]})), fmtInt, it => '  (' + fmtMoneyShort(it.p) + ')')),
+      h('section', {class: 'card'}, h('h2', {text: 'Devices'}), h('p', {class: 'hint', text: 'First-time downloads by device'}),
+        devTotal ? h('div', {}, h('div', {class: 'segbar', role: 'img', 'aria-label': w.devices.map(d => `${d[0]} ${d[1]}`).join(', ')}, w.devices.map((d, k) => h('span', {style: `flex:${d[1]};background:${color(k + 1)}`, title: `${d[0]}: ${d[1]}`}))),
+          h('div', {class: 'legend'}, w.devices.map((d, k) => h('span', {}, h('i', {class: 'swatch', style: 'background:' + color(k + 1)}), `${d[0]} ${fmtInt(d[1])} (${Math.round(d[1] / devTotal * 100)}%)`)))) : h('div', {class: 'empty', text: 'No downloads in this period.'})),
+      h('section', {class: 'card'}, h('h2', {text: 'In-app products'}), h('p', {class: 'hint', text: 'Units and proceeds in the period'}),
+        w.products.length ? table([{key: 't', label: 'Product', cell: r => r[0]}, {key: 'u', label: 'Units', num: true, cell: r => fmtInt(r[1]), sort: r => r[1]}, {key: 'p', label: 'Proceeds', num: true, cell: r => fmtMoney(r[2]), sort: r => r[2]}], w.products, {sortKey: 'p'}) : h('div', {class: 'empty', text: 'No in-app sales in this period.'}))));
+  }
+  out.push(h('div', {class: 'grid2'}, reviewSummaryCard(a.reviews, 'Reviews'), ratingsCard(a)));
+  out.push(reviewsCard(a, block));
+  const BLOCKED = new Set(['MISSING_METADATA', 'DEVELOPER_ACTION_NEEDED', 'REJECTED', 'WAITING_FOR_UPLOAD']);
+  if ((a.products || []).length) out.push(h('section', {class: 'card'}, h('h2', {text: 'In-app products in App Store Connect'}),
+    h('p', {class: 'hint', text: 'Review state of each in-app purchase and subscription. Only approved products can be bought.'}),
+    table([
+      {key: 'n', label: 'Product', cell: x => h('div', {}, h('strong', {text: x.name || '—'}), h('div', {class: 'muted', text: x.product_id || ''}))},
+      {key: 'k', label: 'Kind', cell: x => (x.kind === 'subscription' ? 'Subscription' : 'In-app purchase') + (x.type ? ' · ' + x.type : '')},
+      {key: 's', label: 'State', cell: x => BLOCKED.has(x.state) ? h('span', {}, sevTag('warning'), ' ', x.state) : (x.state || '—'), sort: x => BLOCKED.has(x.state) ? 1 : 0},
+    ], a.products, {sortKey: 's'})));
+  out.push(h('section', {class: 'card'}, h('h2', {text: 'Versions'}), h('p', {class: 'hint', text: '"Created" is when the version record was made in App Store Connect, not its release date. "First in sales" is the first day a download of that version appears.'}),
+    (a.versions || []).length ? h('div', {class: 'scroll'}, table([
+      {key: 'v', label: 'Version', cell: v => v.version}, {key: 'p', label: 'Platform', cell: v => v.platform || '—'}, {key: 's', label: 'State', cell: v => v.state || '—'},
+      {key: 'c', label: 'Created', cell: v => fmtDate(v.created), sort: v => v.created}, {key: 'f', label: 'First in sales', cell: v => v.first_seen ? fmtDate(v.first_seen) : '—'},
+    ], a.versions, {sortKey: 'c'})) : h('p', {class: 'muted', text: 'No versions fetched.'})));
+  out.push(signalsCard(a.signals, 'Signals for this app'));
+  return out;
+}
+
+function ratingsCard(a) {
+  const r = a.ratings || {}, hist = a.rating_history || [];
+  const card = h('section', {class: 'card'}, h('h2', {text: 'Public rating'}));
+  card.append(h('p', {class: 'hint', text: 'From the public App Store lookup, captured once per run; Apple shows no count below a threshold and none for Mac apps.'}));
+  card.append(h('p', {}, h('strong', {text: ratingText(a)}), r.countries ? h('span', {class: 'muted', text: ` across ${r.countries} storefronts`}) : null));
+  if (hist.length >= 2) card.append(lineChart({labels: hist.map(x => x[0]), series: [{name: 'Rating count', color: 'var(--s1)', values: hist.map(x => x[2])}], height: 160, label: 'Public rating count over time'}));
+  else card.append(h('p', {class: 'muted', text: 'A rating history builds up as daily runs accumulate.'}));
+  return card;
+}
+
+function themesCard(a, block) {
+  const card = h('section', {class: 'card'}, h('h2', {text: 'What reviewers say'}), h('p', {class: 'hint', text: 'Themes and reply drafts written by the agent from the review text. Drafts are never posted; copy one into App Store Connect if you want to use it.'}));
+  if ((block.review_themes || []).length) card.append(h('div', {style: 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px'}, block.review_themes.map(t =>
+    h('span', {class: 'chip'}, h('span', {class: 'sev ' + (t.sentiment === 'negative' ? 'warning' : t.sentiment === 'positive' ? 'good' : 'info')}, h('i', {'aria-hidden': 'true'})), `${t.theme}${t.count ? ' · ' + t.count : ''} (${t.sentiment || 'mixed'})`))));
+  const byId = Object.fromEntries((a.review_list || []).map(r => [r.id, r]));
+  (block.reply_drafts || []).forEach(d => {
+    const r = byId[d.review_id];
+    const copy = h('button', {class: 'btn', type: 'button', text: 'Copy draft'});
+    copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(d.draft); copy.textContent = 'Copied'; } catch (e) { copy.textContent = 'Select the text to copy'; } });
+    card.append(h('div', {class: 'review'}, r ? h('div', {class: 'meta'}, h('span', {class: 'stars', text: '★'.repeat(r.rating || 0)}), h('span', {text: fmtDate(r.created)}), h('span', {text: r.territory})) : null,
+      r ? h('div', {class: 'title', text: r.title}) : null, h('div', {class: 'draft', text: d.draft}), copy));
+  });
+  return card;
+}
+
+function reviewsCard(a, block) {
+  const all = a.review_list || [];
+  const terrs = [...new Set(all.map(r => r.territory).filter(Boolean))].sort();
+  const card = h('section', {class: 'card'}, h('h2', {text: 'Customer reviews'}));
+  if (!all.length) { card.append(h('p', {class: 'muted', text: 'No written reviews fetched for this app.'})); return card; }
+  const list = h('div'), count = h('span', {class: 'muted'});
+  const f = state.rv;
+  const starBtns = [5, 4, 3, 2, 1].map(k => { const b = h('button', {class: 'chip', type: 'button', 'aria-pressed': String(f.stars.has(k)), text: k + '★'}); b.addEventListener('click', () => { f.stars.has(k) ? f.stars.delete(k) : f.stars.add(k); b.setAttribute('aria-pressed', String(f.stars.has(k))); paint(); }); return b; });
+  const terr = h('select', {'aria-label': 'Territory'}, h('option', {value: '', text: 'All territories'}), terrs.map(t => h('option', {value: t, text: t})));
+  terr.value = f.territory; terr.addEventListener('change', () => { f.territory = terr.value; paint(); });
+  const resp = h('select', {'aria-label': 'Response state'}, h('option', {value: 'all', text: 'Answered or not'}), h('option', {value: 'unanswered', text: 'Unanswered'}), h('option', {value: 'answered', text: 'Answered'}));
+  resp.value = f.resp; resp.addEventListener('change', () => { f.resp = resp.value; paint(); });
+  const q = h('input', {type: 'search', placeholder: 'Search text', 'aria-label': 'Search review text'}); q.value = f.q;
+  q.addEventListener('input', () => { f.q = q.value; paint(); });
+  const reset = h('button', {class: 'btn', type: 'button', text: 'Reset filters'});
+  reset.addEventListener('click', () => { f.stars.clear(); f.territory = ''; f.resp = 'all'; f.q = ''; terr.value = ''; resp.value = 'all'; q.value = ''; starBtns.forEach(b => b.setAttribute('aria-pressed', 'false')); paint(); });
+  const drafts = Object.fromEntries((block.reply_drafts || []).map(d => [d.review_id, d.draft]));
+  const paint = () => {
+    const needle = f.q.trim().toLowerCase();
+    const shown = all.filter(r => (!f.stars.size || f.stars.has(r.rating)) && (!f.territory || r.territory === f.territory)
+      && (f.resp === 'all' || (f.resp === 'answered') === !!r.response) && (!needle || (r.title + ' ' + r.body).toLowerCase().includes(needle)));
+    count.textContent = `Showing ${shown.length} of ${all.length}`;
+    list.replaceChildren(...(shown.length ? shown.slice(0, 200).map(r => h('article', {class: 'review'},
+      h('div', {class: 'meta'}, h('span', {class: 'stars', 'aria-label': r.rating + ' stars', text: '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0))}), h('span', {text: fmtDate(r.created)}), h('span', {text: r.territory}), h('span', {text: r.nickname}), h('span', {text: r.response ? 'answered' : 'unanswered'}), drafts[r.id] ? h('span', {text: 'reply draft above'}) : null),
+      h('div', {class: 'title', text: r.title}), h('div', {class: 'body', text: r.body}),
+      r.response ? h('div', {class: 'resp', text: 'Your reply' + (r.response.date ? ' (' + fmtDate(r.response.date) + ')' : '') + ': ' + (r.response.body || '')}) : null))
+      : [h('div', {class: 'empty', text: 'No review matches these filters.'})]));
+  };
+  card.append(h('div', {class: 'toolbar'}, starBtns, terr, resp, q, reset, count), list);
+  paint();
+  return card;
+}
+
+// ---------- shell ----------
+const viewSel = document.getElementById('view-select');
+viewSel.append(h('option', {value: 'portfolio', text: 'All apps'}), ...D.apps.map(a => h('option', {value: a.id, text: a.name})));
+const periodBox = document.getElementById('period');
+PERIODS.forEach(([k, label]) => { const b = h('button', {type: 'button', 'data-k': k, text: label}); b.addEventListener('click', () => { state.period = k; render(); }); periodBox.append(b); });
+viewSel.addEventListener('change', () => go(viewSel.value));
+function go(view) { state.view = view; state.sev = 'all'; render(); scrollTo({top: 0}); }
+
+function render() {
+  writeHash();
+  viewSel.value = state.view;
+  periodBox.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.k === state.period)));
+  const [lo, hi] = rangeIdx();
+  document.getElementById('range-line').textContent = `${fmtDate(D.days[lo])} – ${fmtDate(D.days[hi])}`;
+  hideTip();
+  const a = appById[state.view];
+  document.title = (a ? a.name + ' · ' : '') + 'App Store Tracker';
+  main.replaceChildren(...(a ? appView(a) : portfolioView()));
+}
+
+const m = D.meta;
+document.getElementById('meta-line').textContent = `${m.demo ? 'DEMO DATA · ' : ''}${VOL ? 'Downloads and proceeds from ' + SRC + ' through ' + fmtDate(m.as_of) : 'No sales data'} · ${D.apps.length} apps · generated ${m.generated_at.replace('T', ' ').slice(0, 16)}`;
+document.getElementById('footer').append(
+  h('p', {text: `appstore-tracker ${m.version}. Data from App Store Connect through the asc CLI (read-only), public App Store lookups, and ${m.fx && m.fx.source ? m.fx.source : 'no'} exchange rates; proceeds are approximate after conversion.`}),
+  h('p', {text: 'This file holds private sales figures and customer reviews. Keep it local; do not publish it.'}));
+render();
+})();
+</script>
+</body>
+</html>
