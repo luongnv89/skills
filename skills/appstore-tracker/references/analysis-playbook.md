@@ -95,12 +95,14 @@ Pick actions from the signals present. Rank them by expected sales impact for th
 
 Write `insights/<run date>.json` (the path is in `digest.insights_file`). `render` validates it and refuses to build on any error.
 
-**Same-day runs.** When the file already exists (for example a one-app question after a full report), read it and merge, so the day's archive keeps the earlier report:
+**Same-day runs.** When the file already exists, read it and merge, so the day's archive keeps the earlier report. For a one-app follow-up:
 
 - Replace or add only the asked app's `apps.<id>` entry and that app's actions.
 - Keep `date`, `headline`, `summary`, the portfolio actions and the other apps' entries.
 - Drop or re-cite any kept action whose signal id is no longer in today's digest, since a refetch can change the signals.
 - Re-rank the actions and keep at most 5.
+
+A full report (no single app asked) rewrites `headline`, `summary` and the portfolio actions from today's digest, and keeps each app entry it does not rewrite.
 
 ```json
 {

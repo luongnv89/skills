@@ -79,9 +79,9 @@ Run `T render`. It validates the insights file, then writes `dashboard.html` (th
  "archive_written": true, "as_of": "2026-11-04", "insights": "embedded", "apps": 9}
 ```
 
-One archive per day. `--no-insights` never replaces one built from today's insights (`"archive_written": false`).
+One archive per day; `--no-insights` keeps one holding insights (`"archive_written": false`).
 
-**Verify:** the exit code is 0, and the output names the dashboard path with `"insights": "embedded"`.
+**Verify:** the exit code is 0, and the output names the dashboard path with `"insights": "embedded"` (`none` under `--no-insights`).
 
 ## Step 5 — Report
 
@@ -93,7 +93,7 @@ Answer in this order:
 4. **Uncertainty:** the data gaps and the inferences.
 5. **Decision:** "No approval needed", or the access step only the user can take, such as creating a Sales-role key.
 
-**Numbers only:** no Actions; with `"archive_written": false`, name `history/<run date>.html` as today's report.
+**Numbers only:** no headline or Actions; with `"archive_written": false`, name `history/<run date>.html` as today's report.
 
 ## Edge cases
 

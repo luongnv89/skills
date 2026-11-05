@@ -1648,9 +1648,9 @@ def cmd_render(args) -> int:
         history = home / "history"
         history.mkdir(parents=True, exist_ok=True)
         archive = history / f"{run_date}.html"
-        # One archive per day. A numbers-only refresh never replaces a report that today's insights built.
+        # One archive per day. A numbers-only refresh never replaces an archive that embeds insights.
         keep_archive = bool(args.no_insights and archive.exists()
-                            and (home / "insights" / f"{run_date}.json").exists())
+                            and '"insights":null' not in archive.read_text(encoding="utf-8"))
         if not any(r["date"] == run_date for r in model["runs"]):
             model["runs"].append({"date": run_date, "file": archive.name, "headline": (insights or {}).get("headline")})
         elif not keep_archive:  # a kept archive keeps the headline build_model read from its insights file
