@@ -314,7 +314,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**aso-marketing**](skills/aso-marketing/) | 1.5.0 | max | App Store + Google Play keyword and metadata optimization |
 | [**appstore-assets**](skills/appstore-assets/) | 1.3.0 | high | Upload-ready App Store screenshots and creative assets for iPhone, iPad and Mac, including looping header and search videos, from code or a landing page |
 | [**appstore-review-checker**](skills/appstore-review-checker/) | 1.7.0 | high | Pre-submission audit vs Apple guidelines |
-| [**appstore-tracker**](skills/appstore-tracker/) | 1.0.4 | high | Daily downloads, proceeds, store funnel, reviews and ratings for every App Store app via the asc CLI, with trend signals, ranked actions and a dated HTML dashboard |
+| [**appstore-tracker**](skills/appstore-tracker/) | 1.0.5 | high | Daily downloads, proceeds, store funnel, reviews and ratings for every App Store app via the asc CLI, with trend signals, ranked actions and a dated HTML dashboard |
 
 ### Tooling
 

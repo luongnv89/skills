@@ -8,11 +8,11 @@
 <style>
 :root {
   color-scheme: light;
-  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #706e69;
   --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
   --other: #a3a29b; --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
-  --up: #006300; --down: #b42f2f; --accent: #2a78d6;
+  --up: #006300; --down: #b42f2f; --accent: #2368c9;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
@@ -145,6 +145,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
   .actions-table td:last-child::before { content: 'Effort: '; color: var(--ink-2); }
   .actions-table .chip { white-space: normal; max-width: 100%; }
 }
+@media (max-width: 720px) { .filters { position: static; } } /* a sticky bar this tall would hide keyboard focus (WCAG 2.4.11) */
 @media (max-width: 480px) { .seg button { padding: 6px 8px; } }
 </style>
 </head>
@@ -858,12 +859,13 @@ function themesCard(a, block) {
   return card;
 }
 
+const MAX_REVIEWS = 200;
 function reviewsCard(a, block) {
   const all = a.review_list || [];
   const terrs = [...new Set(all.map(r => r.territory).filter(Boolean))].sort();
   const card = h('section', {class: 'card'}, h('h2', {text: 'Customer reviews'}));
   if (!all.length) { card.append(h('p', {class: 'muted', text: 'No written reviews fetched for this app.'})); return card; }
-  const list = h('div'), count = h('span', {class: 'muted'});
+  const list = h('div'), count = h('span', {class: 'muted', role: 'status', 'aria-live': 'polite'});
   const f = state.rv;
   const starBtns = [5, 4, 3, 2, 1].map(k => { const b = h('button', {class: 'chip', type: 'button', 'aria-pressed': String(f.stars.has(k)), text: k + '★'}); b.addEventListener('click', () => { f.stars.has(k) ? f.stars.delete(k) : f.stars.add(k); b.setAttribute('aria-pressed', String(f.stars.has(k))); paint(); }); return b; });
   const terr = h('select', {'aria-label': 'Territory'}, h('option', {value: '', text: 'All territories'}), terrs.map(t => h('option', {value: t, text: t})));
@@ -879,8 +881,10 @@ function reviewsCard(a, block) {
     const needle = f.q.trim().toLowerCase();
     const shown = all.filter(r => (!f.stars.size || f.stars.has(r.rating)) && (!f.territory || r.territory === f.territory)
       && (f.resp === 'all' || (f.resp === 'answered') === !!r.response) && (!needle || (r.title + ' ' + r.body).toLowerCase().includes(needle)));
-    count.textContent = `Showing ${shown.length} of ${all.length}`;
-    list.replaceChildren(...(shown.length ? shown.slice(0, 200).map(r => h('article', {class: 'review'},
+    count.textContent = shown.length > MAX_REVIEWS
+      ? `Showing ${MAX_REVIEWS.toLocaleString()} of ${shown.length.toLocaleString()} matching (${all.length.toLocaleString()} total). Refine the filters to see more.`
+      : `Showing ${shown.length} of ${all.length}`;
+    list.replaceChildren(...(shown.length ? shown.slice(0, MAX_REVIEWS).map(r => h('article', {class: 'review'},
       h('div', {class: 'meta'}, h('span', {class: 'stars', 'aria-label': r.rating + ' stars', text: '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0))}), h('span', {text: fmtDate(r.created)}), h('span', {text: r.territory}), h('span', {text: r.nickname}), h('span', {text: r.response ? 'answered' : 'unanswered'}), drafts[r.id] ? h('span', {text: 'reply draft above'}) : null),
       h('div', {class: 'title', text: r.title}), h('div', {class: 'body', text: r.body}),
       r.response ? h('div', {class: 'resp', text: 'Your reply' + (r.response.date ? ' (' + fmtDate(r.response.date) + ')' : '') + ': ' + (r.response.body || '')}) : null))
