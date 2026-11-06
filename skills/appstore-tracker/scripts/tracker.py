@@ -50,7 +50,7 @@ try:
 except ImportError:  # pragma: no cover - Windows
     fcntl = None
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL_DIR / "assets" / "dashboard.html"
 DEFAULT_HOME = "~/.appstore-tracker"
@@ -389,14 +389,15 @@ def web_session_ok(timeout) -> tuple[bool, str]:
     return bool(st.get("authenticated")), "not authenticated"
 
 
-def fetch_web_analytics(home: Path, app_id: str, first: date, last: date, timeout: int) -> int:
-    """Merge App Analytics daily values into raw/web/<app>.json; the newest fetch wins (Apple revises recent days)."""
+def fetch_web_analytics(home: Path, app_id: str, first: date, last: date, timeout: int) -> tuple[int, int]:
+    """Merge App Analytics daily values into raw/web/<app>.json; the newest fetch wins (Apple revises recent days).
+    Returns (days added by this fetch, days stored in total)."""
     data = asc(["web", "analytics", "overview", "--app", app_id, "--start", first.isoformat(),
                 "--end", last.isoformat(), "--output", "json"], None, max(timeout, 180))
     path = home / "raw" / "web" / f"{app_id}.json"
     store = read_json(path, {}) or {}
     measures = store.setdefault("measures", {})
-    added = 0
+    held = {d for series in measures.values() for d in series}
     for block in ("acquisition", "sales"):
         for m in data.get(block) or []:
             name = WEB_MEASURES.get(m.get("measure"))
@@ -410,11 +411,11 @@ def fetch_web_analytics(home: Path, app_id: str, first: date, last: date, timeou
                 if m.get("meetsThreshold") is False:  # below Apple's privacy threshold: unknown, not zero
                     series.pop(day, None)
                     continue
-                added += day not in series
                 series[day] = point.get("value") or 0
     store["updated"] = datetime.now().isoformat(timespec="seconds")
     write_json(path, store)
-    return added
+    days = {d for series in measures.values() for d in series}
+    return len(days - held), len(days)
 
 
 def fetch_rejection(app_id: str, timeout: int) -> dict:
@@ -736,12 +737,13 @@ def cmd_fetch(args) -> int:
                         return app, None, err
 
                 with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
-                    for app, added, err in pool.map(web, apps):
+                    for app, web_days, err in pool.map(web, apps):
                         if err:
                             summary["errors"].append({"source": "analytics", "app": app["id"], "kind": err.kind, "message": err.message,
                                                       "fix": asc_fix(err, "read App Analytics", None)})
                         else:
-                            counts["analytics_days"] += added
+                            counts["analytics_days_added"] += web_days[0]  # 0 on a same-day rerun
+                            counts["analytics_days_total"] += web_days[1]
                 for app in apps:
                     versions = read_json(home / "raw" / "versions" / f"{app['id']}.json", []) or []
                     latest = max(versions, key=lambda v: v.get("created") or "", default=None)
@@ -898,16 +900,20 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
     else:
         last_day = today_pt() - timedelta(days=1)
         first_day = last_day - timedelta(days=89)
-    if as_of_arg:
+    max_day = last_day  # the last day with known data; later days are unknown, never zero
+    if as_of_arg is not None:  # '' is an invalid date, not "no value"
         try:
             last_day = parse_day(as_of_arg)
         except ValueError:
             raise TrackerError(f"--as-of '{as_of_arg}' is not a YYYY-MM-DD date.", "Pass a date such as 2026-11-04.")
         if last_day < first_day:
             raise TrackerError(f"--as-of {as_of_arg} is before the first sales day {first_day}.",
-                               f"Pass a date between {first_day} and today.")
+                               f"Pass a date between {first_day} and {max_day}.")
+        if last_day > max_day:
+            raise TrackerError(f"--as-of {as_of_arg} is after the last day with data, {max_day}; later days are not published yet.",
+                               f"Pass a date between {first_day} and {max_day}, or omit --as-of.")
     # Review windows follow the calendar, not the sales history, so stale sales never freeze them.
-    review_end = last_day if as_of_arg else max(last_day, today_pt() - timedelta(days=1))
+    review_end = last_day if as_of_arg is not None else max(last_day, today_pt() - timedelta(days=1))
     days = day_range(first_day, last_day)
     idx = {d.isoformat(): i for i, d in enumerate(days)}
     n = len(days)
@@ -1064,7 +1070,7 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
         for w in WINDOWS + ["all"]:
             lo, hi = window_bounds(w)
             cur ={m: round(sum_series(series, lo, hi, m), 2) for m in METRICS}
-            pb = prev_bounds(w)
+            pb = prev_bounds(w) if all(day_known[lo:hi + 1]) else None  # no delta against an unknown day
             prev = {m: round(sum_series(series, pb[0], pb[1], m), 2) for m in METRICS} if pb else None
             cnt, avg = review_window(rs, w)
             pcnt, pavg = review_window(rs, w, back=1)
@@ -1245,11 +1251,16 @@ def app_signals(app, days, day_known, sales_available, prev_price, base) -> list
             out.append(s)
         if k["page_views"] >= 30 and pv["page_views"] >= 30:
             cr, pcr = k["downloads"] / k["page_views"], pv["downloads"] / pv["page_views"]
-            change = pct(cr, pcr)
-            sev = "info" if change is None or abs(change) < 20 else ("good" if cr > pcr else "warning")
-            out.append(sig(aid, "page_conversion_28d", sev, "Product page conversion (28 days)",
-                           f"{name}: {cr:.1%} of product page views became first-time downloads vs {pcr:.1%} in the previous 28 days ({k['page_views']:.0f} vs {pv['page_views']:.0f} page views).",
-                           rate=round(cr, 4), previous=round(pcr, 4), change_pct=change, page_views=k["page_views"]))
+            if cr > 1 or pcr > 1:  # installs straight from search results skip the product page
+                out.append(sig(aid, "page_conversion_28d", "info", "Product page conversion not measurable (28 days)",
+                               f"{name}: {k['downloads']:.0f} first-time downloads vs {k['page_views']:.0f} product page views in 28 days ({pv['downloads']:.0f} vs {pv['page_views']:.0f} in the previous 28). More downloads than page views means many installs came without a product page view, so page conversion is not a share of page views here.",
+                               downloads=k["downloads"], page_views=k["page_views"], previous_downloads=pv["downloads"], previous_page_views=pv["page_views"]))
+            else:
+                change = pct(cr, pcr)
+                sev = "info" if change is None or abs(change) < 20 else ("good" if cr > pcr else "warning")
+                out.append(sig(aid, "page_conversion_28d", sev, "Product page conversion (28 days)",
+                               f"{name}: {cr:.1%} of product page views became first-time downloads vs {pcr:.1%} in the previous 28 days ({k['page_views']:.0f} vs {pv['page_views']:.0f} page views).",
+                               rate=round(cr, 4), previous=round(pcr, 4), change_pct=change, page_views=k["page_views"]))
     if funnel and w28["kpis"]["impressions"] >= 1000:
         k = w28["kpis"]
         ttr = k["page_views"] / k["impressions"]
@@ -1909,7 +1920,7 @@ def cmd_demo(args) -> int:
         (sales_dir / f"{d.isoformat()}.tsv.gz").write_bytes(gzip.compress(buf.getvalue().encode("utf-8"), mtime=0))
     write_json(home / "raw" / "sales" / "status.json", status)
     for k, app in enumerate(apps[:3]):  # synthetic App Analytics funnel: impressions and product page views
-        scale = (300, 520, 90)[k]
+        scale = (300, 3000, 90)[k]  # Demo Puzzle: many impressions, low tap-through, page views above downloads
         imp, pv = {}, {}
         for d in day_range(first, last - timedelta(days=1)):
             base = scale * (1.25 if d.weekday() >= 5 else 1.0) * (0.75 if k == 2 and d > last - timedelta(days=28) else 1.0)

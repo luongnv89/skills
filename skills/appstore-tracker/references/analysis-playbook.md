@@ -21,7 +21,7 @@ Contents: [Metrics](#metrics) · [Data caveats](#data-caveats) · [Signal catalo
 
 In-app rows are attributed to an app through `Parent Identifier` = the app's SKU. With `analytics` as the source, `downloads`, `redownloads`, `updates`, `iap` and `proceeds` are App Analytics totals: there is no country, device, refund, subscription or product split, and proceeds carry no currency field: quote them as reported by App Analytics, without a currency claim.
 
-**Windows.** `kpis_7d`, `kpis_28d` and `kpis_90d` end on `meta.as_of`, the last sales day with a known state. `prev` covers the window of equal length just before it. It is omitted when any day in that earlier window is unknown, so a missing `prev` means "no comparison", not zero. Review counts in a window come from each review's created date.
+**Windows.** `kpis_7d`, `kpis_28d` and `kpis_90d` end on `meta.as_of`, the last sales day with a known state. `prev` covers the window of equal length just before it. It is omitted when any day in either window is unknown, so a missing `prev` means "no comparison", not zero. `--as-of` accepts only days from `meta.first_day` to the last day with data; a later day exits 1, since unpublished days are unknown, not zero. Review counts in a window come from each review's created date.
 
 ## Data caveats
 
@@ -33,7 +33,7 @@ State these in the insights when they affect a claim:
 - **Small numbers.** A signal with `low_volume: true`, or windows under about 20 units, is noise. Say so instead of calling it a trend.
 - **Public ratings.** A count of 0 with written reviews present means Apple shows no public rating, not zero ratings. Apple hides ratings below a threshold, and the public lookup returns none for Mac apps. Say "not shown publicly".
 - **Versions.** `created` is when the version record was made in App Store Connect, not its release date. `first_seen` (the first day the version appears in download rows) is the closest release proxy. The store's `released` date covers only the live version. In update rows, `Version` is the version users upgraded *from*.
-- **Funnel.** Page-view conversion is first-time downloads ÷ product page views, computed by the tracker; tap-through is page views ÷ impressions. Apple's own conversion rate uses unique impressions, so the numbers differ: name the one you quote. Without `funnel_available`, make no funnel claim. Apple Ads, retention and crashes are not collected.
+- **Funnel.** Page-view conversion is first-time downloads ÷ product page views, computed by the tracker; above 100% it is not a share of page views, so the tracker withholds it; tap-through is page views ÷ impressions. Apple's own conversion rate uses unique impressions, so the numbers differ: name the one you quote. Without `funnel_available`, make no funnel claim. Apple Ads, retention and crashes are not collected.
 - **History depth.** Apple keeps about 365 days of daily reports. Public ratings and prices exist only for the days the tracker ran.
 
 ## Signal catalog
@@ -42,7 +42,7 @@ Signal ids are `<app id or portfolio>/<kind>`. Thresholds:
 
 | Kind | Fires when | Severity |
 | --- | --- | --- |
-| `sales_unavailable` | no sales report on disk | critical |
+| `sales_unavailable` | no sales report on disk | warning when App Analytics supplies downloads and proceeds, critical when it does not |
 | `sales_stale` | the last fetch failed on sales, or the newest report is more than 4 days old | critical if it failed, else warning |
 | `trend_downloads_7d`, `trend_downloads_28d`, `trend_proceeds_28d` | a comparison window exists | good/warning if the change is at least 20% and at least 5 units; info otherwise or at low volume |
 | `spike_<day>` | the day is above the trailing 28-day mean + 3σ and at least 5 | good |
@@ -59,7 +59,7 @@ Signal ids are `<app id or portfolio>/<kind>`. Thresholds:
 | `stale_release` | live version older than 120 days | info |
 | `price_change` | US price differs from the previous snapshot | info |
 | `trend_impressions_28d` | App Analytics impressions, 28 days vs the previous 28 | as `trend_*`, floor 100 |
-| `page_conversion_28d` | 30 or more page views in both windows | good/warning on a 20% relative change, else info |
+| `page_conversion_28d` | 30 or more page views in both windows | good/warning on a 20% relative change, else info; info with no rate when downloads exceed page views in either window (installs from search results skip the product page) |
 | `low_tap_through_28d` | 1,000+ impressions and under 3% reach the product page | warning |
 | `products_not_sellable` | an in-app purchase or subscription is MISSING_METADATA, DEVELOPER_ACTION_NEEDED, REJECTED or WAITING_FOR_UPLOAD | warning on a live app, else info |
 | `not_listed` | no public listing; carries the latest version state and, when rejected, the App Review guidelines | critical for a 4.3 spam rejection, warning for other rejections, else info |
