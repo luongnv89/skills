@@ -59,7 +59,7 @@ Signal ids are `<app id or portfolio>/<kind>`. Thresholds:
 | `stale_release` | live version older than 120 days | info |
 | `price_change` | US price differs from the previous snapshot | info |
 | `trend_impressions_28d` | App Analytics impressions, 28 days vs the previous 28 | as `trend_*`, floor 100 |
-| `page_conversion_28d` | 30 or more page views in both windows | good/warning on a 20% relative change, else info; info with no rate when downloads exceed page views in either window (installs from search results skip the product page) |
+| `page_conversion_28d` | 30 or more page views in both windows | good/warning on a 20% relative change, else info; info with no rate when downloads exceed page views in the current window, info with no comparison when they do in the previous one (installs from search results skip the product page) |
 | `low_tap_through_28d` | 1,000+ impressions and under 3% reach the product page | warning |
 | `products_not_sellable` | an in-app purchase or subscription is MISSING_METADATA, DEVELOPER_ACTION_NEEDED, REJECTED or WAITING_FOR_UPLOAD | warning on a live app, else info |
 | `not_listed` | no public listing; carries the latest version state and, when rejected, the App Review guidelines | critical for a 4.3 spam rejection, warning for other rejections, else info |

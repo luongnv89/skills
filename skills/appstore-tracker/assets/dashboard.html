@@ -569,7 +569,7 @@ function kpiTiles(obj, seriesObj) {
     : tile(label, '—', null, null, 'sales data unavailable');
   const pv = k.page_views, ppv = p ? p.page_views : null;
   const conv = pv ? k.downloads / pv : null, pconv = ppv ? p.downloads / ppv : null;
-  const over = conv > 1 || pconv > 1;  // installs from search results skip the product page: not a share of page views
+  // Above 100% installs skipped the product page (search results), so the ratio is not a share of page views.
   const rv = w.reviews;
   return h('div', {class: 'kpis'},
     sales(ASREP ? 'Proceeds (as reported)' : 'Proceeds', 'proceeds', true),
@@ -581,8 +581,8 @@ function kpiTiles(obj, seriesObj) {
     SALES ? sales('Refunds', 'refunds', false, false) : tile('Refunds', '—', null, null, 'needs Sales reports'),
     FUNNEL ? tile('Impressions', fmtInt(k.impressions), delta(k.impressions, p ? p.impressions : null), sp('impressions')) : null,
     FUNNEL ? tile('Product page views', fmtInt(pv), delta(pv, ppv), sp('page_views')) : null,
-    FUNNEL ? (over && conv > 1 ? tile('Page view → download', '—', null, null, 'more downloads than page views')
-      : tile('Page view → download', conv == null ? '—' : (conv * 100).toFixed(1) + '%', conv == null || pconv == null || over ? null : starDeltaPct(conv, pconv))) : null,
+    FUNNEL ? (conv > 1 ? tile('Page view → download', '—', null, null, 'more downloads than page views')
+      : tile('Page view → download', conv == null ? '—' : (conv * 100).toFixed(1) + '%', conv == null || pconv == null || pconv > 1 ? null : starDeltaPct(conv, pconv), null, pconv > 1 ? 'no comparison: prior period above 100%' : '')) : null,
     tile('New reviews', fmtInt(rv.count), delta(rv.count, rv.prev_count)),
     tile('Avg rating, new reviews', rv.avg == null ? '—' : nf2.format(rv.avg) + '★', rv.avg == null ? null : starDelta(rv.avg, rv.prev_avg), null, rv.avg == null ? 'no reviews in period' : ''));
 }
@@ -654,7 +654,7 @@ function gapsCard() {
   const g = D.gaps || [];
   const cov = D.meta;
   return h('section', {class: 'card'}, h('h2', {text: 'Data coverage and gaps'}),
-    h('p', {class: 'hint', text: ASREP ? `App Analytics: ${cov.known_days} of ${cov.total_days} days known (${fmtDate(cov.first_day)} – ${fmtDate(cov.as_of)}, Pacific time). Proceeds as reported by App Analytics, with no currency and no conversion. Refunds, subscriptions, countries and devices need Sales reports.`
+    h('p', {class: 'hint', text: ASREP ? `App Analytics: ${cov.known_days} of ${cov.total_days} days known (${fmtDate(cov.first_day)} – ${fmtDate(cov.as_of)}, Pacific time). Proceeds as reported by App Analytics, with no currency and no conversion. Refunds, subscriptions, countries, devices and in-app products need Sales reports.`
       : `Sales: ${cov.known_days} of ${cov.total_days} days known (${fmtDate(cov.first_day)} – ${fmtDate(cov.as_of)}, Pacific time). Proceeds ≈ ${BASE} at ${cov.fx && cov.fx.source ? cov.fx.source : 'no'} rates${cov.fx && cov.fx.date ? ' of ' + fmtDate(cov.fx.date) : ''}.`}),
     g.length ? h('ul', {class: 'tight'}, g.map(x => h('li', {}, h('strong', {text: x.source + (x.app ? ' · ' + ((appById[x.app] || {}).name || x.app) : '') + ': '}), x.message, h('div', {class: 'muted', text: x.fix || ''})))) : h('p', {text: 'No gaps recorded.'}));
 }
@@ -681,7 +681,7 @@ function portfolioView() {
       () => seriesTable(wk, fmtInt), legend(wk.series))
       : h('section', {class: 'card'}, h('h2', {text: 'First-time downloads by app'}), h('div', {class: 'empty', text: 'No first-time downloads in this period.'})));
     const wp = weekly(labels, [{name: 'Proceeds', color: 'var(--s1)', values: sliceSeries(P.series.proceeds)}]);
-    out.push(chartCard(`Proceeds (${CUR})`, (wp.weekly ? 'Weekly totals' : 'Per day') + '; refunds subtract', lineChart({labels: wp.labels, titles: wp.titles, series: wp.series, fmt: fmtMoney, integer: false, area: true, label: 'Proceeds over time'}),
+    out.push(chartCard(`Proceeds (${CUR})`, (wp.weekly ? 'Weekly totals' : 'Per day') + (SALES ? '; refunds subtract' : ''), lineChart({labels: wp.labels, titles: wp.titles, series: wp.series, fmt: fmtMoney, integer: false, area: true, label: 'Proceeds over time'}),
       () => seriesTable(wp, fmtMoney)));
     if (FUNNEL) out.push(funnelCard(P));
   }
@@ -693,7 +693,7 @@ function portfolioView() {
       {key: 'dl', label: 'Downloads', num: true, cell: r => VOL ? fmtInt(r.w.kpis.downloads) : '—', sort: r => r.w.kpis.downloads},
       {key: 'dld', label: 'Δ', num: true, cell: r => { if (!VOL) return '—'; const d = delta(r.w.kpis.downloads, r.w.prev && r.w.prev.downloads); return h('span', {class: 'delta ' + d.cls, text: d.text.replace(' vs prior', '')}); }},
       {key: 'pr', label: 'Proceeds', num: true, cell: r => VOL ? fmtMoney(r.w.kpis.proceeds) : '—', sort: r => r.w.kpis.proceeds},
-      {key: 'iap', label: 'IAP + subs', num: true, cell: r => VOL ? fmtInt(r.w.kpis.iap + r.w.kpis.subs) : '—', sort: r => r.w.kpis.iap + r.w.kpis.subs},
+      {key: 'iap', label: SALES ? 'IAP + subs' : 'In-app purchases', num: true, cell: r => VOL ? fmtInt(r.w.kpis.iap + r.w.kpis.subs) : '—', sort: r => r.w.kpis.iap + r.w.kpis.subs},
       {key: 'rf', label: 'Refunds', num: true, cell: r => SALES ? fmtInt(r.w.kpis.refunds) : '—', sort: r => r.w.kpis.refunds},
       {key: 'rv', label: 'Reviews (all)', num: true, cell: r => r.a.reviews.count ? `${nf2.format(r.a.reviews.avg)}★ · ${r.a.reviews.count}` : '—', sort: r => r.a.reviews.count},
       {key: 'un', label: 'Unanswered', num: true, cell: r => String(r.a.reviews.unanswered), sort: r => r.a.reviews.unanswered},
@@ -732,7 +732,7 @@ function dailyLogCard(P) {
       {key: 'dl', label: 'Downloads', num: true, cell: r => fmtInt(v(r, 'downloads')), sort: r => v(r, 'downloads')},
       {key: 'rd', label: 'Redownloads', num: true, cell: r => fmtInt(v(r, 'redownloads'))},
       {key: 'up', label: 'Updates', num: true, cell: r => fmtInt(v(r, 'updates'))},
-      {key: 'ia', label: 'IAP + subs', num: true, cell: r => r.k ? fmtInt(P.series.iap[r.i] + P.series.subs[r.i]) : '—'},
+      {key: 'ia', label: SALES ? 'IAP + subs' : 'In-app purchases', num: true, cell: r => r.k ? fmtInt(P.series.iap[r.i] + P.series.subs[r.i]) : '—'},
       {key: 'rf', label: 'Refunds', num: true, cell: r => SALES ? fmtInt(v(r, 'refunds')) : '—'},
       {key: 'pr', label: 'Proceeds', num: true, cell: r => fmtMoney(v(r, 'proceeds')), sort: r => v(r, 'proceeds')},
       {key: 'nr', label: 'New reviews', num: true, cell: r => fmtInt(P.reviews.daily_new[r.i])},

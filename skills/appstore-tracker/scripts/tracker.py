@@ -905,7 +905,7 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
         try:
             last_day = parse_day(as_of_arg)
         except ValueError:
-            raise TrackerError(f"--as-of '{as_of_arg}' is not a YYYY-MM-DD date.", "Pass a date such as 2026-11-04.")
+            raise TrackerError(f"--as-of '{as_of_arg}' is not a YYYY-MM-DD date.", f"Pass a date between {first_day} and {max_day}, or omit --as-of.")
         if last_day < first_day:
             raise TrackerError(f"--as-of {as_of_arg} is before the first sales day {first_day}.",
                                f"Pass a date between {first_day} and {max_day}.")
@@ -1251,10 +1251,14 @@ def app_signals(app, days, day_known, sales_available, prev_price, base) -> list
             out.append(s)
         if k["page_views"] >= 30 and pv["page_views"] >= 30:
             cr, pcr = k["downloads"] / k["page_views"], pv["downloads"] / pv["page_views"]
-            if cr > 1 or pcr > 1:  # installs straight from search results skip the product page
+            if cr > 1:  # installs straight from search results skip the product page
                 out.append(sig(aid, "page_conversion_28d", "info", "Product page conversion not measurable (28 days)",
                                f"{name}: {k['downloads']:.0f} first-time downloads vs {k['page_views']:.0f} product page views in 28 days ({pv['downloads']:.0f} vs {pv['page_views']:.0f} in the previous 28). More downloads than page views means many installs came without a product page view, so page conversion is not a share of page views here.",
                                downloads=k["downloads"], page_views=k["page_views"], previous_downloads=pv["downloads"], previous_page_views=pv["page_views"]))
+            elif pcr > 1:
+                out.append(sig(aid, "page_conversion_28d", "info", "Product page conversion (28 days)",
+                               f"{name}: {cr:.1%} of product page views became first-time downloads ({k['page_views']:.0f} page views). No comparison: the previous 28 days had more downloads than page views ({pv['downloads']:.0f} vs {pv['page_views']:.0f}).",
+                               rate=round(cr, 4), page_views=k["page_views"]))
             else:
                 change = pct(cr, pcr)
                 sev = "info" if change is None or abs(change) < 20 else ("good" if cr > pcr else "warning")
