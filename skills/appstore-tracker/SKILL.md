@@ -4,7 +4,7 @@ description: "Analyze App Store apps via the asc CLI: sales, downloads, reviews 
 license: MIT
 effort: high
 metadata:
-  version: 1.0.3
+  version: 1.0.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
