@@ -33,6 +33,7 @@
     {"name": "ai-job-scout", "source": "skills/ai-job-scout"},
     {"name": "appstore-assets", "source": "skills/appstore-assets"},
     {"name": "appstore-review-checker", "source": "skills/appstore-review-checker"},
+    {"name": "appstore-tracker", "source": "skills/appstore-tracker"},
     {"name": "aso-marketing", "source": "skills/aso-marketing"},
     {"name": "auto-push", "source": "skills/auto-push"},
     {"name": "brand-name-checker", "source": "skills/brand-name-checker"},
