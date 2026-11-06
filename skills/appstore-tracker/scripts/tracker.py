@@ -50,7 +50,7 @@ try:
 except ImportError:  # pragma: no cover - Windows
     fcntl = None
 
-VERSION = "1.0.5"
+VERSION = "1.0.6"
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL_DIR / "assets" / "dashboard.html"
 DEFAULT_HOME = "~/.appstore-tracker"
@@ -1169,7 +1169,7 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
             "series": {m: [round(r[m], 2) for r in daily["_other"]] for m in METRICS},
             "titles": {k: round(v, 2) for k, v in sorted(unattributed.items(), key=lambda kv: -kv[1])[:10]},
         }
-    portfolio["signals"] = portfolio_signals(model_apps, portfolio, sales_available, last_fetch, cfg, volume_source)
+    portfolio["signals"] = portfolio_signals(model_apps, portfolio, sales_available, last_fetch, cfg, volume_source, max_day.isoformat())
     all_signals = portfolio["signals"] + all_signals
 
     gaps = data_gaps(sales_available, last_fetch, fx, pending, parse_errors, model_apps, volume_source, funnel_available)
@@ -1388,7 +1388,7 @@ def app_signals(app, days, day_known, sales_available, prev_price, base) -> list
     return out
 
 
-def portfolio_signals(apps, portfolio, sales_available, last_fetch, cfg, volume_source=None) -> list[dict]:
+def portfolio_signals(apps, portfolio, sales_available, last_fetch, cfg, volume_source=None, newest_day=None) -> list[dict]:
     out = []
     if not sales_available:
         reason = ((last_fetch.get("sales") or {}).get("error_kind") or (last_fetch.get("sales") or {}).get("state") or "not fetched")
@@ -1403,20 +1403,23 @@ def portfolio_signals(apps, portfolio, sales_available, last_fetch, cfg, volume_
             return out
     w7, w28 = portfolio["windows"]["7"], portfolio["windows"]["28"]
     sales = last_fetch.get("sales") or {}
-    lag = (today_pt() - parse_day(w7["to"])).days
+    # Measure staleness from the newest report on disk, not the --as-of day, so a back-dated run does not warn.
+    newest = newest_day or w7["to"]
+    lag = (today_pt() - parse_day(newest)).days
     if sales_available and (sales.get("error_kind") or lag > PENDING_DAYS + 1):
         why = sales.get("error_kind") or "no new reports"
         out.append(sig("portfolio", "sales_stale", "critical" if sales.get("error_kind") else "warning",
-                       f"Sales data stops on {w7['to']}",
-                       f"The newest sales report on disk is {w7['to']}, {lag} days ago ({why} in the last fetch). Recent trends are missing, not flat.",
-                       as_of=w7["to"], lag_days=lag, reason=why))
+                       f"Sales data stops on {newest}",
+                       f"The newest sales report on disk is {newest}, {lag} days ago ({why} in the last fetch). Recent trends are missing, not flat.",
+                       as_of=newest, lag_days=lag, reason=why))
     for w, win in ((7, w7), (28, w28)):
         if win["prev"] and win["complete"]:
             s = trend_signal("portfolio", "All apps", w, "downloads", "downloads", win["kpis"]["downloads"], win["prev"]["downloads"], 5)
             if s:
                 out.append(s)
+    cur = (cfg.get("base_currency") or "USD") if sales_available else "(as reported)"
     if w28["prev"] and w28["complete"]:
-        s = trend_signal("portfolio", "All apps", 28, "proceeds", "proceeds", w28["kpis"]["proceeds"], w28["prev"]["proceeds"], 5, True, (cfg.get("base_currency") or "USD") if sales_available else "(as reported)")
+        s = trend_signal("portfolio", "All apps", 28, "proceeds", "proceeds", w28["kpis"]["proceeds"], w28["prev"]["proceeds"], 5, True, cur)
         if s:
             out.append(s)
     totals = [(a["name"], a["windows"]["90"]["kpis"]["proceeds"]) for a in apps]
@@ -1425,7 +1428,7 @@ def portfolio_signals(apps, portfolio, sales_available, last_fetch, cfg, volume_
         name, top = max(totals, key=lambda x: x[1])
         if top / total >= 0.7 and len(apps) > 1:
             out.append(sig("portfolio", "revenue_concentration_90d", "info", f"{name} earns {top / total:.0%} of proceeds",
-                           f"{name} brought {top:,.2f} of {total:,.2f} {cfg.get('base_currency') or 'USD'} proceeds over 90 days.",
+                           f"{name} brought {top:,.2f} of {total:,.2f} {cur} proceeds over 90 days.",
                            app=name, share=round(top / total, 3)))
     dormant = [a["name"] for a in apps if any(s["kind"] == "dormant" for s in a["signals"])]
     if dormant:

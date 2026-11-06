@@ -145,9 +145,11 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
   .actions-table td:last-child::before { content: 'Effort: '; color: var(--ink-2); }
   .actions-table .chip { white-space: normal; max-width: 100%; }
 }
-@media (max-width: 720px) { .filters { position: static; } }
-@media (min-width: 721px) { html { scroll-padding-top: 72px; } } /* keep focused rows clear of the sticky filter bar */ /* a sticky bar this tall would hide keyboard focus (WCAG 2.4.11) */
+@media (max-width: 720px) { .filters { position: static; } } /* a sticky bar this tall would hide keyboard focus (WCAG 2.4.11) */
+@media (min-width: 721px) { html { scroll-padding-top: 72px; } } /* keep focused rows clear of the sticky filter bar */
 @media (max-width: 480px) { .seg button { padding: 6px 8px; } }
+@media (max-width: 380px) { .seg { display: flex; width: 100%; } .seg button { flex: 1 1 auto; padding: 5px 4px; font-size: 13px; } } /* all five periods fit at 320px */
+@media (pointer: coarse) { button.chip { min-height: 32px; padding: 6px 12px; } }
 </style>
 </head>
 <body>
@@ -856,7 +858,7 @@ function themesCard(a, block) {
     const r = byId[d.review_id];
     const copy = h('button', {class: 'btn', type: 'button', text: 'Copy draft'});
     copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(d.draft); copy.textContent = 'Copied'; } catch (e) { copy.textContent = 'Select the text to copy'; } });
-    card.append(h('div', {class: 'review'}, r ? h('div', {class: 'meta'}, h('span', {class: 'stars', text: '★'.repeat(r.rating || 0)}), h('span', {text: fmtDate(r.created)}), h('span', {text: r.territory})) : null,
+    card.append(h('div', {class: 'review'}, r ? h('div', {class: 'meta'}, h('span', {class: 'stars', role: 'img', 'aria-label': (r.rating || 0) + ' out of 5 stars', text: '★'.repeat(r.rating || 0)}), h('span', {text: fmtDate(r.created)}), h('span', {text: r.territory})) : null,
       r ? h('div', {class: 'title', text: r.title}) : null, h('div', {class: 'draft', text: d.draft}), copy));
   });
   return card;
@@ -889,7 +891,7 @@ function reviewsCard(a, block) {
       ? `Showing ${MAX_REVIEWS.toLocaleString()} of ${shown.length.toLocaleString()} matching (${all.length.toLocaleString()} total). Refine the filters to see more.`
       : `Showing ${shown.length} of ${all.length}`;
     list.replaceChildren(...(shown.length ? shown.slice(0, MAX_REVIEWS).map(r => h('article', {class: 'review'},
-      h('div', {class: 'meta'}, h('span', {class: 'stars', 'aria-label': r.rating + ' stars', text: '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0))}), h('span', {text: fmtDate(r.created)}), h('span', {text: r.territory}), h('span', {text: r.nickname}), h('span', {text: r.response ? 'answered' : 'unanswered'}), drafts[r.id] ? h('span', {text: 'reply draft above'}) : null),
+      h('div', {class: 'meta'}, h('span', {class: 'stars', role: 'img', 'aria-label': (r.rating || 0) + ' out of 5 stars', text: '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0))}), h('span', {text: fmtDate(r.created)}), h('span', {text: r.territory}), h('span', {text: r.nickname}), h('span', {text: r.response ? 'answered' : 'unanswered'}), drafts[r.id] ? h('span', {text: 'reply draft above'}) : null),
       h('div', {class: 'title', text: r.title}), h('div', {class: 'body', text: r.body}),
       r.response ? h('div', {class: 'resp', text: 'Your reply' + (r.response.date ? ' (' + fmtDate(r.response.date) + ')' : '') + ': ' + (r.response.body || '')}) : null))
       : [h('div', {class: 'empty', text: 'No review matches these filters.'})]));
