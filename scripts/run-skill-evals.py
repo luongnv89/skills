@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run a skill's trigger evals: does each prompt make Claude open the skill?
 
-Reads the canonical suite at skills/<name>/evals/evals.json (CONTRIBUTING.md:104)
+Reads the canonical suite at meta/<name>/evals/evals.json (CONTRIBUTING.md:104)
 and replays every `prompt` through `claude -p`, watching the streamed tool calls.
 A case triggers when Claude invokes the Skill tool for this skill, or reads its
 SKILL.md. `kind: negative-trigger` cases must NOT trigger; every other case must.
@@ -103,7 +103,7 @@ def main() -> int:
             return 2
         repo_skill = matches[0]
 
-    suite = repo_skill / "evals" / "evals.json"
+    suite = REPO / "meta" / repo_skill.relative_to(REPO / "skills") / "evals" / "evals.json"
     if not suite.is_file():
         print(f"✗ no eval suite at {suite.relative_to(REPO)}", file=sys.stderr)
         return 2

@@ -4,7 +4,7 @@ description: "Generate a Technical Architecture Document (TAD) from a PRD. Use w
 license: MIT
 effort: max
 metadata:
-  version: 1.7.0
+  version: 1.7.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -218,7 +218,7 @@ A run succeeds only when every item below is verifiable in `tad.md` or the Final
 - [ ] Step Completion Reports are emitted for each phase that ran.
 - [ ] The Final Report opens with `Result:` and the status, and carries `Evidence:` (with the commit hash and the GitHub link to `tad.md` when pushed), `Uncertainty:` and `Decision:` lines.
 - [ ] After a pushed run, `git -C "$repo" status --porcelain` lists none of the files this run wrote.
-- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear (`references/final-report.md` → *Reader checks*; scenario cases in `evals/evals.json`).
+- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear (`references/final-report.md` → *Reader checks*; scenario cases in `meta/tad-generator/evals/evals.json`).
 
 ## Edge Cases
 

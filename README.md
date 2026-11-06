@@ -41,7 +41,7 @@ This catalog release adds three skills. [user-test](skills/user-test/) tests an 
 
 **Earlier upgrade guidance (from 3.0.0):**
 
-- Install [**ship**](skills/ship/docs/README.md): `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill ship`, then replace `/release-manager` invocations with `/ship`.
+- Install [**ship**](meta/ship/docs/README.md): `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill ship`, then replace `/release-manager` invocations with `/ship`.
 - Review and remove the obsolete installed `release-manager` copy yourself; reinstalling does not remove it automatically, and both names can compete for triggers.
 - `/ship [X.Y.Z|major|minor|patch]` runs autonomously by default. Use `/ship --no-auto` to keep step-by-step confirmations.
 
@@ -49,7 +49,7 @@ This catalog release adds three skills. [user-test](skills/user-test/) tests an 
 
 - `herdr-agent-comms` is now [**herdr-agent**](skills/herdr-agent/). Reinstall under the new name and update prompts; installers do not automatically remove the old installed copy, which can still trigger.
 - `plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd); see the [installation note](#product-planning). Its epic output is now a static plan map with status maintained through native GitHub sub-issues. Update parsers expecting `- [x] #N — <id>` to accept `- #N — <id>`.
-- [**cleanup-project**](skills/cleanup-project/docs/README.md#migrating-from-branch-inspector) replaces `branch-inspector`. `convert-documents-to-markdown`, `fork-upstream-sync`, `opencode-sandbox`, `opencode-handoff`, `subagent-creator`, and the `website-cloner` suite are retired from this catalog. Existing installed copies are not automatically removed.
+- [**cleanup-project**](meta/cleanup-project/docs/README.md#migrating-from-branch-inspector) replaces `branch-inspector`. `convert-documents-to-markdown`, `fork-upstream-sync`, `opencode-sandbox`, `opencode-handoff`, `subagent-creator`, and the `website-cloner` suite are retired from this catalog. Existing installed copies are not automatically removed.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 
@@ -222,11 +222,11 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 2.3.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**code-review**](skills/code-review/) | 2.3.1 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**codebase-modernizer**](skills/codebase-modernizer/) | 1.5.0 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.6.0 | low | Target untested branches and edge cases |
 | [**user-test**](skills/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
-| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.7.0 | medium | Usability review using Krug's principles |
+| [**dont-make-me-think**](skills/dont-make-me-think/) | 1.7.1 | medium | Usability review using Krug's principles |
 | [**ux-ax-review**](skills/ux-ax-review/) | 1.3.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
@@ -255,7 +255,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**cleanup-project**](skills/cleanup-project/) | 1.1.0 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.5.0 | medium | Pre-commit + lean, fast GitHub Actions quality gates |
 | [**github-pages-publish**](skills/github-pages-publish/) | 1.1.0 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
-| [**security-setup**](skills/security-setup/) | 1.6.0 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
+| [**security-setup**](skills/security-setup/) | 1.6.1 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**ship**](skills/ship/) | 3.1.0 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 
 ### Product Planning
@@ -263,13 +263,13 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**product-planner**](skills/product-planner/) | 1.2.0 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
-| [**idea-validator**](skills/idea-validator/) | 1.10.0 | max | Market, feasibility, competitor checks for ideas |
-| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.8.0 | high | Score codebase + landing page vs 32 viral principles |
+| [**idea-validator**](skills/idea-validator/) | 1.10.1 | max | Market, feasibility, competitor checks for ideas |
+| [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.8.1 | high | Score codebase + landing page vs 32 viral principles |
 | [**product-launch**](skills/product-launch/) | 1.2.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan |
 | [**brand-name-checker**](skills/brand-name-checker/) | 1.6.0 | max | Trademark, domain, social, registry conflicts |
-| [**prd-generator**](skills/prd-generator/) | 1.6.0 | max | Structured PRD from idea or validate notes |
-| [**tad-generator**](skills/tad-generator/) | 1.7.0 | max | Technical architecture document from PRD |
-| [**tasks-generator**](skills/tasks-generator/) | 1.6.0 | max | Sprint tasks and plan from PRD |
+| [**prd-generator**](skills/prd-generator/) | 1.6.1 | max | Structured PRD from idea or validate notes |
+| [**tad-generator**](skills/tad-generator/) | 1.7.1 | max | Technical architecture document from PRD |
+| [**tasks-generator**](skills/tasks-generator/) | 1.6.1 | max | Sprint tasks and plan from PRD |
 
 > **`plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd)** (idd#502), next to the `issue-creator` it depends on: `asm install https://github.com/luongnv89/idd --skill plan-to-issues`, or the idd Claude Code plugin.
 
@@ -277,14 +277,14 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**ai-job-scout**](skills/ai-job-scout/) | 1.2.0 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence; filterable HTML report for larger searches |
+| [**ai-job-scout**](skills/ai-job-scout/) | 1.2.1 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence; filterable HTML report for larger searches |
 
 ### Frontend & Design
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**frontend-design**](skills/frontend-design/) | 1.5.0 | high | Production UIs with usability-first approach |
-| [**logo-designer**](skills/logo-designer/) | 1.5.0 | medium | 7 SVG logo variants from project context |
+| [**frontend-design**](skills/frontend-design/) | 1.5.1 | high | Production UIs with usability-first approach |
+| [**logo-designer**](skills/logo-designer/) | 1.5.1 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.5.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 | [**design-optimizer**](skills/design-optimizer/) | 1.2.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
 
@@ -292,17 +292,17 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Engine | Version | What it does |
 |---|---|---|
-| drawio-generator | 1.5.0 | draw.io XML — precise, editable, C4, swimlanes |
-| excalidraw-generator | 1.6.0 | Excalidraw JSON — hand-drawn, sketch, wireframes |
+| drawio-generator | 1.5.1 | draw.io XML — precise, editable, C4, swimlanes |
+| excalidraw-generator | 1.6.1 | Excalidraw JSON — hand-drawn, sketch, wireframes |
 
 ### Documentation
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.2.0 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**landing-page-generator**](skills/landing-page-generator/) | 1.8.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
+| [**landing-page-generator**](skills/landing-page-generator/) | 1.8.1 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
 | [**search-optimizer**](skills/search-optimizer/) | 1.2.0 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
-| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.7.0 | high | Technical SEO + AI-bot directives |
+| [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.7.1 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.5.0 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 2.3.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
@@ -311,7 +311,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**aso-marketing**](skills/aso-marketing/) | 1.5.0 | max | App Store + Google Play keyword and metadata optimization |
+| [**aso-marketing**](skills/aso-marketing/) | 1.5.1 | max | App Store + Google Play keyword and metadata optimization |
 | [**appstore-assets**](skills/appstore-assets/) | 1.3.0 | high | Upload-ready App Store screenshots and creative assets for iPhone, iPad and Mac, including looping header and search videos, from code or a landing page |
 | [**appstore-review-checker**](skills/appstore-review-checker/) | 1.7.0 | high | Pre-submission audit vs Apple guidelines |
 | [**appstore-tracker**](skills/appstore-tracker/) | 1.0.6 | high | Daily downloads, proceeds, store funnel, reviews and ratings for every App Store app via the asc CLI, with trend signals, ranked actions and a dated HTML dashboard |
@@ -398,13 +398,16 @@ No. They only guide the agent during development.
 │   ├── <name>/
 │   │   ├── SKILL.md         # Required: frontmatter + instructions
 │   │   ├── references/      # Loaded on demand
-│   │   ├── scripts/ tests/  # Optional helpers and their tests
-│   │   ├── agents/          # Optional subagent prompts
-│   │   ├── evals/           # evals.json trigger/behavior suites
-│   │   └── docs/README.md   # Human-facing docs
+│   │   ├── scripts/         # Optional helpers
+│   │   └── agents/          # Optional subagent prompts
 │   ├── <umbrella>/<child>/  # Suite children (install.sh:44-46)
 │   ├── README.md            # Plugin directory listing page
 │   └── .claude-plugin/      # Generated plugin.json
+├── meta/<name>/             # Non-runtime files, kept out of the 512-file plugin folder
+│   ├── docs/README.md       # Human-facing docs
+│   ├── evals/evals.json     # Trigger/behavior suites
+│   └── tests/               # Tests for the skill's scripts
+├── eval-fixtures/<name>/    # Eval input fixtures
 ├── packages/lstack/         # lstack manifest + runbook
 ├── scripts/                 # Build, validation and eval runners
 ├── tests/                   # lstack packaging tests

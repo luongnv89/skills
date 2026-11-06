@@ -47,7 +47,7 @@ A skill is a folder containing:
 | `scripts/` | Optional | Executable code (Python, Bash, etc.) |
 | `references/` | Optional | Documentation loaded as needed |
 | `agents/` | Optional | Subagent prompts (`CLAUDE.md:19`) |
-| `docs/README.md` | Optional | Human-only catalog page; must start with AI-skip HTML comment (`CLAUDE.md:20`) |
+| `docs/README.md` | Optional | Human-only catalog page; must start with AI-skip HTML comment (`CLAUDE.md:20`). In this repo it lives at `meta/<name>/docs/README.md`, outside the 512-file plugin folder |
 | `assets/` | Optional | Templates, fonts, icons used in output |
 
 ### Progressive Disclosure (Three Levels)
@@ -152,7 +152,7 @@ Suite umbrellas may nest child skills one level deep (`skills/<umbrella>/<child>
 - No capitals: ~~`NotionProjectSetup`~~
 - `name` in frontmatter must equal the parent directory name (`CLAUDE.md:39`)
 
-**No root-level `README.md` inside the skill folder.** Agent-facing docs go in `SKILL.md` or `references/`. Human catalog notes may live at `docs/README.md` with the AI-skip comment (`CLAUDE.md:20`, [CONTRIBUTING.md](../CONTRIBUTING.md)).
+**No root-level `README.md` inside the skill folder.** Agent-facing docs go in `SKILL.md` or `references/`. Human catalog notes may live at `docs/README.md` (in this repo, `meta/<name>/docs/README.md`) with the AI-skip comment (`CLAUDE.md:20`, [CONTRIBUTING.md](../CONTRIBUTING.md)).
 
 ---
 

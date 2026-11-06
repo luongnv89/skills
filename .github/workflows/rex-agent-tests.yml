@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "skills/rex-agent/scripts/**"
-      - "skills/rex-agent/tests/**"
+      - "meta/rex-agent/tests/**"
       - "skills/rex-agent/SKILL.md"
       - "skills/rex-agent/references/**"
       - ".github/workflows/rex-agent-tests.yml"
@@ -12,7 +12,7 @@ on:
     branches: [main]
     paths:
       - "skills/rex-agent/scripts/**"
-      - "skills/rex-agent/tests/**"
+      - "meta/rex-agent/tests/**"
       - "skills/rex-agent/SKILL.md"
       - "skills/rex-agent/references/**"
       - ".github/workflows/rex-agent-tests.yml"
@@ -39,9 +39,9 @@ jobs:
             skills/rex-agent/scripts/grid.py \
             skills/rex-agent/scripts/launch_profile.py \
             skills/rex-agent/scripts/rexlib.py \
-            skills/rex-agent/tests/fake_rex.py
+            meta/rex-agent/tests/fake_rex.py
 
       - name: Run unit tests (fake rex CLI, no Rex app needed)
         run: |
-          cd skills/rex-agent
+          cd meta/rex-agent
           python3 -m unittest discover -s tests -p 'test_*.py' -v

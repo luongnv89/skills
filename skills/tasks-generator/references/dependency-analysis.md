@@ -114,5 +114,5 @@ explain the correction, but may not override the deterministic result.
 Run the local standard-library fixtures from the repository root:
 
 ```bash
-python3 -m unittest discover -s skills/tasks-generator/tests -p 'test_*.py'
+python3 -m unittest discover -s meta/tasks-generator/tests -p 'test_*.py'
 ```

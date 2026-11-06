@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.6.0
+  version: 1.6.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -438,4 +438,4 @@ Optional and propose-only. After the run's result is delivered, run this check:
 - `references/verification-scenarios.md` - no-blindspot manual verification scenarios
 - `references/final-report.md` - final report parts, status rules, and examples
 - `scripts/security_check.py` - reusable local security summary runner
-- `evals/evals.json` - trigger and behavior eval cases with final-report assertions
+- `meta/security-setup/evals/evals.json` - trigger and behavior eval cases with final-report assertions

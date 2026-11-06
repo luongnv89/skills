@@ -48,4 +48,4 @@ Use these when reviewing a run's Final Report, in addition to the correctness it
 | Claims are traceable | Each material claim points to a link, a commit hash, or a `validate.md` section that supports its scope. |
 | Next decision is clear | The `Decision:` line names the pending question or says `No approval needed.`, and the `Next step:` line names the user's action. |
 
-A heading's presence alone does not pass a check. Ask a human reviewer the same four questions. If no reviewer answers, record human understanding as unconfirmed; agent inspection cannot confirm it. Negative-trigger cases in `evals/evals.json` are excluded from these checks.
+A heading's presence alone does not pass a check. Ask a human reviewer the same four questions. If no reviewer answers, record human understanding as unconfirmed; agent inspection cannot confirm it. Negative-trigger cases in `meta/idea-validator/evals/evals.json` are excluded from these checks.

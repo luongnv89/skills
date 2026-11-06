@@ -4,7 +4,7 @@ description: "Generate sprint-based development tasks from a PRD. Use when asked
 license: MIT
 effort: max
 metadata:
-  version: 1.6.0
+  version: 1.6.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -234,7 +234,7 @@ A run succeeds only when every item below is verifiable in `tasks.md` or the Fin
 - [ ] If a prior `tasks.md` existed, a non-empty `tasks_backup_YYYY_MM_DD_HHMMSS.md` was written before it changed.
 - [ ] Step Completion Reports are emitted for each phase that ran.
 - [ ] The Final Report opens with `Result:` and the status, and carries `Evidence:` (with the commit hash and the GitHub link to `tasks.md` when pushed), `Uncertainty:` and `Decision:` lines.
-- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear ([references/final-report.md](references/final-report.md) → *Reader checks*; scenario cases in `evals/evals.json`).
+- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear ([references/final-report.md](references/final-report.md) → *Reader checks*; scenario cases in `meta/tasks-generator/evals/evals.json`).
 
 If a criterion fails, report it as a `×` row in the Phase 6 Step Completion Report and do not claim `COMPLETE`.
 
