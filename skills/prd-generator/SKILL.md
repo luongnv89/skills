@@ -4,7 +4,7 @@ description: "Generate Product Requirements Documents from `idea.md` and `valida
 license: MIT
 effort: max
 metadata:
-  version: 1.6.0
+  version: 1.6.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -206,7 +206,7 @@ A run succeeds only when every item below is verifiable in `prd.md` or the Final
 - [ ] If a previous `prd.md` existed, a non-empty `prd.backup.YYYYMMDD_HHMMSS.md` was written before overwrite.
 - [ ] Step Completion Reports are emitted for each phase that ran.
 - [ ] The Final Report opens with `Result:` and the status, and carries `Evidence:`, `Uncertainty:` and `Decision:` lines.
-- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear (`references/final-report.md` → *Reader checks*; scenario cases in `evals/evals.json`).
+- [ ] Reader checks pass: the result is findable, facts and assumptions are separated, claims are traceable, and the next decision is clear (`references/final-report.md` → *Reader checks*; scenario cases in `meta/prd-generator/evals/evals.json`).
 
 ## Expected Output
 

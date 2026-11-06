@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.10.0
+  version: 1.10.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

@@ -4,7 +4,7 @@ description: "Find open AI engineering jobs that fit a candidate, verify locatio
 license: MIT
 effort: high
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: "Luong NGUYEN"
 ---
 
@@ -92,7 +92,7 @@ Check every item of the **Correctness** and **Understanding** lists in `referenc
 
 ## Testing
 
-Use `evals/evals.json` for positive, boundary, and negative-trigger tests. Grade every non-negative eval against both Acceptance Criteria lists.
+Use `meta/ai-job-scout/evals/evals.json` for positive, boundary, and negative-trigger tests. Grade every non-negative eval against both Acceptance Criteria lists.
 
 ## Self-Improve
 

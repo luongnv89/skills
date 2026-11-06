@@ -145,7 +145,7 @@ const rows = await db.query('SELECT * FROM orders WHERE user_id = ANY($1)', [ids
 \`\`\`
 ```
 
-Expected result: a markdown report with one block per issue, sorted Critical → Low, followed by a phase completion report. See `docs/README.md` for a longer end-to-end example.
+Expected result: a markdown report with one block per issue, sorted Critical → Low, followed by a phase completion report. See `meta/code-review/docs/README.md` for a longer end-to-end example.
 
 ## Edge Cases
 

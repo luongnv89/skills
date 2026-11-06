@@ -59,4 +59,4 @@ Use these when reviewing a run's Final Report, in addition to the correctness it
 | Claims are traceable | The file path, the `N/10` count and each failed check's element ID support the `Result:` line. |
 | Next decision is clear | The `Decision:` line names the pending question or says `No approval needed.` |
 
-A heading's presence alone does not pass a check. Ask a human reviewer the same four questions. If no reviewer answers, record human understanding as unconfirmed; agent inspection cannot confirm it. Negative-trigger cases in `evals/evals.json` are excluded from these checks.
+A heading's presence alone does not pass a check. Ask a human reviewer the same four questions. If no reviewer answers, record human understanding as unconfirmed; agent inspection cannot confirm it. Negative-trigger cases in `meta/diagram-generator/excalidraw-generator/evals/evals.json` are excluded from these checks.

@@ -96,16 +96,16 @@ Hard rules for this catalog (`CLAUDE.md:28-42`):
 2. Quote frontmatter strings containing `:` `#` `-` `<` `>` `|` `,` `&` `?` `!`.
 3. Keep each `SKILL.md` under 500 lines; spill to `references/`.
 4. `name` must exactly match the parent directory name (lowercase, hyphens).
-5. Start every `docs/README.md` with the AI-skip HTML comment (see existing skills).
+5. Put a skill's human docs, eval suite and script tests in `meta/<name>/` (`docs/README.md`, `evals/evals.json`, `tests/`), mirroring its `skills/` path, never inside `skills/`. `init_skill.py` scaffolds `docs/README.md` inside the skill, so move it. Start every `docs/README.md` with the AI-skip HTML comment (see existing skills).
 6. Never hand-edit `dist/`; regenerate via `package_skill.py`.
 7. Do not commit `*-workspace/` contents or secrets.
 8. Run `quick_validate.py` on any skill you touched before opening a PR.
 
 ### Eval Suites (`evals/evals.json`)
 
-A skill may ship a test set at `skills/<name>/evals/evals.json`. The canonical shape is defined by **skill-creator**, which is external to this repo (`CONTRIBUTING.md:18`, `:24-27`) — see `~/.claude/skills/skill-creator/references/schemas.md:9-45`.
+A skill may ship a test set at `meta/<name>/evals/evals.json` (suite children: `meta/<umbrella>/<child>/evals/evals.json`). The canonical shape is defined by **skill-creator**, which is external to this repo (`CONTRIBUTING.md:18`, `:24-27`) — see `~/.claude/skills/skill-creator/references/schemas.md:9-45`.
 
-Input fixtures for those cases live outside the plugin folder, in `eval-fixtures/<name>/` at the repository root, because `skills/` is the Claude plugin folder and the directory portal caps it at 512 files. A case's `files` entries stay relative to the skill root, so they read `../../eval-fixtures/<name>/<fixture>`.
+Suites and their input fixtures live outside the plugin folder, because `skills/` is the Claude plugin folder and the directory portal caps it at 512 files. Fixtures go in `eval-fixtures/<name>/` at the repository root. `meta/<name>/` sits at the same depth as `skills/<name>/`, so a case's `files` entries read `../../eval-fixtures/<name>/<fixture>` from either one.
 
 The suite itself looks like this:
 
@@ -137,7 +137,7 @@ Validate every suite in the catalog:
 python3 scripts/validate-evals.py
 ```
 
-It walks `skills/*/evals/evals.json` and `skills/*/*/evals/evals.json` (suite sub-skills) and reports two tiers:
+It walks `meta/*/evals/evals.json` and `meta/*/*/evals/evals.json` (suite sub-skills) and reports two tiers:
 
 | Tier | Exit | What it catches |
 |---|---|---|

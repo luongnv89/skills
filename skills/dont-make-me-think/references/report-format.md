@@ -173,4 +173,4 @@ Use these when reviewing a run's output, in addition to the correctness items in
 | Claims are traceable | Every issue has a **Where** a developer can locate; every score below 5 has a **Why** naming the element that caused it. |
 | Next decision is clear | The Next Decision line names one choice, or says `No approval needed.` |
 
-A heading's presence alone does not pass a check. Ask a human reviewer the same four questions. If no reviewer answers, record human understanding as unconfirmed; agent inspection cannot confirm it. Negative-trigger cases in `evals/evals.json` are excluded from these checks.
+A heading's presence alone does not pass a check. Ask a human reviewer the same four questions. If no reviewer answers, record human understanding as unconfirmed; agent inspection cannot confirm it. Negative-trigger cases in `meta/dont-make-me-think/evals/evals.json` are excluded from these checks.

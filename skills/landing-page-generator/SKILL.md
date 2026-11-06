@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 1.8.0
+  version: 1.8.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

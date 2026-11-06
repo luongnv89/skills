@@ -4,13 +4,13 @@ on:
   pull_request:
     paths:
       - "skills/user-test/scripts/**"
-      - "skills/user-test/tests/**"
+      - "meta/user-test/tests/**"
       - ".github/workflows/user-test-tests.yml"
   push:
     branches: [main]
     paths:
       - "skills/user-test/scripts/**"
-      - "skills/user-test/tests/**"
+      - "meta/user-test/tests/**"
       - ".github/workflows/user-test-tests.yml"
 
 permissions:
@@ -33,5 +33,5 @@ jobs:
 
       - name: Run unit tests (temp dirs and local processes, no network)
         run: |
-          cd skills/user-test
+          cd meta/user-test
           python3 -m unittest discover -s tests -p 'test_*.py' -v

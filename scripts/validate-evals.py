@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-# Validates: every skills/*/evals/evals.json against the canonical eval schema
-# Usage: python3 scripts/validate-evals.py [--path skills]
+# Validates: every meta/*/evals/evals.json against the canonical eval schema
+# (suites live outside the skills/ plugin folder, which is capped at 512 files)
+# Usage: python3 scripts/validate-evals.py [--path meta]
 #
 # The canonical shape is defined by skill-creator, which is external to this repo
 # (CONTRIBUTING.md:18, :24-27):
@@ -161,7 +162,7 @@ def check_file(path: Path):
 
 def main(argv):
     root = Path(__file__).resolve().parent.parent
-    base = root / "skills"
+    base = root / "meta"
     if len(argv) >= 2 and argv[0] == "--path":
         base = (root / argv[1]).resolve()
 

@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - browse
 metadata:
-  version: 1.8.0
+  version: 1.8.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -229,5 +229,5 @@ Optional and propose-only. After the run's result is delivered, run this check:
 - `references/step-reports.md` — Step Completion Report formats for the three phases.
 - `references/honest-evaluation.md` — the candor rules: no inflation, no invented flaws,
   labelled low-confidence.
-- `scripts/virality_score.py` — deterministic Virality Score + tier helper (`tests/` holds its
+- `scripts/virality_score.py` — deterministic Virality Score + tier helper (`meta/viral-product-evaluator/tests/` holds its
   stdlib fixtures).

@@ -4,7 +4,7 @@ description: "Generate professional diagrams as valid draw.io XML — flowcharts
 license: MIT
 effort: high
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

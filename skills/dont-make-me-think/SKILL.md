@@ -6,7 +6,7 @@ effort: medium
 dependencies:
   - browse
 metadata:
-  version: 1.7.0
+  version: 1.7.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

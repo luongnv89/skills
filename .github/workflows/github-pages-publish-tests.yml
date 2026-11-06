@@ -5,14 +5,14 @@ on:
     paths:
       - "skills/github-pages-publish/scripts/**"
       - "skills/github-pages-publish/assets/**"
-      - "skills/github-pages-publish/tests/**"
+      - "meta/github-pages-publish/tests/**"
       - ".github/workflows/github-pages-publish-tests.yml"
   push:
     branches: [main]
     paths:
       - "skills/github-pages-publish/scripts/**"
       - "skills/github-pages-publish/assets/**"
-      - "skills/github-pages-publish/tests/**"
+      - "meta/github-pages-publish/tests/**"
       - ".github/workflows/github-pages-publish-tests.yml"
 
 permissions:
@@ -35,5 +35,5 @@ jobs:
 
       - name: Run unit tests (temp git repos, no network)
         run: |
-          cd skills/github-pages-publish
+          cd meta/github-pages-publish
           python3 -m unittest discover -s tests -p 'test_*.py' -v

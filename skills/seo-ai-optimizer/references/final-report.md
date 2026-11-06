@@ -95,5 +95,5 @@ Use these when reviewing a run's Final Report, in addition to the correctness it
 
 A heading's presence alone does not pass a check. Ask a human reviewer the same four
 questions. If no reviewer answers, record human understanding as unconfirmed; agent
-inspection cannot confirm it. Negative-trigger cases in `evals/evals.json` are excluded
+inspection cannot confirm it. Negative-trigger cases in `meta/seo-ai-optimizer/evals/evals.json` are excluded
 from these checks.

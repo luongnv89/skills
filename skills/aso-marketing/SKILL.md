@@ -4,7 +4,7 @@ description: "Optimize App Store and Google Play listings via a 7-phase, plan-ap
 license: MIT
 effort: max
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
