@@ -4,7 +4,7 @@
 One section per script; each section's comment block says what it covers.
 
 Run directly (stdlib unittest only, no live tmux needed):
-    python3 -m unittest discover -s skills/tmux-agent-comms/tests -p 'test_*.py'
+    python3 -m unittest discover -s meta/tmux-agent-comms/tests -p 'test_*.py'
 """
 
 
@@ -32,7 +32,7 @@ FAKE_BIN = HERE / "bin"
 # Behavioral tests for broadcast.sh against a fake `tmux` CLI.
 #
 # Run:
-#     python3 -m unittest discover -s skills/tmux-agent-comms/tests -p 'test_*.py'
+#     python3 -m unittest discover -s meta/tmux-agent-comms/tests -p 'test_*.py'
 # ============================================================================
 
 BROADCAST = SCRIPTS / "broadcast.sh"
@@ -169,7 +169,7 @@ class BroadcastTests(unittest.TestCase):
 # Behavioral tests for wait_for_idle.py against a fake `tmux` CLI.
 #
 # Run:
-#     python3 -m unittest discover -s skills/tmux-agent-comms/tests -p 'test_*.py'
+#     python3 -m unittest discover -s meta/tmux-agent-comms/tests -p 'test_*.py'
 # ============================================================================
 
 WAITER = SCRIPTS / "wait_for_idle.py"

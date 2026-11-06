@@ -75,7 +75,7 @@ With no argument, the skill looks in the last project folder or under `IDEAS_ROO
 | `references/final-report.md` | Filled Final Report examples, fill rules and reader checks |
 | `references/edge-cases.md` | Required behavior and final status for each edge case |
 | `scripts/analyze_dependencies.py` | Validates the task graph and computes the critical path and bottlenecks (stdlib only) |
-| `tests/test_analyze_dependencies.py` | Unit tests for the dependency script (`python3 -m unittest discover -s skills/tasks-generator/tests`) |
+| `tests/test_analyze_dependencies.py` | Unit tests for the dependency script (`python3 -m unittest discover -s meta/tasks-generator/tests`) |
 | `evals/evals.json` | Scenario evals: happy path, edge cases and negative triggers |
 
 ## Output

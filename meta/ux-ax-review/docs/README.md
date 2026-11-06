@@ -100,7 +100,7 @@ or sent to third-party AI services as an “improvement.”
 ## Verification
 
 ```bash
-python3 -m unittest discover -s skills/ux-ax-review/tests -v
+python3 -m unittest discover -s meta/ux-ax-review/tests -v
 python3 skills/ux-ax-review/scripts/validate_report.py /path/to/ux-ax-findings.json --markdown /path/to/UX_AX_REVIEW.md
 ```
 

@@ -5,7 +5,7 @@ the Herdr transport, and worker launch.
 One section per contract; each section's comment block says what it covers.
 
 Run directly (stdlib unittest only):
-    python3 -m unittest discover -s skills/issue-work-loop/tests -p 'test_*.py'
+    python3 -m unittest discover -s meta/issue-work-loop/tests -p 'test_*.py'
 """
 
 

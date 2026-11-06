@@ -2,7 +2,7 @@
 
 Run directly from the repository root::
 
-    python3 -m unittest discover -s skills/viral-product-evaluator/tests -p 'test_*.py'
+    python3 -m unittest discover -s meta/viral-product-evaluator/tests -p 'test_*.py'
 
 The CLI tests deliberately use subprocess only to exercise the executable
 boundary.  The calculator itself has no subprocess, network, eval, git, or

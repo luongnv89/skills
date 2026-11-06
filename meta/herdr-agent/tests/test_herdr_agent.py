@@ -4,7 +4,7 @@
 One section per script; each section's comment block says what it covers.
 
 Run directly (stdlib unittest only, no live herdr needed):
-    python3 -m unittest discover -s skills/herdr-agent/tests -p 'test_*.py'
+    python3 -m unittest discover -s meta/herdr-agent/tests -p 'test_*.py'
 """
 
 
