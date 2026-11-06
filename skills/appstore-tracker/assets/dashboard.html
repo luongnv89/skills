@@ -145,7 +145,8 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
   .actions-table td:last-child::before { content: 'Effort: '; color: var(--ink-2); }
   .actions-table .chip { white-space: normal; max-width: 100%; }
 }
-@media (max-width: 720px) { .filters { position: static; } } /* a sticky bar this tall would hide keyboard focus (WCAG 2.4.11) */
+@media (max-width: 720px) { .filters { position: static; } }
+@media (min-width: 721px) { html { scroll-padding-top: 72px; } } /* keep focused rows clear of the sticky filter bar */ /* a sticky bar this tall would hide keyboard focus (WCAG 2.4.11) */
 @media (max-width: 480px) { .seg button { padding: 6px 8px; } }
 </style>
 </head>
@@ -648,11 +649,13 @@ function signalsCard(list, title) {
   const body = h('div');
   const chips = h('div', {class: 'toolbar', role: 'group', 'aria-label': 'Filter signals by severity'});
   const order = ['critical', 'warning', 'good', 'info'];
+  // Build the chips once and flip aria-pressed in place, so the clicked chip keeps keyboard focus.
+  const chipBtns = ['all', ...order].filter(k => k === 'all' || counts[k]).map(k => {
+    const b = h('button', {class: 'chip', type: 'button', 'aria-pressed': String(state.sev === k), text: (k === 'all' ? 'All' : SEV_LABEL[k]) + ' ' + (counts[k] || 0)});
+    b.addEventListener('click', () => { state.sev = k; chipBtns.forEach(c => c.setAttribute('aria-pressed', String(c === b))); paint(); }); return b;
+  });
+  chips.append(...chipBtns);
   const paint = () => {
-    chips.replaceChildren(...['all', ...order].filter(k => k === 'all' || counts[k]).map(k => {
-      const b = h('button', {class: 'chip', type: 'button', 'aria-pressed': String(state.sev === k), text: (k === 'all' ? 'All' : SEV_LABEL[k]) + ' ' + (counts[k] || 0)});
-      b.addEventListener('click', () => { state.sev = k; paint(); }); return b;
-    }));
     const shown = list.filter(x => state.sev === 'all' || x.severity === state.sev)
       .sort((a, b) => order.indexOf(a.severity) - order.indexOf(b.severity));
     body.replaceChildren(shown.length ? table([
@@ -869,6 +872,7 @@ function reviewsCard(a, block) {
   const f = state.rv;
   const starBtns = [5, 4, 3, 2, 1].map(k => { const b = h('button', {class: 'chip', type: 'button', 'aria-pressed': String(f.stars.has(k)), text: k + '★'}); b.addEventListener('click', () => { f.stars.has(k) ? f.stars.delete(k) : f.stars.add(k); b.setAttribute('aria-pressed', String(f.stars.has(k))); paint(); }); return b; });
   const terr = h('select', {'aria-label': 'Territory'}, h('option', {value: '', text: 'All territories'}), terrs.map(t => h('option', {value: t, text: t})));
+  if (f.territory && !terrs.includes(f.territory)) f.territory = ''; // a territory picked on another app
   terr.value = f.territory; terr.addEventListener('change', () => { f.territory = terr.value; paint(); });
   const resp = h('select', {'aria-label': 'Response state'}, h('option', {value: 'all', text: 'Answered or not'}), h('option', {value: 'unanswered', text: 'Unanswered'}), h('option', {value: 'answered', text: 'Answered'}));
   resp.value = f.resp; resp.addEventListener('change', () => { f.resp = resp.value; paint(); });
@@ -901,7 +905,15 @@ viewSel.append(h('option', {value: 'portfolio', text: 'All apps'}), ...D.apps.ma
 const periodBox = document.getElementById('period');
 PERIODS.forEach(([k, label]) => { const b = h('button', {type: 'button', 'data-k': k, text: label}); b.addEventListener('click', () => { state.period = k; render(); }); periodBox.append(b); });
 viewSel.addEventListener('change', () => go(viewSel.value));
-function go(view) { state.view = view; state.sev = 'all'; render(); scrollTo({top: 0}); }
+function go(view) {
+  // Re-rendering <main> removes the control that had focus; move focus to the new view's heading
+  // instead of letting it fall to <body>. The header view select keeps its own focus.
+  const lost = main.contains(document.activeElement) || document.activeElement === document.body;
+  state.view = view; state.sev = 'all'; render(); scrollTo({top: 0});
+  if (!lost) return;
+  const hd = appById[view] ? main.querySelector('h2') : document.getElementById('page-title');
+  if (hd) { hd.setAttribute('tabindex', '-1'); hd.focus({preventScroll: true}); }
+}
 
 function render() {
   writeHash();
