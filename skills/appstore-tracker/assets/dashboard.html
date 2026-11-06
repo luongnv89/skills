@@ -134,15 +134,15 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
 @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } header.top { flex-direction: column; } .tile .value { font-size: 19px; } }
 @media (max-width: 720px) {
   /* Recommended actions: one stacked card per action. Cells: #, [App], Action, Evidence, Impact, Effort. */
-  .actions-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .actions-table thead { display: none; }
   .actions-table table, .actions-table tbody { display: block; }
   .actions-table tbody tr { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 10px 0; border-bottom: 1px solid var(--grid); }
   .actions-table td { display: block; padding: 0; border: 0; text-align: left; min-width: 0; }
   .actions-table td:first-child { color: var(--ink-2); font-weight: 600; }
   .actions-table td:first-child::before { content: '#'; }
   .actions-table td:nth-last-child(4), .actions-table td:nth-last-child(3) { flex: 1 0 100%; overflow-wrap: anywhere; }
-  .actions-table td:nth-last-child(2)::before { content: 'Impact: '; color: var(--muted); }
-  .actions-table td:last-child::before { content: 'Effort: '; color: var(--muted); }
+  .actions-table td:nth-last-child(2)::before { content: 'Impact: '; color: var(--ink-2); }
+  .actions-table td:last-child::before { content: 'Effort: '; color: var(--ink-2); }
   .actions-table .chip { white-space: normal; max-width: 100%; }
 }
 @media (max-width: 480px) { .seg button { padding: 6px 8px; } }
