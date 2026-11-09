@@ -183,7 +183,7 @@ Document what was created/modified:
 - ✅ Created `metadata/app-info/en.json` (Name, Subtitle, Keywords, Description)
   - Name: "Sleep Meditation: ZenMind" (25/30 chars)
   - Subtitle: "Fall Asleep & Ease Stress" (25/30 chars)
-  - Keywords: [100 chars] (90/100 chars = 90% utilization)
+  - Keywords: (98/100 chars = 98% utilization)
   - Description: [4000 chars] (2800/4000 chars = 70% utilization)
 
 - ✅ Created `metadata/app-info/de.json` (German localization)
@@ -213,7 +213,7 @@ Document what was created/modified:
 |-------|-----|---------|--------|
 | Title/Name | 25/30 (83%) | 25/30 (83%) | ✅ Optimal |
 | Subtitle/Short Desc | 25/30 (83%) | 72/80 (90%) | ✅ Good |
-| Keywords/Full Desc | 90/100 (90%) | 2800/4000 (70%) | ✅ Good |
+| Keywords/Full Desc | 98/100 (98%) | 2800/4000 (70%) | ✅ Good |
 
 ## Localization Status
 

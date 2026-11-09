@@ -405,7 +405,7 @@ Or, if issues found:
 ### 🔴 Critical: Prohibited Keyword Found
 
 **Field**: iOS Keywords
-**Issue**: Contains "free meditation" (banned on iOS)
+**Issue**: Contains "free" (banned on iOS)
 **Current**: "guided,mindfulness,free,relief,..."
 **Fix**: Remove "free"; use the characters for another relevant word
 **Action**: Update `metadata/app-info/en.json` → keywords field
