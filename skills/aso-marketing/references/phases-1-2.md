@@ -33,8 +33,8 @@ Ask the user to identify 3-5 direct competitors. For each:
 ### 1.4 Current Performance Baseline
 
 If available, gather:
-- Current keyword rankings
-- Download/install numbers and trends
+- Current rank for each candidate keyword. Record `unranked` or `unknown` where there is no data; Phase 7 measures against this baseline
+- Download/install numbers and trends (and paid conversions, if the app sells anything)
 - Ratings and review sentiment
 - Conversion rate (impressions → installs)
 
@@ -58,8 +58,12 @@ If available, gather:
 | Competitor | Platform | Keywords in Title | Rating | Apparent Strategy |
 |-----------|----------|-------------------|--------|-------------------|
 
+### Keyword Rank Baseline
+| Keyword | Store | Current Rank (or unranked / unknown) | Source and date |
+|---------|-------|--------------------------------------|-----------------|
+
 ### Key Findings
-1. [Finding 1 — most impactful]
+1. [Finding 1 — most impactful. If product signals are weak (rating below 4.0, or recent reviews repeatedly reporting a broken core function), say so: ASO will not fix it]
 
 ### Opportunities
 1. [Opportunity 1 — highest potential impact]
@@ -81,6 +85,8 @@ Build a prioritized, actionable plan based on the analysis.
 - Secondary: [e.g., "Improve conversion rate"]
 
 ### Target Keywords
+Pick keywords the app can win at its current size (`aso_best_practices.md` → Stage-aware targeting). The Rationale column says why each one is winnable now.
+
 #### Primary Keywords (high volume, core relevance)
 | Keyword/Phrase | Est. Volume | Competition | Target Field | Rationale |
 
@@ -95,6 +101,7 @@ Build a prioritized, actionable plan based on the analysis.
 #### App Name / Title
 - Current: "[current]"
 - Proposed: "[proposed]"
+- Brand position: [keyword first / brand first — brand status known or unknown, and the evidence]
 - Rationale: [why this change improves discoverability]
 
 #### Subtitle (iOS) / Short Description (Android)
@@ -118,15 +125,27 @@ Build a prioritized, actionable plan based on the analysis.
 
 ### Visual Asset Recommendations
 - **App Icon:** [assessment and suggestions]
-- **Screenshots:** [ordering, messaging, keyword captions]
+- **Screenshots:** [ordering; one benefit-led caption per screenshot, legible on a phone; what the first three say on their own]
 - **Preview Video:** [if applicable]
 
 ### Localization Strategy
 - Priority markets: [ranked by opportunity]
-- Localization approach per market
+- Per market: researched local keywords (not translations), marked validated or unvalidated; localized screenshots; which localizations the storefront indexes
 
 ### Ratings & Reviews Strategy
 - Current rating, target rating, actions
+- Prompt moment: [the value moment that triggers the native review prompt; never on first launch, never rewarded]
+
+### Localized Pricing (optional — recommendation only)
+Include only when the app sells something and the user names target markets with different purchasing power, or asks about pricing (`aso_best_practices.md` → Localized Pricing). The skill never changes prices or writes them to any file.
+| Tier | Markets | Proposed price (% of base) | Evidence (purchasing power, local competitors) |
+- Per-user cost check: [does a lower tier stay profitable? If not, keep the base price there and say why. Unknown → "unvalidated: confirm costs before applying"]
+
+### Measurement Plan
+- Keywords to track: [primary and secondary, with the Phase 1 baseline rank]
+- Cadence: [e.g., weekly for a measurement window of at least 6 weeks]
+- Outcome metrics: impressions → product page views → downloads → paid conversions
+- Change order: [cycle 1 = the indexed metadata set (title, subtitle, keywords); then one lever per cycle: screenshots, localizations, pricing]
 
 ### Timeline & Priorities
 | Priority | Action | Impact | Effort | Timeline |

@@ -28,7 +28,7 @@ Read `references/aso_best_practices.md` → "Store Policy Compliance" section fo
 
 ### Step 2: Prohibited Keyword Scan
 
-For EACH field in the proposed metadata (name, subtitle, keywords, descriptions), scan for banned terms:
+For EACH field in the proposed metadata (name, subtitle, keywords, descriptions, promotional text, screenshot caption text), in EVERY locale, scan for banned terms. The lists are English: for localized fields, also scan the translated equivalents of each term (e.g. pt-BR "grátis", "melhor"; de-DE "kostenlos", "beste").
 
 **Apple App Store — Banned in title, subtitle, keywords:**
 - Pricing terms: "free", "sale", "discount", "limited time", "on sale"
@@ -51,31 +51,29 @@ Create a compliance matrix:
 ```
 Scan Results:
 
-iOS Name: "Meditation – Sleep & Calm"
-- "Meditation" ✅ OK (core function, not banned)
-- "Sleep" ✅ OK
-- "Calm" ✅ OK
+iOS Name: "Sleep Meditation: ZenMind"
+- "Sleep", "Meditation" ✅ OK (core function, not banned)
+- "ZenMind" ✅ OK (the user's own brand)
 - No prohibited terms found
 
-iOS Subtitle: "Sleep better tonight"
-- "Sleep" ✅ OK
-- "better" ✅ OK (comparative, not superlative — "best" would fail)
+iOS Subtitle: "Fall Asleep & Ease Stress"
+- "Fall Asleep", "Ease Stress" ✅ OK (benefits, no superlative — "best" would fail)
 - No prohibited terms found
 
-iOS Keywords: "meditation,sleep,mindfulness,relaxation,stress relief,breathing,anxiety,sleep sounds,guided,calm"
-- Check each: meditation ✅, sleep ✅, mindfulness ✅, ...
+iOS Keywords: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
+- Check each: guided ✅, mindfulness ✅, relaxation ✅, ...
 - No prohibited terms found
 
 iOS Description:
 - "Sleep better" ✅ OK
-- "500+ guided meditations" ✅ OK (number is OK, just not "#1" or "top")
-- "Calm your mind" ✅ OK
+- "500+ guided meditations" ✅ OK (number is OK, just not "#1" or "top"), if the app really has 500+
+- "Quiet your mind" ✅ OK (avoids the competitor brand "Calm")
 - No prohibited terms found
 
-Android Title: "Meditation – Sleep & Calm"
+Android Title: "Sleep Meditation: ZenMind"
 - Same as iOS, ✅ OK
 
-Android Short Description: "Sleep, meditate, and find calm with 500+ guided meditations and relaxation sounds"
+Android Short Description: "Guided sleep meditation, bedtime stories and breathing for stress relief"
 - All terms ✅ OK
 - No prohibited terms found
 
@@ -90,7 +88,7 @@ Scan all proposed metadata for:
 1. **Competitor brand names** — any mention of:
    - Other meditation apps (e.g., "Calm", "Headspace", "Insight Timer")
    - Any competitor app names should be REMOVED from title, subtitle, keywords, descriptions
-   - Example: ❌ "Better than Calm" → ✅ "Deep sleep and calm" (no competitor names)
+   - Example: ❌ "Better than Calm" → ✅ "Deep Sleep, Less Stress" (no competitor names)
 
 2. **Trademarked terms** — any term the developer doesn't own:
    - Platform trademarks: Apple, Google, iOS, Android (usually OK in description, bad in title/subtitle)
@@ -107,7 +105,7 @@ Matrix for trademark check:
 ```
 Trademark Scan:
 
-iOS Name: "Meditation – Sleep & Calm"
+iOS Name: "Sleep Meditation: ZenMind"
 - No competitor names ✅
 - No trademarked terms ✅
 - No "Featured" claims ✅
@@ -143,7 +141,7 @@ Both Platforms Description:
 Verify all claims in the description are verifiable:
 
 - [ ] "500+ guided meditations" — does the app actually have 500+? If so, OK.
-- [ ] "2M+ users" — is this publicly stated somewhere, or just marketing hope? If unverifiable, remove or change to "Join millions..."
+- [ ] "2M+ users" — is this publicly stated somewhere, or just marketing hope? If unverifiable, remove it; "Join millions..." is just as unverifiable
 - [ ] "Award-winning" — does the app have a real award? If not, ❌ remove.
 - [ ] "Voted best app" — if not actually voted/awarded, ❌ remove.
 - [ ] "Reduce anxiety" — is this a medical claim? If so, requires disclaimer or removal.
@@ -159,13 +157,13 @@ Example corrections:
 
 iOS keywords field must NOT duplicate words from title or subtitle:
 
-- Title: "Meditation – Sleep & Calm"
-- Subtitle: "Sleep better tonight"
-- Keywords should NOT contain: meditation, sleep, calm, better, tonight
-- Keywords example: "mindfulness,relaxation,stress relief,breathing,anxiety,sleep sounds,guided,focus,yoga,wellness"
+- Title: "Sleep Meditation: ZenMind"
+- Subtitle: "Fall Asleep & Ease Stress"
+- Keywords should NOT contain: sleep, meditation, zenmind, fall, asleep, ease, stress
+- Keywords example: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
 
 If duplicates found:
-- ❌ Keywords: "meditation,sleep,calm,..." (bad — wasting 20+ chars on duplicates)
+- ❌ Keywords: "meditation,sleep,stress,..." (bad — wasting characters on duplicates of the title and subtitle)
 - ✅ Keywords: "mindfulness,relaxation,..." (good — new words, maximize character budget)
 
 ### Step 7: Write Compliance Report
@@ -187,8 +185,8 @@ Generate a comprehensive compliance report:
 
 | Field | Proposed Value | Banned Term Found | Status | Fix Required |
 |-------|----------------|-------------------|--------|--------------|
-| Name | "Meditation – Sleep & Calm" | None | ✅ PASS | No |
-| Subtitle | "Sleep better tonight" | None | ✅ PASS | No |
+| Name | "Sleep Meditation: ZenMind" | None | ✅ PASS | No |
+| Subtitle | "Fall Asleep & Ease Stress" | None | ✅ PASS | No |
 | Keywords | "meditation,sleep,mindfulness,..." | None | ✅ PASS | No |
 | Description | [text] | None | ✅ PASS | No |
 | What's New | [text] | None | ✅ PASS | No |
@@ -197,7 +195,7 @@ Generate a comprehensive compliance report:
 
 | Field | Proposed Value | Banned Term Found | Status | Fix Required |
 |-------|----------------|-------------------|--------|--------------|
-| Title | "Meditation – Sleep & Calm" | None | ✅ PASS | No |
+| Title | "Sleep Meditation: ZenMind" | None | ✅ PASS | No |
 | Short Description | [text] | None | ✅ PASS | No |
 | Full Description | [text] | None | ✅ PASS | No |
 
@@ -248,11 +246,11 @@ Generate a comprehensive compliance report:
 | Claim | Field | Verifiable? | Evidence | Status |
 |-------|-------|-----------|----------|--------|
 | "500+ guided meditations" | Description | Yes | App data / store listing | ✅ OK |
-| "2M+ users" | Description | ? | Marketing claim only | ⚠️ Consider changing to "Join millions..." |
+| "2M+ users" | Description | ? | Marketing claim only | ⚠️ Remove unless a public source supports it |
 | "Reduce anxiety" | Description | Qualitative | User reports / testimonials | ✅ OK (not medical claim) |
 
 **Recommendations**:
-- ⚠️ Change "2M+ users" to "Join millions of meditators" (unverifiable number removal)
+- ⚠️ Remove "2M+ users" unless the user can point to a public source (unverifiable claim)
 - ✅ Keep "Reduce anxiety" (lifestyle claim, not medical)
 
 **Overall Content Accuracy Status**: ✅ PASS (with recommended changes)
@@ -322,7 +320,7 @@ Or, if issues found:
 
 Here are the revised fields:
 
-iOS Keywords: "meditation,sleep,mindfulness,guided meditation,relaxation,stress relief,breathing,anxiety,sleep sounds,calm"
+iOS Keywords: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
 
 iOS Subtitle: "Sleep better, stress less"
 

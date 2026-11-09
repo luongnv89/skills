@@ -1,6 +1,8 @@
 # ASO Best Practices Reference (2025-2026)
 
-Comprehensive reference for App Store Optimization techniques across Apple App Store and Google Play Store. This document covers keyword strategy, metadata optimization, conversion optimization, localization, and ongoing measurement.
+Comprehensive reference for App Store Optimization techniques across Apple App Store and Google Play Store. This document covers keyword strategy, metadata optimization, conversion optimization, localization, pricing, and ongoing measurement.
+
+Sections marked *(practitioner)* draw on Darius Pop's X Article "The Ultimate Guide to ASO" (x.com/tyd3n_/status/2117694233301725635, November 3, 2026). They are one indie developer's advice, not Apple or Google rules: present them as starting points, never as guarantees.
 
 ## Table of Contents
 
@@ -13,8 +15,11 @@ Comprehensive reference for App Store Optimization techniques across Apple App S
 7. [Ratings & Reviews Strategy](#ratings--reviews-strategy)
 8. [Algorithm & Ranking Factors](#algorithm--ranking-factors)
 9. [A/B Testing](#ab-testing)
-10. [Common Mistakes](#common-mistakes)
-11. [Character Limits Quick Reference](#character-limits-quick-reference)
+10. [Localized Pricing](#localized-pricing-practitioner)
+11. [Measurement and Iteration](#measurement-and-iteration-practitioner)
+12. [Store Policy Compliance](#store-policy-compliance)
+13. [Common Mistakes](#common-mistakes)
+14. [Character Limits Quick Reference](#character-limits-quick-reference)
 
 ---
 
@@ -41,6 +46,8 @@ Score each keyword on three dimensions:
 
 Target keywords where you score high relevance and volume with manageable difficulty. Avoid high-difficulty keywords unless your app has strong signals (ratings, downloads) to compete.
 
+**Stage-aware targeting *(practitioner)*.** Work in this order: relevance (real search intent for what the app does) → popularity (someone searches it) → difficulty (who already ranks) → opportunity (demand the app can realistically win). A new or small app targets keywords it can win now. It moves to competitive head terms as its ratings and downloads grow. Ranking #1 for a term nobody searches is worth nothing, and a top-volume term owned by apps with millions of downloads is out of reach from day one. Record in the plan why each primary keyword is winnable at the app's current size. Treat a keyword as **winnable** when the median rating count of the current top-10 results is within about 10× of the app's own, or when an ASO tool's difficulty score is in its low or medium band; otherwise mark it watch-only.
+
 ### Long-Tail Keyword Strategy (2025-2026 Focus)
 
 Long-tail keywords have become more valuable because:
@@ -65,6 +72,7 @@ Apple's search combines words across title, subtitle, and keywords. This means:
 - Placing different high-value words in each indexed field
 - Avoiding word repetition across fields (wastes character budget)
 - Testing which combinations produce the best ranking results
+- Keeping an exact phrase together only when that phrase is itself the target query. Combination does not make every pairing rank.
 
 ---
 
@@ -72,9 +80,17 @@ Apple's search combines words across title, subtitle, and keywords. This means:
 
 ### App Name (30 chars)
 - Include your primary keyword alongside the brand name
-- Format options: "BrandName - Primary Keyword" or "BrandName: Short Value Prop"
 - The name carries the strongest indexation weight
 - Keep it readable — don't sacrifice clarity for keyword cramming
+
+**Brand position *(practitioner)*.** Choose the order by whether people already search for the brand:
+
+| Brand status | Order | Example |
+|---|---|---|
+| Unknown: new app, or no evidence users search the brand name | Keyword first | `Habit Tracker: MyApp` |
+| Known: users already search the brand (as they do for Duolingo) | Brand first | `MyApp: Habit Tracker` |
+
+Treat the brand as **known** only with evidence: the brand name appears in the store's search autocomplete, App Analytics shows brand-name searches, or the user says people search for it. Otherwise it is unknown. Keyword-first does not guarantee a better rank. It tells someone scrolling search results what the app does before they know the name. When the brand status is unclear, default to keyword-first and state the assumption in the plan.
 
 ### Subtitle (30 chars)
 - Include your secondary keyword and a benefit
@@ -92,7 +108,7 @@ Apple's search combines words across title, subtitle, and keywords. This means:
 - Prioritize by keyword score (relevance × volume / difficulty)
 
 ### Description (4,000 chars)
-- NOT indexed for search, but critical for conversion
+- NOT indexed for search on Apple, but critical for conversion. Don't stuff it with keywords: it is written for people deciding whether to download. Google Play differs (see below)
 - Description keyword coverage matters for conversion rate — users who see their search terms reflected are more likely to download
 - Structure: Hook → Features → Social Proof → Call to Action
 - First 3 lines visible before "Read More" — make them count
@@ -175,10 +191,16 @@ Each stage matters for ASO because stores reward apps that convert well and reta
 ### Screenshots
 - **Order matters:** Lead with the single most compelling feature
 - **First 2-3 screenshots:** Visible in search results — they must tell the story
-- **Captions:** Include keywords in caption text (OCR-indexed on App Store since June 2025)
+- **Captions:** State a benefit first and use keywords where they read naturally. ASO practitioners report that App Store caption text has been indexed by text recognition since June 2025; Apple has not confirmed it
 - **Show real app UI** — not just marketing graphics
 - **Highlight value propositions** — each screenshot should answer "why should I download?"
 - **Optimal count:** 8-10 screenshots covering core features, edge cases, and social proof
+
+**Screenshot captions *(practitioner)*:**
+- **Benefits, not feature labels.** "See How Much Money You've Saved" beats "Advanced Analytics Dashboard": it gives the viewer a reason to care.
+- **Legible on a phone.** Large type and strong contrast. Light gray text on white fails.
+- **One message per screenshot.** The first screenshot only has to earn the next look, not explain everything.
+- **The first three carry the search result.** Depending on the layout, search results show up to three screenshots, so those three must tell the story on their own.
 
 ### Preview Video
 - First 3 seconds are auto-played in search results — lead with the best moment
@@ -203,6 +225,14 @@ Rank markets by: (1) market size for your category, (2) competition level, (3) l
 - Keyword popularity varies dramatically across markets (a keyword with 70 popularity in the US may have 5 in France)
 - Local competitors differ — run competitor analysis per market
 - Consider character encoding: some languages need more characters for the same meaning
+
+**Market keyword research *(practitioner)*:**
+1. Research the terms people actually use in that market. The literal translation of "budget tracker" may not be what people in Germany, Italy or France search for. Users in a non-English market sometimes search an English keyword, which can be an opening.
+2. Compare their popularity and difficulty, and choose the ones that fit the app.
+3. Adapt the title, subtitle and keywords per locale, and localize the screenshots too.
+4. Treat AI-brainstormed local keywords as hypotheses. Mark them unvalidated until popularity and difficulty data, from an ASO tool or the store's autocomplete, back them up.
+5. Check which localizations each target storefront indexes, from Apple's current App Store Connect Help list of localizations per storefront; if you can't check it, mark the mapping unverified. Apple indexes localizations per storefront, not one independent keyword field per country. Plan the keyword budget per localization, not per country.
+6. Confirm the app is available in each target storefront before planning for it.
 
 ### Key Markets by App Store Revenue (2025-2026)
 1. United States (en-US)
@@ -233,10 +263,11 @@ Rank markets by: (1) market size for your category, (2) competition level, (3) l
 - Review text is indexed by Google Play (not Apple)
 
 ### In-App Review Prompt Strategy
-- **When to prompt:** After a positive action (completed task, achievement, 3rd session)
-- **When NOT to prompt:** After errors, crashes, or during onboarding
+- **When to prompt:** After a moment of value, such as a completed task, a reached milestone or an achievement
+- **When NOT to prompt:** On first launch, after errors or crashes, or during onboarding
+- **Never reward or incentivize a rating,** and never manipulate reviews. Both stores' policies forbid it. Trust comes from genuine ratings: users choose a 4.8-star app with hundreds of reviews over a 3.2-star app with almost none *(practitioner)*
 - **Frequency:** Max once per 30 days; respect "don't ask again"
-- **Use native API:** `SKStoreReviewController` (iOS) / `ReviewManager` (Android)
+- **Use native API:** `AppStore.requestReview(in:)` / SwiftUI `requestReview` (iOS; older code uses `SKStoreReviewController`) / `ReviewManager` (Android). iOS shows the system prompt at most 3 times per 365 days, whatever the app requests
 
 ### Review Response Strategy
 - Respond to negative reviews within 24 hours
@@ -289,6 +320,39 @@ Rank markets by: (1) market size for your category, (2) competition level, (3) l
 3. Short description / subtitle
 4. Description first paragraph
 5. Preview video vs. no video
+
+---
+
+## Localized Pricing *(practitioner)*
+
+Pricing is a conversion lever, not a metadata field. The skill **recommends** a pricing test in the plan and never changes prices: the developer sets them in App Store Connect or the Play Console.
+
+Store currency conversion and tax adjustments are not purchasing-power pricing. A user in a lower-income market who would pay half the base price is worth more than one who pays nothing. Starting points to test, not rules:
+
+| Market tier | Starting price |
+|---|---|
+| Tier 1 | 100% of the base price |
+| Tier 2 | 55–70% of the base price |
+| Tier 3 | 30–40% of the base price |
+
+- Assign tiers from research (purchasing power, local competitors' prices, subscription behaviour), never at random.
+- Check per-user costs first. When variable costs such as AI inference or infrastructure make a lower tier unprofitable, recommend keeping the base price there and say why. When the costs are unknown, ask the user; without an answer, mark the section "unvalidated: confirm costs before applying".
+- On the App Store, lowering a subscription's price in a storefront also applies to existing subscribers there; include that revenue effect, and tell the user to confirm it in Apple's current pricing documentation.
+- Only include this section when the app sells something (a subscription, an in-app purchase or a paid download) and the user names target markets with different purchasing power, or asks about pricing.
+
+---
+
+## Measurement and Iteration *(practitioner)*
+
+ASO compounds over weeks. Nobody wakes up to a million downloads the day after a title change.
+
+- **Baseline before changes.** Record the current rank for each target keyword in Phase 1 (`unranked` or `unknown` when there is no data). When every baseline is `unknown`, the Final Report's Decision asks the user to record ranks in each target storefront before uploading the new metadata.
+- **Track the trend.** Re-check the same keywords on a fixed cadence (for example weekly). A move from #47 to #28 to #16 is a signal. It doesn't prove the metadata caused it: seasonality, updates and competitors also move ranks.
+- **Measure outcomes, not just ranks.** Track impressions → product page views → downloads → paid conversions. Better ranks with flat downloads mean the listing is not converting.
+- **One lever per cycle**, so a change can be attributed. A cycle is one store submission: cycle 1 ships the indexed metadata set (title, subtitle, keywords, per locale); later cycles change one lever each (screenshots, then localizations, then pricing). On iOS the name, subtitle and keywords change only with a new app version submission; promotional text changes without one.
+- **Measurement window:** at least 6 weeks per cycle. A re-run inside the window reviews the data and keeps the metadata unless the user asks for a change.
+- **When ranks stall:** the keywords may be too competitive, the search intent may be wrong, or there may be better, unexplored terms. Revisit the keyword tables before rewriting copy.
+- **ASO cannot save a product nobody wants.** When Phase 1 finds weak product signals (a rating below 4.0, or recent reviews repeatedly reporting a broken core function), say so in the Analysis Report instead of promising ASO gains.
 
 ---
 
@@ -394,6 +458,11 @@ Both Apple and Google enforce strict metadata policies. Violating these policies
 12. **Same metadata across all locales** — Signals lazy localization to both algorithms and users
 13. **Unverifiable superlative claims** — "Fastest", "most popular", "award-winning" without evidence triggers rejection
 14. **Emojis and special characters in titles** — Both stores now prohibit these in titles and subtitles
+15. **Brand-first title for an unknown app** — Searchers can't tell what the app does from a name they've never seen *(practitioner)*
+16. **Chasing the highest-volume keywords from day one** — A new app can't outrank apps with millions of downloads; pick winnable terms first *(practitioner)*
+17. **Feature-label screenshot captions** — "Advanced Analytics Dashboard" gives no reason to download; state the benefit *(practitioner)*
+18. **Prompting for a review on first launch, or rewarding ratings** — Annoying at best, a policy violation at worst *(practitioner)*
+19. **Judging ASO by rank alone, or after one day** — Track ranks over weeks and measure downloads and paid conversions *(practitioner)*
 
 ---
 

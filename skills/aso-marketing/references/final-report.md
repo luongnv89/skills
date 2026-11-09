@@ -34,7 +34,7 @@ the Phase 4-7 criteria as not applicable.
 Result: COMPLETE. Optimized the iOS and Android listings for FocusFlow; wrote 4 metadata files; Phase 3 compliance PASS.
 Evidence: Phase 1 baseline iOS keywords 29/100; after Phase 4 iOS title 29/30, keywords 99/100, Android short description 74/80; Phase 5 re-scan found 0 prohibited terms and 0 competitor names; .bak copies made for 2 overwritten files.
 Uncertainty: Search volumes are heuristic estimates (no keyword tool was available); ranking and conversion effects are untested until the listing is live.
-Decision: No approval needed. Upload the metadata to App Store Connect and Google Play Console, then re-check rankings in 1-2 weeks.
+Decision: No approval needed. Upload the metadata to App Store Connect and Google Play Console, then re-check the tracked keywords weekly against the Phase 1 baseline.
 ```
 
 ## PARTIAL example
