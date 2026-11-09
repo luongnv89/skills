@@ -69,7 +69,7 @@ For Android:
 ### Step 4: Visual Asset Recommendations
 
 - **App Icon**: Assess current icon. If needed, recommend visual changes (color, clarity, distinctiveness)
-- **Screenshots**: Recommend ordering (lead with strongest benefit) and one benefit-led caption per screenshot, legible on a phone (large type, strong contrast), with keywords where they read naturally (iOS OCR-indexes since June 2025). The first three must tell the story on their own
+- **Screenshots**: Recommend ordering (lead with strongest benefit) and one benefit-led caption per screenshot, legible on a phone (large type, strong contrast), with keywords where they read naturally (reportedly OCR-indexed on the App Store since June 2025, per ASO practitioners; Apple has not confirmed it). The first three must tell the story on their own
 - **Preview Video**: Recommend whether one is needed, what to show in first 3 seconds (hook users before they swipe past)
 
 ### Step 5: Localization Strategy
@@ -307,7 +307,7 @@ Start your first guided sleep session tonight and wake up rested.
 | sleep meditation | iOS | unranked | weekly, 6-8 weeks |
 
 - Outcome metrics: impressions → product page views → downloads → paid conversions
-- Change order: cycle 1 ships the indexed metadata set (title, subtitle, keywords); screenshots next cycle; pricing after that
+- Change order: cycle 1 ships the indexed metadata set (title, subtitle, keywords) for the locales the approved plan covers; then one lever per cycle: screenshots, new localizations, pricing
 
 ---
 
@@ -315,7 +315,7 @@ Start your first guided sleep session tonight and wake up rested.
 
 | Priority | Action | Impact | Effort | Timeline |
 |----------|--------|--------|--------|----------|
-| **P0** | Update iOS name + subtitle + keywords (takes 30 min in App Store Connect) | Very High | Low | Week 1 |
+| **P0** | Update iOS name + subtitle + keywords (ships with the next app version submission) | Very High | Low | Week 1 |
 | **P0** | Update Android title + short description (takes 30 min in Google Play Console) | Very High | Low | Week 1 |
 | **P1** | Refresh app icon for better small-size clarity | High | Medium | Week 2-3 |
 | **P1** | Create localization keywords for Japan, Germany | High | Medium | Week 2-4 |

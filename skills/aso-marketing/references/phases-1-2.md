@@ -145,7 +145,7 @@ Include only when the app sells something and the user names target markets with
 - Keywords to track: [primary and secondary, with the Phase 1 baseline rank]
 - Cadence: [e.g., weekly for a measurement window of at least 6 weeks]
 - Outcome metrics: impressions → product page views → downloads → paid conversions
-- Change order: [cycle 1 = the indexed metadata set (title, subtitle, keywords); then one lever per cycle: screenshots, localizations, pricing]
+- Change order: [cycle 1 = the indexed metadata set (title, subtitle, keywords) for the locales this plan covers; then one lever per cycle: screenshots, new localizations, pricing]
 
 ### Timeline & Priorities
 | Priority | Action | Impact | Effort | Timeline |

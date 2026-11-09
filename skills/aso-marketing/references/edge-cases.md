@@ -19,7 +19,7 @@
 ### Apple App Store
 - Indexed fields: title, subtitle, keyword field (100 chars)
 - Description is NOT indexed but affects conversion
-- Screenshot captions are OCR-indexed (since June 2025)
+- Screenshot captions are reportedly OCR-indexed since June 2025 (practitioner reports; Apple has not confirmed it)
 - Custom Product Pages (CPPs) enable audience-specific listings
 - Use `asc` CLI tools if available for metadata sync
 

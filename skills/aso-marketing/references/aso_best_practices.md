@@ -90,7 +90,7 @@ Apple's search combines words across title, subtitle, and keywords. This means:
 | Unknown: new app, or no evidence users search the brand name | Keyword first | `Habit Tracker: MyApp` |
 | Known: users already search the brand (as they do for Duolingo) | Brand first | `MyApp: Habit Tracker` |
 
-Treat the brand as **known** only with evidence: the brand name appears in the store's search autocomplete, App Analytics shows brand-name searches, or the user says people search for it. Otherwise it is unknown. Keyword-first does not guarantee a better rank. It tells someone scrolling search results what the app does before they know the name. When the brand status is unclear, default to keyword-first and state the assumption in the plan.
+Treat the brand as **known** only with evidence: the brand name appears in the store's search autocomplete, Apple Search Ads shows search popularity for the brand name, or the user says people search for it. Otherwise it is unknown. Keyword-first does not guarantee a better rank. It tells someone scrolling search results what the app does before they know the name. When the brand status is unclear, default to keyword-first and state the assumption in the plan.
 
 ### Subtitle (30 chars)
 - Include your secondary keyword and a benefit
@@ -349,7 +349,7 @@ ASO compounds over weeks. Nobody wakes up to a million downloads the day after a
 - **Baseline before changes.** Record the current rank for each target keyword in Phase 1 (`unranked` or `unknown` when there is no data). When every baseline is `unknown`, the Final Report's Decision asks the user to record ranks in each target storefront before uploading the new metadata.
 - **Track the trend.** Re-check the same keywords on a fixed cadence (for example weekly). A move from #47 to #28 to #16 is a signal. It doesn't prove the metadata caused it: seasonality, updates and competitors also move ranks.
 - **Measure outcomes, not just ranks.** Track impressions → product page views → downloads → paid conversions. Better ranks with flat downloads mean the listing is not converting.
-- **One lever per cycle**, so a change can be attributed. A cycle is one store submission: cycle 1 ships the indexed metadata set (title, subtitle, keywords, per locale); later cycles change one lever each (screenshots, then localizations, then pricing). On iOS the name, subtitle and keywords change only with a new app version submission; promotional text changes without one.
+- **One lever per cycle**, so a change can be attributed. A cycle is one store submission: cycle 1 ships the indexed metadata set (title, subtitle, keywords) for the locales the approved plan covers; later cycles change one lever each (screenshots, then new localizations, then pricing). On iOS the name, subtitle and keywords change only with a new app version submission; promotional text changes without one.
 - **Measurement window:** at least 6 weeks per cycle. A re-run inside the window reviews the data and keeps the metadata unless the user asks for a change.
 - **When ranks stall:** the keywords may be too competitive, the search intent may be wrong, or there may be better, unexplored terms. Revisit the keyword tables before rewriting copy.
 - **ASO cannot save a product nobody wants.** When Phase 1 finds weak product signals (a rating below 4.0, or recent reviews repeatedly reporting a broken core function), say so in the Analysis Report instead of promising ASO gains.

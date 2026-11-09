@@ -57,7 +57,7 @@ Once the user approves, implement the changes systematically. Work through the p
 
 ### 4.5 Visual Asset Guidance
 
-- **Screenshots:** Recommend ordering and one benefit-led caption per screenshot ("See How Much Money You've Saved", not "Advanced Analytics Dashboard"), with keywords where they read naturally (OCR-indexed on App Store since June 2025). Captions must be legible on a phone: large type, strong contrast
+- **Screenshots:** Recommend ordering and one benefit-led caption per screenshot ("See How Much Money You've Saved", not "Advanced Analytics Dashboard"), with keywords where they read naturally (reportedly OCR-indexed on the App Store since June 2025, per ASO practitioners; Apple has not confirmed it). Captions must be legible on a phone: large type, strong contrast
 - **App Icon:** Assess clarity at small sizes, color contrast
 - **Preview Video:** First 3 seconds matter most
 
@@ -145,7 +145,7 @@ Cross-reference against `references/aso_best_practices.md`:
 1. Upload metadata to the store(s). On iOS, the name, subtitle and keywords go live only with a new app version submission
 2. Re-check the tracked keywords on the stated cadence against the Phase 1 baseline; judge by downloads and paid conversions, not rank alone
 3. A/B test screenshots and descriptions, one lever per cycle
-4. Apply any approved localized-pricing test in App Store Connect / Play Console (the skill does not change prices)
+4. Apply any recommended localized-pricing test yourself in App Store Connect / Play Console (the skill does not change prices)
 5. Re-run this skill after the measurement window closes (at least 6 weeks)
 
 ### Files Modified

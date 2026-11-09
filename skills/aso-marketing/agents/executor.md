@@ -19,7 +19,7 @@ You receive these parameters in your prompt:
 
 ### Step 1: Load Approved Plan
 
-**Never implement Localized Pricing.** Approval of a plan never covers prices. Don't edit price, in-app purchase or subscription files, fastlane price settings, or run `asc` or console pricing commands. List each pricing item in the implementation notes as a user action in App Store Connect / Play Console.
+**Never implement Localized Pricing.** Approval of a plan never covers prices. Don't edit price, in-app purchase or subscription files, fastlane price settings, or run `asc` or console pricing commands. List each pricing item as a user action in App Store Connect / Play Console, in chat and in the implementation notes as tier percentages only, never amounts.
 
 Read the ASO plan markdown and identify:
 - Approved changes for each metadata field
@@ -50,7 +50,7 @@ Each JSON file format:
 {
   "name": "Sleep Meditation: ZenMind",
   "subtitle": "Fall Asleep & Ease Stress",
-  "keywords": "meditation,sleep,mindfulness,...",
+  "keywords": "guided,mindfulness,relaxation,...",
   "description": "Meditation and sleep made simple...",
   "release_notes": "Latest update: Added 50 new..."
 }
@@ -182,7 +182,7 @@ Document what was created/modified:
 ### iOS Metadata
 - ✅ Created `metadata/app-info/en.json` (Name, Subtitle, Keywords, Description)
   - Name: "Sleep Meditation: ZenMind" (25/30 chars)
-  - Subtitle: "Fall Asleep & Ease Stress" (20/30 chars)
+  - Subtitle: "Fall Asleep & Ease Stress" (25/30 chars)
   - Keywords: [100 chars] (90/100 chars = 90% utilization)
   - Description: [4000 chars] (2800/4000 chars = 70% utilization)
 
@@ -195,10 +195,10 @@ Document what was created/modified:
 
 ### Android Metadata
 - ✅ Created `fastlane/metadata/android/en-US/title.txt`
-  - "Sleep Meditation: ZenMind" (27/30 chars)
+  - "Sleep Meditation: ZenMind" (25/30 chars)
 
 - ✅ Created `fastlane/metadata/android/en-US/short_description.txt`
-  - "Guided sleep meditation, bedtime stories and breathing for stress relief" (61/80 chars)
+  - "Guided sleep meditation, bedtime stories and breathing for stress relief" (72/80 chars)
 
 - ✅ Created `fastlane/metadata/android/en-US/full_description.txt`
   - Full description with natural keyword integration
@@ -211,8 +211,8 @@ Document what was created/modified:
 
 | Field | iOS | Android | Status |
 |-------|-----|---------|--------|
-| Title/Name | 25/30 (83%) | 27/30 (90%) | ✅ Optimal |
-| Subtitle/Short Desc | 20/30 (67%) | 61/80 (76%) | ✅ Good |
+| Title/Name | 25/30 (83%) | 25/30 (83%) | ✅ Optimal |
+| Subtitle/Short Desc | 25/30 (83%) | 72/80 (90%) | ✅ Good |
 | Keywords/Full Desc | 90/100 (90%) | 2800/4000 (70%) | ✅ Good |
 
 ## Localization Status
@@ -238,7 +238,7 @@ Document what was created/modified:
    - [ ] Collect user feedback from reviews
 
 4. **Timeline**:
-   - App Store: Changes live within ~24-48 hours
+   - App Store: name, subtitle and keywords go live only with a new app version submission (usually reviewed within ~24-48 hours); promotional text changes without one
    - Google Play: Changes live within a few minutes to a few hours
 
 ---

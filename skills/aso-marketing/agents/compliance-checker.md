@@ -187,7 +187,7 @@ Generate a comprehensive compliance report:
 |-------|----------------|-------------------|--------|--------------|
 | Name | "Sleep Meditation: ZenMind" | None | ✅ PASS | No |
 | Subtitle | "Fall Asleep & Ease Stress" | None | ✅ PASS | No |
-| Keywords | "meditation,sleep,mindfulness,..." | None | ✅ PASS | No |
+| Keywords | "guided,mindfulness,relaxation,..." | None | ✅ PASS | No |
 | Description | [text] | None | ✅ PASS | No |
 | What's New | [text] | None | ✅ PASS | No |
 
@@ -285,23 +285,23 @@ Or, if issues found:
 ### 1. Prohibited Keyword Violation
 **Field**: iOS Keywords
 **Issue**: Contains "free" which is banned on iOS
-**Current**: "...meditation,sleep,free meditation,..."
-**Fix**: Remove "free meditation" and replace with "guided meditation"
-**Revised**: "meditation,sleep,mindfulness,guided meditation,..."
+**Current**: "...guided,mindfulness,free,..."
+**Fix**: Remove "free" and use the characters for another relevant word
+**Revised**: "guided,mindfulness,relaxation,..."
 
 ### 2. Competitor Trademark
 **Field**: iOS Subtitle
 **Issue**: "Better than Calm" mentions competitor brand "Calm" (trademarked)
 **Current**: "Better than Calm – sleep better"
 **Fix**: Remove competitor reference, focus on value proposition
-**Revised**: "Sleep better, stress less"
+**Revised**: "Fall Asleep & Ease Stress"
 
 ### 3. Unverifiable Claim
 **Field**: Android Full Description
 **Issue**: "Voted Best Meditation App 2025" — is this a real award?
 **Current**: "Voted Best Meditation App 2025"
 **Fix**: If real, provide award name. If not, remove.
-**Revised**: Remove or change to "Loved by users worldwide"
+**Revised**: Remove it (a vague replacement such as "Loved by users worldwide" is just as unverifiable)
 
 ---
 
@@ -322,7 +322,7 @@ Here are the revised fields:
 
 iOS Keywords: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
 
-iOS Subtitle: "Sleep better, stress less"
+iOS Subtitle: "Fall Asleep & Ease Stress"
 
 Android Full Description: [revised text without award claim]
 ```

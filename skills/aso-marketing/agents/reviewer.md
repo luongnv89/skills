@@ -236,16 +236,16 @@ The ASO implementation has been reviewed against:
 ### Character Limits
 | Field | iOS | Android | Status |
 |-------|-----|---------|--------|
-| Name/Title | 25/30 | 27/30 | ✅ OK |
-| Subtitle/Short Desc | 20/30 | 61/80 | ✅ OK |
-| Keywords/Description | 90/100 | 2800/4000 | ✅ OK |
+| Name/Title | 25/30 | 25/30 | ✅ OK |
+| Subtitle/Short Desc | 25/30 | 72/80 | ✅ OK |
+| Keywords/Description | 98/100 | 2800/4000 | ✅ OK |
 
 ### Keyword Duplication (iOS)
 ✅ **PASS** — Keywords field contains no duplicates of Name or Subtitle
 - Name: "Sleep Meditation: ZenMind"
 - Subtitle: "Fall Asleep & Ease Stress"
-- Keywords: "mindfulness,relaxation,stress relief,breathing,anxiety,sleep sounds,guided,focus,yoga,wellness"
-- No overlap detected
+- Keywords: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
+- No overlap detected (no keyword repeats sleep, meditation, zenmind, fall, asleep, ease or stress)
 
 ### Formatting
 ✅ **PASS** — No emojis, ALL CAPS, or special character issues
@@ -376,7 +376,7 @@ Implementation is high-quality with no notable gaps.
    - [ ] Plan re-optimization after the measurement window closes (at least 6 weeks)
 
 4. **Timeline**:
-   - iOS: Changes live in ~24-48 hours
+   - iOS: name, subtitle and keywords go live only with a new app version submission (usually reviewed within ~24-48 hours); promotional text changes without one
    - Android: Changes live in minutes to a few hours
 
 ---
@@ -406,8 +406,8 @@ Or, if issues found:
 
 **Field**: iOS Keywords
 **Issue**: Contains "free meditation" (banned on iOS)
-**Current**: "meditation,sleep,mindfulness,free meditation,stress relief,..."
-**Fix**: Remove "free meditation", replace with "guided meditation" or similar
+**Current**: "guided,mindfulness,free,relief,..."
+**Fix**: Remove "free"; use the characters for another relevant word
 **Action**: Update `metadata/app-info/en.json` → keywords field
 
 ---
@@ -415,10 +415,10 @@ Or, if issues found:
 ### 🟡 Medium: Keyword Utilization Below Target
 
 **Field**: iOS Keywords
-**Issue**: Using only 65/100 characters (65% utilization, target >85%)
-**Current**: "meditation,sleep,mindfulness,anxiety,relaxation" (45 chars)
-**Fix**: Add 3-5 more keywords: "breathing,stress,focus,sleep sounds,yoga,unwind"
-**Expected**: "meditation,sleep,mindfulness,anxiety,relaxation,breathing,stress,focus,sleep sounds,yoga,unwind" (~90 chars)
+**Issue**: Using only 37/100 characters (37% utilization, target >85%)
+**Current**: "guided,mindfulness,anxiety,relaxation" (37 chars)
+**Fix**: Add more single words that don't repeat the name or subtitle: "breathing,relief,bedtime,story,sounds,rest,unwind,night,deep"
+**Expected**: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep" (98 chars)
 **Action**: Update `metadata/app-info/en.json` → keywords field
 
 ---
@@ -439,7 +439,7 @@ After fixing the above 2 issues, here are the corrected fields:
 
 ```json
 {
-  "keywords": "meditation,sleep,mindfulness,anxiety,relaxation,breathing,stress,focus,sleep sounds,yoga,unwind"
+  "keywords": "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
 }
 ```
 

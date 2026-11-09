@@ -160,7 +160,7 @@ Common edge cases (no local metadata files, single-platform app, no competitor a
 
 ## Platform-Specific Notes
 
-Apple App Store, Google Play Store, and cross-store conventions (indexed fields, character limits, OCR-indexed screenshots, A/B testing surfaces) are documented in `references/edge-cases.md` (Platform-Specific Notes section).
+Apple App Store, Google Play Store, and cross-store conventions (indexed fields, character limits, screenshot caption indexing, A/B testing surfaces) are documented in `references/edge-cases.md` (Platform-Specific Notes section).
 
 ## Cross-Skill Integration
 
