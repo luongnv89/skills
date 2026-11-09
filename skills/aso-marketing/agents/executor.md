@@ -19,6 +19,8 @@ You receive these parameters in your prompt:
 
 ### Step 1: Load Approved Plan
 
+**Never implement Localized Pricing.** Approval of a plan never covers prices. Don't edit price, in-app purchase or subscription files, fastlane price settings, or run `asc` or console pricing commands. List each pricing item as a user action in App Store Connect / Play Console, in chat and in the implementation notes as tier percentages only, never amounts.
+
 Read the ASO plan markdown and identify:
 - Approved changes for each metadata field
 - User modifications (if any) to the plan
@@ -46,9 +48,9 @@ metadata/
 Each JSON file format:
 ```json
 {
-  "name": "Meditation – Sleep & Calm",
-  "subtitle": "Sleep better tonight",
-  "keywords": "meditation,sleep,mindfulness,...",
+  "name": "Sleep Meditation: ZenMind",
+  "subtitle": "Fall Asleep & Ease Stress",
+  "keywords": "guided,mindfulness,relaxation,...",
   "description": "Meditation and sleep made simple...",
   "release_notes": "Latest update: Added 50 new..."
 }
@@ -88,18 +90,18 @@ For each locale in the approved plan:
 1. **Name** (30 chars max):
    - Update `metadata/app-info/{locale}.json` → "name" field
    - Verify character count
-   - Example: `"name": "Meditation – Sleep & Calm"`
+   - Example: `"name": "Sleep Meditation: ZenMind"`
 
 2. **Subtitle** (30 chars max):
    - Update `metadata/app-info/{locale}.json` → "subtitle" field
    - Verify character count
-   - Example: `"subtitle": "Sleep better tonight"`
+   - Example: `"subtitle": "Fall Asleep & Ease Stress"`
 
 3. **Keywords** (100 chars max):
    - Update `metadata/app-info/{locale}.json` → "keywords" field
    - Verify: comma-separated, no spaces, no duplicates of name/subtitle
    - Character count must be <= 100
-   - Example: `"keywords": "meditation,sleep,mindfulness,relaxation,stress relief,breathing,anxiety,sleep sounds,guided,calm"`
+   - Example: `"keywords": "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"`
 
 4. **Description**:
    - Update `metadata/app-info/{locale}.json` → "description" field
@@ -123,12 +125,12 @@ For each locale in the approved plan:
 1. **Title** (30 chars max):
    - Create/update `fastlane/metadata/android/{locale}/title.txt`
    - Single line, no newlines
-   - Example: `Meditation – Sleep & Calm`
+   - Example: `Sleep Meditation: ZenMind`
 
 2. **Short Description** (80 chars max):
    - Create/update `fastlane/metadata/android/{locale}/short_description.txt`
    - Single line, no newlines
-   - Example: `Sleep, meditate, and find calm with 500+ guided meditations`
+   - Example: `Guided sleep meditation, bedtime stories and breathing for stress relief`
 
 3. **Full Description** (4000 chars max):
    - Create/update `fastlane/metadata/android/{locale}/full_description.txt`
@@ -179,13 +181,13 @@ Document what was created/modified:
 
 ### iOS Metadata
 - ✅ Created `metadata/app-info/en.json` (Name, Subtitle, Keywords, Description)
-  - Name: "Meditation – Sleep & Calm" (25/30 chars)
-  - Subtitle: "Sleep better tonight" (20/30 chars)
-  - Keywords: [100 chars] (90/100 chars = 90% utilization)
+  - Name: "Sleep Meditation: ZenMind" (25/30 chars)
+  - Subtitle: "Fall Asleep & Ease Stress" (25/30 chars)
+  - Keywords: (98/100 chars = 98% utilization)
   - Description: [4000 chars] (2800/4000 chars = 70% utilization)
 
 - ✅ Created `metadata/app-info/de.json` (German localization)
-  - Name: "Meditation – Schlaf & Ruhe" (27/30 chars)
+  - Name: "Schlafmeditation: ZenMind" (25/30 chars)
   - [...]
 
 - ✅ Created `metadata/version/1.0.0/en.json` (Release Notes)
@@ -193,10 +195,10 @@ Document what was created/modified:
 
 ### Android Metadata
 - ✅ Created `fastlane/metadata/android/en-US/title.txt`
-  - "Meditation – Sleep & Calm" (27/30 chars)
+  - "Sleep Meditation: ZenMind" (25/30 chars)
 
 - ✅ Created `fastlane/metadata/android/en-US/short_description.txt`
-  - "Sleep, meditate, and find calm with 500+ guided meditations" (61/80 chars)
+  - "Guided sleep meditation, bedtime stories and breathing for stress relief" (72/80 chars)
 
 - ✅ Created `fastlane/metadata/android/en-US/full_description.txt`
   - Full description with natural keyword integration
@@ -209,9 +211,9 @@ Document what was created/modified:
 
 | Field | iOS | Android | Status |
 |-------|-----|---------|--------|
-| Title/Name | 25/30 (83%) | 27/30 (90%) | ✅ Optimal |
-| Subtitle/Short Desc | 20/30 (67%) | 61/80 (76%) | ✅ Good |
-| Keywords/Full Desc | 90/100 (90%) | 2800/4000 (70%) | ✅ Good |
+| Title/Name | 25/30 (83%) | 25/30 (83%) | ✅ Optimal |
+| Subtitle/Short Desc | 25/30 (83%) | 72/80 (90%) | ✅ Good |
+| Keywords/Full Desc | 98/100 (98%) | 2800/4000 (70%) | ✅ Good |
 
 ## Localization Status
 
@@ -227,16 +229,16 @@ Document what was created/modified:
 
 2. **Before publishing**:
    - [ ] Review all metadata in store consoles one more time
-   - [ ] Verify screenshots have caption text aligned with keywords
+   - [ ] Verify screenshot captions state benefits, are legible on a phone, and use keywords where natural
    - [ ] Check that all localized versions display correctly
 
 3. **After publishing**:
-   - [ ] Monitor keyword rankings for primary keywords in App Store Connect / Google Play Console
-   - [ ] Track install numbers for the first 2 weeks (baseline)
+   - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline
+   - [ ] Track impressions, product page views, downloads and paid conversions
    - [ ] Collect user feedback from reviews
 
 4. **Timeline**:
-   - App Store: Changes live within ~24-48 hours
+   - App Store: name, subtitle and keywords go live only with a new app version submission (usually reviewed within ~24-48 hours); promotional text changes without one
    - Google Play: Changes live within a few minutes to a few hours
 
 ---

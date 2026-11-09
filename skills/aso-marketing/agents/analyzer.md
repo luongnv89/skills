@@ -73,7 +73,8 @@ If the app is already live:
 - Note the current rating (if available)
 - Note the install count or ranking (if available from public info)
 - Check for existing reviews (sentiment)
-- Note any current app store keyword rankings (if available)
+- Record the current rank for each candidate keyword as the Keyword Rank Baseline (`unranked` or `unknown` where there is no data; a pre-launch app is `unranked` throughout). Phase 7 measures against it
+- If weak ratings or retention point at the product itself, say so in Key Findings: ASO will not fix it
 
 ### Step 6: Gather Competitive Landscape
 

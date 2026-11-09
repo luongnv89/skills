@@ -1,10 +1,10 @@
 ---
 name: aso-marketing
-description: "Optimize App Store and Google Play listings via a 7-phase, plan-approval-gated ASO workflow (keyword strategy, metadata, localization). Don't use for web SEO, paid UA campaigns, or pre-submission compliance audits."
+description: "Optimize App Store and Google Play listings via a 7-phase, plan-approval-gated ASO workflow: keywords and rank tracking, metadata, screenshot captions, localization. Don't use for web SEO, Search Ads/paid UA, or pre-submission compliance audits."
 license: MIT
 effort: max
 metadata:
-  version: 1.5.1
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -79,7 +79,7 @@ Read `references/phases-1-2.md` (Phase 1 section). Gather codebase info, audit e
 
 ### Phase 2: Plan
 
-Read `references/phases-1-2.md` (Phase 2 section). Build a prioritized plan covering objectives, target keywords (primary/secondary/long-tail), metadata optimization (title, subtitle, keywords, description, what's-new), visual assets, localization, ratings strategy, and timeline.
+Read `references/phases-1-2.md` (Phase 2 section). Build a prioritized plan covering objectives, target keywords the app can win at its current size (primary/secondary/long-tail), metadata optimization (title with its brand position, subtitle, keywords, description, what's-new), visual assets, localization, ratings strategy, optional localized pricing (recommendation only — the skill never changes prices), a measurement plan, and timeline.
 
 ### Phase 3: Policy Compliance Check
 
@@ -109,7 +109,7 @@ Read `references/phases-4-7.md` (Phase 6 section) and cross-reference `reference
 
 ### Phase 7: Summarize
 
-Read `references/phases-4-7.md` (Phase 7 section). Produce the final summary report (Changes Made, Metadata Comparison, Compliance Status, Expected Outcomes, Next Steps, Files Modified).
+Read `references/phases-4-7.md` (Phase 7 section). Produce the final summary report (Changes Made, Metadata Comparison, Compliance Status, Expected Outcomes, Measurement Plan, Next Steps, Files Modified).
 
 ## Step Completion Reports
 
@@ -137,8 +137,8 @@ Output after Phase 4 (`metadata/app-info/en-US.json`):
 
 ```json
 {
-  "name": "FocusFlow: Focus & Work Timer",
-  "subtitle": "Deep Work Sessions & Tracking"
+  "name": "Focus & Work Timer: FocusFlow",
+  "subtitle": "Deep Sessions & Daily Tracking"
 }
 ```
 
@@ -148,7 +148,7 @@ Output keywords field:
 pomodoro,concentration,study,productivity,distraction,blocker,habit,goal,task,routine,break,planner
 ```
 
-(99/100 chars, all prohibited terms cleared, no word repeated from the title or subtitle.) Full walkthrough in `references/expected-output.md`.
+(99/100 chars, all prohibited terms cleared, no word repeated from the title or subtitle. The title leads with the keyword because nobody searches the brand yet.) Full walkthrough in `references/expected-output.md`.
 
 ## Acceptance Criteria
 
@@ -156,11 +156,11 @@ The skill run is successful when all metadata is within character limits, contai
 
 ## Edge Cases
 
-Common edge cases (no local metadata files, single-platform app, no competitor access, pre-launch app, non-English primary locale, user rejects plan, compliance violation in draft) are documented in `references/edge-cases.md`. Read that file when an edge case applies — do not improvise.
+Common edge cases (no local metadata files, single-platform app, no competitor access, pre-launch app, user asks to change prices, weak product signals, re-run inside the measurement window, non-English primary locale, user rejects plan, compliance violation in draft) are documented in `references/edge-cases.md`. Read that file when an edge case applies — do not improvise.
 
 ## Platform-Specific Notes
 
-Apple App Store, Google Play Store, and cross-store conventions (indexed fields, character limits, OCR-indexed screenshots, A/B testing surfaces) are documented in `references/edge-cases.md` (Platform-Specific Notes section).
+Apple App Store, Google Play Store, and cross-store conventions (indexed fields, character limits, screenshot caption indexing, A/B testing surfaces) are documented in `references/edge-cases.md` (Platform-Specific Notes section).
 
 ## Cross-Skill Integration
 
@@ -171,6 +171,7 @@ This skill complements `seo-ai-optimizer`. See `references/edge-cases.md` (Cross
 - **No destructive action without confirmation.** Before `git pull --rebase`, run the dry-run preview in Repo Sync and get the user's confirmation. Before `git stash` or any file deletion, ask the user. Before overwriting an existing metadata file, create a `.bak` backup or confirm the file is tracked in version control. Report every failure or error to the user; do not retry it silently.
 - **Compliance gate is non-negotiable.** Never present a non-compliant plan to the user; never execute without explicit approval.
 - **Trademark caution:** Competitor brand names from Phase 1 analysis must never appear in proposed metadata.
+- **Prices are the user's to set.** Localized Pricing is a recommendation in the plan; approval never covers it. Never write a price to any file or run a pricing command.
 
 ## Self-Improve
 

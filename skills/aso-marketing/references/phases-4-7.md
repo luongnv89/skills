@@ -57,7 +57,7 @@ Once the user approves, implement the changes systematically. Work through the p
 
 ### 4.5 Visual Asset Guidance
 
-- **Screenshots:** Recommend ordering, caption text with keywords (OCR-indexed on App Store since June 2025)
+- **Screenshots:** Recommend ordering and one benefit-led caption per screenshot ("See How Much Money You've Saved", not "Advanced Analytics Dashboard"), with keywords where they read naturally (reportedly OCR-indexed on the App Store since June 2025, per ASO practitioners; Apple has not confirmed it). Captions must be legible on a phone: large type, strong contrast
 - **App Icon:** Assess clarity at small sizes, color contrast
 - **Preview Video:** First 3 seconds matter most
 
@@ -73,7 +73,7 @@ Once the user approves, implement the changes systematically. Work through the p
 - [ ] Descriptions read naturally
 - [ ] No spelling/grammar errors in any locale
 - [ ] Cross-field keyword combinations produce intended search queries
-- [ ] Visual asset recommendations are specific and actionable
+- [ ] Visual asset recommendations are specific and actionable; screenshot captions state benefits and are legible on a phone
 - [ ] Localized metadata is genuinely localized
 - [ ] No prohibited keywords (re-scan all fields)
 - [ ] No competitor trademarks
@@ -92,13 +92,15 @@ Re-run Phase 1 analysis checks on updated metadata to verify improvements.
 
 Cross-reference against `references/aso_best_practices.md`:
 
-- [ ] Title/name includes primary keyword
+- [ ] Title/name includes primary keyword, keyword first unless users already search the brand
 - [ ] Subtitle/short description includes secondary keyword + value prop
 - [ ] Keywords field maximizes character budget (iOS)
 - [ ] Description is conversion-optimized
 - [ ] Localization is market-aware
 - [ ] Visual assets support conversion
-- [ ] Rating/review strategy addressed
+- [ ] Rating/review strategy addressed: prompt after a value moment, no incentives
+- [ ] Measurement plan names the tracked keywords with baseline ranks and outcome metrics
+- [ ] Localized pricing, if included, is a recommendation with evidence and a per-user cost check
 - [ ] All metadata passes Store Policy Compliance rules
 - [ ] No trademark violations
 - [ ] No prohibited keywords
@@ -134,11 +136,17 @@ Cross-reference against `references/aso_best_practices.md`:
 ### Expected Outcomes
 - [Outcome 1, 2, ...]
 
+### Measurement Plan
+| Keyword | Store | Baseline Rank (Phase 1) | Re-check Cadence |
+- Outcome metrics: impressions → product page views → downloads → paid conversions
+- Next lever to change: [one, after this cycle's results]
+
 ### Next Steps
-1. Upload metadata to the store(s)
-2. Monitor rankings for target keywords after 1-2 weeks
-3. A/B test screenshots and descriptions
-4. Re-run this skill in 4-6 weeks
+1. Upload metadata to the store(s). On iOS, the name, subtitle and keywords go live only with a new app version submission
+2. Re-check the tracked keywords on the stated cadence against the Phase 1 baseline; judge by downloads and paid conversions, not rank alone
+3. A/B test screenshots and descriptions, one lever per cycle
+4. Apply any recommended localized-pricing test yourself in App Store Connect / Play Console (the skill does not change prices)
+5. Re-run this skill after the measurement window closes (at least 6 weeks)
 
 ### Files Modified
 - [list all files created or modified with paths]

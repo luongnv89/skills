@@ -4,7 +4,7 @@ Validate every piece of proposed metadata against Apple App Store and Google Pla
 
 ## 3.1 Prohibited Keyword Scan
 
-Check all proposed metadata fields (title, subtitle, keywords, short description, full description) for prohibited terms.
+Check all proposed metadata fields (title, subtitle, keywords, short description, full description, promotional text, screenshot caption text) in every locale for prohibited terms. The lists below are English: for each localized field, also scan the translated equivalents of every term (for example "grátis" and "melhor" in pt-BR, "kostenlos" and "beste" in de-DE).
 
 **Apple App Store — Banned in title, subtitle, and keywords:**
 - Pricing terms: "free", "sale", "discount", "limited time"

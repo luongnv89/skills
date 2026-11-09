@@ -17,6 +17,8 @@
 - Iterates on the plan with user approval before executing any changes
 - Covers both Apple App Store and Google Play Store with platform-specific techniques
 - Includes localization strategy, conversion rate optimization, and A/B testing recommendations
+- Puts the keyword before an unknown brand in the title, picks keywords the app can win at its current size, and writes benefit-led screenshot captions
+- Recommends localized pricing tiers when the app sells something (it never changes prices) and closes with a measurement plan against a baseline of keyword ranks
 
 ## When to Use
 

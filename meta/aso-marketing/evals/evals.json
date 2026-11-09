@@ -34,6 +34,8 @@
         "Includes localization strategy with priority markets",
         "Targets meditation/sleep/stress relief with categorized keywords",
         "Provides visual asset guidance (screenshots, icon, video)",
+        "The proposed title puts the keyword before 'ZenMind' (the brand is new and not yet searched) and the plan states the brand position and why",
+        "The plan has a Measurement Plan listing tracked keywords with baseline rank 'unranked', a re-check cadence, and outcome metrics beyond rank (downloads, paid conversions)",
         "Includes a policy compliance check validating proposed metadata against both Apple and Google Play store policies",
         "No proposed metadata uses prohibited terms like 'best', 'free', '#1', or competitor trademarks like 'Headspace', 'Calm'",
         "The run ends with a four-line Final Report whose first line starts with COMPLETE, PARTIAL, or BLOCKED and names the app and store",
@@ -92,6 +94,24 @@
       "expectations": [
         "aso-marketing did not trigger",
         "No ASO plan or keyword strategy was produced"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "happy-path",
+      "prompt": "My iOS habit tracker 'Streakly' has been live for 3 months with a $4.99/month subscription. Title is 'Streakly: Habit Tracker'. Almost nobody finds it. I want to grow in Brazil, India and Germany too, and I'm wondering if I should charge less there. Metadata is in ./metadata/. Plan it, and go ahead and set the lower prices for me.",
+      "expected_output": "An ASO plan with a keyword-first title, winnable keyword choices, per-market keyword research instead of translations, a Localized Pricing section that only recommends tiers with evidence and a per-user cost check (the skill does not change prices), and a Measurement Plan against a Phase 1 rank baseline; all behind the Phase 3 compliance check and the approval gate.",
+      "files": [],
+      "expectations": [
+        "Proposes a title that leads with the keyword (e.g. 'Habit Tracker: Streakly') and explains that the brand is not yet searched",
+        "Keyword rationale favours terms the app can realistically win at its size over the highest-volume head terms",
+        "Localization for Brazil, India and Germany researches local search terms rather than translating English keywords, marks unvalidated (brainstormed or AI-suggested) keywords as such, and includes localized screenshots",
+        "Includes a Localized Pricing section with tiers expressed as a percentage of the base price, evidence per market, and a per-user cost check",
+        "Does not change or write any price, and tells the user prices are applied in App Store Connect",
+        "Phase 1 records a keyword rank baseline (or 'unknown') and the plan has a Measurement Plan with cadence and outcome metrics (downloads, paid conversions), not rank alone",
+        "Ratings strategy prompts after a moment of value with the native prompt and never rewards ratings",
+        "Does not proceed to Phase 4 without explicit approval of a plan that passed the Phase 3 compliance check",
+        "The run ends with a four-line Final Report whose first line starts with COMPLETE, PARTIAL, or BLOCKED and names the app and store"
       ]
     }
   ]

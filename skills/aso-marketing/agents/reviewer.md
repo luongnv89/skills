@@ -104,16 +104,16 @@ Cross-reference the implementation against best practices:
 
 Read `references/aso_best_practices.md` and verify:
 
-- [ ] Title/name includes primary keyword
-  - Primary keyword: [meditation, sleep, etc.]
+- [ ] Title/name includes primary keyword, in the brand position the plan chose
+  - Primary keyword: [sleep meditation, etc.]
   - Does title include it? [check]
-  - Placement: [beginning/middle/end]
+  - Brand position: [keyword first (brand unknown) / brand first (brand known)] matches the plan's evidence: [YES/NO]
 
 - [ ] Subtitle/short description includes secondary keyword and value prop
   - Secondary keyword: [e.g., "stress relief", "anxiety"]
   - Does subtitle include it? [check]
   - Value prop present? [check]
-  - Example: "Sleep better tonight" ✅ (value prop) + "Stress relief" [if present]
+  - Example: "Fall Asleep & Ease Stress" ✅ (value prop) + "Stress relief" [if present]
 
 - [ ] Keywords field maximizes character budget (iOS)
   - Chars used: X/100
@@ -136,16 +136,24 @@ Read `references/aso_best_practices.md` and verify:
 - [ ] Visual assets support conversion
   - [If applicable: Screenshots, icon, video]
   - Screenshot 1 leads with strongest benefit: [YES/NO]
-  - Captions include keywords (iOS): [YES/NO]
+  - Each caption states a benefit, not a feature label: [YES/NO]
+  - Captions legible on a phone (large type, strong contrast): [YES/NO]
+  - Keywords used where they read naturally (iOS): [YES/NO]
   - App icon is clear at small sizes: [YES/NO]
 
 - [ ] Rating/review strategy addressed
-  - In-app review prompt timing documented: [YES/NO]
+  - Native prompt after a moment of value, never on first launch: [YES/NO]
+  - No reward or incentive for ratings: [YES/NO]
   - Review response strategy documented: [YES/NO]
 
-- [ ] Ongoing optimization recommendations provided
-  - Monitor keywords for: [rankings, install volume, conversion]
-  - Test schedule: [4-6 weeks for re-optimization]
+- [ ] Localized pricing (if present) is a recommendation only
+  - Tiers as % of base, evidence per market, per-user cost check: [YES/NO]
+  - No price written to any file or console: [YES/NO]
+
+- [ ] Measurement plan provided
+  - Tracked keywords with Phase 1 baseline ranks: [YES/NO]
+  - Outcome metrics: impressions → page views → downloads → paid conversions: [YES/NO]
+  - Re-run after the measurement window closes (at least 6 weeks): [YES/NO]
   - A/B test plan: [if applicable]
 
 - [ ] **All metadata passes Store Policy Compliance rules**
@@ -228,16 +236,16 @@ The ASO implementation has been reviewed against:
 ### Character Limits
 | Field | iOS | Android | Status |
 |-------|-----|---------|--------|
-| Name/Title | 25/30 | 27/30 | ✅ OK |
-| Subtitle/Short Desc | 20/30 | 61/80 | ✅ OK |
-| Keywords/Description | 90/100 | 2800/4000 | ✅ OK |
+| Name/Title | 25/30 | 25/30 | ✅ OK |
+| Subtitle/Short Desc | 25/30 | 72/80 | ✅ OK |
+| Keywords/Description | 98/100 | 2800/4000 | ✅ OK |
 
 ### Keyword Duplication (iOS)
 ✅ **PASS** — Keywords field contains no duplicates of Name or Subtitle
-- Name: "Meditation – Sleep & Calm"
-- Subtitle: "Sleep better tonight"
-- Keywords: "mindfulness,relaxation,stress relief,breathing,anxiety,sleep sounds,guided,focus,yoga,wellness"
-- No overlap detected
+- Name: "Sleep Meditation: ZenMind"
+- Subtitle: "Fall Asleep & Ease Stress"
+- Keywords: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
+- No overlap detected (no keyword repeats sleep, meditation, zenmind, fall, asleep, ease or stress)
 
 ### Formatting
 ✅ **PASS** — No emojis, ALL CAPS, or special character issues
@@ -283,7 +291,7 @@ The ASO implementation has been reviewed against:
 - Hook: "Meditation and sleep made simple" (benefit-first) ✅
 - Features: Bullet points for scannability ✅
 - Keywords: Integrated naturally 5+ times, no stuffing ✅
-- CTA: "Join 2M+ meditators" (social proof + reason to download) ✅
+- CTA: "Start your first guided sleep session tonight" (clear reason to download, no unverifiable numbers) ✅
 
 ### Localization
 ✅ **PASS** — German and Japanese are genuinely localized
@@ -293,7 +301,7 @@ The ASO implementation has been reviewed against:
 
 ### Visual Assets
 ℹ️ **N/A** — Asset optimization depends on executor providing visual changes
-- Screenshots should have captions with keywords (not verified here, depends on next step)
+- Screenshots should have benefit-led captions, legible on a phone, with keywords where natural (not verified here, depends on next step)
 - App icon should be clear at 16px (not verified here)
 - Recommendation: Verify visual assets in store console before publishing
 
@@ -305,8 +313,8 @@ The ASO implementation has been reviewed against:
 
 ### Ongoing Optimization
 ✅ **PASS** — Plan documented
-- Monitor rankings for primary keywords ✅
-- Re-evaluate in 4-6 weeks ✅
+- Measurement plan: tracked keywords with Phase 1 baseline ranks, cadence, outcome metrics ✅
+- Re-evaluate after the measurement window closes (at least 6 weeks) ✅
 - A/B test with Custom Product Pages (iOS) or Store Listing Experiments (Android) ✅
 
 ---
@@ -362,13 +370,13 @@ Implementation is high-quality with no notable gaps.
    - [ ] Double-check character limits in console UI (sometimes display differs from source)
 
 3. **After publishing**:
-   - [ ] Monitor rankings for primary keywords (appears in App Store Connect / Google Play Console after 24-48 hours)
-   - [ ] Track install metrics for 2 weeks (baseline)
+   - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline (rank tracker or manual store search)
+   - [ ] Track impressions, product page views, downloads and paid conversions, not rank alone
    - [ ] Collect reviews and analyze sentiment
-   - [ ] Plan re-optimization in 4-6 weeks
+   - [ ] Plan re-optimization after the measurement window closes (at least 6 weeks)
 
 4. **Timeline**:
-   - iOS: Changes live in ~24-48 hours
+   - iOS: name, subtitle and keywords go live only with a new app version submission (usually reviewed within ~24-48 hours); promotional text changes without one
    - Android: Changes live in minutes to a few hours
 
 ---
@@ -397,9 +405,9 @@ Or, if issues found:
 ### 🔴 Critical: Prohibited Keyword Found
 
 **Field**: iOS Keywords
-**Issue**: Contains "free meditation" (banned on iOS)
-**Current**: "meditation,sleep,mindfulness,free meditation,stress relief,..."
-**Fix**: Remove "free meditation", replace with "guided meditation" or similar
+**Issue**: Contains "free" (banned on iOS)
+**Current**: "guided,mindfulness,free,relief,..."
+**Fix**: Remove "free"; use the characters for another relevant word
 **Action**: Update `metadata/app-info/en.json` → keywords field
 
 ---
@@ -407,10 +415,10 @@ Or, if issues found:
 ### 🟡 Medium: Keyword Utilization Below Target
 
 **Field**: iOS Keywords
-**Issue**: Using only 65/100 characters (65% utilization, target >85%)
-**Current**: "meditation,sleep,mindfulness,anxiety,relaxation" (45 chars)
-**Fix**: Add 3-5 more keywords: "breathing,stress,focus,sleep sounds,yoga,calm"
-**Expected**: "meditation,sleep,mindfulness,anxiety,relaxation,breathing,stress,focus,sleep sounds,yoga,calm" (~90 chars)
+**Issue**: Using only 37/100 characters (37% utilization, target >85%)
+**Current**: "guided,mindfulness,anxiety,relaxation" (37 chars)
+**Fix**: Add more single words that don't repeat the name or subtitle: "breathing,relief,bedtime,story,sounds,rest,unwind,night,deep"
+**Expected**: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep" (98 chars)
 **Action**: Update `metadata/app-info/en.json` → keywords field
 
 ---
@@ -431,7 +439,7 @@ After fixing the above 2 issues, here are the corrected fields:
 
 ```json
 {
-  "keywords": "meditation,sleep,mindfulness,anxiety,relaxation,breathing,stress,focus,sleep sounds,yoga,calm"
+  "keywords": "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
 }
 ```
 

@@ -28,8 +28,8 @@ Example `metadata/app-info/en-US.json` after execution:
 
 ```json
 {
-  "name": "FocusFlow: Focus & Work Timer",
-  "subtitle": "Deep Work Sessions & Tracking"
+  "name": "Focus & Work Timer: FocusFlow",
+  "subtitle": "Deep Sessions & Daily Tracking"
 }
 ```
 
@@ -49,9 +49,17 @@ pomodoro,concentration,study,productivity,distraction,blocker,habit,goal,task,ro
 ### Changes Made
 | # | Area         | Change                          | Before                        | After                          | Expected Impact              |
 |---|--------------|---------------------------------|-------------------------------|--------------------------------|------------------------------|
-| 1 | iOS Title    | Added primary keyword           | FocusFlow: Work Timer         | FocusFlow: Focus & Work Timer  | +rankings for "focus timer"  |
+| 1 | iOS Title    | Keyword first, brand last       | FocusFlow: Work Timer         | Focus & Work Timer: FocusFlow  | +rankings for "focus timer"  |
 | 2 | iOS Keywords | Expanded from 29 to 99 chars    | timer,focus,work,productivity | pomodoro,concentration,...     | 3x more indexable queries    |
 | 3 | Android Desc | Rewrote opening hook + keywords | A simple timer for focused... | Block distractions. Build...   | Higher conversion rate       |
+
+### Measurement Plan
+| Keyword     | Store | Baseline Rank (Phase 1) | Re-check Cadence |
+|-------------|-------|-------------------------|------------------|
+| focus timer | iOS   | unranked                | weekly, 6 weeks  |
+| pomodoro    | iOS   | #84                     | weekly, 6 weeks  |
+- Outcome metrics: impressions → product page views → downloads → paid conversions
+- Next lever to change: screenshots (benefit-led captions), after this cycle
 
 ### Store Policy Compliance
 - Prohibited keyword check: PASS — no banned terms in any metadata field
@@ -67,5 +75,5 @@ After the Summary Report, every run ends with the four-line Final Report. Status
 Result: COMPLETE. Optimized the iOS and Android listings for FocusFlow; wrote 4 metadata files; Phase 3 compliance PASS.
 Evidence: Phase 1 baseline iOS keywords 29/100; after Phase 4 iOS title 29/30, keywords 99/100; Phase 5 re-scan found 0 prohibited terms and 0 competitor names.
 Uncertainty: Search volumes are heuristic estimates; ranking and conversion effects are untested until the listing is live.
-Decision: No approval needed. Upload the metadata to both stores, then re-check rankings in 1-2 weeks.
+Decision: No approval needed. Upload the metadata to both stores, then re-check the tracked keywords weekly against the Phase 1 baseline.
 ```
