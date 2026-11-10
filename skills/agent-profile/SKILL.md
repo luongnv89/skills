@@ -26,8 +26,10 @@ User-invoked only: `/agent-profile [profile-name] [task]`.
   Code, a `[profiles.*]` entry for Codex.
 - **detected:** reported by `agent_profile.py detect` on this machine, this run.
 - **typed model:** a model id the user typed because the harness cannot list its models.
-- **run folder:** `~/.cache/agent-profile/runs/<stamp>-<profile>/` with `prompt.md`,
-  `command.json`, `output.log` and `result.json`.
+- **working directory:** where the delegated agent works (`--cwd`): the current
+  directory or a new git worktree.
+- **run folder:** `~/.cache/agent-profile/runs/<stamp>-<profile>-<id>/` with `prompt.md`,
+  `command.json`, `output.log`, the pid files and `result.json`.
 
 `$AP` below is `python3 <this skill's directory>/scripts/agent_profile.py`. To keep the
 context budget small, read a reference file only in the step that names it, and use
@@ -38,16 +40,17 @@ context budget small, read a reference file only in the step that names it, and 
 - `python3` 3.9 or later (3.11+ to read Codex profiles) and `git` on PATH.
 - At least one harness CLI on PATH, logged in through its own tool (`claude` or `mcc
   login`, `pi auth`, `opencode auth`, …). The skill never handles credentials.
-- A shell tool that can wait for the run: up to the 3600 s default timeout in Foreground.
+- A shell tool that can wait 10 minutes: a Foreground run stops at 540 s by default.
+  Longer tasks go to Background (3600 s by default).
 
 ## Rules that outrank everything else
 
 1. Offer only detected options. Never offer a harness, harness profile, model or thinking
    level that `detect` did not report. Accept a typed model only when the harness's
    `models_complete` is false, and pass `--typed-model`.
-2. Never show the full command until Step 5, and never run before the user says go.
-   A run with `full` permissions (pi always has them) needs its own explicit yes every
-   time; only then pass `--confirm-full`.
+2. Never run before the user says go to the command shown in Step 5. A run with `full`
+   permissions needs its own explicit yes every time; only then pass `--confirm-full`.
+   pi and opencode offer only `full`: neither can restrict its tools in headless runs.
 3. The task reaches the harness only through the prompt file. Never paste it into a
    shell string.
 4. Never read, print or store a credential. Profiles hold no keys, and `pi auth
@@ -82,18 +85,22 @@ model, thinking, permissions, scope.
 
 1. Run `$AP detect` once and show its output: harnesses with version and adapter status
    (`verified` or `untested`), harness profiles, models, thinking levels, permissions.
-   Keep `$AP detect --json` for the choices below; never re-type a value by hand.
+   Keep `$AP detect --json` for the choices below; never re-type a value by hand. A
+   harness whose models say `LIST FAILED` cannot be saved until a re-run of detect lists
+   them.
 2. Ask, one question at a time, each listing only detected values (numbered text when
    there are more than 4):
    1. **Harness:** installed ones; mark untested adapters.
    2. **Harness profile:** only when the harness reported some (mcc profiles for claude,
       Codex config profiles). Show each one's detail line.
    3. **Model:** the detected list. When `models_complete` is false, add `Type a model
-      id`. For pi, keep the model's `provider` for `--provider`.
+      id`. For pi, keep the model's `provider` for `--provider`. For opencode, a listed
+      model may take a `#<variant>` suffix the user types.
    4. **Thinking:** the detected levels plus `harness default`. Skip the question when the
       harness has no levels, or when the model's `thinking` is false.
    5. **Permissions:** the detected modes, explained from `references/harnesses.md`
-      (ask, edits, full). Recommend `edits`.
+      (ask, edits, full). Recommend `edits` where it exists. When `full` is the only mode
+      (pi, opencode), say so and that every run will ask for a separate yes.
    6. **Name:** suggest `<harness>-<model>-<thinking>` in lowercase with hyphens; the user
       may change it.
    7. **Scope:** global (every project, default) or this project
@@ -116,27 +123,32 @@ Ask both in one AskUserQuestion call:
 - **Mode:** `Foreground` (wait for the result) or `Background` (return at once, check
   later).
 
-For a worktree, run Repo Sync first, then
-`git worktree add -b agent/<profile>-<stamp> ../<repo>-agent-<stamp> HEAD`, and use that
-path as `--cwd`.
+For a worktree, plan the path `../<repo>-agent-<stamp>` and the branch
+`agent/<profile>-<stamp>` now; Step 6 creates them only after the user says Run it.
+For a Foreground task likely to take more than 9 minutes, recommend Background.
 
-**Done when** the run directory exists and the mode is recorded.
+**Done when** the working directory (existing or planned) and the mode are recorded.
 
 ## Repo Sync Before Edits (mandatory)
 
 The delegated agent edits files in a git repo, so before Step 6:
 
-1. `branch="$(git rev-parse --abbrev-ref HEAD)"`. With no `origin`, or a branch not on
+1. Not a git repo → record `sync: skipped (not a git repo)` and continue.
+2. `branch="$(git rev-parse --abbrev-ref HEAD)"`. With no `origin`, or a branch not on
    `origin`, record `sync: skipped (<reason>)` and continue.
-2. Otherwise run `git fetch origin && git pull --rebase origin "$branch"`. If
-   `git status --porcelain` shows changes, first `git stash push -u -m agent-profile-sync`,
-   then sync, then `git stash pop`.
-3. On a conflict: `git rebase --abort`, `git stash pop`, then stop and ask the user.
-4. Not a git repo → `sync: skipped (not a git repo)`.
+3. If `git status --porcelain` shows changes, run `git stash push -u -m agent-profile-sync`
+   first. Then `git fetch origin && git pull --rebase origin "$branch"`, then `git stash pop`
+   if you stashed.
+4. The rebase conflicts → `git rebase --abort`, then `git stash pop` if you stashed, then
+   stop and ask the user.
+5. The rebase succeeded but `git stash pop` conflicts → leave the stash in place (it is
+   not dropped), show `git status --short`, and stop and ask the user.
 
 ## Step 5: Confirm
 
-Run `$AP command <name> --prompt-file <file> --cwd <dir>` and show:
+Run `$AP command <name> --prompt-file <file> --cwd <dir> --project "$PWD"` (for a
+planned worktree, `--cwd` is the current directory; the command is the same apart from
+the path) and show:
 
 ```
 Profile:   <brief>
@@ -146,33 +158,44 @@ Command:   <display>
 Notes:     <notes, or none>
 ```
 
+Notes cover a typed model, a harness version that changed since the profile was saved,
+a project profile (check it is one you trust), an untested adapter, and a harness that
+always has full access. A `command` error (harness removed, model no longer listed)
+goes back to Step 2.
+
 Ask `Run it`, `Change` (back to Step 2 or 4) or `Cancel`. When
 `needs_full_confirmation` is true, ask a separate question first: "This profile runs
-with full permissions: the agent can run any command without asking. Run it?"
+with full permissions: the agent can run any command without asking. Run it?" Cancel
+leaves nothing behind: no worktree or run folder exists yet.
 
 **Done when** the user chose Run (and confirmed full permissions when needed), or
 cancelled.
 
 ## Step 6: Run
 
-`$AP run <name> --prompt-file <file> --cwd <dir> [--background] [--confirm-full]`.
+For a new worktree: run Repo Sync, then
+`git worktree add -b agent/<profile>-<stamp> ../<repo>-agent-<stamp> HEAD`, and use that
+path as `--cwd`.
 
-- **Foreground:** wait. The script prints the last 60 log lines and a JSON result:
-  `status` (done, failed, timeout, failed-to-start), `exit_code`, `duration_s`,
-  `run_dir`. The default timeout is 3600 s; give the shell tool at least that much, or
-  suggest Background for long tasks.
+`$AP run <name> --prompt-file <file> --cwd <dir> --project "$PWD" [--background] [--confirm-full]`.
+
+- **Foreground:** give the shell tool a 600 s timeout. The script stops the harness at
+  540 s, prints the last 60 log lines and a JSON result: `status` (done, failed, timeout,
+  interrupted, failed-to-start), `exit_code`, `duration_s`, `run_dir`. If the shell tool
+  kills the script, the harness is stopped too and `result.json` says `interrupted`.
 - **Background:** report `run_dir` and the pid. When the user asks, or before ending
-  the conversation, run `$AP status <run_dir>`.
+  the conversation, run `$AP status <run_dir>` (running, done, failed, timeout, stopped,
+  orphaned, lost). To end it early on the user's request: `$AP stop <run_dir>`.
 
 **Done when** a result exists (foreground), or the run folder and pid are reported
 (background).
 
 ## Step 7: Report
 
-In the run directory, run `git status --short` and `git diff --stat`. Then print:
+In the working directory, run `git status --short` and `git diff --stat`. Then print:
 
 ```
-Result:      <done | failed (exit N) | timeout | running in background>
+Result:      <done | failed (exit N) | timeout | interrupted | stopped | running in background>
 Evidence:    profile <brief>; exit <code> in <duration>; <N> files changed; log <run_dir>/output.log
 Uncertainty: <the agent's claims are unverified; untested adapter; typed model>
 Decision:    <review the diff; keep, merge or delete branch agent/…; or "No approval needed.">
@@ -191,7 +214,7 @@ After the user picks it, `Current directory` and `Foreground`, Step 5 shows:
 Profile:   cc-sonnet — claude/twmaisie · sonnet · thinking low · permissions edits · global
 Location:  /home/me/app (current directory)
 Mode:      foreground
-Command:   /usr/local/bin/mcc exec twmaisie -- claude -p --model sonnet --effort low --permission-mode acceptEdits < /tmp/agent-profile-20261110-0912.md
+Command:   /usr/local/bin/mcc exec twmaisie -- /usr/local/bin/claude -p --model sonnet --effort low --permission-mode acceptEdits < /tmp/agent-profile-20261110-0912.md
 Notes:     none
 ```
 
@@ -199,7 +222,7 @@ Expected output after the run:
 
 ```
 Result:      done
-Evidence:    profile cc-sonnet — claude/twmaisie · sonnet · thinking low · permissions edits · global; exit 0 in 48.2s; 1 file changed; log ~/.cache/agent-profile/runs/20261110-091233-cc-sonnet/output.log
+Evidence:    profile cc-sonnet — claude/twmaisie · sonnet · thinking low · permissions edits · global; exit 0 in 48.2s; 1 file changed; log ~/.cache/agent-profile/runs/20261110-091233-cc-sonnet-3fa2c1/output.log
 Uncertainty: the agent says the test passes; this skill did not run the tests
 Decision:    review the diff in tests/dates.test.ts. No other approval needed.
 ```
@@ -249,4 +272,4 @@ Optional and propose-only. After the run's result is delivered, run this check:
 | ------------------------------- | -------------- | ---------------------------------------------------------------------- |
 | `references/harnesses.md`       | Steps 3, 5     | each adapter: detection, models, thinking, permissions, headless command, status |
 | `references/profile-format.md`  | Steps 2, 3, 6  | storage, profile fields, run folder, script exit codes, errors, edge cases |
-| `scripts/agent_profile.py`      | every step     | `detect`, `list`, `show`, `save`, `delete`, `command`, `run`, `status`  |
+| `scripts/agent_profile.py`      | every step     | `detect`, `list`, `show`, `save`, `delete`, `command`, `run`, `status`, `stop` |

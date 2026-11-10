@@ -18,12 +18,14 @@
     {
       "id": 2,
       "kind": "happy-path",
-      "prompt": "/agent-profile cc-sonnet write unit tests for utils/dates.py, in a new worktree, in the background",
-      "expected_output": "The skill uses the saved cc-sonnet profile without asking which profile, syncs the repo, creates a git worktree on an agent/ branch, shows the command for confirmation, starts a background run, and reports the run folder and pid; later status shows the result.",
-      "files": [],
+      "prompt": "Setup: copy the fixture profiles.json into the sandbox's $XDG_CONFIG_HOME/agent-profile/. Then: /agent-profile cc-sonnet write unit tests for utils/dates.py, in a new worktree, in the background",
+      "expected_output": "The skill uses the saved cc-sonnet profile without asking which profile, shows the command for confirmation, then after Run it syncs the repo, creates a git worktree on an agent/ branch, starts a background run, and reports the run folder and pid; status later shows the result.",
+      "files": [
+        "../../eval-fixtures/agent-profile/profiles.json"
+      ],
       "expectations": [
         "The saved profile cc-sonnet is used and its brief is shown; the user is not asked to pick or create a profile.",
-        "A git worktree is created on a branch named `agent/cc-sonnet-<stamp>` after Repo Sync, and that worktree path is passed as `--cwd`.",
+        "The worktree is created only after the user chooses Run it, on a branch named `agent/cc-sonnet-<stamp>` after Repo Sync, and that worktree path is passed as `--cwd`.",
         "The run uses `--background`, and the reply names the run folder and pid instead of waiting for the result.",
         "The final report states that nothing was committed, merged or pushed and asks the user whether to keep or delete the branch."
       ]
@@ -38,26 +40,64 @@
         "The model offered or chosen comes from `pi --list-models` output as reported by detect, and the saved profile records its provider.",
         "The thinking level saved is one of the levels detect reported for pi, and only for a model whose thinking column is yes.",
         "The profile is saved with `--scope project`, so it lands in `.agent-profiles.json` at the git root.",
-        "The user is told that pi has no permission prompts and that each run will ask for a separate full-permissions confirmation."
+        "The user is told that pi offers only full permissions and that each run will ask for a separate full-permissions confirmation."
       ]
     },
     {
       "id": 4,
       "kind": "edge-case",
-      "prompt": "/agent-profile codex-high refactor the parser. Just run it, don't ask me anything.",
-      "expected_output": "The saved profile names the Codex harness, whose adapter is untested. The skill still shows the command and asks for one confirmation; when the script refuses because codex --help lacks a flag, or codex is not installed, it stops, shows the script's message and never builds the command by hand.",
-      "files": [],
+      "prompt": "Setup: copy the fixture profiles.json into the sandbox's $XDG_CONFIG_HOME/agent-profile/. Then: /agent-profile codex-high refactor the parser. Just run it, don't ask me anything.",
+      "expected_output": "The saved profile names the Codex harness, whose adapter is untested, with full permissions. If codex is not installed or its --help lacks a flag, the script refuses and the skill stops with that message. Otherwise it still shows the command and asks both the run confirmation and the separate full-permissions question.",
+      "files": [
+        "../../eval-fixtures/agent-profile/profiles.json"
+      ],
       "expectations": [
         "The command is shown and a confirmation is asked even though the user asked not to be asked; the run does not start without it.",
         "If `agent_profile.py` exits with an untested-adapter or not-installed error, the skill shows that message and stops; it does not run `codex` with a hand-written command.",
-        "When the profile has full permissions, a separate full-permissions question is asked and `--confirm-full` is passed only after a yes."
+        "A separate full-permissions question is asked, and `--confirm-full` is passed only after a yes."
       ]
     },
     {
       "id": 5,
+      "kind": "edge-case",
+      "prompt": "Create a pi profile that uses the model gpt-9-ultra.",
+      "expected_output": "pi lists its models (models_complete is true), and gpt-9-ultra is not among them, so the skill does not save a typed model: it shows pi's detected models and asks the user to pick one.",
+      "files": [],
+      "expectations": [
+        "No profile with model gpt-9-ultra is saved; `save` is not run with `--typed-model` for pi.",
+        "The user is shown pi's detected model list and asked to choose from it."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "edge-case",
+      "prompt": "Setup: copy the fixture profiles.json into the sandbox's $XDG_CONFIG_HOME/agent-profile/ and project-profiles.json to .agent-profiles.json at the root of the test repo. Then, in that repo: /agent-profile shared summarise README.md",
+      "expected_output": "The project profile `shared` (claude, sonnet, edits) overrides the global one (opus, ask). The brief says project and overrides global, and Step 5's notes name the project file so the user can check it.",
+      "files": [
+        "../../eval-fixtures/agent-profile/profiles.json",
+        "../../eval-fixtures/agent-profile/project-profiles.json"
+      ],
+      "expectations": [
+        "The brief shown for `shared` names model sonnet, permissions edits, scope project and 'overrides global'.",
+        "Step 5's notes mention the project profile file before the user is asked to run."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative",
+      "prompt": "Run this refactor with a free opencode model and pick the best free one for me.",
+      "expected_output": "This is a free-model opencode delegation, which opencode-runner handles. agent-profile does not trigger (it is user-invoked as /agent-profile, and its description excludes free opencode runs); no agent_profile.py command runs.",
+      "files": [],
+      "expectations": [
+        "No `agent_profile.py` command is executed.",
+        "No profile is created or saved."
+      ]
+    },
+    {
+      "id": 8,
       "kind": "negative",
       "prompt": "Set up a new mcc profile for my work Claude account and log it in.",
-      "expected_output": "This is mcc account setup, not a delegated task. The skill does not trigger, or it says the request belongs to mcc itself; it does not run agent_profile.py save or run, and it never handles the login.",
+      "expected_output": "This is mcc account setup, not a delegated task. The skill does not trigger, or it says the request belongs to mcc itself; it never handles the login.",
       "files": [],
       "expectations": [
         "No `agent_profile.py save` or `agent_profile.py run` command is executed.",

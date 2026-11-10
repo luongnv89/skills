@@ -12,8 +12,8 @@
 
 - **Discovery first.** `detect` finds the installed harness CLIs and their versions, then each one's harness profiles (mcc profiles for Claude Code, Codex config profiles), its models (`pi --list-models`, `opencode models`, `devin models list`, Claude Code's aliases) and its thinking levels (parsed from each CLI's `--help`). New profiles offer only what it found.
 - **Reusable profiles**, stored globally (`~/.config/agent-profile/profiles.json`) or per project (`.agent-profiles.json`, which overrides a global profile of the same name). No credentials are ever stored.
-- **Each run asks** where it goes (current directory or a new git worktree) and how (foreground or background), and shows the exact command first. Every full-permissions run needs its own yes.
-- **Safe launch.** The task reaches the harness as a file or a single argument, never through a shell. Background runs leave a run folder with the prompt, the command, the log and the result (exit code, duration, timeout).
+- **Each run asks** where it goes (current directory or a new git worktree) and how (foreground or background), and shows the exact command first. Every full-permissions run needs its own yes. pi and opencode run with full tool access only, because neither can restrict its tools headless.
+- **Safe launch.** The task reaches the harness as a file or a single argument, never through a shell. Each run leaves a run folder with the prompt, the command, the log and the result (done, failed, timeout, interrupted, stopped). `status` and `stop` follow background runs.
 - **Eight adapters.** Claude Code (with mcc), pi and opencode are verified by real runs. Codex, Factory Droid, Devin CLI, Grok Build and Gemini CLI follow their docs, and their flags are checked against `--help` before each run.
 
 ## When to Use
@@ -53,7 +53,7 @@ Needs Python 3.9+ (3.11+ to read Codex profiles), git, and at least one logged-i
 
 | Path | Description |
 | --- | --- |
-| `scripts/agent_profile.py` | `detect`, `list`, `show`, `save`, `delete`, `command`, `run`, `status` (standard library only) |
+| `scripts/agent_profile.py` | `detect`, `list`, `show`, `save`, `delete`, `command`, `run`, `status`, `stop` (standard library only) |
 | `references/harnesses.md` | Per-harness detection, models, thinking, permission flags, headless command, verified/untested status |
 | `references/profile-format.md` | Storage, profile fields, run folder, error messages, edge cases |
 
