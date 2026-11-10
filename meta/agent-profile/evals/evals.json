@@ -34,13 +34,13 @@
       "id": 3,
       "kind": "happy-path",
       "prompt": "Make me a pi profile with a free model and the highest thinking level it supports, call it pi-max, and save it just for this project.",
-      "expected_output": "The skill runs detect for pi, offers only pi's detected models, keeps the provider of the chosen model, offers only thinking levels pi reported (and none for a model marked without thinking), and saves pi-max with --scope project and full permissions after explaining that pi always has full tool access.",
+      "expected_output": "The skill runs detect for pi, offers only pi's detected models, keeps the provider of the chosen model, offers only thinking levels pi reported (and none for a model marked without thinking), and saves pi-max with --scope project after explaining pi's permission modes (ask or full).",
       "files": [],
       "expectations": [
         "The model offered or chosen comes from `pi --list-models` output as reported by detect, and the saved profile records its provider.",
         "The thinking level saved is one of the levels detect reported for pi, and only for a model whose thinking column is yes.",
         "The profile is saved with `--scope project`, so it lands in `.agent-profiles.json` at the git root.",
-        "The user is told that pi offers only full permissions and that each run will ask for a separate full-permissions confirmation."
+        "The user is told pi's permission modes (ask = read-only tools, full = every tool, no edits mode), and that a full profile asks for a separate confirmation on every run."
       ]
     },
     {

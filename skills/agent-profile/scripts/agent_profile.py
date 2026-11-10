@@ -47,6 +47,15 @@ ARGV_PROMPT_LIMIT = 100_000  # bytes; larger tasks need a harness that reads a f
 FOREGROUND_TIMEOUT = 540     # fits a 10-minute shell-tool cap; longer tasks run in Background
 BACKGROUND_TIMEOUT = 3600
 OPENCODE_MESSAGE = "Follow the instructions in the attached file."
+# Values that reach a harness argv: never option-like, no whitespace or control characters.
+VALUE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/@#\[\]+=-]{0,199}$")
+# Passed as OPENCODE_CONFIG_CONTENT; honoured with --standalone (tested with 2.2.6). Deny everything,
+# then allow by name, so a renamed tool (2.2.6 calls its shell tool `shell`, not `bash`) stays denied.
+_OC_READ = {"*": "deny", "read": "allow", "glob": "allow", "grep": "allow", "list": "allow"}
+OPENCODE_PERMS = {
+    "ask": {"permission": _OC_READ},
+    "edits": {"permission": dict(_OC_READ, edit="allow", write="allow")},
+}
 
 
 def die(msg, code=2):
@@ -212,18 +221,18 @@ ADAPTERS = {
         "name": "pi", "bin": "pi", "verified": True,
         "profiles": None, "models": _pi_models, "thinking": _pi_thinking, "per_model_thinking": True,
         "help": [["--help"]], "flags": ["-p", "--model", "--provider", "--thinking"],
-        "permissions": {"full": []},
-        "permission_note": "pi has no permission prompts, so every run has full tool access "
-                           "(its --tools/--exclude-tools flags denied even reads in testing)",
+        "permissions": {"ask": ["--tools", "read,grep,find,ls"], "full": []},
+        "permission_note": "pi has no permission prompts: `ask` limits it to read-only tools, "
+                           "`full` gives every tool; there is no tested `edits` mode",
     },
     "opencode": {
         "name": "opencode", "bin": "opencode", "verified": True,
         "profiles": None, "models": _opencode_models,
         "thinking": lambda b: ([], "opencode lists no variants: type <model>#<variant> to use one"),
         "per_model_thinking": False, "variants": True,
-        "help": [["run", "--help"]], "flags": ["--model", "--auto", "--file"],
-        "permissions": {"full": ["--auto"]},
-        "permission_note": "opencode allows tools by default in `run`, so every run has full tool access",
+        "help": [["run", "--help"]], "flags": ["--model", "--auto", "--file", "--standalone"],
+        "permissions": {"ask": [], "edits": ["--auto"], "full": ["--auto"]},
+        "permission_note": "",
     },
     "codex": {
         "name": "Codex", "bin": "codex", "verified": False,
@@ -366,9 +375,9 @@ def entry_problem(name, p):
         return "no model"
     if p.get("permissions") not in PERMISSIONS:
         return f"bad permissions {p.get('permissions')!r}"
-    for k in ("harness_profile", "provider", "thinking"):
-        if k in p and not isinstance(p[k], str):
-            return f"bad {k}"
+    for k in ("model", "harness_profile", "provider", "thinking"):
+        if k in p and not (isinstance(p[k], str) and VALUE_RE.match(p[k])):
+            return f"bad {k} {p[k]!r}"
     return None
 
 
@@ -392,10 +401,12 @@ def load(path, strict=False):
 
 
 class Locked:
-    """Exclusive lock on <file>.lock for a read-modify-write."""
+    """Exclusive lock for a read-modify-write of one profile file (lock kept in the cache)."""
 
     def __init__(self, path):
-        self.lock = path.with_name(path.name + ".lock")
+        import hashlib  # keep lock files out of repos: one per profile file, in the cache
+        digest = hashlib.sha256(str(path.resolve()).encode()).hexdigest()[:16]
+        self.lock = runs_root().parent / "locks" / f"{digest}.lock"
 
     def __enter__(self):
         self.lock.parent.mkdir(parents=True, exist_ok=True)
@@ -465,6 +476,10 @@ def cmd_save(a):
         die(f"profile name '{a.name}' is invalid: use 1-40 lowercase letters, digits or hyphens, starting with a letter or digit")
     if a.harness not in ADAPTERS:
         die(f"unknown harness '{a.harness}'. Known: {', '.join(ADAPTERS)}")
+    for flag, v in (("--model", a.model), ("--harness-profile", a.harness_profile),
+                    ("--provider", a.provider), ("--thinking", a.thinking)):
+        if v is not None and not VALUE_RE.match(v):
+            die(f"{flag} {v!r} is not a valid value: it must start with a letter or digit and hold no spaces")
     d = detect_one(a.harness)
     if d["status"] != "installed":
         die(f"harness '{a.harness}' ({d['bin']}) is not installed on this machine; install it, then run detect again")
@@ -533,8 +548,11 @@ def recheck(p):
         die(f"harness '{p['harness']}' ({d['bin']}) is not installed; run detect and pick or create another profile")
     notes = []
     hp = p.get("harness_profile")
-    if hp and d.get("harness_profiles") and hp not in [x["name"] for x in d["harness_profiles"]]:
-        die(f"harness profile '{hp}' is no longer detected for {p['harness']}; edit the profile")
+    if hp and hp not in [x["name"] for x in d.get("harness_profiles", [])]:
+        die(f"harness profile '{hp}' is not detected for {p['harness']}; edit the profile")
+    t = p.get("thinking")
+    if t and t not in d.get("thinking_levels", []):
+        die(f"thinking '{t}' is not a level {p['harness']} reports ({', '.join(d.get('thinking_levels', [])) or 'none'}); edit the profile")
     if p["permissions"] not in d["permissions"]:
         die(f"{p['harness']} has no '{p['permissions']}' permission mode; edit the profile")
     model, _ = find_model(d, p["model"], p.get("provider"))
@@ -558,14 +576,14 @@ def argv_prompt(prompt, hid):
 
 
 def build(p, prompt_file, cwd):
-    """Return (argv, stdin_path, env_unset, notes). The prompt never passes through a shell."""
+    """Return (argv, stdin_path, env_unset, env_set, notes). The prompt never passes through a shell."""
     hid = p["harness"]
     a = ADAPTERS[hid]
     notes = recheck(p)
     path = shutil.which(a["bin"])
     perm = a["permissions"][p["permissions"]]
     t, m = p.get("thinking"), p["model"]
-    stdin, env_unset = None, []
+    stdin, env_unset, env_set = None, [], {}
     if hid == "claude":
         argv = [path, "-p", "--model", m] + (["--effort", t] if t else []) + perm
         stdin = prompt_file
@@ -578,9 +596,16 @@ def build(p, prompt_file, cwd):
             die(f"profile uses mcc profile '{hp}' but mcc is not installed")
     elif hid == "pi":
         argv = [path, "-p"] + (["--provider", p["provider"]] if p.get("provider") else []) + ["--model", m] \
-            + (["--thinking", t] if t else []) + ["--", "@" + prompt_file]
+            + (["--thinking", t] if t else []) + perm + ["--", "@" + prompt_file]
     elif hid == "opencode":
-        argv = [path, "run", "--model", m] + perm + ["--file", prompt_file, "--", OPENCODE_MESSAGE]
+        # --standalone: a private server in this run's process tree, so permission config is read
+        # fresh and stop/timeout reach the tools (the shared background service would escape both)
+        argv = [path, "run", "--standalone", "--model", m] + perm + ["--file", prompt_file, "--", OPENCODE_MESSAGE]
+        if p["permissions"] in OPENCODE_PERMS:
+            env_set["OPENCODE_CONFIG_CONTENT"] = json.dumps(OPENCODE_PERMS[p["permissions"]], separators=(",", ":"))
+            if any((Path(cwd) / f).exists() for f in ("opencode.json", "opencode.jsonc", ".opencode")):
+                notes.append("the working directory has its own opencode config, which may change what "
+                             f"`{p['permissions']}` allows: check its permission rules")
     elif hid == "codex":
         argv = [path, "exec", "--cd", cwd, "--model", m] \
             + (["--profile", p["harness_profile"]] if p.get("harness_profile") else []) \
@@ -610,12 +635,13 @@ def build(p, prompt_file, cwd):
         notes.append(f"{a['name']} adapter is untested: flags checked against --help only")
     if a.get("permission_note"):
         notes.append(a["permission_note"])
-    return argv, stdin, env_unset, notes
+    return argv, stdin, env_unset, env_set, notes
 
 
-def display(argv, stdin, prompt_file, env_unset):
+def display(argv, stdin, prompt_file, env_unset, env_set=None):
     shown = [f"<task from {prompt_file}>" if (len(x) > 200 or "\n" in x) else x for x in argv]
-    prefix = "".join(f"env -u {v} " for v in env_unset)
+    prefix = "".join(f"env -u {v} " for v in env_unset) + "".join(
+        f"{k}={shlex.quote(v)} " for k, v in (env_set or {}).items())
     return prefix + shlex.join(shown) + (f" < {shlex.quote(stdin)}" if stdin else "")
 
 
@@ -625,9 +651,10 @@ def cmd_command(a):
         die(f"prompt file {a.prompt_file} does not exist")
     cwd = os.path.abspath(a.cwd)
     prompt_file = os.path.abspath(a.prompt_file)
-    argv, stdin, env_unset, notes = build(p, prompt_file, cwd)
+    argv, stdin, env_unset, env_set, notes = build(p, prompt_file, cwd)
     print(json.dumps({"profile": brief(p), "cwd": cwd, "argv": argv, "stdin": stdin, "env_unset": env_unset,
-                      "display": display(argv, stdin, prompt_file, env_unset), "notes": notes,
+                      "env_set": env_set, "display": display(argv, stdin, prompt_file, env_unset, env_set),
+                      "notes": notes,
                       "needs_full_confirmation": p["permissions"] == "full"}, indent=2))
 
 
@@ -663,17 +690,42 @@ def write_result(run_dir, result):
     os.replace(tmp, Path(run_dir) / "result.json")
 
 
+def descendants(pid):
+    """Every live descendant of pid, found through /proc parent links (Linux; else empty)."""
+    children = {}
+    for d in Path("/proc").glob("[0-9]*"):
+        try:
+            ppid = int((d / "stat").read_text().rsplit(")", 1)[-1].split()[1])
+        except (OSError, ValueError, IndexError):
+            continue
+        children.setdefault(ppid, []).append(int(d.name))
+    out, todo = [], [pid]
+    while todo:
+        for c in children.get(todo.pop(), []):
+            out.append(c)
+            todo.append(c)
+    return out
+
+
 def kill_group(pid):
-    """SIGTERM the process group, then SIGKILL after 10 s."""
+    """SIGTERM the harness's process group and every descendant (some start their own
+    session), then SIGKILL whatever is left after 10 s."""
+    targets = [pid] + descendants(pid)
     for sig, wait in ((signal.SIGTERM, 10), (signal.SIGKILL, 2)):
+        targets += [x for x in descendants(pid) if x not in targets]
         try:
             os.killpg(pid, sig)
         except OSError:
-            return
+            pass
+        for t in targets:
+            try:
+                os.kill(t, sig)
+            except OSError:
+                pass
         end = time.time() + wait
-        while time.time() < end and pid_alive(pid):
+        while time.time() < end and any(pid_alive(t) for t in targets):
             time.sleep(0.2)
-        if not pid_alive(pid):
+        if not any(pid_alive(t) for t in targets):
             return
 
 
@@ -701,6 +753,7 @@ def execute(run_dir, timeout):
             env = dict(os.environ, PWD=spec["cwd"])
             for v in spec.get("env_unset", []):
                 env.pop(v, None)
+            env.update(spec.get("env_set", {}))
             proc = subprocess.Popen(spec["argv"], cwd=spec["cwd"], stdin=stdin, stdout=log,
                                     stderr=subprocess.STDOUT, start_new_session=True, env=env)
             state["proc"] = proc
@@ -750,11 +803,15 @@ def cmd_run(a):
         die(f"profile '{a.name}' runs with full permissions; ask the user to confirm this run, then pass --confirm-full")
     timeout = a.timeout or (BACKGROUND_TIMEOUT if a.background else FOREGROUND_TIMEOUT)
     run_dir = new_run_dir(p["name"])
-    shutil.copy(a.prompt_file, run_dir / "prompt.md")
-    argv, stdin, env_unset, notes = build(p, str(run_dir / "prompt.md"), cwd)
+    try:
+        shutil.copy(a.prompt_file, run_dir / "prompt.md")
+        argv, stdin, env_unset, env_set, notes = build(p, str(run_dir / "prompt.md"), cwd)
+    except BaseException:  # a refused build leaves no half-made run folder
+        shutil.rmtree(run_dir, ignore_errors=True)
+        raise
     (run_dir / "command.json").write_text(json.dumps(
         {"profile": p["name"], "brief": brief(p), "cwd": cwd, "argv": argv, "stdin": stdin,
-         "env_unset": env_unset, "notes": notes, "timeout_s": timeout}, indent=2) + "\n")
+         "env_unset": env_unset, "env_set": env_set, "notes": notes, "timeout_s": timeout}, indent=2) + "\n")
     if a.background:
         runner = subprocess.Popen([sys.executable, os.path.abspath(__file__), "_execute", str(run_dir),
                                    "--timeout", str(timeout)], stdin=subprocess.DEVNULL,

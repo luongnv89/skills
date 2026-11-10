@@ -33,11 +33,18 @@ typed ids.
 | `edits` | file edits allowed, commands refused | `--permission-mode acceptEdits`       | `--sandbox workspace-write`    | `--auto low`  | `--permission-mode accept-edits` | n/a       | `--approval-mode auto_edit` |
 | `full`  | any command without asking           | `--permission-mode bypassPermissions` | `--sandbox danger-full-access` | `--auto high` | `--permission-mode dangerous`    | `--yolo`  | `--approval-mode yolo`      |
 
-- **pi** and **opencode** offer only `full`. opencode's `run` allows tools by default:
-  a profile without `--auto` still ran shell commands and wrote files, and
-  `OPENCODE_CONFIG_CONTENT` permission rules were ignored (tested with 2.2.6). pi has no
-  permission prompts, and its `--tools`/`--exclude-tools` flags denied even reads in
-  testing (1.3.0). opencode `full` adds `--auto`.
+- **opencode** (`--standalone`, see below) gets its rules in `OPENCODE_CONFIG_CONTENT`: deny
+  everything, then allow by name. `ask` allows `read`, `glob`, `grep` and `list`; `edits`
+  adds `edit` and `write` and passes `--auto` so allowed tools never wait for a prompt;
+  `full` is `--auto` alone. Tested with 2.2.6: under `ask` nothing was written, and under
+  `edits` files were written but the shell never ran. Rules keyed on `bash` alone did not
+  hold, because 2.2.6 names its shell tool `shell`. Without `--standalone` the shared
+  background service ignored the rules. A repo's own `opencode.json` or `.opencode/` may
+  add rules; Step 5's notes flag one.
+- **pi** has no permission prompts. `ask` passes `--tools read,grep,find,ls` (tested:
+  reads worked, nothing was written, no shell ran); `full` passes nothing. `edits`
+  (`--exclude-tools bash`) is not offered: through the opencode-cli provider it worked
+  with one model and refused even reads with another.
 - claude `ask` was verified: a write task under `dontAsk` created no file. Allow rules in
   the profile's own `settings.json` still apply.
 - `full` always needs the user's own yes for each run (SKILL.md rule 2).
@@ -51,8 +58,8 @@ is refused, and one starting with `-` gets a `Task:` line in front.
 | Harness  | Command                                                                                     |
 | -------- | ------------------------------------------------------------------------------------------- |
 | claude   | `mcc exec <profile> -- claude -p --model M [--effort T] <perm> < file`; without mcc, only the `default` profile, run as `claude …` with `CLAUDE_CONFIG_DIR` removed |
-| pi       | `pi -p [--provider P] --model M [--thinking T] -- @file`                                    |
-| opencode | `opencode run --model M --auto --file file -- "Follow the instructions in the attached file."` |
+| pi       | `pi -p [--provider P] --model M [--thinking T] [--tools read,grep,find,ls] -- @file`        |
+| opencode | `[OPENCODE_CONFIG_CONTENT=<rules>] opencode run --standalone --model M [--auto] --file file -- "Follow the instructions in the attached file."` |
 | codex    | `codex exec --cd DIR --model M [--profile P] [--config model_reasoning_effort=T] <perm> [--skip-git-repo-check] - < file` (the last flag only outside a git repo) |
 | droid    | `droid exec --cwd DIR --model M [--reasoning-effort T] [perm] --file file`                  |
 | devin    | `devin --print --prompt-file file --model M --respect-workspace-trust false <perm>`         |
@@ -68,8 +75,12 @@ Every run also sets `PWD` to the working directory: opencode takes its directory
   `mcc exec <profile> -- <command>` runs the command with that profile's
   `CLAUDE_CONFIG_DIR`. Running through `mcc exec default` keeps a delegated run on
   `~/.claude` even when the main agent itself runs under another mcc profile.
-- **opencode:** `opencode models` can fail once while its plugins start; the script
-  retries once, then reports the error.
+- **opencode:** `run` normally hands the session to a shared background service
+  (`opencode serve --service`) that lives outside the run's process tree, so a timeout or
+  `stop` would end only the client while tools kept running. `--standalone` starts a
+  private server as a child of the run instead; `stop` was verified to end both.
+  `opencode models` can fail once while its plugins start; the script retries once, then
+  reports the error.
 - **pi:** the same model id can exist under several providers; the profile keeps the
   provider.
 

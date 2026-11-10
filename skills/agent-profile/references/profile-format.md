@@ -10,14 +10,16 @@ Read in Steps 2, 3 and 6.
 | project | `.agent-profiles.json` at the git root (or the current directory outside git) | yes: `list` marks it "overrides global" |
 
 Both files have the shape `{"version": 1, "profiles": {"<name>": {…}}}`. A save or delete
-holds a lock (`<file>.lock`) and writes a unique temp file, then renames it. Neither file
-ever holds a credential.
+holds a lock (one file per profile file under `~/.cache/agent-profile/locks/`, never in the
+repo) and writes a unique temp file, then renames it. Neither file ever holds a credential.
 
 A project file comes with the repo, so it is checked on load. An entry with a bad name, an
-unknown harness, no model or a bad permission mode is skipped with a warning. At
+unknown harness, no model, a bad permission mode, or a model, thinking, provider or
+harness profile value that starts with `-` or holds spaces is skipped with a warning
+(`save` refuses the same values). At
 `command`/`run` time every profile is checked again against what is installed. A model
-no longer in a complete list, a harness profile no longer detected, or a missing harness
-stops the run. Step 5's notes name a project profile's file so the user can check it.
+no longer in a complete list, a harness profile or thinking level the harness does not
+report, or a missing harness stops the run. Step 5's notes name a project profile's file so the user can check it.
 Most teams keep `.agent-profiles.json` out of git, since mcc and Codex profile names are
 local to one machine.
 
@@ -67,8 +69,12 @@ digit.
 | `orphaned`        | the runner died and the harness still runs: use `stop`             |
 | `lost`            | both are gone and no result was written                            |
 
-A harness that starts its own new session (`setsid`) escapes the process-group kill; no
-adapter here does.
+Stopping a run (timeout, interrupt, `stop`) signals the harness's process group and every
+descendant found through `/proc`, so a child that started its own session (opencode's
+private server does) is ended too. A process that left the tree (re-parented to init)
+cannot be found; opencode's shared background service is avoided with `--standalone` for
+that reason. A refused `run` (bad profile, untested adapter) removes the run folder it
+created.
 
 ## Errors
 

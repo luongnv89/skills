@@ -50,7 +50,6 @@ context budget small, read a reference file only in the step that names it, and 
    `models_complete` is false, and pass `--typed-model`.
 2. Never run before the user says go to the command shown in Step 5. A run with `full`
    permissions needs its own explicit yes every time; only then pass `--confirm-full`.
-   pi and opencode offer only `full`: neither can restrict its tools in headless runs.
 3. The task reaches the harness only through the prompt file. Never paste it into a
    shell string.
 4. Never read, print or store a credential. Profiles hold no keys, and `pi auth
@@ -99,8 +98,8 @@ model, thinking, permissions, scope.
    4. **Thinking:** the detected levels plus `harness default`. Skip the question when the
       harness has no levels, or when the model's `thinking` is false.
    5. **Permissions:** the detected modes, explained from `references/harnesses.md`
-      (ask, edits, full). Recommend `edits` where it exists. When `full` is the only mode
-      (pi, opencode), say so and that every run will ask for a separate yes.
+      (ask, edits, full). Recommend `edits` where it exists. pi has no `edits` mode: say so,
+      and that `full` means a separate yes on every run.
    6. **Name:** suggest `<harness>-<model>-<thinking>` in lowercase with hyphens; the user
       may change it.
    7. **Scope:** global (every project, default) or this project
@@ -181,8 +180,9 @@ path as `--cwd`.
 
 - **Foreground:** give the shell tool a 600 s timeout. The script stops the harness at
   540 s, prints the last 60 log lines and a JSON result: `status` (done, failed, timeout,
-  interrupted, failed-to-start), `exit_code`, `duration_s`, `run_dir`. If the shell tool
-  kills the script, the harness is stopped too and `result.json` says `interrupted`.
+  interrupted, failed-to-start), `exit_code`, `duration_s`, `run_dir`. If the shell tool stops the script (SIGTERM, SIGINT or SIGHUP), the harness is stopped
+  too and `result.json` says `interrupted`. After a SIGKILL nothing can clean up: `status`
+  then reports `orphaned`, and `stop` ends the harness.
 - **Background:** report `run_dir` and the pid. When the user asks, or before ending
   the conversation, run `$AP status <run_dir>` (running, done, failed, timeout, stopped,
   orphaned, lost). To end it early on the user's request: `$AP stop <run_dir>`.
