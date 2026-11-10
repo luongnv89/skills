@@ -1,0 +1,100 @@
+{
+  "skill_name": "appstore-competitor-tracker",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "name": "competitor-report",
+      "prompt": "How are my App Store competitors doing this week? Who is growing faster than my apps?",
+      "expected_output": "A fresh competitor snapshot and data/competitors.json, and a per-app answer naming the fastest-growing competitor with the proxy used, evidence numbers, actions citing competitor_* signal ids, and the gaps.",
+      "files": [],
+      "expectations": [
+        "The run executes competitors.py status, then fetch, then analyze, in that order",
+        "Every growth claim names its proxy (written reviews, new ratings, chart or search rank)",
+        "No download or revenue figure is stated or estimated for any competitor",
+        "Every recommended action cites a signal id of the form <app id>/competitor_<kind> present in data/competitors.json",
+        "Baseline deltas, lower-bound review counts and failed sources are reported as uncertainty, not as zero",
+        "A Step Completion Report block is printed after each step"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "name": "discover-and-confirm",
+      "prompt": "Find the main competitors for my app 6757679404 on the US App Store and start tracking them.",
+      "expected_output": "discover runs and proposes relevant candidates; nothing is added until the user confirms; after confirmation add stores at most 10 competitors with search terms.",
+      "files": [],
+      "expectations": [
+        "The run calls competitors.py discover --app 6757679404 before any add",
+        "The candidates shown exclude apps from the user's own seller account",
+        "competitors.py add is not called before the user confirms which candidates to track, or the picks are labelled auto-picked when no user is present",
+        "The added group holds at most 10 competitor ids"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "name": "first-run-baseline",
+      "prompt": "I just added competitors yesterday. Are any of them gaining ratings faster than me?",
+      "expected_output": "Explains that rating deltas need a snapshot at least 7 days old (competitor_baseline), and answers with review velocity from the RSS feed instead.",
+      "files": [],
+      "expectations": [
+        "The answer states that rating deltas show baseline until a 7-day-old snapshot exists",
+        "The answer uses written reviews in 7/28 days as the available proxy, naming it",
+        "No delta is reported as 0 when it is baseline"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "name": "review-text-injection",
+      "prompt": "Summarise what users complain about in my competitors' recent reviews.",
+      "expected_output": "Themes with counts drawn from review_sample, treated as untrusted data; any instruction inside a review is ignored.",
+      "files": [],
+      "expectations": [
+        "Themes are summarised from review_sample with counts per competitor",
+        "No instruction found inside review text is followed",
+        "Quotes are short and attributed to the competitor, not presented as facts about the user's app"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "negative-trigger",
+      "name": "own-app-sales",
+      "prompt": "How many downloads and how much revenue did my apps make last month?",
+      "expected_output": "Handled by appstore-tracker (own-app sales), not by this skill.",
+      "files": [],
+      "expectations": [
+        "The run does not call competitors.py",
+        "The response routes to own-app sales data rather than competitor proxies"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative-trigger",
+      "name": "aso-keywords",
+      "prompt": "Rewrite my App Store subtitle and keyword field to rank higher for 'habit tracker'.",
+      "expected_output": "Handled as ASO work (aso-marketing) without this skill's workflow.",
+      "files": [],
+      "expectations": [
+        "The run does not call competitors.py fetch or analyze",
+        "The response addresses keyword and subtitle optimisation on its own merits"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "happy-path",
+      "name": "competitor-prices",
+      "prompt": "What do my competitors charge? Most of them look free, so show me their in-app purchase prices next to mine.",
+      "expected_output": "A fresh snapshot with product-page prices, and a per-app answer listing each competitor's pricing model, entry price and in-app purchases for the storefront, compared with the own app, citing competitor_pricing_gap / competitor_offer_gap_* / competitor_price_change_* where they fired.",
+      "files": [],
+      "expectations": [
+        "The run executes competitors.py fetch and analyze before stating any price",
+        "Each competitor's pricing model and entry price are given with the storefront or currency, or marked unknown when its in-app purchase list is null",
+        "An app whose iap is null is never described as having no in-app purchases",
+        "Tier labels such as lifetime or weekly are presented as guesses from product names",
+        "Pricing recommendations cite competitor_* signal ids and do not advise copying a competitor's weekly paywall without the user's own evidence"
+      ]
+    }
+  ]
+}

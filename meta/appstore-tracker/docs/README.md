@@ -15,6 +15,7 @@
 - Computes rule-based signals (trends, spikes, release impact, store funnel and conversion, refunds, localization gaps, unanswered negative reviews, unsellable products, rejected apps with their App Review guideline), and the agent turns them into ranked actions that cite their evidence. A 4.3 spam rejection is never answered with "resubmit".
 - Writes one self-contained `dashboard.html` (portfolio view plus one view per app, light and dark, no CDN) and a dated copy for every run.
 - Drafts replies to unanswered negative reviews. It never posts them.
+- With [appstore-competitor-tracker](../../appstore-competitor-tracker/docs/README.md) installed, each report also shows how every app's competitors grow (new ratings, written reviews, chart and search rank, never their downloads or revenue): competitor signals in the actions, a Competitors section per app (with each app's pricing model, entry price and in-app purchase list) and a Competitive position card.
 
 ## When to Use
 
@@ -23,6 +24,7 @@
 | "How are my App Store apps doing?" | Refresh all data, write insights and actions, render the dashboard |
 | "How is TextWiz doing on the App Store?" | Run the same pipeline and answer for that app, with a link to its view |
 | "Just refresh my app store stats" | Update the data and the dashboard without new recommendations |
+| "How are my competitors doing?" | Fetch competitor snapshots, merge their signals, and add one Competitors line per app |
 | "Show me what the tracker would look like" | Build a dashboard from synthetic demo data in a separate folder |
 
 ## How It Works

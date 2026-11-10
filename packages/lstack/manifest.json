@@ -32,6 +32,7 @@
     {"name": "agent-config", "source": "skills/agent-config"},
     {"name": "ai-job-scout", "source": "skills/ai-job-scout"},
     {"name": "appstore-assets", "source": "skills/appstore-assets"},
+    {"name": "appstore-competitor-tracker", "source": "skills/appstore-competitor-tracker"},
     {"name": "appstore-review-checker", "source": "skills/appstore-review-checker"},
     {"name": "appstore-tracker", "source": "skills/appstore-tracker"},
     {"name": "aso-marketing", "source": "skills/aso-marketing"},
