@@ -54,7 +54,7 @@ digit.
 | `prompt.md`   | the task, copied at run time                              |
 | `command.json`| profile brief, cwd, argv, stdin, removed env vars, notes, timeout |
 | `output.log`  | stdout and stderr of the harness                          |
-| `runner.pid`, `child.pid` | the supervising script and the harness (foreground and background) |
+| `runner.pid`, `child.pid` | the supervising script and the harness, each as `<pid> <start time>`; a pid whose start time no longer matches is treated as gone, so `stop` never signals a reused pid |
 | `result.json` | `status`, `exit_code`, `duration_s`, `finished`           |
 
 | `status` / state  | Meaning                                                            |

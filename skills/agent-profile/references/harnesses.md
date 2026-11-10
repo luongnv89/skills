@@ -33,16 +33,15 @@ typed ids.
 | `edits` | file edits allowed, commands refused | `--permission-mode acceptEdits`       | `--sandbox workspace-write`    | `--auto low`  | `--permission-mode accept-edits` | n/a       | `--approval-mode auto_edit` |
 | `full`  | any command without asking           | `--permission-mode bypassPermissions` | `--sandbox danger-full-access` | `--auto high` | `--permission-mode dangerous`    | `--yolo`  | `--approval-mode yolo`      |
 
-- **opencode** (`--standalone`, see below) gets its rules in `OPENCODE_CONFIG_CONTENT`: deny
-  everything, then allow by name. `ask` allows `read`, `glob`, `grep` and `list`; `edits`
-  adds `edit` and `write` and passes `--auto` so allowed tools never wait for a prompt;
-  `full` is `--auto` alone. Tested with 2.2.6: under `ask` nothing was written, and under
-  `edits` files were written but the shell never ran. Rules keyed on `bash` alone did not
-  hold, because 2.2.6 names its shell tool `shell`. Without `--standalone` the shared
-  background service ignored the rules. A repo's own `opencode.json` or `.opencode/` may
-  add rules; Step 5's notes flag one.
-- **pi** has no permission prompts. `ask` passes `--tools read,grep,find,ls` (tested:
-  reads worked, nothing was written, no shell ran); `full` passes nothing. `edits`
+- **opencode** offers only `full` (`--auto`). Inline `OPENCODE_CONFIG_CONTENT` rules held
+  in clean repos (tested with 2.2.6), but agent-level rules in any other opencode config
+  override them: a repo's `opencode.json` or `.opencode/agent/*.md` (also in a parent
+  folder of the working directory), the global config, `OPENCODE_CONFIG`, or a
+  `default_agent`. A review run under such a config wrote files and ran the shell under a
+  restricted profile, so the skill does not offer `ask` or `edits` for opencode.
+- **pi** has no permission prompts. `ask` passes `--no-mcp --tools read,grep,find,ls` (tested:
+  reads worked, nothing was written, no shell ran; `--no-mcp` because `--tools` keeps MCP
+  tools, and pi's code mode can reach them); `full` passes nothing. `edits`
   (`--exclude-tools bash`) is not offered: through the opencode-cli provider it worked
   with one model and refused even reads with another.
 - claude `ask` was verified: a write task under `dontAsk` created no file. Allow rules in
@@ -58,8 +57,8 @@ is refused, and one starting with `-` gets a `Task:` line in front.
 | Harness  | Command                                                                                     |
 | -------- | ------------------------------------------------------------------------------------------- |
 | claude   | `mcc exec <profile> -- claude -p --model M [--effort T] <perm> < file`; without mcc, only the `default` profile, run as `claude …` with `CLAUDE_CONFIG_DIR` removed |
-| pi       | `pi -p [--provider P] --model M [--thinking T] [--tools read,grep,find,ls] -- @file`        |
-| opencode | `[OPENCODE_CONFIG_CONTENT=<rules>] opencode run --standalone --model M [--auto] --file file -- "Follow the instructions in the attached file."` |
+| pi       | `pi -p [--provider P] --model M [--thinking T] [--no-mcp --tools read,grep,find,ls] -- @file` |
+| opencode | `opencode run --standalone --model M --auto --file file -- "Follow the instructions in the attached file."` |
 | codex    | `codex exec --cd DIR --model M [--profile P] [--config model_reasoning_effort=T] <perm> [--skip-git-repo-check] - < file` (the last flag only outside a git repo) |
 | droid    | `droid exec --cwd DIR --model M [--reasoning-effort T] [perm] --file file`                  |
 | devin    | `devin --print --prompt-file file --model M --respect-workspace-trust false <perm>`         |

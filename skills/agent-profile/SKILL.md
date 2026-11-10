@@ -98,8 +98,8 @@ model, thinking, permissions, scope.
    4. **Thinking:** the detected levels plus `harness default`. Skip the question when the
       harness has no levels, or when the model's `thinking` is false.
    5. **Permissions:** the detected modes, explained from `references/harnesses.md`
-      (ask, edits, full). Recommend `edits` where it exists. pi has no `edits` mode: say so,
-      and that `full` means a separate yes on every run.
+      (ask, edits, full). Recommend `edits` where it exists. pi has `ask` and `full`;
+      opencode has only `full`. Say so, and that `full` means a separate yes on every run.
    6. **Name:** suggest `<harness>-<model>-<thinking>` in lowercase with hyphens; the user
       may change it.
    7. **Scope:** global (every project, default) or this project
@@ -158,8 +158,8 @@ Notes:     <notes, or none>
 ```
 
 Notes cover a typed model, a harness version that changed since the profile was saved,
-a project profile (check it is one you trust), an untested adapter, and a harness that
-always has full access. A `command` error (harness removed, model no longer listed)
+a project profile (check it is one you trust), an untested adapter, and why a harness
+offers fewer permission modes (opencode). A `command` error (harness removed, model no longer listed)
 goes back to Step 2.
 
 Ask `Run it`, `Change` (back to Step 2 or 4) or `Cancel`. When

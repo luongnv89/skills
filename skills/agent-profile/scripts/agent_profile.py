@@ -48,14 +48,8 @@ FOREGROUND_TIMEOUT = 540     # fits a 10-minute shell-tool cap; longer tasks run
 BACKGROUND_TIMEOUT = 3600
 OPENCODE_MESSAGE = "Follow the instructions in the attached file."
 # Values that reach a harness argv: never option-like, no whitespace or control characters.
-VALUE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/@#\[\]+=-]{0,199}$")
-# Passed as OPENCODE_CONFIG_CONTENT; honoured with --standalone (tested with 2.2.6). Deny everything,
-# then allow by name, so a renamed tool (2.2.6 calls its shell tool `shell`, not `bash`) stays denied.
-_OC_READ = {"*": "deny", "read": "allow", "glob": "allow", "grep": "allow", "list": "allow"}
-OPENCODE_PERMS = {
-    "ask": {"permission": _OC_READ},
-    "edits": {"permission": dict(_OC_READ, edit="allow", write="allow")},
-}
+VALUE_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@#\[\]+=-]{0,199}")  # use fullmatch
+
 
 
 def die(msg, code=2):
@@ -220,8 +214,8 @@ ADAPTERS = {
     "pi": {
         "name": "pi", "bin": "pi", "verified": True,
         "profiles": None, "models": _pi_models, "thinking": _pi_thinking, "per_model_thinking": True,
-        "help": [["--help"]], "flags": ["-p", "--model", "--provider", "--thinking"],
-        "permissions": {"ask": ["--tools", "read,grep,find,ls"], "full": []},
+        "help": [["--help"]], "flags": ["-p", "--model", "--provider", "--thinking", "--tools", "--no-mcp"],
+        "permissions": {"ask": ["--no-mcp", "--tools", "read,grep,find,ls"], "full": []},
         "permission_note": "pi has no permission prompts: `ask` limits it to read-only tools, "
                            "`full` gives every tool; there is no tested `edits` mode",
     },
@@ -231,8 +225,9 @@ ADAPTERS = {
         "thinking": lambda b: ([], "opencode lists no variants: type <model>#<variant> to use one"),
         "per_model_thinking": False, "variants": True,
         "help": [["run", "--help"]], "flags": ["--model", "--auto", "--file", "--standalone"],
-        "permissions": {"ask": [], "edits": ["--auto"], "full": ["--auto"]},
-        "permission_note": "",
+        "permissions": {"full": ["--auto"]},
+        "permission_note": "opencode offers only full: agent-level rules in any opencode config "
+                           "(repo, parent folders, global, OPENCODE_CONFIG) can override restrictions",
     },
     "codex": {
         "name": "Codex", "bin": "codex", "verified": False,
@@ -365,7 +360,7 @@ def project_file(project):
 
 def entry_problem(name, p):
     """Why a stored entry cannot be used, or None."""
-    if not isinstance(name, str) or not NAME_RE.match(name):
+    if not isinstance(name, str) or not NAME_RE.fullmatch(name):
         return "invalid name"
     if not isinstance(p, dict):
         return "not an object"
@@ -376,7 +371,7 @@ def entry_problem(name, p):
     if p.get("permissions") not in PERMISSIONS:
         return f"bad permissions {p.get('permissions')!r}"
     for k in ("model", "harness_profile", "provider", "thinking"):
-        if k in p and not (isinstance(p[k], str) and VALUE_RE.match(p[k])):
+        if k in p and not (isinstance(p[k], str) and VALUE_RE.fullmatch(p[k])):
             return f"bad {k} {p[k]!r}"
     return None
 
@@ -409,8 +404,11 @@ class Locked:
         self.lock = runs_root().parent / "locks" / f"{digest}.lock"
 
     def __enter__(self):
-        self.lock.parent.mkdir(parents=True, exist_ok=True)
-        self.fh = open(self.lock, "w")
+        try:
+            self.lock.parent.mkdir(parents=True, exist_ok=True)
+            self.fh = open(self.lock, "w")
+        except OSError as e:
+            die(f"cannot create the lock {self.lock} ({e.strerror}); check XDG_CACHE_HOME / ~/.cache", 1)
         if fcntl:
             fcntl.flock(self.fh, fcntl.LOCK_EX)
         return self
@@ -472,13 +470,13 @@ def find_model(d, model_id, provider=None):
 # ---------------------------------------------------------------- save
 
 def cmd_save(a):
-    if not NAME_RE.match(a.name):
+    if not NAME_RE.fullmatch(a.name):
         die(f"profile name '{a.name}' is invalid: use 1-40 lowercase letters, digits or hyphens, starting with a letter or digit")
     if a.harness not in ADAPTERS:
         die(f"unknown harness '{a.harness}'. Known: {', '.join(ADAPTERS)}")
     for flag, v in (("--model", a.model), ("--harness-profile", a.harness_profile),
                     ("--provider", a.provider), ("--thinking", a.thinking)):
-        if v is not None and not VALUE_RE.match(v):
+        if v is not None and not VALUE_RE.fullmatch(v):
             die(f"{flag} {v!r} is not a valid value: it must start with a letter or digit and hold no spaces")
     d = detect_one(a.harness)
     if d["status"] != "installed":
@@ -556,6 +554,8 @@ def recheck(p):
     if p["permissions"] not in d["permissions"]:
         die(f"{p['harness']} has no '{p['permissions']}' permission mode; edit the profile")
     model, _ = find_model(d, p["model"], p.get("provider"))
+    if t and d["per_model_thinking"] and model is not None and model.get("thinking") is False:
+        die(f"model '{p['model']}' does not support thinking ({d['models_source']}); edit the profile")
     if model is None:
         if d["models_complete"]:
             die(f"model '{p['model']}' is no longer in {p['harness']}'s list ({d['models_source']}); edit the profile")
@@ -601,11 +601,7 @@ def build(p, prompt_file, cwd):
         # --standalone: a private server in this run's process tree, so permission config is read
         # fresh and stop/timeout reach the tools (the shared background service would escape both)
         argv = [path, "run", "--standalone", "--model", m] + perm + ["--file", prompt_file, "--", OPENCODE_MESSAGE]
-        if p["permissions"] in OPENCODE_PERMS:
-            env_set["OPENCODE_CONFIG_CONTENT"] = json.dumps(OPENCODE_PERMS[p["permissions"]], separators=(",", ":"))
-            if any((Path(cwd) / f).exists() for f in ("opencode.json", "opencode.jsonc", ".opencode")):
-                notes.append("the working directory has its own opencode config, which may change what "
-                             f"`{p['permissions']}` allows: check its permission rules")
+
     elif hid == "codex":
         argv = [path, "exec", "--cd", cwd, "--model", m] \
             + (["--profile", p["harness_profile"]] if p.get("harness_profile") else []) \
@@ -663,6 +659,19 @@ def runs_root():
     return base / "agent-profile" / "runs"
 
 
+def start_time(pid):
+    """Process start time in clock ticks since boot (/proc), or None."""
+    try:
+        with open(f"/proc/{pid}/stat") as fh:
+            return fh.read().rsplit(")", 1)[-1].split()[19]
+    except (OSError, IndexError):
+        return None
+
+
+def write_pid(path, pid):
+    Path(path).write_text(f"{pid} {start_time(pid) or ''}".strip())
+
+
 def pid_alive(pid):
     if not pid:
         return False
@@ -678,10 +687,15 @@ def pid_alive(pid):
 
 
 def read_pid(run_dir, name):
+    """The recorded pid, or None when it is gone or now names another process (pid reuse)."""
     try:
-        return int((Path(run_dir) / name).read_text().strip())
-    except (OSError, ValueError):
+        fields = (Path(run_dir) / name).read_text().split()
+        pid = int(fields[0])
+    except (OSError, ValueError, IndexError):
         return None
+    if len(fields) > 1 and start_time(pid) not in (None, fields[1]):
+        return None  # same number, different process
+    return pid
 
 
 def write_result(run_dir, result):
@@ -734,7 +748,7 @@ def execute(run_dir, timeout):
     if (run_dir / "result.json").exists():
         die(f"{run_dir} already has a result; start a new run with `run`")
     spec = json.loads((run_dir / "command.json").read_text())
-    (run_dir / "runner.pid").write_text(str(os.getpid()))
+    write_pid(run_dir / "runner.pid", os.getpid())
     start = time.time()
     state = {"proc": None, "status": None}
 
@@ -757,7 +771,7 @@ def execute(run_dir, timeout):
             proc = subprocess.Popen(spec["argv"], cwd=spec["cwd"], stdin=stdin, stdout=log,
                                     stderr=subprocess.STDOUT, start_new_session=True, env=env)
             state["proc"] = proc
-            (run_dir / "child.pid").write_text(str(proc.pid))
+            write_pid(run_dir / "child.pid", proc.pid)
             try:
                 code = proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
