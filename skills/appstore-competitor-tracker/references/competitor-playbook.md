@@ -83,7 +83,7 @@ Every id is `<own app id>/competitor_<kind>`, so `appstore-tracker` accepts it a
 | `competitor_price_change_<id>` | its upfront price differs from the snapshot about a week back, or an in-app product was added, removed or repriced since then (details in `metrics.iap_changed` / `iap_added` / `iap_removed`) | info |
 | `competitor_pricing_gap` | own app is paid upfront while ≥ 2/3 of the competitors with a known price are free to download; or the own entry price is > 2× the competitors' median entry price (median > 0). Needs ≥ 2 competitors with a known price | warning |
 | `competitor_offer_gap_<kind>` | own app is free or freemium with a known IAP list, ≥ 2 competitors have a known list, more than half of them sell `<kind>` (`lifetime`, `remove_ads`, `subscription`) and the own app does not. Skipped for a paid-upfront own app, which already sells permanent access | info |
-| `competitor_rank_gain_<id>` | it rose ≥ 10 places in its genre chart since about a week ago (entering counts from "outside the top N") | warning if it now ranks above the own app in the same chart, else info |
+| `competitor_rank_gain_<id>` | it rose ≥ 10 places in its genre chart since about a week ago (entering counts from "outside the top N"; a move between the free and paid charts does not count) | warning if it now ranks above the own app in the same chart, else info |
 | `competitor_search_rank_<term slug>_<6-hex hash of the lowercased term>` | for a group term: own app outside the top 10 while a competitor is in the top 5 | warning |
 | | otherwise, the own app's position changed since the previous snapshot | info |
 | `competitor_rating_gap` | mean rating of competitors with ≥ 5 ratings is ≥ 0.5★ above the own app's | warning |

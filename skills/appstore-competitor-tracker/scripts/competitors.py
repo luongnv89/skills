@@ -1224,9 +1224,11 @@ def group_signals(own: str, g: dict, snaps: list[dict], cc: str) -> list[dict]:
                            iap_changed=(ic or {}).get("changed") or None, iap_added=(ic or {}).get("added") or None,
                            iap_removed=(ic or {}).get("removed") or None, iap_capped=(ic or {}).get("capped")))
         ch = c.get("chart") or {}
-        if ch.get("available") and ch.get("vs") and ch.get("rank") and not ch.get("prev_unknown"):
+        # A rank in the other chart (free <-> paid switch) is not comparable: no gain, never "was outside the top N".
+        if (ch.get("available") and ch.get("vs") and ch.get("rank") and not ch.get("prev_unknown")
+                and ch.get("prev_chart") in (None, ch.get("chart"))):
             entries = ch.get("entries") if isinstance(ch.get("entries"), int) else 200
-            prev = ch.get("prev_rank") if ch.get("prev_chart") in (None, ch.get("chart")) else None
+            prev = ch.get("prev_rank")
             gain = (prev or entries + 1) - ch["rank"]
             if gain >= RANK_GAIN:
                 mine = me.get("chart") or {}
