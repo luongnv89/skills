@@ -77,7 +77,7 @@ Signal ids are `<app id or portfolio>/<kind>`. Thresholds:
 | `competitor_pricing_gap` | this app is paid upfront while ≥ 2/3 of competitors are free to download, or its entry price is > 2× the competitors' median | warning |
 | `competitor_offer_gap_<kind>` | most competitors sell a lifetime, remove-ads or subscription product that this free or freemium app lacks (heuristic labels) | info |
 | `competitor_rank_gain_<id>` | a competitor rose ≥ 10 places in the genre chart (iOS only) | warning if now above this app in the same chart, else info |
-| `competitor_search_rank_<term>` | this app is outside the top 10 for a tracked term while a competitor is top 5; else this app's position moved | warning / info |
+| `competitor_search_rank_<term slug>_<hash6>` | this app is outside the top 10 for a tracked term while a competitor is top 5; else this app's position moved | warning / info |
 | `competitor_rating_gap` | competitors' mean rating is ≥ 0.5★ above (or below) this app's | warning / good |
 
 A `competitors` data gap means the file is stale (over 2 days old), unreadable, or partly failed: say so instead of quoting old ranks as current.

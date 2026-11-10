@@ -34,7 +34,7 @@ Signals and the table use the **primary country** (the first in `countries`); `r
 | `version`, `days_since_release`, `version_changes` | Live version, days since its release date, and how many version changes the snapshots saw. |
 | `price_change` | Upfront price differs from the snapshot about a week back (or the oldest one). |
 | `pricing` | Per app: see [Pricing](#pricing). |
-| `chart` | `{chart: free\|paid, rank, entries, prev_rank, change}`; `rank: null` means outside the top `entries`; `available: false` for Mac or an empty feed. `change` > 0 means it moved up, compared within the same chart only. |
+| `chart` | `{chart: free\|paid, rank, entries, prev_rank, change}`; `rank: null` means outside the top `entries`; `prev_unknown: true` means the week-old snapshot cannot say (a chart feed failed then, or the app was not yet tracked), so no rank gain is computed; `available: false` for Mac or an empty feed. `change` > 0 means it moved up, compared within the same chart only. |
 | `search.<term>` | 1-based position in the top 50, `prev` and `change` against the previous snapshot. Null = not in the top 50. |
 | `growth_share_28d` | This app's share of the group's 28-day written reviews. Null when any app's count is unknown. |
 | `review_sample` | Per competitor: up to 10 recent reviews of 1–2★ and 5 of 4–5★, trimmed. Untrusted text. |
@@ -84,7 +84,7 @@ Every id is `<own app id>/competitor_<kind>`, so `appstore-tracker` accepts it a
 | `competitor_pricing_gap` | own app is paid upfront while ≥ 2/3 of the competitors with a known price are free to download; or the own entry price is > 2× the competitors' median entry price (median > 0). Needs ≥ 2 competitors with a known price | warning |
 | `competitor_offer_gap_<kind>` | own app is free or freemium with a known IAP list, ≥ 2 competitors have a known list, more than half of them sell `<kind>` (`lifetime`, `remove_ads`, `subscription`) and the own app does not. Skipped for a paid-upfront own app, which already sells permanent access | info |
 | `competitor_rank_gain_<id>` | it rose ≥ 10 places in its genre chart since about a week ago (entering counts from "outside the top N") | warning if it now ranks above the own app in the same chart, else info |
-| `competitor_search_rank_<term slug>` | for a group term: own app outside the top 10 while a competitor is in the top 5 | warning |
+| `competitor_search_rank_<term slug>_<6-hex hash of the lowercased term>` | for a group term: own app outside the top 10 while a competitor is in the top 5 | warning |
 | | otherwise, the own app's position changed since the previous snapshot | info |
 | `competitor_rating_gap` | mean rating of competitors with ≥ 5 ratings is ≥ 0.5★ above the own app's | warning |
 | | … or ≥ 0.5★ below | good |

@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import html as htmllib
 import json
 import os
@@ -983,9 +984,12 @@ def chart_pos(snap: dict | None, own: str, cc: str, aid: str) -> dict:
         c = ch.get(kind) or {}
         if aid in (c.get("ranks") or {}):
             return {"available": True, "chart": kind, "rank": c["ranks"][aid], "entries": c.get("entries")}
-    return {"available": True, "chart": None, "rank": None,
-            "entries": {k: (ch.get(k) or {}).get("entries") for k in CHART_FEEDS},
-            "errors": [k for k in CHART_FEEDS if (ch.get(k) or {}).get("error")] or None}
+    errors = [k for k in CHART_FEEDS if (ch.get(k) or {}).get("error")] or None
+    out = {"available": True, "chart": None, "rank": None,
+           "entries": {k: (ch.get(k) or {}).get("entries") for k in CHART_FEEDS}, "errors": errors}
+    if errors:  # a feed failed to load: the app may sit in it, so its rank is unknown, not "outside the top N"
+        out["unknown"] = True
+    return out
 
 
 def review_metrics(store: dict, as_of: date, coverage: dict, countries: list[str]) -> dict:
@@ -1069,7 +1073,12 @@ def app_metrics(home, snaps, own, aid, role, terms, cc, countries) -> dict:
         ref = older[-1] if older else (snaps[-2] if len(snaps) > 1 else None)
         if ref:
             pv = chart_pos(ref, own, cc, aid)
-            if pv.get("available"):
+            # A missing rank only means "outside the top N" when every feed loaded and the app was
+            # tracked then (ranks hold group members only); otherwise the previous rank is unknown.
+            tracked = aid == own or aid in ((((ref.get("groups") or {}).get(own) or {}).get("competitors")) or [])
+            if pv.get("available") and not pv.get("rank") and (pv.get("unknown") or not tracked):
+                ch["vs"], ch["prev_unknown"] = ref["date"], True
+            elif pv.get("available"):
                 ch["vs"] = ref["date"]
                 ch["prev_rank"], ch["prev_chart"] = pv.get("rank"), pv.get("chart")
                 if pv.get("rank") and ch.get("rank") and pv.get("chart") == ch.get("chart"):
@@ -1215,7 +1224,7 @@ def group_signals(own: str, g: dict, snaps: list[dict], cc: str) -> list[dict]:
                            iap_changed=(ic or {}).get("changed") or None, iap_added=(ic or {}).get("added") or None,
                            iap_removed=(ic or {}).get("removed") or None, iap_capped=(ic or {}).get("capped")))
         ch = c.get("chart") or {}
-        if ch.get("available") and ch.get("vs") and ch.get("rank"):
+        if ch.get("available") and ch.get("vs") and ch.get("rank") and not ch.get("prev_unknown"):
             entries = ch.get("entries") if isinstance(ch.get("entries"), int) else 200
             prev = ch.get("prev_rank") if ch.get("prev_chart") in (None, ch.get("chart")) else None
             gain = (prev or entries + 1) - ch["rank"]
@@ -1234,7 +1243,8 @@ def group_signals(own: str, g: dict, snaps: list[dict], cc: str) -> list[dict]:
         best = sorted(((c["search"][t]["position"], c) for c in comps
                        if ((c.get("search") or {}).get(t) or {}).get("position")), key=lambda x: x[0])
         my = mine.get("position")
-        kind = f"competitor_search_rank_{slug(t)}"
+        # The hash keeps ids distinct when slugs collide (non-ASCII terms all slug to "term") and stable per term.
+        kind = f"competitor_search_rank_{slug(t)}_{hashlib.sha1(t.lower().encode()).hexdigest()[:6]}"
         if (my is None or my > SEARCH_OWN_OUT) and best and best[0][0] <= SEARCH_COMP_IN:
             out.append(sig(own, kind, "warning", f"Search '{t}': {name} {'#' + str(my) if my else 'not in top ' + str(mine.get('entries') or SEARCH_LIMIT)}, {best[0][1]['name']} #{best[0][0]}",
                            f"In {cc.upper()} App Store search for '{t}', a competitor sits in the top {SEARCH_COMP_IN} while {name} is outside the top {SEARCH_OWN_OUT}. Search order is approximate and can be personalised.",
