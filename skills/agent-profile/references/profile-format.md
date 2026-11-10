@@ -91,6 +91,8 @@ Exit 2 is bad input, exit 1 is a runtime failure.
 | `thinking … is not valid` / `does not support thinking` | re-ask the thinking question from the detected levels |
 | `a … profile named … exists`            | ask replace or rename                                         |
 | `untested adapter: … does not mention`  | stop; show the message; suggest updating the adapter (rule 7) |
+| `… no longer mentions …, which the '<mode>' mode needs` | a verified CLI changed its flags: stop, show the message, suggest re-verifying the adapter (rule 7) |
+| `cannot check …'s flags`                | its help timed out or could not run: stop; ask the user to check the CLI, then retry |
 | `… runs with full permissions`          | ask the full-permission question (Step 5), then pass `--confirm-full` |
 | `the task is over … bytes`              | shorten the task, or use a harness that reads a file          |
 | `… is not valid JSON` / `does not hold a profiles object` | show the file path; ask the user to fix or move it |

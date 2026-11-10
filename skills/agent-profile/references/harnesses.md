@@ -7,8 +7,12 @@ explains it.
 **Status.** `verified` means a real headless run through this skill succeeded on
 2026-11-10 with the version shown. `untested` means the flags come from the CLI's
 published docs. Before every run of an untested adapter, the script checks each flag and
-permission value it uses against `<cli> --help` as a whole token. It refuses to run when
-one is missing.
+permission value it uses against the CLI's help (for example `codex exec --help`) as a
+whole token, and refuses to run when one is missing. For verified adapters it checks the
+option flags of the chosen permission mode the same way (claude `--permission-mode`, pi
+`--no-mcp`/`--tools`, opencode `--auto`). Help is read with `NO_COLOR=1 FORCE_COLOR=0
+TERM=dumb` and colour codes stripped; a help call that times out stops the run with
+"cannot check" rather than a false "flag missing".
 
 | Harness  | CLI        | Status (version)        | Harness profiles                    | Models from                         | Thinking                                   |
 | -------- | ---------- | ----------------------- | ----------------------------------- | ----------------------------------- | ------------------------------------------ |

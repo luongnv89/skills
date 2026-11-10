@@ -78,13 +78,27 @@ def probe(argv, timeout=PROBE_TIMEOUT, retries=0):
     return False, "", last
 
 
+ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)")
+
+
 def help_text(argv):
-    """Help output, from stdout or stderr, whatever the exit code."""
+    """Help output without colour codes, from stdout or stderr, whatever the exit code.
+    Raises RuntimeError when the CLI cannot be run or does not answer in time."""
+    env = dict(os.environ, NO_COLOR="1", FORCE_COLOR="0", TERM="dumb")
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=PROBE_TIMEOUT,
-                           stdin=subprocess.DEVNULL)
-        return (p.stdout or "") + (p.stderr or "")
-    except (FileNotFoundError, subprocess.TimeoutExpired):
+                           stdin=subprocess.DEVNULL, env=env)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"`{shlex.join([Path(argv[0]).name] + argv[1:])}` did not answer within {PROBE_TIMEOUT}s")
+    except OSError as e:
+        raise RuntimeError(f"`{Path(argv[0]).name}` could not be run ({e.strerror})")
+    return ANSI_RE.sub("", (p.stdout or "") + (p.stderr or ""))
+
+
+def help_or_empty(argv):
+    try:
+        return help_text(argv)
+    except RuntimeError:
         return ""
 
 
@@ -104,7 +118,7 @@ def is_git_dir(path):
 # failed, so nothing may be saved until detect succeeds.
 
 def _claude_models(bin_path):
-    text = help_text([bin_path, "--help"])
+    text = help_or_empty([bin_path, "--help"])
     block = re.search(r"--model <model>(.*?)(?:\n\s*--[a-z]|\Z)", text, re.S)
     aliases = re.findall(r"'([a-z0-9][a-z0-9.\-]*)'", block.group(1)) if block else []
     models = [{"id": a, "thinking": None, "note": "alias named in claude --help"} for a in aliases]
@@ -112,7 +126,7 @@ def _claude_models(bin_path):
 
 
 def _claude_thinking(bin_path):
-    text = help_text([bin_path, "--help"])
+    text = help_or_empty([bin_path, "--help"])
     m = re.search(r"--effort <level>.*?\(([^)]*)\)", text, re.S)
     levels = [x.strip() for x in m.group(1).split(",")] if m else []
     return levels, "claude --help (--effort); which levels a model honours is not reported"
@@ -155,7 +169,7 @@ def _pi_models(bin_path):
 
 
 def _pi_thinking(bin_path):
-    text = help_text([bin_path, "--help"])
+    text = help_or_empty([bin_path, "--help"])
     m = re.search(r"--thinking <level>\s+Set thinking level:\s*([a-z, ]+)", text)
     levels = [x.strip() for x in m.group(1).split(",")] if m else []
     return levels, "pi --help (--thinking); only for models marked thinking; a model's maximum is not reported"
@@ -619,28 +633,36 @@ def build(p, prompt_file, cwd):
         argv = [path, "--model", m] + perm + ["-p", argv_prompt(Path(prompt_file).read_text(), hid)]
     elif hid == "gemini":
         argv = [path, "--model", m] + perm + ["--prompt=" + argv_prompt(Path(prompt_file).read_text(), hid)]
+    help_cmd = " / ".join(shlex.join([a["bin"]] + h) for h in a["help"])
     if a["verified"]:
         opts = [x for x in perm if x.startswith("-")]
         if opts:
-            text = "".join(help_text([path] + h) for h in a["help"])
+            text = checked_help(path, a, help_cmd)
             missing = [f for f in opts if not has_token(text, f)]
             if missing:
-                die(f"`{a['bin']} --help` no longer mentions {', '.join(missing)}, which the "
+                die(f"`{help_cmd}` no longer mentions {', '.join(missing)}, which the "
                     f"'{p['permissions']}' mode needs; do not run; report this to the user", 1)
     else:
-        text = "".join(help_text([path] + h) for h in a["help"])
+        text = checked_help(path, a, help_cmd)
         needed = set(a["flags"]) | set(perm)
         for extra in ("--profile", "--skip-git-repo-check"):
             if extra in argv:
                 needed.add(extra)
         missing = sorted(f for f in needed if not has_token(text, f))
         if missing:
-            die(f"untested adapter: `{a['bin']} --help` does not mention {', '.join(missing)}; "
+            die(f"untested adapter: `{help_cmd}` does not mention {', '.join(missing)}; "
                 f"the CLI changed or differs from its docs. Do not run; report this to the user", 1)
         notes.append(f"{a['name']} adapter is untested: flags checked against --help only")
     if a.get("permission_note"):
         notes.append(a["permission_note"])
     return argv, stdin, env_unset, env_set, notes
+
+
+def checked_help(path, a, help_cmd):
+    try:
+        return "".join(help_text([path] + h) for h in a["help"])
+    except RuntimeError as e:
+        die(f"cannot check {a['name']}'s flags: {e}; try again, or check that `{help_cmd}` works", 1)
 
 
 def display(argv, stdin, prompt_file, env_unset, env_set=None):
@@ -686,7 +708,7 @@ def pid_alive(pid):
         return False
     try:
         os.kill(pid, 0)
-    except OSError:
+    except (OSError, OverflowError):
         return False
     try:  # a zombie counts as gone
         with open(f"/proc/{pid}/stat") as fh:
@@ -702,7 +724,7 @@ def read_pid(run_dir, name):
         pid = int(fields[0])
     except (OSError, ValueError, IndexError):
         return None
-    if pid <= 1 or len(fields) > 2:
+    if pid <= 1 or pid > 2**31 - 1 or len(fields) > 2:
         return None
     if Path("/proc/self/stat").exists():
         # Linux: trust a pid only when its recorded start time matches the live process
