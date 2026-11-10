@@ -65,8 +65,8 @@ def probe(argv, timeout=PROBE_TIMEOUT, retries=0):
     last = ""
     for _ in range(retries + 1):
         try:
-            p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
-                               stdin=subprocess.DEVNULL)
+            p = subprocess.run(argv, capture_output=True, text=True, errors="replace",
+                               timeout=timeout, stdin=subprocess.DEVNULL)
         except FileNotFoundError:
             return False, "", f"{argv[0]} not found on PATH"
         except subprocess.TimeoutExpired:
@@ -78,7 +78,7 @@ def probe(argv, timeout=PROBE_TIMEOUT, retries=0):
     return False, "", last
 
 
-ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)")
+ANSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b[()][0-9A-Za-z]")
 
 
 def help_text(argv):
@@ -86,8 +86,8 @@ def help_text(argv):
     Raises RuntimeError when the CLI cannot be run or does not answer in time."""
     env = dict(os.environ, NO_COLOR="1", FORCE_COLOR="0", TERM="dumb")
     try:
-        p = subprocess.run(argv, capture_output=True, text=True, timeout=PROBE_TIMEOUT,
-                           stdin=subprocess.DEVNULL, env=env)
+        p = subprocess.run(argv, capture_output=True, text=True, errors="replace",
+                           timeout=PROBE_TIMEOUT, stdin=subprocess.DEVNULL, env=env)
     except subprocess.TimeoutExpired:
         raise RuntimeError(f"`{shlex.join([Path(argv[0]).name] + argv[1:])}` did not answer within {PROBE_TIMEOUT}s")
     except OSError as e:
@@ -95,11 +95,22 @@ def help_text(argv):
     return ANSI_RE.sub("", (p.stdout or "") + (p.stderr or ""))
 
 
+_HELP_CACHE = {}
+
+
+def help_or_error(argv):
+    """(help text, error) for detection, read once per argv per process."""
+    key = tuple(argv)
+    if key not in _HELP_CACHE:
+        try:
+            _HELP_CACHE[key] = (help_text(argv), "")
+        except RuntimeError as e:
+            _HELP_CACHE[key] = ("", str(e))
+    return _HELP_CACHE[key]
+
+
 def help_or_empty(argv):
-    try:
-        return help_text(argv)
-    except RuntimeError:
-        return ""
+    return help_or_error(argv)[0]
 
 
 def has_token(text, token):
@@ -126,10 +137,10 @@ def _claude_models(bin_path):
 
 
 def _claude_thinking(bin_path):
-    text = help_or_empty([bin_path, "--help"])
+    text, err = help_or_error([bin_path, "--help"])
     m = re.search(r"--effort <level>.*?\(([^)]*)\)", text, re.S)
     levels = [x.strip() for x in m.group(1).split(",")] if m else []
-    return levels, "claude --help (--effort); which levels a model honours is not reported"
+    return levels, "claude --help (--effort); which levels a model honours is not reported", err
 
 
 def _mcc_profiles():
@@ -169,10 +180,10 @@ def _pi_models(bin_path):
 
 
 def _pi_thinking(bin_path):
-    text = help_or_empty([bin_path, "--help"])
+    text, err = help_or_error([bin_path, "--help"])
     m = re.search(r"--thinking <level>\s+Set thinking level:\s*([a-z, ]+)", text)
     levels = [x.strip() for x in m.group(1).split(",")] if m else []
-    return levels, "pi --help (--thinking); only for models marked thinking; a model's maximum is not reported"
+    return levels, "pi --help (--thinking); only for models marked thinking; a model's maximum is not reported", err
 
 
 def _opencode_models(bin_path):
@@ -320,8 +331,9 @@ def detect_one(hid):
                 models.append({"id": p["model"], "thinking": None, "note": f"set in mcc profile {p['name']}"})
                 seen.add(p["model"])
     row.update(models=models, models_source=src, models_complete=complete, models_error=merr)
-    levels, tsrc = a["thinking"](path)
-    row.update(thinking_levels=levels, thinking_source=tsrc, per_model_thinking=a["per_model_thinking"])
+    levels, tsrc, *terr = a["thinking"](path)
+    row.update(thinking_levels=levels, thinking_source=tsrc, thinking_error=(terr[0] if terr else ""),
+               per_model_thinking=a["per_model_thinking"])
     return row
 
 
@@ -350,7 +362,8 @@ def print_detect(d):
             print(f"      - {m['id']}{prov}{t}" + (f" ({m['note']})" if m.get("note") else ""))
         if n > 40:
             print(f"      … {n - 40} more (use --json)")
-        print(f"    thinking {', '.join(h['thinking_levels']) or 'none'} ({h['thinking_source']})")
+        print(f"    thinking {', '.join(h['thinking_levels']) or 'none'} ({h['thinking_source']})"
+              + (f"; HELP FAILED: {h['thinking_error']}" if h.get("thinking_error") else ""))
         print(f"    permissions {', '.join(h['permissions'])}" + (f": {h['permission_note']}" if h["permission_note"] else ""))
 
 
@@ -515,6 +528,8 @@ def cmd_save(a):
     if a.thinking:
         levels = d["thinking_levels"]
         if not levels:
+            if d.get("thinking_error"):
+                die(f"could not read {a.harness}'s thinking levels ({d['thinking_error']}); fix the harness, then retry", 1)
             die(f"{a.harness} has no thinking levels ({d['thinking_source']}); omit --thinking")
         if a.thinking not in levels:
             die(f"thinking '{a.thinking}' is not valid for {a.harness}: {', '.join(levels)}")
