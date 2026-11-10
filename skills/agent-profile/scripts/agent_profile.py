@@ -51,7 +51,6 @@ OPENCODE_MESSAGE = "Follow the instructions in the attached file."
 VALUE_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@#\[\]+=-]{0,199}")  # use fullmatch
 
 
-
 def die(msg, code=2):
     print(f"agent_profile: error: {msg}", file=sys.stderr)
     sys.exit(code)
@@ -420,8 +419,11 @@ class Locked:
 
 
 def write(path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    except OSError as e:
+        die(f"cannot write {path} ({e.strerror}); check the folder's permissions", 1)
     try:
         with os.fdopen(fd, "w") as fh:
             fh.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
@@ -598,10 +600,9 @@ def build(p, prompt_file, cwd):
         argv = [path, "-p"] + (["--provider", p["provider"]] if p.get("provider") else []) + ["--model", m] \
             + (["--thinking", t] if t else []) + perm + ["--", "@" + prompt_file]
     elif hid == "opencode":
-        # --standalone: a private server in this run's process tree, so permission config is read
-        # fresh and stop/timeout reach the tools (the shared background service would escape both)
+        # --standalone: a private server inside this run's process tree, so stop and timeouts
+        # reach the tools (the shared background service would escape both)
         argv = [path, "run", "--standalone", "--model", m] + perm + ["--file", prompt_file, "--", OPENCODE_MESSAGE]
-
     elif hid == "codex":
         argv = [path, "exec", "--cd", cwd, "--model", m] \
             + (["--profile", p["harness_profile"]] if p.get("harness_profile") else []) \
@@ -618,7 +619,15 @@ def build(p, prompt_file, cwd):
         argv = [path, "--model", m] + perm + ["-p", argv_prompt(Path(prompt_file).read_text(), hid)]
     elif hid == "gemini":
         argv = [path, "--model", m] + perm + ["--prompt=" + argv_prompt(Path(prompt_file).read_text(), hid)]
-    if not a["verified"]:
+    if a["verified"]:
+        opts = [x for x in perm if x.startswith("-")]
+        if opts:
+            text = "".join(help_text([path] + h) for h in a["help"])
+            missing = [f for f in opts if not has_token(text, f)]
+            if missing:
+                die(f"`{a['bin']} --help` no longer mentions {', '.join(missing)}, which the "
+                    f"'{p['permissions']}' mode needs; do not run; report this to the user", 1)
+    else:
         text = "".join(help_text([path] + h) for h in a["help"])
         needed = set(a["flags"]) | set(perm)
         for extra in ("--profile", "--skip-git-repo-check"):
@@ -673,7 +682,7 @@ def write_pid(path, pid):
 
 
 def pid_alive(pid):
-    if not pid:
+    if not pid or pid <= 1:  # never 0, -1 or a negative group id: those signal many processes
         return False
     try:
         os.kill(pid, 0)
@@ -693,8 +702,12 @@ def read_pid(run_dir, name):
         pid = int(fields[0])
     except (OSError, ValueError, IndexError):
         return None
-    if len(fields) > 1 and start_time(pid) not in (None, fields[1]):
-        return None  # same number, different process
+    if pid <= 1 or len(fields) > 2:
+        return None
+    if Path("/proc/self/stat").exists():
+        # Linux: trust a pid only when its recorded start time matches the live process
+        if len(fields) < 2 or start_time(pid) != fields[1]:
+            return None
     return pid
 
 
@@ -795,7 +808,10 @@ def execute(run_dir, timeout):
 def new_run_dir(name):
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     root = runs_root()
-    root.mkdir(parents=True, exist_ok=True)
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        die(f"cannot create the run folder under {root} ({e.strerror}); check XDG_CACHE_HOME / ~/.cache", 1)
     for _ in range(20):
         d = root / f"{stamp}-{name}-{secrets.token_hex(3)}"
         try:
@@ -803,6 +819,8 @@ def new_run_dir(name):
             return d
         except FileExistsError:
             continue
+        except OSError as e:
+            die(f"cannot create {d} ({e.strerror})", 1)
     die("could not create a unique run folder", 1)
 
 
