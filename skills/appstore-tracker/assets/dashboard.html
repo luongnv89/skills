@@ -70,6 +70,7 @@ ul.tight { margin: 6px 0; padding-left: 18px; }
 ul.tight li { margin: 3px 0; }
 .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; font-size: 12px; color: var(--ink-2); background: var(--surface); white-space: nowrap; }
 button.chip { cursor: pointer; }
+.comp-themes .chip { white-space: normal; max-width: 100%; overflow-wrap: anywhere; }
 button.chip[aria-pressed="true"] { border-color: var(--ink-2); color: var(--ink); font-weight: 600; }
 .sev { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .sev i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
@@ -129,6 +130,10 @@ tr.click:hover td { background: var(--wash); }
 footer { color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
 .muted { color: var(--muted); }
 .nowrap { white-space: nowrap; }
+details.iap { border-top: 1px solid var(--border); padding: 6px 0; }
+details.iap > summary { cursor: pointer; font-size: 13px; }
+details.iap .table-wrap { margin-top: 6px; }
+.you { font-size: 11px; font-weight: 650; color: var(--accent); border: 1px solid currentColor; border-radius: 999px; padding: 0 6px; margin-left: 6px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } }
 @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } header.top { flex-direction: column; } .tile .value { font-size: 19px; } }
@@ -144,6 +149,7 @@ footer { color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
   .actions-table td:nth-last-child(2)::before { content: 'Impact: '; color: var(--ink-2); }
   .actions-table td:last-child::before { content: 'Effort: '; color: var(--ink-2); }
   .actions-table .chip { white-space: normal; max-width: 100%; }
+  .comp-signals td > code { overflow-wrap: anywhere; } /* long signal ids: give the Signal column the width */
 }
 @media (max-width: 720px) { .filters { position: static; } } /* a sticky bar this tall would hide keyboard focus (WCAG 2.4.11) */
 @media (min-width: 721px) { html { scroll-padding-top: 72px; } } /* keep focused rows clear of the sticky filter bar */
@@ -671,6 +677,117 @@ function signalsCard(list, title) {
   return h('section', {class: 'card'}, h('h2', {text: title}), h('p', {class: 'hint', text: 'Computed by fixed rules from the data; recommended actions cite these ids.'}), chips, body);
 }
 
+// ---------- competitors (public proxies from appstore-competitor-tracker) ----------
+const COMP = D.competitors || null;
+const isCompSig = x => typeof x.kind === 'string' && x.kind.startsWith('competitor_');
+const pctTxt = v => v == null ? '—' : Math.round(v * 100) + '%';
+function rankTxt(c) {
+  if (!c || c.available == null) return '—';
+  if (!c.available) return h('span', {class: 'muted', title: c.reason || '', text: 'n/a'});
+  if (!c.rank) { const n = typeof c.entries === 'number' ? c.entries : Math.max(...Object.values(c.entries || {}).filter(Number.isFinite), 0); return h('span', {class: 'muted', text: n ? `outside top ${n}` : '—'}); }
+  const ch = c.change ? h('span', {class: 'delta ' + (c.change > 0 ? 'up-good' : 'down-bad'), text: ` ${c.change > 0 ? '▲' : '▼'}${Math.abs(c.change)}`}) : null;
+  return h('span', {}, `#${c.rank} ${c.chart}`, ch);
+}
+function deltaTxt(d) {
+  if (!d) return '—';
+  if (d.value == null) return h('span', {class: 'muted', title: d.reason || 'needs a snapshot this many days old', text: d.baseline ? 'baseline' : '—'});
+  return h('span', {title: `since ${fmtDate(d.baseline_date)} (${d.span_days} days)`, text: (d.value > 0 ? '+' : '') + fmtInt(d.value)});
+}
+const fmtMoneyRaw = (v, cur) => v == null ? '—' : (cur === 'USD' ? '$' + v.toFixed(2) : `${v.toFixed(['JPY', 'KRW'].includes(cur) ? 0 : 2)} ${cur || ''}`.trim());
+const MODEL_LABEL = {paid: 'Paid', freemium: 'Free + in-app', free: 'Free'};
+function pricingCell(x) {
+  const p = x.pricing || {};
+  const was = x.price_change ? h('div', {class: 'muted', title: 'changed after ' + fmtDate(x.price_change.since), text: `was ${x.price_change.from}`}) : null;
+  if (!p.model) return h('span', {class: 'muted', title: p.iap_unknown_reason || '', text: x.formatted_price ? `${x.formatted_price} · IAPs unknown` : 'unknown'});
+  return h('div', {}, h('strong', {text: MODEL_LABEL[p.model] || p.model}),
+    h('div', {class: 'muted', title: p.entry_basis || '', text: p.model === 'free' ? 'no in-app purchases' : p.model === 'paid' ? `${p.upfront_text || p.entry_text}${p.iap_count ? ' + ' + p.iap_count + ' IAP' : ''}` : `from ${p.entry_text}`}), was);
+}
+function pricingDetails(g) {
+  const apps = (g.apps || []).filter(x => x.pricing);
+  const P = g.pricing || {};
+  const box = h('div', {}, h('h2', {style: 'margin-top:12px', text: 'Pricing and in-app purchases'}));
+  const cmp = [];
+  if (P.own_entry != null && P.competitor_entry_median != null) cmp.push(`Your entry price ${apps[0] && apps[0].pricing.entry_text || '—'} vs competitors' median ${fmtMoneyRaw(P.competitor_entry_median, P.currency)} (lowest ${fmtMoneyRaw(P.competitor_entry_min, P.currency)}).`);
+  if (P.competitors_upfront_known) cmp.push(`${P.competitors_free_download} of ${P.competitors_upfront_known} competitors are free to download.`);
+  const w = P.competitors_with || {};
+  if (P.competitors_iap_known) cmp.push(`Competitors with a known IAP list (${P.competitors_iap_known}) selling a subscription: ${w.subscription || 0} (weekly: ${w.weekly || 0}); lifetime: ${w.lifetime || 0}; remove-ads: ${w.remove_ads || 0}.`);
+  box.append(h('p', {class: 'hint', text: cmp.join(' ') + ' Entry price = upfront price, or the cheapest in-app purchase of a free download (tips and consumables excluded). Tier labels are guessed from product names. Prices are for this storefront only; Apple lists at most 10 in-app purchases.'}));
+  apps.forEach(x => {
+    const p = x.pricing, ch = p.iap_change || {};
+    const changed = new Set((ch.changed || []).map(c => c.name)), added = new Set((ch.added || []).map(c => c.name));
+    const n = p.iap_count == null ? 'in-app purchases unknown' : `${p.iap_count} in-app purchase${p.iap_count === 1 ? '' : 's'}${p.iap_capped ? ' (first 10 shown)' : ''}`;
+    const sum = h('summary', {}, h('strong', {text: x.name || x.id}), x.role === 'own' ? h('span', {class: 'you', text: 'you'}) : null,
+      ` · ${MODEL_LABEL[p.model] || 'model unknown'} · ${n}`, (changed.size || added.size || (ch.removed || []).length) ? h('span', {class: 'chip', style: 'margin-left:6px', text: 'changed'}) : null);
+    let body;
+    if (p.iap == null) body = h('p', {class: 'muted', text: 'Unknown: ' + (p.iap_unknown_reason || 'no product page data') + '. Not the same as "no in-app purchases".'});
+    else if (!p.iap.length) body = h('p', {class: 'muted', text: 'The product page lists no in-app purchases.'});
+    else body = table([
+      {key: 'n', label: 'Product', cell: r => h('span', {}, r.name, changed.has(r.name) ? h('span', {class: 'chip', style: 'margin-left:6px', text: 'price changed'}) : added.has(r.name) ? h('span', {class: 'chip', style: 'margin-left:6px', text: 'new'}) : null)},
+      {key: 'p', label: 'Price', num: true, cell: r => r.price_text || '—', sort: r => r.price},
+      {key: 't', label: 'Tier (heuristic)', cell: r => r.tier === 'other' ? h('span', {class: 'muted', text: '—'}) : r.tier.replace('_', ' ')},
+    ], p.iap, {caption: `In-app purchases of ${x.name || x.id}`});
+    const gone = (ch.removed || []).length ? h('p', {class: 'muted', text: `Since ${fmtDate(ch.since)}: ${ch.removed.map(r => r.name + ' ' + r.price_text).join(', ')} ${ch.capped ? 'no longer among the 10 shown' : 'removed'}.`}) : null;
+    box.append(h('details', {class: 'iap', ...(x.role === 'own' ? {open: ''} : {})}, sum, body, gone));
+  });
+  return box;
+}
+function competitorsCard(a) {
+  const g = a.competitors;
+  const block = ((D.insights || {}).apps || {})[a.id] || {};
+  const card = h('section', {class: 'card', id: 'competitors'}, h('h2', {text: 'Competitors'}),
+    h('p', {class: 'hint', text: `Public App Store data, ${String(g.country || '').toUpperCase()} storefront, as of ${fmtDate(g.as_of)}. Growth is shown through proxies (new ratings, written reviews, chart and search rank), never downloads or revenue.${COMP && COMP.stale ? ' This competitor data is stale.' : ''}`}));
+  if (block.competitors_summary) card.append(h('p', {text: block.competitors_summary}));
+  const terms = g.terms || [];
+  const hasPricing = (g.apps || []).some(x => x.pricing);
+  const lb = (x, w) => x.reviews_lower_bound && x.reviews_lower_bound[w] ? '≥' : '';
+  card.append(table([
+    {key: 'n', label: 'App', cell: x => h('div', {}, h('strong', {text: x.name || x.id}), x.role === 'own' ? h('span', {class: 'you', text: 'you'}) : null, h('div', {class: 'muted', text: x.seller || ''})), sort: x => (x.name || '').toLowerCase()},
+    {key: 'r', label: 'Ratings', num: true, cell: x => x.ratings == null ? '—' : `${fmtInt(x.ratings)}${x.avg_rating != null ? ' · ' + nf2.format(x.avg_rating) + '★' : ''}`, sort: x => x.ratings},
+    {key: 'd7', label: 'Δ 7d', num: true, cell: x => deltaTxt(x.ratings_delta_7d), sort: x => (x.ratings_delta_7d || {}).value},
+    {key: 'd28', label: 'Δ 28d', num: true, cell: x => deltaTxt(x.ratings_delta_28d), sort: x => (x.ratings_delta_28d || {}).value},
+    {key: 'rv', label: 'Reviews 28d', num: true, cell: x => x.reviews_28d == null ? '—' : lb(x, '28d') + fmtInt(x.reviews_28d), sort: x => x.reviews_28d},
+    {key: 'sh', label: 'Share 28d', num: true, cell: x => pctTxt(x.growth_share_28d), sort: x => x.growth_share_28d},
+    {key: 'av', label: 'Avg ★ 90d', num: true, cell: x => x.avg_stars_90d == null ? '—' : nf2.format(x.avg_stars_90d), sort: x => x.avg_stars_90d},
+    {key: 'v', label: 'Version', cell: x => x.version ? `${x.version} · ${x.days_since_release != null ? x.days_since_release + 'd ago' : '—'}` : '—', sort: x => x.days_since_release == null ? null : -x.days_since_release},
+    hasPricing
+      ? {key: 'p', label: 'Pricing', cell: pricingCell, sort: x => (x.pricing || {}).entry_price}
+      : {key: 'p', label: 'Price', cell: x => x.price_change ? h('span', {title: 'changed after ' + fmtDate(x.price_change.since)}, `${x.price_change.from} → ${x.formatted_price}`) : (x.formatted_price || '—')},
+    {key: 'c', label: 'Chart', cell: x => rankTxt(x.chart)},
+    ...terms.map(t => ({key: 's:' + t, label: `"${t}"`, num: true, cell: x => { const q = (x.search || {})[t] || {}; if (q.unknown) return '—'; if (!q.position) return h('span', {class: 'muted', text: 'not in top ' + (q.entries || 50)}); return h('span', {}, '#' + q.position, q.change ? h('span', {class: 'delta ' + (q.change > 0 ? 'up-good' : 'down-bad'), text: ` ${q.change > 0 ? '▲' : '▼'}${Math.abs(q.change)}`}) : null); }, sort: x => { const q = (x.search || {})[t] || {}; return q.position ? -q.position : null; }})),
+  ], g.apps || [], {sortKey: 'rv', caption: 'Your app and its competitors'}));
+  card.append(h('p', {class: 'hint', style: 'margin-top:8px', text: `Δ = new public ratings since a snapshot that many days old ("baseline" until one exists). Reviews come from the public review feed; "≥" marks a count capped by the feed. Chart: ${g.genre || 'genre'} top free/paid${g.chart && g.chart.available === false ? ' (not available: ' + (g.chart.reason || '') + ')' : ''}. Search order is approximate.`}));
+  if (hasPricing) card.append(pricingDetails(g));
+  const themes = block.competitor_themes || [];
+  if (themes.length) {
+    const nameOf = id => ((g.apps || []).find(x => x.id === id) || {}).name || id;
+    card.append(h('h2', {style: 'margin-top:12px', text: 'What users say about competitors'}),
+      h('div', {class: 'comp-themes', style: 'display:flex;flex-wrap:wrap;gap:6px'}, themes.map(t => h('span', {class: 'chip'}, h('span', {class: 'sev ' + (t.sentiment === 'negative' ? 'warning' : t.sentiment === 'positive' ? 'good' : 'info')}, h('i', {'aria-hidden': 'true'})), `${nameOf(t.competitor_id)}: ${t.theme}${t.count ? ' · ' + t.count : ''} (${t.sentiment || 'mixed'})`))));
+  }
+  const sigs = (a.signals || []).filter(isCompSig);
+  if (sigs.length) {
+    const order = ['critical', 'warning', 'good', 'info'];
+    card.append(h('h2', {style: 'margin-top:12px', text: 'Competitor signals'}), table([
+      {key: 'sev', label: 'Severity', cell: x => sevTag(x.severity), sort: x => 3 - order.indexOf(x.severity)},
+      {key: 't', label: 'Signal', cell: x => h('div', {}, h('strong', {text: x.title}), h('div', {class: 'muted', text: x.detail}))},
+      {key: 'id', label: 'Id', cell: x => h('code', {class: 'muted'}, ...x.id.split(/(?<=[/_])/).flatMap((p, i) => i ? [h('wbr'), p] : [p]))},
+    ], sigs, {sortKey: 'sev', caption: 'Competitor signals'}));
+    card.lastChild.classList.add('comp-signals');
+  }
+  return card;
+}
+function competitivePositionCard() {
+  const rows = (COMP.groups || []).filter(r => appById[r.app_id]);
+  if (!rows.length) return null;
+  return h('section', {class: 'card'}, h('h2', {text: 'Competitive position'}),
+    h('p', {class: 'hint', text: `Share of written reviews in the last 28 days within each app's competitor group (a proxy for active users, not downloads). As of ${fmtDate(COMP.meta.as_of)}${COMP.stale ? ' (stale)' : ''}. Click a row for the app's Competitors section.`}),
+    table([
+      {key: 'a', label: 'App', cell: r => h('strong', {text: (appById[r.app_id] || {}).name || r.name}), sort: r => (r.name || '').toLowerCase()},
+      {key: 'n', label: 'Competitors', num: true, cell: r => String(r.competitors), sort: r => r.competitors},
+      {key: 's', label: 'Your share 28d', num: true, cell: r => pctTxt(r.own_share_28d), sort: r => r.own_share_28d},
+      {key: 't', label: 'Fastest competitor', cell: r => r.top_competitor ? h('span', {}, r.outpacing ? sevTag('warning') : null, ' ', `${r.top_competitor.name} · ${fmtInt(r.top_competitor.reviews_28d)} reviews (${pctTxt(r.top_competitor.share_28d)})`) : '—'},
+    ], rows, {sortKey: 's', desc: false, rowClick: r => go(r.app_id, 'competitors'), caption: 'Competitive position'}));
+}
+
 function gapsCard() {
   const g = D.gaps || [];
   const cov = D.meta;
@@ -722,6 +839,8 @@ function portfolioView() {
       {key: 'ver', label: 'Store version', cell: r => r.a.store.version ? `${r.a.store.version} · ${fmtDate(r.a.store.currentVersionReleaseDate)}` : '—'},
       {key: 'tr', label: 'Trend', cell: r => VOL ? sparkline(sliceSeries(r.a.series.downloads), 90, 22) : '—'},
     ], rows, {sortKey: VOL ? 'pr' : 'rv', rowClick: r => go(r.a.id), caption: 'Apps'})));
+  const cpos = COMP ? competitivePositionCard() : null;
+  if (cpos) out.push(cpos);
   // countries + reviews
   const pw = win(P);
   out.push(h('div', {class: 'grid2'},
@@ -820,6 +939,7 @@ function appView(a) {
     else out.push(h('div', {class: 'grid3'}, [['Countries', 'country'], ['Devices', 'device'], ['In-app products', 'product']].map(([t, x]) => h('section', {class: 'card'}, h('h2', {text: t}),
       h('div', {class: 'empty', text: `Needs Sales reports; App Analytics has no ${x} split.`})))));
   }
+  if (a.competitors) out.push(competitorsCard(a));
   out.push(h('div', {class: 'grid2'}, reviewSummaryCard(a.reviews, 'Reviews'), ratingsCard(a)));
   out.push(reviewsCard(a, block));
   const BLOCKED = new Set(['MISSING_METADATA', 'DEVELOPER_ACTION_NEEDED', 'REJECTED', 'WAITING_FOR_UPLOAD']);
@@ -907,11 +1027,14 @@ viewSel.append(h('option', {value: 'portfolio', text: 'All apps'}), ...D.apps.ma
 const periodBox = document.getElementById('period');
 PERIODS.forEach(([k, label]) => { const b = h('button', {type: 'button', 'data-k': k, text: label}); b.addEventListener('click', () => { state.period = k; render(); }); periodBox.append(b); });
 viewSel.addEventListener('change', () => go(viewSel.value));
-function go(view) {
+function go(view, section) {
   // Re-rendering <main> removes the control that had focus; move focus to the new view's heading
   // instead of letting it fall to <body>. The header view select keeps its own focus.
   const lost = main.contains(document.activeElement) || document.activeElement === document.body;
-  state.view = view; state.sev = 'all'; render(); scrollTo({top: 0});
+  state.view = view; state.sev = 'all'; render();
+  const sec = section && document.getElementById(section), sh = sec && sec.querySelector('h2');
+  if (sh) { sh.setAttribute('tabindex', '-1'); sh.focus({preventScroll: true}); sec.scrollIntoView({block: 'start'}); return; }
+  scrollTo({top: 0});
   if (!lost) return;
   const hd = appById[view] ? main.querySelector('h2') : document.getElementById('page-title');
   if (hd) { hd.setAttribute('tabindex', '-1'); hd.focus({preventScroll: true}); }

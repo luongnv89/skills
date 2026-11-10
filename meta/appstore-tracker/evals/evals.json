@@ -116,6 +116,21 @@
         "The run does not invoke tracker.py or produce the tracker dashboard",
         "The response treats the request as a guideline compliance review"
       ]
+    },
+    {
+      "id": 9,
+      "kind": "happy-path",
+      "name": "competitors-in-report",
+      "prompt": "Give me today's App Store report, and include how my competitors are growing compared to my apps.",
+      "expected_output": "The full pipeline with Step 1b: competitors.py fetch and analyze before tracker.py analyze, competitor_* signals in the digest, competitors_summary per app in the insights, a Competitors section in the dashboard, and one Competitors line per app in the answer naming the proxy.",
+      "files": [],
+      "expectations": [
+        "competitors.py status runs, and fetch then analyze run before tracker.py analyze when it is ready",
+        "data/digest.json contains competitor_* signal ids, and the insights file has competitors_summary for each app with a competitor group",
+        "render exits 0 with insights embedded",
+        "The answer gives one Competitors line per app, naming the proxy (written reviews or new ratings), and never states competitor downloads or revenue",
+        "If no competitor group exists, competitors are added only after the user confirms them, or are labelled auto-picked"
+      ]
     }
   ]
 }

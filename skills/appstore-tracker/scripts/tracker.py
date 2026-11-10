@@ -8,6 +8,7 @@ Subcommands
   fetch    pull apps, versions, reviews, ratings, store listings, daily sales, FX
   analyze  aggregate the history; write data/digest.json for the agent
   render   validate the day's insights file; write dashboard.html + history copy
+           (both pick up data/competitors.json from appstore-competitor-tracker when present)
   demo     write a synthetic data dir (no network) for previews and tests
 
 Every App Store Connect call runs with ASC_READ_ONLY=1, so nothing is changed in
@@ -50,7 +51,7 @@ try:
 except ImportError:  # pragma: no cover - Windows
     fcntl = None
 
-VERSION = "1.0.6"
+VERSION = "1.1.1"
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE = SKILL_DIR / "assets" / "dashboard.html"
 DEFAULT_HOME = "~/.appstore-tracker"
@@ -870,6 +871,77 @@ def pct(cur, prev):
     return round((cur - prev) / abs(prev) * 100, 1)
 
 
+COMPETITOR_STALE_DAYS = 2
+COMPETITOR_SEVERITIES = {"critical", "warning", "good", "info"}
+
+
+def load_competitors(home: Path, app_ids) -> tuple[dict | None, list[dict]]:
+    """Read data/competitors.json (written by appstore-competitor-tracker). Absent -> (None, []).
+    A broken or stale file becomes a data gap, never a failed run."""
+    path = home / "data" / "competitors.json"
+    if not path.exists():
+        return None, []
+    fix = "Rerun `competitors.py fetch` and `competitors.py analyze` (appstore-competitor-tracker)."
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return None, [{"source": "competitors", "kind": "invalid", "message": f"data/competitors.json is unreadable ({exc})", "fix": fix}]
+    if not isinstance(data, dict) or not isinstance(data.get("groups"), list) or not isinstance(data.get("meta"), dict):
+        return None, [{"source": "competitors", "kind": "invalid", "message": "data/competitors.json has no meta/groups", "fix": fix}]
+    gaps, meta = [], data["meta"]
+    as_of = meta.get("as_of")
+    try:
+        age = (today_local() - parse_day(str(as_of))).days
+    except ValueError:
+        age = None
+    if age is None or age > COMPETITOR_STALE_DAYS:
+        gaps.append({"source": "competitors", "kind": "stale",
+                     "message": f"competitor data is from {as_of or 'an unknown day'}" + (f", {age} days old" if age is not None else ""),
+                     "fix": fix})
+    errs = [e for e in meta.get("errors") or [] if isinstance(e, dict)]
+    if errs:
+        kinds = sorted({f"{e.get('source')}:{e.get('kind')}" for e in errs})
+        gaps.append({"source": "competitors", "kind": "partial", "message": f"{len(errs)} competitor source(s) failed in the last fetch ({', '.join(kinds[:6])}); their metrics are unknown, not zero",
+                     "fix": fix})
+    groups = []
+    for g in data["groups"]:
+        if not isinstance(g, dict) or not isinstance(g.get("apps"), list):
+            continue
+        if str(g.get("app_id")) not in app_ids:
+            gaps.append({"source": "competitors", "kind": "unknown_app", "message": f"competitor group for app {g.get('app_id')} is not in this account; skipped",
+                         "fix": "Track that app, or `competitors.py remove` its group."})
+            continue
+        groups.append(g)
+    signals = []
+    for x in data.get("signals") or []:
+        if not isinstance(x, dict):
+            continue
+        scope, kind = str(x.get("scope") or ""), str(x.get("kind") or "")
+        if scope not in app_ids or not kind.startswith("competitor_") or x.get("id") != f"{scope}/{kind}" or x.get("severity") not in COMPETITOR_SEVERITIES:
+            continue
+        signals.append(sig(scope, kind, x["severity"], trim(str(x.get("title") or kind), 200), trim(str(x.get("detail") or ""), 600),
+                           **(x.get("metrics") if isinstance(x.get("metrics"), dict) else {})))
+    return {"meta": meta, "groups": groups, "signals": signals, "stale": bool(age is None or age > COMPETITOR_STALE_DAYS)}, gaps
+
+
+def competitor_overview(comp: dict) -> dict:
+    """Compact block for the portfolio: per app, how many competitors and who grows fastest."""
+    meta = comp["meta"]
+    rows = []
+    for g in comp["groups"]:
+        apps = g["apps"]
+        own = next((a for a in apps if a.get("role") == "own"), {})
+        rivals = [a for a in apps if a.get("role") == "competitor"]
+        fast = max((a for a in rivals if a.get("reviews_28d") is not None), key=lambda a: a["reviews_28d"], default=None)
+        rows.append({"app_id": g["app_id"], "name": g.get("name"), "competitors": len(rivals),
+                     "own_share_28d": own.get("growth_share_28d"), "own_reviews_28d": own.get("reviews_28d"),
+                     "top_competitor": {"id": fast["id"], "name": fast.get("name"), "reviews_28d": fast["reviews_28d"],
+                                        "share_28d": fast.get("growth_share_28d")} if fast else None,
+                     "outpacing": any(str(s).endswith("/competitor_outpacing") for s in g.get("signals") or [])})
+    return {"meta": {k: meta.get(k) for k in ("as_of", "snapshot_days", "first_snapshot", "countries", "primary_country", "demo", "proxies")},
+            "stale": comp["stale"], "errors": len(meta.get("errors") or []), "groups": rows}
+
+
 def build_model(home: Path, as_of_arg: str | None = None) -> dict:
     cfg = load_config(home)
     apps = read_json(home / "raw" / "apps.json", None)
@@ -1158,6 +1230,17 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
         all_signals.extend(app_model["signals"])
         model_apps.append(app_model)
 
+    comp, comp_gaps = load_competitors(home, set(by_id))
+    if comp:
+        groups = {str(g["app_id"]): g for g in comp["groups"]}
+        for am in model_apps:
+            g = groups.get(am["id"])
+            if g:
+                am["competitors"] = g
+                extra = [x for x in comp["signals"] if x["scope"] == am["id"]]
+                am["signals"].extend(extra)
+                all_signals.extend(extra)
+
     ids = list(by_id) + (["_other"] if "_other" in daily else [])
     portfolio_reviews = sorted((r for rs in reviews.values() for r in rs), key=lambda r: r.get("created") or "", reverse=True)
     portfolio = {
@@ -1172,13 +1255,13 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
     portfolio["signals"] = portfolio_signals(model_apps, portfolio, sales_available, last_fetch, cfg, volume_source, max_day.isoformat())
     all_signals = portfolio["signals"] + all_signals
 
-    gaps = data_gaps(sales_available, last_fetch, fx, pending, parse_errors, model_apps, volume_source, funnel_available)
+    gaps = data_gaps(sales_available, last_fetch, fx, pending, parse_errors, model_apps, volume_source, funnel_available) + comp_gaps
     insights_dir = home / "insights"
     runs = []
     for p in sorted((home / "history").glob("*.html")):
         ins = read_json(insights_dir / f"{p.stem}.json", None, INSIGHTS_FIX, 2) if (insights_dir / f"{p.stem}.json").exists() else None
         runs.append({"date": p.stem, "file": p.name, "headline": (ins or {}).get("headline") if isinstance(ins, dict) else None})
-    return {
+    model = {
         "meta": {
             "tool": "appstore-tracker", "version": VERSION, "generated_at": datetime.now().isoformat(timespec="seconds"),
             "run_date": today_local().isoformat(), "as_of": days[-1].isoformat() if days else None,
@@ -1191,6 +1274,9 @@ def build_model(home: Path, as_of_arg: str | None = None) -> dict:
         "days": [d.isoformat() for d in days], "known": [1 if k else 0 for k in day_known],
         "apps": model_apps, "portfolio": portfolio, "signals": all_signals, "gaps": gaps, "runs": runs,
     }
+    if comp:  # only when competitor data exists, so a run without it is unchanged
+        model["competitors"] = competitor_overview(comp)
+    return model
 
 
 def sig(scope, kind, severity, title, detail, **metrics) -> dict:
@@ -1518,6 +1604,7 @@ def make_digest(model: dict) -> dict:
             "versions": [{k: v.get(k) for k in ("version", "platform", "state", "created", "first_seen")} for v in a["versions"][:5]],
             "rejection": a.get("rejection"),
             "signals": [s["id"] for s in a["signals"]], "review_sample": picked,
+            **({"competitors": a["competitors"]} if a.get("competitors") else {}),
         })
     p = model["portfolio"]
     return {
@@ -1526,6 +1613,7 @@ def make_digest(model: dict) -> dict:
                       "top_countries_90d": p["windows"]["90"]["countries"][:8], "reviews": {k: p["reviews"][k] for k in ("count", "avg", "dist", "unanswered", "unanswered_negative")}},
         "signals": [{k: s[k] for k in ("id", "severity", "title", "detail", "metrics")} for s in model["signals"]],
         "apps": apps,
+        **({"competitors": model["competitors"]} if model.get("competitors") else {}),
         "insights_file": None,
     }
 
@@ -1542,6 +1630,8 @@ def validate_insights(ins, model) -> list[str]:
     signal_ids = {s["id"] for s in model["signals"]}
     app_ids = {a["id"] for a in model["apps"]}
     review_ids = {r["id"] for a in model["apps"] for r in a["review_list"]}
+    rival_ids = {a["id"]: {str(x.get("id")) for x in (a.get("competitors") or {}).get("apps", []) if x.get("role") == "competitor"}
+                 for a in model["apps"]}
     is_str = lambda v: isinstance(v, str) and v.strip() != ""
     if not (isinstance(ins.get("date"), str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", ins["date"])):
         problems.append("date: required, a YYYY-MM-DD string")
@@ -1615,6 +1705,27 @@ def validate_insights(ins, model) -> list[str]:
             for rid in rids:
                 if not isinstance(rid, str) or rid not in review_ids:
                     problems.append(f"{where}.review_themes[{j}].review_ids: {json.dumps(rid)[:60]} is not a known review id")
+        if "competitors_summary" in block:
+            if not isinstance(block["competitors_summary"], str):
+                problems.append(f"{where}.competitors_summary: string")
+            elif not rival_ids.get(aid):
+                problems.append(f"{where}.competitors_summary: no competitor data for this app in data/competitors.json")
+        cthemes = block.get("competitor_themes", [])
+        if not isinstance(cthemes, list):
+            problems.append(f"{where}.competitor_themes: must be a list")
+            cthemes = []
+        for j, th in enumerate(cthemes):
+            w2 = f"{where}.competitor_themes[{j}]"
+            if not isinstance(th, dict) or not is_str(th.get("theme")):
+                problems.append(f"{w2}: object with a 'theme' string")
+                continue
+            if not isinstance(th.get("competitor_id"), str) or th["competitor_id"] not in rival_ids.get(aid, set()):
+                problems.append(f"{w2}.competitor_id: {json.dumps(th.get('competitor_id'))[:60]} is not a competitor of app {aid} in data/competitors.json")
+            if th.get("sentiment") not in (None, "positive", "negative", "mixed", "neutral"):
+                problems.append(f"{w2}.sentiment: positive, negative, mixed or neutral")
+            cnt = th.get("count")
+            if cnt is not None and (not isinstance(cnt, int) or isinstance(cnt, bool) or cnt < 0):
+                problems.append(f"{w2}.count: integer >= 0")
         drafts = block.get("reply_drafts") if isinstance(block.get("reply_drafts"), list) else []
         for j, d in enumerate(drafts):
             if not isinstance(d, dict) or not isinstance(d.get("review_id"), str) or d["review_id"] not in review_ids or not is_str(d.get("draft")):
@@ -1627,6 +1738,10 @@ def render_html(model: dict, insights, link_prefix: str) -> str:
         raise TrackerError(f"the dashboard template is missing: {TEMPLATE}.",
                            "Reinstall the skill so assets/dashboard.html exists next to scripts/.")
     payload = dict(model)
+    # Competitor review samples feed the agent's themes; the dashboard shows only the themes.
+    def without_samples(group):
+        return dict(group, apps=[{k: v for k, v in x.items() if k != "review_sample"} for x in group.get("apps", [])])
+    payload["apps"] = [dict(a, competitors=without_samples(a["competitors"])) if a.get("competitors") else a for a in model["apps"]]
     payload["insights"] = insights
     payload["meta"] = dict(model["meta"], link_prefix=link_prefix)
     data = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))

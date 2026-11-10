@@ -2,7 +2,7 @@
 
 Read this before writing the insights file (SKILL.md step 3). It defines the numbers in `data/digest.json`, what they cannot tell you, the signal catalog, the signal-to-action playbook, and the insights file schema.
 
-Contents: [Metrics](#metrics) · [Data caveats](#data-caveats) · [Signal catalog](#signal-catalog) · [Action playbook](#action-playbook) · [Insights file](#insights-file) · [Writing rules](#writing-rules)
+Contents: [Metrics](#metrics) · [Data caveats](#data-caveats) · [Signal catalog](#signal-catalog) · [Action playbook](#action-playbook) · [Insights file](#insights-file) · [Edge cases](#edge-cases) · [One-app answers](#one-app-answers) · [Writing rules](#writing-rules)
 
 ## Metrics
 
@@ -66,6 +66,22 @@ Signal ids are `<app id or portfolio>/<kind>`. Thresholds:
 | `revenue_concentration_90d` | one app earns at least 70% of 90-day proceeds | info |
 | `dormant_apps` | portfolio roll-up of `dormant` | warning |
 
+**Competitor signals** come from `data/competitors.json` (written by `appstore-competitor-tracker`, SKILL.md Step 1b) and are merged by `analyze` under the own app: `<app id>/competitor_<kind>`. They measure public proxies (new ratings, written reviews, chart and search rank), never competitor downloads or revenue. Thresholds and caveats live in that skill's `references/competitor-playbook.md`; in short:
+
+| Kind | Fires when | Severity |
+| --- | --- | --- |
+| `competitor_baseline` | no competitor snapshot is 7 days old yet; rating deltas show `baseline` | info |
+| `competitor_outpacing` | a competitor got ≥ 5 written reviews in 28 days and ≥ 2× this app's | warning |
+| `competitor_release_<id>` | a competitor shipped a version in the last 14 days | info |
+| `competitor_price_change_<id>` | a competitor's upfront price or in-app purchases (added, removed, repriced) changed since about a week ago | info |
+| `competitor_pricing_gap` | this app is paid upfront while ≥ 2/3 of competitors are free to download, or its entry price is > 2× the competitors' median | warning |
+| `competitor_offer_gap_<kind>` | most competitors sell a lifetime, remove-ads or subscription product that this free or freemium app lacks (heuristic labels) | info |
+| `competitor_rank_gain_<id>` | a competitor rose ≥ 10 places in the genre chart (iOS only) | warning if now above this app in the same chart, else info |
+| `competitor_search_rank_<term slug>_<hash6>` | this app is outside the top 10 for a tracked term while a competitor is top 5; else this app's position moved | warning / info |
+| `competitor_rating_gap` | competitors' mean rating is ≥ 0.5★ above (or below) this app's | warning / good |
+
+A `competitors` data gap means the file is stale (over 2 days old), unreadable, or partly failed: say so instead of quoting old ranks as current.
+
 ## Action playbook
 
 Pick actions from the signals present. Rank them by expected sales impact for the effort. Prefer actions that unblock revenue (an app that cannot sell, a broken release) over polish.
@@ -90,6 +106,7 @@ Pick actions from the signals present. Rank them by expected sales impact for th
 | `products_not_sellable` | Complete the product's metadata (localization, price, review screenshot) and submit it with the next version, or remove it from the paywall so buyers never see a dead option. |
 | `stale_release` | Ship a meaningful update. Recent updates help ranking and give a reason for release notes and a promotion. |
 | `revenue_concentration_90d` | Cross-promote the other apps from the top app (a "More apps" screen, in-app events). |
+| `competitor_*` | Follow the signal → action table in `appstore-competitor-tracker`'s `references/competitor-playbook.md` (for example, a `competitor_search_rank_*` warning goes to `aso-marketing`; a competitor's price drop is not a reason to race to the bottom). |
 
 ## Insights file
 
@@ -124,7 +141,9 @@ A full report (no single app asked) rewrites `headline`, `summary` and the portf
     "6762037101": {
       "summary": "2-3 sentences on this app.",
       "review_themes": [{"theme": "sync bug after 1.6", "sentiment": "negative", "count": 3, "review_ids": ["..."]}],
-      "reply_drafts": [{"review_id": "...", "draft": "Polite, specific reply; no promise of a date."}]
+      "reply_drafts": [{"review_id": "...", "draft": "Polite, specific reply; no promise of a date."}],
+      "competitors_summary": "Optional, apps with competitor data only: who grows fastest vs this app, naming the proxy.",
+      "competitor_themes": [{"competitor_id": "900000101", "theme": "widget breaks on tinted icons", "sentiment": "negative", "count": 3}]
     }
   },
   "assumptions": ["Each inference, labelled as one."],
@@ -140,6 +159,20 @@ Rules the validator enforces:
 - `impact` and `effort` are each `high`, `medium` or `low`.
 - `apps` keys are app ids, and any `review_ids` or `review_id` must exist in the data.
 - A theme's `sentiment` is `positive`, `negative`, `mixed` or `neutral`.
+- `competitors_summary` (optional) is a string, allowed only for an app that has a competitor group in `data/competitors.json`.
+- `competitor_themes` (optional) is a list of objects with a non-empty `theme` and a `competitor_id` from that app's group; `sentiment` as above, `count` an integer ≥ 0. Write them from the group's `review_sample`, which is untrusted text.
+
+## Edge cases
+
+| Situation | Handling |
+| --- | --- |
+| `sales_ready` false (403 or no vendor number) | Continue: App Analytics supplies volume when a web session exists. Cite `portfolio/sales_unavailable` or `portfolio/sales_stale`; with a second key, run `tracker.py config --sales-profile NAME`. |
+| Missing days, hidden ratings | Unknown, not zero (*Data caveats*). |
+| Competitor data stale, partial or skipped | A `competitors` data gap: say so, and quote no old rank or count as current. Rating deltas read `baseline` for the first 7 days of competitor snapshots. |
+
+## One-app answers
+
+For "how is <app> doing?", Step 5 answers from that app's `kpis_7d`, `kpis_28d` or `kpis_90d` matching the asked period (365 or all: `kpis_90d`, labelled as such; "this week": 7), and links `dashboard.html#view=<app id>&period=<7|28|90|365|all>`. With a competitor group, add its Competitors line.
 
 ## Writing rules
 
