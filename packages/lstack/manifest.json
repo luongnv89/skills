@@ -58,6 +58,7 @@
     {"name": "logo-designer", "source": "skills/logo-designer"},
     {"name": "ollama-optimizer", "source": "skills/ollama-optimizer"},
     {"name": "opencode-runner", "source": "skills/opencode-runner"},
+    {"name": "agent-profile", "source": "skills/agent-profile"},
     {"name": "oss-ready", "source": "skills/oss-ready"},
     {"name": "prd-generator", "source": "skills/prd-generator"},
     {"name": "product-launch", "source": "skills/product-launch"},

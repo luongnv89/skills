@@ -203,7 +203,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Harden and ship a repo | security-setup → devops-pipeline → ship (auto-push and cleanup-project for day-to-day work) |
 | Open-source a project | oss-ready → doc-manager → landing-page-generator → github-pages-publish |
 | Brand and launch | brand-name-checker → logo-designer → landing-page-generator → github-pages-publish → product-launch |
-| Run an agent fleet | herdr-agent *or* rex-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner |
+| Run an agent fleet | herdr-agent *or* rex-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr) · opencode-runner · agent-profile |
 
 ### Find by Category
 
@@ -323,6 +323,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**ollama-optimizer**](skills/ollama-optimizer/) | 1.4.0 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.4.0 | high | Cross-platform install.sh with env detection |
 | [**opencode-runner**](skills/opencode-runner/) | 1.7.0 | medium | Delegate work to opencode free cloud models |
+| [**agent-profile**](skills/agent-profile/) | 1.0.0 | medium | Run a task with a saved agent profile (harness, harness profile, model, thinking level) built from the CLIs installed on this machine |
 | [**herdr-agent**](skills/herdr-agent/) | 3.3.1 | medium | Manage Herdr agent fleets: tile panes, message/wait/read, steer, `help` |
 | [**rex-agent**](skills/rex-agent/) | 1.1.0 | medium | Manage Rex agent fleets: equal columns, prompt/wait/read via program status, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.7.0 | max | Resolve one GitHub issue via a Herdr implementer→reviewer loop until CLEAN |

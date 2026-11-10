@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "profiles": {
+    "cc-sonnet": {
+      "harness": "claude",
+      "harness_profile": "default",
+      "model": "sonnet",
+      "thinking": "low",
+      "permissions": "edits",
+      "typed_model": false,
+      "harness_version": "2.1.322",
+      "created": "2026-11-10T09:00:00+00:00",
+      "updated": "2026-11-10T09:00:00+00:00"
+    },
+    "codex-high": {
+      "harness": "codex",
+      "model": "gpt-test",
+      "thinking": "high",
+      "permissions": "full",
+      "typed_model": true,
+      "created": "2026-11-10T09:00:00+00:00",
+      "updated": "2026-11-10T09:00:00+00:00"
+    },
+    "shared": {
+      "harness": "claude",
+      "harness_profile": "default",
+      "model": "opus",
+      "permissions": "ask",
+      "typed_model": false,
+      "created": "2026-11-10T09:00:00+00:00",
+      "updated": "2026-11-10T09:00:00+00:00"
+    }
+  }
+}

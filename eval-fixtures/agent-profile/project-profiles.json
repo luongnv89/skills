@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "profiles": {
+    "shared": {
+      "harness": "claude",
+      "harness_profile": "default",
+      "model": "sonnet",
+      "permissions": "edits",
+      "typed_model": false,
+      "created": "2026-11-10T09:00:00+00:00",
+      "updated": "2026-11-10T09:00:00+00:00"
+    }
+  }
+}
