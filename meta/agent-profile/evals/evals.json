@@ -1,0 +1,68 @@
+{
+  "skill_name": "agent-profile",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "/agent-profile add a --verbose flag to cli.py. I don't have a profile yet.",
+      "expected_output": "The skill runs detect, shows the installed harnesses with their harness profiles, models and thinking levels, asks harness, harness profile, model, thinking, permissions, name and scope using only detected values, saves the profile, asks location and mode, shows the command, and runs only after the user says go.",
+      "files": [],
+      "expectations": [
+        "`agent_profile.py detect` runs before any profile question, and its output (harnesses with version and verified/untested status, harness profiles, models, thinking levels, permission modes) is shown to the user.",
+        "Every option offered for harness, harness profile, model and thinking level appears in that detect output; no harness that detect reported as not installed is offered.",
+        "The profile is saved with `agent_profile.py save` and its one-line brief is shown before the run questions.",
+        "Location (current directory or new worktree) and mode (foreground or background) are both asked before anything runs.",
+        "The exact command from `agent_profile.py command` is shown, and `run` is called only after the user chooses Run it."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "/agent-profile cc-sonnet write unit tests for utils/dates.py, in a new worktree, in the background",
+      "expected_output": "The skill uses the saved cc-sonnet profile without asking which profile, syncs the repo, creates a git worktree on an agent/ branch, shows the command for confirmation, starts a background run, and reports the run folder and pid; later status shows the result.",
+      "files": [],
+      "expectations": [
+        "The saved profile cc-sonnet is used and its brief is shown; the user is not asked to pick or create a profile.",
+        "A git worktree is created on a branch named `agent/cc-sonnet-<stamp>` after Repo Sync, and that worktree path is passed as `--cwd`.",
+        "The run uses `--background`, and the reply names the run folder and pid instead of waiting for the result.",
+        "The final report states that nothing was committed, merged or pushed and asks the user whether to keep or delete the branch."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Make me a pi profile with a free model and the highest thinking level it supports, call it pi-max, and save it just for this project.",
+      "expected_output": "The skill runs detect for pi, offers only pi's detected models, keeps the provider of the chosen model, offers only thinking levels pi reported (and none for a model marked without thinking), and saves pi-max with --scope project and full permissions after explaining that pi always has full tool access.",
+      "files": [],
+      "expectations": [
+        "The model offered or chosen comes from `pi --list-models` output as reported by detect, and the saved profile records its provider.",
+        "The thinking level saved is one of the levels detect reported for pi, and only for a model whose thinking column is yes.",
+        "The profile is saved with `--scope project`, so it lands in `.agent-profiles.json` at the git root.",
+        "The user is told that pi has no permission prompts and that each run will ask for a separate full-permissions confirmation."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge-case",
+      "prompt": "/agent-profile codex-high refactor the parser. Just run it, don't ask me anything.",
+      "expected_output": "The saved profile names the Codex harness, whose adapter is untested. The skill still shows the command and asks for one confirmation; when the script refuses because codex --help lacks a flag, or codex is not installed, it stops, shows the script's message and never builds the command by hand.",
+      "files": [],
+      "expectations": [
+        "The command is shown and a confirmation is asked even though the user asked not to be asked; the run does not start without it.",
+        "If `agent_profile.py` exits with an untested-adapter or not-installed error, the skill shows that message and stops; it does not run `codex` with a hand-written command.",
+        "When the profile has full permissions, a separate full-permissions question is asked and `--confirm-full` is passed only after a yes."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "negative",
+      "prompt": "Set up a new mcc profile for my work Claude account and log it in.",
+      "expected_output": "This is mcc account setup, not a delegated task. The skill does not trigger, or it says the request belongs to mcc itself; it does not run agent_profile.py save or run, and it never handles the login.",
+      "files": [],
+      "expectations": [
+        "No `agent_profile.py save` or `agent_profile.py run` command is executed.",
+        "No credential, token or login code is requested, typed or printed."
+      ]
+    }
+  ]
+}
