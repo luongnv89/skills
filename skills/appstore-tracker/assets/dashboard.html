@@ -134,6 +134,8 @@ details.iap { border-top: 1px solid var(--border); padding: 6px 0; }
 details.iap > summary { cursor: pointer; font-size: 13px; }
 details.iap .table-wrap { margin-top: 6px; }
 .you { font-size: 11px; font-weight: 650; color: var(--accent); border: 1px solid currentColor; border-radius: 999px; padding: 0 6px; margin-left: 6px; }
+.sig-scope, .sig-id { display: none; }
+.sig-scope { font-size: 12px; color: var(--ink-2); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } }
 @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } header.top { flex-direction: column; } .tile .value { font-size: 19px; } }
@@ -149,7 +151,12 @@ details.iap .table-wrap { margin-top: 6px; }
   .actions-table td:nth-last-child(2)::before { content: 'Impact: '; color: var(--ink-2); }
   .actions-table td:last-child::before { content: 'Effort: '; color: var(--ink-2); }
   .actions-table .chip { white-space: normal; max-width: 100%; }
-  .comp-signals td > code { overflow-wrap: anywhere; } /* long signal ids: give the Signal column the width */
+  /* Signal tables: fold Scope and Id into the Signal cell, which gets the width.
+     Signals cells: Severity, Scope, Signal, Id. Competitor signals cells: Severity, Signal, Id. */
+  .signals-table th:nth-child(2), .signals-table td:nth-child(2), .signals-table th:nth-child(4), .signals-table td:nth-child(4),
+  .comp-signals th:nth-child(3), .comp-signals td:nth-child(3) { display: none; }
+  .signals-table td:nth-child(3), .comp-signals td:nth-child(2) { overflow-wrap: anywhere; }
+  .signals-table .sig-scope, .signals-table .sig-id, .comp-signals .sig-id { display: block; }
 }
 @media (max-width: 720px) { .filters { position: static; } } /* a sticky bar this tall would hide keyboard focus (WCAG 2.4.11) */
 @media (min-width: 721px) { html { scroll-padding-top: 72px; } } /* keep focused rows clear of the sticky filter bar */
@@ -651,6 +658,9 @@ function insightsCard(appId) {
   return card;
 }
 
+// The full id stays the text (read, copied and spoken whole); <wbr> after / and _ lets it wrap.
+const sigIdCode = id => h('code', {class: 'muted'}, ...id.split(/(?<=[/_])/).flatMap((p, i) => i ? [h('wbr'), p] : [p]));
+
 function signalsCard(list, title) {
   const counts = {all: list.length};
   list.forEach(x => counts[x.severity] = (counts[x.severity] || 0) + 1);
@@ -666,12 +676,15 @@ function signalsCard(list, title) {
   const paint = () => {
     const shown = list.filter(x => state.sev === 'all' || x.severity === state.sev)
       .sort((a, b) => order.indexOf(a.severity) - order.indexOf(b.severity));
-    body.replaceChildren(shown.length ? table([
+    const scopeName = x => x.scope === 'portfolio' ? 'All apps' : (appById[x.scope] || {}).name || x.scope;
+    const tw = shown.length ? table([
       {key: 'sev', label: 'Severity', cell: x => sevTag(x.severity), sort: x => 3 - order.indexOf(x.severity)},
-      {key: 'scope', label: 'Scope', cell: x => x.scope === 'portfolio' ? 'All apps' : (appById[x.scope] || {}).name || x.scope},
-      {key: 'title', label: 'Signal', cell: x => h('div', {}, h('strong', {text: x.title}), h('div', {class: 'muted', text: x.detail}))},
-      {key: 'id', label: 'Id', cell: x => h('code', {class: 'muted', text: x.id})},
-    ], shown, {caption: 'Signals'}) : h('div', {class: 'empty', text: 'No signal at this severity.'}));
+      {key: 'scope', label: 'Scope', cell: scopeName},
+      {key: 'title', label: 'Signal', cell: x => h('div', {}, h('span', {class: 'sig-scope', text: scopeName(x)}), h('strong', {text: x.title}), h('div', {class: 'muted', text: x.detail}), h('div', {class: 'sig-id'}, sigIdCode(x.id)))},
+      {key: 'id', label: 'Id', cell: x => sigIdCode(x.id)},
+    ], shown, {caption: 'Signals'}) : null;
+    if (tw) tw.classList.add('signals-table'); // phone layout hook (720px block)
+    body.replaceChildren(tw || h('div', {class: 'empty', text: 'No signal at this severity.'}));
   };
   paint();
   return h('section', {class: 'card'}, h('h2', {text: title}), h('p', {class: 'hint', text: 'Computed by fixed rules from the data; recommended actions cite these ids.'}), chips, body);
@@ -768,8 +781,8 @@ function competitorsCard(a) {
     const order = ['critical', 'warning', 'good', 'info'];
     card.append(h('h2', {style: 'margin-top:12px', text: 'Competitor signals'}), table([
       {key: 'sev', label: 'Severity', cell: x => sevTag(x.severity), sort: x => 3 - order.indexOf(x.severity)},
-      {key: 't', label: 'Signal', cell: x => h('div', {}, h('strong', {text: x.title}), h('div', {class: 'muted', text: x.detail}))},
-      {key: 'id', label: 'Id', cell: x => h('code', {class: 'muted'}, ...x.id.split(/(?<=[/_])/).flatMap((p, i) => i ? [h('wbr'), p] : [p]))},
+      {key: 't', label: 'Signal', cell: x => h('div', {}, h('strong', {text: x.title}), h('div', {class: 'muted', text: x.detail}), h('div', {class: 'sig-id'}, sigIdCode(x.id)))},
+      {key: 'id', label: 'Id', cell: x => sigIdCode(x.id)},
     ], sigs, {sortKey: 'sev', caption: 'Competitor signals'}));
     card.lastChild.classList.add('comp-signals');
   }
