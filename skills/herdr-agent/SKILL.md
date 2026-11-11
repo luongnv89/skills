@@ -1,11 +1,11 @@
 ---
 name: herdr-agent
-description: "Manage AI agent fleets in Herdr: tile root + sub-agents in one tab, start/prompt/wait/read/monitor via the herdr agent CLI, steer any pane; `help` lists every operation. Use for Herdr fleets. Don't use for tmux, screen, or non-Herdr terminals."
+description: "Manage AI agent fleets in the Herdr TUI: tile root + sub-agents in one tab, start/prompt/wait/read/monitor via the herdr agent CLI, steer panes; `help` lists all. Don't use for the Herdr desktop app (hc-agent), tmux, or screen."
 license: MIT
 compatibility: "Requires herdr 0.9.0 or later on PATH and a running Herdr server (`herdr status`) for every operation except `help`, which runs no herdr command. Default same-kind launches also require `pane process-info` to return full argv; `--without flags` explicitly opts out."
 effort: medium
 metadata:
-  version: 3.3.1
+  version: 3.3.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -13,7 +13,7 @@ metadata:
 
 Build and control an AI-agent fleet in the root agent's Herdr tab. Keep the **root pane** as orchestrator; add each **sub-agent** as a right-hand split running the main agent's own launch profile; equalize all columns; then start, prompt, wait, read, monitor, steer, or tear down through the `herdr` CLI.
 
-Use Herdr concepts, not tmux assumptions. Let the server do the work: `herdr agent prompt --wait` submits and waits in one request, `herdr agent wait` is event-driven, and `herdr api snapshot` reports the whole fleet in one call. Relay reply deltas rather than whole panes to protect the context and token budget.
+Use Herdr concepts, not tmux assumptions; `references/herdr-recipes.md` says which server calls do the work. Relay reply deltas rather than whole panes to protect the context and token budget.
 
 ## Choose the Workflow
 
@@ -48,6 +48,8 @@ The full help text is in `references/help-request.md`. For a narrower question s
 
 ## Check Prerequisites
 
+First, if `HC_TERMINAL_ID` is set and `HERDR_ENV` is not, this is the Herdr desktop app: stop and use `hc-agent`. Never call `herdr` there; it reaches an unrelated TUI server.
+
 1. Run `command -v herdr` and `herdr status`. If the server is unavailable, ask the user to start Herdr from a real terminal; never run bare `herdr` from a non-TTY shell.
 2. Confirm `HERDR_ENV=1`. Outside a Herdr pane, do not inspect or control the focused session. If check 1 or 2 fails, stop: the run ends `BLOCKED`.
 3. Resolve the root pane, tab, and workspace from `HERDR_PANE_ID`, `HERDR_TAB_ID`, and `HERDR_WORKSPACE_ID`, or from `herdr pane current --current` and list/get commands.
@@ -70,6 +72,7 @@ The full help text is in `references/help-request.md`. For a narrower question s
 ## Phase 1 — Resolve Root Context
 
 ```bash
+test -z "${HC_TERMINAL_ID:-}" || test "${HERDR_ENV:-}" = 1 || { echo "Error: Herdr desktop app; use hc-agent" >&2; exit 1; }
 command -v herdr >/dev/null || { echo "Error: herdr is not installed" >&2; exit 1; }
 test "${HERDR_ENV:-}" = 1 || { echo "Error: not running inside a Herdr pane" >&2; exit 1; }
 herdr status || { echo "Error: Herdr server is unavailable" >&2; exit 1; }

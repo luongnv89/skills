@@ -100,6 +100,16 @@
       "expectations": [
         "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
       ]
+    },
+    {
+      "id": 12,
+      "kind": "negative-trigger",
+      "prompt": "I'm in the Herdr desktop app (HC_TERMINAL_ID=t2x, no HERDR_ENV). Spin up a reviewer agent beside my pane.",
+      "expected_output": "Should NOT drive the fleet with herdr-agent: HC_TERMINAL_ID is set and HERDR_ENV is not, so this is the Herdr desktop app. Runs no herdr command (herdr there reaches an unrelated TUI server) and routes the request to hc-agent.",
+      "files": [],
+      "expectations": [
+        "herdr-agent is not applied: no herdr command runs, not even herdr status, and the request is routed to hc-agent."
+      ]
     }
   ]
 }

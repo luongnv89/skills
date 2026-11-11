@@ -12,3 +12,4 @@ Read this when a target or the layout does not behave as the phase expects. Each
 - Successor never acks: HANDOFF failed — stay main, keep the fleet, and report the orphan pane before asking to close it.
 - Root process-info has only `argv0`, no full `argv`: abort before splitting or starting; update/restart Herdr, or use `--without flags` only when reduced inheritance is intentional.
 - A start times out after inheriting a flag: the CLI rejected it; read the pane for its message before retrying.
+- Herdr desktop app (`HC_TERMINAL_ID` set, `HERDR_ENV` unset): stop before any `herdr` command — there it reaches an unrelated TUI server and acts on another project's panes — and use `hc-agent`. `hc-agent`'s `references/app-vs-tui.md` lists every operation that differs or is unavailable in the app.

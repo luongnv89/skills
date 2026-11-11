@@ -31,5 +31,6 @@ WHAT IT NEEDS
   herdr 0.9.0 or later on PATH, a running server (`herdr status`), and this
   session inside a Herdr pane (HERDR_ENV=1). Default same-kind launches need
   the server's `pane process-info` API to return full argv.
-  Not for tmux or GNU screen — use tmux-agent-comms there.
+  Not for the Herdr desktop app (HC_TERMINAL_ID set, no HERDR_ENV) —
+  use hc-agent there. Not for tmux or GNU screen — use tmux-agent-comms.
 ```
