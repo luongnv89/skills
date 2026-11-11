@@ -63,7 +63,7 @@ python3 "$here/agent.py" wait reviewer --timeout 180                 # until set
 python3 "$here/agent.py" wait reviewer --until blocked --timeout 120 # until a dialog appears
 ```
 
-`wait` returns at once for an already settled agent. With `--until blocked`, reaching `blocked` exits 0. Never `sleep` in a loop to wait for an agent.
+`wait` returns at once for an already settled agent. With `--until blocked`, reaching `blocked` exits 0; a turn that ends without a dialog returns `settled`, also exit 0, so read `outcome`. Never `sleep` in a loop to wait for an agent.
 
 ## Reading the reply without burning context
 

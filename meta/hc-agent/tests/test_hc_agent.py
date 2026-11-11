@@ -367,6 +367,16 @@ class PromptTests(FleetCase):
         self.assertEqual(json.loads(proc.stdout)["outcome"], "blocked")
         self.assertTrue(any(c[1:2] == ["wait"] for c in self.log("hc")), "a working target blocks in hc wait")
 
+    def test_wait_until_blocked_settles_when_the_turn_ends_without_a_dialog(self):
+        ids = self.fleet(reviewer={"state": "working"})
+        self.update(lambda st: st.update(on_wait={ids["reviewer"]: [[[0.1, {"app": "claude-code",
+                                                                            "state": "done"}]]]}))
+        proc = self.run_script("agent.py", "wait", "reviewer", "--until", "blocked", "--timeout", "10")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)["outcome"], "settled")
+        waits = [c for c in self.log("hc") if c[1:2] == ["wait"]]
+        self.assertLessEqual(len(waits), 2, "hc wait runs only while the target reads working, never in a loop")
+
 
 class FleetTests(FleetCase):
     def test_fleet_lists_only_the_root_tab_with_roles(self):

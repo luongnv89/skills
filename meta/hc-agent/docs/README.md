@@ -12,7 +12,7 @@
 ## Highlights
 
 - **Built for the app, not the TUI** — the desktop app's terminals have `HC_TERMINAL_ID`, not `HERDR_ENV`, and the `herdr` CLI there reaches a different server. hc-agent uses only `hc` (herdr-core) and `herdr-app`; herdr-agent now sends app users here.
-- **One-call spawn** — `launch_profile.py --start` splits an explicit pane to the right with `herdr-app do pane.split`, labels the new terminal, puts focus back where you were, and returns only when the worker reports `idle`.
+- **One-call spawn** — `launch_profile.py --start` splits an explicit pane to the right with `herdr-app do pane.split`, labels the new terminal, puts focus back where you were, and returns only when the worker reports `idle` or `done`.
 - **Workers mirror the main agent** — same harness, model, thinking level, setup flags, and launch wrapper (such as `mcc run --`) as the agent running the skill. Your own prompt is never handed to them, and an inherited permission bypass is announced first.
 - **Prompt and wait in one call** — `agent.py prompt` refuses busy, blocked, silent or agent-less targets before typing, sends with `hc send --if idle`, and waits for the turn it caused; `read --turn` returns exactly that turn's reply.
 - **Status you can trust** — a terminal with no OSC 7501 status is unverifiable, never idle.
@@ -36,7 +36,7 @@
 ```mermaid
 graph TD
     A["agent.py check · HC_TERMINAL_ID, hc get labels, herdr-app ls"] --> B["launch_profile.py · resolve and announce the inherited profile"]
-    B --> C["launch_profile.py --start · pane.split, hc label, restore focus, wait for idle"]
+    B --> C["launch_profile.py --start · pane.split, hc label, restore focus, wait for idle or done"]
     C --> D["agent.py prompt · preflight, hc send --if idle, wait for this turn"]
     D --> E["Map settled | blocked | stalled | timeout | exited"]
     E --> F["agent.py read --turn · relay the delta · agent.py focus to steer"]

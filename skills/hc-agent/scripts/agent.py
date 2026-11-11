@@ -109,9 +109,11 @@ def wait_turn(addr: str, base_turn, base_ms, activity_timeout: float, timeout: f
 
     A turn needs activity: a status newer than the baseline (`status_ms` or
     `turn` changed). `working` marks it active; a newer `done` or `error`, or
-    `idle` once working was seen or the turn counter moved, settles it. `blocked`
-    ends it at once, a vanished status mid-turn is unverifiable, and a finished
-    terminal is exited. While working, `hc wait` blocks instead of polling.
+    `idle` once working was seen or the turn counter moved, settles it, also with
+    until="blocked" (the turn ended without a dialog). `blocked` ends it at once, a
+    vanished status mid-turn is unverifiable, and a finished terminal is exited.
+    Only a `working` read blocks in `hc wait`; anything else polls every 0.25 s,
+    because `hc wait` on a terminal that is not working returns at once.
     """
     start = time.monotonic()
     rec: dict = {}
@@ -126,9 +128,9 @@ def wait_turn(addr: str, base_turn, base_ms, activity_timeout: float, timeout: f
             return "blocked", rec
         if status == "working":
             active = True
-        elif until == "settled" and status in ("done", "error") and newer:
+        elif status in ("done", "error") and newer:
             return "settled", rec
-        elif until == "settled" and status == "idle" and (active or moved):
+        elif status == "idle" and (active or moved):
             return "settled", rec
         elif status in ("unverified", "no-agent") and (active or newer):
             return "unverifiable", rec
@@ -137,7 +139,7 @@ def wait_turn(addr: str, base_turn, base_ms, activity_timeout: float, timeout: f
             return "timeout", rec
         if not active and not newer and elapsed > activity_timeout:
             return "stalled", rec
-        if active:
+        if status == "working":
             left = max(1, int(min(timeout - elapsed, 30)))
             hclib.run(HC, ["wait", addr, "--timeout", str(left), "--json"], timeout=left + 15, check=False)
         else:

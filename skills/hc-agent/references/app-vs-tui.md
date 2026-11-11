@@ -53,7 +53,7 @@ Checked live on 2026-11-11 with hc 0.1.20 and Herdr.app 0.1.15 on macOS: first s
 ## Verified live
 
 - App terminals set `HC_TERMINAL_ID`, `HC_SCOPE` and `HC_TERMINAL_SOCKET`, and none of `HERDR_ENV`, `HERDR_PANE_ID`, `HERDR_TAB_ID` or `HERDR_WORKSPACE_ID`.
-- The shapes of `hc get --json`, `hc ls --json` (no labels in its rows), `herdr-app ls` and `herdr-app status`, and errors as `{"error": {kind, message, hint}}` on stderr with exit codes 3, 7, 9, 10 and 11.
+- The shapes of `hc get --json`, `hc ls --json` (no labels in its rows), `herdr-app ls` and `herdr-app status`, and errors as `{"error": {kind, message, hint}}` on stderr. Exit codes 3 (`not_found`) and 10 (`status_mismatch`) were observed; 7, 9 and 11 are per hc's documentation.
 - `herdr-app do pane.split --direction right --pane <p> --argv '<json>'` returns `{"pane", "terminal"}`, moves focus to the new pane, and `herdr-app do pane.focus --pane <p>` moves it back.
 - A `pane.split` terminal has `parent: null` and `die_with_parent: false`.
 - `hc send <t> <text>` replies `{"started", "status", "turn"}`; `hc send --if idle` on a terminal with no status exits 10 (`status_mismatch`) and types nothing.
@@ -62,7 +62,7 @@ Checked live on 2026-11-11 with hc 0.1.20 and Herdr.app 0.1.15 on macOS: first s
   - `agent.py check` exited 0.
   - `launch_profile.py` kept the wrapper. The worker's argv was the folder wrapper around `mcc run -- --model <m> --effort <e>`, its foreground process was the harness with those flags once each, and the root's prompt was dropped.
   - `--start` split with an explicit `--pane`. The new terminal carried `herdr.space` / `herdr.tab` plus the four `hc-agent.*` labels (so `hc label --json <t> k=v…` works), had `parent: null` and `die_with_parent: false`, and reached `ready` with focus back on root.
-  - `agent.py fleet` and `agent.py get <name>` found the worker by its label.
+  - `agent.py fleet` and `agent.py get <name>` found the worker by its label; `get` and `close` resolved it through `hc ls --json --label …`, so `hc ls --label` matches labels set by `hc label`.
   - `agent.py prompt` with a one-line task on stdin: `hc send --json --if idle -- <t> <text>` was accepted, the worker went `working` → `done`, `turn` moved 0 → 1, and `agent.py read --turn` returned the reply.
   - `agent.py close <name> --confirmed` closed only the worker, and the fleet was back to root alone.
 
@@ -74,7 +74,7 @@ Checked live on 2026-11-11 with hc 0.1.20 and Herdr.app 0.1.15 on macOS: first s
 - Column sizing with three or more columns, and splitting a worker pane instead of root.
 - Linux and Windows: the environment variables, `/bin/sh` for the folder wrapper, and install paths.
 - `hc` and `herdr-app` on PATH by default (observed in `~/.local/bin` only).
-- Whether the window renders `hc-agent.*` labels anywhere, and whether `hc ls --label` matches labels set by `hc label` (documented by `hc ls --help`, not exercised).
+- Whether the window renders `hc-agent.*` labels anywhere.
 - Multi-line text through `hc send` (it pastes, per its help; bracketed paste was not observed). The turn tag goes on the task's last line, so a one-line task stays one line.
 - `herdr-app do agent.focus` on a terminal without agent status (the script falls back to `pane.focus`).
 - The terminal address format: every address seen was `t` plus a digit and base-36 characters (`t7`, `t2x`, `t999`).
