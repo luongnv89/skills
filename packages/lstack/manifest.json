@@ -51,6 +51,7 @@
     {"name": "frontend-design", "source": "skills/frontend-design"},
     {"name": "github-pages-publish", "source": "skills/github-pages-publish"},
     {"name": "herdr-agent", "source": "skills/herdr-agent"},
+    {"name": "hc-agent", "source": "skills/hc-agent"},
     {"name": "idea-validator", "source": "skills/idea-validator"},
     {"name": "install-script-generator", "source": "skills/install-script-generator"},
     {"name": "issue-work-loop", "source": "skills/issue-work-loop"},

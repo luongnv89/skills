@@ -2,6 +2,8 @@
 
 Read this when you need layout variants, spawn mechanics, multi-line prompts, human steer/focus, scrollback recovery, or troubleshooting. Delivery and waiting live in `references/delivery-and-waiting.md`; status, badges and reporting live in `references/fleet-monitoring.md`.
 
+Let the server do the work: `herdr agent prompt --wait` submits and waits in one request, `herdr agent wait` is event-driven, and `herdr api snapshot` reports the whole fleet in one call.
+
 ## Default fleet layout (this skill)
 
 **Root + sub-agents as equal-width columns in one tab:**

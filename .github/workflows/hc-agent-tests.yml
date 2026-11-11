@@ -1,0 +1,47 @@
+name: hc-agent tests
+
+on:
+  pull_request:
+    paths:
+      - "skills/hc-agent/**"
+      - "meta/hc-agent/tests/**"
+      - ".github/workflows/hc-agent-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skills/hc-agent/**"
+      - "meta/hc-agent/tests/**"
+      - ".github/workflows/hc-agent-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Syntax-check test shims
+        run: |
+          sh -n meta/hc-agent/tests/bin/hc
+          sh -n meta/hc-agent/tests/bin/herdr-app
+          sh -n meta/hc-agent/tests/bin/herdr
+
+      - name: Byte-compile Python scripts
+        run: |
+          python3 -m py_compile \
+            skills/hc-agent/scripts/agent.py \
+            skills/hc-agent/scripts/hclib.py \
+            skills/hc-agent/scripts/launch_profile.py \
+            meta/hc-agent/tests/fake_hc.py \
+            meta/hc-agent/tests/fake_herdr_app.py
+
+      - name: Run unit/fixture tests (fake hc and herdr-app, no live app needed)
+        run: python3 -m unittest discover -s meta/hc-agent/tests -p 'test_*.py' -v

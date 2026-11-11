@@ -1,0 +1,124 @@
+{
+  "skill_name": "hc-agent",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "I'm in the Herdr desktop app and I already have an hc-agent worker named 'reviewer' beside me. Ask it to summarize the open PRs and show me what it says back.",
+      "expected_output": "Runs agent.py check, resolves reviewer by its hc-agent.name label with agent.py get, then sends and waits in one `agent.py prompt reviewer - --timeout N` call (hc send --if idle under the hood, the terminal address, never the name, passed to hc) rather than hc send plus sleep or repeated hc read. Maps blocked / stalled / timeout to distinct outcomes, reads the reply with `agent.py read reviewer --turn <turn>`, and relays only the delta.",
+      "files": [],
+      "expectations": [
+        "The prompt goes through `agent.py prompt` (one call that preflights, sends, and waits), not raw `hc send` followed by sleep or polling.",
+        "The reply is read with `agent.py read ... --turn <id>` (the prompt's turn ID) and only the relevant delta is relayed.",
+        "No herdr command runs at any point; every call goes through hc, herdr-app, or this skill's scripts.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values, a kept or dropped wrapper and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Spin up two agents in this Herdr app tab named 'tests' and 'docs' beside my pane, same model as you.",
+      "expected_output": "Runs agent.py check, resolves the launch profile once and relays its summary (including a kept mcc wrapper or an inherited bypass), then starts each worker with `launch_profile.py --start tests --cwd <project>` and `--start docs`, which split with `herdr-app do pane.split --direction right --pane <explicit pane>`, label the terminal with hc label, put focus back on the previously focused pane, and wait for idle. Never uses terminal.open, terminal.keep or hc run for workers. Confirms with agent.py fleet before assigning work, and reports that column widths are app-managed.",
+      "files": [],
+      "expectations": [
+        "Each worker is started with `launch_profile.py --start <name>`, not with a hand-built `herdr-app do pane.split` or `hc run` command.",
+        "Both workers land in the root's tab and each start reports `focus_restored`; no new tab or space is created.",
+        "The launch-profile summary line is resolved as its own call and relayed before the first start, and the root's own prompt is not passed to the workers.",
+        "No herdr command runs at any point; every call goes through hc, herdr-app, or this skill's scripts.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values, a kept or dropped wrapper and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "edge",
+      "prompt": "I'm done with my Herdr app fleet for this project, shut the agents down.",
+      "expected_output": "Treats teardown as destructive: lists the workers with agent.py fleet, asks for explicit confirmation, then runs `agent.py close <names> --confirmed`, which closes only hc-agent.role=worker terminals in the root's tab via herdr-app do pane.close. Keeps the root pane and the user's own panes, never quits the app or stops the hc core. If the user does not confirm, closes nothing and records the teardown as skipped.",
+      "files": [],
+      "expectations": [
+        "The agent asks for confirmation before closing anything.",
+        "Only worker panes are closed; the root pane, a `main` successor, the user's own panes, the app and the hc core are left alone.",
+        "No herdr command runs at any point; every call goes through hc, herdr-app, or this skill's scripts.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values, a kept or dropped wrapper and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge",
+      "prompt": "The reviewer agent in my Herdr app tab looks stuck. Send it 'continue' anyway.",
+      "expected_output": "Resolves reviewer, and when agent.py get or agent.py prompt reports blocked (or unverifiable), does not type: shows the agent with agent.py focus, tells the user a person must answer the dialog, and never uses hc send --force. If the agent is working, waits with agent.py wait instead of sending.",
+      "files": [],
+      "expectations": [
+        "Nothing is typed into a blocked, working or unverifiable agent, and `--force` is never used.",
+        "The user is told which dialog or state needs them.",
+        "No herdr command runs at any point; every call goes through hc, herdr-app, or this skill's scripts.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values, a kept or dropped wrapper and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "happy-path",
+      "prompt": "What are all my agents in this Herdr app tab doing right now?",
+      "expected_output": "Runs agent.py check, then agent.py fleet, and reports each terminal's role, status and message, blocked first, labelled as polled at a time. Lists only the root's tab, never terminals of other spaces or tabs. Sends nothing.",
+      "files": [],
+      "expectations": [
+        "The status comes from `agent.py fleet` (one hc get per terminal), reported as polled at a time, not from memory.",
+        "No prompt is sent and no pane is focused, split or closed.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values, a kept or dropped wrapper and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "happy-path",
+      "prompt": "/hc-agent help",
+      "expected_output": "Prints the help summary from references/help-request.md, runs no hc or herdr-app command, and emits no completion or final report.",
+      "files": [],
+      "expectations": [
+        "The help text is printed and no hc, herdr-app or herdr command runs.",
+        "No step completion report or final report is printed."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "edge",
+      "prompt": "Keep driving this Herdr app fleet through the whole refactor; don't let the run fall over when your context fills up.",
+      "expected_output": "Evaluates the context gate at the gate points; at the threshold starts a successor with `launch_profile.py --start main-g2 --role main`, sends the brief through agent.py prompt, reads the HANDOFF ACCEPTED ack, sends GO, then goes read-only and announces the successor. A failed start or missing ack aborts the HANDOFF and keeps the current main.",
+      "files": [],
+      "expectations": [
+        "The successor is started through `launch_profile.py --start main-g<N> --role main` (a pane.split terminal), never with hc run.",
+        "The outgoing agent writes nothing to the fleet after GO.",
+        "No herdr command runs at any point; every call goes through hc, herdr-app, or this skill's scripts.",
+        "The run ends with a final report: Result first (COMPLETE, PARTIAL or BLOCKED), then Evidence naming only checks that ran, Uncertainty listing UNKNOWN values, a kept or dropped wrapper and unchecked replies, and Decision naming the approval needed or 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "I'm in a Herdr TUI pane (HERDR_ENV=1). Ask my 'reviewer' agent to summarize the open PRs.",
+      "expected_output": "Should NOT trigger hc-agent: HERDR_ENV=1 means a Herdr TUI pane, which herdr-agent owns. Runs no hc or herdr-app command and routes the request to herdr-agent.",
+      "files": [],
+      "expectations": [
+        "hc-agent is not applied: no hc or herdr-app command runs, and the request is routed to herdr-agent."
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "negative-trigger",
+      "prompt": "My SSH session died, reattach my tmux coding agents.",
+      "expected_output": "Should NOT trigger hc-agent (tmux domain). Routes to tmux-agent-comms or plain tmux help.",
+      "files": [],
+      "expectations": [
+        "hc-agent is not applied: no hc or herdr-app command runs, and the request is routed to tmux-agent-comms."
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "negative-trigger",
+      "prompt": "Tile two worker agents next to me in this Rex window.",
+      "expected_output": "Should NOT trigger hc-agent: the request names Rex, which rex-agent owns.",
+      "files": [],
+      "expectations": [
+        "hc-agent is not applied: no hc or herdr-app command runs, and the request is routed to rex-agent."
+      ]
+    }
+  ]
+}
