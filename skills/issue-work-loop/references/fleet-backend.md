@@ -80,9 +80,12 @@ profile_json="$(python3 "$helper" \
 }
 ```
 
-Validate `profile_json` with the unchanged parser in `loop-protocol.md` → *Probe and target evidence*. hc-agent prints the same required keys and adds `main_kind` and `launch`, which the parser ignores. Every other rule there still applies, except the destination readback, which the app replaces as described next: inspect the root argv from `hc get "$HC_TERMINAL_ID" --json` and every local file a worker argument names; redact values; refuse explicit native, configuration, or environment bypass; fail closed on unknown or unverifiable input; and re-probe immediately before every start.
+Validate `profile_json` with the unchanged parser in `loop-protocol.md` → *Probe and target evidence*. hc-agent prints the same required keys and adds `main_kind` and `launch`, which the parser ignores. Every other rule there still applies, except the destination environment readback, which the app replaces with the evidence described next: inspect the root argv from `hc get "$HC_TERMINAL_ID" --json` and every local file a worker argument names; redact values; refuse explicit native, configuration, or environment bypass; fail closed on unknown or unverifiable input, with the one pi exception named below; and re-probe immediately before every start.
 
-Split and start are one call in the app, so no destination pane exists before the start. Right after the start, `hc get "$t" --json` is the supported destination evidence: `.foreground.argv` must carry no bypass token, and `.foreground.cwd` must equal `$project_dir`. On a mismatch, close that worker under *Close-confirmation policy* and stop BLOCKED before any task. The start passes no environment (`pane.split` takes none), so the worker inherits the app terminal's environment, and no supported command reads it back. The loop sets no bypass variable itself. An environment-carried bypass inherited from the app is therefore not ruled out: record it under `Uncertainty:` in the final report.
+Split and start are one call in the app, so no destination pane exists before the start. Right after the start, `hc get "$t" --json` is the supported destination evidence: `.foreground.argv` must carry no bypass token, and `.foreground.cwd` must equal `$project_dir`. On a mismatch, close that worker under *Close-confirmation policy* and stop BLOCKED before any task. The start passes no environment (`pane.split` takes none), so the worker inherits the app terminal's environment, and hc-agent 1.0.0 has no command that reads it back. The loop sets no bypass variable itself. This is the app carve-out from the TUI's stop-before-start rule (`SKILL.md` → *Selective Worker Launch Profile*, `loop-protocol.md` → *Probe and target evidence*):
+
+- **claude and opencode:** the effective mode on screen replaces the environment readback. The *App boot gate* below checks it and fails closed.
+- **pi:** it shows no mode on screen, so the app allows the start with an operator-accepted residual risk. Record this exact line in the run's `Uncertainty:` row: `pi app worker: inherited environment not verifiable (hc-agent has no env readback); accepted by operator`.
 
 ## App spawn
 
@@ -105,13 +108,15 @@ The loop does not choose placement: hc-agent splits its newest worker pane, or r
 
 ## App boot gate
 
-The boot-gate matrix in `loop-protocol.md` is unchanged. Only the keystroke transport differs:
+The boot-gate matrix in `loop-protocol.md` is unchanged. The keystroke transport differs, and for claude and opencode a bounded read, `hc read "$t" --lines 40` (or `agent.py read "$t" --tail 40`), is also the effective-mode check that replaces the environment readback:
 
-- **claude:** send `hc keys "$t" shift+tab` as a keystroke, never as text. Then run a bounded read, `hc read "$t" --lines 40` (or `agent.py read "$t" --tail 40`), which must show the auto-accept-edits indicator. Allow at most three presses, reading after each one. If the indicator still does not show, close that loop-owned worker and stop BLOCKED with *App boot mode unverifiable*.
-- **opencode:** send `hc keys "$t" tab`, then run the same bounded read for the Build agent.
-- **pi:** autonomous by default. `outcome: ready` from the start is its readiness wait.
+- **Before any mode switch:** a bounded read must show no bypass-permissions or dangerous-mode indicator.
+- **claude:** send `hc keys "$t" shift+tab` as a keystroke, never as text. Allow at most three presses, with a bounded read after each one. Every read must still show no bypass-permissions or dangerous-mode indicator; if one appears, press no further. The last read must show the auto-accept-edits indicator.
+- **opencode:** send `hc keys "$t" tab`, then run the same bounded read. It must show no bypass-permissions or dangerous-mode indicator, and it must show the Build agent.
+- **Anything else** (expected indicator absent, a bypass-permissions or dangerous-mode indicator present, or a failed read): close that loop-owned worker and stop BLOCKED with *App boot mode unverifiable*.
+- **pi:** autonomous by default, with no mode on screen. `outcome: ready` from the start is its readiness wait. Its environment is the operator-accepted residual risk under *App launch-profile gate*.
 
-Shift+Tab delivery through `hc keys` is **not yet verified live**: hc-agent documents `hc keys` from its help text only. That is why the gate fails closed. Permission bypass is never the fallback. Keep `--without bypass` on every start, and never pass `--dangerously-skip-permissions`, `--allow-dangerously-skip-permissions`, or `--permission-mode bypassPermissions`.
+Shift+Tab delivery through `hc keys` and the on-screen indicator check are **not yet verified live**: hc-agent documents `hc keys` from its help text only. That is why the gate fails closed. Permission bypass is never the fallback. Keep `--without bypass` on every start, and never pass `--dangerously-skip-permissions`, `--allow-dangerously-skip-permissions`, or `--permission-mode bypassPermissions`.
 
 ## App send, wait, and read
 
@@ -147,8 +152,8 @@ python3 "$here/agent.py" read "$t" --turn "$turn"
 hc-agent Rule 8: "**Confirm destruction.** Closing panes, tabs, or spaces can lose work. Obtain explicit approval and preserve the orchestrator pane unless the user says otherwise." The loop obtains that approval this way:
 
 - **FRESHEN and failed boot gates:** invoking the loop approves closing and respawning a worker the loop itself spawned this run.
-- **SWEEP:** an explicit `work_loop.auto_cleanup: true` in `.gitissue.yml` approves closing this run's workers. In the app, the documented default (`true` when the key is absent) is **not** approval, unlike the TUI.
-- **Otherwise**, with `auto_cleanup` absent or false: when a user is present, list the run's workers with `agent.py fleet` and ask before closing. A yes closes them. A no, or no answer, leaves them open. An unattended run leaves them open. Either way the report shows `Cleanup: ⚠ pending` with the names. `--no-cleanup` leaves them open without asking, as in the TUI.
+- **SWEEP:** the effective `work_loop.auto_cleanup` value is the approval, as in the TUI. An absent key means the documented default `true`, which approves closing this run's workers.
+- **`auto_cleanup: false` or `--no-cleanup`:** both behave as in the TUI. SWEEP closes nothing and asks nothing, the report shows `Cleanup: ○ skipped`, and `Uncertainty:` names the workers left open.
 - Pass only names from this run's spawn ledger to `agent.py close <names…> --confirmed`. Never pass root, a `main` successor, an unlabelled terminal, or a terminal outside the root's tab. hc-agent refuses root and `main` too, but that refusal is a backstop, not the policy.
 - Verify with `agent.py fleet --json` that no closed ledger name remains.
 
@@ -160,7 +165,7 @@ hc-agent Rule 8: "**Confirm destruction.** Closing panes, tabs, or spaces can lo
 4. Split and start are one call. The loop does not choose placement and passes no `--env`.
 5. Timeouts are seconds (`--timeout 60` start, `--timeout 180` prompt), not milliseconds.
 6. Replies are read by turn ID (`agent.py read --turn`). The loop records one turn per prompt.
-7. Closes reach only labelled workers this loop spawned, under the *Close-confirmation policy*. SWEEP needs an explicit `auto_cleanup: true` or the user's answer.
-8. Shift+Tab via `hc keys` is not verified live, so the claude boot gate fails closed with *App boot mode unverifiable*.
+7. Closes reach only labelled workers this loop spawned, under the *Close-confirmation policy*. SWEEP closes follow the effective `auto_cleanup` (default `true`), as in the TUI.
+8. No environment readback: claude and opencode boot gates check the on-screen mode (no bypass indicator before the switch, the expected one after) and fail closed with *App boot mode unverifiable*; that check and Shift+Tab via `hc keys` are not verified live. pi carries an operator-accepted residual risk.
 9. Worker status is polled (`agent.py fleet`), not an atomic snapshot.
 10. The app has no sidebar badges or notifications. The loop uses neither in either runtime, so nothing is lost: blocked workers are surfaced in chat, with `agent.py focus`.

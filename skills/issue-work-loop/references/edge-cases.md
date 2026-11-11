@@ -8,8 +8,10 @@ Each row is a situation the loop must handle rather than crash on. Exact stop an
 | Neither `HERDR_ENV=1` nor `HC_TERMINAL_ID` | Stop before acquiring anything with *No Herdr runtime detected* |
 | Herdr desktop app with `herdr` on PATH | Ignore it; never call `herdr` in the app, because it reaches a separate TUI server |
 | App terminal has no agent status (`agent.py` exit 4 or 5) | Stop BLOCKED with *App terminal has no agent status*; the app has no no-agent fallback |
-| App claude worker: Shift+Tab through `hc keys` never shows auto-accept edits (not yet verified live) | Fail closed: close that loop-spawned worker and stop with *App boot mode unverifiable*; never fall back to permission bypass |
-| App SWEEP without an explicit `work_loop.auto_cleanup: true` | Ask before closing when a user is present; otherwise leave the workers open and report `Cleanup: ⚠ pending` |
+| App claude or opencode worker: the screen shows a bypass-permissions or dangerous-mode indicator, the expected mode (auto-accept edits, Build agent) never shows, or the read fails (not yet verified live) | Fail closed: close that loop-spawned worker and stop with *App boot mode unverifiable*; never fall back to permission bypass |
+| App pi worker: inherited environment cannot be read back | Start it; record `pi app worker: inherited environment not verifiable (hc-agent has no env readback); accepted by operator` under `Uncertainty:` |
+| App SWEEP with `work_loop.auto_cleanup` absent | The default `true` approves closing this run's workers, as in the TUI |
+| App SWEEP with `auto_cleanup: false` or `--no-cleanup` | Close nothing and ask nothing, as in the TUI; report `Cleanup: ○ skipped` and name the open workers under `Uncertainty:` |
 | A dependency cannot be acquired | Stop before the repo sync; report every failed skill in one *Missing required skills* block |
 | ISSUE implementer produces no unique open PR | If authoritative `already_resolved` with zero links, hand off `ALREADY_RESOLVED`; otherwise stop and report reason |
 | Existing linked PR in ISSUE preflight | Confirm switch to PR mode; decline aborts |

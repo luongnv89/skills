@@ -61,9 +61,12 @@ Use `✗ what failed`, `To fix:`, and exact identifiers. Never expose tokens. Is
 ✗ App boot mode unverifiable for {role}
 
   Worker:  {name} ({terminal}, {agent_cli})
-  Tried:   hc keys {terminal} shift+tab, up to 3 presses, each followed by a
-           bounded read; the auto-accept-edits indicator never showed
-  Note:    Shift+Tab delivery through hc keys is not yet verified live
+  Tried:   bounded read before the switch, then hc keys {terminal}
+           {shift+tab | tab}, each press followed by a bounded read
+  Reason:  {expected indicator (auto-accept edits | Build agent) never showed |
+            a bypass-permissions or dangerous-mode indicator is on screen |
+            the bounded read failed}
+  Note:    hc keys delivery and this screen check are not yet verified live
   Action:  closed this loop-spawned worker; no role task was dispatched
   Refused: permission bypass is never the fallback
 ```

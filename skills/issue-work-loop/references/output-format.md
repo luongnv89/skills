@@ -125,7 +125,7 @@ A CLEAN-first PR report must show `FIXER pane: ○ not spawned` and `Isolated wo
 ```text
 ◆ SWEEP (cleanup, {ISSUE|PR})
 ··································································
-  Worker panes:       √ closed {spawned_names} | ○ none | ⚠ partial | ⚠ pending (app)
+  Worker panes:       √ closed {spawned_names} | ○ none | ⚠ partial
   Worktrees removed:  √ {paths} | ○ none | ⚠ partial
   Issue-resolver wt:  √ removed | ○ not applicable (PR mode)
   On default branch:  √ {default_branch}
@@ -136,8 +136,6 @@ A CLEAN-first PR report must show `FIXER pane: ○ not spawned` and `Isolated wo
 
 `spawned_names` is ISSUE implementer+reviewer, or PR reviewer plus optional FIXER. Never claim a FIXER was closed when one was not spawned.
 
-In the Herdr desktop app, `⚠ pending` means close approval was missing (`fleet-backend.md` → *Close-confirmation policy*): the workers stay open, the SWEEP result is `PARTIAL`, and the final `Result:` is `PARTIAL — cleanup pending`.
-
 ## Final report contract
 
 Every final report (CLEAN, MAX_ROUNDS, push-safety stop, FAILED, ALREADY_RESOLVED, ABORTED) opens with these four lines, in this order, before the handoff facts:
@@ -146,7 +144,7 @@ Every final report (CLEAN, MAX_ROUNDS, push-safety stop, FAILED, ALREADY_RESOLVE
 |---|---|
 | `Result:` | `COMPLETE` (CLEAN verdict, PR open, SWEEP PASS or skipped by `--no-cleanup`), `PARTIAL — {reason}` (CLEAN or MAX_ROUNDS with a SWEEP or release failure, or MAX_ROUNDS with FINDINGS left), or `BLOCKED — {reason}` (any stop before CLEAN: preflight, push safety, failure, decline) |
 | `Evidence:` | Only checks that ran this run: the fresh `gh pr view` (state, branch, head SHA), `reviewed_head_sha`, `herdr agent list` (app: `agent.py fleet --json`), `git worktree list`. A worker's claim alone is not evidence. |
-| `Uncertainty:` | What was not verified: CI not observed, context UNKNOWN fallbacks, a fork push fact unknown, a failed `asm deps release`, panes left by `--no-cleanup` or app workers left open pending close approval. Write `none` only when every handoff fact has a check under `Evidence:`. |
+| `Uncertainty:` | What was not verified: CI not observed, context UNKNOWN fallbacks, a fork push fact unknown, a failed `asm deps release`, workers left open by `--no-cleanup` or `auto_cleanup: false` (both runtimes), and for a pi worker in the Herdr desktop app `pi app worker: inherited environment not verifiable (hc-agent has no env readback); accepted by operator`. Write `none` only when every handoff fact has a check under `Evidence:`. |
 | `Decision:` | The user's next decision. Merge is always the user's; also name any other approval (switch mode, fix on a fork). If no approval is needed (BLOCKED before any PR exists), write "No approval needed." and name the remaining user action. |
 
 Map Step Completion Report results to `Result:` this way: all phases PASS → `COMPLETE`; any PARTIAL → `PARTIAL — {phase}: {reason}`; any FAIL or stop → `BLOCKED — {phase}: {reason}`.
@@ -171,7 +169,7 @@ Map Step Completion Report results to `Result:` this way: all phases PASS → `C
   Rounds:        {r}/{K}
   Spawned roles: {IMPLEMENTER, REVIEWER | REVIEWER | REVIEWER, FIXER}
   Freshen:       {role=count, ...}
-  Cleanup:       √ | ⚠ partial | ⚠ pending (app) | ○ skipped
+  Cleanup:       √ | ⚠ partial | ○ skipped
   Verdict:       CLEAN
 ```
 
@@ -193,7 +191,7 @@ Map Step Completion Report results to `Result:` this way: all phases PASS → `C
   Head:          {head_ref} @ {sha}
   Rounds:        {K}/{K}
   Spawned roles: {roles}
-  Cleanup:       √ | ⚠ partial | ⚠ pending (app) | ○ skipped
+  Cleanup:       √ | ⚠ partial | ○ skipped
   Verdict:       MAX_ROUNDS
 
   Remaining FINDINGS:
@@ -216,7 +214,7 @@ Map Step Completion Report results to `Result:` this way: all phases PASS → `C
   PR:            {url or none}
   Head:          {sha or unknown}
   Spawned roles: {roles or none}
-  Cleanup:       √ | ⚠ partial | ⚠ pending (app) | ○ skipped
+  Cleanup:       √ | ⚠ partial | ○ skipped
 ```
 
 `ALREADY_RESOLVED` uses `Result: COMPLETE` when the closing evidence (merged PR or closing commit) is listed under `Evidence:`; otherwise it is `BLOCKED`.

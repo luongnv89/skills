@@ -159,15 +159,16 @@ closed; never use a native/unverified fallback. Before starting, follow the
 concrete evidence and fail-closed gate in `references/loop-protocol.md`.
 If the target environment or configuration (including inherited inline
 settings values) cannot be established from actual local evidence, stop before
-`herdr agent start`; do not invent a Herdr inspection command.
+`herdr agent start`; do not invent a Herdr inspection command. App carve-out:
+an on-screen mode check replaces this readback, and pi is an accepted risk; see
+`references/fleet-backend.md` → *App launch-profile gate*.
 
 The probe is not an immutable start snapshot. Re-probe root state and the
 stable local evidence immediately before every start, using the exact same
 worker kind/model/thinking/native inputs. If a source changes or stable
 provenance cannot be established, discard the old result and stop. The detailed
 parser, inspection boundary, prohibited bypass forms, and blocked-path wording
-are authoritative in `references/loop-protocol.md`. App runtime: see
-`references/fleet-backend.md` → *App launch-profile gate*.
+are authoritative in `references/loop-protocol.md`.
 
 ## Autonomous Worker Boot Gate (mandatory)
 

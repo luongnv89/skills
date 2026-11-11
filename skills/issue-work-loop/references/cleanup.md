@@ -33,7 +33,7 @@ Close each current and orphaned FRESHEN replacement recorded by this run:
 herdr pane close "$worker_pane" 2>/dev/null || true
 ```
 
-App runtime: close only spawn-ledger names with `agent.py close <names…> --confirmed`, and only under `fleet-backend.md` → *Close-confirmation policy*; without that approval, leave the workers open and report `Cleanup: ⚠ pending`.
+App runtime: close only spawn-ledger names with `agent.py close <names…> --confirmed`, under `fleet-backend.md` → *Close-confirmation policy*: the effective `auto_cleanup` (default `true`) approves the close, as in the TUI.
 
 Never close `root_pane`/`$HERDR_PANE_ID`, stop the Herdr server, or infer ownership solely from a broad name prefix. Re-query `herdr agent list` (app: `agent.py fleet --json`) and require every tracked pane id to be absent.
 

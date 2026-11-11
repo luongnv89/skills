@@ -372,6 +372,10 @@ boundary is mandatory before the start command:
 Error: worker target cwd/environment/configuration cannot be established from supported local evidence; refusing to start
 ```
 
+App carve-out: the desktop app has no destination environment readback, so
+`fleet-backend.md` → *App launch-profile gate* replaces it with the boot gate's
+on-screen mode check and an operator-accepted pi residual risk.
+
 Retain selective filtering for every launch: require `without` to contain
 `bypass` but not blanket `flags`, require empty inherited `profile.bypass`, and
 reject skip-permissions switches, `--permission-mode bypassPermissions`, Pi

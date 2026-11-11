@@ -829,14 +829,56 @@ class AppBackendContractTests(unittest.TestCase):
                        "--without bypass", "App boot mode unverifiable"):
             self.assertIn(phrase, boot, phrase)
 
-    def test_close_policy_needs_explicit_approval_and_own_workers_only(self):
+    def test_close_policy_uses_effective_auto_cleanup_and_own_workers_only(self):
         policy = section(self.doc, "## Close-confirmation policy")
         for phrase in (
             "Rule 8", "Confirm destruction", "invoking the loop approves",
-            "`work_loop.auto_cleanup: true`", "**not** approval", "ask before closing",
-            "leaves them open", "spawn ledger", "--confirmed", "Never pass root",
+            "effective `work_loop.auto_cleanup` value is the approval",
+            "documented default `true`", "`auto_cleanup: false` or `--no-cleanup`",
+            "closes nothing and asks nothing", "`Cleanup: ○ skipped`",
+            "spawn ledger", "--confirmed", "Never pass root",
         ):
             self.assertIn(phrase, policy, phrase)
+        for stale in ("**not** approval", "ask before closing", "⚠ pending"):
+            self.assertNotIn(stale, policy, stale)
+        refs = SKILL_DIR / "references"
+        for name in ("cleanup.md", "edge-cases.md", "output-format.md", "vocabulary-and-config.md"):
+            text = (refs / name).read_text(encoding="utf-8")
+            with self.subTest(doc=name):
+                self.assertNotIn("pending (app)", text)
+                self.assertNotIn("explicit `true`", text)
+                self.assertNotIn("cleanup pending", text)
+
+    def test_app_screen_mode_check_replaces_env_readback_and_fails_closed(self):
+        boot = section(self.doc, "## App boot gate")
+        for phrase in (
+            "effective-mode check that replaces the environment readback",
+            "**Before any mode switch:**", "no bypass-permissions or dangerous-mode indicator",
+            "auto-accept-edits indicator", "Build agent", "press no further",
+            "expected indicator absent", "a failed read", "close that loop-owned worker",
+            "stop BLOCKED with *App boot mode unverifiable*", "not yet verified live",
+        ):
+            self.assertIn(phrase, boot, phrase)
+        self.assertLess(boot.index("**Before any mode switch:**"), boot.index("**claude:**"))
+        errors = (SKILL_DIR / "references" / "error-messages.md").read_text(encoding="utf-8")
+        error = errors.split("### App boot mode unverifiable", 1)[1].split("\n### ", 1)[0]
+        for phrase in ("bypass-permissions or dangerous-mode indicator", "bounded read failed", "Build agent"):
+            self.assertIn(phrase, error, phrase)
+        gate = section(self.doc, "## App launch-profile gate")
+        self.assertNotIn("is therefore not ruled out", gate)
+        self.assertIn("fail closed on unknown or unverifiable input, with the one pi exception", gate)
+        accepted = ("pi app worker: inherited environment not verifiable "
+                    "(hc-agent has no env readback); accepted by operator")
+        self.assertIn(accepted, gate)
+        self.assertIn("`Uncertainty:`", gate)
+        self.assertIn(accepted, OUTPUT_FORMAT.read_text(encoding="utf-8"))
+        launch = section(SKILL_MD.read_text(encoding="utf-8"), "## Selective Worker Launch Profile")
+        probe = WorkerLaunchContractTests.selective_profile_section(
+            None, PROTOCOL, "### Probe and target evidence")
+        for name, text in (("SKILL.md", launch), ("loop-protocol.md", probe)):
+            with self.subTest(doc=name):
+                self.assertIn("App carve-out", text)
+                self.assertIn("fleet-backend.md` → *App launch-profile gate*", text)
 
     def test_differing_steps_are_named(self):
         steps = section(self.doc, "## Steps that differ in the app").lower()
