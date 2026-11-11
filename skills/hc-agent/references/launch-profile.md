@@ -35,7 +35,7 @@ Launch profile: claude (inherited from main) · model claude-opus-5-5 (self-repo
 - **Wrapper with `--`:** the worker keeps the wrapper prefix up to `--`, so it runs on the same account, and its flags come from the wrapper's own arguments after `--`. Flags the wrapper injects into the foreground process are not copied, because the wrapper adds them again.
 - **Wrapper without `--`:** the profile aborts, because the wrapper's own arguments cannot be told from the harness's. `--without wrapper` launches the foreground binary directly and warns that the worker may use another account or config.
 
-Wrapper handling is unverified live: whether `mcc run` accepts the worker's flags after `--`, and whether a flag it also injects (a doubled `--model`) is accepted, were not exercised. Name it under `Uncertainty:`.
+Wrapper handling was run live once, with `mcc run --` and Claude Code: the worker ran `mcc run -- --model <m> --effort <e>`, its harness process carried each flag once, and the root's prompt was not passed. Other wrappers, and a wrapper that injects a flag the worker also carries, are unverified. Name the wrapper under `Uncertainty:`.
 
 **Positionals never carry over.** Both lists end with the root's own prompt (`/issue-resolver 469`). The strict parser drops every positional and names the count under `dropped`, so a worker is never handed the root's task.
 

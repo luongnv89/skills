@@ -15,6 +15,8 @@ State is one JSON file at $FAKE_HC_STATE, shared with fake_herdr_app.py:
     on_send     address -> list of schedules; each send pops the first one:
                 [[delay_s, status|null, screen_text?], ...]
     spawn       the schedule a new pane.split terminal runs at boot
+    on_wait     address -> list of schedules; each `hc wait` pops the first one
+                (a change that can only happen once the script is blocked in hc wait)
     flip_after_get / label_fails / split_fails   race and failure hooks
     log         every call: ["hc", ...] or ["herdr-app", ...]
 
@@ -231,6 +233,10 @@ def main(argv: list[str]) -> int:
                 schedule(state, addr, queue.pop(0))
             print(json.dumps({"started": None, "status": None, "turn": rec.get("turn") or 0}))
             return 0
+        if cmd == "wait":
+            queue = (state.get("on_wait") or {}).get(addr) or []
+            if queue:
+                schedule(state, addr, queue.pop(0))
     # wait: poll the shared state until the terminal stops working
     limit = time.time() + float((opts.get("timeout") or ["180"])[0])
     while True:

@@ -93,7 +93,7 @@ No files. Each fleet operation ends with a step completion report, then a final 
 
 ## Requirements
 
-- The Herdr desktop app with its `hc` and `herdr-app` CLIs on PATH (observed with hc 0.1.20 and Herdr.app 0.1.15 on macOS)
+- The Herdr desktop app with its `hc` and `herdr-app` CLIs on PATH (observed with hc 0.1.20 and Herdr.app 0.1.15 on macOS, including one end-to-end run with a Claude Code worker through the `mcc run --` wrapper; `references/app-vs-tui.md` lists what that run covered and what is still unverified)
 - Run the orchestrator **inside** one of the app's terminals, shown in the window, so `HC_TERMINAL_ID` names it
 - Worker CLIs that report OSC 7501 status (Claude Code does)
 

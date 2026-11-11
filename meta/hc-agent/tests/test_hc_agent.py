@@ -200,7 +200,9 @@ class CheckTests(FakeAppCase):
         self.assertIn("hc and herdr-app not on PATH", proc.stderr)
 
 
-class PromptTests(FakeAppCase):
+class FleetCase(FakeAppCase):
+    """Helpers for tests that build a fleet in the root's tab; holds no tests itself."""
+
     def fleet(self, **workers: dict) -> dict:
         terms = {ROOT: self.state()["terminals"][ROOT]}
         for n, (name, spec) in enumerate(workers.items(), start=2):
@@ -219,6 +221,8 @@ class PromptTests(FakeAppCase):
     def sends(self) -> list[list[str]]:
         return [c for c in self.log("hc") if c[1:2] == ["send"]]
 
+
+class PromptTests(FleetCase):
     def test_idle_target_settles_after_working_then_done(self):
         ids = self.fleet(reviewer={})
         self.on_send(ids["reviewer"], (0.2, {"app": "claude-code", "state": "working", "msg": ""}),
@@ -355,16 +359,16 @@ class PromptTests(FakeAppCase):
 
     def test_wait_until_blocked(self):
         ids = self.fleet(reviewer={"state": "working"})
-        self.update(lambda st: st["pending"].append(
-            {"addr": ids["reviewer"], "at": __import__("time").time() + 0.3,
-             "status": {"app": "claude-code", "state": "blocked"}}))
-        proc = self.run_script("agent.py", "wait", "reviewer", "--until", "blocked", "--timeout", "4")
+        # the dialog appears only once the script is blocked in `hc wait`, so no clock races the preflight
+        self.update(lambda st: st.update(on_wait={ids["reviewer"]: [[[0.1, {"app": "claude-code",
+                                                                            "state": "blocked"}]]]}))
+        proc = self.run_script("agent.py", "wait", "reviewer", "--until", "blocked", "--timeout", "10")
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertEqual(json.loads(proc.stdout)["outcome"], "blocked")
         self.assertTrue(any(c[1:2] == ["wait"] for c in self.log("hc")), "a working target blocks in hc wait")
 
 
-class FleetTests(PromptTests):
+class FleetTests(FleetCase):
     def test_fleet_lists_only_the_root_tab_with_roles(self):
         terms = {ROOT: self.state()["terminals"][ROOT], "t2": worker("t2", "reviewer", state="blocked"),
                  "t3": worker("t3", "tests", state="done"), "t4": term("t4", state=None, fg=["/bin/zsh"]),
