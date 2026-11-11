@@ -33,7 +33,9 @@ Close each current and orphaned FRESHEN replacement recorded by this run:
 herdr pane close "$worker_pane" 2>/dev/null || true
 ```
 
-Never close `root_pane`/`$HERDR_PANE_ID`, stop the Herdr server, or infer ownership solely from a broad name prefix. Re-query `herdr agent list` and require every tracked pane id to be absent.
+App runtime: close only spawn-ledger names with `agent.py close <names…> --confirmed`, under `fleet-backend.md` → *Close-confirmation policy*: the effective `auto_cleanup` (default `true`) approves the close, as in the TUI.
+
+Never close `root_pane`/`$HERDR_PANE_ID`, stop the Herdr server, or infer ownership solely from a broad name prefix. Re-query `herdr agent list` (app: `agent.py fleet --json`) and require every tracked pane id to be absent.
 
 Expected names:
 
@@ -94,7 +96,7 @@ Never `reset --hard` uncertain user work. A recoverable stash is preferable.
 ```bash
 test "$(git rev-parse --abbrev-ref HEAD)" = "$default_branch"
 test -z "$(git status --porcelain)"
-# every tracked worker pane id is absent from herdr agent list
+# every tracked worker pane id is absent from herdr agent list (app: agent.py fleet --json)
 # every recorded loop-created worktree path is absent from git worktree list --porcelain
 # no non-primary worktree from this run checks out refs/heads/${pr_branch}
 ```
@@ -105,7 +107,7 @@ Report each check independently. `PASS` requires all applicable checks. A CLEAN-
 
 ```text
 mode: ISSUE | PR
-spawned_panes: [{role, name, pane_id}, ...]
+spawned_panes: [{role, name, pane_id, terminal (app)}, ...]   # the spawn ledger
 pr_number, pr_url, head_ref, head_sha
 issue_context: none | #N | #N,#K
 worktree_paths_seen: [...]

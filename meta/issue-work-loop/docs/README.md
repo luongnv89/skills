@@ -7,7 +7,7 @@
 
 # Issue Work Loop
 
-> Run an independent Herdr review/fix loop for either one open issue or one existing open PR. You own the merge.
+> Run an independent Herdr review/fix loop, in the Herdr TUI or the Herdr desktop app, for either one open issue or one existing open PR. You own the merge.
 
 ## Highlights
 
@@ -19,7 +19,7 @@
 - Notes and partials count as FINDINGS.
 - Every review verifies the current PR head SHA.
 - Every reviewer and fixer runs autonomously; pi is autonomous by default, while Claude Code (Shift+Tab) and opencode (Build agent) are switched after boot — never with skip-permissions flags.
-- Dependencies (`herdr-agent`, `issue-pr-review`, and `issue-resolver` in ISSUE mode) are acquired with `asm deps` before the first change and released at the end of every run.
+- Dependencies (`herdr-agent` in the Herdr TUI or `hc-agent` in the Herdr desktop app, `issue-pr-review`, and `issue-resolver` in ISSUE mode) are acquired with `asm deps` before the first change and released at the end of every run.
 - SWEEP closes only spawned panes and removes only loop-created worktrees.
 - No second PR, force-push, merge, or auto-merge.
 
@@ -95,11 +95,18 @@ Each worker is launched bare (no invented auto-mode startup flags), then passes 
 
 PR mode captures the existing PR's source branch, head SHA, owner/repository, cross-repository status, and maintainer-edit facts. Older `gh` versions may lack optional JSON fields; review can continue via fallback queries, but unknown push facts block FIXER creation. A fork PR is never used as a permission experiment after edits.
 
+## What differs in the Herdr desktop app
+
+The loop picks its runtime from the environment: `HERDR_ENV=1` means the Herdr TUI and `herdr-agent` (even when `HC_TERMINAL_ID` is also set); otherwise a non-empty `HC_TERMINAL_ID` means the Herdr desktop app and `hc-agent`; with neither, it stops before acquiring anything. In the app it never calls `herdr`, which reaches a separate TUI server there.
+
+In the app, split and start are one call, timeouts are in seconds, replies are read by turn ID, a terminal without agent status is BLOCKED (there is no no-agent fallback), and status is polled. The app has no environment readback, so for claude and opencode the boot gate checks the mode on screen: no bypass indicator before the switch (Shift+Tab or Tab through `hc keys`), the expected mode after. Neither step is verified live yet, so the gate fails closed rather than falling back to permission bypass. A pi worker's inherited environment stays unverified, an operator-accepted risk the report records. Closing workers needs approval: running the loop approves FRESHEN restarts of its own workers, and the effective `work_loop.auto_cleanup` (default `true`) approves SWEEP, as in the TUI; `false` or `--no-cleanup` leaves them open without asking. Full list: `references/fleet-backend.md` → *Steps that differ in the app*.
+
 ## Resources
 
 | Path | Description |
 |---|---|
 | `SKILL.md` | Mode selector and orchestrator phase spine |
+| `references/fleet-backend.md` | Runtime detection; Herdr desktop app (hc-agent) steps and close policy |
 | `references/loop-protocol.md` | Link evidence, PR identity, push safety, ROUND rules |
 | `references/agent-prompts.md` | Implementer, reviewer, and PR FIXER prompts |
 | `references/context-gate.md` | Role-specific FRESHEN rules |
@@ -109,7 +116,7 @@ PR mode captures the existing PR's source branch, head SHA, owner/repository, cr
 | `references/vocabulary-and-config.md` | Leading words and `work_loop.*` config keys |
 | `references/error-messages.md` | Exact stop/recovery messages |
 | `evals/evals.json` | Trigger and behavior eval cases |
-| `tests/` | Regression tests pinning the transport, launch-profile, and dependency contracts |
+| `tests/` | Regression tests pinning the transport, launch-profile, dependency, and desktop-app backend contracts |
 
 ## Output
 

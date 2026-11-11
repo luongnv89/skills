@@ -265,7 +265,9 @@ fi
 
 A missing helper or unsupported `--without bypass` is a hard stop, not a
 fallback to a repository copy, `--without flags`, a native skip-permissions
-switch, or an unverified launcher.
+switch, or an unverified launcher. App runtime: see `fleet-backend.md` →
+*App launch-profile gate*, which runs the same check on hc-agent's helper and
+also requires `agent.py`.
 
 ### Probe and target evidence
 
@@ -277,7 +279,9 @@ again. For example, the profile probe and start share the same
 `worker_profile_args` and `worker_native_args` Bash arrays. Populate these from
 the actual worker launch request: helper kind/model/thinking options in the
 former, native arguments in the latter (an empty array when none). Do not
-substitute or omit supplied values.
+substitute or omit supplied values. App runtime: the probe passes
+`--root "$HC_TERMINAL_ID"`, not `--root-pane`, and this parser accepts its
+output (`fleet-backend.md`).
 
 ```bash
 profile_args=(
@@ -343,6 +347,8 @@ boundary is mandatory before the start command:
   `herdr pane process-info --pane "$root_pane"` supplies the root foreground
   argv. Inspect the actual token/value pairs in memory and redact values in any
   report; inherited inline settings cannot be replaced by a JSON field name.
+  App runtime: `hc get "$HC_TERMINAL_ID" --json` (`.status.app`,
+  `.foreground.argv`) replaces both `herdr` calls; see `fleet-backend.md`.
 - Inspect every actual worker argument and every local file it names, including
   `--settings`, `--mcp-config`, `--config`, and inline JSON/config values. Keep
   only redacted provenance (for example, a path plus metadata/digest), never
@@ -366,6 +372,10 @@ boundary is mandatory before the start command:
 Error: worker target cwd/environment/configuration cannot be established from supported local evidence; refusing to start
 ```
 
+App carve-out: the desktop app has no destination environment readback, so
+`fleet-backend.md` → *App launch-profile gate* replaces it with the boot gate's
+on-screen mode check and an operator-accepted pi residual risk.
+
 Retain selective filtering for every launch: require `without` to contain
 `bypass` but not blanket `flags`, require empty inherited `profile.bypass`, and
 reject skip-permissions switches, `--permission-mode bypassPermissions`, Pi
@@ -385,6 +395,8 @@ and argv fingerprint, configuration path/metadata or inline-value digest, and
 target pane/evidence source); never print the values. If any source changes,
 discard the old profile and re-probe. If stable provenance cannot be
 established, stop rather than start on stale or caller-side evidence.
+App runtime: repeat `hc get "$HC_TERMINAL_ID" --json` instead of the `herdr`
+calls (`fleet-backend.md`).
 
 Only after all checks above PASS, start with the same verified inputs:
 
@@ -398,7 +410,9 @@ python3 "$helper" "${profile_args[@]}" \
 ```
 
 This is caller-side policy only: do not change `herdr-agent` defaults or its
-launch-profile contract.
+launch-profile contract. App runtime: split and start are one call,
+`--start "$worker_name" --cwd "$project_dir" --timeout 60` (seconds); see
+`fleet-backend.md` → *App spawn*.
 
 ## Autonomous worker boot gate
 
@@ -417,6 +431,8 @@ Every newly launched or FRESHENed reviewer, ISSUE implementer, and PR FIXER must
 4. For any other CLI, autonomy is unknown — fail closed with the autonomous-mode error rather than improvising startup flags.
 5. FRESHEN clears the recorded mode state, so the replacement session must pass the gate again.
 
+App runtime: send these keystrokes with `hc keys` and fail closed as `fleet-backend.md` → *App boot gate* describes.
+
 Do not count mode activation as a ROUND. Do not send the worker task in the same input as the mode switch; a prompt-level request to act autonomously is not verification.
 
 ## Herdr send/wait contract
@@ -424,6 +440,8 @@ Do not count mode activation as a ROUND. Do not send the worker task in the same
 For normal worker transport, delegate to the current `herdr-agent` skill's
 **Phase 4 — Prompt Safely** and **Phase 5 — Read and Verify**. Those phases are
 the transport source of truth; do not reproduce an older pane protocol here.
+App runtime: `agent.py prompt`, `agent.py read --turn`, and the exit-code map in
+`fleet-backend.md` → *App send, wait, and read* replace this section.
 
 ### Detected-agent path (normal)
 
@@ -456,6 +474,8 @@ use the current `herdr-agent` Phase 4–5 pane-surface fallback in that installe
 skill's `references/delivery-and-waiting.md` only after verifying that no detected
 agent exists. In that explicitly verified fallback, follow the source's documented
 `pane run` + `wait_for_idle.py` contract; it is not the normal transport.
+App runtime: there is no fallback; a terminal without agent status is BLOCKED
+(`fleet-backend.md`).
 
 Autonomous-mode switches are keystrokes verified by bounded reads, not task
 sends. Keep them separate from the task prompt, and repeat the boot gate after

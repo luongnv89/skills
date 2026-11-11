@@ -2,24 +2,25 @@
 name: issue-work-loop
 description: "Run Herdr loops for one open GitHub issue (resolve→review→fix) or an existing PR (review→lazy fixer) until CLEAN. Don't use for plain resolution without review, review-only/no-fix requests, backlog automation, or merging."
 license: MIT
-compatibility: "Requires herdr, git, gh auth and asm; herdr-agent and issue-pr-review in both modes, issue-resolver only in ISSUE mode."
+compatibility: "Requires git, gh auth, asm, and the Herdr TUI (herdr) or the Herdr desktop app (hc, herdr-app); herdr-agent in the TUI or hc-agent in the app, issue-pr-review in both modes, issue-resolver only in ISSUE mode."
 effort: max
 dependencies:
   - herdr-agent
+  - hc-agent
   - issue-pr-review
   - issue-resolver
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Issue Work Loop
 
-Run one GitHub change through an independent Herdr review/fix loop until **CLEAN**, without merging.
+Run one GitHub change through an independent Herdr review/fix loop until **CLEAN**, without merging, in the Herdr TUI or the Herdr desktop app.
 
 ## Mode Selector
 
-Select exactly one mode before loading branch-specific instructions:
+Select exactly one mode before loading branch instructions:
 
 | Input | Mode | Meaning |
 |---|---|---|
@@ -30,7 +31,7 @@ Select exactly one mode before loading branch-specific instructions:
 
 Options such as `--max-rounds K`, `--agent-cli cmd`, and `--no-cleanup` work in both modes. Invocation examples: `references/vocabulary-and-config.md` → _Invocation_.
 
-If both an issue and PR are supplied, validate that the PR links that issue. If not, stop and ask the user to correct the mismatch; never silently choose one. If linked, run **PR** mode and retain every linked issue in `issue_context`.
+If both are supplied, the PR must link the issue: if not, stop and ask the user to correct the mismatch, never silently choosing one; if linked, run **PR** mode and keep every linked issue in `issue_context`.
 
 A request for review only/no fixes belongs to `issue-pr-review`, not this skill. A request to merge is outside this skill.
 
@@ -42,7 +43,7 @@ A request for review only/no fixes belongs to `issue-pr-review`, not this skill.
 
 | Rule | Meaning |
 |---|---|
-| Herdr panes | Spawn and communicate via `herdr-agent`, not Agent-tool subagents |
+| Herdr panes | Spawn and communicate via the runtime's fleet skill, not Agent-tool subagents. App runtime: see `references/fleet-backend.md` |
 | Role split | ISSUE keeps an implementer; PR starts with a reviewer and lazily adds a **FIXER** |
 | Autonomous workers | Every reviewer and writer passes the autonomous-mode boot gate before receiving work |
 | Notes count | Every fix, note, and partial item is a FINDING |
@@ -53,7 +54,7 @@ A request for review only/no fixes belongs to `issue-pr-review`, not this skill.
 
 ## Vocabulary and Configuration
 
-The loop's leading words (ISSUE, PR, ROUND, FINDING, CLEAN, FIXER, FRESHEN, SWEEP, USER-MERGE) and the optional `.gitissue.yml` keys under `work_loop.*` are in `references/vocabulary-and-config.md`. Read it once before Phase 1. CLI flags override config; print `○ First run — using default config` when `.gitissue.yml` is absent, and never modify the file.
+Leading words (ISSUE, PR, ROUND, FINDING, CLEAN, FIXER, FRESHEN, SWEEP, USER-MERGE) and optional `work_loop.*` keys in `.gitissue.yml` are in `references/vocabulary-and-config.md`. Read it once before Phase 1; never modify `.gitissue.yml`.
 
 ## Prerequisites
 
@@ -62,19 +63,25 @@ On failure, print the matching block from `references/error-messages.md` and sto
 1. Git repo: `git rev-parse --git-dir`
 2. Authenticated GitHub CLI: `which gh && gh auth status`
 3. GitHub remote: `git remote -v`
-4. Running Herdr server: `command -v herdr && herdr status` (never launch bare `herdr` from a non-TTY shell)
-5. Bundled references present: `agent-prompts.md`, `context-gate.md`, `loop-protocol.md`, `cleanup.md`, `edge-cases.md`, `error-messages.md`, `output-format.md`
+4. Herdr runtime (`references/fleet-backend.md`): `HERDR_ENV=1` → TUI, `command -v herdr && herdr status` (never launch bare `herdr` from a non-TTY shell); else `HC_TERMINAL_ID` → desktop app, `hc` and `herdr-app` on PATH, never `herdr`; neither → stop
+5. Bundled references present: every `references/` file under *Additional Resources*
 
 ## Dependency Preflight (mandatory)
 
-This skill hands whole phases to the skills declared in frontmatter `dependencies`: `herdr-agent` (every pane spawn, send, and wait) and `issue-pr-review` (the reviewer role) in **both** modes, and `issue-resolver` (the implementer) in ISSUE mode only. Run this before the repo sync below, the first step that changes anything. The Mode Selector has already chosen the mode, and every run of a mode reaches all of that mode's dependencies, so acquire them here rather than mid-ROUND. Set `mode` to `issue` or `pr` (lowercase) and `number` to the issue or PR number first.
+This skill hands whole phases to its frontmatter `dependencies`: the runtime's fleet skill (`herdr-agent` in the TUI, `hc-agent` in the app; every pane spawn, send, and wait) and `issue-pr-review` (reviewer) in **both** modes, plus `issue-resolver` (implementer) in ISSUE mode only. Run this before the repo sync, the first step that changes anything, and acquire everything here, not mid-ROUND. First set `mode` (`issue` or `pr`) and `number`.
 
 ```bash
 command -v asm >/dev/null || { echo "Missing installer: npm install -g agent-skill-manager" >&2; exit 1; }
 asm deps --help >/dev/null 2>&1 || { echo "asm has no 'deps' command; upgrade: npm install -g agent-skill-manager@latest" >&2; exit 1; }
+if [ "${HERDR_ENV:-}" = 1 ]; then runtime=tui fleet=herdr-agent   # TUI wins when both are set
+elif [ -n "${HC_TERMINAL_ID:-}" ]; then runtime=app fleet=hc-agent
+  for c in hc herdr-app; do
+    command -v "$c" >/dev/null || { echo "Herdr desktop app CLIs unavailable: $c" >&2; exit 1; }
+  done
+else echo "No Herdr runtime detected: need HERDR_ENV=1 (TUI) or HC_TERMINAL_ID (desktop app)" >&2; exit 1; fi
 asm deps discover issue-work-loop --json
 iwl_session="iwl-${mode}-${number}-$(date +%s)"   # mode: issue | pr
-req="herdr-agent issue-pr-review"
+req="$fleet issue-pr-review"
 [ "$mode" = issue ] && req="$req issue-resolver"   # PR mode never acquires issue-resolver
 lease_dir="$(mktemp -d)"; failed=""
 for s in $req; do
@@ -86,9 +93,9 @@ if [ -n "$failed" ]; then
 fi
 ```
 
-1. If any acquisition fails, print the *Missing required skills* block from `references/error-messages.md` and stop. All failures are reported in one pass; never continue with a partial run.
-2. Set `herdr_agent_dir` to the `path` field of `$lease_dir/herdr-agent.json`, never to a repository path. Set `here` to its absolute `scripts/` directory. If either directory or `launch_profile.py` is missing, stop before sync.
-3. Record each acquired `skillMdPath`. Worker prompts in `references/agent-prompts.md` pass it as `{issue_resolver_skill_md}` or `{issue_pr_review_skill_md}` for a worker CLI that lacks the slash command.
+1. If any acquisition fails, print the *Missing required skills* block from `references/error-messages.md` and stop. Report all failures in one pass; never run partially.
+2. Set `fleet_dir` to the `path` field of `$lease_dir/$fleet.json`, never to a repository path; in the TUI also set `herdr_agent_dir` to it. Set `here` to its absolute `scripts/` directory. If either directory or `launch_profile.py` (in the app, also `agent.py`) is missing, stop before sync.
+3. Record each acquired `skillMdPath` for the worker prompts in `references/agent-prompts.md`.
 4. **Release in `finally`.** The main agent owns the lease. Once `iwl_session` is set, at every terminal outcome — handoff, stop, error, or `--no-cleanup` — run `asm deps release --session "$iwl_session" --json` once, after SWEEP if SWEEP runs and before the final report. A failed release goes into the final report's `Uncertainty:` line.
 
 ## Repo Sync Before Edits (mandatory)
@@ -121,7 +128,7 @@ If `origin` is missing or rebase/stash-pop conflicts occur, stop and ask the use
 
 ## Selective Worker Launch Profile (mandatory)
 
-The dependency preflight resolves the acquired `herdr-agent` directory and
+The dependency preflight resolves the acquired fleet skill directory and
 its absolute scripts directory as `here`; a missing helper, or a helper whose
 `--help` output does not advertise `--without bypass`, is a fatal preflight
 error. Never assume a repository-relative `skills/herdr-agent/scripts/` path.
@@ -152,7 +159,9 @@ closed; never use a native/unverified fallback. Before starting, follow the
 concrete evidence and fail-closed gate in `references/loop-protocol.md`.
 If the target environment or configuration (including inherited inline
 settings values) cannot be established from actual local evidence, stop before
-`herdr agent start`; do not invent a Herdr inspection command.
+`herdr agent start`; do not invent a Herdr inspection command. App carve-out:
+an on-screen mode check replaces this readback, and pi is an accepted risk; see
+`references/fleet-backend.md` → *App launch-profile gate*.
 
 The probe is not an immutable start snapshot. Re-probe root state and the
 stable local evidence immediately before every start, using the exact same
@@ -163,11 +172,7 @@ are authoritative in `references/loop-protocol.md`.
 
 ## Autonomous Worker Boot Gate (mandatory)
 
-Every reviewer, ISSUE implementer, and PR FIXER passes this gate after its interactive CLI is ready and before it receives any task, and again after every FRESHEN because a restarted CLI is a new session.
-
-Launch bare, switch after boot, and verify before any task; never use either skip-permissions flag. Invariants: `references/loop-protocol.md` → _Autonomous worker boot gate invariants_.
-
-The per-harness matrix — startup, switch, and what counts as verified for `pi`, `claude`, and `opencode` — is in `references/loop-protocol.md` → *Autonomous worker boot gate*, which is authoritative. A task prompt saying "work autonomously" does not satisfy this gate.
+Every reviewer, ISSUE implementer, and PR FIXER passes this gate after its CLI is ready and before any task, and again after every FRESHEN (a restarted CLI is a new session). Launch bare, switch after boot, verify, and never use either skip-permissions flag. The per-harness matrix for `pi`, `claude`, and `opencode` in `references/loop-protocol.md` → *Autonomous worker boot gate* is authoritative; app keystrokes are in `references/fleet-backend.md`. A task prompt saying "work autonomously" does not satisfy this gate.
 
 ## Workflow Overview
 
@@ -178,15 +183,15 @@ PR:    PREFLIGHT → REVIEWER → REVIEW
                               └─ FINDINGS → PUSH-SAFETY → lazy FIXER → push same PR → re-review
 ```
 
-Read `references/loop-protocol.md` after selecting the mode; it is authoritative for mode-specific preflight, linked-issue evidence, ROUND state, push safety, and PR-head verification. Other references are listed under *Additional Resources*.
+Read `references/loop-protocol.md` after selecting the mode; it is authoritative for mode-specific preflight, link evidence, ROUND state, push safety, and PR-head checks.
 
 ## Phase 1 — Preflight
 
 ### Shared
 
-1. Parse the mode and options. Numbers must be positive; `max_rounds` defaults to 5 and must be at least 1.
+1. Parse the mode and options. Numbers are positive; `max_rounds` defaults to 5, minimum 1.
 2. Run the prerequisites and repo sync.
-3. Resolve the repo root and Herdr root pane/tab/workspace. Track every pane this run spawns.
+3. Resolve the repo root and Herdr root context (TUI pane/tab/workspace; App runtime: see `references/fleet-backend.md`). Track every pane this run spawns.
 4. Emit the mode-specific Preflight Step Completion Report.
 
 ### ISSUE and PR branches
@@ -195,7 +200,7 @@ Then run the selected mode's branch steps in `references/loop-protocol.md` → _
 
 ## Phase 2 — First Worker
 
-Every spawn below uses `herdr-agent` readiness/send/wait mechanics. A worker receives its role prompt only after it reports ready and passes the **Autonomous Worker Boot Gate**.
+Every spawn below uses the fleet skill's readiness/send/wait mechanics (App runtime: see `references/fleet-backend.md`). A worker receives its role prompt only after it reports ready and passes the **Autonomous Worker Boot Gate**.
 
 - **ISSUE:**
   1. Spawn the implementer pane.
@@ -211,14 +216,12 @@ Start `round = 1`; a ROUND counts when REVIEW completes.
 1. Context-gate the reviewer at every ROUND start: if its probed context-window usage is at or above `work_loop.context_threshold` percent, FRESHEN it (`references/context-gate.md`). Why (token budget): `references/context-gate.md` → _Truncated verdicts_.
 2. Before review, refresh the PR and require its current `headRefName` and `headRefOid`; send that SHA in the reviewer prompt. Reviewer must report `reviewed_head_sha` matching it.
 3. Normalize verdicts strictly: notes are FINDINGS; contradictory CLEAN plus items becomes FINDINGS; one verdict-only re-prompt is allowed.
-4. On CLEAN, do not dispatch a writer. In PR mode, a FIXER must never have been spawned if every review was CLEAN.
+4. On CLEAN, dispatch no writer; a PR-mode run whose every review was CLEAN never spawns a FIXER.
 5. On FINDINGS with rounds left:
    - ISSUE: context-gate the implementer, then fix the existing branch without re-running `issue-resolver`.
    - PR: run the push-safety gate first. If safe, lazily spawn `fix-{M}` (or configured name), pass the Autonomous Worker Boot Gate, require an isolated worktree, then send the PR FIXER prompt. If unsafe/unknown, stop before spawning or pushing and provide handoff.
 6. After any fix, require a non-force push and validate the same PR number/head branch now has a new SHA before incrementing the ROUND and re-reviewing.
 7. At max rounds, retain all remaining FINDINGS and stop for human decision.
-
-Full parse/retry rules are in `references/loop-protocol.md`.
 
 ## Phase 4 — SWEEP
 
@@ -228,21 +231,21 @@ Unless `--no-cleanup`, follow `references/cleanup.md`:
 - PR: close reviewer and the optional FIXER; no FIXER pane/worktree exists on a CLEAN-first path.
 - Never close the root pane, delete the remote PR branch, force-push, or discard user work.
 
-Continue to handoff even if cleanup is PARTIAL so the PR URL and recovery steps are not lost.
+Continue to handoff even if cleanup is PARTIAL, keeping the PR URL and recovery steps.
 
 ## Phase 5 — USER-MERGE Handoff
 
 Never run `gh pr merge` or enable auto-merge.
 
 1. Release the dependency lease (*Dependency Preflight*, step 4).
-2. Print the mode-specific final report (`Result:`, `Evidence:`, `Uncertainty:`, `Decision:`, then the handoff facts): `references/output-format.md` → _Final report contents_.
+2. Print the mode-specific final report: `references/output-format.md` → _Final report contents_.
 
 ## Acceptance Criteria
 
 A phase is complete only when its criterion below holds. Never report PASS from a worker's claim alone — verify GitHub state, head SHA, pane list, and worktree list.
 
-- **Phase 1 — Preflight:** mode is unambiguous; target exists and is OPEN; every dependency the mode reaches is acquired under one `iwl_session`; Herdr root is available; linked-PR/issue evidence is recorded; no worker has spawned on a failing gate.
-- **Phase 2 — First Worker:** ISSUE has one validated open PR and a ready, autonomous reviewer, or an authoritative `already_resolved` terminal outcome; PR has only a ready, autonomous reviewer and the preflight head SHA. Any writer already spawned is also verified autonomous. If ISSUE reports `already_resolved` and a linked open PR appeared after preflight, require the same switch-to-PR confirmation; accept switches to full PR mode, decline aborts.
+- **Phase 1 — Preflight:** mode is unambiguous; target exists and is OPEN; every dependency the mode reaches is acquired under one `iwl_session`; Herdr runtime is detected and its root is available; linked-PR/issue evidence is recorded; no worker has spawned on a failing gate.
+- **Phase 2 — First Worker:** ISSUE has one validated open PR and a ready, autonomous reviewer, or an authoritative `already_resolved` terminal outcome; PR has only a ready, autonomous reviewer and the preflight head SHA. Any writer already spawned is also verified autonomous. An `already_resolved` ISSUE that finds a linked open PR follows `references/loop-protocol.md` → *Already resolved*.
 - **Phase 3 — ROUNDs:** CLEAN has zero FINDINGS at the verified current SHA; or MAX_ROUNDS/FAILED records every remaining FINDING and a reason; every fix stayed on the same PR branch; PR-mode unsafe push paths spawned no FIXER.
 - **Phase 4 — SWEEP:** tracked worker panes are absent; no loop-created non-primary worktree remains; primary checkout is clean on the default branch, or each failed check has exact recovery instructions.
 - **Phase 5 — Handoff:** the PR remains open; final facts match a fresh `gh pr view`; merge ownership is explicitly human; no second PR, force-push, or hidden unresolved FINDING occurred; `asm deps release` ran for `iwl_session`.
@@ -250,7 +253,7 @@ A phase is complete only when its criterion below holds. Never report PASS from 
 
 ### Expected output
 
-Each phase and ROUND emits a Step Completion Report; the run ends with the Phase 5 final report (`Result:`, `Evidence:`, `Uncertainty:`, `Decision:`, then the handoff facts). The exact mode-specific layouts are in `references/output-format.md`.
+Each phase and ROUND emits a Step Completion Report, and the run ends with the Phase 5 final report; layouts are in `references/output-format.md`.
 
 ```text
 ◆ ROUND 2 (PR)
@@ -263,13 +266,15 @@ Each phase and ROUND emits a Step Completion Report; the run ends with the Phase
 
 ## Edge Cases
 
-Read `references/edge-cases.md` when a dependency, linked PR, verdict, PR head, push access, autonomous mode, worker, or round limit goes off the happy path; its _When to read this file_ section lists each trigger. Exact stop blocks are in `references/error-messages.md`.
+Read `references/edge-cases.md` when the runtime, a dependency, linked PR, verdict, PR head, push access, autonomous mode, worker, or round limit goes off the happy path. Exact stop blocks are in `references/error-messages.md`.
 
 ## What You Must Not Do
 
 - Merge, auto-merge, close the PR, force-push, or delete its remote branch
 - Open a second PR
 - Use Agent-tool subagents instead of Herdr panes
+- Call `herdr` in the Herdr desktop app
+- Close a terminal or pane this run did not spawn
 - Launch Claude Code workers with either skip-permissions flag instead of the Shift+Tab mode switch
 - Dispatch work before autonomous mode is verified, including after FRESHEN
 - Let the reviewer edit, commit, or push
@@ -281,17 +286,7 @@ Read `references/edge-cases.md` when a dependency, linked PR, verdict, PR head, 
 
 ## Step Completion Reports
 
-After each phase and ROUND, emit:
-
-```text
-◆ {Phase or ROUND} ({mode})
-··································································
-  {Check}:            √ pass | × fail — {reason}
-  Criteria:           √ N/M met
-  Result:             PASS | CONTINUE | FAIL | PARTIAL
-```
-
-A PASS requires the phase's criterion in **Acceptance Criteria** above.
+After each phase and ROUND, emit the template in `references/output-format.md` → *Demanding completion report*. A PASS requires the phase's criterion in **Acceptance Criteria** above.
 
 ## Self-Improve
 
@@ -311,6 +306,7 @@ Optional and propose-only. After the run's result is delivered, run this check:
 
 ## Additional Resources
 
+- `references/fleet-backend.md` — runtime detection; app runtime (hc-agent) steps
 - `references/loop-protocol.md` — mode state machines, link evidence, push safety, parse rules
 - `references/agent-prompts.md` — ISSUE implementer, shared reviewer, PR FIXER prompts
 - `references/context-gate.md` — role-specific FRESHEN rules
@@ -319,4 +315,4 @@ Optional and propose-only. After the run's result is delivered, run this check:
 - `references/vocabulary-and-config.md` — leading words and `work_loop.*` config keys
 - `references/error-messages.md` — exact stop/handoff blocks
 - `references/edge-cases.md` — situation → response table
-- Required skills (frontmatter `dependencies`): `herdr-agent`, `issue-pr-review`; ISSUE also requires `issue-resolver`
+- Required skills (frontmatter `dependencies`): `herdr-agent` (TUI) or `hc-agent` (app), `issue-pr-review`; ISSUE also requires `issue-resolver`

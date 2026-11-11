@@ -8,10 +8,11 @@ Terminal style: `● ✓ ✗ ◆ ⚡ ⚠ ○`, two-space indent, separators, URL
 ◆ Preflight (ISSUE #{N})
 ··································································
   Git / gh / Herdr:  √ pass
-  Skills acquired:    √ issue-resolver, issue-pr-review, herdr-agent ({iwl_session})
+  Runtime:            √ tui (herdr-agent) | √ app (hc-agent)
+  Skills acquired:    √ issue-resolver, issue-pr-review, {herdr-agent|hc-agent} ({iwl_session})
   Issue open:         √ #{N} — {title}
   Linked open PRs:    √ 0 | ⚠ 1 → awaiting switch | × {count}
-  Criteria:           √ 4/4 met
+  Criteria:           √ 5/5 met
   Result:             PASS | FAIL
 ```
 
@@ -23,13 +24,14 @@ Exactly one linked open PR prints the confirmation from `error-messages.md`; acc
 ◆ Preflight (PR #{M})
 ··································································
   Git / gh / Herdr:  √ pass
-  Skills acquired:    √ issue-pr-review, herdr-agent ({iwl_session})
+  Runtime:            √ tui (herdr-agent) | √ app (hc-agent)
+  Skills acquired:    √ issue-pr-review, {herdr-agent|hc-agent} ({iwl_session})
   PR open:            √ #{M} — {title}
   Head:               √ {head_ref} @ {sha_short}
   Source / fork:      √ {owner_repo} | ⚠ unknown; review allowed
   Issue context:      {none | #N | #N,#K}
   Explicit link:      √ matched | ○ not supplied | × mismatch
-  Criteria:           √ 6/6 met
+  Criteria:           √ 7/7 met
   Result:             PASS | FAIL
 ```
 
@@ -141,8 +143,8 @@ Every final report (CLEAN, MAX_ROUNDS, push-safety stop, FAILED, ALREADY_RESOLVE
 | Line | Content |
 |---|---|
 | `Result:` | `COMPLETE` (CLEAN verdict, PR open, SWEEP PASS or skipped by `--no-cleanup`), `PARTIAL — {reason}` (CLEAN or MAX_ROUNDS with a SWEEP or release failure, or MAX_ROUNDS with FINDINGS left), or `BLOCKED — {reason}` (any stop before CLEAN: preflight, push safety, failure, decline) |
-| `Evidence:` | Only checks that ran this run: the fresh `gh pr view` (state, branch, head SHA), `reviewed_head_sha`, `herdr agent list`, `git worktree list`. A worker's claim alone is not evidence. |
-| `Uncertainty:` | What was not verified: CI not observed, context UNKNOWN fallbacks, a fork push fact unknown, a failed `asm deps release`, panes left by `--no-cleanup`. Write `none` only when every handoff fact has a check under `Evidence:`. |
+| `Evidence:` | Only checks that ran this run: the fresh `gh pr view` (state, branch, head SHA), `reviewed_head_sha`, `herdr agent list` (app: `agent.py fleet --json`), `git worktree list`. A worker's claim alone is not evidence. |
+| `Uncertainty:` | What was not verified: CI not observed, context UNKNOWN fallbacks, a fork push fact unknown, a failed `asm deps release`, workers left open by `--no-cleanup` or `auto_cleanup: false` (both runtimes), and for a pi worker in the Herdr desktop app `pi app worker: inherited environment not verifiable (hc-agent has no env readback); accepted by operator`. Write `none` only when every handoff fact has a check under `Evidence:`. |
 | `Decision:` | The user's next decision. Merge is always the user's; also name any other approval (switch mode, fix on a fork). If no approval is needed (BLOCKED before any PR exists), write "No approval needed." and name the remaining user action. |
 
 Map Step Completion Report results to `Result:` this way: all phases PASS → `COMPLETE`; any PARTIAL → `PARTIAL — {phase}: {reason}`; any FAIL or stop → `BLOCKED — {phase}: {reason}`.
@@ -153,7 +155,8 @@ Map Step Completion Report results to `Result:` this way: all phases PASS → `C
 ◆ Work Loop Complete
   Result:        COMPLETE
   Evidence:      gh pr view #{M}: OPEN, {head_ref} @ {sha_short}; reviewed_head_sha
-                 matches; herdr agent list: worker panes absent; worktrees removed
+                 matches; herdr agent list (app: agent.py fleet): worker panes
+                 absent; worktrees removed
   Uncertainty:   {none | CI not observed | context UNKNOWN fallback for {role} | ...}
   Decision:      merge PR #{M} is yours — inspect and merge manually if ready
 

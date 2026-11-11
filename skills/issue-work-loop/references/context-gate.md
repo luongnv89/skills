@@ -27,7 +27,7 @@ Invalid threshold uses 50 and prints one warning. Threshold must be 1–99.
 ## FRESHEN procedure
 
 1. Record compact state: `mode`, `issue_context`, `pr_number`, `pr_url`, `head_ref`, current `head_sha`, FINDINGS, role, isolated FIXER worktree path if any.
-2. Close only that worker pane; never close the root orchestrator pane.
+2. Close only that worker pane; never close the root orchestrator pane. App runtime: invoking the loop approves this close of a loop-spawned worker (`fleet-backend.md` → *Close-confirmation policy*).
 3. Re-spawn the same configured role name; if occupied, append an epoch and update tracked pane state.
 4. Wait for readiness.
 5. Send the matching compact handoff from `agent-prompts.md`.

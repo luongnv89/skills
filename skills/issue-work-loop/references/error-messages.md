@@ -35,6 +35,51 @@ Use `✗ what failed`, `To fix:`, and exact identifiers. Never expose tokens. Is
   Note:    do not launch bare herdr from a non-TTY agent shell
 ```
 
+### No Herdr runtime detected
+```text
+✗ No Herdr runtime detected
+
+  Checked: HERDR_ENV=1 (Herdr TUI) and HC_TERMINAL_ID (Herdr desktop app);
+           neither is set
+  To fix:  run the loop inside a Herdr TUI pane or a Herdr desktop app terminal
+  Docs:    references/fleet-backend.md → Runtime detection
+```
+
+### Herdr desktop app CLIs unavailable
+```text
+✗ Herdr desktop app CLIs unavailable: {hc | herdr-app | agent.py check}
+
+  Check:   command -v hc && command -v herdr-app
+           python3 "$here/agent.py" check   (after Dependency Preflight)
+  To fix:  install the app's hc and herdr-app CLIs, then run the loop in a
+           terminal the app window shows
+  Note:    herdr is never called in the app; it reaches a separate TUI server
+```
+
+### App boot mode unverifiable
+```text
+✗ App boot mode unverifiable for {role}
+
+  Worker:  {name} ({terminal}, {agent_cli})
+  Tried:   bounded read before the switch, then hc keys {terminal}
+           {shift+tab | tab}, each press followed by a bounded read
+  Reason:  {expected indicator (auto-accept edits | Build agent) never showed |
+            a bypass-permissions or dangerous-mode indicator is on screen |
+            the bounded read failed}
+  Note:    hc keys delivery and this screen check are not yet verified live
+  Action:  closed this loop-spawned worker; no role task was dispatched
+  Refused: permission bypass is never the fallback
+```
+
+### App terminal has no agent status
+```text
+✗ App terminal {terminal} ({name}) has no agent status
+
+  Outcome: {unverifiable (exit 4) | no_agent (exit 5)}
+  Action:  read it with hc read {terminal} --lines 40; nothing was typed
+  Safety:  the app has no no-agent fallback; the run stops BLOCKED
+```
+
 ### Autonomous mode unavailable
 ```text
 ✗ Could not enable or verify autonomous mode for {role}
@@ -56,12 +101,14 @@ Use `✗ what failed`, `To fix:`, and exact identifiers. Never expose tokens. Is
 ✗ Missing required skill(s): {names}
 
   Cause:   asm deps acquire {name} --session {iwl_session} failed
-  Both:    issue-pr-review, herdr-agent
+  Both:    issue-pr-review, plus the runtime's fleet skill:
+           herdr-agent (Herdr TUI) or hc-agent (Herdr desktop app)
   ISSUE:   issue-resolver (not required in PR mode)
   No asm:  npm install -g agent-skill-manager
   Old asm: asm deps --help fails → npm install -g agent-skill-manager@latest
   To fix:  install each one, restart the session, and retry:
-           asm install github:luongnv89/skills:skills/herdr-agent -p claude --yes
+           asm install github:luongnv89/skills:skills/herdr-agent -p claude --yes   # TUI
+           asm install github:luongnv89/skills:skills/hc-agent -p claude --yes      # app
            asm install https://github.com/luongnv89/idd --skill skills/{issue-skill} -p claude --yes
   Verify:  asm list -p claude --json | grep '"{name}"'
 ```
@@ -294,6 +341,8 @@ No error. Report exactly `issue_context: none` or all de-duplicated links such a
 
   To fix:  herdr agent list
            herdr pane close {pane_id}
+  App:     agent.py fleet, then agent.py close {name} --confirmed under the
+           close-confirmation policy in fleet-backend.md
   Safety:  root pane was not touched
 ```
 
