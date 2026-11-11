@@ -254,6 +254,8 @@ WRAPPER_ERR = "main runs through the wrapper"
 def read_launch(rec: dict, spec: dict, drop_wrapper: bool) -> tuple[dict | None, str, str]:
     """(launch, error, warning). launch = {mode, prefix, tail}: the worker runs prefix + args."""
     top = [a for a in rec.get("argv") or [] if isinstance(a, str)] if isinstance(rec.get("argv"), list) else []
+    if top[:3] == hclib.FOLDER_WRAPPER and len(top) >= 5:
+        top = top[4:]  # a terminal --start made (a HANDOFF successor): judge the worker argv inside
     fg = hclib.foreground_argv(rec)
     fi = harness_index(fg, spec) if fg else None
     direct = not top or harness_index(top, spec) is not None or binary_name(top[0]) in hclib.SHELLS
@@ -489,7 +491,7 @@ def start_worker(args, profile: dict, argv: list[str]) -> int:
                           or os.getcwd())
     command = list(argv)
     if os.path.isfile("/bin/sh"):
-        command = ["/bin/sh", "-c", 'cd "$0" && exec "$@"', cwd, *command]
+        command = [*hclib.FOLDER_WRAPPER, cwd, *command]
     target = split_target(root)
     prior = hclib.app_status().get("focused_pane") or root.pane
     term = pane = ""

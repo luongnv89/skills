@@ -161,7 +161,7 @@ def do_prompt(root: hclib.Root, target: str, text: str, timeout: float, activity
               "sent": False, "turn": turn}
     if status not in hclib.READY:
         return {**result, "outcome": REFUSE.get(status, "unverifiable")}
-    payload = clean + (f"\n\n(hc-agent turn {turn})" if turn else "")
+    payload = clean + (f" (hc-agent turn {turn})" if turn else "")  # same line: no extra Enter if unbracketed
     args = ["send", "--json", *(["--if", "idle"] if status == "idle" else []), "--", addr, payload]
     started = time.monotonic()
     try:

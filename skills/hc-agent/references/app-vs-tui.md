@@ -6,7 +6,7 @@ Never call `herdr` from an app terminal. It is on PATH there, but it talks to th
 
 ## Observed versions
 
-Checked live on 2026-11-11 with hc 0.1.20 and Herdr.app 0.1.15 on macOS. Linux and Windows were not tested.
+Checked live on 2026-11-11 with hc 0.1.20 and Herdr.app 0.1.15 on macOS, one command at a time. The hc-agent scripts themselves have not been run against a live app: their tests use fakes built from those captures. Linux and Windows were not tested.
 
 ## Operation by operation
 
@@ -55,12 +55,15 @@ Checked live on 2026-11-11 with hc 0.1.20 and Herdr.app 0.1.15 on macOS. Linux a
 
 ## Unverified
 
+- End to end: no hc-agent script has run against the live app. Every row above marked different rests on the single commands listed under *Verified live* plus the fakes.
+- `herdr.space` / `herdr.tab` labels on a `pane.split` terminal. `agent.py check` requires them on root, so a HANDOFF successor, which becomes root, depends on them. Fleet membership itself comes from `herdr-app ls`, not from these labels.
+- Argument order: `hc send --json --if idle -- <t> <text>` (the `--` separator) and `hc label --json <t> k=v…` were not run; the smoke test used `hc send <t> <text>`.
 - A full prompt cycle on a live agent through `hc send`: the `working` → `done` transition, when `turn` increments, and the output shapes of `hc wait` and `hc send --wait` (the scripts decide from `hc get` and ignore both).
 - Column sizing with three or more columns, and splitting a worker pane instead of root.
 - The `mcc run --` wrapper as a worker prefix: whether the wrapper re-adds flags the worker also carries, and whether a doubled `--model` is accepted.
 - Linux and Windows: the environment variables, `/bin/sh` for the folder wrapper, and install paths.
 - `hc` and `herdr-app` on PATH by default (observed in `~/.local/bin` only).
 - Whether the window renders `hc-agent.*` labels anywhere, and whether `hc ls --label` matches labels set by `hc label` (documented by `hc ls --help`, not exercised).
-- Multi-line text through `hc send` (it pastes, per its help; bracketed paste was not observed).
+- Multi-line text through `hc send` (it pastes, per its help; bracketed paste was not observed). The turn tag goes on the task's last line, so a one-line task stays one line.
 - `herdr-app do agent.focus` on a terminal without agent status (the script falls back to `pane.focus`).
 - The terminal address format: every address seen was `t` plus a digit and base-36 characters (`t7`, `t2x`, `t999`).

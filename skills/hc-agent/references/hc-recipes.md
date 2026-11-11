@@ -62,7 +62,7 @@ python3 "$here/launch_profile.py" … --start lint -- --add-dir ../shared   # na
 2. Reads `focused_pane` from `herdr-app status`, the pane to give focus back to. It is root's pane only if the user was there; restoring root unconditionally could switch the user's view to another space.
 3. Picks the pane to split: the newest terminal in the root's tab labeled by this skill, else root's own pane.
 4. Runs `herdr-app do pane.split --direction right --pane <that pane> --argv '["/bin/sh","-c","cd \"$0\" && exec \"$@\"","<dir>", <worker argv>…]'`. The argv is a JSON array, so no value passes through a shell prompt or its history; the `sh` wrapper only changes folder and then replaces itself with the worker.
-5. Labels the new terminal at once with `hc label <t> hc-agent.role=<worker|main> hc-agent.name=<name> hc-agent.space=<space> hc-agent.tab=<tab>`, before anything is sent to it.
+5. Labels the new terminal at once with `hc label --json <t> hc-agent.role=<worker|main> hc-agent.name=<name> hc-agent.space=<space> hc-agent.tab=<tab>`, before anything is sent to it.
 6. Always (even when the split or the labeling failed) runs `herdr-app do pane.focus --pane <saved pane>` and re-reads `herdr-app status` to report `focus_restored`.
 7. Polls `hc get <t>` until the worker reports `idle` or `done` (`--timeout`, default 60 seconds). `blocked` exits 3, `error` or a finished terminal exits 1, and no status before the timeout exits 1.
 

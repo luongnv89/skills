@@ -35,6 +35,9 @@ NAME_RE = re.compile(r"^[a-z][a-z0-9_-]{0,31}$")
 ADDRESS_RE = re.compile(r"^(?:[A-Za-z0-9._-]+/)?t[0-9][0-9a-z]*$")
 CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
 LABEL = "hc-agent"  # label namespace: hc-agent.role, .name, .space, .tab
+# launch_profile.py --start runs each worker as FOLDER_WRAPPER + [dir, *argv]: the shell changes
+# folder, then execs the worker. read_launch strips it, so a HANDOFF successor keeps the wrapper.
+FOLDER_WRAPPER = ["/bin/sh", "-c", 'cd "$0" && exec "$@"']
 
 # agent.py exit codes; references/delivery-and-waiting.md has the table.
 EXIT = {"ok": 0, "settled": 0, "error": 1, "blocked": 3, "unverifiable": 4, "no_agent": 5,
@@ -110,7 +113,7 @@ def ls_labeled(*labels: str) -> list[dict]:
 
 
 def label(addr: str, pairs: dict[str, str]) -> None:
-    run(HC, ["label", addr, *[f"{k}={v}" for k, v in pairs.items()], "--json"])
+    run(HC, ["label", "--json", addr, *[f"{k}={v}" for k, v in pairs.items()]])
 
 
 def read_screen(addr: str, lines: int) -> str:

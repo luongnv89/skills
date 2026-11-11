@@ -84,6 +84,7 @@ class FakeAppCase(unittest.TestCase):
             "FAKE_HC_PYTHON": sys.executable,
             "FAKE_HERDR_TRIPWIRE": str(self.tripwire),
             "LANG": "en_US.UTF-8",
+            "PYTHONUTF8": "1",
         }
         self.write_state({ROOT: term(ROOT, state="working", argv=["mcc", "run", "--", "/issue-resolver 469"],
                                      fg=[CLAUDE, "/issue-resolver 469"])})
@@ -228,7 +229,7 @@ class PromptTests(FakeAppCase):
         send = self.sends()[0]
         self.assertEqual(send[:6], ["hc", "send", "--json", "--if", "idle", "--"])
         self.assertEqual(send[6], ids["reviewer"], "hc must get the address, never the label name")
-        self.assertTrue(send[7].endswith(f"(hc-agent turn {out['turn']})"))
+        self.assertEqual(send[7], f"Summarize the open PRs (hc-agent turn {out['turn']})", "one line, tag last")
         self.assert_no_forbidden_calls()
 
     def test_done_target_is_sent_without_the_idle_guard(self):
@@ -459,6 +460,14 @@ class LaunchProfileUnitTests(unittest.TestCase):
         self.assertEqual(launch["prefix"], [CLAUDE])
         self.assertIn("another account", warning)
 
+    def test_a_worker_started_by_this_skill_keeps_its_wrapper(self):
+        """A HANDOFF successor is root later: its argv starts with the folder wrapper --start adds."""
+        rec = term(ROOT, argv=[*launch_profile.hclib.FOLDER_WRAPPER, PROJECT, "mcc", "run", "--",
+                               "--permission-mode", "plan"], fg=[CLAUDE, "--permission-mode", "plan"])
+        launch, err, warning = launch_profile.read_launch(rec, self.SPEC, False)
+        self.assertEqual((launch["mode"], launch["prefix"], err, warning), ("wrapper", ["mcc", "run", "--"], "", ""))
+        self.assertEqual(launch["tail"], ["--permission-mode", "plan"])
+
     def test_agent_typed_at_a_shell_is_direct(self):
         rec = term(ROOT, argv=["/bin/zsh", "-l"], fg=["node", "/opt/agents/claude.js", "--effort", "max"])
         launch, _, _ = launch_profile.read_launch(rec, self.SPEC, False)
@@ -521,7 +530,7 @@ class LaunchProfileTests(FakeAppCase):
         new = report["terminal"]
         calls = self.log()
         i_split = calls.index(split[0])
-        self.assertEqual(calls[i_split + 1][:3], ["hc", "label", new])
+        self.assertEqual(calls[i_split + 1][:4], ["hc", "label", "--json", new])
         self.assertIn("hc-agent.role=worker", calls[i_split + 1])
         self.assertIn("hc-agent.name=reviewer", calls[i_split + 1])
         self.assertIn(f"hc-agent.tab={TAB}", calls[i_split + 1])
