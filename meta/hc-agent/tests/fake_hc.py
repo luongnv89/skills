@@ -18,6 +18,7 @@ State is one JSON file at $FAKE_HC_STATE, shared with fake_herdr_app.py:
     on_wait     address -> list of schedules; each `hc wait` pops the first one
                 (a change that can only happen once the script is blocked in hc wait)
     flip_after_get / label_fails / split_fails   race and failure hooks
+    wait_returns_at_once   `hc wait` ends at once (as a message to the caller does)
     log         every call: ["hc", ...] or ["herdr-app", ...]
 
 The fake is strict: a subcommand, flag or --if value the skill must not use
@@ -238,6 +239,10 @@ def main(argv: list[str]) -> int:
             if queue:
                 schedule(state, addr, queue.pop(0))
     # wait: poll the shared state until the terminal stops working
+    with locked() as state:
+        if state.get("wait_returns_at_once"):
+            print(json.dumps({"reason": "message"}))
+            return 0
     limit = time.time() + float((opts.get("timeout") or ["180"])[0])
     while True:
         with locked() as state:

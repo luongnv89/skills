@@ -377,6 +377,14 @@ class PromptTests(FleetCase):
         waits = [c for c in self.log("hc") if c[1:2] == ["wait"]]
         self.assertLessEqual(len(waits), 2, "hc wait runs only while the target reads working, never in a loop")
 
+    def test_wait_paces_itself_when_hc_wait_returns_at_once(self):
+        ids = self.fleet(reviewer={"state": "working"})
+        self.update(lambda st: st.update(wait_returns_at_once=True))
+        proc = self.run_script("agent.py", "wait", ids["reviewer"], "--timeout", "2")
+        self.assertEqual(json.loads(proc.stdout)["outcome"], "timeout", proc.stderr)
+        waits = [c for c in self.log("hc") if c[1:2] == ["wait"]]
+        self.assertLessEqual(len(waits), 9, "at most one hc wait per 0.25 s over a 2 s timeout")
+
 
 class FleetTests(FleetCase):
     def test_fleet_lists_only_the_root_tab_with_roles(self):

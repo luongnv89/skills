@@ -113,7 +113,8 @@ def wait_turn(addr: str, base_turn, base_ms, activity_timeout: float, timeout: f
     until="blocked" (the turn ended without a dialog). `blocked` ends it at once, a
     vanished status mid-turn is unverifiable, and a finished terminal is exited.
     Only a `working` read blocks in `hc wait`; anything else polls every 0.25 s,
-    because `hc wait` on a terminal that is not working returns at once.
+    because `hc wait` on a terminal that is not working returns at once. An
+    `hc wait` that returns early is padded to 0.25 s too.
     """
     start = time.monotonic()
     rec: dict = {}
@@ -141,7 +142,10 @@ def wait_turn(addr: str, base_turn, base_ms, activity_timeout: float, timeout: f
             return "stalled", rec
         if status == "working":
             left = max(1, int(min(timeout - elapsed, 30)))
+            began = time.monotonic()
             hclib.run(HC, ["wait", addr, "--timeout", str(left), "--json"], timeout=left + 15, check=False)
+            # a message to us, or an error, ends hc wait at once: never re-read faster than the poll
+            time.sleep(max(0.0, 0.25 - (time.monotonic() - began)))
         else:
             time.sleep(0.25)
 
