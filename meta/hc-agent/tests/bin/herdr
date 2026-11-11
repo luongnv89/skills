@@ -1,0 +1,5 @@
+#!/bin/sh
+# Tripwire: hc-agent must never call the Herdr TUI CLI. Record the call and fail.
+printf '%s\n' "$*" >> "${FAKE_HERDR_TRIPWIRE:-/dev/null}"
+echo '{"error":{"code":"tripwire","message":"hc-agent called herdr"}}' >&2
+exit 99
