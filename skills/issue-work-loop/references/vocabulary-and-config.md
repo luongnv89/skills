@@ -26,7 +26,7 @@ Optional `.gitissue.yml` keys (defaults when absent):
 | `work_loop.implementer_name` | `"impl-{N}"` | ISSUE implementer pane |
 | `work_loop.reviewer_name` | `"rev-{N}"` in ISSUE; `"rev-pr-{M}"` in PR | Reviewer pane |
 | `work_loop.fixer_name` | `"fix-{M}"` | PR FIXER pane, lazily spawned |
-| `work_loop.auto_cleanup` | `true` | Run SWEEP before handoff |
+| `work_loop.auto_cleanup` | `true` | Run SWEEP before handoff. In the Herdr desktop app only an explicit `true` approves closing workers (`fleet-backend.md`) |
 
 CLI flags override config. `--no-cleanup` sets `auto_cleanup: false` for debugging and leaves panes/worktrees. Print `○ First run — using default config` when `.gitissue.yml` is absent; do not modify the file.
 
