@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Contract tests for issue-work-loop: dependency preflight and final report,
-the Herdr transport, and worker launch.
+the Herdr transport, worker launch, and the Herdr desktop app backend.
 
 One section per contract; each section's comment block says what it covers.
 
@@ -46,6 +46,12 @@ fi
 echo '{}'
 """
 
+# Records any call; the Herdr desktop app run must never reach the TUI CLI.
+TRIPWIRE = """#!/bin/sh
+echo "$(basename "$0") $*" >> "$CLI_LOG"
+exit 99
+"""
+
 
 def section(text: str, heading: str) -> str:
     start = text.index(heading)
@@ -78,10 +84,21 @@ class DependencyLeaseTests(unittest.TestCase):
         asm.write_text(FAKE_ASM, encoding="utf-8")
         asm.chmod(0o755)
         self.log = self.tmp / "asm.log"
+        self.cli_log = self.tmp / "cli.log"
+        # herdr, hc and herdr-app live outside self.bin so with_asm=False still
+        # removes only asm. Each records a call and fails: preflight checks
+        # existence with command -v and must never run them.
+        self.cli = self.tmp / "cli"
+        self.cli.mkdir()
+        for name in ("herdr", "hc", "herdr-app"):
+            stub = self.cli / name
+            stub.write_text(TRIPWIRE, encoding="utf-8")
+            stub.chmod(0o755)
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
 
-    def run_snippet(self, mode, fail="", with_asm=True, no_deps=False):
+    def run_snippet(self, mode, fail="", with_asm=True, no_deps=False, runtime="tui"):
         path_dirs = [str(self.bin)] if with_asm else []
+        path_dirs.append(str(self.cli))
         env = {
             "PATH": os.pathsep.join(path_dirs + ["/usr/bin", "/bin"]),
             "TMPDIR": str(self.tmp),
@@ -89,9 +106,14 @@ class DependencyLeaseTests(unittest.TestCase):
             "ASM_ROOT": str(self.tmp / "skills"),
             "ASM_FAIL": fail,
             "ASM_NO_DEPS": "1" if no_deps else "",
+            "CLI_LOG": str(self.cli_log),
             "mode": mode,
             "number": "42",
         }
+        if runtime in ("tui", "both"):
+            env["HERDR_ENV"] = "1"
+        if runtime in ("app", "both"):
+            env["HC_TERMINAL_ID"] = "t2x"
         return subprocess.run(
             ["bash", "-c", self.snippet],
             env=env,
@@ -108,11 +130,51 @@ class DependencyLeaseTests(unittest.TestCase):
     def acquired(self):
         return [c.split()[2] for c in self.calls() if c.startswith("deps acquire")]
 
+    def cli_calls(self):
+        if not self.cli_log.exists():
+            return []
+        return self.cli_log.read_text(encoding="utf-8").splitlines()
+
     def test_frontmatter_declares_every_invoked_skill(self):
         self.assertEqual(
             sorted(frontmatter_dependencies(self.skill)),
-            ["herdr-agent", "issue-pr-review", "issue-resolver"],
+            ["hc-agent", "herdr-agent", "issue-pr-review", "issue-resolver"],
         )
+
+    def test_app_runtime_acquires_hc_agent_and_never_calls_herdr(self):
+        for mode, expected in (
+            ("pr", ["hc-agent", "issue-pr-review"]),
+            ("issue", ["hc-agent", "issue-pr-review", "issue-resolver"]),
+        ):
+            with self.subTest(mode=mode):
+                self.log.unlink(missing_ok=True)
+                result = self.run_snippet(mode, runtime="app")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.acquired(), expected)
+                self.assertEqual(self.cli_calls(), [])
+
+    def test_tui_wins_when_both_runtimes_are_set(self):
+        result = self.run_snippet("pr", runtime="both")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.acquired(), ["herdr-agent", "issue-pr-review"])
+
+    def test_no_runtime_stops_before_any_acquire(self):
+        result = self.run_snippet("issue", runtime="none")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("No Herdr runtime detected", result.stderr)
+        self.assertIn("HERDR_ENV=1", result.stderr)
+        self.assertIn("HC_TERMINAL_ID", result.stderr)
+        self.assertEqual(self.acquired(), [])
+
+    def test_app_runtime_with_a_missing_cli_stops_before_any_acquire(self):
+        # bash's `command -v hc herdr-app` exits 0 when only one exists, so
+        # the gate must check each binary on its own.
+        (self.cli / "herdr-app").unlink()
+        result = self.run_snippet("pr", runtime="app")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Herdr desktop app CLIs unavailable: herdr-app", result.stderr)
+        self.assertEqual(self.acquired(), [])
+        self.assertEqual(self.cli_calls(), [])
 
     def test_pr_mode_never_acquires_issue_resolver(self):
         result = self.run_snippet("pr")
@@ -624,6 +686,167 @@ class WorkerLaunchContractTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("start_args", self.state()["panes"][WORKER_PANE])
         self.assertIn("--without flags", result.stderr)
+
+
+# ============================================================================
+# app_backend_contract
+# The Herdr desktop app backend (hc-agent): runtime rule, launch-profile gate,
+# seconds-based timeouts, close policy, and docs naming both runtimes.
+# ============================================================================
+
+FLEET_BACKEND = SKILLS / "issue-work-loop" / "references" / "fleet-backend.md"
+HC_AGENT = SKILLS / "hc-agent"
+HC_BIN = SKILLS.parent / "meta" / "hc-agent" / "tests" / "bin"
+META_README = SKILLS.parent / "meta" / "issue-work-loop" / "docs" / "README.md"
+APP_ROOT = "t1"
+
+
+def bash_blocks(text: str) -> list[str]:
+    return re.findall(r"```bash\n(.*?)```", text, re.DOTALL)
+
+
+class AppBackendContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.doc = FLEET_BACKEND.read_text(encoding="utf-8")
+        cls.gate_block, cls.probe_block = bash_blocks(section(cls.doc, "## App launch-profile gate"))[:2]
+        cls.parser_block = bash_blocks(
+            WorkerLaunchContractTests.selective_profile_section(
+                None, PROTOCOL, "### Probe and target evidence"
+            )
+        )[0]
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="issue_work_loop_app_"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def bash(self, script, **env):
+        base = {"PATH": "/usr/bin:/bin", "HOME": str(self.tmp)}
+        base.update(env)
+        return subprocess.run(
+            ["bash", "-c", script], env=base, text=True, capture_output=True, check=False
+        )
+
+    def test_runtime_rule_puts_tui_first_and_stops_without_either(self):
+        rule = section(self.doc, "## Runtime detection")
+        rows = [line for line in rule.splitlines() if line.startswith("| ")]
+        tui, app, neither = rows[1:4]
+        self.assertIn("HERDR_ENV=1", tui)
+        self.assertIn("also set", tui)
+        self.assertIn("herdr-agent", tui)
+        self.assertIn("HC_TERMINAL_ID", app)
+        self.assertIn("hc-agent", app)
+        self.assertIn("No Herdr runtime detected", neither)
+        self.assertIn("never calls `herdr` in the app", rule)
+
+    def test_app_gate_accepts_hc_agent_and_requires_agent_py(self):
+        ok = self.bash(self.gate_block, fleet_dir=str(HC_AGENT))
+        self.assertEqual(ok.returncode, 0, ok.stderr)
+        partial = self.tmp / "partial"
+        (partial / "scripts").mkdir(parents=True)
+        for script in ("launch_profile.py", "hclib.py"):  # everything but agent.py
+            shutil.copy(HC_AGENT / "scripts" / script, partial / "scripts")
+        missing = self.bash(self.gate_block, fleet_dir=str(partial))
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertIn("hc-agent scripts are unavailable", missing.stderr)
+        self.assertNotEqual(self.bash(self.gate_block).returncode, 0)
+
+    def probe(self, root_argv, without_bypass=True):
+        state = self.tmp / "hc-state.json"
+        record = {
+            "address": APP_ROOT, "argv": root_argv, "created_ms": 1000, "cwd": "/work/project",
+            "foreground": {"argv": root_argv, "cwd": "/work/project", "name": "x", "pid": 42},
+            "labels": {"herdr.space": "sp1", "herdr.tab": "tb1"}, "state": "live",
+            "status": {"app": "claude-code", "msg": "", "state": "idle"},
+            "status_ms": 1000, "turn": 1, "parent": None, "die_with_parent": False,
+        }
+        state.write_text(json.dumps({"terminals": {APP_ROOT: record}, "app": {"spaces": []}, "log": []}))
+        block = self.probe_block
+        if not without_bypass:
+            block = block.replace(" --without bypass", "")
+        script = "\n".join((
+            f"helper={json.dumps(str(HC_AGENT / 'scripts' / 'launch_profile.py'))}",
+            "main_model=''", "main_thinking=''", "worker_profile_args=()", "worker_native_args=()",
+            block, 'printf "%s" "$profile_json"',
+        ))
+        result = self.bash(
+            script, PATH=f"{HC_BIN}{os.pathsep}/usr/bin:/bin", FAKE_HC_STATE=str(state),
+            HC_TERMINAL_ID=APP_ROOT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        log = json.loads(state.read_text())["log"]
+        self.assertTrue(log, "the probe must read the root through hc")
+        self.assertFalse([call for call in log if call[0] == "herdr"], log)
+        return result.stdout
+
+    def parse(self, profile_json):
+        helper = self.tmp / "profile-helper.py"
+        helper.write_text("import os\nprint(os.environ['PROFILE_JSON'], end='')\n")
+        script = "\n".join((
+            "root_pane='root'", "main_model=''", "main_thinking=''",
+            "worker_profile_args=()", "worker_native_args=()", self.parser_block,
+        ))
+        return self.bash(script, helper=str(helper), PROFILE_JSON=profile_json)
+
+    def test_app_probe_uses_root_and_its_json_passes_the_loop_parser(self):
+        self.assertIn('--root "$HC_TERMINAL_ID"', self.probe_block)
+        self.assertNotIn("--root-pane", self.probe_block)
+        self.assertIn("--without bypass", self.probe_block)
+        root_argv = ["/opt/agents/bin/claude", "--dangerously-skip-permissions"]
+        accepted = self.parse(self.probe(root_argv))
+        self.assertEqual(accepted.returncode, 0, accepted.stderr)
+        rejected = self.parse(self.probe(root_argv, without_bypass=False))
+        self.assertNotEqual(rejected.returncode, 0, "inherited bypass must fail closed")
+
+    def test_app_timeouts_are_seconds_and_reads_use_turn_ids(self):
+        spawn = bash_blocks(section(self.doc, "## App spawn"))[0]
+        self.assertRegex(spawn, r"--start \"\$worker_name\" --cwd \"\$project_dir\" --timeout 60(?!\d)")
+        self.assertNotIn("--pane", spawn)
+        self.assertNotIn("--env", spawn)
+        transport = section(self.doc, "## App send, wait, and read")
+        prompt, read = bash_blocks(transport)[:2]
+        self.assertRegex(prompt, r'agent\.py" prompt "\$t" - --timeout 180(?!\d)')
+        self.assertIn('read "$t" --turn "$turn"', read)
+        self.assertIn("250000", transport)
+        for code in range(3, 10):
+            self.assertRegex(transport, rf"\n\| {code} \|")
+
+    def test_app_never_recommends_permission_bypass(self):
+        for flag in ("--dangerously-skip-permissions", "bypassPermissions"):
+            for line in self.doc.splitlines():
+                if flag in line:
+                    self.assertIn("never", line.lower(), line)
+        boot = section(self.doc, "## App boot gate")
+        for phrase in ("hc keys \"$t\" shift+tab", "not yet verified live", "fails closed",
+                       "--without bypass", "App boot mode unverifiable"):
+            self.assertIn(phrase, boot, phrase)
+
+    def test_close_policy_needs_explicit_approval_and_own_workers_only(self):
+        policy = section(self.doc, "## Close-confirmation policy")
+        for phrase in (
+            "Rule 8", "Confirm destruction", "invoking the loop approves",
+            "`work_loop.auto_cleanup: true`", "**not** approval", "ask before closing",
+            "leaves them open", "spawn ledger", "--confirmed", "Never pass root",
+        ):
+            self.assertIn(phrase, policy, phrase)
+
+    def test_differing_steps_are_named(self):
+        steps = section(self.doc, "## Steps that differ in the app").lower()
+        for phrase in (
+            "no no-agent fallback", "one call", "no `--env`", "seconds", "turn id",
+            "close-confirmation policy", "not verified live", "polled", "badges or notifications",
+        ):
+            self.assertIn(phrase, steps, phrase)
+
+    def test_docs_name_both_runtimes(self):
+        for path in (SKILL_MD, META_README):
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(path=path.name):
+                for phrase in ("Herdr TUI", "Herdr desktop app", "hc-agent"):
+                    self.assertTrue(phrase in text, f"{path.name} lacks {phrase!r}")
+        must_not = section(SKILL_MD.read_text(encoding="utf-8"), "## What You Must Not Do")
+        self.assertIn("Call `herdr` in the Herdr desktop app", must_not)
+        self.assertIn("Close a terminal or pane this run did not spawn", must_not)
 
 
 if __name__ == "__main__":

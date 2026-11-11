@@ -271,6 +271,49 @@
         "Stops before dispatch if autonomous mode cannot be verified",
         "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
+    },
+    {
+      "id": 20,
+      "kind": "edge",
+      "prompt": "/issue-work-loop --pr 88, run from a terminal of the Herdr desktop app (HC_TERMINAL_ID is set, HERDR_ENV is unset; the herdr CLI is also on PATH).",
+      "expected_output": "Detects the Herdr desktop app runtime, acquires hc-agent instead of herdr-agent, and runs every spawn, send, wait, read, and close through hc-agent's scripts without ever calling herdr.",
+      "files": [],
+      "expectations": [
+        "Detects the app runtime from HC_TERMINAL_ID with HERDR_ENV unset, and checks only that hc and herdr-app are on PATH before acquisition",
+        "Acquires hc-agent and issue-pr-review (not herdr-agent) under one asm deps session",
+        "Never runs any herdr command, including herdr status, even though herdr is on PATH",
+        "Resolves root context with hc-agent's agent.py check after acquisition",
+        "Starts the reviewer with hc-agent's launch_profile.py --start ... --cwd ... --timeout 60 (seconds) and --without bypass, never --dangerously-skip-permissions",
+        "Sends tasks with agent.py prompt --timeout 180 and reads replies with agent.py read --turn",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
+      ]
+    },
+    {
+      "id": 21,
+      "kind": "edge",
+      "prompt": "/issue-work-loop 42 in a plain terminal where neither HERDR_ENV nor HC_TERMINAL_ID is set.",
+      "expected_output": "Stops at preflight with the 'No Herdr runtime detected' message before acquiring dependencies or spawning any worker.",
+      "files": [],
+      "expectations": [
+        "Stops with a clear 'No Herdr runtime detected' message naming HERDR_ENV=1 (Herdr TUI) and HC_TERMINAL_ID (Herdr desktop app)",
+        "Acquires no dependency and spawns no worker",
+        "Does not guess a runtime or fall back to calling herdr or hc anyway",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
+      ]
+    },
+    {
+      "id": 22,
+      "kind": "edge",
+      "prompt": "Run /issue-work-loop --pr 64 in the Herdr desktop app. .gitissue.yml has no work_loop.auto_cleanup key. The review ends CLEAN, and the user's own shell sits in another pane of the same tab.",
+      "expected_output": "At SWEEP, treats the missing auto_cleanup key as no approval in the app, lists the loop's own workers and asks before closing them (or leaves them open and reports cleanup pending), and never closes root or the user's pane.",
+      "files": [],
+      "expectations": [
+        "Treats only an explicit work_loop.auto_cleanup: true as approval for SWEEP closes in the app, per hc-agent Rule 8 (Confirm destruction)",
+        "Lists the run's own workers and asks before closing them; on no answer, leaves them open and reports Cleanup: pending",
+        "Passes only names from the run's spawn ledger to agent.py close --confirmed, never root, a main successor, or the user's unlabelled pane",
+        "Verifies the result with agent.py fleet --json",
+        "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
+      ]
     }
   ]
 }
