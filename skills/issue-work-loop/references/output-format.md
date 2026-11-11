@@ -157,7 +157,8 @@ Map Step Completion Report results to `Result:` this way: all phases PASS → `C
 ◆ Work Loop Complete
   Result:        COMPLETE
   Evidence:      gh pr view #{M}: OPEN, {head_ref} @ {sha_short}; reviewed_head_sha
-                 matches; herdr agent list: worker panes absent; worktrees removed
+                 matches; herdr agent list (app: agent.py fleet): worker panes
+                 absent; worktrees removed
   Uncertainty:   {none | CI not observed | context UNKNOWN fallback for {role} | ...}
   Decision:      merge PR #{M} is yours — inspect and merge manually if ready
 

@@ -80,9 +80,9 @@ profile_json="$(python3 "$helper" \
 }
 ```
 
-Validate `profile_json` with the unchanged parser in `loop-protocol.md` → *Probe and target evidence*. hc-agent prints the same required keys and adds `main_kind` and `launch`, which the parser ignores. Every other rule there still applies: inspect the root argv from `hc get "$HC_TERMINAL_ID" --json` and every local file a worker argument names; redact values; refuse explicit native, configuration, or environment bypass; fail closed on unknown or unverifiable input; and re-probe immediately before every start.
+Validate `profile_json` with the unchanged parser in `loop-protocol.md` → *Probe and target evidence*. hc-agent prints the same required keys and adds `main_kind` and `launch`, which the parser ignores. Every other rule there still applies, except the destination readback, which the app replaces as described next: inspect the root argv from `hc get "$HC_TERMINAL_ID" --json` and every local file a worker argument names; redact values; refuse explicit native, configuration, or environment bypass; fail closed on unknown or unverifiable input; and re-probe immediately before every start.
 
-Split and start are one call in the app, so no destination pane exists before the start. Right after the start, `hc get "$t" --json` is the supported destination evidence: `.foreground.argv` must carry no bypass token, and `.foreground.cwd` must equal `$project_dir`. On a mismatch, close that worker under *Close-confirmation policy* and stop BLOCKED before any task.
+Split and start are one call in the app, so no destination pane exists before the start. Right after the start, `hc get "$t" --json` is the supported destination evidence: `.foreground.argv` must carry no bypass token, and `.foreground.cwd` must equal `$project_dir`. On a mismatch, close that worker under *Close-confirmation policy* and stop BLOCKED before any task. The start passes no environment (`pane.split` takes none), so the worker inherits the app terminal's environment, and no supported command reads it back. The loop sets no bypass variable itself. An environment-carried bypass inherited from the app is therefore not ruled out: record it under `Uncertainty:` in the final report.
 
 ## App spawn
 
@@ -132,6 +132,8 @@ python3 "$here/agent.py" read "$t" --turn "$turn"
 | `agent.py prompt` exit | Outcome | Loop response |
 |---|---|---|
 | 0 | settled | Read with `--turn`, then parse |
+| 1 | error (missing or ambiguous target, own terminal, bad text) | Stop BLOCKED and report the message; nothing more is sent |
+| 2 | usage | Fix the call; nothing was sent |
 | 3 | blocked | BLOCKED, needs human input: surface it, `agent.py focus`; never answer it, never `--force` |
 | 4 | unverifiable | BLOCKED, *App terminal has no agent status*; read the screen, never type |
 | 5 | no agent | BLOCKED, *App terminal has no agent status*; the app has no no-agent fallback |

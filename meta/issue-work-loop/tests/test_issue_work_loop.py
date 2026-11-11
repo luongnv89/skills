@@ -16,6 +16,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -721,7 +722,12 @@ class AppBackendContractTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
 
     def bash(self, script, **env):
-        base = {"PATH": "/usr/bin:/bin", "HOME": str(self.tmp)}
+        # The interpreter running these tests, not whatever python3 /usr/bin has.
+        base = {
+            "PATH": f"{Path(sys.executable).parent}{os.pathsep}/usr/bin:/bin",
+            "HOME": str(self.tmp),
+            "FAKE_HC_PYTHON": sys.executable,
+        }
         base.update(env)
         return subprocess.run(
             ["bash", "-c", script], env=base, text=True, capture_output=True, check=False
@@ -770,7 +776,9 @@ class AppBackendContractTests(unittest.TestCase):
             block, 'printf "%s" "$profile_json"',
         ))
         result = self.bash(
-            script, PATH=f"{HC_BIN}{os.pathsep}/usr/bin:/bin", FAKE_HC_STATE=str(state),
+            script,
+            PATH=os.pathsep.join((str(HC_BIN), str(Path(sys.executable).parent), "/usr/bin", "/bin")),
+            FAKE_HC_STATE=str(state),
             HC_TERMINAL_ID=APP_ROOT,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -808,7 +816,7 @@ class AppBackendContractTests(unittest.TestCase):
         self.assertRegex(prompt, r'agent\.py" prompt "\$t" - --timeout 180(?!\d)')
         self.assertIn('read "$t" --turn "$turn"', read)
         self.assertIn("250000", transport)
-        for code in range(3, 10):
+        for code in range(0, 10):
             self.assertRegex(transport, rf"\n\| {code} \|")
 
     def test_app_never_recommends_permission_bypass(self):

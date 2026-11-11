@@ -13,7 +13,7 @@
         "Spawns ISSUE implementer first and instructs it to use /issue-resolver 17 --auto",
         "Uses issue-pr-review --review-only for independent review",
         "Does not merge and runs mode-aware SWEEP",
-        "Acquires herdr-agent, issue-pr-review, and issue-resolver with asm deps acquire under one session before the repo sync, and releases that session after SWEEP",
+        "Acquires the runtime's fleet skill (herdr-agent in the Herdr TUI, hc-agent in the Herdr desktop app), issue-pr-review, and issue-resolver with asm deps acquire under one session before the repo sync, and releases that session after SWEEP",
         "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
@@ -43,7 +43,7 @@
         "Requires PR state OPEN",
         "Spawns reviewer first and never calls issue-resolver in PR mode",
         "Does not spawn a FIXER before a FINDINGS verdict",
-        "Acquires only herdr-agent and issue-pr-review in PR mode; never acquires issue-resolver",
+        "Acquires only the runtime's fleet skill (herdr-agent in the Herdr TUI, hc-agent in the Herdr desktop app) and issue-pr-review in PR mode; never acquires issue-resolver",
         "Final report opens with a Result: status (COMPLETE, PARTIAL — reason, or BLOCKED — reason), then Evidence: naming only checks that ran, Uncertainty: naming unverified items, and Decision: naming the user's next decision"
       ]
     },
