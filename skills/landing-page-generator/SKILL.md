@@ -244,7 +244,7 @@ End every run, stops included, with this compact text block. Status is `COMPLETE
 ```text
 Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA), A/B test ideas, and Privacy Policy, Terms of Use, and Changelog pages, built as HTML in landing-page/; Docs skipped (hosted app, no setup outside the app).
 Evidence: Framework PAS named and applied via references/section-templates.md; hero headline 8 words; every CTA starts with an action verb; pages: Privacy Policy, Terms of Use, Changelog delivered, Docs skipped (hosted app); companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; [proof needed] markers: 2 on the landing page, 18 on the companion pages; anti-slop check passed; page: built (landing-page/: index.html, privacy.html, terms.html, changelog.html) by frontend-design; page checks Pages built, Sections carried, CTAs carried, Markers carried (24/24), Nothing added, Notes excluded, Links resolve, Design checks passed; sync: skipped (new folder).
-Uncertainty: Assumed a setup-time objection belongs in the FAQ; no data practices, legal entity, or release date were supplied, so those facts are markers; responsive rendering untested (no browser), breakpoints inspected in CSS.
+Uncertainty: Assumed a setup-time objection belongs in the FAQ; the brief gives no contrarian take, so the hero leaves it out; no data practices, legal entity, or release date were supplied, so those facts are markers; responsive rendering untested (no browser), breakpoints inspected in CSS.
 Decision: No approval needed. Before publishing: replace the [proof needed] markers with real facts, and have a lawyer review the Privacy Policy and Terms of Use.
 ```
 
