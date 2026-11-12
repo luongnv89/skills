@@ -91,7 +91,7 @@ window.APP_CONFIG = {
              screens: { iphone: () => html, ipad: () => html, mac: () => html } }],
   creatives: { enabled /* only when requested */, kinds: ["header", "search", "universal"],
                headline, sub, searchHeadline, searchSub,
-               hero: { platform, frame }, sides: [{ platform, frame }] /* "wide" only */, layout?: "wide" | "safe" /* default; a variant sets it to undo a base "wide" */,
+               hero: { platform, frame }, sides: [{ platform, frame }] /* search, universal; header only under "wide" */, layout?: "wide" | "safe" /* default; a variant sets it to undo a base "wide" */,
                video: { kinds: ["header", "search"], duration? /* fitted */, fps: 30, transition: 0.8, searchSize?: "max",
                         beats: [{ headline, sub, searchHeadline?, searchSub?, hero?, sides? }] },
                variants: [{ id: "tiktok-trails", kinds?, headline?, hero?, video?: { … } }] },
@@ -136,8 +136,8 @@ returns to its start is a visible yo-yo).
 
 **Timeline.** Beat 0 is the still (headline, sub, hero, sides; search uses
 `searchHeadline`). Each entry in `video.beats` adds a beat built only from
-existing frames. The header shows the hero and one side device, search the
-hero and two. A beat holds, then crossfades (`transition`, default 0.8 s:
+existing frames. The header shows the hero (plus one side device under
+`layout: "wide"`), search the hero and two. A beat holds, then crossfades (`transition`, default 0.8 s:
 the caption fades out, then the next fades in; each device crossfades its
 screen). The last crossfade returns to beat 0 half a second before the end,
 so the loop seam falls inside beat 0's hold. Devices drift ±8 px and the arcs
