@@ -95,13 +95,17 @@ directory follows a generated **`directory`** branch instead of `main`:
 - Each `SKILL.md` keeps only `name`, `description`, `license`, `compatibility`
   and `metadata`; `effort` and `dependencies` move under `metadata` as quoted
   text. Bodies and resource files are copied byte for byte.
-- Members are flattened to `skills/<name>/` as in the ZIP exports, so the
-  manifest needs no `skills` paths. The edition writes its own `README.md`,
+- Members are flattened to `skills/<name>/` as in the ZIP exports. They sit at
+  the plugin root, so the edition's `plugin.json` sets `"skills": ["./"]`
+  (Claude Code's default scan is only `./skills/`); the self-check refuses a
+  manifest that would load nothing. The edition writes its own `README.md`,
   `LICENSE` and description with the real skill count, and a branch-root
   `provenance.json` with the source commit and every file's SHA-256.
 - The build re-checks the output (file types, `#!`, UTF-8 and NUL, package
   configuration, symlinks, 256 KiB, 512 files, frontmatter keys) and exits 1 on
-  any problem. `tests/test-lstack-directory.py` covers each rule.
+  any problem. `tests/test-lstack-directory.py` covers each rule. `.ico` and
+  `.svg` are refused too: the checklist holds `.ico` for a reviewer, and the
+  community rule doesn't list SVG.
 
 Build and publish from a clean checkout of the commit to publish:
 
@@ -115,7 +119,11 @@ git -C ../lstack-directory add -A
 git -C ../lstack-directory commit -m "chore(directory): lstack directory edition from $(git rev-parse --short HEAD)"
 git -C ../lstack-directory push origin directory
 python3 scripts/build-lstack-directory.py --check ../lstack-directory   # re-check any time
+claude --plugin-dir ../lstack-directory/skills plugin details lstack    # must list every skill
+git worktree remove ../lstack-directory
 ```
+
+`git worktree add --orphan` needs git 2.42 or later.
 
 Then, in the developer portal, set the plugin's **Tracked branch or tag** to
 `directory` (Settings tab) and select **Check for new commits**, or validate a

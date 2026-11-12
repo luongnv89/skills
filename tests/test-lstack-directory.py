@@ -69,7 +69,7 @@ class DirectoryEditionTests(unittest.TestCase):
         plugin = json.loads(files["skills/.claude-plugin/plugin.json"])
         self.assertEqual((plugin["name"], plugin["version"]), ("lstack", "0.1.0"))
         self.assertTrue(plugin["description"].startswith("1 first-party"))
-        self.assertNotIn("skills", plugin)  # flattened members; "./" is the default
+        self.assertEqual(plugin["skills"], ["./"])  # members sit at the plugin root, not in ./skills/
         self.assertGreaterEqual(EDITION.readme_words(files["skills/README.md"].decode()), 40)
         self.assertIn("parent", files["skills/README.md"].decode())
         for path in ("skills/LICENSE", "LICENSE", "README.md", "provenance.json"):
@@ -121,12 +121,17 @@ class DirectoryEditionTests(unittest.TestCase):
             ("a/pnpm-workspace.yaml", b"a: 1\n"): "package-manager",
             ("a/x.md", b"a" * (256 * 1024)): "256 KiB", ("a/.DS_Store", b"x"): "operating-system",
             ("a/x.png", b"MZ\x90\0"): "not a PNG", ("a/x.webp", b"RIFF0000AVI "): "not a WEBP",
+            ("a/x.svg", b"<svg/>"): "type outside", ("a/x.ico", b"\0\0\1\0"): "type outside",
+            ("a/Makefile", b"all:\n"): "type outside", ("a/COPYING", b"GPL\n"): "type outside",
+            ("a/X.PY", b"x\n"): "type outside", ("a/__MACOSX", b"x"): "operating-system",
+            ("a/composer.json", b"{}"): "package-manager", ("a/requirements-dev.txt", b"x\n"): "package-manager",
+            ("a/environment.yml", b"a: 1\n"): "package-manager", ("a/Package.JSON", b"{}"): "package-manager",
         }
         for (path, data), expected in cases.items():
             self.assertIn(expected, EDITION.file_problem(path, data) or "", path)
         for path, data in [("a/x.md", b"# ok\n"), ("a/x.yml", b"a: 1\n"), ("a/x.json", b"{}\n"),
                            ("a/x.png", png), ("a/LICENSE", b"MIT\n"), ("a/.gitignore", b"x\n"),
-                           ("a/x.txt", "é\n".encode())]:
+                           ("a/x.txt", "é\n".encode()), ("a/X.PNG", png), ("a/README.MD", b"# x\n")]:
             self.assertIsNone(EDITION.file_problem(path, data), path)
 
     def test_check_tree_refuses_each_kind_of_problem(self):
@@ -156,6 +161,44 @@ class DirectoryEditionTests(unittest.TestCase):
             (out / "skills/child" / ("f%03d.md" % i)).write_text("x\n")
         self.assertIn("files (limit 512)", "\n".join(EDITION.check_tree(out)[0]))
 
+    def test_check_tree_refuses_a_plugin_that_loads_no_skills_or_a_bad_root(self):
+        out, files, _ = self.build()
+        manifest = out / "skills/.claude-plugin/plugin.json"
+        data = json.loads(manifest.read_text())
+        del data["skills"]
+        manifest.write_text(json.dumps(data))
+        self.assertIn("load only with", "\n".join(EDITION.check_tree(out)[0]))
+        manifest.unlink()
+        self.assertIn("plugin.json missing", "\n".join(EDITION.check_tree(out)[0]))
+        (out / ".git").mkdir()
+        (out / "skills/child/.git").mkdir()
+        (out / "skills/child/.git/hook").write_bytes(b"#!/bin/sh\n")
+        self.assertIn(".git/hook", "\n".join(EDITION.check_tree(out)[0]))
+        linked = Path(self.tmp.name) / "linked"
+        (linked).mkdir()
+        (linked / "skills").symlink_to(out / "skills")
+        self.assertIn("missing or a symlink", EDITION.check_tree(linked)[0][0])
+
+    def test_refuses_unsafe_values_duplicates_and_conflicts(self):
+        base = skill("v")
+        for text, pattern in [
+                (base.replace("Second sentence.", "a\\u007fb"), "unsupported character"),
+                (base.replace("Second sentence.", "a\\u0085b"), "unsupported character"),
+                (base.replace("Second sentence.", "a\\u2028b"), "unsupported character"),
+                (base.replace("license: MIT\n", "license: MIT\nlicense: MIT\n"), "unsupported frontmatter line"),
+                (base.replace("  version: 1.2.3\n", "  version: 1.2.3\n  version: 1.2.4\n"), "unsupported frontmatter line"),
+                (base.replace("license: MIT\n", "license: MIT # c\n"), "unsupported frontmatter value"),
+                (base.replace("license: MIT\n", "license: a: b\n"), "unsupported frontmatter value"),
+                (base.replace("license: MIT\n", "effort: high\n").replace("  version: 1.2.3\n", "  version: 1.2.3\n  effort: low\n"), "both effort"),
+                (base.replace("license: MIT\n", "dependencies: [a, b\n"), "unsupported dependencies"),
+                ("---\nname: v\ndescription: d\nmetadata: {version: 1.0.0}\n---\nx\n", "flow-form metadata")]:
+            with self.assertRaisesRegex(ValueError, pattern):
+                EDITION.standard_skill_md(text.encode(), "v/SKILL.md")
+
+    def test_self_dependency_is_kept(self):
+        self.add_member("selfish", skill("selfish", "dependencies:\n  - selfish\n"))
+        self.assertIn("selfish", self.build()[2]["included"])
+
     def test_refuses_unknown_keys_and_unsupported_yaml(self):
         self.add_member("hooked", skill("hooked", "hooks: {}\n"))
         with self.assertRaisesRegex(ValueError, "outside the allowed list.*hooks"):
@@ -176,12 +219,25 @@ class DirectoryEditionTests(unittest.TestCase):
             EDITION.write(target, files)
         with self.assertRaisesRegex(ValueError, "inside this repository"):
             EDITION.write(ROOT / "dist" / "edition-test-never-created", files)
+        empty = Path(self.tmp.name) / "empty"
+        empty.mkdir()
+        link = Path(self.tmp.name) / "link"
+        link.symlink_to(empty)
+        afile = Path(self.tmp.name) / "afile"
+        afile.write_text("x")
+        for bad in (link, afile):
+            with self.assertRaisesRegex(ValueError, "new or empty folder"):
+                EDITION.write(bad, files)
+        self.assertEqual(list(empty.iterdir()), [])
 
     def test_real_catalog_builds_and_passes_its_own_check(self):
         files, summary = EDITION.prepare(ROOT)
         members = {m["name"] for m in json.loads((ROOT / "packages/lstack/manifest.json").read_text())["members"]}
         self.assertEqual(set(summary["included"]) | set(summary["excluded"]), members)
         self.assertTrue(summary["included"])
+        readme = files["skills/README.md"].decode()
+        self.assertIn(" %d first-party" % len(summary["included"]), readme)
+        self.assertIn("full %d-skill" % len(members), json.loads(files["skills/.claude-plugin/plugin.json"])["description"])
         for path, data in files.items():
             self.assertIsNone(EDITION.file_problem(path, data), path)
             if path.endswith("/SKILL.md"):
@@ -194,6 +250,26 @@ class DirectoryEditionTests(unittest.TestCase):
                                  env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
             self.assertEqual(cli.returncode, 0, cli.stderr)
             self.assertEqual(json.loads(cli.stdout)["problems"], [])
+
+
+    def test_cli_refuses_a_builder_that_differs_from_the_revision(self):
+        repo = Path(self.tmp.name) / "clone"
+        subprocess.run(["git", "clone", "-q", str(ROOT), str(repo)], check=True)
+        subprocess.run(["git", "-C", str(repo), "checkout", "-q", subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"]).decode().strip()], check=True)
+        env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
+        for script in ("scripts/build-lstack-directory.py", "scripts/build-lstack.py"):
+            target = repo / script
+            original = target.read_bytes()
+            target.write_bytes(original + b"\n# local edit\n")
+            cli = subprocess.run([sys.executable, str(repo / "scripts/build-lstack-directory.py"), "--list"],
+                                 capture_output=True, text=True, env=env)
+            self.assertEqual(cli.returncode, 1, script)
+            self.assertIn("differs from the selected revision", cli.stderr)
+            target.write_bytes(original)
+        cli = subprocess.run([sys.executable, str(repo / "scripts/build-lstack-directory.py"), "--list",
+                              "--revision", "HEAD~1000000"], capture_output=True, text=True, env=env)
+        self.assertEqual(cli.returncode, 1)
 
 
 if __name__ == "__main__":

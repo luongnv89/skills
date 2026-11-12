@@ -28,13 +28,17 @@ PLUGIN = "skills"  # same plugin path as main, so the listing keeps its folder
 FULL_INSTALL = "claude plugin marketplace add luongnv89/skills"
 TEXT_EXT = {".md", ".markdown", ".txt", ".json", ".yaml", ".yml"}
 TEXT_NAMES = {"LICENSE", "README", ".gitignore"}
+# .ico is left out on purpose: the pre-submission checklist holds .ico files for a reviewer.
 IMAGE_MAGIC = {".png": (b"\x89PNG\r\n\x1a\n",), ".jpg": (b"\xff\xd8\xff",), ".jpeg": (b"\xff\xd8\xff",),
-               ".gif": (b"GIF87a", b"GIF89a"), ".ico": (b"\x00\x00\x01\x00",), ".webp": (b"RIFF",)}
+               ".gif": (b"GIF87a", b"GIF89a"), ".webp": (b"RIFF",)}
 PACKAGE_CONFIG = {".npmrc", ".yarnrc", ".yarnrc.yml", ".pnpmrc", "pnpm-workspace.yaml", "bunfig.toml",
                   "uv.toml", "pip.conf", "pip.ini", ".pypirc", "pyproject.toml", "requirements.txt",
                   "pipfile", "pipfile.lock", "poetry.lock", "package.json", "package-lock.json",
                   "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "bun.lockb",
-                  ".tool-versions", "deno.json", "deno.jsonc", "cargo.toml", "go.mod", "gemfile"}
+                  ".tool-versions", "deno.json", "deno.jsonc", "cargo.toml", "go.mod", "gemfile",
+                  "composer.json", "bower.json", "jsr.json", "vcpkg.json", "package.yaml", "package.json5",
+                  "pubspec.yaml", "environment.yml", "environment.yaml", "conanfile.txt", "constraints.txt"}
+REQUIREMENTS = re.compile(r"(?:.*-)?requirements(?:-.*)?\.(?:txt|in)\Z")
 SYSTEM_FILES = {".ds_store", "thumbs.db", "desktop.ini", "__macosx"}
 SKILL_KEYS = ("name", "description", "license", "compatibility", "metadata")
 MOVED_KEYS = ("effort", "dependencies")
@@ -50,7 +54,7 @@ def file_problem(path, data):
     suffix = PurePosixPath(lower).suffix
     if lower in SYSTEM_FILES:
         return "operating-system file"
-    if lower in PACKAGE_CONFIG:
+    if lower in PACKAGE_CONFIG or REQUIREMENTS.match(lower):
         return "package-manager configuration"
     if len(data) >= MAX_FILE:
         return "file of 256 KiB or more"
@@ -85,12 +89,19 @@ def scalar(raw, path):
     """Unquote one YAML scalar written in the forms this repository uses; refuse others."""
     raw = raw.strip()
     if raw.startswith('"'):
-        return json.loads(raw)
+        return checked(json.loads(raw), raw, path)
     if raw.startswith("'") and raw.endswith("'") and len(raw) >= 2:
         return raw[1:-1].replace("''", "'")
     if raw and PLAIN.fullmatch(raw) and ": " not in raw:
         return raw
     raise ValueError("unsupported frontmatter value " + repr(raw) + " in " + path)
+
+
+def checked(value, raw, path):
+    """Refuse characters YAML rejects or reads as line breaks inside a quoted scalar."""
+    if re.search("[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f\u2028\u2029\ud800-\udfff]", value):
+        raise ValueError("unsupported character in frontmatter value " + repr(raw) + " in " + path)
+    return value
 
 
 def parse_frontmatter(block, path):
@@ -105,6 +116,8 @@ def parse_frontmatter(block, path):
                 raise ValueError("unsupported frontmatter line " + repr(line) + " in " + path)
             top[key] = value.strip()
             current = key if not value.strip() else None
+            if key == "metadata" and value.strip():
+                raise ValueError("unsupported flow-form metadata in " + path)
             if key == "dependencies" and value.strip().startswith("["):
                 inner = value.strip()
                 if not inner.endswith("]"):
@@ -129,13 +142,17 @@ def standard_skill_md(data, path):
     unknown = set(top) - set(SKILL_KEYS) - set(MOVED_KEYS)
     if unknown:
         raise ValueError("frontmatter keys outside the allowed list in " + path + ": " + ", ".join(sorted(unknown)))
+    for key in MOVED_KEYS:
+        if key in top and key in metadata:
+            raise ValueError("both " + key + " and metadata." + key + " in " + path)
     if "effort" in top:
-        metadata.setdefault("effort", scalar(top["effort"], path))
+        metadata["effort"] = scalar(top["effort"], path)
     if deps:
-        metadata.setdefault("dependencies", ", ".join(deps))
+        metadata["dependencies"] = ", ".join(deps)
     lines = ["---"]
     for key in SKILL_KEYS[:-1]:
         if key in top:
+            scalar(top[key], path)  # refuse values the edition could not copy safely
             lines.append(key + ": " + top[key])
     if metadata:
         lines.append("metadata:")
@@ -149,8 +166,9 @@ def check_tree(root):
     root = Path(root)
     plugin = root / PLUGIN
     problems, files, notes = [], [], []
-    for current, dirs, names in os.walk(plugin):
-        dirs[:] = [d for d in dirs if d != ".git"]
+    if plugin.is_symlink() or not plugin.is_dir():
+        return ["plugin folder " + PLUGIN + "/ is missing or a symlink"], 0, notes
+    for current, dirs, names in os.walk(plugin, onerror=lambda e: problems.append("unreadable: " + str(e))):
         for entry in [*dirs, *names]:
             p = Path(current) / entry
             rel = p.relative_to(plugin).as_posix()
@@ -187,8 +205,14 @@ def check_tree(root):
                         problems.append(rel + ": metadata." + key + " is not a quoted string")
     if len(files) > MAX_FILES:
         problems.append("plugin folder has %d files (limit %d)" % (len(files), MAX_FILES))
-    if not (plugin / ".claude-plugin/plugin.json").is_file():
+    manifest = plugin / ".claude-plugin/plugin.json"
+    if not manifest.is_file():
         problems.append(".claude-plugin/plugin.json missing")
+    else:
+        paths = json.loads(manifest.read_bytes()).get("skills", [])
+        paths = [paths] if isinstance(paths, str) else paths
+        if not (plugin / "skills").is_dir() and not {".", "./"} & set(paths):
+            problems.append(".claude-plugin/plugin.json: skills at the plugin root load only with \"skills\": [\"./\"]")
     return problems, len(files), notes
 
 
@@ -241,6 +265,7 @@ def prepare(repo, revision="HEAD"):
                 descriptions[name] = scalar(top["description"], name)
             out[PLUGIN + "/" + name + "/" + rel] = data
     plugin = BUILDER.plugin_metadata(manifest, "claude")
+    plugin["skills"] = ["./"]  # members sit at the plugin root; the default scan is ./skills/ only
     plugin["description"] = ("%d first-party Agent Skills for Claude Code, Markdown instructions only; "
                              "the full %d-skill lstack installs from the luongnv89/skills marketplace."
                              % (len(included), len(members)))
@@ -280,7 +305,8 @@ Source: [github.com/luongnv89/skills](https://github.com/luongnv89/skills) · Li
 
 {rows}
 
-Left out of this edition (they ship scripts or depend on skills that do): {left_out}.
+Left out of this edition (they ship files the directory accepts only from verified
+organizations, such as scripts, or depend on skills outside this edition): {left_out}.
 """
     if readme_words(readme) < 40:
         raise ValueError("edition README is under 40 words")
@@ -326,8 +352,13 @@ def main():
             print(json.dumps({"files": count, "problems": problems, "notes": notes}, indent=2))
             return 1 if problems else 0
         sha = BUILDER.git(ROOT, "rev-parse", "--verify", args.revision + "^{commit}").decode().strip()
-        if BUILDER.git(ROOT, "show", sha + ":" + SELF) != Path(__file__).read_bytes():
-            raise ValueError("builder differs from the selected revision; check out that revision first")
+        for script in (SELF, BUILDER.BUILDER):
+            try:
+                committed = BUILDER.git(ROOT, "show", sha + ":" + script)
+            except subprocess.CalledProcessError:
+                raise ValueError(script + " is not in " + args.revision + "; build from a revision that has it")
+            if committed != (ROOT / script).read_bytes():
+                raise ValueError(script + " differs from the selected revision; check out that revision first")
         files, summary = prepare(ROOT, sha)
         if args.output:
             write(args.output, files)
