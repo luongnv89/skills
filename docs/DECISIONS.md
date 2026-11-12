@@ -26,7 +26,7 @@ Append-only log of ambiguities resolved while reconciling docs to the code.
 
 - Q: Guide line “No README.md inside the skill folder” vs catalog convention of `docs/README.md`?
 - A (doc-manager): Repo convention allows human-only `docs/README.md` with AI-skip comment (`CLAUDE.md:20`, CONTRIBUTING). Guide corrected: no root-level skill `README.md`; `docs/README.md` is allowed.
-- Source: `CLAUDE.md:20`, existing `skills/*/docs/README.md`
+- Source: `CLAUDE.md:20`, existing `meta/*/docs/README.md` (at `skills/*/docs/README.md` until #485 moved them)
 
 ## 2026-08-18
 
