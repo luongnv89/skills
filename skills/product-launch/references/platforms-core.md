@@ -333,6 +333,7 @@ traction on the core platforms depends on. Mode: paste-ready. The limits below a
 - **x — X:** a launch post of ≤280 characters with the product link, plus an optional
   thread of 3–5 posts (problem, demo GIF, how it works, ask for feedback). X counts any
   URL as 23 characters. `check_kit.py` counts the raw URL, so a pass is conservative.
+  The post covers the four-item X checklist in `launch-story.md` §3.
 - **linkedin — LinkedIn:** one post of ≤3,000 characters. The first two lines carry the
   hook, because the feed truncates after them. Post on L-day.
 - **email-list — email to your list:** only when the profile shows a waitlist or a
