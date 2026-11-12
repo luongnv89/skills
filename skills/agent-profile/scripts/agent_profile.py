@@ -49,6 +49,13 @@ BACKGROUND_TIMEOUT = 3600
 OPENCODE_MESSAGE = "Follow the instructions in the attached file."
 # Values that reach a harness argv: never option-like, no whitespace or control characters.
 VALUE_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@#\[\]+=-]{0,199}")  # use fullmatch
+# opencode ask/edits rules (tested with 2.2.7): deny every tool, then allow by name; `edit` covers
+# write and apply_patch. Rules are last-match-wins, so `.env` files are denied again after `read`.
+_OC_READ = {"*": "deny", "read": {"*": "allow", "*.env": "deny", "*.env.*": "deny", "*.env.example": "allow"},
+            "glob": "allow", "grep": "allow", "list": "allow"}
+OPENCODE_PERMS = {"ask": _OC_READ, "edits": dict(_OC_READ, edit="allow")}
+# Other opencode configs these would otherwise load ahead of the inline rules.
+OPENCODE_ENV_UNSET = ["OPENCODE_CONFIG", "OPENCODE_CONFIG_DIR", "OPENCODE_CLI_CONFIG_CONTENT"]
 
 
 def die(msg, code=2):
@@ -248,10 +255,10 @@ ADAPTERS = {
         "profiles": None, "models": _opencode_models,
         "thinking": lambda b: ([], "opencode lists no variants: type <model>#<variant> to use one"),
         "per_model_thinking": False, "variants": True,
-        "help": [["run", "--help"]], "flags": ["--model", "--auto", "--file", "--standalone"],
-        "permissions": {"full": ["--auto"]},
-        "permission_note": "opencode offers only full: agent-level rules in any opencode config "
-                           "(repo, parent folders, global, OPENCODE_CONFIG) can override restrictions",
+        "help": [["run", "--help"]], "flags": ["--model", "--auto", "--file", "--standalone", "--agent"],
+        "permissions": {"ask": ["--agent", "build"], "edits": ["--agent", "build"], "full": ["--auto"]},
+        "permission_note": "opencode `ask`/`edits` deny every tool but the ones named and are checked against "
+                           "the rules opencode resolves before each run; `full` is not restricted",
     },
     "codex": {
         "name": "Codex", "bin": "codex", "verified": False,
@@ -632,6 +639,9 @@ def build(p, prompt_file, cwd):
         # --standalone: a private server inside this run's process tree, so stop and timeouts
         # reach the tools (the shared background service would escape both)
         argv = [path, "run", "--standalone", "--model", m] + perm + ["--file", prompt_file, "--", OPENCODE_MESSAGE]
+        if p["permissions"] in OPENCODE_PERMS:
+            env_unset = list(OPENCODE_ENV_UNSET)
+            env_set["OPENCODE_CONFIG_CONTENT"] = opencode_config(p["permissions"])
     elif hid == "codex":
         argv = [path, "exec", "--cd", cwd, "--model", m] \
             + (["--profile", p["harness_profile"]] if p.get("harness_profile") else []) \
@@ -670,7 +680,93 @@ def build(p, prompt_file, cwd):
         notes.append(f"{a['name']} adapter is untested: flags checked against --help only")
     if a.get("permission_note"):
         notes.append(a["permission_note"])
+    if hid == "opencode" and p["permissions"] in OPENCODE_PERMS:
+        verify_opencode_perms(path, p["permissions"], cwd, env_unset, env_set)
+        notes.append(f"opencode resolves the `{p['permissions']}` rules last for agent `build` (checked with "
+                     "`opencode debug agents`); MCP servers and plugins opencode starts are not checked")
     return argv, stdin, env_unset, env_set, notes
+
+
+def opencode_config(mode):
+    """OPENCODE_CONFIG_CONTENT for a confined mode: the same rules at top level and on agent
+    `build`, which is kept a visible primary agent so `--agent build` selects it."""
+    rules = OPENCODE_PERMS[mode]
+    return json.dumps({"permission": rules,
+                       "agent": {"build": {"mode": "primary", "hidden": False, "permission": rules}}},
+                      separators=(",", ":"))
+
+
+def opencode_rows(mode):
+    """The rules as opencode resolves them: (action, resource, effect), in order."""
+    rows = []
+    for action, v in OPENCODE_PERMS[mode].items():
+        rows += [(action, r, e) for r, e in v.items()] if isinstance(v, dict) else [(action, "*", v)]
+    return rows
+
+
+def opencode_perm_problem(data, mode):
+    """Why `opencode debug agents` output does not prove the run is confined, or None.
+    The injected rules must be the last rules of agent `build` that can allow anything:
+    only deny rules may follow them (opencode appends a few of its own)."""
+    if not isinstance(data, list):
+        return "its output is not a list of agents"
+    for ag in data:
+        if not (isinstance(ag, dict) and isinstance(ag.get("id"), str) and isinstance(ag.get("permissions"), list)
+                and all(isinstance(r, dict) and all(isinstance(r.get(k), str) for k in ("action", "resource", "effect"))
+                        for r in ag["permissions"])):
+            return "it lists an agent in a shape this script does not know"
+    build_agents = [ag for ag in data if ag["id"] == "build"]
+    if len(build_agents) != 1:
+        return "it does not list exactly one agent `build`"
+    b = build_agents[0]
+    if b.get("mode") not in ("primary", "all") or b.get("hidden") is not False:
+        return f"agent `build` is not a visible primary agent (mode {b.get('mode')!r}, hidden {b.get('hidden')!r})"
+    got = [(r["action"], r["resource"], r["effect"]) for r in b["permissions"]]
+    want = opencode_rows(mode)
+    end = len(got)
+    while end and got[end - 1][2] == "deny" and got[end - len(want):end] != want:
+        end -= 1
+    if end < len(want) or got[end - len(want):end] != want:
+        return f"agent `build` has rules after the `{mode}` rules that can allow a tool"
+    return None
+
+
+def verify_opencode_perms(path, mode, cwd, env_unset, env_set, timeout=PROBE_TIMEOUT):
+    """Ask opencode, with the run's own environment and directory, which rules agent `build`
+    resolves to. Refuse (exit 1) unless the confined rules come last."""
+    cmd = [path, "debug", "agents", "--standalone"]
+    fix = (f"do not run this `{mode}` profile; check the opencode config files and variables that apply "
+           "to the working directory, or use another harness")
+    try:
+        proc = subprocess.Popen(cmd, cwd=cwd, env=run_env(cwd, env_unset, env_set), stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors="replace",
+                                start_new_session=True)
+    except OSError as e:
+        die(f"cannot check opencode's resolved permissions ({e.strerror}); {fix}", 1)
+    try:
+        out, err = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        kill_group(proc.pid)  # its private server must not outlive the check
+        proc.communicate()
+        die(f"`opencode debug agents --standalone` did not answer within {timeout}s; {fix}", 1)
+    if proc.returncode != 0:
+        die(f"`opencode debug agents --standalone` exited {proc.returncode}: {(err or out).strip()[:200]}; {fix}", 1)
+    try:
+        data = json.loads(out)
+    except json.JSONDecodeError:
+        data = None
+    why = opencode_perm_problem(data, mode) if data is not None else "its output is not JSON"
+    if why:
+        die(f"opencode's resolved permissions do not confine this run: {why}; {fix}", 1)
+
+
+def run_env(cwd, env_unset, env_set):
+    """The harness environment. Some harnesses (opencode) take their working directory from $PWD."""
+    env = dict(os.environ, PWD=cwd)
+    for v in env_unset:
+        env.pop(v, None)
+    env.update(env_set)
+    return env
 
 
 def checked_help(path, a, help_cmd):
@@ -813,11 +909,7 @@ def execute(run_dir, timeout):
     with open(run_dir / "output.log", "ab") as log:
         stdin = open(spec["stdin"], "rb") if spec["stdin"] else subprocess.DEVNULL
         try:
-            # Some harnesses (opencode) take their working directory from $PWD, so set it too.
-            env = dict(os.environ, PWD=spec["cwd"])
-            for v in spec.get("env_unset", []):
-                env.pop(v, None)
-            env.update(spec.get("env_set", {}))
+            env = run_env(spec["cwd"], spec.get("env_unset", []), spec.get("env_set", {}))
             proc = subprocess.Popen(spec["argv"], cwd=spec["cwd"], stdin=stdin, stdout=log,
                                     stderr=subprocess.STDOUT, start_new_session=True, env=env)
             state["proc"] = proc

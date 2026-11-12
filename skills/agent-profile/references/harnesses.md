@@ -10,7 +10,7 @@ published docs. Before every run of an untested adapter, the script checks each 
 permission value it uses against the CLI's help (for example `codex exec --help`) as a
 whole token, and refuses to run when one is missing. For verified adapters it checks the
 option flags of the chosen permission mode the same way (claude `--permission-mode`, pi
-`--no-mcp`/`--tools`, opencode `--auto`). Help is read with `NO_COLOR=1 FORCE_COLOR=0
+`--no-mcp`/`--tools`, opencode `--agent`/`--auto`). Help is read with `NO_COLOR=1 FORCE_COLOR=0
 TERM=dumb` and colour codes stripped; a help call that times out stops the run with
 "cannot check" rather than a false "flag missing".
 
@@ -18,7 +18,7 @@ TERM=dumb` and colour codes stripped; a help call that times out stops the run w
 | -------- | ---------- | ----------------------- | ----------------------------------- | ----------------------------------- | ------------------------------------------ |
 | claude   | `claude`   | verified (2.1.322)      | mcc profiles (`mcc list --json`), always with `default` (`~/.claude`) | the aliases `claude --help` names, plus each mcc profile's model; other aliases and full ids may be typed | `--effort` levels parsed from `--help`; which levels a model honours is not reported |
 | pi       | `pi`       | verified (1.3.0)        | none                                | `pi --list-models` (with provider and thinking support) | `--thinking` levels from `--help`, only for models marked thinking; a model's maximum is not reported |
-| opencode | `opencode` | verified (2.2.6)        | none                                | `opencode models`                   | none listed; type `<listed model>#<variant>` |
+| opencode | `opencode` | verified (2.2.7)        | none                                | `opencode models`                   | none listed; type `<listed model>#<variant>` |
 | codex    | `codex`    | untested                | `[profiles.*]` in `~/.codex/config.toml` | none: type the id               | minimal, low, medium, high, xhigh (docs)   |
 | droid    | `droid`    | untested                | none                                | none: type the id (`droid exec --help` lists them) | off, low, medium, high (docs; model-dependent) |
 | devin    | `devin`    | untested                | none                                | `devin models list --format json`   | none                                       |
@@ -37,12 +37,33 @@ typed ids.
 | `edits` | file edits allowed, commands refused | `--permission-mode acceptEdits`       | `--sandbox workspace-write`    | `--auto low`  | `--permission-mode accept-edits` | n/a       | `--approval-mode auto_edit` |
 | `full`  | any command without asking           | `--permission-mode bypassPermissions` | `--sandbox danger-full-access` | `--auto high` | `--permission-mode dangerous`    | `--yolo`  | `--approval-mode yolo`      |
 
-- **opencode** offers only `full` (`--auto`). Inline `OPENCODE_CONFIG_CONTENT` rules held
-  in clean repos (tested with 2.2.6), but agent-level rules in any other opencode config
-  override them: a repo's `opencode.json` or `.opencode/agent/*.md` (also in a parent
-  folder of the working directory), the global config, `OPENCODE_CONFIG`, or a
-  `default_agent`. A review run under such a config wrote files and ran the shell under a
-  restricted profile, so the skill does not offer `ask` or `edits` for opencode.
+- **opencode** `full` is `--auto`. `ask` and `edits` pass `--agent build` and, in
+  `OPENCODE_CONFIG_CONTENT`, one rule block twice: as top-level `permission` and as
+  `agent.build.permission` (singular; `agents.build.permissions` is ignored), with
+  `agent.build` kept `mode: primary`, `hidden: false`. The block denies `*`, allows `read`
+  (then denies `*.env` and `*.env.*` again and allows `*.env.example`), `glob`, `grep` and
+  `list`; `edits` also allows `edit`, which covers write and apply_patch. The shell tool
+  (`shell` in 2.2.x, not `bash`), web, subagents and anything new stay denied. The run
+  unsets `OPENCODE_CONFIG`, `OPENCODE_CONFIG_DIR` and `OPENCODE_CLI_CONFIG_CONTENT`.
+  No `--auto`: every tool is allowed or denied by name, so a leftover prompt is refused
+  instead of approved. Rules are last-match-wins, and the inline config resolves after a
+  repo or parent-folder `opencode.json`, `.opencode/agent/build.md`, the global config
+  and `OPENCODE_CONFIG`; `--agent build` beats a `default_agent`.
+- Before `command` prints and before `run` starts, the script runs
+  `opencode debug agents --standalone` with the run's own environment and directory. It
+  refuses (exit 1) unless agent `build` is a visible primary agent whose rules end with
+  the block, followed only by deny rules (2.2.7 appends `browser` and `skill browser`
+  denies). A non-zero exit, a timeout (its server is killed), output that is not the known
+  JSON shape, or no `build` agent is also a refusal: a newer opencode that changes the
+  shape is never run confined on trust. For a planned worktree, `command` checks the
+  current directory and `run` checks again in the new worktree. MCP servers and plugins
+  that opencode starts are not checked.
+- opencode `ask`/`edits` were verified on 2.2.7 (2026-11-12) with a free model, cwd in a
+  repo subfolder, against an allow-all `build` from each source: a repo-root `opencode.json`,
+  `.opencode/agent/build.md`, `OPENCODE_CONFIG`, the global config, and a project
+  `default_agent`. Asked to write a file and run `touch`, `ask` wrote nothing and ran no
+  shell; `edits` wrote the file and ran no shell. `full` did both, and a timed-out run
+  left no opencode process.
 - **pi** has no permission prompts. `ask` passes `--no-mcp --tools read,grep,find,ls` (tested:
   reads worked, nothing was written, no shell ran; `--no-mcp` because `--tools` keeps MCP
   tools, and pi's code mode can reach them); `full` passes nothing. `edits`
@@ -62,7 +83,7 @@ is refused, and one starting with `-` gets a `Task:` line in front.
 | -------- | ------------------------------------------------------------------------------------------- |
 | claude   | `mcc exec <profile> -- claude -p --model M [--effort T] <perm> < file`; without mcc, only the `default` profile, run as `claude …` with `CLAUDE_CONFIG_DIR` removed |
 | pi       | `pi -p [--provider P] --model M [--thinking T] [--no-mcp --tools read,grep,find,ls] -- @file` |
-| opencode | `opencode run --standalone --model M --auto --file file -- "Follow the instructions in the attached file."` |
+| opencode | `[env -u OPENCODE_CONFIG … OPENCODE_CONFIG_CONTENT=<rules>] opencode run --standalone --model M <--auto \| --agent build> --file file -- "Follow the instructions in the attached file."` |
 | codex    | `codex exec --cd DIR --model M [--profile P] [--config model_reasoning_effort=T] <perm> [--skip-git-repo-check] - < file` (the last flag only outside a git repo) |
 | droid    | `droid exec --cwd DIR --model M [--reasoning-effort T] [perm] --file file`                  |
 | devin    | `devin --print --prompt-file file --model M --respect-workspace-trust false <perm>`         |
