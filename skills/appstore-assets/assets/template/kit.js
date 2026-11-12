@@ -213,9 +213,9 @@ function renderFrame(cfg, frame, platform, stageH) {
 // hero device, so a crop to it still shows the app. Slots are device boxes
 // { cx, cy, w, h }; slots outside the safe area only show on wide displays.
 // The PNG is the video's first frame (t = 0). The header renders `safeLayout`
-// (caption and one hero device inside the safe area, ≥ 12 px clear of the
-// ±8 px video drift, no side device) unless creatives.layout is "wide": then
-// the header hero flanks the caption on the right and a side device on the
+// (caption and one hero device inside the safe area; the hero is ≥ 12 px
+// clear vertically, the axis of the ±8 px video drift; no side device)
+// unless creatives.layout is "wide": then the header hero flanks the caption on the right and a side device on the
 // left, both outside the safe area. `landscape` overrides apply when an iPhone
 // or iPad platform is landscape (the search, and the "wide" header).
 const CREATIVE = {

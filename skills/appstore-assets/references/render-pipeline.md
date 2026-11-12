@@ -148,7 +148,7 @@ into the first.
 | --- | --- |
 | First impression | Frame 0 shows beat 0 complete: no fade-in, the headline is readable from 0 s |
 | Dwell | Each beat holds at least max(2.5 s, 1 s + words / 4) of its caption (beat 0 before the first crossfade); `render.py` fails with the needed time otherwise |
-| Safe area | Caption and hero device sit inside Apple's art safe area (`references/apple-specs.md`); the header hero keeps ≥ 12 px clear of it at rest, so the ±8 px drift never crosses it. Under `layout: "wide"` only the header caption does |
+| Safe area | Caption and hero device sit inside Apple's art safe area (`references/apple-specs.md`); the header hero keeps ≥ 12 px clear of it vertically at rest, so the ±8 px vertical drift never crosses it. Under `layout: "wide"` only the header caption does |
 | Timing | `duration` 5–30 s, `fps` 30 or 60, `duration × fps` a whole number. Without `duration` the kit fits it: the shortest half-second that holds every beat, at least 12 s, at most 30 s. A set `duration` is kept as is |
 | Loop | `check_assets.py` fails when the last→first difference exceeds twice the neighboring frame steps |
 

@@ -85,7 +85,9 @@ does not apply: static PNGs have none and the kit fixes the video motion. After 
 - **Universal (16:9):** hero device centered, side devices lower and smaller
   behind it, headline above.
 - The arc motif radiates from the stage center on wide stages only.
-- For a Mac-first app, the hero is the Mac window and a phone may flank it.
+- For a Mac-first app, the hero is the Mac window. The default header shows it
+  alone; a phone may flank it on the search and universal creatives and on a
+  `layout: "wide"` header.
 - The caption names only the devices the image shows ("for iPhone and iPad"
   needs an iPad in the composition), and `kinds` lists only the placements
   the user asked for.

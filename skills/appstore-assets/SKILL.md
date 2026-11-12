@@ -15,8 +15,8 @@ metadata:
 # App Store Assets
 
 Turn an app's codebase or landing page into an upload-ready App Store **asset
-set**: screenshots for each required display class plus optional creative
-assets (header and search images, and their looping muted videos), rendered
+set**: screenshots for each required display class plus optional creatives
+(header and search images, and their looping muted videos), rendered
 from HTML by headless Chrome and verified against Apple's specs. Prime directive: show only what the shipped app does. Never invent UI,
 features or claims (App Review Guideline 2.3).
 
@@ -29,16 +29,15 @@ Terms used throughout:
 - **overclaim**: anything a frame shows that the shipped build cannot do.
 - **pre-authorized run**: the request fixes the direction, frames and UI source, or delegates them ("just build it", "pick whatever looks good", "don't ask"), or its run options say `preauthorized: true`.
 - **run options**: a batch run's decisions in a `run.json` file or an `appstore-assets-run` prompt block (`references/render-pipeline.md` → Batch runs and reports). Read them before Step 1; each key fixes its decision.
-- **creative video**: a looping, muted product page header or search results video (`creative/<kind>.mp4`) made from the still creative and grounded frames. An **App Preview** (recorded app footage with audio) is not one.
+- **creative video**: a looping, muted product page header or search results video (`creative/<kind>.mp4`) made from the still creative and grounded frames, unlike an **App Preview** (recorded app footage with audio).
 
 ## When to Use
 
-Use when someone needs App Store screenshots, header/search creative images,
-or a product page header or search results video for an iPhone, iPad or Mac
-app, from its code or landing page, or wants an existing asset set edited and
-re-rendered. Not for App Previews (recorded app footage, 15–30 s, with audio):
-say so and offer a header video instead. Also not for listing copy, review
-audits, app icons, or Google Play assets.
+Use when someone needs App Store screenshots or header/search images or
+videos for an iPhone, iPad or Mac app, from its code or landing page, or wants
+an existing asset set edited and re-rendered. Not for App Previews (recorded
+app footage, 15–30 s, with audio; say so and offer a header video), listing
+copy, review audits, app icons, or Google Play assets.
 
 ## Workflow overview
 
@@ -57,7 +56,7 @@ Completion Report: `√`/`×` rows tied to commands, files or counts, then
 | Only watchOS, tvOS or visionOS, or no Apple target | **Stop**: report BLOCKED with the reason; write nothing |
 | No input named or found | Ask for the codebase path or landing-page URL; write nothing |
 
-Find existing sets first with the commands in `references/input-discovery.md` → Existing
+Find existing sets first via `references/input-discovery.md` → Existing
 asset sets (`store/screenshots/`, `fastlane/screenshots/`, `metadata/`, `appstore-assets/`; `1.0`
 and `1.0.0` are one version). Update reuses that set's `src/` and `out`, which may differ.
 
@@ -113,7 +112,7 @@ under Uncertainty; without `browse`, use the host's web-fetch tool.
 
 Spawn the explorer. Input: `agents/app-explorer.md`, `references/input-discovery.md`, the
 input path or URL, and whether `browse` is available. Output: the app brief JSON, saved in Step 4 as `<out>/src/brief.json` for Steps 6–7 and later Update runs. Do not
-read the source tree yourself in this step; the explorer keeps it out of your context budget.
+read the source tree yourself; the explorer keeps it out of your context budget.
 
 Bar: every platform carries evidence, every screen has a `source`, and `orientation` and `limits` are filled (or null with a `gaps` reason). If `stop_reason` is set, take the Stop branch.
 
@@ -168,9 +167,8 @@ What each script retries, fails on and prunes: `references/render-pipeline.md` �
 behavior_. Videos render last and are slow, so iterate with `--no-video`. If a script fails, apply the fix it prints
 and re-run it; fix a caption `WARN:` (outside the safe area) too. List `creative/` WARN rows under
 Uncertainty. A hand-made `header*`/`search*`/`universal*` file is checked as an upload asset:
-if one FAILs and `.kit-outputs.json` does not list it, or lists it as changed (its
-FAIL row ends "(not written by the kit)"), never move, rename or delete it yourself: report
-BLOCKED and ask the user to fix, rename or move it. Bar: both commands exit 0.
+if one FAILs and `.kit-outputs.json` omits it or lists it as changed (its
+FAIL row ends "(not written by the kit)"), never move, rename or delete it yourself: report BLOCKED and ask the user to fix, rename or move it. Bar: both commands exit 0.
 
 ## Step 6 — Review and polish
 
@@ -194,9 +192,9 @@ approval. List the brief's `listing_findings` as optional listing fixes; creativ
 - Captures with QA data, an open keyboard or old UI are not clean: use grounded screens and say why.
 - A feature gated by an entitlement the project lacks (CarPlay, HealthKit, Watch) is never drawn.
 - "Coming soon" and roadmap features stay out of frames and captions; record the omission in `PLAN.md`.
-- An iPhone-only app needs no iPad set, even though it runs on iPad.
-- An "App Store video" request is ambiguous: an App Preview (recorded footage) is out of scope; offer a header or search video, and build one only once it is chosen or pre-authorized.
-- Voice-over, music or "sound on" requests: videos ship silent (muted by default); put every message in captions and record the decision.
+- An iPhone-only app needs no iPad set, though it runs on iPad.
+- An "App Store video" request is ambiguous: an App Preview is out of scope; offer a header or search video, built only once chosen or pre-authorized.
+- Voice-over, music or "sound on" requests: videos ship silent; put every message in captions and record the decision.
 - A video beat that needs a screen no frame shows needs a grounded frame first, or the beat is dropped.
 - A landscape-only app (games often are) gets landscape screenshots: `orientation: "landscape"`, never a portrait set of rotated screens.
 - iPhone Duo is not rendered (`references/apple-specs.md`): say so; never stretch an iPhone frame to its size.
@@ -208,7 +206,7 @@ A run is COMPLETE only when you verify every item:
 - [ ] `render.py` and `check_assets.py` exit 0 on the final state: exact sizes, RGB without alpha, at most 10 per class, the required class per platform, caption contrast, no dropped-frame leftovers.
 - [ ] `iphone-6.9/` and `iphone-6.3/` hold the same frame names.
 - [ ] Each requested video passes `check_assets.py` (exact size, 30/60 fps CFR, 5–30 s, H.264 yuv420p, no blank frame or seam jump), and its sheet shows every caption inside the safe area.
-- [ ] The header crop tile on `sheets/creative.png` shows real app UI, not only the caption (unless `creatives.layout: "wide"`).
+- [ ] The `sheets/creative.png` header crop tile shows real app UI, not only the caption (unless `creatives.layout: "wide"`).
 - [ ] `config.js` holds no `TODO:` and every screen builder cites `// Source:`.
 - [ ] The latest reviewer verdict is `PASS`, with no blocking finding.
 - [ ] Simulator state is restored and scratch files are deleted (or listed as kept).
@@ -231,9 +229,9 @@ Report extras: `references/render-pipeline.md` → _Final report additions_.
 
 PARTIAL means assets exist but a check or blocking finding remains; BLOCKED means no assets
 were written, or a hand-made `creative/` file fails Step 5. State that nothing was committed or uploaded, and name the recreated frames.
-When grading runs, also check that a reader finds the result first, can tell verified facts
-from assumptions, can trace each claim to evidence, and sees the next decision. Without a
-human review, mark that understanding as unconfirmed.
+When grading runs, also check that a reader finds the result first, tells verified facts
+from assumptions, traces each claim to evidence, and sees the next decision; without a
+human review, mark that unconfirmed.
 
 ## Self-Improve
 
@@ -252,7 +250,7 @@ Optional and propose-only. After the run's result is delivered, run this check:
 8. The user opts out → stop proposing. With their approval, replace this section's body with `Off — the user opted out.`
 ## Reference files
 
-- `references/apple-specs.md`: sizes, required classes, creative image and video specs, safe areas, encoding decisions, source URLs (Steps 2, 5).
+- `references/apple-specs.md`: sizes, required classes, creative specs, safe areas, encoding, source URLs (Steps 2, 5).
 - `references/apple-guidelines.md`: content rules, overclaim traps, story and captions (Steps 3, 6).
 - `references/input-discovery.md`: where each brief field comes from (explorer slice, Step 1).
 - `references/design-direction.md`: frontend-design and emil-design-eng mapping, polish checklist (Steps 3, 6).
