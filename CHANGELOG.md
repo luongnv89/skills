@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- **lstack directory edition (#504).** `scripts/build-lstack-directory.py` builds a `directory` branch for the Claude plugin directory, which accepts only Markdown, text, JSON, YAML and images, and only standard frontmatter keys, from organizations Anthropic hasn't verified. Members that ship scripts, or that depend on skills left out, are excluded by rule; each `SKILL.md` keeps `name`, `description`, `license`, `compatibility` and `metadata`, with `effort` and `dependencies` moved under `metadata`. The build re-checks its output and exits 1 on any problem. At this commit the edition holds 22 of the 48 members. `main` and the full lstack are unchanged.
+
 ## v4.4.0 — 2026-11-12
 
 This catalog release adds two skills: `agent-profile`, which hands one task to another coding agent through a saved profile of harness, model, thinking level and permission mode, and `hc-agent`, which brings `herdr-agent`'s fleet workflow to the Herdr desktop app. `issue-work-loop` can now run its fleet in the desktop app through `hc-agent`, and `herdr-agent` sends desktop app users there. `product-launch` plans a launch around one launch story, with a copy test, opt-in campaign tracks and Reddit participation before promotion, and `landing-page-generator` applies the same copy test to its hero. `appstore-assets` keeps real app UI inside the header's art safe area by default, `appstore-review-checker` catches the rejection patterns behind post-approval removals, `aso-marketing` folds in practitioner ASO lessons, and `idea-validator` maps paid markets and defines its verdict inputs. Each skill's docs, evals and tests moved out of the `skills/` plugin folder into `meta/<name>/`, so the folder holds 425 files, under the Claude plugin directory's 512-file limit. The catalog release version is 4.4.0. The lstack package and plugin version is 0.8.0, first released by this tag, with 48 members (46 top-level), and each member keeps its independent version.
