@@ -142,12 +142,14 @@ class DirectoryEditionTests(unittest.TestCase):
         for name, data in planted:
             (child / name).write_bytes(data)
         (child / "link.md").symlink_to(out / "README.md")
+        (child / "__MACOSX").mkdir()
         skill_md = child / "SKILL.md"
         skill_md.write_text(skill_md.read_text().replace("license: MIT\n", "license: MIT\nhooks: x\n")
                             .replace('  version: "1.2.3"', "  version: 1.2.3"))
         problems = "\n".join(EDITION.check_tree(out)[0])
         for needle in ("helper.py", "note.md: starts with #!", "bin.md", "package.json", "big.md",
-                       "link.md: symlink", "outside the allowed list: hooks", "metadata.version is not a quoted"):
+                       "link.md: symlink", "__MACOSX: operating-system file",
+                       "outside the allowed list: hooks", "metadata.version is not a quoted"):
             self.assertIn(needle, problems)
 
     def test_check_tree_counts_files_and_notes_resource_frontmatter(self):
@@ -257,6 +259,12 @@ class DirectoryEditionTests(unittest.TestCase):
         subprocess.run(["git", "clone", "-q", str(ROOT), str(repo)], check=True)
         subprocess.run(["git", "-C", str(repo), "checkout", "-q", subprocess.check_output(
             ["git", "-C", str(ROOT), "rev-parse", "HEAD"]).decode().strip()], check=True)
+        # Test the builder under test (the working tree), not the one in the commit.
+        for script in ("scripts/build-lstack-directory.py", "scripts/build-lstack.py"):
+            (repo / script).write_bytes((ROOT / script).read_bytes())
+        subprocess.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                        "-c", "core.hooksPath=/dev/null", "commit", "-qam", "builder", "--allow-empty"],
+                       check=True)
         env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
         for script in ("scripts/build-lstack-directory.py", "scripts/build-lstack.py"):
             target = repo / script
