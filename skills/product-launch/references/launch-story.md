@@ -96,6 +96,9 @@ later of today + 21 days and today + the longest opted-in lead time. A user-set 
 earlier than that is never moved silently: flag the conflict and propose the later date
 at the gate.
 
+For each track that is on, add a `## Timeline` row at L minus its lead time with the track's
+first action; checklist rows take their date from that row.
+
 ## 5. Disclosure rule
 
 Source: US FTC, "Disclosures 101 for Social Media Influencers"

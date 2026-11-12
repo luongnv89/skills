@@ -340,7 +340,8 @@ Mode A Step 5 (SKILL.md → *Workflow*):
 - The problem: how the world works today for this audience, in the subheadline.
 - The contrarian take, when the brief or the launch story gives one. When neither does, leave it out and say so on the Final Report's `Uncertainty:` line; `[proof needed]` marks missing proof only.
 - One big number from the brief, with its source, or `[proof needed]` (Mode B: `[placeholder]`).
-- When `launch-kit/copy-bank.md` exists, reuse its launch story (`copy.story.hero`, `.villain`, `.contrarian`) and its facts instead of writing a new one.
+- Slots: problem = subheadline sentence 1; contrarian take = subheadline sentence 2, or omitted; big number = trust bar, or `[proof needed]`; proof of work = a hero visual or demo the brief names, beside the headline, or the trust bar when the brief names none. The subheadline stays 1-2 sentences.
+- When `launch-kit/copy-bank.md` exists, reuse its launch story (`copy.story.hero` is the story's protagonist, the customer, not the page headline; `.villain`, `.contrarian`) and its facts instead of writing a new one.
 
 ## Expected Output Example (Mode A)
 
