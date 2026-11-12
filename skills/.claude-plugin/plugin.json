@@ -1,0 +1,25 @@
+{
+  "author": {
+    "name": "Luong NGUYEN"
+  },
+  "description": "22 first-party Agent Skills for Claude Code, Markdown instructions only; the full 48-skill lstack installs from the luongnv89/skills marketplace.",
+  "homepage": "https://luongnv.com/skills/",
+  "icon": "./.claude-plugin/icon.png",
+  "keywords": [
+    "skills",
+    "code-review",
+    "documentation",
+    "diagrams",
+    "github",
+    "release",
+    "seo",
+    "productivity"
+  ],
+  "license": "MIT",
+  "name": "lstack",
+  "repository": "https://github.com/luongnv89/skills",
+  "skills": [
+    "./"
+  ],
+  "version": "0.8.0"
+}

@@ -1,0 +1,100 @@
+# Edge Cases and Platform Notes
+
+## Edge Cases
+
+- **No local metadata files** — App has no `metadata/`, `fastlane/`, or equivalent. Create the canonical directory structure and write optimized files from scratch, then provide upload instructions.
+- **Single-platform app** — Skip phases for the irrelevant store. Do not propose a keywords field for Android (it has none).
+- **No competitor access** — Skip Phase 1.3; base keyword strategy on app features alone. Flag this gap in the analysis report.
+- **Unverifiable keyword volume data** — Proceed with heuristic priority (feature-specific over generic, long-tail over head terms) and note the limitation.
+- **Pre-launch app** — No live listing. Skip performance-baseline steps (record every baseline rank as `unranked`); focus on metadata creation and visual guidance. The brand is unknown, so the title leads with the keyword.
+- **User asks the skill to change prices** — Pricing is set in App Store Connect or the Play Console, not in metadata files. Put the tier proposal in the plan's Localized Pricing section and leave the change to the user.
+- **Product signals are weak** — A rating below 4.0, or recent reviews repeatedly reporting a broken core function, show users don't want the app as it stands. Say so in Key Findings and the Final Report's `Uncertainty:` line; don't promise ASO gains.
+- **Metadata policy violation in proposed plan** — Compliance check (Phase 3) catches a prohibited term. Revise the plan silently, replace the violation, re-run compliance, present the corrected plan.
+- **Non-English primary locale** — Adapt all metadata templates, character limits, and keyword strategies to the target language.
+- **Re-run inside the measurement window** — The last metadata change shipped less than 6 weeks ago. Review the tracked ranks and outcome metrics against the baseline and keep the metadata; change it only when the user asks, and say the data is too early to judge.
+- **User rejects the plan** — Do not execute. Iterate in Phase 2, then re-run Phase 3 compliance check before presenting the revised plan. If the user ends the run without approving a plan, the Final Report status is `PARTIAL`.
+
+## Platform-Specific Notes
+
+### Apple App Store
+- Indexed fields: title, subtitle, keyword field (100 chars)
+- Description is NOT indexed but affects conversion
+- Screenshot captions are reportedly OCR-indexed since June 2025 (practitioner reports; Apple has not confirmed it)
+- Custom Product Pages (CPPs) enable audience-specific listings
+- Use `asc` CLI tools if available for metadata sync
+
+### Google Play Store
+- All text fields are indexed (title, short description, full description)
+- No separate keyword field
+- Google detects and penalizes keyword stuffing
+- Store Listing Experiments enable A/B testing
+- Long description supports up to 4,000 chars
+- Google considers app quality signals: crash rate, ANR rate, retention
+
+### Both Stores
+- App ratings above 4.0 are critical for conversion (90% of featured apps are 4.0+)
+- Regular updates signal active maintenance
+- Localization should be market-aware, not simple translation
+- First 1-3 lines of description must hook the user before "Read More"
+
+## Acceptance Criteria
+
+A run is successful when all are verifiable:
+
+- [ ] **Analysis report produced** — App Overview, Metadata Status table, Key Findings.
+- [ ] **ASO plan covers all required fields** — Title with its brand position, subtitle/short desc, keywords (iOS), full description, visual recommendations, Measurement Plan.
+- [ ] **Compliance check ran and passed** — Phase 3 report present and PASS before plan shown.
+- [ ] **User approval gate respected** — Phase 4 does not begin until explicit approval.
+- [ ] **All metadata fields within character limits** — Title ≤30, subtitle ≤30, iOS keywords ≤100, Android short desc ≤80, full desc ≤4000.
+- [ ] **No prohibited keywords in any output metadata** — Zero banned terms.
+- [ ] **No trademark violations** — No competitor brand names anywhere.
+- [ ] **iOS keywords field has no duplicates with title/subtitle**.
+- [ ] **Metadata files written** — At least one file or correct directory structure exists.
+- [ ] **Summary report produced** — Changes Made, Metadata Comparison, Compliance, Measurement Plan, Next Steps.
+- [ ] **Final Report produced** — the four-line `Result` / `Evidence` / `Uncertainty` / `Decision` block in `references/final-report.md`, with a status that matches this checklist.
+
+A plan-only run (the user declines execution) treats the metadata-files and Summary Report items as not applicable.
+
+### Understanding criteria
+
+Review every happy-path and edge run's Final Report against these four reader checks (full table in `references/final-report.md`):
+
+- **Result is findable** — the first line gives the status, the app and store, and what was written.
+- **Facts and assumptions are separated** — character counts and scan counts are stated as checked; heuristic keyword volumes and untested ranking effects are labeled as uncertain.
+- **Claims are traceable** — every field change cites its before and after character count.
+- **Next decision is clear** — the pending approval is named, or the report says `No approval needed.` and names the remaining user action.
+
+Agent inspection cannot confirm human understanding. If no human reviewer answers these checks, record human understanding as unconfirmed.
+
+## Step Completion Reports
+
+Emit exactly 5 reports per run — `M` is always 5, and the groupings below are the 5 steps:
+
+```
+◆ [Step Name] ([step N of M] — [context])
+··································································
+  [Check 1]:          √ pass
+  [Check 2]:          √ pass (note if relevant)
+  [Check 3]:          × fail — [reason]
+  [Criteria]:         √ N/M met
+  ____________________________
+  Result:             PASS | FAIL | PARTIAL
+```
+
+### Skill-specific checks per phase
+
+- **Phase: Analyze (Phase 1)** — `Current state analysis`, `Metadata audit complete`, `Competitive landscape identified`, `Baseline documented`
+- **Phase: Plan + Compliance (Phases 2-3)** — `Plan completeness`, `Policy compliance`, `Prohibited keyword scan`, `Trademark check`
+- **Phase: Execute (Phase 4)** — `Metadata fields updated`, `Character limits respected`, `Keywords correctly formatted`, `Implementation quality`
+- **Phase: Review + Verify (Phases 5-6)** — `No policy violations re-introduced`, `Best practices met`, `Cross-field keyword combinations valid`, `Localization market-aware`
+- **Phase: Summarize (Phase 7)** — `Summary report with Measurement Plan`, `Metadata comparison table present`, `Compliance status stated`, `Files modified listed`
+
+## Cross-Skill Integration
+
+Works well combined with:
+- **`asc-aso-audit`** — Detailed offline iOS metadata audit
+- **`asc-localize-metadata`** — Bulk localization across locales
+- **`asc-metadata-sync`** — Sync local metadata with App Store Connect
+- **`asc-whats-new-writer`** — Generate engaging release notes
+- **`asc-shots-pipeline`** — Automated screenshot capture
+- **`seo-ai-optimizer`** — Align ASO and SEO keyword strategies

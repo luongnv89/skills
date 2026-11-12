@@ -1,0 +1,73 @@
+# Example Output
+
+A complete run produces `APPSTORE_AUDIT.md` in the project root. Example snippet:
+
+```markdown
+# App Store Review Audit Report
+
+**App:** NutriTrack – Meal Planner
+**Date:** 2026-04-19
+**Platform:** iOS 16+
+**App Type:** Health & Fitness — uses HealthKit, has user accounts, offers subscriptions
+
+## Verdict: LIKELY REJECT
+
+**Summary:** Two critical issues will likely cause rejection: missing account deletion flow (Guideline 5.1.1-v-delete, a Top 20 trigger) and UIWebView usage (Guideline 2.5.6). Fix these before submitting.
+
+- Total checks: 47
+- Pass: 38 | Fail: 2 | Warning: 5 | N/A: 2
+
+---
+
+## Critical Issues (FAIL)
+
+### 5.1.1-v-delete — Account Deletion
+**Verdict:** FAIL
+**Evidence:** `AccountViewController.swift` has a "Delete Account" button (line 142) that calls `deleteAccountAPI()` but no confirmation screen or in-app deletion flow was found. The API call is stubbed and returns a 501 Not Implemented response in `NetworkClient.swift:87`.
+**Why it matters:** Apple requires apps with account creation to provide an in-app account deletion option that fully removes user data.
+**Fix:** Implement a two-step deletion flow (confirm dialog → API call → sign out → clear local data). See Human Interface Guidelines: Deleting an account.
+
+### 2.5.6 — WebKit for Web Content (UIWebView)
+**Verdict:** FAIL
+**Evidence:** `LegacyBrowserViewController.swift:14` imports `UIKit` and declares `var webView: UIWebView`. UIWebView is deprecated since iOS 12 and forbidden in new submissions.
+**Fix:** Replace with `WKWebView` from `WebKit`. Import `WebKit` and update the property type and any delegate methods.
+
+---
+
+## Warnings
+
+### 2.3 — Accurate Metadata
+**Verdict:** WARNING
+**Evidence:** App Store description claims "Real-time nutritionist AI chat" but no chat UI or AI integration was found in source code.
+**Recommendation:** Either implement the feature before submitting or remove the claim from the description to avoid a 2.3 rejection for misleading metadata.
+```
+
+The verdict is `LIKELY REJECT` because 5.1.1-v-delete is a Top 20 trigger (see *Verdict Criteria* in `references/audit-workflow.md`).
+
+## Minimal expected shape
+
+The smallest report that still meets the acceptance criteria:
+
+```markdown
+# App Store Review Audit Report
+
+**App:** NutriTrack – Meal Planner
+**Date:** 2026-04-19
+**Platform:** iOS 16+
+
+## Verdict: LIKELY REJECT
+
+- Total checks: 47 | Pass: 38 | Fail: 2 | Warning: 5 | N/A: 2
+
+## Critical Issues (FAIL)
+
+### 5.1.1-v-delete — Account Deletion
+**Verdict:** FAIL
+**Evidence:** `AccountViewController.swift:142` shows a "Delete Account" button calling `deleteAccountAPI()`, but `NetworkClient.swift:87` returns 501.
+**Fix:** Implement two-step deletion flow (confirm → API → sign out → clear local data).
+
+## Pre-Submission Checklist
+
+1. [ ] Implement account deletion flow (5.1.1-v-delete)
+2. [ ] Replace UIWebView with WKWebView (2.5.6)
+```

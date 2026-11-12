@@ -1,0 +1,708 @@
+{
+  "edition": "directory",
+  "excluded": {
+    "agent-profile": "ships files the directory refuses: scripts/agent_profile.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "appstore-assets": "ships files the directory refuses: assets/template/config.js (type outside Markdown, text, JSON, YAML and images (.js)); assets/template/index.html (type outside Markdown, text, JSON, YAML and images (.html)); assets/template/kit.css (type outside Markdown, text, JSON, YAML and images (.css)); assets/template/kit.js (type outside Markdown, text, JSON, YAML and images (.js)); scripts/check_assets.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/fetch_font.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/render.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "code-review": "ships files the directory refuses: references/report-template.html (type outside Markdown, text, JSON, YAML and images (.html))",
+    "codebase-modernizer": "ships files the directory refuses: scripts/dep_scan.sh (type outside Markdown, text, JSON, YAML and images (.sh))",
+    "design-optimizer": "depends on skills outside this edition: dont-make-me-think, ux-ax-review, website-agent-readiness, viral-product-evaluator, browse",
+    "dev-machine-setup": "ships files the directory refuses: assets/starship.toml (type outside Markdown, text, JSON, YAML and images (.toml)); assets/zshrc-config (type outside Markdown, text, JSON, YAML and images (no extension)); scripts/detect_env.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "dont-make-me-think": "ships files the directory refuses: scripts/process_screenshots.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "github-pages-publish": "ships files the directory refuses: assets/text-page.html (type outside Markdown, text, JSON, YAML and images (.html)); scripts/pages_publish.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "hc-agent": "ships files the directory refuses: scripts/agent.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/hclib.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/launch_profile.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "herdr-agent": "ships files the directory refuses: scripts/badge.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/broadcast.sh (type outside Markdown, text, JSON, YAML and images (.sh)); scripts/fleet_status.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/launch_profile.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/next_grid_split.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/preflight_send.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/wait_for_idle.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "install-script-generator": "ships files the directory refuses: scripts/doc_generator.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/env_explorer.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/executor.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/plan_generator.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "issue-work-loop": "depends on skills outside this edition: herdr-agent, hc-agent, issue-pr-review, issue-resolver",
+    "ollama-optimizer": "ships files the directory refuses: scripts/benchmark_ollama.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/detect_system.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "oss-ready": "ships files the directory refuses: assets/LICENSE-MIT (type outside Markdown, text, JSON, YAML and images (no extension))",
+    "product-launch": "ships files the directory refuses: scripts/check_kit.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "product-planner": "depends on skills outside this edition: tasks-generator",
+    "rex-agent": "ships files the directory refuses: scripts/agent.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/grid.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/launch_profile.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/rexlib.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "search-optimizer": "depends on skills outside this edition: seo-ai-optimizer, website-agent-readiness, viral-product-evaluator",
+    "security-setup": "ships files the directory refuses: scripts/security_check.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "seo-ai-optimizer": "ships files the directory refuses: scripts/audit_seo.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "tasks-generator": "ships files the directory refuses: scripts/analyze_dependencies.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "tmux-agent-comms": "ships files the directory refuses: scripts/broadcast.sh (type outside Markdown, text, JSON, YAML and images (.sh)); scripts/preflight_send.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/wait_for_idle.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "user-test": "ships files the directory refuses: scripts/user_test.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "ux-ax-review": "ships files the directory refuses: scripts/validate_report.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "viral-product-evaluator": "ships files the directory refuses: scripts/virality_score.py (type outside Markdown, text, JSON, YAML and images (.py))",
+    "website-agent-readiness": "ships files the directory refuses: scripts/render_plan.py (type outside Markdown, text, JSON, YAML and images (.py)); scripts/scan_site.sh (type outside Markdown, text, JSON, YAML and images (.sh)); scripts/triage_scan.py (type outside Markdown, text, JSON, YAML and images (.py))"
+  },
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "0c1a0646485fcb59c2c3f49c295cc79b3eaf4e1ae8be1c8aea79fd2e16a4a6e4"
+    },
+    {
+      "path": "README.md",
+      "sha256": "84bd2d689201bb2a23bbc6f3d1e95c72b4d5684b58633c2a4ba0040513a84de5"
+    },
+    {
+      "path": "skills/.claude-plugin/icon.png",
+      "sha256": "40fa02ffed69773f211e55dbf10e7e3f7beb40e19b91623284d92c8ba78a7064"
+    },
+    {
+      "path": "skills/.claude-plugin/plugin.json",
+      "sha256": "9046d9bc1093f3b9e91ebd39667efc68e7a5dfd4f246fc861fbc5d60f248ee12"
+    },
+    {
+      "path": "skills/LICENSE",
+      "sha256": "0c1a0646485fcb59c2c3f49c295cc79b3eaf4e1ae8be1c8aea79fd2e16a4a6e4"
+    },
+    {
+      "path": "skills/README.md",
+      "sha256": "b1d88db5b3681b38d15c71588c49738b5a6d2bdc6ebd15483b08aeefea6cb895"
+    },
+    {
+      "path": "skills/agent-config/SKILL.md",
+      "sha256": "511f1379b9db7f2a88bbeea3064124b18805c4731cfecaa7568d50c15e2c7a25"
+    },
+    {
+      "path": "skills/agent-config/references/agents-md-checklist.md",
+      "sha256": "253b0734d5198253a702cc88828749393dda4bd9dd8775e9ea81d57d4d4c2874"
+    },
+    {
+      "path": "skills/agent-config/references/agents-md-writing.md",
+      "sha256": "4fe8ea0eb9ed9a503c94284f85e1092d4b8188f9042667e260fafadfe1d1e4f4"
+    },
+    {
+      "path": "skills/agent-config/references/anti-patterns.md",
+      "sha256": "9e1b56d61d81adf1e94380589a5da060632ac64c57a52544d6997dc565a3a30c"
+    },
+    {
+      "path": "skills/agent-config/references/final-report.md",
+      "sha256": "b12a45256c12d1210206e18b79e8e5110ccdf03400b37a1d4cfe8db3201e62ff"
+    },
+    {
+      "path": "skills/agent-config/references/knowledge-routing.md",
+      "sha256": "f0c9dfe7d993fd7a720bdab43d3adfbfabd5029936008f36d217cce8df4dd4a2"
+    },
+    {
+      "path": "skills/agent-config/references/official-standards.md",
+      "sha256": "5f39f97e87d8d7927ef58db0771423a9209d4ea796b3819a33cbba5dea28ca77"
+    },
+    {
+      "path": "skills/agent-config/references/optional-blocks.md",
+      "sha256": "31bf4632d924544f9a4aa9b40ddc9665fec2e19ec5ef315c56503458f7c88902"
+    },
+    {
+      "path": "skills/agent-config/references/token-efficiency-block.md",
+      "sha256": "993d684c1000db818e6a56c1d194d3bfe15062b8cc5ff5d80e1ef446fed9f11a"
+    },
+    {
+      "path": "skills/ai-job-scout/SKILL.md",
+      "sha256": "9a5a2a37e9ac970caa85d7d95e53568c606607c711903ce8a8f2666a40bd75d9"
+    },
+    {
+      "path": "skills/ai-job-scout/references/interactive-report.md",
+      "sha256": "20532f2d764139a65c50968ba845e02b4ad116b123a179dc9da268b3219df64d"
+    },
+    {
+      "path": "skills/ai-job-scout/references/report-format.md",
+      "sha256": "e066929de207ce96581fc87883c72d6a808cc35161fffa34e8e3b38cda25948d"
+    },
+    {
+      "path": "skills/appstore-review-checker/SKILL.md",
+      "sha256": "8eddbe9d7c4b425b417617b0901ca706201a88cf451f24e9cedea5098cdaa7b3"
+    },
+    {
+      "path": "skills/appstore-review-checker/agents/fixer.md",
+      "sha256": "fe47e865ec97f8bb1451379db46a1818511a59b7936899b8b25812100b78e1a3"
+    },
+    {
+      "path": "skills/appstore-review-checker/agents/guideline-auditor.md",
+      "sha256": "cb9b000b2b6abbee3eea291bfa22a656babc1e46b26492724d485c34ed8532cb"
+    },
+    {
+      "path": "skills/appstore-review-checker/agents/project-explorer.md",
+      "sha256": "613f9c63c239835b25a2c50f19a2573417fe7429beb423ee67ceb8f028e08316"
+    },
+    {
+      "path": "skills/appstore-review-checker/agents/report-writer.md",
+      "sha256": "bd8b34de66ef4bb2718240369ac37c0f49f8b2e5832a610b4ca3ca66cefcf057"
+    },
+    {
+      "path": "skills/appstore-review-checker/references/audit-workflow.md",
+      "sha256": "f79f3c5cd2df82ad85aa1895613304c8b1b48b762ad811d4a4d710bf2d04f212"
+    },
+    {
+      "path": "skills/appstore-review-checker/references/edge-cases.md",
+      "sha256": "37bbed506cc87f0fc02b04041948d569ada5a646e8263c800565bf23e6710682"
+    },
+    {
+      "path": "skills/appstore-review-checker/references/example-output.md",
+      "sha256": "8707755df1b6a12211c6216f64c949b1f88895119141c77838ebb9e11bc552b7"
+    },
+    {
+      "path": "skills/appstore-review-checker/references/final-report.md",
+      "sha256": "8f81a31846c39bce261eb76a05eb15712287b4e8f158c443a4560a78f291b811"
+    },
+    {
+      "path": "skills/appstore-review-checker/references/guidelines.md",
+      "sha256": "94aa3342023b4aff83a78da6f5fa2a616afd08b260316e7fa3909afa34b18b15"
+    },
+    {
+      "path": "skills/appstore-review-checker/references/quality-checks.md",
+      "sha256": "087a1424e4f8e4888d6653306c0b02a2fe9a92f0cb8c5ccce9608882c34f1da6"
+    },
+    {
+      "path": "skills/appstore-review-checker/references/subagent-architecture.md",
+      "sha256": "f3e5c28ab68159569941cb01e91a243eef196c89ede003300e8861416d88264f"
+    },
+    {
+      "path": "skills/aso-marketing/SKILL.md",
+      "sha256": "f23ae1cbabd64835c8294d171d3bca2f4d7d6daab915458344ddc9a6685d1759"
+    },
+    {
+      "path": "skills/aso-marketing/agents/analyzer.md",
+      "sha256": "49dd1d5607d46e2d07be46be4c268df9d86a481c26ff8cb93bb77f6783751127"
+    },
+    {
+      "path": "skills/aso-marketing/agents/compliance-checker.md",
+      "sha256": "b9df46957d3624b31c16fbb44a031d45cf769024f2efa219502ab0e08680794a"
+    },
+    {
+      "path": "skills/aso-marketing/agents/executor.md",
+      "sha256": "d11b12e56a9c5f462ec5d27ad00cef700456f1aafeeb838e93bb8266e8a2174b"
+    },
+    {
+      "path": "skills/aso-marketing/agents/plan-writer.md",
+      "sha256": "ed1801aced852b54fb1f8867fe62728c3ffb92c87ffd5164a29b340b9aeb3c8a"
+    },
+    {
+      "path": "skills/aso-marketing/agents/reviewer.md",
+      "sha256": "c2e6f08b8d595694db16696a1207dda42bae26e27388e976525cdfbd8cff390a"
+    },
+    {
+      "path": "skills/aso-marketing/references/aso_best_practices.md",
+      "sha256": "4444d225488fa226d44a7d96590f7fa230270f35a6153d6f06d07b0578a875ba"
+    },
+    {
+      "path": "skills/aso-marketing/references/edge-cases.md",
+      "sha256": "053f48333b5f9feb5dbc7aa8963d1aa63230c1ad7ce1cc50772ecda4aed34b81"
+    },
+    {
+      "path": "skills/aso-marketing/references/expected-output.md",
+      "sha256": "3ac4ef12373341503f0e7947e6308c1b2825b2a601d90f4a0eda0558ca358e4f"
+    },
+    {
+      "path": "skills/aso-marketing/references/final-report.md",
+      "sha256": "0ab1af9011d7c8e68cf23f4c57f45f927af85800da7777bf6819fe8a6638a0e6"
+    },
+    {
+      "path": "skills/aso-marketing/references/phase-3-compliance.md",
+      "sha256": "190df3f876ca39f259e1cada8e7908f3c2e5e5ab0c91ed5143d60aff3776ca2f"
+    },
+    {
+      "path": "skills/aso-marketing/references/phases-1-2.md",
+      "sha256": "54067c46e77baa31c1705502a95218d18958ebda0871505e23592fcb8ea084f0"
+    },
+    {
+      "path": "skills/aso-marketing/references/phases-4-7.md",
+      "sha256": "2e705e9b17ac37688ed49bf07122e9191dfbdb475953f56662dc2323d6b45b33"
+    },
+    {
+      "path": "skills/auto-push/SKILL.md",
+      "sha256": "d63769f861686faa6bae318b8436431a8efc48961c769f4190e19d14af892d69"
+    },
+    {
+      "path": "skills/auto-push/references/edge-cases-and-reports.md",
+      "sha256": "2d9adc4067cd4c9f39c5315a31b12609af125f72dda52bce0e992c20e4c2fa2b"
+    },
+    {
+      "path": "skills/brand-name-checker/SKILL.md",
+      "sha256": "bf2db5a7906ae460da58aeddbc1b430b22d2212be58a3c49140097f9cc026e26"
+    },
+    {
+      "path": "skills/brand-name-checker/agents/domain-checker.md",
+      "sha256": "9d1e7f8bc91a2cf668211163e2cf1603822c452710f8b0726cb6c2bc69cf3562"
+    },
+    {
+      "path": "skills/brand-name-checker/agents/registry-checker.md",
+      "sha256": "a7a474553e0c7ceeee2fef9bd837f3d3570081cb11537043bb0a4ecd1779b6b9"
+    },
+    {
+      "path": "skills/brand-name-checker/agents/social-checker.md",
+      "sha256": "1dd6a9a0a4325c969b4bc5bfcd618410bb85077ad472354ab8bee38b6061e32f"
+    },
+    {
+      "path": "skills/brand-name-checker/agents/synthesizer.md",
+      "sha256": "73f8101cc620b81c29eb45beef92e281968a466b658b93ac468143337bf73cae"
+    },
+    {
+      "path": "skills/brand-name-checker/agents/trademark-checker.md",
+      "sha256": "b910e4cf3315e22a87a10723d7d1adeba7e066eba403fa4e297f6767eb5b3e03"
+    },
+    {
+      "path": "skills/brand-name-checker/references/edge-cases.md",
+      "sha256": "0224d30320bd90b0ffc211fec628bf67a601113b6a55fdfa7b601ed0ac9637f9"
+    },
+    {
+      "path": "skills/brand-name-checker/references/output-contract.md",
+      "sha256": "deaf728c30bdb24877a48efa24210dd4ee6b2a28af79b5f6116d01436209a13b"
+    },
+    {
+      "path": "skills/brand-name-checker/references/prd-integration.md",
+      "sha256": "22bad599eb33bf0d19f361e01397436084bc3dfa6b0873fb452ff21ec25da825"
+    },
+    {
+      "path": "skills/brand-name-checker/references/repo-sync.md",
+      "sha256": "64953f797ccab2a4b7d75f0e6761f351388818634d407010076d324e4919d946"
+    },
+    {
+      "path": "skills/brand-name-checker/references/source-checks.md",
+      "sha256": "8c73a279c58ae421f5f428dd4da830612e1076115c95a17db7146784c183f13e"
+    },
+    {
+      "path": "skills/brand-name-checker/references/step-reports.md",
+      "sha256": "248cbcc11de3f885f4ebdd477731c9a6f635657d1ac68b4d734fac64c5351e7c"
+    },
+    {
+      "path": "skills/cleanup-project/SKILL.md",
+      "sha256": "45366ece7076c1d567b96e499b05e40394872052532c854ab279af6ef3cd31df"
+    },
+    {
+      "path": "skills/cleanup-project/references/action-plans.md",
+      "sha256": "2ed439932f62995c4ed0e461ae02342c0d7d52c80d5516ca3247eef0e1019527"
+    },
+    {
+      "path": "skills/cleanup-project/references/example-output.md",
+      "sha256": "bf92c7b1bd9caacf845d86ec3e65e6321a7896e854770adf74bac39a232f72fa"
+    },
+    {
+      "path": "skills/cleanup-project/references/ignore-patterns.md",
+      "sha256": "18210d2eeb4e5eec23f60ecf70bd5bdaeab7f1867d8b0773c1f49b3750e5bfcc"
+    },
+    {
+      "path": "skills/cleanup-project/references/merged-detection.md",
+      "sha256": "c147d89b6f313fa7c632c00027f0d34c5c5ef8cdf041b247db8d24f6cc8124d9"
+    },
+    {
+      "path": "skills/cleanup-project/references/overview-fields.md",
+      "sha256": "7965f12c60c74371379caf0fc46ba3cd9deffd54fe4cadb290d639698eacc94f"
+    },
+    {
+      "path": "skills/cleanup-project/references/scopes-and-results.md",
+      "sha256": "3c7d7a8fade24e84edf46e4f04363d487dc90e014511816354f8abf555b87be2"
+    },
+    {
+      "path": "skills/cleanup-project/references/uncommitted-review.md",
+      "sha256": "e835dd500d98d5e52a133994e2215bdea93fa1559af3b1a76315fa9ff52c9857"
+    },
+    {
+      "path": "skills/cli-builder/SKILL.md",
+      "sha256": "85279ee315a180c221aaf9960ce675a36e01af1fa1bcd1d0f58e211d877e568d"
+    },
+    {
+      "path": "skills/cli-builder/references/btop-style.md",
+      "sha256": "559a6e54f25aa09b1db107da2036a398b6c217e4aad948637d467ec47441fa0d"
+    },
+    {
+      "path": "skills/cli-builder/references/cli-libraries.md",
+      "sha256": "930edcb1d97664bf23a92f0949879259ea42616db77177287e47f7c097088a9f"
+    },
+    {
+      "path": "skills/cli-builder/references/final-report.md",
+      "sha256": "cac871bfd9fe5e305aa832d228ed09c7c7afe16cbf5c924840fcd71d6a186d03"
+    },
+    {
+      "path": "skills/cli-builder/references/testing-patterns.md",
+      "sha256": "4b0a68e344c7a439483bb089cfe5c0287b8561e8ff6b69592a1e3db3e2c4c06c"
+    },
+    {
+      "path": "skills/devops-pipeline/SKILL.md",
+      "sha256": "32392b50f324d68bf8d659964b796736912633182d5df1726b968b215dee2ba2"
+    },
+    {
+      "path": "skills/devops-pipeline/references/cli-e2e.md",
+      "sha256": "ab740a6fe3c2673d969535d60c80421f68af140bef48241baa036d9b8c9dc3a2"
+    },
+    {
+      "path": "skills/devops-pipeline/references/final-report.md",
+      "sha256": "5fd87044dae9dcea6bdd6a94962f47ae155706997448c3d3cc06fb4f7901ba7b"
+    },
+    {
+      "path": "skills/devops-pipeline/references/github-actions.md",
+      "sha256": "3e2a16613e8075944ba4c88d24aa16b028115659ad6b4cec7a513c5c580f2f9d"
+    },
+    {
+      "path": "skills/devops-pipeline/references/precommit-configs.md",
+      "sha256": "6bf04323371a5568f12e9ff90c6e569bb086d05ea9bcdbe72734cdfdcf009371"
+    },
+    {
+      "path": "skills/diagram-generator/SKILL.md",
+      "sha256": "cbe4c2251c6e742f2da8b7b56907533c2cb9d6f77a8ff80f3a9eef6583d3e333"
+    },
+    {
+      "path": "skills/diagram-generator/references/final-report.md",
+      "sha256": "2e7b57d11d675401d3951098fe566b7d6715ebdbbdeaf4684e7db6214f7dbc0d"
+    },
+    {
+      "path": "skills/doc-manager/SKILL.md",
+      "sha256": "f1844eaa623a52ff1c34359fbc91b8d9f30e464c7ab136f0fbb4323b6c626fbe"
+    },
+    {
+      "path": "skills/doc-manager/references/change-summary.md",
+      "sha256": "fe05a20422f12cf4cca5e9e09f283207faea252b2b9220c1e397a81db8abf74a"
+    },
+    {
+      "path": "skills/doc-manager/references/runbook-validation.md",
+      "sha256": "2f458dc08049bef05ef30dd747a53c3ba513b1d438dec6ba2fc1b29b68e2dd21"
+    },
+    {
+      "path": "skills/drawio-generator/SKILL.md",
+      "sha256": "aa5c80a86dec8f53290beee66bf81dae94ae9e04ae15b888fecfa29546533f1a"
+    },
+    {
+      "path": "skills/drawio-generator/agents/xml-fixer.md",
+      "sha256": "62cd0ee922b904b47db327e6699cf9c5002e25259d82256132db478a04d0a19f"
+    },
+    {
+      "path": "skills/drawio-generator/agents/xml-generator.md",
+      "sha256": "04e60075fe2500ff8e3039c1d53f834d03490140c0975f8de43216e784cfb6d3"
+    },
+    {
+      "path": "skills/drawio-generator/agents/xml-validator.md",
+      "sha256": "6a908b99f217979b80b11b0dc585b4bc7b50bdbb77878021f367d884418a3a1b"
+    },
+    {
+      "path": "skills/drawio-generator/references/drawio-format.md",
+      "sha256": "1fab15f6ebb846946f6a940f4f54a1b70b6ca82931048e8f9fd863680c8f90b4"
+    },
+    {
+      "path": "skills/drawio-generator/references/final-report.md",
+      "sha256": "fc2d031dcff28c72444d8a2e5feadcdce2be24b951ce0019d705949ff5578e42"
+    },
+    {
+      "path": "skills/drawio-generator/references/step-reports.md",
+      "sha256": "8e0a0ecd6302bccd1aab46a0e3d7b47035e5ea24f8c4767810e2468eb62eab0e"
+    },
+    {
+      "path": "skills/drawio-generator/references/validation-checks.md",
+      "sha256": "e3ac0129afe38db9d167ae3f669f4db48c24839feee52ae3ecfdf68e65c24590"
+    },
+    {
+      "path": "skills/drawio-generator/references/xml-authoring.md",
+      "sha256": "adc71e592813c60298ab1a2ff27eab0c0ebbb70de243f6034f1c21086e5a5706"
+    },
+    {
+      "path": "skills/excalidraw-generator/SKILL.md",
+      "sha256": "3db958b61b6cc53c1c1a26171f037368fdb4ef682a28fcbb3857ce047b7ad5c0"
+    },
+    {
+      "path": "skills/excalidraw-generator/agents/json-fixer.md",
+      "sha256": "fbd8015a3d43ca4e98117c71ef1de74dabaf67d4dade9dd276723572a6d3e588"
+    },
+    {
+      "path": "skills/excalidraw-generator/agents/json-generator.md",
+      "sha256": "c436cf6bef2232890bc185b0981780acc5b7897754bce371689d942664e3f460"
+    },
+    {
+      "path": "skills/excalidraw-generator/agents/json-validator.md",
+      "sha256": "5b2bfa382eda0e573c0a362798f83a393878ba2c69534b984436537c49b5f70c"
+    },
+    {
+      "path": "skills/excalidraw-generator/references/diagram-types.md",
+      "sha256": "5b79c0316e5e993920cfa4dd1f7ce9ec8cf786aef8ec5a54e5d50e9cd03d7c6a"
+    },
+    {
+      "path": "skills/excalidraw-generator/references/excalidraw-format.md",
+      "sha256": "586167a350ec210251bd17ada8ed5e6a8b0772e884dbeb40db956ff78ce4250b"
+    },
+    {
+      "path": "skills/excalidraw-generator/references/final-report.md",
+      "sha256": "516a71e284b7fe7701cbb29608c81aaf0b895550713a73501fb1de7d18b6071f"
+    },
+    {
+      "path": "skills/excalidraw-generator/references/step-reports.md",
+      "sha256": "8077fdad8a6d9d90975d656954e929ace6491011521cbe1b2003dd7c95910d2b"
+    },
+    {
+      "path": "skills/excalidraw-generator/references/style-and-iteration.md",
+      "sha256": "3607fcf23f0556c1f83fc23e12b5bc55d74c489fafcb117ca3263228d6b5d423"
+    },
+    {
+      "path": "skills/excalidraw-generator/references/validation-checks.md",
+      "sha256": "031ae9cbbbb8da7063e7158a5aa299c8eb15ce11072d9f81daafa75eff99a7dd"
+    },
+    {
+      "path": "skills/frontend-design/SKILL.md",
+      "sha256": "f27bf88a9f0f529ebc446fa5c3805174a759ab58feffad4de76de044408de3dc"
+    },
+    {
+      "path": "skills/frontend-design/references/aesthetics-guide.md",
+      "sha256": "340195a1132bf1ef1e23aff0da8c19fffbbaed69b4ee5d68892cf87e898f0d45"
+    },
+    {
+      "path": "skills/frontend-design/references/final-report.md",
+      "sha256": "85dc6da9588119cfca682201c3a79eab2c7fb3f618f961c0e50d2cb604e100bb"
+    },
+    {
+      "path": "skills/frontend-design/references/step-reports.md",
+      "sha256": "6db3dc6729923148019830935bd3ce0e0038c9dd690cb0d2de71d2fb0c37b1eb"
+    },
+    {
+      "path": "skills/frontend-design/references/usability-guide.md",
+      "sha256": "20097adbda0f1a48351eaaa0e1fb943b547dadd324884a95df860e00dd3754d0"
+    },
+    {
+      "path": "skills/idea-validator/SKILL.md",
+      "sha256": "9019d4c7fb7ba4439a704e176aa9d92a85d555a531b8fba98d90b5d61a25ae79"
+    },
+    {
+      "path": "skills/idea-validator/references/file-templates.md",
+      "sha256": "a80f4d226c8208e9995abdde63c7a8cbe98ddb303a08cd8007f4e8a6397521db"
+    },
+    {
+      "path": "skills/idea-validator/references/final-report.md",
+      "sha256": "1ce9e6d3ee650ecb8fef04e72d4bdb40b649656d9206cf724a5774c6027a75c7"
+    },
+    {
+      "path": "skills/idea-validator/references/step-completion-reports.md",
+      "sha256": "acf8646c3c68abc757901cec52ac7faf5668c5e3db535af285753a72788ec918"
+    },
+    {
+      "path": "skills/landing-page-generator/SKILL.md",
+      "sha256": "ce154bd581e11483d72d228be29be781ec54261424c7266604de2d66cdbac758"
+    },
+    {
+      "path": "skills/landing-page-generator/references/anti-slop-rules.md",
+      "sha256": "8a91fee6caa106833f26c50560e4924ffc76ae8e2bb6260c6b6cf8cc06251610"
+    },
+    {
+      "path": "skills/landing-page-generator/references/companion-pages.md",
+      "sha256": "e8c200e45ec210b05806aa9d5bfa4a769c6f96d9882029f8ceb0f286a4823dd7"
+    },
+    {
+      "path": "skills/landing-page-generator/references/final-report.md",
+      "sha256": "da24d45dbc7fdc7f5d1253d6edf3f41aab31b910b71c489bbd22d53073eb1d24"
+    },
+    {
+      "path": "skills/landing-page-generator/references/page-build.md",
+      "sha256": "1c16331911b855aed9abc978fd248ac6824204ce2c0a28c8fe55020c537e5a99"
+    },
+    {
+      "path": "skills/landing-page-generator/references/readme-mode.md",
+      "sha256": "ad7c75cd060e320845f3f1b166aa0584a003e7045d0f268787e6e476daa55c9b"
+    },
+    {
+      "path": "skills/landing-page-generator/references/readme-section-templates.md",
+      "sha256": "afdf977801992a63b8e3278e0302efe6ac7541f665ee4dadb078becd5d3b9de7"
+    },
+    {
+      "path": "skills/landing-page-generator/references/readme-step-reports.md",
+      "sha256": "9c59052a28c01a79bc52884943d881b9e32420452d48551cbb470cb5b86ab5a4"
+    },
+    {
+      "path": "skills/landing-page-generator/references/section-templates.md",
+      "sha256": "f02535a75e02e37a2f383fe946cd02dcbf19c0eb7cbfbb43216d1e806a898b13"
+    },
+    {
+      "path": "skills/landing-page-generator/references/step-reports.md",
+      "sha256": "3e9ae08906cc864a6d66cfa77baf31ab3d8f25a9dc10f573f099c45f991b5ddd"
+    },
+    {
+      "path": "skills/logo-designer/SKILL.md",
+      "sha256": "a298aac7b99c1a5d1ef9d8535fd59486f4ff2bd554097a0dd8033f491307cf37"
+    },
+    {
+      "path": "skills/logo-designer/agents/brand-researcher.md",
+      "sha256": "60adf1c81b6bb9fd760990333a3b1364c3e8b1100392b4b18c98d5e09bb8f47b"
+    },
+    {
+      "path": "skills/logo-designer/agents/svg-generator.md",
+      "sha256": "0c727cb64c1402fecc3845ce97fdb86c53a9496f8ba7b78199400038ca7753c4"
+    },
+    {
+      "path": "skills/logo-designer/agents/svg-reviewer.md",
+      "sha256": "8204932708b9d64ab0443517a5bca00382aa5a3c3cee6ec8193effa0c1e0ef9e"
+    },
+    {
+      "path": "skills/logo-designer/references/brand-showcase.md",
+      "sha256": "e877d2162d167bf72b3d3bc6e1394be250ece2cbcae7d825159b0b5a7be0f6b5"
+    },
+    {
+      "path": "skills/logo-designer/references/design-principles.md",
+      "sha256": "919dd6762e4bbeeae6129a314f690818ad964ef3be11ece60798035b12c166c8"
+    },
+    {
+      "path": "skills/logo-designer/references/final-report.md",
+      "sha256": "4532e296c45752357ad6b326c81f1a8b89b40d284b2831ff9c289efcd9bf4749"
+    },
+    {
+      "path": "skills/logo-designer/references/step-reports.md",
+      "sha256": "8e61c209de7ed26abf5585985cd6532eb510bf4ad34bcfa94c70a4b617f7299b"
+    },
+    {
+      "path": "skills/logo-designer/references/svg-deliverables.md",
+      "sha256": "f709f84074de3d53297292b7e2ee5e53942b5900f7018db8699693bd5bd4ec27"
+    },
+    {
+      "path": "skills/opencode-runner/SKILL.md",
+      "sha256": "883e62f68f96867617b2232cdb34a599d3e28cf9abeee13a381ecff74186aaca"
+    },
+    {
+      "path": "skills/opencode-runner/references/edge-cases.md",
+      "sha256": "5c9d26ebf664efe75ffaae985cb7eaf32bbdd45c9ed88e7d4364bb15a2690e39"
+    },
+    {
+      "path": "skills/opencode-runner/references/expected-output.md",
+      "sha256": "266d343ccad3e696c8ba9ad6f73011629432ce6963710dc0b74c5f23eaa1f698"
+    },
+    {
+      "path": "skills/opencode-runner/references/final-report.md",
+      "sha256": "f88680f5e7736c77110c84b2ec6dbbc2df95fbbceed5cf1078b30d50c2510645"
+    },
+    {
+      "path": "skills/prd-generator/SKILL.md",
+      "sha256": "e4ba59e9bb184f441304fe7f933e6718c174ca897c932681cad34a5bbeea906a"
+    },
+    {
+      "path": "skills/prd-generator/references/edge-cases.md",
+      "sha256": "2830f3dc2fddd38e4e6d2454abb31eabc96f835081ee7f8b6fac7e7be914d5e6"
+    },
+    {
+      "path": "skills/prd-generator/references/expected-output.md",
+      "sha256": "1567f30ee46a459fa0836d0450cc78c8cc3e6558c522b480b9b1f54d5591fdd1"
+    },
+    {
+      "path": "skills/prd-generator/references/final-report.md",
+      "sha256": "7f7e7d082e2528999faa44bc477d181588d53a68a7b13836571ac4ab381d4efd"
+    },
+    {
+      "path": "skills/prd-generator/references/prd-template.md",
+      "sha256": "6a35e27d0b0d4fe6637b80e5f179b235dd5342825f96269362fe418a33480083"
+    },
+    {
+      "path": "skills/prd-generator/references/step-reports.md",
+      "sha256": "6c9eda11050fe28e322720edf5bd7fe786518967681cda5d3cdfa8ff9d0635dc"
+    },
+    {
+      "path": "skills/prd-generator/references/verification-steps.md",
+      "sha256": "3e490279bed290c7e79a857edebd6a952c702b44025093acea1ca07ac7f64635"
+    },
+    {
+      "path": "skills/ship/SKILL.md",
+      "sha256": "0dedb5756825917102943d6c8bd4b0e612cce0e8746ac5fe56e4326ef370c07c"
+    },
+    {
+      "path": "skills/ship/agents/changelog-generator.md",
+      "sha256": "60b53890ff9c145165c54e4ae7893bad7781d29f452f45eb33cd00d91b41d72a"
+    },
+    {
+      "path": "skills/ship/agents/docs-updater.md",
+      "sha256": "ab2f28e7b8dd631cd49750d4a26b3c5ebd1c01480dda9d99bcc76b3b17c086d4"
+    },
+    {
+      "path": "skills/ship/agents/landing-page-updater.md",
+      "sha256": "b306aa2e092454dca464f134a86700369a1bbb44c1f5fe97637ed400d1627c08"
+    },
+    {
+      "path": "skills/ship/agents/release-reviewer.md",
+      "sha256": "813ffd18f594b1447159a52ecf88a5b492c29010987d37a38a90db31f7ff3526"
+    },
+    {
+      "path": "skills/ship/agents/version-bumper.md",
+      "sha256": "b81687cdeba90681ecf8f91826c1c78dd0b8121a80e941ecdf0d52299596a8bf"
+    },
+    {
+      "path": "skills/ship/references/auto-mode.md",
+      "sha256": "356a3897d277dc5337a29cb0c76bae8d3a1b9ea394ba9314250805eac318dfb9"
+    },
+    {
+      "path": "skills/ship/references/final-report.md",
+      "sha256": "16b8e49c41e9b7434e6832b085d69bf59e1b34b9c1860438b22c49b756336897"
+    },
+    {
+      "path": "skills/ship/references/orchestration.md",
+      "sha256": "7790513762d5ca31297dc7f1c370af0698ed6e2c1ba82a56ef2759f15a959d86"
+    },
+    {
+      "path": "skills/ship/references/publishing.md",
+      "sha256": "bf009251af66f180b842e0222d3e56034dc5080d55eedf6390932263290063df"
+    },
+    {
+      "path": "skills/ship/references/resume.md",
+      "sha256": "6270001bf14b34a9b3558ee4476c2861e8aaf288ca07073e024012e4c47778fb"
+    },
+    {
+      "path": "skills/ship/references/step-reports.md",
+      "sha256": "c76777e57664885fe698739c4a51e58537875ca14491dedb0ff0f7283633e1eb"
+    },
+    {
+      "path": "skills/tad-generator/SKILL.md",
+      "sha256": "72214972bf8e6c012e4057a4ce1f9ea601a7af08170aa515821cc3025fa4b61c"
+    },
+    {
+      "path": "skills/tad-generator/agents/prd-reader.md",
+      "sha256": "68415db5d431dd6e42c009655c28429a85fd5d0245dee69eea55d3fda2c147b8"
+    },
+    {
+      "path": "skills/tad-generator/agents/tad-writer.md",
+      "sha256": "7386f61f5ea6af17ebd673d0cf88e3bf30236ae2aab82bf6cd6f4edd65dc160a"
+    },
+    {
+      "path": "skills/tad-generator/agents/tech-researcher.md",
+      "sha256": "960245fd95750f65a449240462d2e9f4b98945412285e77b2772e9333a49b5dc"
+    },
+    {
+      "path": "skills/tad-generator/references/edge-cases.md",
+      "sha256": "bc34caeea21021a45bc54e601beadc9858c160423aa27571785a35b1d7420a36"
+    },
+    {
+      "path": "skills/tad-generator/references/final-report.md",
+      "sha256": "90be89651646036267db5ec1b7937b23283bacea7aa38fcb29ecd6d32a13cf96"
+    },
+    {
+      "path": "skills/tad-generator/references/step-completion-reports.md",
+      "sha256": "252cbeb4cc1cc964ab7fde72e19563be1bba9990e5d68b8d3ab19f25812750ca"
+    },
+    {
+      "path": "skills/tad-generator/references/tad-template.md",
+      "sha256": "903b0baf5e1bc22d0f4a6dffee083383041619fc120cdd56a3fcc4a95f606966"
+    },
+    {
+      "path": "skills/tad-generator/references/tech-stack.md",
+      "sha256": "22f05542b317b828786679998a06aed49df8fdf3da114c626dd24ecbae1b8878"
+    },
+    {
+      "path": "skills/tad-generator/references/verification-steps.md",
+      "sha256": "c4ea847369bb09c414b71631bd2c1b5d97b426daccbc8f7029652043ea9bc9e2"
+    },
+    {
+      "path": "skills/test-coverage/SKILL.md",
+      "sha256": "c05a5c99d379f8da87a2aa7f1daa27bd7c89582b5c6baf155b0b4181e622b14b"
+    },
+    {
+      "path": "skills/test-coverage/references/unit-test-quality.md",
+      "sha256": "2376fdd0833b0a5d82b0cd8f9d83fc22b4580e84c16b0cf5b317fd06c7c320cc"
+    }
+  ],
+  "included": [
+    "agent-config",
+    "ai-job-scout",
+    "appstore-review-checker",
+    "aso-marketing",
+    "auto-push",
+    "brand-name-checker",
+    "cleanup-project",
+    "cli-builder",
+    "devops-pipeline",
+    "diagram-generator",
+    "doc-manager",
+    "drawio-generator",
+    "excalidraw-generator",
+    "frontend-design",
+    "idea-validator",
+    "landing-page-generator",
+    "logo-designer",
+    "opencode-runner",
+    "prd-generator",
+    "ship",
+    "tad-generator",
+    "test-coverage"
+  ],
+  "package_version": "0.8.0",
+  "schema_version": 1,
+  "source_commit": "010e025d0386ba0f3ee4e43144c3bc53e0429d7e"
+}
