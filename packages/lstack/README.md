@@ -116,10 +116,10 @@ git fetch origin directory && git worktree add -B directory ../lstack-directory 
 git -C ../lstack-directory rm -rq --ignore-unmatch .
 python3 scripts/build-lstack-directory.py --output ../lstack-directory
 git -C ../lstack-directory add -A
+claude --plugin-dir ../lstack-directory/skills plugin details lstack    # must list every skill
 git -C ../lstack-directory commit -m "chore(directory): lstack directory edition from $(git rev-parse --short HEAD)"
 git -C ../lstack-directory push origin directory
 python3 scripts/build-lstack-directory.py --check ../lstack-directory   # re-check any time
-claude --plugin-dir ../lstack-directory/skills plugin details lstack    # must list every skill
 git worktree remove ../lstack-directory
 ```
 

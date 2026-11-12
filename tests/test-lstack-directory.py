@@ -126,6 +126,8 @@ class DirectoryEditionTests(unittest.TestCase):
             ("a/X.PY", b"x\n"): "type outside", ("a/__MACOSX", b"x"): "operating-system",
             ("a/composer.json", b"{}"): "package-manager", ("a/requirements-dev.txt", b"x\n"): "package-manager",
             ("a/environment.yml", b"a: 1\n"): "package-manager", ("a/Package.JSON", b"{}"): "package-manager",
+            ("a/requirements_dev.txt", b"x\n"): "package-manager", ("a/requirements/base.txt", b"x\n"): "package-manager",
+            ("a/dev.requirements.in", b"x\n"): "package-manager",
         }
         for (path, data), expected in cases.items():
             self.assertIn(expected, EDITION.file_problem(path, data) or "", path)
@@ -170,6 +172,13 @@ class DirectoryEditionTests(unittest.TestCase):
         del data["skills"]
         manifest.write_text(json.dumps(data))
         self.assertIn("load only with", "\n".join(EDITION.check_tree(out)[0]))
+        data["skills"] = "./"
+        manifest.write_text(json.dumps(data))
+        self.assertEqual(EDITION.check_tree(out)[0], [])  # a single string path counts too
+        manifest.write_text("[]")
+        self.assertIn("not a JSON object", "\n".join(EDITION.check_tree(out)[0]))
+        manifest.write_text("{bad")
+        self.assertIn("not valid JSON", "\n".join(EDITION.check_tree(out)[0]))
         manifest.unlink()
         self.assertIn("plugin.json missing", "\n".join(EDITION.check_tree(out)[0]))
         (out / ".git").mkdir()
@@ -180,6 +189,7 @@ class DirectoryEditionTests(unittest.TestCase):
         (linked).mkdir()
         (linked / "skills").symlink_to(out / "skills")
         self.assertIn("missing or a symlink", EDITION.check_tree(linked)[0][0])
+        self.assertIn("missing or a symlink", EDITION.check_tree(Path(self.tmp.name) / "nowhere")[0][0])
 
     def test_refuses_unsafe_values_duplicates_and_conflicts(self):
         base = skill("v")

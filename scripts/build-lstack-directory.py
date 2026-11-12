@@ -38,7 +38,7 @@ PACKAGE_CONFIG = {".npmrc", ".yarnrc", ".yarnrc.yml", ".pnpmrc", "pnpm-workspace
                   ".tool-versions", "deno.json", "deno.jsonc", "cargo.toml", "go.mod", "gemfile",
                   "composer.json", "bower.json", "jsr.json", "vcpkg.json", "package.yaml", "package.json5",
                   "pubspec.yaml", "environment.yml", "environment.yaml", "conanfile.txt", "constraints.txt"}
-REQUIREMENTS = re.compile(r"(?:.*-)?requirements(?:-.*)?\.(?:txt|in)\Z")
+REQUIREMENTS = re.compile(r"(?:.*[-_.])?requirements(?:[-_.].*)?\.(?:txt|in)\Z")
 SYSTEM_FILES = {".ds_store", "thumbs.db", "desktop.ini", "__macosx"}
 SKILL_KEYS = ("name", "description", "license", "compatibility", "metadata")
 MOVED_KEYS = ("effort", "dependencies")
@@ -54,7 +54,9 @@ def file_problem(path, data):
     suffix = PurePosixPath(lower).suffix
     if lower in SYSTEM_FILES:
         return "operating-system file"
-    if lower in PACKAGE_CONFIG or REQUIREMENTS.match(lower):
+    parent = PurePosixPath(path).parent.name.lower()
+    if lower in PACKAGE_CONFIG or REQUIREMENTS.match(lower) or (
+            parent == "requirements" and suffix in {".txt", ".in"}):
         return "package-manager configuration"
     if len(data) >= MAX_FILE:
         return "file of 256 KiB or more"
@@ -209,8 +211,15 @@ def check_tree(root):
     if not manifest.is_file():
         problems.append(".claude-plugin/plugin.json missing")
     else:
-        paths = json.loads(manifest.read_bytes()).get("skills", [])
-        paths = [paths] if isinstance(paths, str) else paths
+        try:
+            data = json.loads(manifest.read_bytes())
+        except ValueError as exc:
+            data = None
+            problems.append(".claude-plugin/plugin.json is not valid JSON: " + str(exc))
+        paths = data.get("skills", []) if isinstance(data, dict) else []
+        paths = [paths] if isinstance(paths, str) else paths if isinstance(paths, list) else []
+        if data is not None and not isinstance(data, dict):
+            problems.append(".claude-plugin/plugin.json is not a JSON object")
         if not (plugin / "skills").is_dir() and not {".", "./"} & set(paths):
             problems.append(".claude-plugin/plugin.json: skills at the plugin root load only with \"skills\": [\"./\"]")
     return problems, len(files), notes
