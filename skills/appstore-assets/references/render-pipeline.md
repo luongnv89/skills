@@ -91,7 +91,7 @@ window.APP_CONFIG = {
              screens: { iphone: () => html, ipad: () => html, mac: () => html } }],
   creatives: { enabled /* only when requested */, kinds: ["header", "search", "universal"],
                headline, sub, searchHeadline, searchSub,
-               hero: { platform, frame }, sides: [{ platform, frame }] /* "wide" only */, layout?: "wide",
+               hero: { platform, frame }, sides: [{ platform, frame }] /* "wide" only */, layout?: "wide" | "safe" /* default; a variant sets it to undo a base "wide" */,
                video: { kinds: ["header", "search"], duration? /* fitted */, fps: 30, transition: 0.8, searchSize?: "max",
                         beats: [{ headline, sub, searchHeadline?, searchSub?, hero?, sides? }] },
                variants: [{ id: "tiktok-trails", kinds?, headline?, hero?, video?: { … } }] },
