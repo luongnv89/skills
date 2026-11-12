@@ -8,7 +8,7 @@ dependencies:
   - "github:emilkowalski/skills:skills/emil-design-eng"
   - browse
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -174,9 +174,9 @@ BLOCKED and ask the user to fix, rename or move it. Bar: both commands exit 0.
 
 ## Step 6 — Review and polish
 
-1. View every sheet in `<out>/sheets/`, video sheets included. Fix text overlapping a device, clipped strings, blank screens, and a caption outside the magenta safe area.
+1. View every sheet in `<out>/sheets/`, video sheets included. Fix text overlapping a device, clipped strings, blank screens, a caption outside the magenta safe area, and a header crop tile without the app.
 2. Acquire `emil-design-eng` and spawn a polish worker with the slice and task in `references/design-direction.md`. Apply its accepted rows to `config.js` only (`css` and brand tokens), then re-run Step 5.
-3. Spawn a fresh reviewer, never the builder. Input: `agents/asset-reviewer.md`, `references/apple-guidelines.md`, the full-size PNGs, the video sheets, `config.js`, `PLAN.md`, `src/brief.json`, and source access. With no brief, say so: the reviewer checks limits against the source, and its `verify_on_build` items go under Uncertainty.
+3. Spawn a fresh reviewer, never the builder. Input: `agents/asset-reviewer.md`, `references/apple-guidelines.md`, the full-size PNGs, every sheet, `config.js`, `PLAN.md`, `src/brief.json`, and source access. With no brief, say so: the reviewer checks limits against the source, and its `verify_on_build` items go under Uncertainty.
 4. If the verdict is `NEEDS_FIX`, fix each blocking finding, re-run Step 5, and spawn a new reviewer. Stop after two fix cycles.
 
 Bar: the latest verdict is `PASS` on the latest render, or two cycles ran and the report is PARTIAL.
@@ -208,6 +208,7 @@ A run is COMPLETE only when you verify every item:
 - [ ] `render.py` and `check_assets.py` exit 0 on the final state: exact sizes, RGB without alpha, at most 10 per class, the required class per platform, caption contrast, no dropped-frame leftovers.
 - [ ] `iphone-6.9/` and `iphone-6.3/` hold the same frame names.
 - [ ] Each requested video passes `check_assets.py` (exact size, 30/60 fps CFR, 5–30 s, H.264 yuv420p, no blank frame or seam jump), and its sheet shows every caption inside the safe area.
+- [ ] The header crop tile on `sheets/creative.png` shows real app UI, not only the caption (unless `creatives.layout: "wide"`).
 - [ ] `config.js` holds no `TODO:` and every screen builder cites `// Source:`.
 - [ ] The latest reviewer verdict is `PASS`, with no blocking finding.
 - [ ] Simulator state is restored and scratch files are deleted (or listed as kept).

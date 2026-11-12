@@ -73,10 +73,12 @@ does not apply: static PNGs have none and the kit fixes the video motion. After 
 
 ## Creative composition
 
-- **Header (21:9):** the caption sits centered in Apple's art safe area (the
-  middle 43 % × 40 %); the hero device flanks it on the right and one side
-  device on the left. On a narrow crop only the caption shows, so it must
-  carry the idea alone. One line of headline, at most one supporting line.
+- **Header (21:9):** the caption sits on the left of Apple's art safe area
+  (the middle 43 % × 40 %) and one hero device on its right, both inside it,
+  so a narrow crop still shows the app. One line of headline, at most one
+  supporting line. `creatives.layout: "wide"` centers the caption and puts a
+  larger hero and a side device outside the area; a narrow crop then shows
+  only the caption, so it must carry the idea alone.
 - **Search (3:2):** caption on the left of the safe area, hero device on its
   right, both inside it ("show the firsthand experience"); up to two side
   devices flank outside it. Up to two headline lines.

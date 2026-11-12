@@ -122,7 +122,7 @@ list: it cites this section once and names only a run that differs from it
 | A3 | Videos fail above 500 MB (the app preview cap); rendered loops are a few MB | Video encoding decisions |
 | A4 | The still templates' art safe area also applies to the header and search videos | Art safe area |
 | A5 | Videos are CFR, MP4 with `+faststart`, no audio track, no metadata | Video encoding decisions |
-| A6 | Side devices outside the art safe area are decoration that narrow displays crop; the caption carries the message (`creatives.layout: "safe"` keeps every device inside) | Art safe area |
+| A6 | A narrow display shows only the art safe area, so the default header keeps one hero device inside it to show the app; under `creatives.layout: "wide"` the devices outside it are decoration that narrow displays crop, and the caption carries the message | Art safe area |
 
 ## Out of scope
 

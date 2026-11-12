@@ -57,7 +57,7 @@ Pillow (`python3 -m pip install pillow`). `render.py` needs Chrome or Chromium
 | Takes a machine-wide lock (`~/.cache/appstore-assets/video.lock`, `flock`) for the video step only, printing `waiting for the video lock … (held by pid N, <out>)` while another render holds it. `APPSTORE_ASSETS_VIDEO_LOCK=0` skips it; `APPSTORE_ASSETS_LOCK_DIR` moves it | Four parallel 4K video renders pushed the load average near 500; stills still render in parallel, and the lock dies with its process |
 | Renders `orientation: "landscape"` classes rotated (iPhone 956 × 440 design zoomed to 874 for 6.3"; iPad 1376 × 1032) | Landscape-only games need landscape screenshots; one kit serves both |
 | Prints `fit headline <id>: 41 -> 37 px` when kit.js shrank a headline that wrapped past two lines (down to 75 %), a WARN when it still does not fit, and a `note:` when a pinned size wraps past two lines | A wide face (a monospace) no longer needs per-frame overrides; a config `css` rule that pins `font-size` turns the fit off for that headline, and `fitHeadlines: false` turns it off everywhere. The fit is on by default, so a re-render of an older set can change an approved headline: the Update report names those frames |
-| Prints `note: header: device slot(s) hero, side0 sit outside Apple's art safe area`, and `WARN: header: caption spans … outside Apple's art safe area` per beat whose caption overflows it | Decoration outside the safe area is cropped on narrow displays; the note says so once instead of a reviewer flagging it per run. A caption outside it loses words: with `layout: "safe"` (a 440 px caption column) drop any `css` rule that pins `.cv-cap h1` or `p` sizes |
+| Keeps the header caption (a 440 px column) and one hero device inside Apple's art safe area by default; with `layout: "wide"` it prints `note: header: device slot(s) hero, side0 sit outside Apple's art safe area`. It prints `WARN: header: caption spans … outside Apple's art safe area` per beat whose caption overflows it | A narrow display shows only the safe area, so the default crop still shows the app; under "wide" the devices are decoration it crops, and the note says so once. A caption outside it loses words: drop any `css` rule that pins `.cv-cap h1` or `p` sizes |
 | Passes the stage height explicitly (`&h=`) | Headless Chrome's viewport is about 87 px shorter than `--window-size`; a `100vh` stage gets clipped |
 | Renders `iphone-6.3` by zooming the 440 px design to 402 px | One layout serves both iPhone classes with identical proportions |
 | Flattens to RGB with Pillow | Chrome writes RGBA; App Store Connect rejects alpha |
@@ -91,7 +91,7 @@ window.APP_CONFIG = {
              screens: { iphone: () => html, ipad: () => html, mac: () => html } }],
   creatives: { enabled /* only when requested */, kinds: ["header", "search", "universal"],
                headline, sub, searchHeadline, searchSub,
-               hero: { platform, frame }, sides: [{ platform, frame }], layout?: "safe",
+               hero: { platform, frame }, sides: [{ platform, frame }] /* "wide" only */, layout?: "wide",
                video: { kinds: ["header", "search"], duration? /* fitted */, fps: 30, transition: 0.8, searchSize?: "max",
                         beats: [{ headline, sub, searchHeadline?, searchSub?, hero?, sides? }] },
                variants: [{ id: "tiktok-trails", kinds?, headline?, hero?, video?: { … } }] },
@@ -148,7 +148,7 @@ into the first.
 | --- | --- |
 | First impression | Frame 0 shows beat 0 complete: no fade-in, the headline is readable from 0 s |
 | Dwell | Each beat holds at least max(2.5 s, 1 s + words / 4) of its caption (beat 0 before the first crossfade); `render.py` fails with the needed time otherwise |
-| Safe area | Caption, and for search the hero device, sit inside Apple's art safe area (`references/apple-specs.md`) |
+| Safe area | Caption and hero device sit inside Apple's art safe area (`references/apple-specs.md`); the header hero keeps ≥ 12 px clear of it at rest, so the ±8 px drift never crosses it. Under `layout: "wide"` only the header caption does |
 | Timing | `duration` 5–30 s, `fps` 30 or 60, `duration × fps` a whole number. Without `duration` the kit fits it: the shortest half-second that holds every beat, at least 12 s, at most 30 s. A set `duration` is kept as is |
 | Loop | `check_assets.py` fails when the last→first difference exceeds twice the neighboring frame steps |
 
@@ -306,5 +306,9 @@ Moved from SKILL.md → Final report.
 On the Update branch, list each `src/*.bak-<timestamp>` backup under Evidence. If the old kit
 predated 1.1.0, say under Decision that `header.png` and `search.png` changed composition (the
 caption, and the search hero, now sit in Apple's art safe area), so the user reviews them before upload.
+If it predated 1.4.0 and `config.js` sets no `creatives.layout`, say that `header.png` (and `header.mp4`)
+changed composition: the caption and one smaller hero now sit in the safe area, with no side device, and
+`creatives.layout: "wide"` restores the old one. A `css` rule pinning `.cv-cap h1` or `p` sizes can now
+trigger the caption `WARN:`.
 Name each frame `render.py` printed a `fit headline` line for: its headline shrank, so the reviewer and
 the user re-check it (`fitHeadlines: false` keeps approved sizes on a re-render only).

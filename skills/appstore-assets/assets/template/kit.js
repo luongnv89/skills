@@ -209,13 +209,15 @@ function renderFrame(cfg, frame, platform, stageH) {
 // Creative assets: one idea, focal point centered so device crops keep it.
 // header and search keep the caption inside Apple's "Art Safe Area" (the
 // layer in Apple's Photoshop templates: header 1646 × 661 px, search
-// 2168 × 1030 px, centered; halved here for the ×2 stage); the search hero
-// sits inside it too, while the header hero flanks it on the right. Slots are
-// device boxes { cx, cy, w, h }; slots outside the safe area only show on
-// wide displays. The PNG is the video's first frame (t = 0). `landscape`
-// overrides apply when an iPhone or iPad platform is landscape; the header's
-// `safeLayout` (creatives.layout: "safe") keeps the caption and one hero device
-// inside the safe area, with no side device.
+// 2168 × 1030 px, centered; halved here for the ×2 stage), and so does one
+// hero device, so a crop to it still shows the app. Slots are device boxes
+// { cx, cy, w, h }; slots outside the safe area only show on wide displays.
+// The PNG is the video's first frame (t = 0). The header renders `safeLayout`
+// (caption and one hero device inside the safe area, ≥ 12 px clear of the
+// ±8 px video drift, no side device) unless creatives.layout is "wide": then
+// the header hero flanks the caption on the right and a side device on the
+// left, both outside the safe area. `landscape` overrides apply when an iPhone
+// or iPad platform is landscape (the search, and the "wide" header).
 const CREATIVE = {
   header: { w: 1920, h: 823, safe: { x: 548.5, y: 246.5, w: 823, h: 330.5 }, h1: 60, sub: 24, align: "center",
     cap: { x: 568.5, y: 246.5, w: 783, h: 330.5 },
@@ -231,10 +233,10 @@ const CREATIVE = {
   universal: { w: 2622, h: 1475, capTop: 110, h1: 96, sub: 32, devTop: 372, hero: 1.2, side: 1.02, dx: 470, dy: 96,
     landscape: { devTop: 420, hero: 1.0, side: 0.8, dx: 700, dy: 150 } },
 };
-// The layout of one creative for this config: base, landscape, or the header's safe layout.
+// The layout of one creative for this config: the header's safe layout (its default), base, or landscape.
 function creativeLayout(cfg, kind, cr) {
   const C = CREATIVE[kind];
-  if (kind === "header" && cr.layout === "safe") return { ...C, ...C.safeLayout };
+  if (kind === "header" && cr.layout !== "wide") return { ...C, ...C.safeLayout };
   return cfg.platforms.some((p) => p !== "mac" && landscape(p)) && C.landscape ? { ...C, ...C.landscape } : C;
 }
 // Device slots that leave Apple's art safe area in the creative last rendered
@@ -461,7 +463,7 @@ async function renderFromQuery(cfg) {
       const kinds = cr.kinds || Object.keys(CREATIVE), videoKinds = cr.video?.kinds || [];
       for (const k of kinds.filter((x) => !CREATIVE[x])) errors.push(`creatives.kinds${tag}: unknown kind "${k}" (use header, search, universal)`);
       for (const k of videoKinds.filter((x) => !VIDEO_KINDS.includes(x))) errors.push(`creatives.video.kinds${tag}: "${k}" has no video placement (use header, search)`);
-      if (cr.layout !== undefined && cr.layout !== "safe") errors.push(`creatives.layout${tag}: "${cr.layout}" must be "safe" or left out`);
+      if (cr.layout !== undefined && cr.layout !== "safe" && cr.layout !== "wide") errors.push(`creatives.layout${tag}: "${cr.layout}" must be "safe", "wide" or left out`);
       stills.push(...kinds.filter((x) => CREATIVE[x]).map((kind) => ({ kind, variant })));
       for (const k of [...new Set([...kinds, ...videoKinds])].filter((x) => CREATIVE[x])) {
         KIT_OUTSIDE.clear();

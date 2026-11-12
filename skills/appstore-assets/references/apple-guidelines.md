@@ -78,13 +78,14 @@ do. The usual sources:
 - Reuse one 16:9 universal master for both placements when the composition
   survives both crops.
 - Keep text and the main subject inside the art safe area (`apple-specs.md`).
-  The kit's default header places the devices outside it, as decoration that
-  narrow displays crop (`render.py` prints a `note:`); that is advisory, not
-  blocking, while the caption carries the message. If the user wants every
-  device inside, set `creatives.layout: "safe"` (caption and one hero device),
-  and drop any `css` rule that pins `.cv-cap h1` or `p` sizes: the safe
+  The kit's default header keeps the caption and one hero device inside it,
+  so a crop to the safe area shows real app UI; one with no app UI there is
+  blocking. Drop any `css` rule that pins `.cv-cap h1` or `p` sizes: the
   caption column is 440 px wide, so a pinned size wraps out of the safe area
-  (`render.py` prints a caption `WARN:`).
+  (`render.py` prints a caption `WARN:`). Only when the user asks for a larger
+  hero or a side device, set `creatives.layout: "wide"`: the devices then sit
+  outside the area as decoration that narrow displays crop (`render.py` prints
+  a `note:`), which is advisory while the caption carries the message.
 
 ## Header and search videos (blocking unless marked)
 
