@@ -83,7 +83,7 @@ defaults the founder can change.
 | Track | Lead time (default) | What the plan and kit add | Rules |
 | --- | --- | --- | --- |
 | video | 42 days | an `assets.md` row with a brief: a script outline built from the story, length, and the sizes the chosen platforms need | Studio criteria: a reel of launch videos for comparable products, a fixed written quote and delivery date, revisions included, and every size the kit needs. Budget and lead time are founder inputs; any figure from the post is practitioner advice, not a fact. The skill never hires or pays. |
-| friends and launch-day invite | 14 days | `copy.invite` (max=300): a hold for the launch hour, sent ahead; then `copy.outreach`, sent at launch time | Message friends when the launch is live. Ask for a reply or a quote of what they think, over likes. Never ask for votes (rule 6). |
+| friends and launch-day invite | 14 days | `copy.invite` (max=300): a hold for the launch hour, sent ahead; then `copy.outreach`, sent at launch time | Message friends when the launch is live. Ask for a reply or a quote of what they think, over likes, and ask anyone who posts to say in the post how they know the founder ("friend of the founder", §5). Never ask for votes (rule 6). |
 | supporter list | 21 days | a checklist row: build the list in the founder's own private tool | Counts and roles only in the kit (§6). |
 | day-0 co-launch partners | 28 days | a pitch to each partner role, from `copy.pitch-100w` | Partners are integrations or tools in the Profile, or ones the founder names. A partner's post discloses the relationship (§5). |
 | earned media | 28 days | pitches from `copy.pitch-100w`, for writers and hosts the founder already knows | Real relationships only. Never buy coverage; a paid placement is paid amplification. |
@@ -111,10 +111,13 @@ Source: US FTC, "Disclosures 101 for Social Media Influencers"
 - **How:** the post itself carries the disclosure, in plain words and in the post's
   language, where a reader cannot miss it. Not only on a profile page, not after a
   "more" cut, not inside a cluster of hashtags. A video says it in the video. Clear
-  wording: "Ad", "Sponsored", "I work at <product>", "<product> gave me a free account".
+  wording: "Ad", "Sponsored", "I work at <product>", "<product> gave me a free account",
+  "friend of the founder".
   Vague wording fails: "sp", "spon", "collab", or "thanks" on its own.
 - A platform's disclosure tool alone is not enough. Use it as well as the in-post line.
-- Writers put the disclosure line into each such draft, from `copy.disclosure`.
+- Writers put the disclosure line into each such draft, from `copy.disclosure`. When the
+  kit asks others to post (`copy.invite`, `copy.outreach`, a co-launch partner pitch), it
+  asks them to put that line in their own post.
 - **Never propose** fake or sock-puppet accounts, bots, engagement pods (groups that
   trade likes, replies or votes), or undisclosed paid posts. Refuse such a request,
   quote this rule, and offer the disclosed alternative (the friends track).

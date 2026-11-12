@@ -84,9 +84,9 @@ Write these sections in this order. Each value has a field marker with the limit
 | `copy.competitors`               | none                     | saashub, alternativeto: the profile's competitors only      |
 | `copy.pricing`                   | max=200                  | every pricing field                                         |
 | `copy.disclosure`                | max=120                  | community posts ("I'm the maker of …"); for a paid, gifted or relationship-based post, the in-post disclosure line (`launch-story.md` §5) |
-| `copy.outreach`                  | max=600                  | a DM or email to friends and communities on L-day (no vote request, no recipient name: `launch-story.md` §6) |
+| `copy.outreach`                  | max=600                  | a DM or email to friends and communities on L-day (no vote request, no recipient name: `launch-story.md` §6; asks anyone who posts to say how they know the founder: §5) |
 | `copy.story.hero` … `copy.story.haters` | max=200 each      | the launch story (`launch-story.md` §1): hero, villain, contrarian, lovers, haters; only the elements the plan sources |
-| `copy.invite`                    | max=300                  | the launch-day hold sent to friends, only when that track is on (`launch-story.md` §4) |
+| `copy.invite`                    | max=300                  | the launch-day hold sent to friends, only when that track is on (`launch-story.md` §4); asks anyone who posts to say how they know the founder (§5) |
 
 Two sections have no field markers:
 
@@ -233,7 +233,9 @@ Blocking checks:
    with the product or a link, and the Participation plan names no product or link.
 8. **Launch story and disclosure (`launch-story.md`):** a paid, gifted or
    relationship-based post lacks a clear in-post disclosure, or hides it (profile only,
-   after a "more" cut, among hashtags); the kit proposes a fake account, a bot, an
+   after a "more" cut, among hashtags); `copy.invite`, `copy.outreach` or a co-launch
+   partner pitch asks people to post without asking them to disclose the relationship in
+   the post; the kit proposes a fake account, a bot, an
    engagement pod or an undisclosed paid post; a contact's name or personal data appears
    anywhere in `launch-kit/`; a story element has no source; or a marketing line fails
    the copy test (`launch-story.md` §2).

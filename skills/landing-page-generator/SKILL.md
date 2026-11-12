@@ -239,7 +239,7 @@ Mode A input and output for a PAS brief, and example trigger phrases: `reference
 
 ## Final Report
 
-End every run, stops included, with this compact text block. Status is `COMPLETE` (every applicable check passes), `PARTIAL` (a deliverable was produced but a check still fails, or the page was not built), or `BLOCKED` (no deliverable). A question that awaits the user's answer does not end the run. The full status rule, fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
+End every run, stops included, with this compact text block. Status is `COMPLETE` (every applicable check passes; a build skipped at the user's request still counts), `PARTIAL` (a deliverable was produced but a check still fails, or the page was not built), or `BLOCKED` (no deliverable). A question that awaits the user's answer does not end the run. The full status rule, fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
 
 ```text
 Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA), A/B test ideas, and Privacy Policy, Terms of Use, and Changelog pages, built as HTML in landing-page/; Docs skipped (hosted app, no setup outside the app).

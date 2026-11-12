@@ -267,7 +267,7 @@
         "The hero section (headline, subheadline, trust bar) shows proof of work, the problem and the contrarian take, and the trust bar uses 'Used by 1,200 freelancers' as its one big number",
         "No number, user count, testimonial or price appears that is not in copy-bank.md; any other missing proof is labeled [proof needed]",
         "The copy uses the chosen framework's template section names and order exactly; the hero rules added no section",
-        "The Step 3 report shows the Hero rules and Copy test checks, and the Final Report records page: not built with the copy-only reason"
+        "The Step 3 report shows the Hero rules and Copy test checks, and the Final Report opens with Result: COMPLETE and records page: skipped — copy only requested (not page: not built)"
       ]
     }
   ]
