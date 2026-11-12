@@ -1,6 +1,6 @@
 # lstack
 
-**lstack 0.7.0** exposes this repository's maintained first-party Agent Skills
+**lstack 0.8.0** exposes this repository's maintained first-party Agent Skills
 as a native Claude Code plugin directly from the canonical `skills/` tree, which
 is itself the plugin folder.
 Optional platform-neutral, Claude and Codex ZIP exports remain available. It is
@@ -32,8 +32,8 @@ claude --plugin-dir /absolute/path/to/checkout/skills
 
 The path is the checkout's `skills/` folder, not the repository root and not
 `skills/.claude-plugin/`. Only native metadata lives in that directory. The
-manifest's `./` entry discovers the 44 immediate members, and two further
-entries add **only** the nested diagram children. Together they expose 46
+manifest's `./` entry discovers the 46 immediate members, and two further
+entries add **only** the nested diagram children. Together they expose 48
 skills once, without flattening, copying or moving source files. Skill-local
 `agents/` files stay resources, not native agents. The repository-root
 `.claude-plugin/marketplace.json` lists the plugin with source `./skills`.
@@ -62,7 +62,7 @@ data-handling/legal disclosures are owner responsibilities. This implementation
 does not submit, publish, or claim acceptance/approval.
 
 Most portal checks read only the plugin folder, which is why it is `skills/` and
-not the repository root: the folder holds the 46 members, `skills/README.md`
+not the repository root: the folder holds the 48 members, `skills/README.md`
 (the listing page and per-skill data-handling disclosure) and the native
 manifest, and stays under the portal's 512-file limit, with no symlinks, no
 non-image binaries and no file over 256 KiB.
@@ -82,15 +82,15 @@ no invented contact, retention or privacy guarantees.
 
 ## Contents and scope
 
-[manifest.json](manifest.json) explicitly lists all **46** current tracked skill
-definitions: 44 top-level skills plus `drawio-generator` and
+[manifest.json](manifest.json) explicitly lists all **48** current tracked skill
+definitions: 46 top-level skills plus `drawio-generator` and
 `excalidraw-generator`, the two children of `diagram-generator`. Native Claude
 loading uses the unchanged nested source layout. In optional ZIP exports every
 member becomes a separately discoverable `skills/<name>/SKILL.md` directory;
 the exported umbrella excludes the children's subtrees to avoid duplication.
 
 Exported files keep their original bytes and Git executable modes: `SKILL.md`,
-references, scripts, agents, assets and human-facing docs. Package version 0.7.0
+references, scripts, agents and assets. Package version 0.8.0
 is independent of both the catalog release and member versions. Generated
 `provenance.json` records the full source commit, manifest/builder SHA-256,
 original member versions, and source/destination/hash/mode for every member file.
@@ -120,7 +120,7 @@ python3 scripts/build-lstack.py --check
 python3 scripts/build-lstack.py
 ```
 
-The default output is `dist/lstack-0.7.0.zip` (ignored by Git). The JSON result
+The default output is `dist/lstack-0.8.0.zip` (ignored by Git). The JSON result
 prints the exact commit, skill/file counts, output path and archive SHA-256.
 Inputs come **entirely from the selected committed Git tree**, never from local
 edits or installed skills. Commit intended packaging/member changes before
@@ -148,14 +148,14 @@ Inspect and extract a **trusted, locally built** archive into a new staging
 folder, not directly over an existing agent installation:
 
 ```bash
-python3 -m zipfile -l dist/lstack-0.7.0.zip
-python3 -m zipfile -e dist/lstack-0.7.0.zip /tmp/lstack-staging
+python3 -m zipfile -l dist/lstack-0.8.0.zip
+python3 -m zipfile -e dist/lstack-0.8.0.zip /tmp/lstack-staging
 ```
 
 Layout:
 
 ```text
-lstack-0.7.0/
+lstack-0.8.0/
   README.md
   LICENSE
   manifest.json
@@ -165,7 +165,7 @@ lstack-0.7.0/
     diagram-generator/SKILL.md
     drawio-generator/SKILL.md
     excalidraw-generator/SKILL.md
-    ... (46 independent member directories)
+    ... (48 independent member directories)
 ```
 
 Read a member's `SKILL.md` and prerequisites before using it. Supply that file
@@ -173,7 +173,7 @@ and its relative resources to a skill-capable agent, or manually install the
 **whole member directory** at that agent's documented skill location. For the
 existing member preflights this is commonly `~/.claude/skills/<name>/` or
 `~/.agents/skills/<name>/`. Review any existing copy and back it up before
-replacing it; don't nest the entire `lstack-0.7.0` directory as one skill. For
+replacing it; don't nest the entire `lstack-0.8.0` directory as one skill. For
 example, after installing `code-review`, ask the agent to review the target
 repository using that skill and verify it loaded the intended definition.
 There is no `/lstack` entry point or automatic dependency installation.
@@ -194,8 +194,8 @@ register its marketplace. The following uses ignored `dist/` under the clone:
 ```bash
 python3 scripts/build-lstack.py --target claude --check
 python3 scripts/build-lstack.py --target claude
-python3 -m zipfile -e dist/lstack-claude-0.7.0.zip dist/claude-staging
-marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.7.0"
+python3 -m zipfile -e dist/lstack-claude-0.8.0.zip dist/claude-staging
+marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.8.0"
 plugin="$marketplace/plugins/lstack"
 claude plugin validate "$plugin"
 claude plugin validate "$marketplace"
@@ -206,16 +206,16 @@ files. The result JSON reports `marketplace_root` and `plugin_root` relative to
 the extraction directory. Its layout is:
 
 ```text
-lstack-claude-0.7.0/
+lstack-claude-0.8.0/
   .claude-plugin/marketplace.json   # lstack, source ./plugins/lstack
   plugins/lstack/
-    .claude-plugin/plugin.json     # name lstack, version 0.7.0
+    .claude-plugin/plugin.json     # name lstack, version 0.8.0
     .claude-plugin/icon.png        # plugin directory listing icon
     README.md
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md       # all 46 members, including flattened children
+    skills/<member>/SKILL.md       # all 48 members, including flattened children
 ```
 
 Only metadata goes inside `.claude-plugin/`; `skills/` is at the **plugin** root.
@@ -312,8 +312,8 @@ committed inputs, never selected by the installed Codex version.
 ```bash
 python3 scripts/build-lstack.py --target codex --check
 python3 scripts/build-lstack.py --target codex
-python3 -m zipfile -e dist/lstack-codex-0.7.0.zip dist/codex-staging
-marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.7.0"
+python3 -m zipfile -e dist/lstack-codex-0.8.0.zip dist/codex-staging
+marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.8.0"
 codex plugin marketplace add "$marketplace"
 codex plugin marketplace list
 codex
@@ -335,15 +335,15 @@ codex plugin list --json --marketplace lstack-local
 The generated archive is self-contained:
 
 ```text
-lstack-codex-0.7.0/
+lstack-codex-0.8.0/
   .agents/plugins/marketplace.json  # lstack-local
   plugins/lstack/
-    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.7.0
+    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.8.0
     README.md
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md        # 46 independent members
+    skills/<member>/SKILL.md        # 48 independent members
 ```
 
 The marketplace entry uses `source: {"source": "local", "path": "./plugins/lstack"}`,
@@ -402,7 +402,7 @@ and an empty working directory, with file-only credential storage and no copied
 credentials. Marketplace registration/listing, local installation and skill
 metadata discovery are checked without model execution. This proves native
 loading, not successful execution of every workflow. Desktop installation/UI,
-authenticated model sessions and all 46 workflows are not exercised. The
+authenticated model sessions and all 48 workflows are not exercised. The
 current official overview supports CLI `/plugins` and Codex in the ChatGPT
 desktop app, but **not the IDE extension**. This local shell-oriented artifact
 is not a public-directory submission or a promise of web/mobile/cloud support.
@@ -453,7 +453,7 @@ artifact is emitted or silently substituted.
   the original repository, not the extracted layout. Follow the manifest's
   source-to-name mapping; no member instructions are rewritten for this bundle.
 - Member-root tests/evals stay in the source repository. Packaging checks prove
-  artifact structure/parity/safety, not all 46 workflows' runtime behavior,
+  artifact structure/parity/safety, not all 48 workflows' runtime behavior,
   host compatibility, or that a human understood every report.
 
 ## Maintain and validate

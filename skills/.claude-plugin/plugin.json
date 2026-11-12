@@ -2,7 +2,7 @@
   "author": {
     "name": "Luong NGUYEN"
   },
-  "description": "46 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+  "description": "48 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
   "homepage": "https://luongnv.com/skills/",
   "icon": "./.claude-plugin/icon.png",
   "keywords": [
@@ -23,5 +23,5 @@
     "./diagram-generator/drawio-generator",
     "./diagram-generator/excalidraw-generator"
   ],
-  "version": "0.7.0"
+  "version": "0.8.0"
 }

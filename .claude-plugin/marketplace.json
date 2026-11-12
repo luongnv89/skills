@@ -1,12 +1,12 @@
 {
-  "description": "46 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+  "description": "48 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
   "name": "lstack",
   "owner": {
     "name": "Luong NGUYEN"
   },
   "plugins": [
     {
-      "description": "46 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+      "description": "48 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
       "name": "lstack",
       "source": "./skills"
     }

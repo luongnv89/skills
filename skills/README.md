@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 46 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 48 first-party Agent Skills for everyday
 engineering and product work: code review, test generation, documentation,
 diagrams, release shipping, repository cleanup, SEO and App Store audits,
 product planning, and multi-agent orchestration. Each skill is a plain-text
@@ -35,7 +35,7 @@ point. To update, run `claude plugin marketplace update lstack`, then
   pushes the site to the target repo's default branch and sets its Pages source
   without a further prompt, but asks before creating a repo or making one public. Other skills that
   push, delete branches or open PRs ask first.
-- **Agent-fleet skills pass on autonomy.** `herdr-agent` and `rex-agent` start
+- **Agent-fleet skills pass on autonomy.** `herdr-agent`, `hc-agent` and `rex-agent` start
   worker agents with the same permission-bypass flags as the agent that
   launched them (`--dangerously-skip-permissions`, `bypassPermissions`, Codex
   bypass, pi `--approve`). They print a warning, and `--without bypass` turns
@@ -64,6 +64,7 @@ working in. That is the only network access many skills make.
 | Skill | Network destinations | Data sent | Actions with your credentials | Tools it runs |
 |---|---|---|---|---|
 | agent-config | your git remote | none | none; writes local files only | git |
+| agent-profile | your git remote (repo sync before a run in a git repo); the harness CLI you pick contacts its own model provider | the task prompt and the repository files the delegated agent reads, sent by that harness to its provider | runs the harness under your own login only after you say go to the command it shows; a `full` permissions run needs a separate yes every time; creates a git worktree and branch only if you choose one; never commits, merges or pushes | python3, git, mcc (optional), the harness CLI: claude, pi, opencode, codex, droid, devin, grok or gemini |
 | ai-job-scout | web search and fetch: public profiles, employer career sites, ATS boards (Greenhouse, Lever, Ashby, Workable), job aggregators | search queries built from the candidate's skills, roles and location | none; never applies or contacts anyone | web search/fetch, optional browser |
 | appstore-assets | your git remote; developer.apple.com (screenshot and creative-asset spec pages); Google Fonts and raw.githubusercontent.com/google/fonts (caption font and its license); the app's landing page when there is no code; GitHub when `asm deps acquire` fetches `emil-design-eng` | the spec and font URLs, the font family name, the landing-page URL | none; never commits, pushes or uploads to App Store Connect | git, python3 (Pillow), headless Chrome/Chromium, asm, web fetch/browse |
 | appstore-review-checker | your git remote | none | none; never reads App Store Connect keys | git |
@@ -84,6 +85,7 @@ working in. That is the only network access many skills make.
 | excalidraw-generator | your git remote, before writing into a repo | none | none | git |
 | frontend-design | your git remote; optional browser for render checks | none | writes UI files after approval; runs your build, lint and test commands | git, project tooling |
 | github-pages-publish | your git remote; GitHub via `gh` (the target repo, its Pages settings and Actions runs, release lookups for the `actions/*` deploy actions); the published site (live check) | the site content you publish, which becomes a public website | commits and pushes the site to the target repo's default branch and sets Pages to deploy from Actions without a further prompt; asks before creating a repo or making a private repo public | git, gh, python3, asm (optional, for frontend-design) |
+| hc-agent | the local Herdr desktop app via `hc` and `herdr-app`; workers contact their own model providers | task prompts typed to worker agents | starts workers with the launcher's permission-bypass flags by default (see above); types into worker terminals; closes worker panes only after confirmation | hc, herdr-app, python3, claude, codex, pi |
 | herdr-agent | local Herdr socket; workers contact their own model providers | task prompts typed to worker agents | starts workers with the launcher's permission-bypass flags by default (see above); types into panes | herdr, python3, claude, codex, pi |
 | idea-validator | web search; your ideas repo remote | idea text and search queries; reports committed to your remote | commits and pushes `idea.md` and `validate.md` without a further prompt | git, web search |
 | install-script-generator | your git remote; a HEAD request to raw.githubusercontent.com when `install.sh` already exists | repository owner, name and branch | none; no commit or push | git, python3 helpers (dry run), bash, shellcheck, curl |
