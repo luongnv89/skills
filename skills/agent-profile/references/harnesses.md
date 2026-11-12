@@ -55,8 +55,9 @@ typed ids.
   the block, followed only by deny rules (2.2.7 appends `browser` and `skill browser`
   denies). A non-zero exit, a timeout (its server is killed), output that is not the known
   JSON shape, or no `build` agent is also a refusal: a newer opencode that changes the
-  shape is never run confined on trust. MCP servers and plugins are not checked;
-  `debug agents` did not load a repo plugin in testing.
+  shape is never run confined on trust. For a planned worktree, `command` checks the
+  current directory and `run` checks again in the new worktree. MCP servers and plugins
+  that opencode starts are not checked.
 - **pi** has no permission prompts. `ask` passes `--no-mcp --tools read,grep,find,ls` (tested:
   reads worked, nothing was written, no shell ran; `--no-mcp` because `--tools` keeps MCP
   tools, and pi's code mode can reach them); `full` passes nothing. `edits`

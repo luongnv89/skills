@@ -257,8 +257,8 @@ ADAPTERS = {
         "per_model_thinking": False, "variants": True,
         "help": [["run", "--help"]], "flags": ["--model", "--auto", "--file", "--standalone", "--agent"],
         "permissions": {"ask": ["--agent", "build"], "edits": ["--agent", "build"], "full": ["--auto"]},
-        "permission_note": "opencode `ask`/`edits` deny every tool but the ones named; each run first "
-                           "checks the rules opencode resolves (`opencode debug agents`) and refuses if they differ",
+        "permission_note": "opencode `ask`/`edits` deny every tool but the ones named and are checked against "
+                           "the rules opencode resolves before each run; `full` is not restricted",
     },
     "codex": {
         "name": "Codex", "bin": "codex", "verified": False,
