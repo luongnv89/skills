@@ -333,6 +333,15 @@ Mode A Step 5 (SKILL.md → *Workflow*):
 - "You" language (customer-focused)
 - Multiple CTAs throughout the page
 
+**Hero rules** (practitioner advice; see `references/anti-slop-rules.md` → *The test*). They shape the content of the template's existing hero fields (headline, subheadline, trust bar) and never add or reorder a section:
+
+- The headline is visualizable and falsifiable, and passes the copy test.
+- Proof of work up top: what the product does today, shown (a demo, a command, a screenshot the brief names).
+- The problem: how the world works today for this audience, in the subheadline.
+- The contrarian take, when the brief or the launch story gives one. When neither does, leave it out and say so on the Final Report's `Uncertainty:` line; `[proof needed]` marks missing proof only.
+- One big number from the brief, with its source, or `[proof needed]`.
+- When `launch-kit/copy-bank.md` exists, reuse its launch story (`copy.story.hero`, `.villain`, `.contrarian`) and its facts instead of writing a new one.
+
 ## Expected Output Example (Mode A)
 
 Example input:

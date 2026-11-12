@@ -2,9 +2,9 @@
 
 The closing chat response of every landing-page-generator run, stops included, in both
 modes. It sits beside the deliverable (Mode A copy in chat; Mode B the rewritten
-`README.md`; the companion pages and the built pages in both) and never replaces it. `SKILL.md` (*Final Report*) holds the status rule and
-a `COMPLETE` example; this file holds the `PARTIAL` and `BLOCKED` examples, the fill
-rules, and the reader checks.
+`README.md`; the companion pages and the built pages in both) and never replaces it. `SKILL.md` (*Final Report*) holds
+a `COMPLETE` example; this file holds the status rule (*Status*), the `PARTIAL` and
+`BLOCKED` examples, the fill rules, and the reader checks.
 
 The report is a compact text block of four lines. Do not replace it with a long Markdown
 report or a rendered page. If the user asks for a different format, keep the four items
