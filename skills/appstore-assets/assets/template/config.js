@@ -84,8 +84,10 @@ window.APP_CONFIG = {
     searchSub: "",
     hero: { platform: "iphone", frame: "01-hero" },
     sides: [{ platform: "iphone", frame: "02-feature" }],
-    // layout: "safe",  // header: caption and hero inside Apple's art safe area, no side device;
-    //                    drop any css rule pinning .cv-cap h1 or p sizes, or the caption overflows the safe area
+    // The header keeps its caption and one hero device inside Apple's art safe area (no side device),
+    // so a narrow crop still shows the app; drop any css rule pinning .cv-cap h1 or p sizes, or the
+    // caption overflows it. "wide" gives a larger hero and a side device outside it, cropped on narrow displays.
+    // layout: "wide",
     // Looping, muted header/search videos (creative/<kind>.mp4). Keep kinds empty
     // unless the user asked for video. Beat 0 is the still above; each extra beat
     // reuses existing frames only. Every beat needs max(2.5 s, 1 s + words / 4).

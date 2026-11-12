@@ -754,7 +754,7 @@ def main() -> None:
     for o in manifest.get("outside", []):
         print(f"note: {o['kind']}{' (variant ' + o['variant'] + ')' if o['variant'] else ''}: device slot(s) "
               f"{', '.join(o['slots'])} sit outside Apple's art safe area, so narrow displays crop them; keep the "
-              "message in the caption" + (", or set creatives.layout: \"safe\"" if o["kind"] == "header" else ""))
+              "message in the caption" + (", or drop creatives.layout: \"wide\" to keep the hero inside" if o["kind"] == "header" else ""))
     for c in manifest.get("capOutside", []):
         print(f"WARN: {c['kind']}{' (variant ' + c['variant'] + ')' if c['variant'] else ''}"
               f"{' beat ' + str(c['beat']) if c['beat'] else ''}: caption spans x {c['box'][0]}-{c['box'][2]}, y {c['box'][1]}-"

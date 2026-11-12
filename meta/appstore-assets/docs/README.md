@@ -9,7 +9,7 @@
 
 > Generate upload-ready App Store screenshots and creative assets (header and search images and looping videos) for iPhone, iPad and Mac from an app's codebase or landing page, following Apple's asset best practices.
 
-Version: **1.3.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.4.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -21,6 +21,7 @@ Version: **1.3.0** · Author: Luong NGUYEN · License: MIT
 - Verifies sizes, the RGB/no-alpha rule, per-class counts and caption contrast with a bundled checker
 - Turns the header and search creatives into looping, muted videos (header 3840 × 1646, search 3744 × 2496 at 30 fps or 3600 × 2400 at 60 fps, 5–30 s): captions carry the message without sound, every frame is reproducible, the last frame flows into the first, and the key text stays inside Apple's art safe area
 - Checks each video with ffprobe (size, constant 30/60 fps, duration, H.264 yuv420p, audio) and writes a video sheet so a reviewer can check every caption and the loop seam without playing it
+- Keeps the header caption and one hero device inside Apple's art safe area, so narrow displays still show the app (`creatives.layout: "wide"` opts into a larger hero and a side device outside it), and the creative sheet adds a crop of that area for review
 - Optional Custom Product Page variants: one header per ad creative, rendered to `creative/<variant>/`
 - Landscape apps (`orientation: "landscape"`, read from `Info.plist` or Flutter's `setPreferredOrientations`) render the rotated sizes from the same kit
 - Video length fitted to the planned beats (12 s minimum, 30 s cap), and headlines in wide faces shrink to fit two lines

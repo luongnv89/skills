@@ -14,7 +14,9 @@ yuv420p (the level is reported; above 5.2 is a warning), a frame count that
 matches duration x fps, and the audio-track rule. With ffmpeg, a blank frame
 (every frame is decoded at low resolution) or a jump at the loop seam also
 fails, and --sheet writes one video sheet per file: frames at most 2 s apart
-with Apple's art safe area outlined, plus the seam pair.
+with Apple's art safe area outlined, plus the seam pair. The creative stills
+sheet outlines it on header and search images and adds each header's crop to
+it, so a reviewer sees what narrow displays show.
 
 Only files the kit could have produced are checked in creative/: header*,
 search* and universal* images and videos at its root and in variant folders
@@ -291,12 +293,25 @@ def video_sheet(frames: dict[int, Image.Image], samples: list[int], last: int, f
     canvas.save(out)
 
 
-def sheet(files: list[Path], out: Path, thumb_w: int = 300) -> None:
+def sheet(files: list[Path], out: Path, thumb_w: int = 300, creative: bool = False) -> None:
+    """One row of thumbnails. On the creative sheet, header and search show Apple's art safe area in
+    magenta, and each header gets a magenta-framed tile of its safe-area crop: what narrow displays show."""
     thumbs = []
     for f in files:
         im = Image.open(f).convert("RGB")
+        kind, full_w = f.stem.split("-")[0], im.width
+        safe = SAFE.get(kind) if creative else None
+        box = safe and (round(safe[0] * im.width), round(safe[1] * im.height),
+                        round((safe[0] + safe[2]) * im.width), round((safe[1] + safe[3]) * im.height))
+        crop = im.crop(box) if box and kind == "header" else None
         im.thumbnail((thumb_w, thumb_w * 3), Image.LANCZOS)
+        if box:  # Apple's art safe area; not part of the asset
+            ImageDraw.Draw(im).rectangle([v * im.width / full_w for v in box], outline="#ff2bd6", width=2)
         thumbs.append(im)
+        if crop:
+            crop.thumbnail((thumb_w * 2, thumb_w * 3), Image.LANCZOS)
+            ImageDraw.Draw(crop).rectangle([0, 0, crop.width - 1, crop.height - 1], outline="#ff2bd6", width=3)
+            thumbs.append(crop)
     gap = 12
     canvas = Image.new("RGB", (sum(t.width for t in thumbs) + gap * (len(thumbs) + 1),
                                max(t.height for t in thumbs) + gap * 2), "white")
@@ -456,7 +471,7 @@ def main() -> None:
             failures += 1
             rows.append((f"{folder}/", "FAIL", f"{len(files)} screenshots; App Store Connect allows {MAX_PER_CLASS} per class"))
         if a.sheet and files:
-            sheet(files, a.sheet / f"{folder}.png")
+            sheet(files, a.sheet / f"{folder}.png", creative=folder == "creative")
 
     for p in platforms:
         need = REQUIRED[p]

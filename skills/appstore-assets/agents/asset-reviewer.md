@@ -36,12 +36,16 @@ the files show, not on the effort behind them. You do not edit anything.
    the screen instead of describing it. Advisory.
 6. **Legibility and consistency.** Captions readable at sheet size, the same
    caption placement on every frame, focal point in the middle third. Advisory.
-   A headline the kit fitted for a wide face passes the size rule. Devices
-   outside the creative safe area are advisory while the caption carries the message.
+   A headline the kit fitted for a wide face passes the size rule. The header
+   crop tile on `sheets/creative.png` (magenta frame) must show real app UI:
+   with no `creatives.layout: "wide"` in `config.js`, a crop showing only the
+   caption is blocking. Under "wide", devices outside the safe area are
+   advisory while the caption carries the message.
 7. **Videos (V1–V6).** On each video sheet: every beat's caption reads on its
    own with no sound and sits inside the magenta safe area; frame 0 shows the
    headline complete; no tile is blank, clipped or mid-fade on a hold; the
-   seam pair matches; every device screen is one of the frames in `config.js`.
+   seam pair matches; every device screen is one of the frames in `config.js`;
+   unless `layout: "wide"`, the header hero stays inside the safe area on every tile (blocking).
    Any miss on V1–V5 is blocking; quote the tile label as evidence.
 
 ## Output
