@@ -174,7 +174,8 @@ exactly one mode.
 
 1. **L-day:** the user's date. Without one, propose the first Tuesday at least 21 days
    out, and record it as an assumption. Those 21 days cover the 7-day account wait on
-   product-hunt and geeknews, Reddit history, and the shorter free queues.
+   product-hunt and geeknews, Reddit history, and the shorter free queues. An opted-in
+   campaign track can move it later: apply the L-day rule in `launch-story.md` §4.
 2. **Account setup:** today, for every account with an age, karma or verification gate:
    product-hunt (7 days), geeknews (7 days), peerlist (verified profile and a 100%
    project), and each chosen subreddit's karma gate. Reddit participation starts the same
@@ -236,6 +237,15 @@ Opted-in actions: <the second-yes actions the user picked, or "none">
 ## Timeline
 | Date | Action | Platform |
 <every dated action from today to L+30, built with §5>
+
+## Launch story
+| Element | Value | Source (Profile row, or founder input needed) |
+<one row each: hero, villain, contrarian take, lovers, haters (launch-story.md §1)>
+Story owner: <role, never a name; or none (track off)>
+
+## Campaign tracks
+| Track | On | Lead time | What the kit adds |
+<every track in launch-story.md §4; all off unless the user turned one on>
 
 ## Budget
 Free path total: $0. Paid options proposed: <each option, its price and what it buys>. Total if all are accepted: $<N>.
@@ -312,6 +322,7 @@ Plan approved <date> · L-day <date> · <N> platforms · Budget $<N>
 ## Checklist
 - [ ] <date> · <action> · [<platform>](platforms/<id>.md)
 <every timeline row, in date order>
+- [ ] <date> · build your supporter list in your own private tool; this kit holds counts and roles only (when that track is on)
 
 ## Founder inputs needed
 <every open question the writers returned, with its file>

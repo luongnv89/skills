@@ -333,6 +333,16 @@ Mode A Step 5 (SKILL.md → *Workflow*):
 - "You" language (customer-focused)
 - Multiple CTAs throughout the page
 
+**Hero rules** (practitioner advice; see `references/anti-slop-rules.md` → *The test*). They shape the content of the template's existing hero fields (headline, subheadline, trust bar) and never add or reorder a section:
+
+- The headline is visualizable and falsifiable, and passes the copy test.
+- Proof of work up top: what the product does today, shown (a demo, a command, a screenshot the brief names).
+- The problem: how the world works today for this audience, in the subheadline.
+- The contrarian take, when the brief or the launch story gives one. When neither does, leave it out and say so on the Final Report's `Uncertainty:` line; `[proof needed]` marks missing proof only.
+- One big number from the brief, with its source, or `[proof needed]` (Mode B: `[placeholder]`).
+- Slots: problem = subheadline sentence 1; contrarian take = subheadline sentence 2, or omitted; big number = trust bar, or `[proof needed]`; proof of work = trust bar, next to the number (the demo, command or screenshot the brief names). When the brief gives neither, the trust bar holds one `[proof needed]` marker that names both gaps. The subheadline stays 1-2 sentences.
+- When `launch-kit/copy-bank.md` exists, reuse its launch story (`copy.story.hero` is the story's protagonist, the customer, not the page headline; `.villain`, `.contrarian`) and its facts instead of writing a new one.
+
 ## Expected Output Example (Mode A)
 
 Example input:
@@ -351,9 +361,9 @@ Framework: PAS
 
 HERO SECTION
 Headline: Answer Every Customer Without Hiring Support
-Subheadline: AcmeDesk gives solo founders a shared inbox and AI draft replies that are ready in 10 minutes, not weeks.
+Subheadline: Solo founders answer every support email themselves, on top of building the product. AcmeDesk gives you a shared inbox with AI draft replies, set up in 10 minutes.
 CTA Button: "Start My Free Trial"
-Trust Bar: [proof needed — add user count, testimonial, or response-time metric]
+Trust Bar: [proof needed — add user count or response-time metric, and a screenshot of the shared inbox]
 ...
 OPTIMIZATION NOTES
 A/B Test Ideas: test speed-focused vs founder-control headlines.

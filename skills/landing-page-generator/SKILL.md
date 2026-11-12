@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 1.8.1
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -138,6 +138,7 @@ Collect before writing:
 | Accounts, plans, trial, billing | Terms of Use |
 | Release history: versions, dates, changes | Changelog |
 | Install and setup steps | Docs |
+| `copy.story.*` and facts in `launch-kit/copy-bank.md`, when it exists | Reuse the launch story |
 
 If any **core** input is missing—product/service name, target audience, problem solved, or primary
 CTA—ask before proceeding. For missing proof, pricing, guarantee, or companion-page details, proceed
@@ -161,6 +162,7 @@ substitute a generic Hero/Problem/Solution layout when another framework applies
 
 **Content quality (all frameworks):**
 - Headlines: 10 words or fewer, value-led, specific to the audience
+- Hero and marketing lines: the hero rules and copy test in `references/section-templates.md` → *Copywriting Best Practices*
 - Subheadlines: 1–2 sentences that expand the headline without repeating it
 - Body copy: active voice, benefit-led; address pain points with concrete scenarios where the template calls for them
 - Features: 3–5 items described as outcomes, not feature lists
@@ -237,12 +239,12 @@ Mode A input and output for a PAS brief, and example trigger phrases: `reference
 
 ## Final Report
 
-End every run, stops included, with this compact text block. Status is `COMPLETE` (the deliverable is produced and every applicable check passes — Mode A: the full-page copy follows the chosen framework's template, or the requested single section plus its fit note is delivered; Mode B: `README.md` is rewritten, `README.backup.md` exists, and the Step 6 Self-Review Checklist passes; both modes: each applicable companion page is delivered, written, or linked and passes the companion checks, and the pages are built and pass the page checks or skipped at the user's request; companion pages only: each requested page passes the companion checks), `PARTIAL` (a deliverable was produced but a check still fails, or the page was not built), or `BLOCKED` (no deliverable: a required question went unanswered and the user ended the run, Mode B found no `README.md` and the user declined creating one, or Repo Sync stopped on a conflict). A question that awaits the user's answer does not end the run. Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
+End every run, stops included, with this compact text block. Status is `COMPLETE` (every applicable check passes; a build skipped at the user's request still counts), `PARTIAL` (a deliverable was produced but a check still fails, or the page was not built), or `BLOCKED` (no deliverable). A question that awaits the user's answer does not end the run. The full status rule, fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
 
 ```text
 Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA), A/B test ideas, and Privacy Policy, Terms of Use, and Changelog pages, built as HTML in landing-page/; Docs skipped (hosted app, no setup outside the app).
 Evidence: Framework PAS named and applied via references/section-templates.md; hero headline 8 words; every CTA starts with an action verb; pages: Privacy Policy, Terms of Use, Changelog delivered, Docs skipped (hosted app); companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; [proof needed] markers: 2 on the landing page, 18 on the companion pages; anti-slop check passed; page: built (landing-page/: index.html, privacy.html, terms.html, changelog.html) by frontend-design; page checks Pages built, Sections carried, CTAs carried, Markers carried (24/24), Nothing added, Notes excluded, Links resolve, Design checks passed; sync: skipped (new folder).
-Uncertainty: Assumed a setup-time objection belongs in the FAQ; no data practices, legal entity, or release date were supplied, so those facts are markers; responsive rendering untested (no browser), breakpoints inspected in CSS.
+Uncertainty: Assumed a setup-time objection belongs in the FAQ; the brief gives no contrarian take, so the hero leaves it out; no data practices, legal entity, or release date were supplied, so those facts are markers; responsive rendering untested (no browser), breakpoints inspected in CSS.
 Decision: No approval needed. Before publishing: replace the [proof needed] markers with real facts, and have a lawyer review the Privacy Policy and Terms of Use.
 ```
 
@@ -253,7 +255,7 @@ Verify before delivering. When the run delivers companion pages only, only the c
 - Output follows the framework-specific template in `references/section-templates.md` or a user-specified
   subset.
 - Chosen framework is named and consistently applied.
-- Hero headline is 10 words or fewer, specific, and value-led.
+- Hero headline is 10 words or fewer, specific, and value-led; the hero follows the hero rules and marketing lines pass the copy test.
 - Every CTA starts with an action verb and states the outcome.
 - Unsupported proof is labeled `[proof needed]`; no fake claims are present.
 - Copy passes `references/anti-slop-rules.md`.

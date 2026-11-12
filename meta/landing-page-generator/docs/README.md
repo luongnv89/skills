@@ -21,7 +21,7 @@
 - README mode: mermaid diagrams, tables over prose, all original content preserved in `<details>`
 - Companion pages with every full landing page: Privacy Policy always, Terms of Use for accounts or paid plans, Changelog always, and Docs for CLIs, libraries, and products with setup steps, with every fact traced to the brief or a project file and every gap marked, never invented
 - A built page at the end of every full run: `frontend-design` turns the copy into `landing-page/index.html` plus one HTML file per companion page, keeping every section, CTA, and `[proof needed]` or `[placeholder]` marker verbatim. Without `frontend-design`, the run delivers the copy, says why no page was built, and reports PARTIAL
-- Anti-slop rules to avoid generic AI marketing filler
+- Anti-slop rules to avoid generic AI marketing filler, plus a copy test (every line visualizable, falsifiable, and something only you can say) and hero rules: proof of work, the problem, a contrarian take, and one real number or `[proof needed]`. The launch story from a `product-launch` kit (`launch-kit/copy-bank.md`) is reused when it exists
 - Default quality bar in both modes: professional, production-ready, elegant, and premium output without being asked
 - A/B test ideas and conversion optimization notes with every copy deliverable
 - Step Completion Reports per step and a closing Final Report (`Result` / `Evidence` / `Uncertainty` / `Decision`) with a COMPLETE / PARTIAL / BLOCKED status for every run, stops included
@@ -67,7 +67,7 @@ graph TD
 | Path | Description |
 |---|---|
 | `references/section-templates.md` | Mode A output format for all landing page sections |
-| `references/anti-slop-rules.md` | Banned phrases and structural patterns (both modes) |
+| `references/anti-slop-rules.md` | Banned phrases, structural patterns and the three-part copy test (both modes) |
 | `references/readme-mode.md` | Mode B — full README-to-landing-page workflow |
 | `references/readme-section-templates.md` | Mode B section flow for the rewritten README |
 | `references/readme-step-reports.md` | Mode B step-completion report format |

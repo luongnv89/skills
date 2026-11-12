@@ -9,7 +9,7 @@ dependencies:
   - logo-designer
   - seo-ai-optimizer
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -212,7 +212,8 @@ catalog values, labeled with the catalog date.
 ## Step 4: Launch Plan and approval gate (you)
 
 1. Run the Repo Sync.
-2. Build the timeline with `references/plan-and-reports.md` §5.
+2. Build the timeline with `references/plan-and-reports.md` §5, plus the launch story and
+   opt-in campaign tracks from `references/launch-story.md` (tracks can move L-day).
 3. Write `launch-kit/launch-plan.md` in the shape of §6 of the same file, with
    `Status: awaiting-approval`. List a second-yes action only when it applies:
    - `gh repo edit`, only when `code_public` is a public GitHub repo;
@@ -232,13 +233,15 @@ catalog values, labeled with the catalog date.
 
 **5a. Copy bank.** Spawn the copy-bank writer.
 
-- **Input:** `references/launch-kit.md` and `launch-kit/launch-plan.md`.
+- **Input:** `references/launch-kit.md`, `references/launch-story.md` and
+  `launch-kit/launch-plan.md`.
 - **Output:** `launch-kit/copy-bank.md`.
 
 **5b. Platform guides.** After 5a, spawn one platform writer per family that has
 approved platforms, all in one turn.
 
-- **Input:** `references/launch-kit.md`, the family file, `launch-kit/launch-plan.md`,
+- **Input:** `references/launch-kit.md`, `references/launch-story.md`, the family file,
+  `launch-kit/launch-plan.md`,
   `launch-kit/copy-bank.md`, the writer's platform ids, and their Step 3 results.
 - **Output:** `launch-kit/platforms/<id>.md` for each id. The return shape is in
   `references/launch-kit.md`.
@@ -261,7 +264,8 @@ approved platform exist.
    - Send each `FAIL` line to the writer of that file, then run the script again.
    - Stop after 3 rounds.
 2. Spawn a fresh reviewer. It must never be one of the writers.
-   - **Input:** `references/launch-kit.md`, the `launch-kit/` folder, and the output of
+   - **Input:** `references/launch-kit.md`, `references/launch-story.md`, the `launch-kit/`
+     folder, and the output of
      `check_kit.py launch-kit --json`.
    - **Output:** the `blocking` and `minor` arrays.
 3. Route each blocking issue to the writer of its file, then run the script again.
@@ -281,8 +285,7 @@ again, with its exact effect, before it runs.
      and report why, unless the repo is PUBLIC and the permission is ADMIN or MAINTAIN.
   2. Print the exact command:
      `gh repo edit <owner/repo> --description "<copy>" --homepage "<url>" --add-topic <t1>,<t2>`.
-     Topics: at most 20 in total, lowercase letters, digits and hyphens, each at most 50
-     characters.
+     Topic rules: `references/platforms-core.md` (GitHub).
   3. Confirm with AskUserQuestion: "Run it" or "Skip".
   4. On "Run it", run it. Verify with
      `gh repo view --json description,homepageUrl,repositoryTopics`.
@@ -311,17 +314,8 @@ After every step, print the Step Completion Report for that step, from
 ## Expected output
 
 A completed run leaves `launch-kit/` with `launch-plan.md`, `README.md`, `copy-bank.md`,
-`assets.md` and one `platforms/<id>.md` per approved platform. A field in a guide looks
-like this, and `check_kit.py` checks it against its limit:
-
-```
-<!-- field: product-hunt.tagline max=60 -->
-~~~text
-Invoices that chase late payments for you
-~~~
-```
-
-Example of the closing lines:
+`assets.md` and one `platforms/<id>.md` per approved platform. Field markers:
+`references/launch-kit.md`. Example of the closing lines:
 
 ```
 Result: COMPLETE
@@ -369,4 +363,5 @@ Optional and propose-only. After the run's result is delivered, run this check:
 | `references/platforms-launch-boards.md`  | Step 3 and Step 5 workers         | 20 launch boards                                                         |
 | `references/platforms-directories.md`    | Step 3 and Step 5 workers         | 22 directories, review sites, AI directories and profiles               |
 | `references/launch-kit.md`               | Step 5 writers, Step 6 reviewer   | kit layout, field markers, copy rules, templates, contracts              |
+| `references/launch-story.md`             | Steps 4, 5 and 6                  | launch story, copy test, X checklist, campaign tracks, disclosure, supporter privacy |
 | `scripts/check_kit.py`                   | Step 6 (run it; `--self-test`)    | field limits, placeholders, vote requests, founder-voice files            |

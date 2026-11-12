@@ -15,8 +15,11 @@
 - Gates and scores **all 50 sites** from a curated list (Product Hunt, Hacker News, Reddit, GeekNews, BetaList, Uneed, DevHunt, AlternativeTo, G2, the AI directories and more) plus your own X, LinkedIn and email list. Each skip gets a reason.
 - Re-checks the prices, queues and rules of the shortlisted sites at run time, because launch sites change often.
 - **Stops for your approval** before writing anything except the plan.
+- Plans one **launch story** with you (hero, villain, contrarian take, who will love it and who will hate it), built from sourced facts and your own answers, never invented, and reused in every post.
+- Offers opt-in **campaign tracks**, each with a lead time: a launch video, a launch-day invite to friends, a private supporter list, co-launch partners, earned media, an in-person event, paid amplification you run yourself, and a story owner. A track that needs more time moves the launch date.
+- Every paid, gifted or relationship-based post carries a clear disclosure in the post itself (US FTC guidance). No fake accounts, bots or engagement pods, and your contacts' names never go into the kit.
 - Writes a `launch-kit/` folder:
-  - a copy bank (taglines and descriptions at every length the sites ask for, plus pitches and FAQ answers);
+  - a copy bank (the launch story, plus taglines and descriptions at every length the sites ask for, pitches and FAQ answers);
   - one setup and launch guide per site, with paste-ready fields;
   - an assets checklist;
   - a dated checklist from L-21 to L+30.
@@ -82,6 +85,7 @@ Give it a landing page URL or file, and run it from the product's repository whe
 | `references/platforms-directories.md`   | Directories, review sites (G2, Capterra), AI directories, Crunchbase, Wellfound                       |
 | `references/product-profile.md`         | The explorer's contract: Profile, Launch blockers and Assets tables                                  |
 | `references/launch-kit.md`              | Kit layout, field markers, copy rules, platform-guide and founder-voice templates, writer and reviewer contracts |
+| `references/launch-story.md`            | Launch story, the three-part copy test, the X launch-post checklist, opt-in campaign tracks and the L-day rule, the disclosure rule, supporter privacy |
 | `scripts/check_kit.py`                  | Checks field limits, placeholders, vote requests and founder-voice files (`--self-test` included)    |
 
 The platform facts were verified on 2026-10-22 from each site's own pages. Each run re-checks the sites it shortlists.
@@ -90,7 +94,7 @@ The platform facts were verified on 2026-10-22 from each site's own pages. Each 
 
 - `launch-kit/launch-plan.md`: the Product Profile, the fit table for every site, the tiered plan, what was skipped and why, the timeline, the budget and the assumptions. It is the only file written before you approve.
 - `launch-kit/README.md`: your next 3 actions and a dated checklist.
-- `launch-kit/copy-bank.md`: taglines, descriptions, pitches and FAQ answers, each with its length limit.
+- `launch-kit/copy-bank.md`: the launch story, taglines, descriptions, pitches and FAQ answers, each with its length limit.
 - `launch-kit/assets.md`: every logo, screenshot and video size each site needs, and what you already have.
 - `launch-kit/platforms/<site>.md`: setup steps, paste-ready fields, the post, launch-day steps, the rules that get you removed, and sources.
 

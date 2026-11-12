@@ -83,14 +83,17 @@ Write these sections in this order. Each value has a field marker with the limit
 | `copy.tags`                      | none                     | 10 lowercase comma-separated keywords                       |
 | `copy.competitors`               | none                     | saashub, alternativeto: the profile's competitors only      |
 | `copy.pricing`                   | max=200                  | every pricing field                                         |
-| `copy.disclosure`                | max=120                  | community posts ("I'm the maker of …")                      |
-| `copy.outreach`                  | max=600                  | a DM or email to friends and communities on L-day (no vote request) |
+| `copy.disclosure`                | max=120                  | community posts ("I'm the maker of …"); for a paid, gifted or relationship-based post, the in-post disclosure line (`launch-story.md` §5) |
+| `copy.outreach`                  | max=600                  | a DM or email to friends and communities on L-day (no vote request, no recipient name: `launch-story.md` §6; asks anyone who posts to say how they know the founder: §5) |
+| `copy.story.hero` … `copy.story.haters` | max=200 each      | the launch story (`launch-story.md` §1): hero, villain, contrarian, lovers, haters; only the elements the plan sources |
+| `copy.invite`                    | max=300                  | the launch-day hold sent to friends, only when that track is on (`launch-story.md` §4); asks anyone who posts to say how they know the founder (§5) |
 
 Two sections have no field markers:
 
 - **Founder story prompts:** 4–6 questions only the founder can answer (why they built
   it, the moment it worked, what they would change). Platform guides point here wherever
   a post needs the founder's own story.
+  - Add one prompt for each story element the plan marks `founder input needed`.
 - **FAQ:** the 6–8 questions launch commenters will likely ask, each answered only from
   profile facts. A question the profile cannot answer goes to "Founder inputs needed".
 
@@ -184,12 +187,12 @@ wording. It contains:
 ## Writer contracts
 
 - **Copy-bank writer (Step 5a):**
-  - Input: this file, and `launch-kit/launch-plan.md`.
+  - Input: this file, `launch-story.md`, and `launch-kit/launch-plan.md`.
   - Output: `launch-kit/copy-bank.md`.
   - Returns `{"file": "launch-kit/copy-bank.md", "founder_inputs": [...]}`.
 - **Platform writer (Step 5b, one per family):**
-  - Input: this file; its family file (`platforms-core.md`, `platforms-launch-boards.md`
-    or `platforms-directories.md`); `launch-kit/launch-plan.md`;
+  - Input: this file; `launch-story.md`; its family file (`platforms-core.md`,
+    `platforms-launch-boards.md` or `platforms-directories.md`); `launch-kit/launch-plan.md`;
     `launch-kit/copy-bank.md`; its platform ids; the Step 3 results for those ids.
   - Output: `launch-kit/platforms/<id>.md` for each assigned id.
   - Returns `{"files": [...], "assets": [{"platform", "asset", "spec", "have"}],
@@ -202,10 +205,13 @@ wording. It contains:
   - Reuses copy-bank values: it copies them as they are, or shortens them to fit a
     platform's limit. Reddit sections are the exception: they restate copy-bank facts,
     the disclosure included, in new sentences (reviewer check 7).
+  - Applies `launch-story.md`: restates the launch story, passes the copy test, covers
+    the X checklist in `x.md`, and puts the disclosure in the post itself for any paid,
+    gifted or relationship-based post.
 
 ## Reviewer contract (Step 6, fresh subagent)
 
-- **Input:** this file, the `launch-kit/` folder, and the output of
+- **Input:** this file, `launch-story.md`, the `launch-kit/` folder, and the output of
   `python3 scripts/check_kit.py launch-kit --json`.
 - **Output:** `{"blocking": [{"file", "line", "rule", "fix"}], "minor": [...]}`. A clean
   pass returns empty arrays.
@@ -225,6 +231,14 @@ Blocking checks:
 6. **Disclosure:** community posts (Reddit, Indie Hackers, GeekNews) disclose the maker.
 7. **Reddit:** no title or body sentence repeats across `reddit.md` sections, no body opens
    with the product or a link, and the Participation plan names no product or link.
+8. **Launch story and disclosure (`launch-story.md`):** a paid, gifted or
+   relationship-based post lacks a clear in-post disclosure, or hides it (profile only,
+   after a "more" cut, among hashtags); `copy.invite`, `copy.outreach` or a co-launch
+   partner pitch asks people to post without asking them to disclose the relationship in
+   the post; the kit proposes a fake account, a bot, an
+   engagement pod or an undisclosed paid post; a contact's name or personal data appears
+   anywhere in `launch-kit/`; a story element has no source; or a marketing line fails
+   the copy test (`launch-story.md` §2).
 
 Minor checks: tone (superlatives, hype), unverified facts without a label, duplicated
 text that should reuse copy-bank values (except across Reddit sections, see check 7).
