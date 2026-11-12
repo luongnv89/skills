@@ -1,0 +1,255 @@
+[
+ {
+  "id": "build",
+  "name": "Build",
+  "request": {
+   "settings": {},
+   "headers": {},
+   "body": {}
+  },
+  "description": "The default agent. Executes tools based on configured permissions.",
+  "mode": "primary",
+  "hidden": false,
+  "permissions": [
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "read",
+    "resource": "*.env",
+    "effect": "ask"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.*",
+    "effect": "ask"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.example",
+    "effect": "allow"
+   },
+   {
+    "action": "question",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "read",
+    "resource": "*.env",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.*",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.example",
+    "effect": "allow"
+   },
+   {
+    "action": "glob",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "grep",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "list",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "shell",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "edit",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "read",
+    "resource": "*.env",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.*",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.example",
+    "effect": "allow"
+   },
+   {
+    "action": "glob",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "grep",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "list",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "browser",
+    "resource": "*",
+    "effect": "deny"
+   },
+   {
+    "action": "skill",
+    "resource": "browser",
+    "effect": "deny"
+   }
+  ]
+ },
+ {
+  "id": "plan",
+  "name": "Plan",
+  "request": {
+   "settings": {},
+   "headers": {},
+   "body": {}
+  },
+  "description": "Read-only agent for exploring the codebase and planning work before implementation.",
+  "mode": "primary",
+  "hidden": false,
+  "permissions": [
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "read",
+    "resource": "*.env",
+    "effect": "ask"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.*",
+    "effect": "ask"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.example",
+    "effect": "allow"
+   },
+   {
+    "action": "question",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "edit",
+    "resource": "*",
+    "effect": "deny"
+   },
+   {
+    "action": "edit",
+    "resource": "/home/user/.opencode/plan/*",
+    "effect": "allow"
+   },
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "*",
+    "resource": "*",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "read",
+    "resource": "*.env",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.*",
+    "effect": "deny"
+   },
+   {
+    "action": "read",
+    "resource": "*.env.example",
+    "effect": "allow"
+   },
+   {
+    "action": "glob",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "grep",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "list",
+    "resource": "*",
+    "effect": "allow"
+   },
+   {
+    "action": "browser",
+    "resource": "*",
+    "effect": "deny"
+   },
+   {
+    "action": "skill",
+    "resource": "browser",
+    "effect": "deny"
+   }
+  ]
+ }
+]
