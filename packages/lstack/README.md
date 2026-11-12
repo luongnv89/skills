@@ -56,8 +56,8 @@ See **Prerequisites and capability limits** before use.
 ### Directory portal and review caveats
 
 If the owner chooses to submit, use repository **luongnv89/skills**, plugin path
-**`skills`**, branch **main**. No separate plugin repository or skill tree is
-needed. Paid login, connected GitHub account, contact information and accurate
+**`skills`**, tracked branch **`directory`** (see *Directory edition* below). No
+separate plugin repository is needed. Paid login, connected GitHub account, contact information and accurate
 data-handling/legal disclosures are owner responsibilities. This implementation
 does not submit, publish, or claim acceptance/approval.
 
@@ -79,6 +79,48 @@ prompts, code, URLs, screenshots or supplied documents may reach model providers
 and external services. Inspect each member's approval gates, credentials and
 dependencies first. The package makes no offline/no-collection claim and supplies
 no invented contact, retention or privacy guarantees.
+
+### Directory edition
+
+The directory accepts only Markdown, text, JSON, YAML and PNG/JPEG/GIF/WebP/ICO
+images from organizations Anthropic hasn't verified. It refuses any file that
+starts with `#!`, package-manager settings, and frontmatter keys outside its
+allowed list (`LOCAL_CODE_FILE_TYPE`, `LOCAL_CODE_FRONTMATTER_KEY`). Main ships
+helper scripts and skill-creator's `effort` and `dependencies` keys, so the
+directory follows a generated **`directory`** branch instead of `main`:
+
+- A member is left out when any of its files breaks the file rule, or when one
+  of its `dependencies` isn't in the edition (it would fetch that skill at run
+  time). The rule is computed on every build; there is no hand-kept list.
+- Each `SKILL.md` keeps only `name`, `description`, `license`, `compatibility`
+  and `metadata`; `effort` and `dependencies` move under `metadata` as quoted
+  text. Bodies and resource files are copied byte for byte.
+- Members are flattened to `skills/<name>/` as in the ZIP exports, so the
+  manifest needs no `skills` paths. The edition writes its own `README.md`,
+  `LICENSE` and description with the real skill count, and a branch-root
+  `provenance.json` with the source commit and every file's SHA-256.
+- The build re-checks the output (file types, `#!`, UTF-8 and NUL, package
+  configuration, symlinks, 256 KiB, 512 files, frontmatter keys) and exits 1 on
+  any problem. `tests/test-lstack-directory.py` covers each rule.
+
+Build and publish from a clean checkout of the commit to publish:
+
+```bash
+python3 scripts/build-lstack-directory.py --list          # included/excluded, with reasons
+git fetch origin directory && git worktree add -B directory ../lstack-directory origin/directory
+#   first time only: git worktree add --orphan -b directory ../lstack-directory
+git -C ../lstack-directory rm -rq --ignore-unmatch .
+python3 scripts/build-lstack-directory.py --output ../lstack-directory
+git -C ../lstack-directory add -A
+git -C ../lstack-directory commit -m "chore(directory): lstack directory edition from $(git rev-parse --short HEAD)"
+git -C ../lstack-directory push origin directory
+python3 scripts/build-lstack-directory.py --check ../lstack-directory   # re-check any time
+```
+
+Then, in the developer portal, set the plugin's **Tracked branch or tag** to
+`directory` (Settings tab) and select **Check for new commits**, or validate a
+new submission with that branch. The full lstack still installs from this
+repository's marketplace on `main`.
 
 ## Contents and scope
 
