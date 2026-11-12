@@ -265,7 +265,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**product-planner**](skills/product-planner/) | 1.2.0 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
 | [**idea-validator**](skills/idea-validator/) | 1.10.1 | max | Market, feasibility, competitor checks for ideas |
 | [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.8.1 | high | Score codebase + landing page vs 32 viral principles |
-| [**product-launch**](skills/product-launch/) | 1.2.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan |
+| [**product-launch**](skills/product-launch/) | 1.3.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan |
 | [**brand-name-checker**](skills/brand-name-checker/) | 1.6.0 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.6.1 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.7.1 | max | Technical architecture document from PRD |
@@ -300,7 +300,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.2.0 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**landing-page-generator**](skills/landing-page-generator/) | 1.8.1 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
+| [**landing-page-generator**](skills/landing-page-generator/) | 1.9.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
 | [**search-optimizer**](skills/search-optimizer/) | 1.2.0 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
 | [**seo-ai-optimizer**](skills/seo-ai-optimizer/) | 1.7.1 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](skills/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
