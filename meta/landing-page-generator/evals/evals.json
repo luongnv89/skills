@@ -251,6 +251,24 @@
         "Every footer link between the built pages resolves (test -e from landing-page/)",
         "The Final Report opens with Result: COMPLETE and its Evidence: line cites the page: entry and each page check with its result"
       ]
+    },
+    {
+      "id": 18,
+      "kind": "happy-path",
+      "name": "hero-rules-reuse-launch-story",
+      "prompt": "Copy the project in ../../eval-fixtures/landing-page-generator/invoicely-launch-kit to a scratch directory. Write landing page copy only (no page build) for Invoicely, invoicing for freelancers. Primary CTA: start free. We already ran our launch planning; reuse the story from launch-kit/copy-bank.md.",
+      "expected_output": "Mode A copy only. Step 1 reads launch-kit/copy-bank.md and reuses its copy.story.* fields and facts. The hero stays inside the template's hero fields and follows the hero rules: a visualizable, falsifiable headline; proof of work up top (invoices sent and followed up automatically, reminders stop on payment); the problem (hours lost chasing late payments); the founder's contrarian take from copy.story.contrarian; and one big number with its source (Used by 1,200 freelancers). Every line passes the three-part copy test. No section is added or reordered, and the build skip is recorded.",
+      "files": [
+        "../../eval-fixtures/landing-page-generator/invoicely-launch-kit"
+      ],
+      "expectations": [
+        "Process: the run read launch-kit/copy-bank.md and reused its launch story; the hero's problem matches copy.story.villain and the contrarian line restates copy.story.contrarian",
+        "The hero headline is 10 words or fewer, names something a reader can picture, and makes a claim a reader could check",
+        "The hero section (headline, subheadline, trust bar) shows proof of work, the problem and the contrarian take, and the trust bar uses 'Used by 1,200 freelancers' as its one big number",
+        "No number, user count, testimonial or price appears that is not in copy-bank.md; any other missing proof is labeled [proof needed]",
+        "The copy uses the chosen framework's template section names and order exactly; the hero rules added no section",
+        "The Step 3 report shows the Hero rules and Copy test checks, and the Final Report records page: not built with the copy-only reason"
+      ]
     }
   ]
 }
