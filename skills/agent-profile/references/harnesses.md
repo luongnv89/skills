@@ -18,7 +18,7 @@ TERM=dumb` and colour codes stripped; a help call that times out stops the run w
 | -------- | ---------- | ----------------------- | ----------------------------------- | ----------------------------------- | ------------------------------------------ |
 | claude   | `claude`   | verified (2.1.322)      | mcc profiles (`mcc list --json`), always with `default` (`~/.claude`) | the aliases `claude --help` names, plus each mcc profile's model; other aliases and full ids may be typed | `--effort` levels parsed from `--help`; which levels a model honours is not reported |
 | pi       | `pi`       | verified (1.3.0)        | none                                | `pi --list-models` (with provider and thinking support) | `--thinking` levels from `--help`, only for models marked thinking; a model's maximum is not reported |
-| opencode | `opencode` | verified (2.2.6)        | none                                | `opencode models`                   | none listed; type `<listed model>#<variant>` |
+| opencode | `opencode` | verified (2.2.7)        | none                                | `opencode models`                   | none listed; type `<listed model>#<variant>` |
 | codex    | `codex`    | untested                | `[profiles.*]` in `~/.codex/config.toml` | none: type the id               | minimal, low, medium, high, xhigh (docs)   |
 | droid    | `droid`    | untested                | none                                | none: type the id (`droid exec --help` lists them) | off, low, medium, high (docs; model-dependent) |
 | devin    | `devin`    | untested                | none                                | `devin models list --format json`   | none                                       |
@@ -58,6 +58,12 @@ typed ids.
   shape is never run confined on trust. For a planned worktree, `command` checks the
   current directory and `run` checks again in the new worktree. MCP servers and plugins
   that opencode starts are not checked.
+- opencode `ask`/`edits` were verified on 2.2.7 (2026-11-12) with a free model, cwd in a
+  repo subfolder, against an allow-all `build` from each source: a repo-root `opencode.json`,
+  `.opencode/agent/build.md`, `OPENCODE_CONFIG`, the global config, and a project
+  `default_agent`. Asked to write a file and run `touch`, `ask` wrote nothing and ran no
+  shell; `edits` wrote the file and ran no shell. `full` did both, and a timed-out run
+  left no opencode process.
 - **pi** has no permission prompts. `ask` passes `--no-mcp --tools read,grep,find,ls` (tested:
   reads worked, nothing was written, no shell ran; `--no-mcp` because `--tools` keeps MCP
   tools, and pi's code mode can reach them); `full` passes nothing. `edits`
