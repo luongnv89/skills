@@ -34,17 +34,25 @@ page and talks. It has five elements:
 - Every post, pitch, video brief and talk outline restates the story. Reddit sections
   restate it in new sentences (launch-kit.md, reviewer check 7).
 - **Story owner:** one person keeps the story the same everywhere and approves changes
-  to it. The plan records the owner's role (founder, head of marketing), never a name.
+  to it. With the story-owner track on, the plan records the owner's role (founder, head
+  of marketing), never a name; with it off, `Story owner: none (track off)`.
+- A plan written before this file existed has no `## Launch story` or
+  `## Campaign tracks` section. Treat every track as off, and write `copy.story.*` fields
+  only for elements a Profile row sources.
 
 ## 2. The copy test
 
-Every line of paste-ready copy passes three questions. A line that fails gets rewritten
-from Profile facts, or cut.
+Every line of marketing copy passes three questions: taglines, descriptions, posts,
+pitches, invites and outreach. The test skips list and fact fields (`copy.name`,
+`copy.tags`, `copy.competitors`, `copy.pricing`, `copy.disclosure`). A line that fails
+gets rewritten from Profile facts, or cut.
 
 1. **Visualizable:** a reader can picture a person, an object or an action. "Invoices
    that chase late payments for you" passes; "Streamline your billing" fails.
-2. **Falsifiable:** a reader could check the line and find it false. A Profile fact with
-   a source stands behind it.
+2. **Falsifiable:** a reader can check the line, and it would be false if the product
+   did not do what it says. A Profile fact with a source stands behind it. This applies
+   to factual claims; the story's belief elements (contrarian take, lovers, haters) are
+   judged on questions 1 and 3 only.
 3. **Only-we-can-say:** a competitor could not paste it onto their own page unchanged. It
    names this product's mechanism, number or story.
 
@@ -81,7 +89,7 @@ defaults the founder can change.
 | earned media | 28 days | pitches from `copy.pitch-100w`, for writers and hosts the founder already knows | Real relationships only. Never buy coverage; a paid placement is paid amplification. |
 | in-person event | 42 days | a checklist: date, venue, a demo script from the story | The skill never books or pays. |
 | paid amplification | 7 days | the option in `## Budget`, and the disclosure line for each paid post | Founder-run and off by default; the default $0 budget keeps it off. The skill never buys, runs or targets ads (rule 1); it writes only the copy and its disclosure. |
-| story owner | 0 days | the owner's role in the plan | Set before Step 5. |
+| story owner | 0 days | the owner's role in the plan | With the track on, name the role before Step 5. Off: `none (track off)`. |
 
 **L-day rule:** with at least one track on, L-day is the first Tuesday on or after the
 later of today + 21 days and today + the longest opted-in lead time. A user-set L-day

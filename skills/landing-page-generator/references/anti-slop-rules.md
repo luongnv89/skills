@@ -40,10 +40,10 @@ AI-generated marketing copy and READMEs have predictable tells that make readers
 
 Read each sentence and ask "does this give the reader information they didn't already have?" If not, cut it.
 
-Then run the three-part copy test on every line of copy. A line that fails gets rewritten from the brief's facts, or cut:
+Then run the three-part copy test on every line of marketing copy: headlines, subheadlines, body copy, features and FAQ answers. It skips CTA buttons (the CTA Button Rules govern them), code and commands, content preserved in `<details>` blocks, and companion pages. A line that fails gets rewritten from the brief's facts, or cut:
 
 1. **Visualizable:** the reader can picture a person, an object or an action. "Invoices that chase late payments for you" passes; "Streamline your billing" fails.
-2. **Falsifiable:** the reader could check it and find it false, because a fact from the brief or the project stands behind it.
+2. **Falsifiable:** the reader can check it, and it would be false if the product did not do what it says; a fact from the brief or the project stands behind it. A stated belief, such as a contrarian take, is judged on questions 1 and 3 only.
 3. **Only-we-can-say:** a competitor could not paste it onto their page unchanged. It names this product's mechanism, number or story.
 
 The copy test and the hero rules (`references/section-templates.md` → *Copywriting Best Practices*) draw on "The secret behind viral product launches" by Kyle Jeong with Tereza Tizkova (x.com/kylejeong/status/2119925224334586085, 2026-11-09; practitioner advice, not platform rules).

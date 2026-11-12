@@ -235,8 +235,8 @@ Blocking checks:
    relationship-based post lacks a clear in-post disclosure, or hides it (profile only,
    after a "more" cut, among hashtags); the kit proposes a fake account, a bot, an
    engagement pod or an undisclosed paid post; a contact's name or personal data appears
-   anywhere in `launch-kit/`; a story element has no source; or a line fails the copy
-   test.
+   anywhere in `launch-kit/`; a story element has no source; or a marketing line fails
+   the copy test (`launch-story.md` §2).
 
 Minor checks: tone (superlatives, hype), unverified facts without a label, duplicated
 text that should reuse copy-bank values (except across Reddit sections, see check 7).

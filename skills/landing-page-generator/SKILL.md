@@ -162,7 +162,7 @@ substitute a generic Hero/Problem/Solution layout when another framework applies
 
 **Content quality (all frameworks):**
 - Headlines: 10 words or fewer, value-led, specific to the audience
-- Hero and every line: the hero rules and copy test in `references/section-templates.md` → *Copywriting Best Practices*
+- Hero and marketing lines: the hero rules and copy test in `references/section-templates.md` → *Copywriting Best Practices*
 - Subheadlines: 1–2 sentences that expand the headline without repeating it
 - Body copy: active voice, benefit-led; address pain points with concrete scenarios where the template calls for them
 - Features: 3–5 items described as outcomes, not feature lists
@@ -255,7 +255,7 @@ Verify before delivering. When the run delivers companion pages only, only the c
 - Output follows the framework-specific template in `references/section-templates.md` or a user-specified
   subset.
 - Chosen framework is named and consistently applied.
-- Hero headline is 10 words or fewer, specific, and value-led; the hero follows the hero rules and every line passes the copy test.
+- Hero headline is 10 words or fewer, specific, and value-led; the hero follows the hero rules and marketing lines pass the copy test.
 - Every CTA starts with an action verb and states the outcome.
 - Unsupported proof is labeled `[proof needed]`; no fake claims are present.
 - Copy passes `references/anti-slop-rules.md`.

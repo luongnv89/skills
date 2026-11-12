@@ -97,7 +97,7 @@ Key rules across all sections:
 - One copy-paste-runnable command per code block
 - Quick Start <=5 steps
 - All original technical content preserved in `<details>` blocks
-- The hero follows the hero rules in `references/section-templates.md` → *Copywriting Best Practices* within its 5 lines, and every line passes the copy test in `references/anti-slop-rules.md`
+- The hero follows the hero rules in `references/section-templates.md` → *Copywriting Best Practices* within its 5 lines, and its marketing lines pass the copy test in `references/anti-slop-rules.md`
 - The final CTA line links each companion page that will exist: run Step 7 items 1-2 first to decide them
 
 ### Step 6: Self-Review Checklist
@@ -117,7 +117,7 @@ Before presenting to the user, verify:
 | Fabricated data | None — real numbers or placeholders only |
 | No emoji | Zero emoji anywhere in the output |
 | No slop phrases | None of the banned phrases from `references/anti-slop-rules.md` |
-| Copy test and hero | Every line passes the three-part copy test; the hero follows the hero rules |
+| Copy test and hero | Hero and feature lines pass the three-part copy test; the hero follows the hero rules |
 | No filler | Every sentence adds information the reader didn't have |
 | No rhetorical questions | No "Tired of X?" or "Want to Y?" patterns |
 

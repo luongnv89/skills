@@ -53,7 +53,7 @@ with a recorded gap, `FAIL` when a check is blocked and the run cannot continue.
   Template sections:       √ pass (every section of the template populated)
   Headline rule:           √ pass (hero headline <= 10 words)
   Hero rules:              √ pass (proof of work, problem, contrarian take or noted gap, one number or [proof needed])
-  Copy test:               √ pass (every line visualizable, falsifiable, only-we-can-say)
+  Copy test:               √ pass (every marketing line visualizable, falsifiable, only-we-can-say)
   Proof handling:          √ pass ([proof needed] where unsupported)
   ____________________________
   Result:             PASS | FAIL | PARTIAL

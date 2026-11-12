@@ -241,7 +241,7 @@ Opted-in actions: <the second-yes actions the user picked, or "none">
 ## Launch story
 | Element | Value | Source (Profile row, or founder input needed) |
 <one row each: hero, villain, contrarian take, lovers, haters (launch-story.md §1)>
-Story owner: <role, never a name>
+Story owner: <role, never a name; or none (track off)>
 
 ## Campaign tracks
 | Track | On | Lead time | What the kit adds |
