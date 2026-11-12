@@ -5,7 +5,7 @@ license: MIT
 effort: medium
 compatibility: "Python 3.9+ (3.11+ to read Codex profiles) and git. Harness CLIs are optional: the skill offers only the ones it finds."
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -99,8 +99,8 @@ model, thinking, permissions, scope.
    4. **Thinking:** the detected levels plus `harness default`. Skip the question when the
       harness has no levels, or when the model's `thinking` is false.
    5. **Permissions:** the detected modes, explained from `references/harnesses.md`
-      (ask, edits, full). Recommend `edits` where it exists. pi has `ask` and `full`;
-      opencode has only `full`. Say so, and that `full` means a separate yes on every run.
+      (ask, edits, full). Recommend `edits` where it exists. pi has only `ask` and `full`:
+      say so, and that `full` means a separate yes on every run.
    6. **Name:** suggest `<harness>-<model>-<thinking>` in lowercase with hyphens; the user
       may change it.
    7. **Scope:** global (every project, default) or this project
@@ -159,9 +159,11 @@ Notes:     <notes, or none>
 ```
 
 Notes cover a typed model, a harness version that changed since the profile was saved,
-a project profile (check it is one you trust), an untested adapter, and why a harness
-offers fewer permission modes (opencode). A `command` error (harness removed, model no longer listed)
-goes back to Step 2.
+a project profile (check it is one you trust), an untested adapter, why a harness offers
+fewer permission modes (pi), and, for opencode `ask`/`edits`, that its resolved rules were
+checked (MCP servers and plugins are not). A `command` error (harness removed, model no
+longer listed, opencode rules that do not confine the run) goes back to Step 2; never work
+around an opencode refusal with a `full` profile without the user's yes.
 
 Ask `Run it`, `Change` (back to Step 2 or 4) or `Cancel`. When
 `needs_full_confirmation` is true, ask a separate question first: "This profile runs
