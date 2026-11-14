@@ -159,25 +159,27 @@ again with a fresh key, except the approved submit, which follows Stage C step 6
    Compare the draft's text (`get_launch` values: name, tagline, description, first
    comment, promo text, shoutout notes) with the kit's field blocks. Read the first comment
    as plain text: unescape entities (`&#39;` → `'`), end each paragraph (`</p>`, `<br>`)
-   with a blank line, turn each `<li>` into a `- ` line and each link into its text plus
-   the URL in brackets (a link whose text is its URL stays the URL), then drop the
-   remaining tags. Compare with runs of whitespace and blank lines collapsed.
-   - Write every draft value that differs from the kit, and every value the kit has no
-     block for (promo text, a shoutout note), as field blocks into
-     `launch-kit/ph-draft-check.md`. Give each block its limits: the kit block's `min=`
-     and `max=` for the same field, or the composer's (`tagline_maximum`,
-     `promo_text_maximum`, `shoutout_note_minimum` and `shoutout_note_maximum`). Run
-     `check_kit.py launch-kit`, then delete the file. The kit itself is not changed yet.
+   with a blank line, put each list item (`<li>` … `</li>`) on its own `- ` line, turn each
+   link into its text plus the URL in brackets (a link whose text is its URL stays the
+   URL), then drop the remaining tags.
+   - Write every draft value that differs from the kit in any character, and every value
+     the kit has no block for (promo text, a shoutout note), as field blocks into
+     `launch-kit/ph-draft-check.md`, exactly as the draft has them. Give each block its
+     limits: the kit block's `min=` and `max=` for the same field, or the composer's
+     (`tagline_maximum`, `promo_text_maximum`, `shoutout_note_minimum` and
+     `shoutout_note_maximum`). Run `check_kit.py launch-kit`, then delete the file. The
+     kit itself is not changed yet.
    - A FAIL (a length limit, a placeholder, a vote request) blocks the submit. Tell the
      user what failed, then offer to send the kit's own value back with `update_launch`,
-     or to take the user's corrected text: check it the same way in
-     `ph-draft-check.md` first, then write it into the kit and send it. A value with no
-     kit block (promo text, a shoutout note) is cleared in the draft with
-     `update_launch` instead of sent back. Run this step again. If the user takes
-     neither, the action ends `declined (copy check failed)`.
-   - A differing value that passes: show the kit's and the draft's versions and ask which
-     to keep. Keeping the draft's value copies its plain text into the kit's field block;
-     keeping the kit's value sends it with `update_launch`.
+     or to take the user's corrected text, checked the same way first, then written into
+     the kit's block (if it has one) and sent. With no kit value to send back, the first
+     offer clears it instead: `promoText` to empty, or the one shoutout removed from
+     `shoutouts` with the others kept. Run this step again. If the user takes neither,
+     the action ends `declined (copy check failed)`.
+   - A value that passes and still differs with runs of whitespace and blank lines
+     collapsed: show the kit's and the draft's versions and ask which to keep. Keeping the
+     draft's value copies its plain text into the kit's field block; keeping the kit's
+     value sends it with `update_launch`.
 
 2. Call `submit_launch` **without** a token. Nothing is submitted. `validation_failed` goes
    back to Stage B; a second `validation_failed` in the same run ends the action
@@ -231,10 +233,10 @@ path.
 ## 4. After submission
 
 Editing or rescheduling a submitted launch can be public. Do it only when the user asks,
-in a run that started from the kit: run §1, write the new text into the kit and run
-`check_kit.py`, call `update_launch` with `preview: true`, then the same show-and-ask as
-Stage C steps 3–5 with the returned token. Never call
-`submit_feedback` unless the user asks for it.
+in a run that started from the kit: run §1, delete a leftover `ph-draft-check.md`, write
+the new text into the kit and run `check_kit.py`, call `update_launch` with
+`preview: true`, then the same show-and-ask as Stage C steps 3–5 with the returned token.
+Never call `submit_feedback` unless the user asks for it.
 
 ## 5. Rules that still hold
 
