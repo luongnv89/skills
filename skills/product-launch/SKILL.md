@@ -308,8 +308,8 @@ again, with its exact effect, before it runs.
      `assets.md`.
   3. Record the files it produced in `assets.md`.
 
-**Done when** every opted-in action has been run and verified, was declined, or failed
-with its error recorded.
+**Done when** every opted-in action was run and verified, declined, failed (error
+recorded) or, for ph-mcp, `unknown`.
 
 ## Step 8: Final report
 

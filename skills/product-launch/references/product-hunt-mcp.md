@@ -158,16 +158,20 @@ again with a fresh key, except the approved submit, which follows Stage C step 6
 1. **Re-check the copy.** Delete any leftover `launch-kit/ph-draft-check.md` first.
    Compare the draft's text (`get_launch` values: name, tagline, description, first
    comment, promo text, shoutout notes) with the kit's field blocks. Read the first comment
-   as plain text: unescape entities (`&#39;` → `'`), turn each `<li>` into a `- ` line and
-   each link into its text plus the URL in brackets, then drop the remaining tags.
+   as plain text: unescape entities (`&#39;` → `'`), end each paragraph (`</p>`, `<br>`)
+   with a blank line, turn each `<li>` into a `- ` line and each link into its text plus
+   the URL in brackets, then drop the remaining tags.
    - Write every draft value that differs from the kit, and every value the kit has no
-     block for (promo text with `max=` the composer's `promo_text_maximum`, a shoutout
-     note), as field blocks into `launch-kit/ph-draft-check.md`. Run
+     block for (promo text, a shoutout note), as field blocks into
+     `launch-kit/ph-draft-check.md`. Give each block its limits: the kit block's `min=`
+     and `max=` for the same field, or the composer's (`tagline_maximum`,
+     `promo_text_maximum`, `shoutout_note_minimum` and `shoutout_note_maximum`). Run
      `check_kit.py launch-kit`, then delete the file. The kit itself is not changed yet.
    - A FAIL (a length limit, a placeholder, a vote request) blocks the submit. Tell the
      user what failed, then offer to send the kit's own value back with `update_launch`,
-     or to take the user's corrected text (kit first, then `update_launch`). Run this step
-     again.
+     or to take the user's corrected text: check it the same way in
+     `ph-draft-check.md` first, then write it into the kit and send it. Run this step
+     again. If the user takes neither, the action ends `declined (copy check failed)`.
    - A differing value that passes: show the kit's and the draft's versions and ask which
      to keep. Keeping the draft's value copies its plain text into the kit's field block;
      keeping the kit's value sends it with `update_launch`.
@@ -216,8 +220,9 @@ again with a fresh key, except the approved submit, which follows Stage C step 6
 **How the action ends** (for Step 7 and `plan-and-reports.md` §11): submitted and verified
 → `run`; "Not yet", no user, blockers left, or an L-day to pick → `declined`; a submit
 whose status cannot be read → `unknown` (the run ends PARTIAL, and nothing points to the
-website); an MCP error before the submit → `failed`, with the error recorded and the
-paste-ready guide left as the path.
+website); an MCP error before the submit, or a submit error that leaves the launch a
+readable `draft` → `failed`, with the error recorded and the paste-ready guide left as the
+path.
 
 ## 4. After submission
 
