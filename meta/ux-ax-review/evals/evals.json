@@ -143,14 +143,14 @@
       "id": 9,
       "kind": "happy-path",
       "prompt": "Review the UX and AI discoverability of our Team settings page from the supplied evidence only. Write the report to the assigned output directory.",
-      "expected_output": "An evidence-only audit. The keyboard notes support accessibility issues for the hand-rolled Role dropdown and Remove member dialog; each recommendation replaces the hand-written handling with a tested behavior (no library is installed, so UI SDK behaviors such as createPopup and createListbox or createRovingFocus, marked beta with a pinned version, or the WAI-ARIA APG pattern) instead of patching key handlers. Nothing is installed. WebMCP, if mentioned, is only an optional early opportunity; the unsupplied AX aspects stay not-tested.",
+      "expected_output": "An evidence-only audit. The keyboard notes support accessibility issues for the hand-rolled Role dropdown and Remove member dialog. Each recommendation replaces the hand-written handling with a tested one in human-ux.md's order instead of patching key handlers: a native <select> and <dialog> with showModal() first; UI SDK (a shipped Select or Alert Dialog, or createPopup/createListbox/createFocusRecovery) only with the beta caveat, an exact pin and its React >= 19 floor named, since the app is on React 18.3; the WAI-ARIA APG pattern otherwise. Nothing is installed. WebMCP, if mentioned, is only an optional early opportunity; the unsupplied AX aspects stay not-tested.",
       "files": [
         "../../eval-fixtures/ux-ax-review/widget-evidence.md",
         "../../eval-fixtures/ux-ax-review/widget-page.html"
       ],
       "expectations": [
         "Accessibility finding(s) cite the supplied keyboard notes (E ids) for the dropdown and the dialog, labelled as owner-supplied data",
-        "Each such recommendation offers a tested behavior: UI SDK (with the beta caveat and pinning) or the APG pattern; it does not just add keydown handlers",
+        "Each such recommendation offers a tested replacement (native element, UI SDK with the beta caveat, exact pin and the React >= 19 floor, or the APG pattern); it does not just add keydown handlers",
         "No package is installed and no target file is changed",
         "WebMCP is absent or listed only as an optional opportunity, never as an issue",
         "robots-sitemap, structured-data, markdown-pages, llms-txt and crawler-access are not-tested, not pass",

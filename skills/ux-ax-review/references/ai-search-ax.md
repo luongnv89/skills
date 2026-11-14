@@ -67,7 +67,7 @@ integration docs before recommending a concrete deep link. Do not add auto-send 
 or tracking without informed consent. Validation: staged/local test of only public or
 consented content with clear preview, minimal disclosure, valid links and fallback copy.
 
-**Agent-operable controls (optional opportunity, part of `ai-actions`).** WebMCP is an
+**Agent-operable controls (optional opportunity, part of `ai-actions`, web only).** WebMCP is an
 early proposal (a W3C Web Machine Learning Community Group draft, not a standard, with an
 early preview in Chrome) that lets a page register its controls as tools for the browser's
 built-in agent. Libraries such as UI SDK (beta) can register a page's controls this way

@@ -140,7 +140,7 @@
         "Interaction source is the existing Radix library",
         "package.json gains no @ui-sdk/* or other new UI dependency",
         "The Sort by menu uses @radix-ui/react-dropdown-menu like the Filter menu",
-        "Final Report opens with Result: and its status, and its Evidence line names the keyboard walk result or records it as untested"
+        "Final Report opens with Result: and its status; Evidence names the Radix interaction source and the keyboard walk result, or Uncertainty records the walk as untested"
       ]
     },
     {

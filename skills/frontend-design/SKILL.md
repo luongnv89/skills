@@ -25,14 +25,14 @@ Trigger this skill when the user asks to:
 1. Record the **explicit brief**: any style preference, color palette, brand kit, or style direction the user gives. If there is none, the Default Style Guide applies.
 2. If the request does not state the purpose and the target audience, ask for them before writing code.
 3. If the work extends an existing codebase, read its framework, CSS variables, and component patterns before proposing anything.
-4. Propose an aesthetic direction (*Design Thinking*). If the interface has an **interactive part** (anything that opens, a selection, arrow-key movement in a group, drag and drop, resizing), read `references/interactive-behaviors.md` and name its interaction source: the project's existing library, UI SDK (beta), or hand-written. In an existing codebase, also list the files you will create or modify and any dependency you will add. Emit the Design Thinking step report.
+4. Propose an aesthetic direction (*Design Thinking*). If the interface has an **interactive part** (anything that opens, a selection, arrow-key movement in a group, drag and drop, resizing), read `references/interactive-behaviors.md` and name its interaction source: a native element, the project's existing library, UI SDK (beta), or hand-written. In an existing codebase, also list the files you will create or modify and any dependency you will add. Emit the Design Thinking step report.
 5. Wait for the user to approve the direction before writing code. If the user asks for changes, propose again. If the user says "just build it", state the direction in one line and continue. If the user ends the run without approving, end with a `BLOCKED` Final Report.
 6. Read `references/aesthetics-guide.md` and the Quick rules in `references/usability-guide.md`. Run *Repo Sync Before Edits*. Then implement the code. Add a short comment at each non-obvious design decision (font pairing, palette mapping, motion timing).
 7. Run the verification checks:
    - **Responsive:** if a browser tool is available, render at 375, 768, and 1280 px and check for horizontal overflow. Otherwise, inspect the breakpoints in the CSS and record responsive rendering as untested.
    - **Contrast:** compute the contrast ratio of each text and background color pair. Each must be at least 4.5:1, or 3:1 for text at 24 px or larger (18.66 px or larger when bold).
    - **Quality and usability:** walk the Default Quality Bar checklist and the six usability Quick rules.
-   - **Keyboard:** for each interactive part, run the keyboard walk in `references/interactive-behaviors.md`.
+   - **Keyboard:** for each interactive part, run the *Keyboard walk* in `references/interactive-behaviors.md`.
    - **Build:** if the project has a build, lint, or test command, run it and record the exit result. Otherwise record `build: not run (no command)`.
 8. If a check fails, fix it and re-run that check. After the second fix cycle, stop fixing and list each remaining failure in the Final Report.
 9. Emit the Implementation step report, then the Final Report.
@@ -87,7 +87,7 @@ Every final design must be professional, production-ready, elegant, and premium,
 
 - **Usability:** apply the six Quick rules in `references/usability-guide.md` to every design; the full step-by-step guideline follows them.
 - **Aesthetics:** `references/aesthetics-guide.md` holds the typography, color, motion, composition, and background guidance and the *Avoid* list.
-- **Interactive parts:** `references/interactive-behaviors.md` picks who handles keyboard, focus and dismissal (existing library, UI SDK behaviors, or hand-written) and maps each interaction to a UI SDK behavior.
+- **Interactive parts:** `references/interactive-behaviors.md` picks who handles keyboard, focus and dismissal (a native element, the existing library, UI SDK behaviors, or hand-written), maps each interaction to a UI SDK behavior, and holds the keyboard walk.
 
 Read the first two in step 6, not earlier, to keep the context window small during the brief and approval steps. Read the third in step 4, and only when the interface has an interactive part.
 
@@ -122,7 +122,7 @@ A run passes when **all** of the following are true:
 - [ ] Delivered code runs without errors in the target framework (HTML/CSS/JS, React, Vue, etc.); the build command passed when one exists.
 - [ ] Layout has no horizontal overflow at 375px, 768px, and 1280px, or the Final Report records responsive rendering as untested.
 - [ ] Accessibility basics covered: semantic HTML, every text pair at WCAG AA contrast, keyboard focus states, and `alt`/`aria-label` where applicable.
-- [ ] Each interactive part uses the source `references/interactive-behaviors.md` picks (an existing library, UI SDK pinned to an exact beta version, or a hand-written APG pattern), and the Final Report names it with the keyboard walk result.
+- [ ] Each interactive part uses the source `references/interactive-behaviors.md` picks (a native element, the existing library, UI SDK pinned to an exact beta version, or a hand-written APG pattern). The Final Report names the source and the keyboard walk result, or records the walk as untested.
 - [ ] Without an explicit brief, only the Default Style Guide colors are used, and Bright Green is never a background.
 - [ ] Every Default Quality Bar item and every usability Quick rule passes, or the Final Report lists the failure.
 - [ ] The Final Report opens with `Result:` and its status, and has `Evidence:`, `Uncertainty:`, and `Decision:` lines. `Evidence:` cites only checks that ran.

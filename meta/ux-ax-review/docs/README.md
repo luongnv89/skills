@@ -15,7 +15,7 @@ Version: **1.4.0** · Author: Luong NGUYEN · License: MIT
 
 - Six human aspects: clarity, brand, responsive, accessibility, performance, conversion.
 - Six AI/search aspects: robots/sitemap, structured data, Markdown, llms.txt, crawler access, copy/share/open-in-AI.
-- Broken keyboard, focus, popup, selection or drag-and-drop behaviour gets a "replace the hand-rolled handling" fix: the project's library, UI SDK behaviors (beta) or the APG pattern; WebMCP agent access stays an optional, early opportunity.
+- Broken keyboard, focus, popup, selection or drag-and-drop behaviour gets a "replace the hand-rolled handling" fix: a native element, the project's library, UI SDK (beta, with its framework floors) or the APG pattern; WebMCP agent access stays an optional, early opportunity.
 - Live URL, repository, supplied evidence and native-app modes; untested is not passed.
 - Focused parallel reviewers for substantial audits, inline fallback; no other skills required.
 - Report-only first: fixes, commits, publishing and access-policy changes need separate approval.
