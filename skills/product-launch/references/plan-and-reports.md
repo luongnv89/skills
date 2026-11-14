@@ -371,7 +371,7 @@ Decision: <the approval needed, or "No approval needed."> Next for you: <the ear
 
 **Status rule:**
 
-- COMPLETE: Steps 5 and 6 passed, and every opted-in action ran or was declined (a ph-mcp "Not yet", blockers left, or no user to ask is declined). Set `Status: kit-complete <date>`.
+- COMPLETE: Steps 5 and 6 passed, and every opted-in action ran or was declined (a ph-mcp "Not yet", blockers left, a failed copy check, an L-day to pick, or no user to ask is declined). Set `Status: kit-complete <date>`.
 - PLAN READY — stopped: the user chose Stop at the gate.
 - PARTIAL: the kit was written, but a check still failed after its fix rounds, or an
   opted-in action failed or ended `unknown` (a Product Hunt submit whose status could not
@@ -385,7 +385,7 @@ Decision: <the approval needed, or "No approval needed."> Next for you: <the ear
 | --------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | A subagent fails, or returns the wrong shape        | Re-run it once with the same input. On a second failure, run that step inline, and say so.  |
 | WebFetch fails on a page                            | Try `curl -sL -A "Mozilla/5.0"` once, then mark the page `unreachable`. Never fill it in from memory. |
-| `check_kit.py` FAILs in `ph-draft-check.md`         | A leftover from an interrupted ph-mcp run (`product-hunt-mcp.md` §3 Stage C): delete it and run the check again. |
+| `launch-kit/ph-draft-check.md` exists outside Stage C step 1 | A leftover from an interrupted ph-mcp run (`product-hunt-mcp.md` §3 Stage C): delete it, then run the check. Never delete it to clear a FAIL inside Stage C step 1. |
 | `check_kit.py` exits 2                              | The kit path is wrong: pass the folder Step 5 wrote. Python is missing: check the limits by hand, and say so. |
 | `gh` is unauthenticated, or the permission is too low | Skip the action. Put `gh auth login` and the command in the README for the founder.        |
 | The Product Hunt MCP is missing, not signed in, or errors | Keep the paste-ready guide as the path, print the install steps (`product-hunt-mcp.md` §1), and record the error. An approved submit with an unknown outcome is retried only as `product-hunt-mcp.md` §3 Stage C step 6 says; an invalid or expired token needs a new preview and a new yes. |
