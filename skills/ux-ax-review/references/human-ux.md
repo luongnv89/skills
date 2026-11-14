@@ -55,9 +55,9 @@ tested one rather than patching key handlers one by one, in this order:
   `createListbox` and `createTypeahead` (options and type-to-find), `createSelection`,
   `createFocusRecovery`, `createReorder` (reordering) or `createTransfer` (moving between
   lists). Say that UI SDK is **beta** (`0.1.0-beta.x`, APIs may change; pin the exact
-  version) and that its adapters need React ≥ 19, Vue ≥ 3.5, Svelte ≥ 5.33 or a Solid 2
-  pre-release; below that floor, recommend the native element or APG pattern, and mention
-  the upgrade only as an optional, separate task;
+  version) and that its adapters need React ≥ 19, Vue ≥ 3.5, Svelte ≥ 5.33 or Solid 2
+  (`solid-js` ≥ 2.0.0-rc.14); below that floor, recommend the native element or APG
+  pattern, and mention the upgrade only as an optional, separate task;
 - the hand-written [WAI-ARIA APG pattern](https://www.w3.org/WAI/ARIA/apg/patterns/) when
   none of these fits.
 

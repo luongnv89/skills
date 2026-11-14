@@ -150,7 +150,7 @@
       "expected_output": "The skill picks the hand-written fallback (or a native element that fits, with the reason): no package can be installed and the UI SDK web components URL is unreachable offline. A hand-written part follows the WAI-ARIA listbox (or combobox) pattern, writes down focus and key decisions, and the run runs or records the keyboard walk.",
       "files": [],
       "expectations": [
-        "Interaction source is hand-written per the WAI-ARIA APG pattern (or a native element such as <input list> with <datalist>, with the reason), with the offline constraint named",
+        "Interaction source is hand-written per the WAI-ARIA APG pattern with the offline constraint named as the reason, or a native element such as <input list> with <datalist> with its reason",
         "No CDN or https://ui-sdk.dev script or stylesheet is referenced",
         "A hand-written listbox or combobox has its role, aria-activedescendant or roving tabindex, arrow and Home/End handling, and Escape handling for a combobox",
         "Final Report opens with Result: and its status, and separates the keyboard walk evidence from untested checks"
