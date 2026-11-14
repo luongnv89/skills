@@ -133,8 +133,8 @@ again with a fresh key, except the approved submit, which follows Stage C step 6
      Never send the MCP connection's own token anywhere.
 
    Read each asset's status in `get_launch` → `prepared_assets` until it is `ready`
-   (`failed` gives the reason), then attach the ready assets with `update_launch` (`thumbnailAssetId`, ordered
-   `galleryAssetIds`). PNG, JPEG, WebP or GIF, up to 10 MB.
+   (`failed` gives the reason), then attach the ready assets with `update_launch`
+   (`thumbnailAssetId`, ordered `galleryAssetIds`). PNG, JPEG, WebP or GIF, up to 10 MB.
 
 ### Stage B: readiness check
 
@@ -149,25 +149,32 @@ again with a fresh key, except the approved submit, which follows Stage C step 6
    Read the launch again with `get_launch` before the next `update_launch`.
 4. **Go to Stage C only when `assessment.submission` is `no_known_blockers`** and L-day is
    inside the schedulable window. An L-day that has passed, or is before `earliest`, ends
-   the action `declined (pick a new L-day)`; the README row says so. Otherwise stop: the draft stays private, the README
-   checklist row (`plan-and-reports.md` §9) says what remains, and the action ends
-   `declined (blockers: …)`.
+   the action `declined (pick a new L-day)`; the README row says so. Otherwise stop: the
+   draft stays private, the README checklist row (`plan-and-reports.md` §9) says what
+   remains, and the action ends `declined (blockers: …)`.
 
 ### Stage C: submit (the one exception to rule 1)
 
-1. **Re-check the copy.** Compare the draft's text (`get_launch` values: name, tagline,
-   description, first comment, promo text, shoutout notes) with the kit's field blocks,
-   reading the first comment as plain text (tags removed).
-   - A value that differs (a resumed draft, an edit in the editor): show both and ask
-     which one to keep. Keeping the draft's value copies it, as plain text, into the
-     kit's field block; keeping the kit's value sends it with `update_launch`.
-   - Text the kit has no block for (promo text, a shoutout note): write it as field
-     blocks into `launch-kit/ph-draft-check.md`.
-   - Run `check_kit.py launch-kit`, then delete `ph-draft-check.md`. A FAIL (a length
-     limit, a placeholder, a vote request) blocks the submit. Fix it as Stage B step 2
-     does (kit first, then `update_launch`), and run this step again.
+1. **Re-check the copy.** Delete any leftover `launch-kit/ph-draft-check.md` first.
+   Compare the draft's text (`get_launch` values: name, tagline, description, first
+   comment, promo text, shoutout notes) with the kit's field blocks. Read the first comment
+   as plain text: unescape entities (`&#39;` → `'`), turn each `<li>` into a `- ` line and
+   each link into its text plus the URL in brackets, then drop the remaining tags.
+   - Write every draft value that differs from the kit, and every value the kit has no
+     block for (promo text with `max=` the composer's `promo_text_maximum`, a shoutout
+     note), as field blocks into `launch-kit/ph-draft-check.md`. Run
+     `check_kit.py launch-kit`, then delete the file. The kit itself is not changed yet.
+   - A FAIL (a length limit, a placeholder, a vote request) blocks the submit. Tell the
+     user what failed, then offer to send the kit's own value back with `update_launch`,
+     or to take the user's corrected text (kit first, then `update_launch`). Run this step
+     again.
+   - A differing value that passes: show the kit's and the draft's versions and ask which
+     to keep. Keeping the draft's value copies its plain text into the kit's field block;
+     keeping the kit's value sends it with `update_launch`.
+
 2. Call `submit_launch` **without** a token. Nothing is submitted. `validation_failed` goes
-   back to Stage B.
+   back to Stage B; a second `validation_failed` in the same run ends the action
+   `declined`, with the server's message recorded.
 3. Show the user the complete returned preview, unedited: every field in `preview.submit`
    (flag topics the kit did not choose, kit topics that are missing, and an empty pricing
    type), the launch time from `preview.submit.launch.scheduled_at` in PT, UTC
@@ -193,6 +200,9 @@ again with a fresh key, except the approved submit, which follows Stage C step 6
      producthunt.com before doing anything, and never point them to submit on the website
      while the status is unknown: a second submit makes a duplicate launch.
    - **`already_submitted`:** read `get_launch` and report its status.
+   - **Any other error on this call:** read `get_launch`. `scheduled` or `unscheduled` →
+     verify as step 8; still `draft` → the action ends `failed`, with the error recorded;
+     unreadable → `unknown`.
    - **`confirmation_invalid`, or an expired token:** nothing was submitted. Start Stage C
      again from step 1 and ask again. Never send a token the user did not approve, and
      never reuse one from an earlier preview or run.

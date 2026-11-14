@@ -323,7 +323,7 @@ Plan approved <date> · L-day <date> · <N> platforms · Budget $<N>
 - [ ] <date> · <action> · [<platform>](platforms/<id>.md)
 <every timeline row, in date order>
 - [ ] <date> · build your supporter list in your own private tool; this kit holds counts and roles only (when that track is on)
-- [ ] <date> · Product Hunt: <submitted through the MCP, launch <ID>, scheduled | draft ready: resume the kit and run ph-mcp to submit, or open the draft on producthunt.com | install the MCP (platforms/product-hunt.md) or submit on the website> (when product-hunt is in the plan; Step 7 updates this row)
+- [ ] <date> · Product Hunt: <submitted through the MCP, launch <ID>, scheduled | draft ready: resume the kit and run ph-mcp to submit, or open the draft on producthunt.com | status unknown: check your launches on producthunt.com before doing anything | install the MCP (platforms/product-hunt.md) or submit on the website> (when product-hunt is in the plan; Step 7 updates this row)
 
 ## Founder inputs needed
 <every open question the writers returned, with its file>
@@ -354,7 +354,7 @@ After each step, print this block. Write each check as `√` (pass), `×` (fail)
 | 4 Plan and gate   | sync recorded, launch-plan.md written, approval asked, answers recorded                          |
 | 5 Launch kit      | copy-bank written, platform files (N/M), README and assets written                               |
 | 6 Kit check       | check_kit.py exit 0, reviewer blocking issues (0), review fresh or self-review (labeled)         |
-| 7 Actions         | each opted-in action: run and verified, declined, failed, or none opted in                       |
+| 7 Actions         | each opted-in action: run and verified, declined, failed, unknown (ph-mcp), or none opted in      |
 | 8 Final report    | Result line first; Evidence, Uncertainty and Decision present                                    |
 
 ## 11. Final report (Step 8)
