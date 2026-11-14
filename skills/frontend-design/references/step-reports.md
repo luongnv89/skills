@@ -28,7 +28,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Differentiation clear:    √ pass | × fail — [what's missing]
   Style source:             √ explicit brief | √ Default Style Guide
   Files listed:             √ pass ([N] files) | — not applicable (new project)
-  Interaction source:       √ [native element | existing library | UI SDK <version> (beta) | hand-written APG] | — no interactive part
+  Interaction source:       √ [native element | existing library | UI SDK <version> (beta) | hand-written APG], per part when they differ (e.g. menu: UI SDK 0.1.0-beta.2; FAQ: native) | — no interactive part
   ____________________________
   Result:                   PASS | FAIL | PARTIAL
 ```

@@ -131,7 +131,7 @@ A run passes when **all** of the following are true:
 ## Edge Cases
 
 - **Conflicting style constraints** (e.g., user says "minimalist" but also "lots of animations"): Name the conflict and ask which constraint takes priority; do not pick one silently.
-- **Existing codebase to extend**: Never introduce a second design system next to the one read in step 3.
+- **Existing codebase to extend**: Never introduce a second design system or interaction library next to the one read in step 3, unless the user explicitly approves it after step 4 names the conflict.
 - **Framework mismatch** (e.g., user says "React" but the repo uses Vue): Confirm the framework before generating; never output React JSX into a Vue project.
 - **More than 5 distinct page sections**: Offer to deliver in phases — core layout first, then secondary sections — rather than one oversized artifact.
 - **Accessibility conflict with aesthetic direction**: Never drop below WCAG AA contrast for aesthetic reasons; change the color pairing instead.

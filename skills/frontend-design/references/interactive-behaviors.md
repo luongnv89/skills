@@ -20,12 +20,12 @@ Take the first row that matches, per interactive part, and name the choice in th
 | Situation | Interaction source |
 |---|---|
 | A native HTML element does the job, keys included: `<details>`/`<summary>` (disclosure, accordion), `<dialog>` with `showModal()`, `<select>`. The `popover` attribute gives Escape and outside-click dismissal, but no arrow keys: not enough alone for a menu or listbox | The native element. |
-| The project already uses a component or headless library (`@ui-sdk/*`, Radix, React Aria, Headless UI, Ark UI, Melt UI, Bits UI, Reka UI, …) | That library. If it lacks the part, compose it from the library's own primitives, or hand-write it (fallback below). Add UI SDK beside it only when the user explicitly approves a second library after step 4 names the conflict (Edge Cases: *Existing codebase*). |
-| React ≥ 19, Vue ≥ 3.5, Svelte ≥ 5.33, or web components in a project with a build step, and the user approves a beta dependency | **UI SDK** components and behaviors, below. |
-| A plain HTML page with no build step that will be served online, where the user accepts a beta script from ui-sdk.dev and did not ask for a self-contained file | UI SDK web components without a bundler, loading the script and stylesheet pinned to one exact release (the version goes in the file name; see *Without a Build Step* in https://ui-sdk.dev/web.md). Never the unversioned files or the `@0` alias: they follow the newest release. |
-| Anything else: another framework (Angular, Qwik, …), an older major (React 18, Vue 3.4, Svelte 4), Solid 1.x (the Solid adapter needs a Solid 2 pre-release), offline or air-gapped, a self-contained file, a "no new dependencies" rule, or the user declines the beta | Hand-written, per the fallback below. An upgrade to the adapter's floor is a separate decision for the user, never part of this build. |
+| The project already uses a component or headless library (`@ui-sdk/*`, Radix, React Aria, Headless UI, Ark UI, Melt UI, Bits UI, Reka UI, …) | That library. If it lacks the part, compose it from the library's own primitives, or hand-write it (fallback below). Add UI SDK beside it only when the user explicitly approves a second library after step 4 names the conflict (Edge Cases: *Existing codebase to extend*). |
+| React ≥ 19, Vue ≥ 3.5, Svelte ≥ 5.33, Solid 2 (`solid-js` ≥ 2.0.0-rc.14), or a framework-free web-components project with a build step, and the user approves a beta dependency | **UI SDK** components and behaviors, below. |
+| A plain HTML page with no build step that will be served online, where the user explicitly accepts a beta third-party script for this page ("just build it" or a caller's pre-approved brief is not enough, since the script reaches every visitor) and no self-contained file was asked for | UI SDK web components without a bundler, loading the script and stylesheet pinned to one exact release (the version goes in the file name; see *Without a Build Step* in https://ui-sdk.dev/web.md). Never the unversioned files or the `@0` alias: they follow the newest release. |
+| Anything else: another framework (Angular, Qwik, …), an older major (React 18, Vue 3.4, Svelte 4), Solid 1.x, offline or air-gapped, a self-contained file, a "no new dependencies" rule, or the user declines the beta | Hand-written, per the fallback below. An upgrade to the adapter's floor is a separate decision for the user, never part of this build. |
 
-Adding UI SDK is a new dependency: list it with the files in step 4, so the step 5 approval covers it. "Just build it" without a stated preference → name it in the one-line direction and continue.
+Adding UI SDK is a new dependency: list it with the files in step 4, so the step 5 approval covers it. "Just build it" without a stated preference → name the npm dependency in the one-line direction and continue (not the ui-sdk.dev script row, which needs an explicit yes). A self-contained file means the user asked for one; a single-file page alone is not.
 
 ## Behavior map
 
@@ -65,7 +65,7 @@ Run it in step 7 for every interactive part, whatever its source (native, librar
 - **Tab:** reaches the part; a group is one tab stop; Tab leaves it again.
 - **Arrows, Home, End:** move through items without skipping; typeahead jumps where offered.
 - **Enter and Space:** activate or select.
-- **Popups:** Escape and an outside click close it, and focus returns to the trigger. A modal dialog keeps Tab inside it while open.
+- **Popups:** Escape closes it, and focus returns to the trigger. A non-modal popup (menu, listbox, popover) also closes on an outside click. A modal dialog keeps Tab inside it while open; an alert dialog stays open on an outside click.
 - **Removal:** when the focused item is removed, focus moves to a neighbour, not to the page top.
 - **Reorder and move:** Space or Enter grabs, arrows move, Escape cancels, and the move is announced (live region).
 - **Focus visible** at every step.

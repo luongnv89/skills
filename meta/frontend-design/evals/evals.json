@@ -140,19 +140,19 @@
         "Interaction source is the existing Radix library",
         "package.json gains no @ui-sdk/* or other new UI dependency",
         "The Sort by menu uses @radix-ui/react-dropdown-menu like the Filter menu",
-        "Final Report opens with Result: and its status; Evidence names the Radix interaction source and the keyboard walk result, or Uncertainty records the walk as untested"
+        "Final Report opens with Result: and its status; Evidence names the Radix interaction source; the keyboard walk result is in Evidence, or Uncertainty records the walk as untested"
       ]
     },
     {
       "id": 11,
       "kind": "edge",
       "prompt": "Build a single self-contained index.html for our intranet FAQ: a list of topics people can filter by typing and pick with the arrow keys. The intranet is air-gapped (no internet, no npm). Just build it.",
-      "expected_output": "The skill picks the hand-written fallback: no package can be installed and the UI SDK web components URL is unreachable offline. It follows the WAI-ARIA listbox (or combobox) pattern, writes down focus and key decisions, and runs or records the keyboard walk.",
+      "expected_output": "The skill picks the hand-written fallback (or a native element that fits, with the reason): no package can be installed and the UI SDK web components URL is unreachable offline. A hand-written part follows the WAI-ARIA listbox (or combobox) pattern, writes down focus and key decisions, and the run runs or records the keyboard walk.",
       "files": [],
       "expectations": [
-        "Interaction source is hand-written per the WAI-ARIA APG pattern, with the offline constraint as the reason",
+        "Interaction source is hand-written per the WAI-ARIA APG pattern (or a native element such as <input list> with <datalist>, with the reason), with the offline constraint named",
         "No CDN or https://ui-sdk.dev script or stylesheet is referenced",
-        "The listbox has its role, aria-activedescendant or roving tabindex, and arrow, Home/End and Escape handling",
+        "A hand-written listbox or combobox has its role, aria-activedescendant or roving tabindex, arrow and Home/End handling, and Escape handling for a combobox",
         "Final Report opens with Result: and its status, and separates the keyboard walk evidence from untested checks"
       ]
     }
