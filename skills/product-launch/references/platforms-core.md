@@ -9,7 +9,8 @@ hashnode · github · own channels (x, linkedin, email-list)
 
 ## product-hunt — Product Hunt
 
-Submit: https://www.producthunt.com/posts/new · Mode: paste-ready · Confidence: high
+Submit: https://www.producthunt.com/posts/new, or through Product Hunt's official MCP
+(`product-hunt-mcp.md`) · Mode: paste-ready · Confidence: high
 
 - **Fits:** new or substantively updated tech products, usable now or soon "with a
   trustworthy timeline". **Not featured:** waitlisted products without immediate access;
@@ -52,6 +53,9 @@ Submit: https://www.producthunt.com/posts/new · Mode: paste-ready · Confidence
 - **Link:** unknown, because product pages return 403 to fetchers.
 - **Do:**
   - Hunt it yourself. A third-party hunter has no advantage.
+  - Prefer submitting through the official MCP when it is connected. Product Hunt's CEO
+    says MCP launches are 3 times more likely to be featured (vendor claim, X,
+    2026-11-13). The MCP also lists what a draft is missing before you submit.
   - Post the maker's first comment at launch: 70% of Product of the Day, Week or Month
     winners had one.
   - Ask people to visit and comment, never to upvote.

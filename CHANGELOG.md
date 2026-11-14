@@ -4,6 +4,10 @@
 
 ### Features
 
+- **`product-launch` 1.3.0 → 1.4.0: launch on Product Hunt through its official MCP (#506).** When Product Hunt's MCP (`https://mcp.producthunt.com/mcp`) is connected and signed in to the founder's personal account, a new opt-in Step 7 action, `ph-mcp`, builds a private draft from the approved kit, uploads the images, and reports the MCP's readiness check as blockers vs optional suggestions. It submits only after an explicit "Submit exactly this" to the preview the MCP returns, in that run; a plan approval, a resume or a blanket "just submit it" never counts. Shoutouts, programs, funding, investor fields and hunter invites are never filled in unless the user gives them. Without the MCP the skill prints the install steps and keeps the paste-ready guide. The Step 3 live check also reads launch-date availability and composer limits through the MCP. Product Hunt's CEO says MCP launches are 3 times more likely to be featured; the skill quotes this as his claim. Every other platform is unchanged: the skill still never posts there.
+
+### Features
+
 - **lstack directory edition (#504).** `scripts/build-lstack-directory.py` builds a `directory` branch for the Claude plugin directory, which accepts only Markdown, text, JSON, YAML and images, and only standard frontmatter keys, from organizations Anthropic hasn't verified. Members that ship scripts, or that depend on skills left out, are excluded by rule; each `SKILL.md` keeps `name`, `description`, `license`, `compatibility` and `metadata`, with `effort` and `dependencies` moved under `metadata`. The build re-checks its output and exits 1 on any problem. At this commit the edition holds 22 of the 48 members. `main` and the full lstack are unchanged.
 
 ## v4.4.0 — 2026-11-12

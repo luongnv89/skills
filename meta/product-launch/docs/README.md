@@ -28,6 +28,7 @@
   - No copy ever asks for votes.
   - Badge-gated free tiers are spelled out.
 - `scripts/check_kit.py` checks every field against its site's character limit before you paste anything.
+- **Product Hunt through its official MCP** (opt-in): when the MCP is connected, the skill builds a private draft from the approved kit, uploads the images, shows what is missing, and submits only after you answer "Submit exactly this" to the preview the MCP returns. Product Hunt's CEO says MCP launches are 3 times more likely to be featured (his claim, X, 2026-11-13). Without the MCP you get the install steps and the paste-ready guide.
 
 ## When to Use
 
@@ -98,4 +99,4 @@ The platform facts were verified on 2026-10-22 from each site's own pages. Each 
 - `launch-kit/assets.md`: every logo, screenshot and video size each site needs, and what you already have.
 - `launch-kit/platforms/<site>.md`: setup steps, paste-ready fields, the post, launch-day steps, the rules that get you removed, and sources.
 
-The run ends with a `Result:` line (COMPLETE, PLAN READY, PARTIAL or BLOCKED), followed by Evidence, Uncertainty and Decision. The skill never posts, signs up, votes or pays for you.
+The run ends with a `Result:` line (COMPLETE, PLAN READY, PARTIAL or BLOCKED), followed by Evidence, Uncertainty and Decision. The skill never posts, signs up, votes or pays for you, with one exception: when Product Hunt's official MCP is connected and you opt in, it builds a private Product Hunt draft, lists what is missing, and submits it only after you approve the exact preview the MCP returns.
