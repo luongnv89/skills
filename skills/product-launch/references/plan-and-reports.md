@@ -254,7 +254,7 @@ Free path total: $0. Paid options proposed: <each option, its price and what it 
 <the file list: README.md, copy-bank.md, assets.md, and platforms/<id>.md for each platform>
 
 ## Actions that need a second yes
-<only what applies: "gh repo edit (metadata)" when the repo is public on GitHub; "/logo-designer: no square logo found"; "/landing-page-generator: no landing page"; "/seo-ai-optimizer: og tags missing"; or "None">
+<only what applies: "gh repo edit (metadata)" when the repo is public on GitHub; "ph-mcp: Product Hunt draft, readiness check, then submit after you approve its preview" when product-hunt is in the plan and its MCP passed product-hunt-mcp.md §1 (otherwise one line: "Product Hunt MCP not connected; install steps in the guide"); "/logo-designer: no square logo found"; "/landing-page-generator: no landing page"; "/seo-ai-optimizer: og tags missing"; or "None">
 
 ## Assumptions and unknowns
 <each assumption, inferred value, and unknown profile field that affected a decision>
@@ -304,8 +304,8 @@ The Resume branch reads the plan's `Status:` line and acts on it.
 | Status              | Action                                                                                                                                                                                         |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `awaiting-approval` | If the request approves the plan, record the approval and go to Step 5. If it changes the plan (date, budget, platforms), take the Change path. Otherwise print the gate summary and ask again. |
-| `approved …`        | A change request takes the Change path, then asks for approval again. Otherwise: if `Generated:` is more than 14 days old, re-run Step 3 and show the changes first; then run Step 5.            |
-| `kit-complete …`    | Ask what to update. Re-run only the steps it touches, and confirm before replacing any file.                                                                                                   |
+| `approved …`        | A change request takes the Change path, then asks for approval again. A request to run ph-mcp when the kit files exist is the `kit-complete` case below; without them, it is a change (ph-mcp joins the second-yes list). Otherwise: if `Generated:` is more than 14 days old, re-run Step 3 and show the changes first; then run Step 5. |
+| `kit-complete …`    | Ask what to update. Re-run only the steps it touches, and confirm before replacing any file. A request to run ph-mcp (or to retry one that was declined or failed) runs Step 7 for it alone, from `product-hunt-mcp.md` §3 Stage A (which runs §1 and asks the combined opt-in and draft question), and records the answer in `Opted-in actions:`. |
 | `stopped`           | Treat it as a new run (Full or Named). Ask before replacing the plan.                                                                                                                          |
 
 ## 9. README.md (Step 5c)
@@ -323,6 +323,7 @@ Plan approved <date> · L-day <date> · <N> platforms · Budget $<N>
 - [ ] <date> · <action> · [<platform>](platforms/<id>.md)
 <every timeline row, in date order>
 - [ ] <date> · build your supporter list in your own private tool; this kit holds counts and roles only (when that track is on)
+- [ ] <date> · Product Hunt: <submitted through the MCP, launch <ID>, scheduled | draft ready: resume the kit and run ph-mcp to submit, or open the draft on producthunt.com | status unknown: check your launches on producthunt.com before doing anything | install the MCP (platforms/product-hunt.md) or submit on the website> (when product-hunt is in the plan; Step 7 updates this row)
 
 ## Founder inputs needed
 <every open question the writers returned, with its file>
@@ -353,7 +354,7 @@ After each step, print this block. Write each check as `√` (pass), `×` (fail)
 | 4 Plan and gate   | sync recorded, launch-plan.md written, approval asked, answers recorded                          |
 | 5 Launch kit      | copy-bank written, platform files (N/M), README and assets written                               |
 | 6 Kit check       | check_kit.py exit 0, reviewer blocking issues (0), review fresh or self-review (labeled)         |
-| 7 Actions         | each opted-in action: run and verified, declined, failed, or none opted in                       |
+| 7 Actions         | each opted-in action: run and verified, declined, failed, unknown (ph-mcp), or none opted in     |
 | 8 Final report    | Result line first; Evidence, Uncertainty and Decision present                                    |
 
 ## 11. Final report (Step 8)
@@ -363,17 +364,18 @@ first.
 
 ```
 Result: COMPLETE | PLAN READY — stopped | PARTIAL — <reason> | BLOCKED — <reason>
-Evidence: <what was verified: profile sources, live-check results with dates, check_kit.py output, gh repo view output>
+Evidence: <what was verified: profile sources, live-check results with dates, check_kit.py output, gh repo view output, the Product Hunt launch ID and status from get_launch>
 Uncertainty: <unverified platform facts (catalog date), unknown profile fields, Reddit rules to re-read, Korean copy to review, self-review instead of a fresh reviewer; or "none known within these checks">
 Decision: <the approval needed, or "No approval needed."> Next for you: <the earliest dated action in README.md>
 ```
 
 **Status rule:**
 
-- COMPLETE: Steps 5 and 6 passed, and every opted-in action ran. Set `Status: kit-complete <date>`.
+- COMPLETE: Steps 5 and 6 passed, and every opted-in action ran or was declined (a ph-mcp "Not yet", blockers left, a failed copy check, an L-day to pick, or no user to ask is declined). Set `Status: kit-complete <date>`.
 - PLAN READY — stopped: the user chose Stop at the gate.
 - PARTIAL: the kit was written, but a check still failed after its fix rounds, or an
-  opted-in action failed.
+  opted-in action failed or ended `unknown` (a Product Hunt submit whose status could not
+  be read).
 - BLOCKED: no readable landing page and no codebase; a sync problem the user must resolve;
   or several products and no answer about which one.
 
@@ -383,8 +385,10 @@ Decision: <the approval needed, or "No approval needed."> Next for you: <the ear
 | --------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | A subagent fails, or returns the wrong shape        | Re-run it once with the same input. On a second failure, run that step inline, and say so.  |
 | WebFetch fails on a page                            | Try `curl -sL -A "Mozilla/5.0"` once, then mark the page `unreachable`. Never fill it in from memory. |
+| `launch-kit/ph-draft-check.md` exists outside Stage C step 1 | A leftover from an interrupted ph-mcp run (`product-hunt-mcp.md` §3 Stage C): delete it, then run the check. Step 1 deletes a leftover at its start and its own file after `check_kit.py` runs; a FAIL there is fixed, never cleared by deleting the file. |
 | `check_kit.py` exits 2                              | The kit path is wrong: pass the folder Step 5 wrote. Python is missing: check the limits by hand, and say so. |
 | `gh` is unauthenticated, or the permission is too low | Skip the action. Put `gh auth login` and the command in the README for the founder.        |
+| The Product Hunt MCP is missing, not signed in, or errors | Keep the paste-ready guide as the path, print the install steps (`product-hunt-mcp.md` §1), and record the error. An approved submit with an unknown outcome is retried only as `product-hunt-mcp.md` §3 Stage C step 6 says; an invalid or expired token needs a new preview and a new yes. |
 | Repo Sync conflicts                                 | Abort, restore the user's changes, and stop and ask (Repo Sync, item 3).                    |
 | A dependency is missing                             | Fail-soft (Dependency Preflight, item 3).                                                   |
 
@@ -398,7 +402,9 @@ Decision: <the approval needed, or "No approval needed."> Next for you: <the ear
   reviewer, and the user decides at the gate.
 - **The user asks the skill to post, submit or sign up:**
   - Quote rule 1, and point to the guides in the kit.
-  - Only `gh repo edit` can run, through its gates.
+  - Only `gh repo edit` and ph-mcp can run, through their gates. "Just submit it to
+    Product Hunt" still gets the MCP preview first and needs "Submit exactly this".
+- **Edit an already-submitted Product Hunt launch** ("change my tagline"): with a kit, take Resume and follow `product-hunt-mcp.md` §4. Without one, say the skill plans launches, and point to Product Hunt's editor.
 - **A request for a ready Show HN post:**
   - Quote HN's rule, with the link news.ycombinator.com/newsguidelines.html.
   - Take the Named branch. The deliverable after approval is the founder-voice brief.

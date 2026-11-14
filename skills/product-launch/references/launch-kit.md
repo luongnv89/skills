@@ -134,6 +134,15 @@ Open questions, or "None".
 The family file's sources, plus the live-check result.
 ```
 
+**product-hunt.md:** keep every website step. The `## Submission fields` values are what
+Step 7 sends to the Product Hunt MCP, so every one of them comes from the Product Profile,
+within the composer limits the live check recorded. The first comment is plain
+paragraphs or a simple list, with no other formatting. When the plan opts into ph-mcp,
+`## Launch day` says the launch is submitted through the MCP in Step 7 after the founder
+approves its preview, and that submitting posts the first comment and notifies followers.
+When the MCP was unavailable, `## Setup` holds the install steps from
+`product-hunt-mcp.md` §1 as an optional step.
+
 **reddit.md:** one section per chosen paste-ready subreddit, each with its allowed day, flair, title
 format, karma gate, post body and a line saying "re-read the rules and pinned posts the
 day you post". The rules in the catalog are dated captures. Each section also has:
