@@ -93,7 +93,7 @@ None. The free plan is usable after sign-up; HN readers prefer a try-without-sig
 Free path total: $0. Paid options proposed: none. Total if all are accepted: $0.
 
 ## Materials Step 5 will write
-README.md, copy-bank.md, assets.md, platforms/product-hunt.md, platforms/hacker-news.md, platforms/saashub.md, platforms/x.md, platforms/linkedin.md
+README.md, copy-bank.md, assets.md, platforms/product-hunt.md (this eval fixture keeps only the Product Hunt guide; the other platforms are out of its scope)
 
 ## Actions that need a second yes
 - /logo-designer: no square logo found (not opted in)

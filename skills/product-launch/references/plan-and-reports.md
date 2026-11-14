@@ -305,7 +305,7 @@ The Resume branch reads the plan's `Status:` line and acts on it.
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `awaiting-approval` | If the request approves the plan, record the approval and go to Step 5. If it changes the plan (date, budget, platforms), take the Change path. Otherwise print the gate summary and ask again. |
 | `approved …`        | A change request takes the Change path, then asks for approval again. A request to run ph-mcp when the kit files exist is the `kit-complete` case below; without them, it is a change (ph-mcp joins the second-yes list). Otherwise: if `Generated:` is more than 14 days old, re-run Step 3 and show the changes first; then run Step 5. |
-| `kit-complete …`    | Ask what to update. Re-run only the steps it touches, and confirm before replacing any file. A request to run ph-mcp (or to retry one that was declined or failed) runs `product-hunt-mcp.md` §1, asks the combined opt-in and Stage A question, records it in `Opted-in actions:`, then runs Step 7 for it alone. |
+| `kit-complete …`    | Ask what to update. Re-run only the steps it touches, and confirm before replacing any file. A request to run ph-mcp (or to retry one that was declined or failed) runs Step 7 for it alone, from `product-hunt-mcp.md` §3 Stage A (which runs §1 and asks the combined opt-in and draft question), and records the answer in `Opted-in actions:`. |
 | `stopped`           | Treat it as a new run (Full or Named). Ask before replacing the plan.                                                                                                                          |
 
 ## 9. README.md (Step 5c)
@@ -374,7 +374,8 @@ Decision: <the approval needed, or "No approval needed."> Next for you: <the ear
 - COMPLETE: Steps 5 and 6 passed, and every opted-in action ran or was declined (a ph-mcp "Not yet", blockers left, or no user to ask is declined). Set `Status: kit-complete <date>`.
 - PLAN READY — stopped: the user chose Stop at the gate.
 - PARTIAL: the kit was written, but a check still failed after its fix rounds, or an
-  opted-in action failed.
+  opted-in action failed or ended `unknown` (a Product Hunt submit whose status could not
+  be read).
 - BLOCKED: no readable landing page and no codebase; a sync problem the user must resolve;
   or several products and no answer about which one.
 
