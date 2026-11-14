@@ -164,18 +164,19 @@ again with a fresh key, except the approved submit, which follows Stage C step 6
    URL), then drop the remaining tags.
    - Write every draft value that differs from the kit in any character, and every value
      the kit has no block for (promo text, a shoutout note), as field blocks into
-     `launch-kit/ph-draft-check.md`, exactly as the draft has them. Give each block its
-     limits: the kit block's `min=` and `max=` for the same field, or the composer's
-     (`tagline_maximum`, `promo_text_maximum`, `shoutout_note_minimum` and
-     `shoutout_note_maximum`). Run `check_kit.py launch-kit`, then delete the file. The
-     kit itself is not changed yet.
+     `launch-kit/ph-draft-check.md`, exactly as the draft has them (the first comment as
+     the plain text read above). Give each block its limits: the kit block's `min=` and
+     `max=` for the same field, or the composer's (`tagline_maximum`,
+     `promo_text_maximum`, `shoutout_note_minimum` and `shoutout_note_maximum`). Run
+     `check_kit.py launch-kit`, then delete the file. The kit itself is not changed yet.
    - A FAIL (a length limit, a placeholder, a vote request) blocks the submit. Tell the
      user what failed, then offer to send the kit's own value back with `update_launch`,
      or to take the user's corrected text, checked the same way first, then written into
      the kit's block (if it has one) and sent. With no kit value to send back, the first
-     offer clears it instead: `promoText` to empty, or the one shoutout removed from
-     `shoutouts` with the others kept. Run this step again. If the user takes neither,
-     the action ends `declined (copy check failed)`.
+     offer clears it instead: `promoText` to `null`, or `shoutouts` sent again without
+     that one (each kept entry with only its `productId`, `rating` and `note`, asking the
+     user for a missing rating; `null` when none is left). Run this step again. If the
+     user takes neither, the action ends `declined (copy check failed)`.
    - A value that passes and still differs with runs of whitespace and blank lines
      collapsed: show the kit's and the draft's versions and ask which to keep. Keeping the
      draft's value copies its plain text into the kit's field block; keeping the kit's
