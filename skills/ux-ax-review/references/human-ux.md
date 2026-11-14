@@ -40,6 +40,26 @@ compliance from a clean scan. Plan manual keyboard + screen-reader checks in key
 Validation: reproduce the reported issue and check the exact remediation with appropriate
 assistive technology; never certify the whole app from the sample.
 
+**Interactive widgets.** When the evidence shows broken keyboard, focus, popup, selection or
+drag-and-drop behaviour in a hand-rolled widget (focus escapes a dialog, Escape or an outside
+click doesn't close a menu, arrow keys skip options, focus is lost when an item is removed,
+reordering works only by mouse), recommend replacing the hand-written handling with a
+tested behavior rather than patching key handlers one by one:
+- the project's existing component or headless library, when it already has one;
+- otherwise, for React, Vue, Svelte, Solid or web components, the matching
+  [UI SDK](https://ui-sdk.dev) behavior from `@ui-sdk/core`: `createPopup` (anything that
+  opens), `createRovingFocus` or `createGridFocus` (arrow keys, one tab stop),
+  `createListbox` and `createTypeahead` (options and type-to-find), `createSelection`,
+  `createFocusRecovery`, `createReorder` (drag and keyboard reordering). Say in the
+  recommendation that UI SDK is **beta** (`0.1.0-beta.x`, APIs may change; pin the exact
+  version);
+- the hand-written [WAI-ARIA APG pattern](https://www.w3.org/WAI/ARIA/apg/patterns/) as
+  the alternative when the stack is unsupported or a new dependency is not acceptable.
+
+This is a recommendation in the plan; the review installs nothing. A library is not a
+conformance claim: the plan task still re-tests the flow with keyboard and a screen reader.
+Keep the finding's severity from its user impact, not from the fix chosen.
+
 ## Performance
 
 Record actual timings and test environment. For web use field Core Web Vitals at the 75th

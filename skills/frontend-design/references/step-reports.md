@@ -28,6 +28,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Differentiation clear:    √ pass | × fail — [what's missing]
   Style source:             √ explicit brief | √ Default Style Guide
   Files listed:             √ pass ([N] files) | — not applicable (new project)
+  Interaction source:       √ [existing library | UI SDK <version> (beta) | hand-written APG] | — no interactive part
   ____________________________
   Result:                   PASS | FAIL | PARTIAL
 ```
@@ -41,6 +42,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Responsive check:         √ pass (375/768/1280 px) | × fail — [width, element] | — untested (no browser)
   Contrast check:           √ pass (lowest [ratio]) | × fail — [pair, ratio, file:line]
   Quality + usability:      √ pass | × fail — [which item failed]
+  Keyboard walk:            √ pass ([N] interactive parts) | × fail — [part, key] | — untested (no browser) | — no interactive part
   Build:                    √ pass ([command]) | × fail — [first error line] | — not run (no command)
   ____________________________
   Result:                   PASS | FAIL | PARTIAL

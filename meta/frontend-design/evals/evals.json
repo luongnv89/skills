@@ -109,6 +109,52 @@
         "frontend-design did not trigger",
         "No frontend code was written"
       ]
+    },
+    {
+      "id": 9,
+      "kind": "happy-path",
+      "prompt": "In the React app in ../../eval-fixtures/frontend-design/react-app, add a project switcher to the header: a button that opens a menu listing the user's projects (Atlas, Beacon, Comet). It must work with the keyboard. Just build it.",
+      "expected_output": "The skill reads package.json (React 19, no component library), reads references/interactive-behaviors.md in step 4, names UI SDK (beta) as the interaction source in the one-line direction, adds @ui-sdk/core and @ui-sdk/react pinned to an exact version, builds the switcher from UI SDK's menu component or createPopup instead of hand-written key and focus handlers, runs or records the keyboard walk, and notes the beta status and the optional ui-sdk skill install in the Final Report.",
+      "files": [
+        "../../eval-fixtures/frontend-design/react-app/package.json",
+        "../../eval-fixtures/frontend-design/react-app/src/App.jsx"
+      ],
+      "expectations": [
+        "Design Thinking report has an Interaction source row naming UI SDK (beta)",
+        "package.json gains @ui-sdk/core and @ui-sdk/react with exact versions (no ^ or ~)",
+        "The menu uses a UI SDK component or createPopup; no hand-written keydown, focus-trap or outside-click handler for it",
+        "Implementation report has a Keyboard walk row (pass, fail with the key, or untested with the reason)",
+        "Final Report opens with Result: and its status; Evidence names the interaction source; Uncertainty states UI SDK is beta with the pinned version; Decision says No approval needed. and mentions the optional ui-sdk skill install"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "edge",
+      "prompt": "Add a 'Sort by' dropdown (Newest, Oldest, Amount) next to the existing Filter menu in ../../eval-fixtures/frontend-design/radix-app/src/Toolbar.jsx. Just build it.",
+      "expected_output": "The skill sees the project already uses Radix dropdown menus and builds the new menu with Radix too; it does not add UI SDK or any second interaction library.",
+      "files": [
+        "../../eval-fixtures/frontend-design/radix-app/package.json",
+        "../../eval-fixtures/frontend-design/radix-app/src/Toolbar.jsx"
+      ],
+      "expectations": [
+        "Interaction source is the existing Radix library",
+        "package.json gains no @ui-sdk/* or other new UI dependency",
+        "The Sort by menu uses @radix-ui/react-dropdown-menu like the Filter menu",
+        "Final Report opens with Result: and its status, and its Evidence line names the keyboard walk result or records it as untested"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "prompt": "Build a single self-contained index.html for our intranet FAQ: a list of topics people can filter by typing and pick with the arrow keys. The intranet is air-gapped (no internet, no npm). Just build it.",
+      "expected_output": "The skill picks the hand-written fallback: no package can be installed and the UI SDK web components URL is unreachable offline. It follows the WAI-ARIA listbox (or combobox) pattern, writes down focus and key decisions, and runs or records the keyboard walk.",
+      "files": [],
+      "expectations": [
+        "Interaction source is hand-written per the WAI-ARIA APG pattern, with the offline constraint as the reason",
+        "No CDN or https://ui-sdk.dev script or stylesheet is referenced",
+        "The listbox has its role, aria-activedescendant or roving tabindex, and arrow, Home/End and Escape handling",
+        "Final Report opens with Result: and its status, and separates the keyboard walk evidence from untested checks"
+      ]
     }
   ]
 }
