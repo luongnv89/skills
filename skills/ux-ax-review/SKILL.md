@@ -4,7 +4,7 @@ description: "Review website/app UX for humans and AX for AI/search; produce an 
 license: MIT
 effort: high
 metadata:
-  version: 1.3.0
+  version: 1.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

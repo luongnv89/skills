@@ -9,12 +9,13 @@
 
 > Audit websites and apps for humans and AI/search, then turn supported findings into an approval-gated improvement plan.
 
-Version: **1.3.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.4.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
 - Six human aspects: clarity, brand, responsive, accessibility, performance, conversion.
 - Six AI/search aspects: robots/sitemap, structured data, Markdown, llms.txt, crawler access, copy/share/open-in-AI.
+- Broken keyboard, focus, popup, selection or drag-and-drop behaviour gets a "replace the hand-rolled handling" fix: a native element, the project's library, UI SDK (beta, with its framework floors) or the APG pattern; WebMCP agent access stays an optional, early opportunity.
 - Live URL, repository, supplied evidence and native-app modes; untested is not passed.
 - Focused parallel reviewers for substantial audits, inline fallback; no other skills required.
 - Report-only first: fixes, commits, publishing and access-policy changes need separate approval.
@@ -94,8 +95,8 @@ or sent to third-party AI services as an “improvement.”
 | `agents/ax-reviewer.md` | Bounded AI/search reviewer contract |
 | `scripts/validate_report.py` | Stdlib-only report coverage/reference validator |
 | `tests/` | Executable validator regression tests and their TDD notes |
-| `evals/evals.json` | Behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
-| `eval-fixtures/ux-ax-review/` (repo root) | Synthetic web, repo, native, blocked and orchestrated-run fixtures |
+| `evals/evals.json` | Behavior evals: 4 happy-path, 3 edge, 2 negative-trigger |
+| `eval-fixtures/ux-ax-review/` (repo root) | Synthetic web, repo, native, blocked, orchestrated-run and hand-rolled-widget fixtures |
 
 ## Verification
 

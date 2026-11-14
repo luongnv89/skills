@@ -66,3 +66,13 @@ private data. Avoid undocumented prompt URLs and brittle vendor links; verify su
 integration docs before recommending a concrete deep link. Do not add auto-send behavior
 or tracking without informed consent. Validation: staged/local test of only public or
 consented content with clear preview, minimal disclosure, valid links and fallback copy.
+
+**Agent-operable controls (optional opportunity, part of `ai-actions`, web only).** WebMCP is an
+early proposal (a W3C Web Machine Learning Community Group draft, not a standard, with an
+early preview in Chrome) that lets a page register its controls as tools for the browser's
+built-in agent. Libraries such as UI SDK (beta) can register a page's controls this way
+(`registerTools`). Its absence is never an issue; mention it only as an optional
+opportunity for an app whose users want agents to operate it, and only together with a
+consent guard that asks the person before consequential actions (purchases, sends,
+deletes). Never claim any agent or browser uses it. Validation: the registered tools are
+listed in a browser that supports the API, and a consequential action asks first.

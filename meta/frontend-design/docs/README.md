@@ -15,6 +15,7 @@
 - Built-in usability principles from "Don't Make Me Think" (scan-friendly, self-evident, low cognitive load)
 - Default style guide (Black/White/Gray/Bright Green) when no preference is provided
 - Default quality bar: every final design is professional, production-ready, elegant, and premium without being asked
+- Interactive parts (popups, selection, keyboard and focus, drag and drop) use a native element, the project's existing library or UI SDK behaviors (beta, pinned) instead of hand-written keyboard and focus code, with a hand-written WAI-ARIA pattern as the fallback and a keyboard walk before delivery
 - Supports HTML/CSS/JS, React, Vue, and any modern frontend framework
 
 ## When to Use
@@ -64,10 +65,12 @@ asm install github:luongnv89/skills:skills/frontend-design
 |---|---|
 | `references/aesthetics-guide.md` | Typography, color, motion, composition and background guidance, plus the generated-look defaults to avoid |
 | `references/usability-guide.md` | Six "Don't Make Me Think" Quick rules applied to every design, then the full step-by-step guideline |
+| `references/interactive-behaviors.md` | Who handles keyboard, focus and dismissal for interactive parts (native element, existing library, UI SDK behaviors in beta, or a hand-written APG pattern), the behavior map, and the keyboard walk |
 | `references/step-reports.md` | Step-completion report template, symbol legend, and per-phase checks |
 | `references/final-report.md` | Final Report status rules, PARTIAL and BLOCKED examples, fill rules, and reader checks |
-| `evals/evals.json` | Trigger and behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
+| `evals/evals.json` | Trigger and behavior evals: 4 happy-path, 5 edge, 2 negative-trigger |
 | `eval-fixtures/frontend-design/vue-repo/` (repo root) | Small Vue fixture for the framework-mismatch eval |
+| `eval-fixtures/frontend-design/react-app/`, `radix-app/` (repo root) | React fixtures for the interaction-source evals: no UI library (UI SDK), existing Radix menus (keep Radix) |
 
 ## Output
 

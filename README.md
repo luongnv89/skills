@@ -231,7 +231,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [**test-coverage**](skills/test-coverage/) | 1.6.0 | low | Target untested branches and edge cases |
 | [**user-test**](skills/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.7.1 | medium | Usability review using Krug's principles |
-| [**ux-ax-review**](skills/ux-ax-review/) | 1.3.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
+| [**ux-ax-review**](skills/ux-ax-review/) | 1.4.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
@@ -287,7 +287,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**frontend-design**](skills/frontend-design/) | 1.5.1 | high | Production UIs with usability-first approach |
+| [**frontend-design**](skills/frontend-design/) | 1.6.0 | high | Production UIs with usability-first approach |
 | [**logo-designer**](skills/logo-designer/) | 1.5.1 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.5.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 | [**design-optimizer**](skills/design-optimizer/) | 1.2.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |

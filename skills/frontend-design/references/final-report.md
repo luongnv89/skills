@@ -44,9 +44,9 @@ Decision: Resolve the conflict on main or tell me to continue without syncing.
 ## Fill rules
 
 - `Result:` comes first. The first word after `Result:` is the status. Name each file written, or say `No code written`.
-- `Evidence:` names each verification check that ran and its observed result: the widths rendered, the lowest contrast ratio found, and the build, lint, or test command with its exit result. Cite a `file:line` for each failure. Cite only checks that ran.
-- `Uncertainty:` lists each check that could not run (for example `Responsive rendering untested: no browser available`), a `sync: failed (...)` or `sync: skipped (...)` record, and each assumption made where the brief was silent. Label assumptions as assumptions.
-- `Decision:` names the one action the user must take, or says `No approval needed.` Name a remaining user action (for example, adding real images) in the same line after `No approval needed.`
+- `Evidence:` names each verification check that ran and its observed result: the widths rendered, the lowest contrast ratio found, the interaction source of each interactive part with the keyboard walk result when it ran, and the build, lint, or test command with its exit result. Cite a `file:line` for each failure. Cite only checks that ran.
+- `Uncertainty:` lists each check that could not run (for example `Responsive rendering untested: no browser available`), a `sync: failed (...)` or `sync: skipped (...)` record, the beta status of UI SDK when it was used (`UI SDK is beta, pinned <version>; APIs may change`), and each assumption made where the brief was silent. Label assumptions as assumptions.
+- `Decision:` names the one action the user must take, or says `No approval needed.` Name a remaining user action (for example, adding real images) in the same line after `No approval needed.` When UI SDK was used, add the optional `ui-sdk` skill install there too, marked optional.
 
 ## Reader checks
 

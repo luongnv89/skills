@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Team settings — Widgets Fixture</title>
+</head>
+<body>
+  <main>
+    <h1>Team</h1>
+    <table>
+      <thead><tr><th>Member</th><th>Role</th><th></th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Ana Lopez</td>
+          <td>
+            <div class="role-select" onclick="toggleRoles(this)">Editor ▾</div>
+            <div class="role-list" hidden>
+              <div class="role-option" onclick="pickRole(this)">Viewer</div>
+              <div class="role-option" onclick="pickRole(this)">Editor</div>
+              <div class="role-option" onclick="pickRole(this)">Admin</div>
+            </div>
+          </td>
+          <td><button onclick="openRemove()">Remove member</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+  <div class="modal" id="remove-dialog" hidden>
+    <h2>Remove Ana Lopez?</h2>
+    <p>They lose access to every project.</p>
+    <button onclick="closeRemove()">Cancel</button>
+    <button onclick="confirmRemove()">Remove</button>
+  </div>
+  <script>
+    function toggleRoles(el) { el.nextElementSibling.hidden = !el.nextElementSibling.hidden; }
+    function pickRole(el) { const list = el.parentElement; list.previousElementSibling.textContent = el.textContent + " ▾"; list.hidden = true; }
+    function openRemove() { document.getElementById("remove-dialog").hidden = false; }
+    function closeRemove() { document.getElementById("remove-dialog").hidden = true; window.scrollTo(0, 0); }
+    function confirmRemove() { closeRemove(); }
+  </script>
+</body>
+</html>
