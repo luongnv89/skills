@@ -120,4 +120,4 @@ Use these four checks to review a final summary. They test whether a person can 
 3. **Claims are traceable** — "applied" means the write command succeeded and the backup exists; "verified" means `benchmark_ollama.py` or `ollama run --verbose` ran after the change. A guide that was only written is not an applied change.
 4. **Next decision is clear** — `Decision:` names the approval needed or says `No approval needed.`, and every user action is on its own `Remaining action:` line.
 
-Ask a human reviewer the same four questions and record the answers in the eval feedback. Missing or blank feedback leaves human understanding unconfirmed; an agent's own reading cannot confirm it.
+Human understanding stays unconfirmed until a person answers these checks; an agent's own reading cannot confirm it.

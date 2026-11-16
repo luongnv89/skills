@@ -324,7 +324,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**cli-builder**](skills/cli-builder/) | 1.4.0 | high | 5-step CLI tool builder with approval gates and btop-inspired output |
-| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.4.0 | medium | Hardware-aware Ollama tuning |
+| [**ollama-optimizer**](skills/ollama-optimizer/) | 1.4.1 | medium | Hardware-aware Ollama tuning |
 | [**install-script-generator**](skills/install-script-generator/) | 2.4.0 | high | Cross-platform install.sh with env detection |
 | [**opencode-runner**](skills/opencode-runner/) | 1.7.0 | medium | Delegate work to opencode free cloud models |
 | [**agent-profile**](skills/agent-profile/) | 1.1.0 | medium | Run a task with a saved agent profile (harness, harness profile, model, thinking level) built from the CLIs installed on this machine |

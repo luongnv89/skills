@@ -4,7 +4,7 @@ description: "Optimize Ollama configuration for the current machine's hardware. 
 license: MIT
 effort: medium
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -30,7 +30,7 @@ Do not use for LM Studio, llama.cpp, vLLM, or hosted-API LLM providers (OpenAI, 
 
 ## Workflow
 
-**Fast path (opt-in only):** only skip full hardware analysis if the user explicitly asks to. Otherwise always run Phases 1-4 and follow the tier-based recommendation — do not apply shortcuts by default, and do not let them override a tier decision already made. For the per-platform shortcut commands and env vars, see [Platform-Specific Setup](references/platform_specific.md) and [Environment Variables](references/environment_variables.md).
+**Fast path (opt-in only):** if the user explicitly asks to skip hardware analysis, recommend from [Platform-Specific Setup](references/platform_specific.md) and [Environment Variables](references/environment_variables.md) for their platform. Otherwise run Phases 1-4 and follow the script's tier.
 
 ### Phase 1: System Detection
 
