@@ -8,7 +8,7 @@ dependencies:
   - "github:emilkowalski/skills:skills/emil-design-eng"
   - browse
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -229,9 +229,9 @@ Report extras: `references/render-pipeline.md` → _Final report additions_.
 
 PARTIAL means assets exist but a check or blocking finding remains; BLOCKED means no assets
 were written, or a hand-made `creative/` file fails Step 5. State that nothing was committed or uploaded, and name the recreated frames.
-When grading runs, also check that a reader finds the result first, tells verified facts
-from assumptions, traces each claim to evidence, and sees the next decision; without a
-human review, mark that unconfirmed.
+Write the report so a reader finds the result first, tells verified facts from assumptions,
+traces each claim to evidence, and sees the next decision; without a human review, mark that
+unconfirmed.
 
 ## Self-Improve
 

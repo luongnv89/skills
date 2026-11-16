@@ -52,11 +52,11 @@ Pillow (`python3 -m pip install pillow`). `render.py` needs Chrome or Chromium
 | Refuses to run while `config.js` contains `TODO:` | Template text must never reach a PNG |
 | Builds a manifest first (`index.html?manifest=1` via `--dump-dom`), rendering every screen once | A broken builder, an unknown icon name or a missing image fails with its frame id instead of shipping a blank PNG |
 | Checks caption contrast from the brand tokens (3:1 headline, 4.5:1 supporting line, light and dark) | A dark frame with dark text cannot pass |
-| After a full render, deletes outputs no longer in `config.js`: `<frame>.png` in the class folders, and in `creative/` only files `.kit-outputs.json` lists (videos only without `--no-video`) whose size and sha256 still match the record, then a variant folder it lists once that folder is empty or holds only `.DS_Store` (removed with it). A listed file changed since gets `WARN: … changed since the kit wrote it, left in place` and leaves the record; a listed variant folder holding anything else is kept with a WARN. Each write records the file's fingerprint atomically right after it lands (`--only` adds to it), so a failed render never adds a file; a file deleted by hand stays listed until the next full render clears it. With no record (a 1.0.0 set), only root `header`/`search`/`universal.png` go, as in 1.0.0. Hidden files are skipped silently; symlinks and anything else in `creative/` get `WARN: … not produced by the kit, left in place`. A file the config still produces is re-rendered over whatever is there, as in 1.0.0: to keep a hand-made asset, remove that kind from the config first; the kit will then leave it in place | A dropped frame, video or variant cannot ship by accident, and a file the kit did not write or that changed since (an App Preview recording, raw art, a hand-replaced `search.png`, `old/header.png`, an empty folder, a symlinked folder) is never deleted |
+| After a full render, deletes outputs no longer in `config.js`: `<frame>.png` in the class folders, and in `creative/` only files `.kit-outputs.json` lists (videos only without `--no-video`) whose size and sha256 still match the record, then a variant folder it lists once that folder is empty or holds only `.DS_Store` (removed with it). A listed file changed since gets `WARN: … changed since the kit wrote it, left in place` and leaves the record; a listed variant folder holding anything else is kept with a WARN. Each write records the file's fingerprint atomically right after it lands (`--only` adds to it), so a failed render never adds a file; a file deleted by hand stays listed until the next full render clears it. With no record (a 1.0.0 set), only root `header`/`search`/`universal.png` go. Hidden files are skipped silently; symlinks and anything else in `creative/` get `WARN: … not produced by the kit, left in place`. A file the config still produces is re-rendered over whatever is there: to keep a hand-made asset, remove that kind from the config first; the kit will then leave it in place | A dropped frame, video or variant cannot ship by accident, and a file the kit did not write or that changed since (an App Preview recording, raw art, a hand-replaced `search.png`, `old/header.png`, an empty folder, a symlinked folder) is never deleted |
 | Retries a Chrome crash, timeout (120 s per screenshot, 240 s on a retry), silent pipe, or wrong-size screenshot or first video frame up to 4 attempts with backoff (about 4, 8, 16 s); a video resumes at the frame it lost, into the same encoder, so the file is byte-identical. After the second failure it switches to `chrome-headless-shell` when one is installed (PATH, Puppeteer or Playwright cache; macOS and Linux) for the rest of the run, unless `--chrome` or `$CHROME` named the binary. `APPSTORE_ASSETS_ATTEMPTS` changes the count | Batch runs on a loaded machine crashed Chrome or wrote wrong-size PNGs; a retry or the headless shell finished them. A size still wrong on the last attempt fails with the sizes. A manifest timeout (an infinite loop or remote asset in `config.js`) fails after 120 s with that fix, and a config or page script error fails at once |
 | Takes a machine-wide lock (`~/.cache/appstore-assets/video.lock`, `flock`) for the video step only, printing `waiting for the video lock … (held by pid N, <out>)` while another render holds it. `APPSTORE_ASSETS_VIDEO_LOCK=0` skips it; `APPSTORE_ASSETS_LOCK_DIR` moves it | Four parallel 4K video renders pushed the load average near 500; stills still render in parallel, and the lock dies with its process |
 | Renders `orientation: "landscape"` classes rotated (iPhone 956 × 440 design zoomed to 874 for 6.3"; iPad 1376 × 1032) | Landscape-only games need landscape screenshots; one kit serves both |
-| Prints `fit headline <id>: 41 -> 37 px` when kit.js shrank a headline that wrapped past two lines (down to 75 %), a WARN when it still does not fit, and a `note:` when a pinned size wraps past two lines | A wide face (a monospace) no longer needs per-frame overrides; a config `css` rule that pins `font-size` turns the fit off for that headline, and `fitHeadlines: false` turns it off everywhere. The fit is on by default, so a re-render of an older set can change an approved headline: the Update report names those frames |
+| Prints `fit headline <id>: 41 -> 37 px` when kit.js shrank a headline that wrapped past two lines (down to 75 %), a WARN when it still does not fit, and a `note:` when a pinned size wraps past two lines | A wide face (a monospace) needs no per-frame overrides; a config `css` rule that pins `font-size` turns the fit off for that headline, and `fitHeadlines: false` turns it off everywhere. The fit is on by default, so a re-render of an older set can change an approved headline: the Update report names those frames |
 | Keeps the header caption (a 440 px column) and one hero device inside Apple's art safe area by default; with `layout: "wide"` it prints `note: header: device slot(s) hero, side0 sit outside Apple's art safe area`. It prints `WARN: header: caption spans … outside Apple's art safe area` per beat whose caption overflows it | A narrow display shows only the safe area, so the default crop still shows the app; under "wide" the devices are decoration it crops, and the note says so once. A caption outside it loses words: drop any `css` rule that pins `.cv-cap h1` or `p` sizes |
 | Passes the stage height explicitly (`&h=`) | Headless Chrome's viewport is about 87 px shorter than `--window-size`; a `100vh` stage gets clipped |
 | Renders `iphone-6.3` by zooming the 440 px design to 402 px | One layout serves both iPhone classes with identical proportions |
@@ -106,8 +106,7 @@ comment above every screen builder: Step 6's reviewer checks it against the code
 (the default size follows the orientation) or `ui.capture()` of a landscape
 capture. The Dynamic Island moves to the left edge, and the caption sits in a
 band above a wide device. A set that forked `kit.js` for landscape (a
-`render_landscape.py` wrapper) moves to the template kit plus `orientation`;
-the hadal-relay set rendered pixel-identical that way.
+`render_landscape.py` wrapper) moves to the template kit plus `orientation`, which renders it the same.
 
 ## Video creatives
 
@@ -267,7 +266,7 @@ frame keeps the same caption and device placement.
 
 ## Update branch: kit refresh and brief
 
-Moved from SKILL.md Step 0; run it on the Update branch before Steps 5–7.
+Run it on the Update branch before Steps 5–7.
 
 Update branch kit refresh: note whether `src/kit.js` predates video (no `__seek` in it), then
 copy the template's `kit.js`, `kit.css` and `index.html` into `src/`, first backing up any that
@@ -289,8 +288,6 @@ ts=$(date +%Y%m%d-%H%M%S); for f in kit.js kit.css index.html; do
 
 ## Step 5 script behavior
 
-Moved from SKILL.md Step 5.
-
 Under load, `render.py` retries Chrome crashes (falling back to `chrome-headless-shell`), and videos
 take turns machine-wide: `waiting for the video lock` is not a hang. It also fails on unknown icons, missing images, caption contrast below 3:1
 (headline) or 4.5:1 (supporting line), and a video beat held shorter than its caption needs;
@@ -300,8 +297,6 @@ second per 4K frame), so iterate with `--no-video`. `check_assets.py` probes eac
 with `--sheet` it writes `sheets/video-<kind>.png`.
 
 ## Final report additions
-
-Moved from SKILL.md → Final report.
 
 On the Update branch, list each `src/*.bak-<timestamp>` backup under Evidence. If the old kit
 predated 1.1.0, say under Decision that `header.png` and `search.png` changed composition (the
