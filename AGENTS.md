@@ -50,5 +50,5 @@ Skill **definitions** live in `skills/<name>/`. Installed copies under `~/.claud
 - Never re-run commands to "verify" unless the outcome was uncertain.
 - Don't echo back large blocks of code or file contents unless asked.
 - Batch related edits into single operations. Don't make 5 edits when 1 handles it.
-- Report results and blockers plainly; skip filler like "I'll continue...".
+- Report results and blockers plainly.
 - If a task needs 1 tool call, don't use 3.
