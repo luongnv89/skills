@@ -25,8 +25,8 @@ def _load_detect_env():
 
 detect_env = _load_detect_env()
 
-# A remote installer piped into a shell: `curl … | sh|bash`, `sh|bash -c "$(curl …)"`, `irm … | iex`.
-PIPE = re.compile(r"curl\s[^|`]*\|\s*(sh|bash)\b|(sh|bash)\s+-c\s+\\?\"\$\(curl\s|irm\s[^|`]*\|\s*iex\b")
+# A remote installer piped into a shell: `curl … | [sudo] sh|bash`, `sh|bash -c "$(curl …)"`, `irm … | iex`.
+PIPE = re.compile(r"curl\s[^|`]*\|\s*(?:sudo\s+(?:-\S+\s+)*)?(sh|bash)\b|(sh|bash)\s+-c\s+\\?\"\$\(curl\s|irm\s[^|`]*\|\s*iex\b")
 
 
 def _finding_ids(tools: dict[str, str | None]) -> set[str]:
@@ -95,7 +95,7 @@ class RemoteInstallerTests(unittest.TestCase):
                 seen += 1
                 with self.subTest(file=path.name, line=line_no):
                     self.assertRegex(context, r"(?i)\bmutating\b")
-        self.assertGreaterEqual(seen, 10)
+        self.assertGreaterEqual(seen, 11)
 
     def test_oh_my_zsh_finding_is_mutating_in_the_example_table(self) -> None:
         text = (REFS / "approvals.md").read_text(encoding="utf-8")

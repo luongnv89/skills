@@ -33,7 +33,7 @@ installer prompts for your password):
 
 Linux: the distro's manager is already present unless the image is minimal (`linux.md`).
 
-Windows — install **App Installer** from the Microsoft Store (*you run this*: Store GUI), then verify:
+Windows — install **App Installer** from the Microsoft Store (**additive**; *you run this*: Store GUI), then verify:
 
 ```powershell
 winget --version
