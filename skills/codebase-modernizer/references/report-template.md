@@ -22,7 +22,7 @@ still has the verdict, the baseline, and the coverage honesty.
 <3–6 sentences: what shape this codebase is in, the two or three things that matter most, and what
 the plan does about them. No hedging, no filler.>
 
-**Top 5 by impact:** `F-XXX-NN` — one line each, in the order the plan tackles them.
+**Top 5 by impact:** `F-<DIM>-<NNN>` — one line each, in the order the plan tackles them.
 
 ## Baseline
 
@@ -110,7 +110,7 @@ One table per dimension, severity-ranked, using the finding record shape from
 Findings that recur rather than sit at one line — the ones a per-file review misses. Each names the
 finding IDs it generalizes.
 
-- **<Pattern>** — <where it recurs, how many sites, why it matters> (`F-XXX-NN`, `F-XXX-NN`, …)
+- **<Pattern>** — <where it recurs, how many sites, why it matters> (`F-<DIM>-<NNN>`, `F-<DIM>-<NNN>`, …)
 
 ## Artifacts written
 
