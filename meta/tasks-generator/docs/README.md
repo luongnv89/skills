@@ -70,12 +70,13 @@ With no argument, the skill looks in the last project folder or under `IDEAS_ROO
 | `agents/dependency-resolver.md` | Wire cross-sprint dependencies and produce final tasks.md |
 | `references/tasks-template.md` | Task format template and sprint structure |
 | `references/dependency-analysis.md` | Graph schema, CLI and output schema of the dependency script |
-| `references/self-test.md` | Checks run against `tasks.md` before reporting, plus a contract fixture |
+| `references/self-test.md` | Checks run against `tasks.md` before reporting |
 | `references/step-completion-reports.md` | Check names and examples for each phase's status report |
 | `references/final-report.md` | Filled Final Report examples, fill rules and reader checks |
 | `references/edge-cases.md` | Required behavior and final status for each edge case |
 | `scripts/analyze_dependencies.py` | Validates the task graph and computes the critical path and bottlenecks (stdlib only) |
 | `tests/test_analyze_dependencies.py` | Unit tests for the dependency script (`python3 -m unittest discover -s meta/tasks-generator/tests`) |
+| `tests/contract_fixture.py`, `tests/test_dependency_contract_fixture.py` | Maintainer fixture for the agent/template ID and dependency contracts, moved out of `references/self-test.md`; run by the same `unittest discover` command |
 | `evals/evals.json` | Scenario evals: happy path, edge cases and negative triggers |
 
 ## Output

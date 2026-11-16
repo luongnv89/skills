@@ -273,7 +273,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**brand-name-checker**](skills/brand-name-checker/) | 1.6.1 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.6.2 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.7.1 | max | Technical architecture document from PRD |
-| [**tasks-generator**](skills/tasks-generator/) | 1.6.1 | max | Sprint tasks and plan from PRD |
+| [**tasks-generator**](skills/tasks-generator/) | 1.6.2 | max | Sprint tasks and plan from PRD |
 
 > **`plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd)** (idd#502), next to the `issue-creator` it depends on: `asm install https://github.com/luongnv89/idd --skill plan-to-issues`, or the idd Claude Code plugin.
 
