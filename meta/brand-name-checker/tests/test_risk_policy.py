@@ -261,6 +261,18 @@ class SourceCheckerTests(unittest.TestCase):
         section = SOURCE_CHECKS_TEXT.split("## Step 3", 1)[1].split("## Step 4", 1)[0]
         self.assertIn("A search that finds no site proves nothing about registration; record it as Unknown.", section)
         self.assertIn("[NAME].[TLD]", section)
+        self.assertIn(
+            "Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD"
+            " only when `prd.md` or the user names it",
+            section,
+        )
+        domain_rows = [
+            line for line in worker_text("source-checker").splitlines() if line.startswith("| `domain` |")
+        ]
+        self.assertEqual(
+            domain_rows,
+            ["| `domain` | *Step 3: Domain Check* | `.com`, `.io`, `.app`, plus each extra TLD that `prd.md` or the user names |"],
+        )
 
     def test_trademark_statuses_carry_no_risk(self) -> None:
         section = SOURCE_CHECKS_TEXT.split("## Step 4", 1)[1]
