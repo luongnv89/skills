@@ -88,9 +88,11 @@ Use `✗ what failed`, `To fix:`, and exact identifiers. Never expose tokens. Is
   To fix:  for pi, nothing needs activation — relaunch the bare command with no auto-mode parameters
            for Claude Code, press Shift+Tab until the auto-accept-edits mode indicator shows
            for opencode, press Tab (or the switch_agent keybind) to select the Build agent, or set it in settings
-           for any other CLI, autonomy cannot be verified by this skill — set
-           work_loop.agent_cli (or the worker's agent_cli) to a supported
-           harness (pi, claude, opencode) and re-run
+           for codex, no autonomy switch that avoids the prohibited approval and
+           sandbox bypasses is verified yet
+           for codex or any other CLI, autonomy cannot be verified by this skill —
+           set work_loop.agent_cli (or the worker's agent_cli) to pi, claude, or
+           opencode and re-run
   Refused: skip-permissions flags and invented auto-mode slash commands or startup flags are not allowed fallbacks
 
   No role task was dispatched to this worker.

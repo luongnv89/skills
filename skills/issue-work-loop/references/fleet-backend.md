@@ -85,6 +85,7 @@ Validate `profile_json` with the unchanged parser in `loop-protocol.md` → *Pro
 Split and start are one call in the app, so no destination pane exists before the start. Right after the start, `hc get "$t" --json` is the supported destination evidence: `.foreground.argv` must carry no bypass token, and `.foreground.cwd` must equal `$project_dir`. On a mismatch, close that worker under *Close-confirmation policy* and stop BLOCKED before any task. The start passes no environment (`pane.split` takes none), so the worker inherits the app terminal's environment, and hc-agent 1.0.0 has no command that reads it back. The loop sets no bypass variable itself. This is the app carve-out from the TUI's stop-before-start rule (`SKILL.md` → *Selective Worker Launch Profile*, `loop-protocol.md` → *Probe and target evidence*):
 
 - **claude and opencode:** the effective mode on screen replaces the environment readback. The *App boot gate* below checks it and fails closed.
+- **codex:** no carve-out. It has no verified boot-gate switch (`loop-protocol.md` matrix) and no on-screen mode to replace the environment readback, so the app stops before the start with *Autonomous mode unavailable* naming `codex`. Never start an app codex worker.
 - **pi:** it shows no mode on screen, so the app allows the start with an operator-accepted residual risk. Record this exact line in the run's `Uncertainty:` row: `pi app worker: inherited environment not verifiable (hc-agent has no env readback); accepted by operator`.
 
 ## App spawn
@@ -113,6 +114,7 @@ The boot-gate matrix in `loop-protocol.md` is unchanged. The keystroke transport
 - **Before any mode switch:** a bounded read must show no bypass-permissions or dangerous-mode indicator.
 - **claude:** send `hc keys "$t" shift+tab` as a keystroke, never as text. Allow at most three presses, with a bounded read after each one. Every read must still show no bypass-permissions or dangerous-mode indicator; if one appears, press no further. The last read must show the auto-accept-edits indicator.
 - **opencode:** send `hc keys "$t" tab`, then run the same bounded read. It must show no bypass-permissions or dangerous-mode indicator, and it must show the Build agent.
+- **codex:** no verified switch (`loop-protocol.md` matrix). An app codex worker never reaches this gate: the *App launch-profile gate* stops it before the start with *Autonomous mode unavailable*.
 - **Anything else** (expected indicator absent, a bypass-permissions or dangerous-mode indicator present, or a failed read): close that loop-owned worker and stop BLOCKED with *App boot mode unverifiable*.
 - **pi:** autonomous by default, with no mode on screen. `outcome: ready` from the start is its readiness wait. Its environment is the operator-accepted residual risk under *App launch-profile gate*.
 
