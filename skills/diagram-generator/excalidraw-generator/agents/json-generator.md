@@ -56,7 +56,6 @@ Receive from main agent:
      - Set `startArrowhead` and `endArrowhead` (default: `"arrow"`)
 
 5. **Set appState**
-   - Apply selected style from style_options
    - Apply selected style from style_options — theme, background color, and element colors are all free choices
    - Set font defaults, canvas size, zoom level
 
