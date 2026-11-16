@@ -40,7 +40,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ## Error Handling
 
 - **git add fails**: Check permissions, locked files, verify repo initialized
-- **git commit fails**: Fix pre-commit hooks, check git config (user.name/email)
+- **git commit fails**: print the hook or git-config error and stop (SKILL.md Step 6); the user fixes the hook finding or sets `user.name`/`user.email`.
 - **git push fails**:
   - Non-fast-forward: `git pull --rebase && git push`
   - No remote branch: `git push -u origin [branch]`
