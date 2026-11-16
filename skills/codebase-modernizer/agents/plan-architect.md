@@ -101,8 +101,8 @@ Write the file, then return JSON:
   "sprints": 10,
   "tasks": 50,
   "closed": {"critical": 3, "high": 11, "medium": 24, "low": 9},
-  "deferred": ["F-PERF-02"],
-  "critical_path": {"tasks": ["Pre.1","Pre.2","0.1","0.3","1.2","2.1","2.4"], "days": 36},
+  "deferred": ["F-PERF-002"],
+  "critical_path": {"tasks": ["Pre.1","Pre.3","Pre.2","0.1","0.3","1.2","2.1","2.4"], "days": 36},
   "self_check": "PASS",
   "gaps": []
 }

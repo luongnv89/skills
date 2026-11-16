@@ -22,7 +22,7 @@ still has the verdict, the baseline, and the coverage honesty.
 <3–6 sentences: what shape this codebase is in, the two or three things that matter most, and what
 the plan does about them. No hedging, no filler.>
 
-**Top 5 by impact:** `F-XXX-NN` — one line each, in the order the plan tackles them.
+**Top 5 by impact:** `F-<DIM>-<NNN>` — one line each, in the order the plan tackles them.
 
 ## Baseline
 
@@ -110,7 +110,7 @@ One table per dimension, severity-ranked, using the finding record shape from
 Findings that recur rather than sit at one line — the ones a per-file review misses. Each names the
 finding IDs it generalizes.
 
-- **<Pattern>** — <where it recurs, how many sites, why it matters> (`F-XXX-NN`, `F-XXX-NN`, …)
+- **<Pattern>** — <where it recurs, how many sites, why it matters> (`F-<DIM>-<NNN>`, `F-<DIM>-<NNN>`, …)
 
 ## Artifacts written
 
@@ -162,7 +162,7 @@ When two dimensions report the same `path:line`:
   ID; the other ID is discarded and never referenced again.
 - The finding is listed **once**, in the keeping dimension's table, with an `Also:` column naming the
   other dimension.
-- The other dimension's table gets a one-line cross-reference (`See F-BUG-04 — also a SEC issue`)
+- The other dimension's table gets a one-line cross-reference (`See F-BUG-004 — also a SEC issue`)
   that is **excluded from all counts**.
 
 Severity is the **higher** of the two dimensions' assessments — deduplicating must never downgrade a
