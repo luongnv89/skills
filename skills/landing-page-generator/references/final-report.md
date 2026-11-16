@@ -29,7 +29,7 @@ second A/B variant) after the deliverable exists does not change a `COMPLETE`.
 
 ```text
 Result: PARTIAL. Rewrote README.md with the PAS structure; the Self-Review Checklist still fails on feature descriptions over 15 words (2 of 4).
-Evidence: README.backup.md created before the rewrite; all original content preserved in <details> blocks; Self-Review Checklist 11/13 — feature descriptions and the no-rhetorical-questions check fail.
+Evidence: README.backup.md created before the rewrite; all original content preserved in <details> blocks; Self-Review Checklist 12/14 — feature descriptions and the no-rhetorical-questions check fail.
 Uncertainty: Trimming the two long feature descriptions further may drop technical detail the project wants visible; not confirmed with the user.
 Decision: Approve the shorter feature wording, or tell me which technical detail to keep and I will rebalance the sections.
 ```

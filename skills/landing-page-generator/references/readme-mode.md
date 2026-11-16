@@ -219,7 +219,7 @@ Original content is preserved in `README.backup.md` and in `<details>` blocks at
 - [ ] Original README backed up to `README.backup.md` before any rewrite
 - [ ] Rewritten README uses one of PAS, AIDA, or StoryBrand and names which one was chosen
 - [ ] H1 follows the value-proposition rule (see Step 5)
-- [ ] Step 6 Self-Review Checklist (13 checks) passes before presenting
+- [ ] Step 6 Self-Review Checklist (14 checks) passes before presenting
 - [ ] Rewritten README meets the Default Quality Bar in `SKILL.md` (professional, production-ready, elegant, premium) without the user asking
 - [ ] Each companion page is recorded as written, linked, or skipped with its reason; every README link to a companion page passes `test -e`; no existing file other than `README.md` was modified
 - [ ] The run records a `page:` entry; built pages pass the page checks in `references/page-build.md`, or the skip or fallback reason is stated

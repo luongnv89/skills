@@ -58,7 +58,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ```
 [diamond] Review (step 6 of 9 — quality gate)
 ··································································
-  Checklist passed:         √ pass (13/13 checks green)
+  Checklist passed:         √ pass (14/14 checks green)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
