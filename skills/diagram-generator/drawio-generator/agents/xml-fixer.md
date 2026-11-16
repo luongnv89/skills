@@ -67,7 +67,7 @@ Apply fixes in priority order from validator report.
 #### Check 9: Unreadable or Small Text
 **For shapes with unreadable text**:
 - If `fontSize < 11`: Set to 12
-- If text color not specified: Set `strokeColor` based on background
+- If text color not specified: Set `fontColor` based on background
 
 **For shapes too small for text**:
 - Calculate required dimensions:

@@ -25,12 +25,12 @@ Apply fixes in priority order from validator report.
   - `type`: use from validator report; if missing, infer from context
   - `x`, `y`, `width`, `height`: use 0, 0, 100, 50 if missing
   - `angle`: 0
-  - `strokeColor`: `"#A1A1A1"`
+  - `strokeColor`: `"#1e1e1e"` (or the stroke color the diagram already uses)
   - `backgroundColor`: `"transparent"`
   - `fillStyle`: `"solid"`
   - `strokeWidth`: 2
   - `strokeStyle`: `"solid"`
-  - `roughness`: 0
+  - `roughness`: 1 (or the style chosen in Phase 2)
   - `opacity`: 100
   - `groupIds`: `[]`
   - `frameId`: `null`

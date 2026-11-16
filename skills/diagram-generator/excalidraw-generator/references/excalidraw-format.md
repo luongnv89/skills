@@ -360,8 +360,8 @@ Use these spacing values for consistent layouts:
 | Constant | Value | Use |
 |----------|-------|-----|
 | NODE_WIDTH | 200 | Standard node/box width (use 240 if text is long) |
-| NODE_HEIGHT | 80 | Minimum for 1-2 lines. Use 120 for 3-4 lines, 160 for 5-6 lines |
-| NODE_PADDING | 20 | Text padding inside nodes (10px each side) |
+| NODE_HEIGHT | 80 | Starting height for a 1-line label; size every bound-text node with the Check 10 formula (`line_count × fontSize × 1.25 + 40`) |
+| NODE_PADDING | 20 | Width padding added to the longest line (Check 10); height padding is the formula's +40 |
 | H_GAP | 80 | Horizontal gap between nodes |
 | V_GAP | 60 | Vertical gap between nodes |
 | ARROW_GAP | 8 | Gap between arrow tip and node |
