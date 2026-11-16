@@ -349,13 +349,9 @@ tests/
 ```markdown
 ## 10. Risks
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Vendor Lock-in | Medium | High | Abstraction layers |
-| Performance | Medium | High | Early load testing |
-| Security | Low | Critical | OWASP compliance |
-| Scalability | Medium | High | Modular design |
-| Tech Debt | High | Medium | Code reviews |
+### 10.1 [Risk name]
+- Probability: [H/M/L] · Impact: [H/M/L] · Source: [PRD field or research round]
+- Mitigation: [specific action]
 ```
 
 ---
