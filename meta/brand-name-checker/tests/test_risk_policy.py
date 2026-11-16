@@ -197,6 +197,16 @@ class WorkerAlignmentTests(unittest.TestCase):
         self.assertNotIn("available|taken|error", text)
         self.assertEqual(text.count("available|taken|similar|unknown"), 4)
 
+    def test_registry_worker_process_says_when_similar_and_unknown(self) -> None:
+        process = worker_text("registry-checker").split("## Process", 1)[1].split("## Output", 1)[0]
+        self.assertIn("return `similar` when there is no exact match but close variants exist", process)
+        self.assertIn("`unknown` when the registry does not answer or answers with an error other than 404", process)
+
+    def test_output_contract_counts_extra_tlds(self) -> None:
+        text = (SKILL_DIR / "references" / "output-contract.md").read_text(encoding="utf-8")
+        self.assertIn("There are 16 checks by default", text)
+        self.assertIn("each extra TLD that `prd.md` or the user names adds one domain check", text)
+
     def test_domain_worker_never_infers_availability_from_no_site(self) -> None:
         text = worker_text("domain-checker")
         self.assertNotIn("No active site", text)

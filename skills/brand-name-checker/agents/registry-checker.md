@@ -19,7 +19,7 @@ Check package registry availability across npm, PyPI, Homebrew, and apt, returni
 
 ## Process
 
-Check each registry independently via WebFetch:
+Check each registry independently via WebFetch. For any registry, return `similar` when there is no exact match but close variants exist (for example `name-js`, `py-name`), and `unknown` when the registry does not answer or answers with an error other than 404 (for example 429 or 500).
 
 ### 1. npm Registry
 - **URL**: `https://registry.npmjs.org/[NAME]`
