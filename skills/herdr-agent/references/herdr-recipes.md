@@ -364,7 +364,7 @@ The hand-rolled equivalent, and why each safeguard exists, is in
 | CLI errors "server not running" | `herdr status`; user starts `herdr` once in a real TTY |
 | Sub-agent on a new tab | You used `tab create` — use grid split in the root tab instead |
 | Root pane taken by worker | Never `pane run` the worker CLI on `$HERDR_PANE_ID` |
-| Unequal-width columns | Always split the current rightmost column and apply the full resize plan from `next_grid_split.py` |
+| Unequal-width columns | Always split the current rightmost column, then run `next_grid_split.py --equalize` |
 | Agent always `unknown` | `herdr integration status`, then `herdr integration install <agent>`; `herdr agent explain <target> --json` shows the matched rule and manifest version |
 | Nested tmux breaks detection | Don't run tmux inside Herdr panes |
 | `agent prompt` returns `agent_prompt_stalled` | Submitted but no activity followed; `agent get` + `agent read` before any resend — a resend can double-submit |
