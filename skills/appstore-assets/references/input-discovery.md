@@ -86,8 +86,8 @@ into it.
 
 ## Capture recipes
 
-Clean captures beat recreated screens, so capture the real app when the
-project can run. Each run used to invent its own harness; use these instead.
+Clean captures beat recreated screens, so capture the real app with these recipes when the
+project can run.
 
 **Where captures live.** Write them straight to `<out>/src/captures/`
 (`<screen>-iphone.png`, `<screen>-ipad.png`) and keep them in git: a re-render
