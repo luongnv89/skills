@@ -42,8 +42,8 @@ matching OS reference is loaded, and the session file exists with phase 1 record
 ## 2. Debloat — fresh Windows only, opt-in
 
 Skip entirely unless the machine is Windows **and** the user asked to clean OEM junk — never on a daily
-driver, container, or remote host. Factory Windows boxes ship trial AV, OEM utilities, and partner games
-(inspired by [XFreeze](https://x.com/xfreeze/status/2090189407659999603)). **List before delete.**
+driver, container, or remote host. Factory Windows boxes ship trial AV, OEM utilities, and partner games.
+**List before delete.**
 
 - **Present** the read-only inventory commands (`winget list`, `Get-AppxPackage`) as a run-block.
 - **Execute** `references/windows.md` § Inventory; build a `keep / review / remove-candidate` table.
@@ -73,15 +73,14 @@ phase 5.
 | `python3`, `uv` | the OS reference § Python |
 
 - **Present:** one run-block per missing item, tagged additive. Flag anything that would touch an existing
-  Node or Python — that is mutating and needs its own yes.
+  Node or Python, and any remote-installer pipe (`curl | sh`, `irm | iex`) — those are mutating and need
+  their own yes.
 - **Verify:** `git --version`, `node -v`, `npm -v`, `python3 --version`, `uv --version` (Unix also
   `zsh --version` and `starship --version`) succeed for the items just installed.
 
-**The skill is self-contained — no external scripts repo is cloned.** `ZSH_THEME="wedisagree"`, the
-four-plugin list, and the `starship init zsh` line all live in `assets/zshrc-config`, which this skill ships
-and deploys by `cp`. Never hand-write those lines into `~/.zshrc` instead — edit the asset, so there stays one
-source of truth. `assets/zshrc-config` is a vendored **fork** of `luongnv89/inbash`'s config: upstream fixes do
-not flow in, which is the price of having no dependency.
+`ZSH_THEME="wedisagree"`, the four-plugin list, and the `starship init zsh` line all live in
+`assets/zshrc-config`, which this skill ships and deploys by `cp`. Never hand-write those lines into
+`~/.zshrc` instead — edit the asset, so there stays one source of truth.
 
 **Deploying it is not always additive.** `cp assets/zshrc-config ~/.zshrc` overwrites an existing `~/.zshrc`,
 so it is additive only when no `~/.zshrc` is present and **mutating** — backup plus its own yes — when one is.

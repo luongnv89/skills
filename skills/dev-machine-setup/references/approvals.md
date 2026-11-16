@@ -11,6 +11,9 @@ The load-bearing distinction for every approval in this skill:
 - **Mutating** — changes something that *already works*: upgrades, removals, `chsh`, rc-file edits,
   `curl | sh`, PATH rewrites, replacing a runtime. Needs an explicit **per-item yes**, with the risk named,
   and any rc file backed up first (`optimize.md` § top).
+- **Remote-installer pipes are always mutating** — `curl | sh`, `/bin/bash -c "$(curl …)"`, `irm … | iex` —
+  even when what they install is absent: they run unreviewed remote code. Each gets its own yes with the URL
+  shown; a blanket approval never covers one.
 
 On a daily driver, mutating steps are the real hazard — not missing packages. A prior yes never carries
 forward to another mutating item.
@@ -65,7 +68,7 @@ each already got their own yes, in approval order. A combined block is never the
 | Finding | Sev | What breaks today | Tag |
 |---------|-----|-------------------|-----|
 | `login-shell-not-zsh` | low | zsh is installed but bash is still your login shell | mutating |
-| `oh-my-zsh-missing` | low | no completion/plugin baseline for zsh | additive |
+| `oh-my-zsh-missing` | low | no completion/plugin baseline for zsh | mutating |
 
 **1 · `login-shell-not-zsh`** — mutating · you run this (asks for your password; corporate policy or LDAP
 may refuse it, which is not a failure — we just skip it)
@@ -74,8 +77,8 @@ may refuse it, which is not a failure — we just skip it)
 chsh -s "$(command -v zsh)"
 ```
 
-**2 · `oh-my-zsh-missing`** — additive · I can run this (downloads and runs the installer from
-github.com/ohmyzsh, and creates `~/.zshrc`)
+**2 · `oh-my-zsh-missing`** — mutating (remote-installer pipe) · I can run this (downloads and runs the
+installer from github.com/ohmyzsh, and creates `~/.zshrc`)
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

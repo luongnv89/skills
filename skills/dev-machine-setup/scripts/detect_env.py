@@ -27,8 +27,8 @@ import sys
 # These two constants are the only version facts in this file. They rot; bump
 # them by hand when the oldest maintained release moves. Everything else is
 # computed from the machine.
-NODE_MIN_MAJOR = 20  # oldest Node LTS still receiving security fixes
-PYTHON_MIN_MINOR = 10  # oldest CPython 3.x still receiving security fixes
+NODE_MIN_MAJOR = 22  # oldest Node LTS still receiving security fixes
+PYTHON_MIN_MINOR = 11  # oldest CPython 3.x still receiving security fixes
 
 BASELINE_UNIX = ("git", "node", "npm", "python3", "uv", "zsh", "starship")
 BASELINE_WINDOWS = ("git", "node", "npm", "python3", "uv")

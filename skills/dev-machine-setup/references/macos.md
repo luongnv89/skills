@@ -1,14 +1,14 @@
 # macOS setup
 
 Self-contained: every command below is a plain Homebrew/system command or copies a file this skill ships in
-`assets/`. There is no external scripts repo to clone.
+`assets/`.
 
 ## Homebrew
 
 If `brew` is missing:
 
 ```bash
-# Confirm URL with the user first
+# Mutating — remote-installer pipe: its own yes, with the URL shown first
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
@@ -59,7 +59,8 @@ macOS ships zsh already; install only if `zsh` is genuinely missing:
 brew install zsh
 ```
 
-Oh My Zsh framework (**additive** — the installer creates `~/.zshrc` only when absent):
+Oh My Zsh framework (**mutating** — a remote-installer pipe, so its own yes with the URL shown; it creates
+`~/.zshrc` only when absent):
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
