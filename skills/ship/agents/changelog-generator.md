@@ -86,7 +86,7 @@ Omit empty sections. Link PR numbers. Credit authors. Put breaking changes first
 - Leave out commit hashes, PR or issue numbers, author handles, conventional-commit prefixes, file paths, and internal names.
 - Leave out changes users cannot see: refactors, tests, CI, build, and dependency bumps. Keep a dependency or security fix only when it changes what users experience.
 - Write each **Action needed** item as the step the user must take, such as "Replace `/old-name` with `/new-name`."
-- Merge related commits into one item. Aim for 3–8 items in total.
+- Merge related commits into one item, so a user can scan the list at a glance.
 
 ```markdown
 ## What's new in v1.3.0
