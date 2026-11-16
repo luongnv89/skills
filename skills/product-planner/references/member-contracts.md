@@ -43,10 +43,11 @@ member is used **unedited**; these notes describe its current behavior, they do 
 - **Writes:** `prd.md` (10 sections).
 - **Existing `prd.md`:** backs it up as `prd.backup.YYYYMMDD_HHMMSS.md` and enters Modification Mode.
 - **Gates:** Phase 3 clarifications (official product name, business model, MVP timeframe, team,
-  compliance); asks whether to continue when `validate.md` is missing. On a `Skip it`, `REJECT` or
-  `NOT RECOMMENDED` verdict it shows the verdict and **asks whether the user still wants a PRD**;
-  without a yes it stops. The orchestrator passes the user's override with the folder so the user is
-  not asked twice; if it asks anyway, relay the question unchanged.
+  compliance); asks whether to continue when `validate.md` is missing. It reads the bold verdict under
+  `## Quick Verdict` in `validate.md`; if its leading token is `Skip it`, it shows the verdict and
+  **asks whether the user still wants a PRD**; without a yes it stops. The orchestrator passes the
+  user's override with the folder so the user is not asked twice; if it asks anyway, relay the
+  question unchanged.
 - **Git:** commits, then **confirms before pushing**. Its `Evidence:` line carries the `prd.md` link and
   commit hash.
 
