@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - browse
 metadata:
-  version: 1.8.1
+  version: 1.8.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -181,7 +181,7 @@ A `viral-evaluation.md` report (plus an inline summary and a `Result:`-first fin
 containing:
 - Overall verdict + Virality Score (e.g. 68 — Promising)
 - Scorecard table for all 32 principles
-- Top 5-8 prioritized fixes with exact copy or code recommendations
+- Prioritized fixes with exact copy or code recommendations
 - What's already working
 - Caveats / low-confidence items
 
