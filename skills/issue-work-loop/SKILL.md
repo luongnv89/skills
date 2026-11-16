@@ -10,7 +10,7 @@ dependencies:
   - issue-pr-review
   - issue-resolver
 metadata:
-  version: 1.8.0
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -154,9 +154,9 @@ not return the destination pane's effective cwd, configuration, or environment.
 cannot prove the worker's effective state. The names-only `flags`/`explicit`
 fields and inherited-only `profile.bypass` are not proof; inspect exact native,
 configuration, and environment inputs. Explicit native/config/environment
-bypass is prohibited. Unknown, unmapped, malformed, or unverified input fails
-closed; never use a native/unverified fallback. Before starting, follow the
-concrete evidence and fail-closed gate in `references/loop-protocol.md`.
+bypass is prohibited. Unknown, unmapped (except plain `opencode` with no
+arguments), malformed, or unverified input fails closed; never use a
+native/unverified fallback. Before starting, follow the concrete evidence and fail-closed gate in `references/loop-protocol.md`.
 If the target environment or configuration (including inherited inline
 settings values) cannot be established from actual local evidence, stop before
 `herdr agent start`; do not invent a Herdr inspection command. App carve-out:
@@ -172,7 +172,7 @@ are authoritative in `references/loop-protocol.md`.
 
 ## Autonomous Worker Boot Gate (mandatory)
 
-Every reviewer, ISSUE implementer, and PR FIXER passes this gate after its CLI is ready and before any task, and again after every FRESHEN (a restarted CLI is a new session). Launch bare, switch after boot, verify, and never use either skip-permissions flag. The per-harness matrix for `pi`, `claude`, and `opencode` in `references/loop-protocol.md` → *Autonomous worker boot gate* is authoritative; app keystrokes are in `references/fleet-backend.md`. A task prompt saying "work autonomously" does not satisfy this gate.
+Every reviewer, ISSUE implementer, and PR FIXER passes this gate after its CLI is ready and before any task, and again after every FRESHEN (a restarted CLI is a new session). Launch bare, switch after boot, verify, and never use either skip-permissions flag. The per-harness matrix for `pi`, `claude`, `opencode`, and `codex` (which fails closed until a non-bypass switch is verified) in `references/loop-protocol.md` → *Autonomous worker boot gate* is authoritative; app keystrokes are in `references/fleet-backend.md`. A task prompt saying "work autonomously" does not satisfy this gate.
 
 ## Workflow Overview
 

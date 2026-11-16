@@ -114,6 +114,7 @@ The boot-gate matrix in `loop-protocol.md` is unchanged. The keystroke transport
 - **claude:** send `hc keys "$t" shift+tab` as a keystroke, never as text. Allow at most three presses, with a bounded read after each one. Every read must still show no bypass-permissions or dangerous-mode indicator; if one appears, press no further. The last read must show the auto-accept-edits indicator.
 - **opencode:** send `hc keys "$t" tab`, then run the same bounded read. It must show no bypass-permissions or dangerous-mode indicator, and it must show the Build agent.
 - **Anything else** (expected indicator absent, a bypass-permissions or dangerous-mode indicator present, or a failed read): close that loop-owned worker and stop BLOCKED with *App boot mode unverifiable*.
+- **codex:** no verified switch (`loop-protocol.md` matrix): close that loop-owned worker and stop with *Autonomous mode unavailable*.
 - **pi:** autonomous by default, with no mode on screen. `outcome: ready` from the start is its readiness wait. Its environment is the operator-accepted residual risk under *App launch-profile gate*.
 
 Shift+Tab delivery through `hc keys` and the on-screen indicator check are **not yet verified live**: hc-agent documents `hc keys` from its help text only. That is why the gate fails closed. Permission bypass is never the fallback. Keep `--without bypass` on every start, and never pass `--dangerously-skip-permissions`, `--allow-dangerously-skip-permissions`, or `--permission-mode bypassPermissions`.

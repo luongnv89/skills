@@ -362,6 +362,25 @@ class TransportContractTests(unittest.TestCase):
         ):
             self.assertNotIn(phrase, intro, phrase)
 
+    def test_transport_text_does_not_describe_a_retired_protocol(self):
+        # #531: the transport points at herdr-agent Phase 4/5 instead of
+        # listing the retired baseline/marker steps it must not reproduce.
+        intro = self.prompts[: self.prompts.index("## Context probe")]
+        transport = subsection(
+            self.protocol,
+            "## Herdr send/wait contract",
+            "### Detected-agent path (normal)",
+        )
+        self.assertIn("the transport source of truth", transport)
+        for phrase in (
+            "retired baseline/marker transport",
+            "older pane protocol",
+            "pre-send transcript baseline",
+            "mint a completion marker",
+        ):
+            self.assertNotIn(phrase, intro, phrase)
+            self.assertNotIn(phrase, self.protocol, phrase)
+
 
 # ============================================================================
 # worker_launch_contract
@@ -539,6 +558,23 @@ class WorkerLaunchContractTests(unittest.TestCase):
             "missing": ({key: value for key, value in valid.items() if key != "argc"}, False),
             "inherited bypass": ({**valid, "bypass": ["permission"]}, False),
             "unknown kind": ({**valid, "kind": "gemini"}, False),
+            "codex mapped": ({**valid, "kind": "codex"}, True),
+            "opencode unmapped bare": (
+                {**valid, "kind": "opencode", "inherited": False, "flags_source": "not mapped",
+                 "model": {"value": "", "source": "not mapped"},
+                 "thinking": {"value": "", "source": "not mapped"}},
+                True,
+            ),
+            "opencode unmapped with native args": (
+                {**valid, "kind": "opencode", "flags_source": "not mapped",
+                 "explicit": ["--agent"], "argc": 2},
+                False,
+            ),
+            "gemini unmapped bare": (
+                {**valid, "kind": "gemini", "flags_source": "not mapped"},
+                False,
+            ),
+            "claude unmapped": ({**valid, "flags_source": "not mapped"}, False),
             "blanket flags": ({**valid, "without": ["bypass", "flags"]}, False),
             "model non-string": (
                 {**valid, "model": {"value": None, "source": "UNKNOWN"}},
@@ -556,6 +592,56 @@ class WorkerLaunchContractTests(unittest.TestCase):
                     self.assertEqual(result.returncode, 0, result.stderr)
                 else:
                     self.assertNotEqual(result.returncode, 0, result.stderr)
+
+    def test_helper_opencode_profile_passes_parser_only_when_bare(self):
+        # #547: launch_profile.py has no opencode flag table, so it reports
+        # flags_source "not mapped"; the loop accepts that only for plain opencode.
+        self.write_state({})
+        cases = {
+            "bare": ((), True),
+            "native args": (("--", "--agent", "build"), False),
+        }
+        for name, (extra, accepted) in cases.items():
+            with self.subTest(case=name):
+                resolved = self.run_profile(
+                    "--kind", "opencode", "--without", "bypass", *extra, start=False)
+                self.assertEqual(resolved.returncode, 0, resolved.stderr)
+                profile = json.loads(resolved.stdout)
+                self.assertEqual(profile["flags_source"], "not mapped")
+                result = self.run_profile_parser(profile)
+                if accepted:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                else:
+                    self.assertNotEqual(result.returncode, 0, result.stderr)
+        refused = self.run_profile(
+            "--kind", "opencode", "--model", "m", "--without", "bypass", start=False)
+        self.assertNotEqual(refused.returncode, 0, refused.stderr)
+
+    def test_codex_fails_closed_at_the_boot_gate_in_every_doc(self):
+        # #547: codex passes the parser but has no verified non-bypass switch.
+        protocol = PROTOCOL.read_text(encoding="utf-8")
+        gate = self.selective_profile_section(PROTOCOL, "## Autonomous worker boot gate")
+        row = next(line for line in gate.splitlines() if line.strip().startswith("| `codex` |"))
+        for phrase in ("Fail closed", "Autonomous mode unavailable",
+                       "--ask-for-approval never", "--sandbox danger-full-access"):
+            self.assertIn(phrase, row, phrase)
+        self.assertIn("For `codex` and any CLI not in the matrix", gate)
+        invariants = self.selective_profile_section(
+            PROTOCOL, "## Autonomous worker boot gate invariants")
+        self.assertIn("`codex` and any launcher not in the matrix fail closed", invariants)
+        self.assertIn("Any other unmapped kind is rejected", protocol)
+        errors = (SKILL_DIR / "references" / "error-messages.md").read_text(encoding="utf-8")
+        error = errors.split("### Autonomous mode unavailable", 1)[1].split("\n### ", 1)[0]
+        self.assertIn("for codex", error)
+        self.assertIn("to pi, claude, or\n           opencode", error)
+        backend = (SKILL_DIR / "references" / "fleet-backend.md").read_text(encoding="utf-8")
+        self.assertIn("- **codex:** no verified switch", backend)
+        prompts = AGENT_PROMPTS.read_text(encoding="utf-8")
+        self.assertIn("codex has no verified switch and fails closed", prompts)
+        boot = section(LOOP_SKILL.read_text(encoding="utf-8"), "## Autonomous Worker Boot Gate")
+        self.assertIn("`codex` (which fails closed", boot)
+        launch = section(LOOP_SKILL.read_text(encoding="utf-8"), "## Selective Worker Launch Profile")
+        self.assertIn("except plain `opencode` with no", launch)
 
     def test_each_doc_section_requires_the_complete_worker_profile_policy(self):
         sections = (

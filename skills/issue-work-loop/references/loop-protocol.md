@@ -307,11 +307,15 @@ required = (
 )
 if not isinstance(profile, dict) or any(key not in profile for key in required):
     raise SystemExit(1)
-if not isinstance(profile["kind"], str) or profile["kind"] not in {"claude", "pi", "codex"}:
+if not isinstance(profile["kind"], str) or profile["kind"] not in {"claude", "pi", "codex", "opencode"}:
     raise SystemExit(1)
 if not isinstance(profile["inherited"], bool):
     raise SystemExit(1)
-if not isinstance(profile["flags_source"], str) or profile["flags_source"] == "not mapped":
+if not isinstance(profile["flags_source"], str):
+    raise SystemExit(1)
+if profile["flags_source"] == "not mapped" and (
+    profile["kind"] != "opencode" or profile["argc"] != 0 or profile["explicit"] != []
+):
     raise SystemExit(1)
 if not all(
     isinstance(profile[key], dict)
@@ -337,6 +341,13 @@ if not isinstance(profile["argc"], int) or profile["argc"] < 0:
   exit 1
 fi
 ```
+
+The helper has a flag table for `claude`, `pi`, and `codex` only. For
+`opencode` it reports `flags_source: "not mapped"`: it inherits only the kind
+and cannot filter any flag. The parser therefore accepts an `opencode` worker
+only with no native arguments (`argc` 0), launched as plain `opencode` with
+its own config defaults, and with no `--model` or `--thinking` (the helper
+refuses both for an unmapped kind). Any other unmapped kind is rejected.
 
 The parser validates only the helper contract: it does not treat names only
 `flags`/`explicit` or an empty inherited-only `profile.bypass` as proof that
@@ -426,9 +437,10 @@ Every newly launched or FRESHENed reviewer, ISSUE implementer, and PR FIXER must
    | `pi` | Bare command; pass no auto-mode parameters | Nothing to activate — autonomous by default | Readiness wait passed; record `autonomous_mode: autonomous_by_default` |
    | `claude` | Plain `claude` | Send the Shift+Tab keystroke (`herdr pane send-keys`, not a text message) until the auto-accept-edits mode is selected | Bounded pane read shows the auto-accept-edits mode indicator; record `autonomous_mode: verified` |
    | `opencode` | Plain `opencode` | Press Tab (or the configured `switch_agent` keybind) to select the full-permission Build agent; settings are the documented alternative | Bounded pane read shows the Build agent selected; record `autonomous_mode: verified` |
+   | `codex` | Plain `codex` (its verified setup flags only) | None verified yet. The approval and sandbox settings that would remove prompts are the prohibited bypasses (`--ask-for-approval never`, `--sandbox danger-full-access`) | Fail closed: close the worker and stop with *Autonomous mode unavailable* naming `codex`. Add a switch here only after one that avoids those settings is verified live |
 
 3. Never send an auto-mode slash command. Never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`; the mode switch above is the working mechanism.
-4. For any other CLI, autonomy is unknown — fail closed with the autonomous-mode error rather than improvising startup flags.
+4. For `codex` and any CLI not in the matrix, autonomy is unknown — fail closed with the autonomous-mode error rather than improvising startup flags.
 5. FRESHEN clears the recorded mode state, so the replacement session must pass the gate again.
 
 App runtime: send these keystrokes with `hc keys` and fail closed as `fleet-backend.md` → *App boot gate* describes.
@@ -438,8 +450,8 @@ Do not count mode activation as a ROUND. Do not send the worker task in the same
 ## Herdr send/wait contract
 
 For normal worker transport, delegate to the current `herdr-agent` skill's
-**Phase 4 — Prompt Safely** and **Phase 5 — Read and Verify**. Those phases are
-the transport source of truth; do not reproduce an older pane protocol here.
+**Phase 4 — Prompt Safely** and **Phase 5 — Read and Verify**; those phases are
+the transport source of truth.
 App runtime: `agent.py prompt`, `agent.py read --turn`, and the exit-code map in
 `fleet-backend.md` → *App send, wait, and read* replace this section.
 
@@ -455,10 +467,8 @@ For every probe, resolve, review, fix, or parse re-prompt:
 3. On success, read only the relevant reply delta with
    `herdr agent read "$target" --source recent-unwrapped --lines 80`.
 
-The normal detected-agent path does not capture a pre-send transcript baseline,
-mint a completion marker, call `pane run`, or invoke `wait_for_idle.py`. A
-prompt plus `--wait` is one server-side request, so do not blindly resend after
-an uncertain result.
+A prompt plus `--wait` is one server-side request, so do not blindly resend
+after an uncertain result.
 
 Preserve the source error mapping exactly: `agent_blocked` (BLOCKED) means
 nothing was sent and a human must resolve the dialog; `agent_prompt_stalled`
@@ -508,4 +518,4 @@ Run after the shared Phase 1 steps in SKILL.md, for the selected mode only.
 
 ## Autonomous worker boot gate invariants
 
-The invariants: launch the `agent_cli` executable **bare** with only its own verified flags, then apply the per-harness post-boot switch and verify it with a bounded pane read before dispatching work. Never send an auto-mode slash command, never pass auto-mode startup flags even where a harness exposes one, and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`. Any launcher not in the matrix fails closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
+The invariants: launch the `agent_cli` executable **bare** with only its own verified flags, then apply the per-harness post-boot switch and verify it with a bounded pane read before dispatching work. Never send an auto-mode slash command, never pass auto-mode startup flags even where a harness exposes one, and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`. `codex` and any launcher not in the matrix fail closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
