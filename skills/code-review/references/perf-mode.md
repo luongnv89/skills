@@ -20,7 +20,8 @@ or worktree during analysis. A named report artifact may be written only when th
 contract specifies one; otherwise findings are report output, not source files.
 
 Any source mutation is a separate, explicitly approved workflow. It must establish its own
-freshness check and stash-first sync contract before edits; this mode never performs that work.
+freshness check and sync/safety gates (cleanup mode stops on a dirty tree) before edits; this mode
+never performs that work.
 
 ## Workflow
 
@@ -44,8 +45,8 @@ Before analysis:
 This mode stops after presenting the optimization report; it never applies fixes or creates or
 switches branches. If the user separately approves a mutation workflow, that workflow must
 re-check `HEAD`, status, and local tracking observations, detect incoming changes, and use its
-stash-first sync contract before edits. It owns branch creation, source changes, per-fix tests,
-security scans, and rollback. No mutation step may be inferred from this report or run as part of
+own sync/safety gates (cleanup mode stops on a dirty tree) before edits. It owns branch creation,
+source changes, per-fix tests, security scans, and rollback. No mutation step may be inferred from this report or run as part of
 performance analysis.
 
 ## Response Format
@@ -149,7 +150,7 @@ Expected result: a markdown report with one block per issue, sorted Critical →
 - **No performance issues found**: emit a "code is already well-optimized" note and recommend runtime profiling tools (`perf`, `py-spy`, Chrome DevTools) — do NOT invent low-severity findings to fill the report.
 - **File exceeds 2000 lines**: stop and ask the user which functions/sections to focus on; do not silently truncate.
 - **Tests are absent**: the mutation handoff warns before applying any fix and requires explicit confirmation; this analysis mode never applies changes silently.
-- **Optimization regresses tests**: the separately approved mutation workflow confirms the diff scope, preserves work through its stash-first recovery contract, and requires approval before reverting; this mode never runs checkout, stash, or discard operations.
+- **Optimization regresses tests**: the separately approved mutation workflow confirms the diff scope, preserves work through its own safety gates, and requires approval before reverting; this mode never runs checkout, stash, or discard operations.
 - **Repo lacks `origin` or sync fails**: the mutation workflow stops before edits and reports the recovery path; performance analysis records its local observations and does not attempt recovery.
 - **Mixed-language project**: analyze each language with its own checklist; do not apply JavaScript heuristics to Python code.
 - **Premature optimization candidates**: skip micro-optimizations unless a measurable hot path is identified — flag them as Low only when a profile or benchmark backs the claim.

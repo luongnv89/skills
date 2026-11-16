@@ -21,7 +21,7 @@ The skill orchestrates parallel reviewer subagents over batched files, then runs
 
 Review mode never performs repository sync or source mutation during analysis. If a separately
 approved mutation is requested, hand it off to a workflow with its own freshness check and
-stash-first sync contract; this mode does not apply fixes.
+sync/safety gates (cleanup mode stops on a dirty tree); this mode does not apply fixes.
 
 ## Environment Check
 

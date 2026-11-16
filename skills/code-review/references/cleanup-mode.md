@@ -117,10 +117,10 @@ Detect the stack (language, package manager, test command, typecheck command) an
 
 Spawn subagents 3, 4, 5, and 8 in a single turn (multiple Agent tool calls in one message). Each receives:
 
-- Absolute repo path
+- Absolute path of the subagent's own worktree, where it edits and commits
 - Stack summary (language, tooling, test command)
 - Instructions to produce a per-category report at `.slop-cleanup/wave-1/<subagent>.md`
-- Isolation: spawn each subagent with `isolation: "worktree"`, branched from the cleanup branch; it edits and commits only there. After the wave, merge each worktree's commits into the cleanup branch one at a time, then run the wave's test gate.
+- Isolation: spawn each subagent with `isolation: "worktree"`, branched from the cleanup branch; it edits and commits only there. After the wave, copy each worktree's `.slop-cleanup/wave-N/<subagent>.md` into the orchestrator checkout's `.slop-cleanup/`, so later waves and the final report can read it. Then cherry-pick each worktree's commits onto the cleanup branch one at a time (no merge commits), and run the wave's test gate.
 - Edit budget: each subagent may edit directly. They must commit their changes with a dedicated message prefixed with their category.
 - Deletion cap: if this category would delete more than 50 items or cross a module boundary, return the list without deleting.
 
@@ -280,3 +280,4 @@ A run passes when **all** of the following are true:
 - **Tests fail after a wave**: Pipeline stops immediately; the failing commit is identified by bisect; subsequent waves do not run on a broken tree.
 - **Subagent finds nothing in its category**: Records an empty findings table and moves on — not every codebase has every type of slop.
 - **Deletion count exceeds 50 or crosses module boundaries**: the subagent returns the deletion list without applying it; the orchestrator shows it to the user and re-dispatches with the approved list.
+- **Cherry-pick conflicts with an earlier category** (e.g., a modify/delete conflict): abort the cherry-pick, stop, name the two categories and the conflicting files, and ask the user.
