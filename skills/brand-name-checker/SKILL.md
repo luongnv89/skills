@@ -4,7 +4,7 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.6.1
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -18,10 +18,10 @@ Use before adopting a product or brand name. To save context budget, queries, ed
 
 ## Subagent Architecture
 
-Workers in `agents/` each return JSON: **social-checker** (6 platforms), **registry-checker** (npm, PyPI, Homebrew, apt), **domain-checker** (TLDs), **trademark-checker** (WIPO, EUIPO, INPI). The **synthesizer** applies the Step 5 risk policy.
+Two workers in `agents/` return JSON. **source-checker** runs one check and is spawned once per check with `{name, check, targets}`: `social` (6 platforms), `registry` (npm, PyPI, Homebrew, apt), `domain` (TLDs), `trademark` (WIPO, EUIPO, INPI). It reads the queries and statuses in `references/source-checks.md` and returns `{check, results: [{source, status, evidence, checked_at}]}`. The **synthesizer** applies the Step 5 risk policy.
 
-- **Flow**: Social → (if no exact handle is taken) → parallel {Registry, Domain, Trademark} → Synthesizer.
-- **Early-Exit Rule**: if social-checker finds an exact handle taken on any of the 6 platforms, skip Steps 2-4 and go straight to the synthesizer with an "Abandon" verdict.
+- **Flow**: social source-checker → (if no exact handle is taken) → registry, domain and trademark source-checkers in parallel → Synthesizer.
+- **Early-Exit Rule**: if the social source-checker returns `taken (exact)` for any of the 6 platforms, skip Steps 2-4 and go straight to the synthesizer with an "Abandon" verdict.
 - **Without subagents**: run Steps 1-4 inline from `references/source-checks.md`, in the same order.
 
 ## Environment Check

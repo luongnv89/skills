@@ -163,59 +163,135 @@ class RiskPolicyContractTests(unittest.TestCase):
 
 
 AGENTS_DIR = SKILL_DIR / "agents"
+SOURCE_CHECKS_TEXT = (SKILL_DIR / "references" / "source-checks.md").read_text(encoding="utf-8")
+REMOVED_WORKERS = ("social-checker", "registry-checker", "domain-checker", "trademark-checker")
 
 
 def worker_text(name: str) -> str:
     return (AGENTS_DIR / f"{name}.md").read_text(encoding="utf-8")
 
 
-class WorkerAlignmentTests(unittest.TestCase):
-    """Workers use the source-checks.md statuses and leave risk to SKILL.md Step 5."""
+def source_checker_output_schema() -> dict:
+    """Parse the unfilled JSON output schema from the source-checker instructions."""
+    output = worker_text("source-checker").split("## Output", 1)[1]
+    match = re.search(r"```json\n(\{.*?\})\n```", output, re.DOTALL)
+    if not match:
+        raise AssertionError("source-checker JSON schema fence is missing")
+    return json.loads(match.group(1))
 
-    def test_trademark_worker_has_no_second_risk_matrix(self) -> None:
-        text = worker_text("trademark-checker")
+
+class SourceCheckerTests(unittest.TestCase):
+    """One source-checker runs every check from source-checks.md and leaves risk to SKILL.md Step 5."""
+
+    def test_per_source_workers_are_gone(self) -> None:
+        self.assertEqual(
+            sorted(path.stem for path in AGENTS_DIR.glob("*.md")),
+            ["source-checker", "synthesizer"],
+        )
+        for name in REMOVED_WORKERS:
+            with self.subTest(name=name):
+                self.assertNotIn(name, SKILL_TEXT)
+                self.assertNotIn(name, SOURCE_CHECKS_TEXT)
+                self.assertNotIn(name, SYNTH_TEXT)
+
+    def test_skill_spawns_one_source_checker_per_check(self) -> None:
+        self.assertIn("source-checker", SKILL_TEXT)
+        self.assertIn("once per check", SKILL_TEXT)
+        self.assertIn("returns `taken (exact)`", SKILL_TEXT)
+
+    def test_source_checker_takes_the_four_checks(self) -> None:
+        text = worker_text("source-checker")
+        self.assertIn('"check": "social|registry|domain|trademark"', text)
+        self.assertIn('"targets": ["<source>"]', text)
+        self.assertIn("../references/source-checks.md", text)
+        for section in (
+            "Step 1: Social Media Check",
+            "Step 2: Package Registry Check",
+            "Step 3: Domain Check",
+            "Step 4: Trademark Check",
+        ):
+            with self.subTest(section=section):
+                self.assertIn(section, text)
+                self.assertIn(f"## {section}", SOURCE_CHECKS_TEXT)
+
+    def test_source_checker_output_matches_the_decision(self) -> None:
+        schema = source_checker_output_schema()
+        self.assertEqual(set(schema), {"check", "results"})
+        self.assertEqual(set(schema["results"][0]), {"source", "status", "evidence", "checked_at"})
+
+    def test_source_checker_has_no_risk_policy(self) -> None:
+        text = worker_text("source-checker")
+        self.assertIn("never assign either", text)
         for token in (
             "Conflict Risk Scoring",
+            "Qualitative risk matrix",
             "0.85",
             "0.60",
             "similarity_score",
             "conflict_risk",
             '"risk_level"',
+            '"recommendation"',
             "high_risk_conflicts",
             "moderate_risk_conflicts",
+            "myproductname",
+            "2026-03-24",
         ):
             with self.subTest(token=token):
                 self.assertNotIn(token, text)
 
-    def test_social_worker_uses_exact_and_non_exact_statuses(self) -> None:
-        text = worker_text("social-checker")
-        self.assertNotIn("unclear", text)
-        self.assertEqual(text.count("available|taken (exact)|similar (non-exact)|unknown"), 6)
+    def test_source_checker_never_infers_availability_from_no_site(self) -> None:
+        text = worker_text("source-checker")
+        self.assertNotIn("No active site", text)
+        self.assertIn("no active site was found is `unknown`; do not infer", text)
 
-    def test_registry_worker_reports_similar_and_unknown(self) -> None:
-        text = worker_text("registry-checker")
-        self.assertNotIn("available|taken|error", text)
-        self.assertEqual(text.count("available|taken|similar|unknown"), 4)
+    def test_linkedin_query_targets_the_exact_company_slug(self) -> None:
+        self.assertIn('`"[NAME]" site:linkedin.com/company/[NAME]`', SOURCE_CHECKS_TEXT)
 
-    def test_registry_worker_process_says_when_similar_and_unknown(self) -> None:
-        process = worker_text("registry-checker").split("## Process", 1)[1].split("## Output", 1)[0]
-        self.assertIn("return `similar` when there is no exact match but close variants exist", process)
-        self.assertIn("`unknown` when the registry does not answer or answers with an error other than 404", process)
+    def test_social_statuses_are_exact_and_non_exact(self) -> None:
+        section = SOURCE_CHECKS_TEXT.split("## Step 1", 1)[1].split("## Step 2", 1)[0]
+        self.assertNotIn("unclear", section)
+        self.assertIn("Statuses: `available`, `taken (exact)`, `similar (non-exact)`, `unknown`.", section)
+
+    def test_registry_statuses_cover_similar_and_unknown(self) -> None:
+        section = SOURCE_CHECKS_TEXT.split("## Step 2", 1)[1].split("## Step 3", 1)[0]
+        self.assertIn("**Similar**: no exact match, but close variants exist", section)
+        self.assertIn("**Unknown**: the registry did not answer, or answered with an error other than 404", section)
+
+    def test_domain_checks_never_infer_availability(self) -> None:
+        section = SOURCE_CHECKS_TEXT.split("## Step 3", 1)[1].split("## Step 4", 1)[0]
+        self.assertIn("A search that finds no site proves nothing about registration; record it as Unknown.", section)
+        self.assertIn("[NAME].[TLD]", section)
+        self.assertIn(
+            "Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD"
+            " only when `prd.md` or the user names it",
+            section,
+        )
+        domain_rows = [
+            line for line in worker_text("source-checker").splitlines() if line.startswith("| `domain` |")
+        ]
+        self.assertEqual(
+            domain_rows,
+            ["| `domain` | *Step 3: Domain Check* | `.com`, `.io`, `.app`, plus each extra TLD that `prd.md` or the user names |"],
+        )
+
+    def test_trademark_statuses_carry_no_risk(self) -> None:
+        section = SOURCE_CHECKS_TEXT.split("## Step 4", 1)[1]
+        self.assertIn("Statuses: `clear`, `similar`, `conflicts_found`, `unknown`.", section)
+        for status in ("clear", "similar", "conflicts_found", "unknown"):
+            with self.subTest(status=status):
+                self.assertIn(f"- `{status}`: ", section)
+        self.assertIn("live or expired, its class, and its owner", section)
+        self.assertNotIn("risk", section.lower())
 
     def test_output_contract_counts_extra_tlds(self) -> None:
         text = (SKILL_DIR / "references" / "output-contract.md").read_text(encoding="utf-8")
         self.assertIn("There are 16 checks by default", text)
         self.assertIn("each extra TLD that `prd.md` or the user names adds one domain check", text)
 
-    def test_domain_worker_never_infers_availability_from_no_site(self) -> None:
-        text = worker_text("domain-checker")
-        self.assertNotIn("No active site", text)
-        self.assertNotIn("|error", text)
-        self.assertIn("no active site was found; do not infer availability", text)
-        self.assertIn('"com_status": "available|parked|active|unknown"', text)
-        for tld in ('"co": {', '"eu": {', '"fr": {', "regional_tlds"):
-            with self.subTest(tld=tld):
-                self.assertNotIn(tld, text)
+    def test_catalog_row_matches_skill_version(self) -> None:
+        version = re.search(r"^  version: (\S+)$", SKILL_TEXT, re.MULTILINE).group(1)
+        readme = (SKILL_DIR.parents[1] / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"| [**brand-name-checker**](skills/brand-name-checker/) | {version} |", readme)
 
     def test_skill_checks_the_three_reported_tlds(self) -> None:
         self.assertNotIn("`.app`, `.co`, `.eu`, `.fr`:", SKILL_TEXT)
