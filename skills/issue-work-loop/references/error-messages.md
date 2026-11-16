@@ -85,7 +85,7 @@ Use `✗ what failed`, `To fix:`, and exact identifiers. Never expose tokens. Is
 ✗ Could not enable or verify autonomous mode for {role}
 
   Worker:  {name} ({agent_cli})
-  To fix:  for pi, nothing needs activation — relaunch the bare command with no auto-mode parameters
+  To fix:  for pi, nothing needs activation — relaunch through the launch-profile gate (`--without bypass`) with no auto-mode parameters
            for Claude Code, press Shift+Tab until the auto-accept-edits mode indicator shows
            for opencode, press Tab (or the switch_agent keybind) to select the Build agent, or set it in settings
            for codex, no autonomy switch that avoids the prohibited approval and
