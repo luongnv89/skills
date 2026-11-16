@@ -281,7 +281,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**ai-job-scout**](skills/ai-job-scout/) | 1.2.1 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence; filterable HTML report for larger searches |
+| [**ai-job-scout**](skills/ai-job-scout/) | 1.2.2 | high | Rank open AI roles for a candidate; verify location and application links; assess each company's product, project, and technical interest with cited evidence; filterable HTML report for larger searches |
 
 ### Frontend & Design
 

@@ -4,7 +4,7 @@ description: "Find open AI engineering jobs that fit a candidate, verify locatio
 license: MIT
 effort: high
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: "Luong NGUYEN"
 ---
 
@@ -89,10 +89,6 @@ Aggregator-only roles and empty results: `references/report-format.md` → _Edge
 ## Acceptance Criteria
 
 Check every item of the **Correctness** and **Understanding** lists in `references/report-format.md` → _Acceptance Criteria_ before delivery. Remove from the ranking any role with a hard-reject or gate failure; label a missing soft detail "unknown". No application, outreach, or tracker change was made.
-
-## Testing
-
-Use `meta/ai-job-scout/evals/evals.json` for positive, boundary, and negative-trigger tests. Grade every non-negative eval against both Acceptance Criteria lists.
 
 ## Self-Improve
 

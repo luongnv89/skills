@@ -54,3 +54,7 @@ For a recurring alert, pass prior reports as context and schedule the invocation
 ## Output
 
 A cited report that opens with a one-line result (complete, partial, or none), then the search evidence, up to three verified roles (company, product/project, AI work, geography, direct application, fit), the uncertainties, and your next steps. Searches for more than five roles, or ones you want to filter, get a filterable HTML report. No applications are sent.
+
+## Testing
+
+Use `meta/ai-job-scout/evals/evals.json` for positive, boundary, and negative-trigger tests. Grade every non-negative eval against both Acceptance Criteria lists.
