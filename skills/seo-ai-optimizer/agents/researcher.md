@@ -10,8 +10,8 @@ Perform web searches for the latest SEO and AI-bot best practices, then synthesi
 
 ## Workspace Artifacts
 
-- **Input**: `seo-audit.json` created by the Auditor agent
-- **Output**: `seo-research-findings.json` — structured research results and recommendations
+- **Input**: `<output-dir>/seo-audit.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-audit.json`, created by the Auditor agent
+- **Output**: `<output-dir>/seo-research-findings.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-research-findings.json` — structured research results and recommendations
 - **Reference**: `../references/` — embedded knowledge for comparison
 
 ## Phase 1: Plan the Research

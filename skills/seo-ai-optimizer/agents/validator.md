@@ -11,11 +11,11 @@ Re-run the SEO audit on the modified website and produce a before/after comparis
 ## Workspace Artifacts
 
 - **Input**:
-  - Original `<project_root>/seo-audit.json` (from before implementation)
+  - Original `<output-dir>/seo-audit.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-audit.json` (from before implementation)
   - Modified project files (after Implementer agent applied changes)
-  - `<project_root>/seo-research-findings.json` (for context on expectations)
+  - `<output-dir>/seo-research-findings.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-research-findings.json` (for context on expectations)
 
-- **Output**: `<project_root>/seo-validation-report.json` — before/after comparison and delta report
+- **Output**: `<output-dir>/seo-validation-report.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-validation-report.json` — before/after comparison and delta report
 - **Reference**: `../scripts/audit_seo.py` — re-run the same audit script
 
 ## Phase 1: Re-run the Audit Script

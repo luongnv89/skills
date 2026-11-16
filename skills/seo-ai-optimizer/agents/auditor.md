@@ -11,7 +11,7 @@ Run the SEO audit script on the target website and perform manual review checks 
 ## Workspace Artifacts
 
 - **Input**: The user's website project directory (passed as `<project_root>`)
-- **Output**: `<project_root>/seo-audit.json` — structured JSON with all findings
+- **Output**: `<output-dir>/seo-audit.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-audit.json` — structured JSON with all findings
 - **Reference**: `../references/technical-seo.md` and `../references/workflow-detail.md` (Step 2) for the manual review checklist
 - **Script**: `../scripts/audit_seo.py` — automated scanning
 

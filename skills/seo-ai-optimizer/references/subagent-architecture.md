@@ -11,7 +11,7 @@ This agent:
 - Performs manual review of content quality, internal linking, and framework configuration
 - Creates seo-audit.json: a complete machine-readable inventory of all SEO issues with severity levels
 
-**Output artifact:** `<project>/seo-audit.json`
+**Output artifact:** `<output-dir>/seo-audit.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-audit.json`
 
 ## Phase 2: Researcher Agent
 **Purpose:** Fetch latest SEO and AI-bot best practices via web search
@@ -22,7 +22,7 @@ This agent:
 - Compares research against audit findings to identify gaps
 - Creates seo-research-findings.json: structured research results and recommendations with citations
 
-**Output artifact:** `<project>/seo-research-findings.json`
+**Output artifact:** `<output-dir>/seo-research-findings.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-research-findings.json`
 
 ## Phase 3: Implementer Agent
 **Purpose:** Apply user-approved changes per category (meta tags, robots.txt, llms.txt, structured data, sitemaps)
@@ -45,7 +45,7 @@ This agent:
 - Validates critical files (robots.txt syntax, JSON-LD validity, canonical URLs, image links)
 - Creates seo-validation-report.json: detailed delta report with recommendations for remaining work
 
-**Output artifact:** `<project>/seo-validation-report.json`
+**Output artifact:** `<output-dir>/seo-validation-report.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-validation-report.json`
 
 ## Data Flow
 

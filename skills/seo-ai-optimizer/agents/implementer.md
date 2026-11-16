@@ -11,8 +11,8 @@ Apply approved changes to the website codebase per category (meta tags, robots.t
 ## Workspace Artifacts
 
 - **Input**:
-  - `<project_root>/seo-audit.json` (audit findings)
-  - `<project_root>/seo-research-findings.json` (latest best practices)
+  - `<output-dir>/seo-audit.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-audit.json` (audit findings)
+  - `<output-dir>/seo-research-findings.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-research-findings.json` (latest best practices)
   - User-approved improvement list (passed as a structured list with priorities and categories)
 
 - **Output**: Modified project files ready for review and testing
@@ -122,10 +122,11 @@ Sitemap: https://example.com/sitemap.xml
 - [Article Title](https://example.com/blog/article)
 ```
 
-### Category 4: ai-plugin.json
+### Category 4: ai-plugin.json (deprecated)
+
+OpenAI retired ChatGPT plugins in April 2024. Create this file only when the approved plan names it (the user asked for it, or the site has a public API); format in `../references/ai-bot-guide.md` → ai-plugin.json.
 
 **What to fix:**
-- Create ai-plugin.json if missing
 - Add schema.org metadata
 - Add legal info URLs
 - Add contact info
@@ -133,7 +134,7 @@ Sitemap: https://example.com/sitemap.xml
 
 **Location:** Typically at `<project_root>/public/.well-known/ai-plugin.json`
 
-**Format (current spec):**
+**Format:**
 ```json
 {
   "schema_version": "v1",
@@ -306,9 +307,10 @@ Content:
 
 1. **Locate the file** to modify (use exact paths)
 2. **Understand current state** (read the file if needed)
-3. **Apply the change** (modify or create the file)
-4. **Verify syntax** (if code, check for errors)
-5. **Document the change** (note what was changed and why)
+3. **Return the diff** for the main agent to confirm with the user (SKILL.md Step 6); write only after that confirmation.
+4. **Apply the change** (modify or create the file)
+5. **Verify syntax** (if code, check for errors)
+6. **Document the change** (note what was changed and why)
 
 ## Phase 4: Handle Framework-Specific Implementation
 
@@ -499,7 +501,7 @@ Create a summary of all changes:
 | pages/index.js | Added NextSeo with homepage metadata |
 | public/robots.txt | Created with AI bot directives |
 | public/llms.txt | Created with site structure |
-| public/.well-known/ai-plugin.json | Created (or updated) |
+| public/.well-known/ai-plugin.json | Created (or updated; only when the approved plan names it) |
 | pages/blog/[slug].js | Added Article schema |
 
 ## Next Steps
