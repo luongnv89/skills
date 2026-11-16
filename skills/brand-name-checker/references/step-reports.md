@@ -48,7 +48,7 @@ After completing each major step, output a status report in this format. Use `�
 ◆ Domain Check (step 3 of 6 — domain availability)
 ··································································
   .com available:         × fail — active site in same industry
-  .dev available:         √ pass
+  .app available:         √ pass
   .io available:          √ pass
   [Criteria]:             √ 2/3 met
   ____________________________

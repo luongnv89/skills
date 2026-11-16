@@ -85,7 +85,7 @@ class RiskPolicyContractTests(unittest.TestCase):
 
     def test_exact_early_exit_preserves_skipped_not_clear(self) -> None:
         self.assertIn(
-            "exact handle collision on any of the 6 platforms immediately returns an Abandon",
+            "exact handle collision on any of the 6 platforms returns Abandon at once",
             SKILL_TEXT,
         )
         self.assertIn("Report those checks as skipped, not clear", SKILL_TEXT)
@@ -160,6 +160,44 @@ class RiskPolicyContractTests(unittest.TestCase):
         self.assertNotIn("Confirm safe to use", SKILL_TEXT)
         self.assertNotIn("No active site", SKILL_TEXT)
         self.assertNotIn("downgrade risk", SKILL_TEXT)
+
+
+AGENTS_DIR = SKILL_DIR / "agents"
+
+
+def worker_text(name: str) -> str:
+    return (AGENTS_DIR / f"{name}.md").read_text(encoding="utf-8")
+
+
+class WorkerAlignmentTests(unittest.TestCase):
+    """Workers use the source-checks.md statuses and leave risk to SKILL.md Step 5."""
+
+    def test_trademark_worker_has_no_second_risk_matrix(self) -> None:
+        text = worker_text("trademark-checker")
+        for token in ("Conflict Risk Scoring", "0.85", "0.60", "similarity_score", "conflict_risk", '"risk_level"'):
+            with self.subTest(token=token):
+                self.assertNotIn(token, text)
+
+    def test_social_worker_uses_exact_and_non_exact_statuses(self) -> None:
+        text = worker_text("social-checker")
+        self.assertNotIn("unclear", text)
+        self.assertEqual(text.count("available|taken (exact)|similar (non-exact)|unknown"), 6)
+
+    def test_registry_worker_reports_similar_and_unknown(self) -> None:
+        text = worker_text("registry-checker")
+        self.assertNotIn("available|taken|error", text)
+        self.assertEqual(text.count("available|taken|similar|unknown"), 4)
+
+    def test_domain_worker_never_infers_availability_from_no_site(self) -> None:
+        text = worker_text("domain-checker")
+        self.assertNotIn("No active site", text)
+        self.assertNotIn("|error", text)
+        self.assertIn("no active site was found; do not infer availability", text)
+
+    def test_skill_checks_the_three_reported_tlds(self) -> None:
+        self.assertNotIn("`.app`, `.co`, `.eu`, `.fr`:", SKILL_TEXT)
+        self.assertIn("DOMAIN: .com ([status]) | .io ([status]) | .app ([status])", SKILL_TEXT)
+        self.assertNotIn("is unchanged", SKILL_TEXT)
 
 
 if __name__ == "__main__":

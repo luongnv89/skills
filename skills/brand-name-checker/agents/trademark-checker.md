@@ -49,7 +49,7 @@ Return JSON with this structure:
   "timestamp": "2026-03-24T10:30:00Z",
   "trademark_status": {
     "wipo": {
-      "status": "no_conflicts|conflicts_found|error",
+      "status": "conflicts_found|similar|clear|unknown",
       "database_url": "https://branddb.wipo.int",
       "conflicts": [
         {
@@ -61,16 +61,14 @@ Return JSON with this structure:
           "registration_status": "live|expired",
           "filing_date": "2020-01-15",
           "registration_date": "2021-06-20",
-          "jurisdiction": "International",
-          "similarity_score": 0.95,
-          "conflict_risk": "high"
+          "jurisdiction": "International"
         }
       ],
       "similar_marks": [],
       "confidence": "high|medium|low"
     },
     "euipo": {
-      "status": "no_conflicts|conflicts_found|error",
+      "status": "conflicts_found|similar|clear|unknown",
       "database_url": "https://euipo.europa.eu/eSearch",
       "conflicts": [],
       "similar_marks": [
@@ -80,18 +78,16 @@ Return JSON with this structure:
           "class_9": true,
           "class_35": true,
           "class_42": false,
-          "registration_status": "live",
+          "registration_status": "live|expired",
           "filing_date": "2019-03-10",
           "registration_date": "2020-08-25",
-          "jurisdiction": "EU",
-          "similarity_score": 0.80,
-          "conflict_risk": "moderate"
+          "jurisdiction": "EU"
         }
       ],
       "confidence": "high|medium|low"
     },
     "inpi": {
-      "status": "no_conflicts|conflicts_found|error",
+      "status": "conflicts_found|similar|clear|unknown",
       "database_url": "https://www.inpi.fr",
       "conflicts": [],
       "similar_marks": [],
@@ -103,26 +99,14 @@ Return JSON with this structure:
     "high_risk_conflicts": 1,
     "moderate_risk_conflicts": 1,
     "live_marks": 2,
-    "expired_marks": 0,
-    "risk_level": "high|moderate|low"
+    "expired_marks": 0
   },
   "analysis": {
     "classes_at_risk": ["9", "35", "42"],
-    "overlapping_jurisdictions": ["International", "EU"],
-    "conflict_summary": "One high-risk WIPO mark (MyProductName Inc.) covers classes 9, 35, 42 in software/tech. EU similar mark (MyProduct) covers 9, 35 only. Recommend variant or different name.",
-    "international_risk": "high"
-  },
-  "notes": "WIPO registration covers exact class overlap. EUIPO similar mark may not block use but creates confusion risk."
+    "overlapping_jurisdictions": ["International", "EU"]
+  }
 }
 ```
-
-## Conflict Risk Scoring
-
-For each mark found:
-
-- **High Risk (0.85+)**: Exact or near-exact name, overlapping classes 9/35/42, live status
-- **Moderate Risk (0.60-0.84)**: Similar name, partial class overlap, live status
-- **Low Risk (<0.60)**: Dissimilar name, different industry, or expired mark
 
 ## Focus on Classes
 

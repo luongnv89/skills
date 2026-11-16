@@ -40,9 +40,10 @@ For each TLD, search:
 
 ### Status Determination
 
-- **Available**: No active site, domain not registered
-- **Parked**: Domain exists but no active site (parking page, "for sale")
-- **Active**: Domain registered and in use
+- Available: an authoritative availability result confirms the domain is unregistered
+- Parked: Domain exists but is for-sale/parking
+- Active: In use (flag if same industry)
+- Unknown: the source is unavailable or only shows that no active site was found; do not infer availability
 
 ## Output
 
@@ -54,7 +55,7 @@ Return JSON with this structure:
   "timestamp": "2026-03-24T10:30:00Z",
   "domain_status": {
     "com": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".com",
       "full_domain": "myproductname.com",
       "site_found": false,
@@ -65,7 +66,7 @@ Return JSON with this structure:
       "confidence": "high|medium|low"
     },
     "io": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".io",
       "full_domain": "myproductname.io",
       "site_found": false,
@@ -76,7 +77,7 @@ Return JSON with this structure:
       "confidence": "high|medium|low"
     },
     "app": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".app",
       "full_domain": "myproductname.app",
       "site_found": false,
@@ -87,7 +88,7 @@ Return JSON with this structure:
       "confidence": "high|medium|low"
     },
     "co": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".co",
       "full_domain": "myproductname.co",
       "site_found": false,
@@ -98,7 +99,7 @@ Return JSON with this structure:
       "confidence": "high|medium|low"
     },
     "eu": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".eu",
       "full_domain": "myproductname.eu",
       "site_found": false,
@@ -109,7 +110,7 @@ Return JSON with this structure:
       "confidence": "high|medium|low"
     },
     "fr": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".fr",
       "full_domain": "myproductname.fr",
       "site_found": false,
@@ -127,8 +128,7 @@ Return JSON with this structure:
     "primary_available": ["io", "app", "co"],
     "primary_taken": ["com"],
     "active_in_same_industry": false
-  },
-  "notes": "myproductname.com is active but parked. io, app, co available. Consider acquiring at least .io if .com unavailable."
+  }
 }
 ```
 

@@ -45,7 +45,7 @@ If the name is taken on a target registry, flag it at the top of the registry li
 
 ## Step 3: Domain Check
 
-Check `.com` first, then `.io`, `.app`, `.co`, and the regional TLDs `.eu` and `.fr`.
+Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD only when `prd.md` or the user names it (`SKILL.md` → *Step 3: Domain Check*).
 
 Queries: `site:[NAME].com` and `"[NAME].com" domain availability`.
 
