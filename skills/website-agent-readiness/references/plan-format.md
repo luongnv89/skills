@@ -62,11 +62,6 @@ print(f"tasks without an acceptance criterion: {bad or 'none'}")
 PY
 ```
 
-The third is not redundant with the first two: a task missing its `- [ ]` line fails
-`/plan-to-issues`'s Phase 1 completion check, and a one-line fix like "add a
-Content-Signal directive" is exactly where the criterion gets dropped as too obvious to
-state.
-
 ## Why `Closes:` is a dash
 
 `/plan-to-issues` derives `dim:` labels from `Closes:` finding IDs shaped
