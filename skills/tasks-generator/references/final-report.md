@@ -11,7 +11,7 @@ Evidence: self-test 7/7 passed (26 task headings, 0 dangling IDs, 0 missing labe
           analyze_dependencies.py: 26 tasks, 31 edges, critical path 1.1 → 2.1 → 2.4 → 3.2 → 3.6 (12 days),
           bottleneck 1.1 (5 direct dependents). Backup: no prior tasks.md. Commit a1b2c3d.
   tasks.md:  https://github.com/me/ideas/blob/main/2026_10_06_habit_tracker_for_nurses/tasks.md
-  README.md: https://github.com/me/ideas/blob/main/README.md (Tasks status ✅)
+  README.md: https://github.com/me/ideas/blob/main/README.md (Tasks column ✅)
 Uncertainty: PRD §4.1 rate limit unspecified (assumed 60 req/min); PRD §5 "social login" providers unnamed
              (assumed Google + GitHub). Both are flagged in tasks.md. No tad.md, so the stack follows the PRD only.
 Decision: No approval needed.

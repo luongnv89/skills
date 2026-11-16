@@ -4,7 +4,7 @@ description: "Validate app/startup ideas with market, feasibility, commercial, a
 license: MIT
 effort: max
 metadata:
-  version: 1.10.1
+  version: 1.11.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -168,13 +168,13 @@ After each step, print its status block from `references/step-completion-reports
 
 ## README Maintenance
 
-After each update to `idea.md` or `validate.md`, check the trigger, defined only here: the ideas root contains a `README.md` and at least two `YYYY_MM_DD_*` idea folders, this run's included. If it matches, insert or update an `## Ideas index` table in that `README.md`, one row per idea: a link to its `idea.md`; its PRD/tasks status (`PRD` if `prd.md` exists, `tasks` if `tasks.md` exists, else `none`); its verdict (or `no verdict`), linked to its `validate.md`.
+After each update to `idea.md` or `validate.md`, check the trigger, defined only here: the ideas repo root has `scripts/update_readme_ideas_index.py`, or the ideas root contains a `README.md` and at least two `YYYY_MM_DD_*` idea folders, this run's included. If it matches, update the index as [references/ideas-index.md](references/ideas-index.md) says.
 
 ## Commit and Push (mandatory)
 
 Skip this step when the ideas root is not a git repository (see Edge Cases). Otherwise, run it after Phase 5, or at an earlier stop (see Instructions):
 
-1. Stage only the files this run wrote: `git add <project folder>/idea.md <project folder>/validate.md`, plus `README.md` when README Maintenance changed it. Never run `git add -A`.
+1. Stage only the files this run wrote: `git add <project folder>/idea.md <project folder>/validate.md`, plus `README.md` and `DASHBOARD.md` when README Maintenance changed them. Never run `git add -A`.
 2. Run `git diff --cached --name-only` to confirm only those files are staged; unstage any other with `git restore --staged <file>`.
 3. Commit with the message `docs(ideas): validate <short_snake_case_name>`.
 4. Push to the current branch.

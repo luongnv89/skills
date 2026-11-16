@@ -33,7 +33,7 @@ member is used **unedited**; these notes describe its current behavior, they do 
   `**Skip it**`. The verdict rule number and rationale belong under `## Why`; match the leading token
   so a trailing parenthetical such as `**Maybe (rule 2)**` still reads as `Maybe`. Four 1–10 ratings.
 - **Git:** commits and pushes immediately, **without asking** for push permission. Its `Evidence:` line
-  carries the links to `idea.md`, `validate.md` and, when changed, `README.md`, plus the commit hash.
+  carries the links to `idea.md`, `validate.md` and, when changed, `README.md` and `DASHBOARD.md`, plus the commit hash.
 - **Status:** `BLOCKED` with no idea description, an unwritable ideas root, or a declined no-search run;
   `PARTIAL` when a step stopped early, search was unavailable, or the files were not pushed.
 

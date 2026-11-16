@@ -9,7 +9,7 @@ Result: COMPLETE. create mode, /Users/me/ideas/2026_10_06_habit_tracker_for_nurs
 Evidence: verification 6/6 passed (check 7 n/a, no prior prd.md): 12 '## ' headings, 6 Given/When/Then lines, 2 mermaid blocks,
           9 MoSCoW lines, idea.md cited. Backup: no prior prd.md. Commit 9c41e2d.
   prd.md:    https://github.com/me/ideas/blob/main/2026_10_06_habit_tracker_for_nurses/prd.md
-  README.md: https://github.com/me/ideas/blob/main/README.md (PRD status ✅)
+  README.md: https://github.com/me/ideas/blob/main/README.md (PRD column ✅)
 Uncertainty: §6 hosting is TBD (idea.md names no provider). Compliance answered "unknown", recorded in §9.
              The p95 latency target (300 ms) is an assumption, not taken from validate.md.
 Decision: No approval needed.

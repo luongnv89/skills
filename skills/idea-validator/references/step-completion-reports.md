@@ -112,7 +112,7 @@ A sync or push that did not happen (skipped, blocked, or waiting on the user) is
 ◆ Commit and Push (step 8 of 8 — [idea name])
 ··································································
   Git repository:     √ pass | ○ skip — not a git repository
-  Staged files:       √ pass ([N]: idea.md, validate.md[, README.md]; [M] others unstaged) | × fail — [unexpected file still staged]
+  Staged files:       √ pass ([N]: idea.md, validate.md[, README.md, DASHBOARD.md]; [M] others unstaged) | × fail — [unexpected file still staged]
   Commit:             √ pass ([short hash] docs(ideas): validate [name]) | × fail — [error]
   Push:               √ pass ([branch] → origin at [short hash of HEAD]) | √ pass (after one rebase retry; origin at [new short hash]) | ○ skip — no origin remote; asked the user | ○ skip — blocked: [rejected after one retry / rebase conflict]; asked the user
   ____________________________
