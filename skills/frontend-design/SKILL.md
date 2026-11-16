@@ -4,13 +4,13 @@ description: "Build production-grade frontend interfaces with distinctive aesthe
 license: MIT
 effort: high
 metadata:
-  version: 1.5.1
+  version: 1.5.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Frontend Design
 
-Create distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with deliberate aesthetic choices.
+Create distinctive, production-grade frontend interfaces that avoid the generated-looking defaults named under *Avoid* in `references/aesthetics-guide.md`. Implement real working code with deliberate aesthetic choices.
 
 ## When to Use
 
@@ -84,7 +84,7 @@ Every final design must be professional, production-ready, elegant, and premium,
 
 ## Usability and Aesthetics References
 
-- **Usability:** apply the six Quick rules in `references/usability-guide.md` to every design; the full step-by-step guideline follows them.
+- **Usability:** apply the six Quick rules in `references/usability-guide.md` to every design.
 - **Aesthetics:** `references/aesthetics-guide.md` holds the typography, color, motion, composition, and background guidance and the *Avoid* list.
 
 Read both in step 6, not earlier, to keep the context window small during the brief and approval steps.
@@ -95,9 +95,9 @@ Production-ready frontend code delivered as one or more files. Example for a lan
 
 - **`index.html`** — fully self-contained HTML with embedded CSS and JS (or separate files if a framework is used)
 - Implemented features: hero section, CTA button, responsive navigation, and a features grid
-- Typography: a distinctive display/body font pairing (e.g., Playfair Display + DM Sans), not Inter/Roboto
+- Typography: a display/body font pairing chosen for this brief, none of the fonts listed under *Avoid*
 - Color palette: strictly four colors per the Default Style Guide, or the explicit brief's palette
-- Interactions: CSS-only hover states on buttons, a staggered reveal animation on page load
+- Interactions: CSS-only hover and focus states on buttons; motion that fits the chosen direction
 - WCAG AA contrast on all text elements
 - Mobile-responsive layout checked at 375px, 768px, and 1280px
 

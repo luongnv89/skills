@@ -63,7 +63,7 @@ asm install github:luongnv89/skills:skills/frontend-design
 | Path | Description |
 |---|---|
 | `references/aesthetics-guide.md` | Typography, color, motion, composition and background guidance, plus the generated-look defaults to avoid |
-| `references/usability-guide.md` | Six "Don't Make Me Think" Quick rules applied to every design, then the full step-by-step guideline |
+| `references/usability-guide.md` | Six "Don't Make Me Think" Quick rules applied to every design, plus the Quick Reference Checklist |
 | `references/step-reports.md` | Step-completion report template, symbol legend, and per-phase checks |
 | `references/final-report.md` | Final Report status rules, PARTIAL and BLOCKED examples, fill rules, and reader checks |
 | `evals/evals.json` | Trigger and behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
