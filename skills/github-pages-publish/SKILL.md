@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 1.1.0
+  version: 1.1.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -25,7 +25,7 @@ Terms used throughout:
 - **content**: the files to publish, staged in `<work>/content/` before anything is pushed.
 - **workspace**: the checkout that receives the commit. It is the current checkout (in-place) or a clone in `<work>/repo/`.
 - **site folder**: the folder inside the workspace that Pages deploys: `.`, `docs`, or the user's choice.
-- **confirmation gate**: one of the questions listed in Step 2. Nothing else stops the run.
+- **confirmation gate**: a Step 2 gate, or a question another step names (missing content or target repo, a sync conflict, a site-folder change, a first-publish sweep, a workflow conflict, a missing `workflow` token scope, a missing home page or link). Nothing else stops the run.
 - **pre-authorized**: the request already answers a gate ("create it if needed", "make it public"). State the answer in one line and continue.
 - **live check**: `verify` passes, which means every checked file at the Pages URL matches the committed file byte for byte.
 - **run log**: `.pages-publish/run-<UTC>.md` in the current directory. Every step appends one row.
