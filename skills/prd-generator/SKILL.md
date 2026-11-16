@@ -4,7 +4,7 @@ description: "Generate Product Requirements Documents from `idea.md` and `valida
 license: MIT
 effort: max
 metadata:
-  version: 1.6.2
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -15,7 +15,7 @@ Generate a Product Requirements Document (`prd.md`) from validated idea files.
 **Terms used throughout:**
 - **`PROJECT_DIR`**: the folder that holds `idea.md` and `validate.md`. `prd.md` is written there.
 - **Run mode**: `create` when `PROJECT_DIR/prd.md` does not exist or the user asks for a new PRD; `modify` when it exists and the user wants changes to it.
-- **Ideas repo**: the git repository that contains `PROJECT_DIR`, when its root has `scripts/update_readme_ideas_index.py` or a `README.md` ideas table with a PRD column.
+- **Ideas repo**: the git repository that contains `PROJECT_DIR`, when its root has `scripts/update_readme_ideas_index.py` or a `README.md` with an `## Ideas index` table.
 - **Status**: `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in *Final Report*.
 
 **Run order:** Phase 1 (Repo Sync runs inside it), Phases 2-7, then the Final Report. A `modify` run replaces Phases 2-5 with *Modification Mode*. A stop at any point still produces the Final Report.
@@ -116,13 +116,11 @@ Base every claim on the inputs. If `idea.md` has no technical context, write `TB
 
 ### Phase 6: README Maintenance (ideas repo)
 
-If `PROJECT_DIR` is not in an ideas repo, skip this phase and Phase 7. Otherwise:
-1. If the repo root has `scripts/update_readme_ideas_index.py`, run `python3 scripts/update_readme_ideas_index.py` from the repo root.
-2. If the script is absent or fails, edit the root `README.md` by hand so the PRD status for this idea is ✅.
+If `PROJECT_DIR` is not in an ideas repo, skip this phase and Phase 7. Otherwise update the index as [references/ideas-index.md](references/ideas-index.md) says.
 
 ### Phase 7: Commit and push
 
-1. Stage only the files this run wrote, by path: `prd.md`, the backup file when Phase 1 wrote one, and `README.md` when Phase 6 changed it. Never run `git add -A`.
+1. Stage only the files this run wrote, by path: `prd.md`, the backup file when Phase 1 wrote one, and `README.md` and `DASHBOARD.md` when Phase 6 changed them. Never run `git add -A`.
 2. Check the staged list with `git diff --cached --name-only`.
 3. Commit with the message `docs: add PRD for <product name>` (`docs: update PRD for <product name>` in `modify` mode).
 4. Ask the user before pushing; a push is visible to others. If the user declines, skip the push; the run is `PARTIAL`.
@@ -163,7 +161,7 @@ Every run, stops included, ends with one summary in concise chat text. The full 
 
 The summary carries these lines, in order:
 - `Result:` the status, the run mode, and the `prd.md` path; for `PARTIAL` or `BLOCKED`, the phase where the run stopped and why.
-- `Evidence:` the verification checks run with their observed counts, the backup file name or `no prior prd.md`, the commit hash, and the GitHub links to `prd.md` and (when changed) `README.md`. Cite only checks that ran.
+- `Evidence:` the verification checks run with their observed counts, the backup file name or `no prior prd.md`, the commit hash, and the GitHub links to `prd.md` and (when changed) `README.md` and `DASHBOARD.md`. Cite only checks that ran.
 - `Uncertainty:` each `TBD` placeholder, each Phase 3 question left unanswered, each value inferred instead of read from the inputs, and each skipped phase. Write `none within the checks run` when there are none.
 - `Decision:` the question the run waits on, or `No approval needed.`
 - `Next step:` one action for the user, such as reviewing §3 with stakeholders or running `tad-generator`.

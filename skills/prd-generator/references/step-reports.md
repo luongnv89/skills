@@ -72,8 +72,8 @@ repo emits Phases 6-7 as `— skipped` lines with the reason.
 ◆ README Maintenance (step 6 of 7 — ideas index)
 ··································································
   Ideas repo detected:      √ pass | — skipped (not an ideas repo)
-  Index updated:            √ pass (update_readme_ideas_index.py) | √ pass (manual)
-  PRD status now ✅:         √ pass
+  Index updated:            √ pass (update_readme_ideas_index.py) | √ pass (Ideas index table)
+  PRD column ✅:             √ pass
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```

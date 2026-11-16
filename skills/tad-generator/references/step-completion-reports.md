@@ -63,8 +63,7 @@ Worked examples of the generic template (SKILL.md → *Step Completion Reports*)
 ```
 ◆ README (step 6 of 8 — ideas repo index)
 ··································································
-  Index script:                 √ pass (or — absent, edited by hand)
-  TAD status ✅:                √ pass
+  Index script:                 √ pass (or — absent: no TAD column, README unchanged)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -73,7 +72,7 @@ Worked examples of the generic template (SKILL.md → *Step Completion Reports*)
 ```
 ◆ Commit (step 7 of 8 — git)
 ··································································
-  Staged by path:               √ pass (tad.md, README.md)
+  Staged by path:               √ pass (tad.md, README.md, DASHBOARD.md)
   Committed:                    √ pass (a1b2c3d)
   Pushed:                       √ pass (or × fail — user declined)
   ____________________________

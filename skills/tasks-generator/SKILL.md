@@ -4,7 +4,7 @@ description: "Generate sprint-based development tasks from a PRD. Use when asked
 license: MIT
 effort: max
 metadata:
-  version: 1.6.2
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -18,7 +18,7 @@ Transform a PRD into a structured, sprint-based `tasks.md` with deterministic de
 - **`PROJECT_DIR`**: the directory that contains `PRD_PATH`. `tasks.md` is written here.
 - **`WORK_DIR`**: a scratch directory created with `mktemp -d`, outside every repository. It holds the intermediate JSON files and is never committed.
 - **`repo`**: the git repository that contains `PROJECT_DIR`, or none.
-- **Ideas repo**: a `repo` whose root has `scripts/update_readme_ideas_index.py` or a `README.md` ideas table with a Tasks column.
+- **Ideas repo**: a `repo` whose root has `scripts/update_readme_ideas_index.py` or a `README.md` with an `## Ideas index` table.
 - **Status**: `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in *Final Report*.
 
 ## Run Order
@@ -131,14 +131,12 @@ Run the checks in [references/self-test.md](references/self-test.md) against `$P
 
 ### Phase 7: README Maintenance (ideas repo only)
 
-Skip this phase outside an ideas repo. Otherwise:
-1. If `$repo/scripts/update_readme_ideas_index.py` exists, run it from `$repo` with `python3 scripts/update_readme_ideas_index.py`. The script belongs to the user's ideas repo; never create it.
-2. If the script is absent or fails, edit `$repo/README.md` by hand so the Tasks status for this idea is ✅.
+Skip this phase outside an ideas repo. Otherwise update the index as [references/ideas-index.md](references/ideas-index.md) says.
 
 ### Phase 8: Commit and Push
 
 Skip this phase outside a git repository. Run every command with `git -C "$repo"`; set `branch="$(git -C "$repo" rev-parse --abbrev-ref HEAD)"` first.
-1. Stage only files this run wrote, by absolute path: `git -C "$repo" add -- "$PROJECT_DIR/tasks.md"`, plus the backup file when Phase 1 wrote one and `"$repo/README.md"` when Phase 7 changed it. Never run `git add -A`, and never stage `WORK_DIR`.
+1. Stage only files this run wrote, by absolute path: `git -C "$repo" add -- "$PROJECT_DIR/tasks.md"`, plus the backup file when Phase 1 wrote one and `"$repo/README.md"` and `"$repo/DASHBOARD.md"` when Phase 7 changed them. Never run `git add -A`, and never stage `WORK_DIR`.
 2. Check the staged list with `git -C "$repo" diff --cached --name-only`; unstage anything else.
 3. Commit with `docs: add tasks for <product name>` (`docs: update tasks for <product name>` when a backup was written).
 4. If `origin` is missing, skip the push; the run is `PARTIAL`.
@@ -200,7 +198,7 @@ Every run, stops included, ends with one summary in concise chat text. The full 
 
 The summary carries these lines, in order:
 - `Result:` the status, the absolute `tasks.md` path, the sprint count, the task count per sprint, and the MVP scope; for `PARTIAL` or `BLOCKED`, the phase where the run stopped and why.
-- `Evidence:` the Phase 6 checks with their observed counts, the critical path and its `effort_days` and the bottlenecks from the script's JSON, the backup file name or `no prior tasks.md`, the commit hash, and the GitHub links to `tasks.md` and (when changed) `README.md`. Cite only checks that ran.
+- `Evidence:` the Phase 6 checks with their observed counts, the critical path and its `effort_days` and the bottlenecks from the script's JSON, the backup file name or `no prior tasks.md`, the commit hash, and the GitHub links to `tasks.md` and (when changed) `README.md` and `DASHBOARD.md`. Cite only checks that ran.
 - `Uncertainty:` each ambiguous PRD item flagged in `tasks.md`, each assumption, each agent that ran inline or was re-run, and each skipped phase. Write `none within the checks run` when there are none.
 - `Decision:` the question the run waits on, or `No approval needed.`
 - `Next step:` one action for the user, such as reviewing Sprint 1 and Wave 1 tasks.

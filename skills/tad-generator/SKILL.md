@@ -4,7 +4,7 @@ description: "Generate a Technical Architecture Document (TAD) from a PRD. Use w
 license: MIT
 effort: max
 metadata:
-  version: 1.7.2
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -15,7 +15,7 @@ Generate a Technical Architecture Document (`tad.md`) with a modular, startup-ap
 **Terms used throughout:**
 - **`PROJECT_DIR`**: the project folder given in `$ARGUMENTS`. It holds `prd.md`, and `tad.md` is written there.
 - **Run mode**: `create` when `PROJECT_DIR/tad.md` does not exist; `modify` when it exists.
-- **Ideas repo**: the git repository that contains `PROJECT_DIR`, when its root has `scripts/update_readme_ideas_index.py` or a `README.md` ideas table with a TAD column.
+- **Ideas repo**: the git repository that contains `PROJECT_DIR`, when its root has `scripts/update_readme_ideas_index.py` or a `README.md` with an `## Ideas index` table.
 - **Status**: `COMPLETE`, `PARTIAL` or `BLOCKED`, chosen by the rules in *Final Report*.
 
 **Run order:** Phase 1 (Repo Sync runs inside it), Phases 2-7, then Phase 8 (the Final Report). A `modify` run replaces Phases 2-5 step 1 with *Modification Mode*. A stop at any point still produces the Final Report.
@@ -131,14 +131,12 @@ Spawn one **tech-researcher** subagent per round, using `agents/tech-researcher.
 
 ### Phase 6: README Maintenance (ideas repo)
 
-If `PROJECT_DIR` is not in an ideas repo, skip this phase. Otherwise:
-1. If the repo root has `scripts/update_readme_ideas_index.py`, run `python3 scripts/update_readme_ideas_index.py` from the repo root. The script belongs to the user's ideas repo, not to this skill; never create it.
-2. If the script is absent or fails, edit the root `README.md` by hand so the TAD status for this idea is ✅.
+If `PROJECT_DIR` is not in an ideas repo, skip this phase. Otherwise update the index as [references/ideas-index.md](references/ideas-index.md) says; the table has no TAD column, so without the script there is nothing to change.
 
 ### Phase 7: Commit and push
 
 Skip this phase when `PROJECT_DIR` is not in a git repository. Run every command with `git -C "$repo"`, and set `branch="$(git -C "$repo" rev-parse --abbrev-ref HEAD)"` first.
-1. Stage only the files this run wrote, by absolute path: `git -C "$repo" add -- "$PROJECT_DIR/tad.md"`, plus the backup file when Phase 1 wrote one and `"$repo/README.md"` when Phase 6 changed it. Never run `git add -A`.
+1. Stage only the files this run wrote, by absolute path: `git -C "$repo" add -- "$PROJECT_DIR/tad.md"`, plus the backup file when Phase 1 wrote one and `"$repo/README.md"` and `"$repo/DASHBOARD.md"` when Phase 6 changed them. Never run `git add -A`.
 2. Check the staged list with `git -C "$repo" diff --cached --name-only`.
 3. Commit with the message `docs: add TAD for <product name>` (`docs: update TAD for <product name>` in `modify` mode).
 4. If `origin` is missing, skip the push; the run is `PARTIAL`, and the `Next step:` line tells the user how to add the remote.
@@ -185,7 +183,7 @@ Every run, stops included, ends with one summary in concise chat text. The full 
 
 The summary carries these lines, in order:
 - `Result:` the status, the run mode, the `tad.md` path, and the main architecture decisions (stack, hosting, modular boundaries); for `PARTIAL` or `BLOCKED`, the phase where the run stopped and why.
-- `Evidence:` the verification checks run with their observed counts, the cost estimates by phase from §11.3 (or `TBD`), the backup file name or `no prior tad.md`, the commit hash, and the GitHub links to `tad.md` and (when changed) `README.md`. Cite only checks that ran.
+- `Evidence:` the verification checks run with their observed counts, the cost estimates by phase from §11.3 (or `TBD`), the backup file name or `no prior tad.md`, the commit hash, and the GitHub links to `tad.md` and (when changed) `README.md` and `DASHBOARD.md`. Cite only checks that ran.
 - `Uncertainty:` each `TBD` or `Unknown` value, each Phase 3 decision left unanswered, each assumption, each failed or inline research round, missing web access, and each skipped phase. Write `none within the checks run` when there are none.
 - `Decision:` the question the run waits on, or `No approval needed.`
 - `Next step:` one action for the user, such as reviewing §10 Risks or running `tasks-generator`.
