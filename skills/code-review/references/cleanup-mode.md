@@ -120,18 +120,20 @@ Spawn subagents 3, 4, 5, and 8 in a single turn (multiple Agent tool calls in on
 - `repo_path`: the subagent's own working directory (its isolated worktree); it never `cd`s to the orchestrator checkout, and it returns its absolute worktree path and branch with its result
 - `base_sha`: the full SHA of the cleanup-branch tip at dispatch time (for a deletion-cap re-dispatch, the current tip). Before any edit the subagent checks that `git status --porcelain` is empty, runs `git reset --keep <base_sha>`, and confirms `git rev-parse HEAD` equals `base_sha`; on any mismatch it stops and returns an error without editing, since the Agent tool may create the worktree from `origin`'s default branch rather than the unpushed cleanup branch
 - Stack summary (language, tooling, test command)
-- Instructions to produce a per-category report at `.slop-cleanup/wave-1/<subagent>.md`
-- Isolation: spawn each subagent with `isolation: "worktree"`, pinned to `base_sha` as above; it edits and commits only there. After the wave, copy each worktree's `.slop-cleanup/wave-N/<subagent>.md` to the same `.slop-cleanup/wave-N/<subagent>.md` path in the orchestrator checkout, using the worktree path the subagent returned, so later waves and the final report can read it. Then cherry-pick exactly the commits in `<base_sha>..<returned branch>`, oldest first (`git rev-list --reverse`), onto the cleanup branch one at a time (no merge commits), and run the wave's test gate.
+- Instructions to produce a per-category report at `.slop-cleanup/wave-1/<subagent>.md`, and never to stage or commit anything under `.slop-cleanup/`: reports stay untracked
+- Isolation: spawn each subagent with `isolation: "worktree"`, pinned to `base_sha` as above; it edits and commits only there. After the wave, cherry-pick exactly the commits in `<base_sha>..<returned branch>`, oldest first (`git rev-list --reverse`), onto the cleanup branch one at a time (no merge commits). Then copy each worktree's `.slop-cleanup/wave-N/<subagent>.md` to the same `.slop-cleanup/wave-N/<subagent>.md` path in the orchestrator checkout, using the worktree path the subagent returned, so later waves and the final report can read it. Then run the wave's test gate, and once it passes, clean up the wave's worktrees (below).
 - Edit budget: each subagent may edit directly. They must commit their changes with a dedicated message prefixed with their category.
 - Deletion cap: if this category would delete more than 50 items or cross a module boundary, return the list without deleting.
 
 Wait for all four to finish. Run tests and typecheck. If anything broke, stop and report which subagent's commit introduced the failure (bisect by commit).
 
+**Worktree cleanup.** After the copy and the passing test gate, for each worktree path and branch a subagent returned: confirm `git cherry <cleanup-branch> <branch>` prints no `+` lines (every commit landed), delete the copied report from that worktree (it is untracked and would block removal), run `git worktree remove <path>` without `--force`, then `git branch -D <branch>`. If any check or the removal fails, keep that worktree and branch and list them. When a wave stops early (test failure, cherry-pick conflict, deletion-cap approval), keep all its worktrees and name them in the stop report.
+
 ### 3. Dispatch Wave 2 in parallel
 
 Spawn subagents 1, 2, 6, and 7. Same protocol — parallel dispatch, `base_sha` set to the cleanup-branch tip after Wave 1's cherry-picks and passing test gate, per-category reports at `.slop-cleanup/wave-2/<subagent>.md`, dedicated commits. Pass `wave_1_reports` as absolute paths under the orchestrator checkout's `.slop-cleanup/wave-1/`, since the copied Wave 1 reports are not in the subagents' worktrees.
 
-Wait for all four to finish. Run tests and typecheck. Stop on failure.
+Wait for all four to finish. Run tests and typecheck. Stop on failure; otherwise clean up the wave's worktrees the same way.
 
 ### 4. Assemble the final report
 
@@ -143,6 +145,7 @@ Read each subagent's category report and produce `SLOP_CLEANUP.md` at the repo r
 **Branch:** chore/code-review-cleanup-YYYYMMDD
 **Commits:** N  (list with category and one-line summary)
 **Tests:** ✓ passing  |  **Typecheck:** ✓ clean
+**Worktrees:** N removed  |  kept: path and branch of each, or none
 
 ## Summary
 - Files deleted: N
@@ -171,11 +174,12 @@ Anything each subagent flagged as "delete at your own risk" (external callers un
 - Review the branch
 - Run a full regression suite
 - Merge or cherry-pick categories
+- Inspect any kept worktrees, then remove them with `git worktree remove` and `git branch -D`
 ```
 
 ### 5. Hand off to the user
 
-Show the report path, the branch name, and summarize: *"Cleaned up N categories across M files, removed L lines, tests passing on branch X. Review `SLOP_CLEANUP.md` and merge when ready."*
+Show the report path, the branch name, the removed and kept worktrees, and summarize: *"Cleaned up N categories across M files, removed L lines, tests passing on branch X. Review `SLOP_CLEANUP.md` and merge when ready."*
 
 ## Graceful Degradation
 
@@ -209,6 +213,7 @@ After each wave and at the end, output a status report in this format:
   Slop comment cleaner:    √ pass (removed 234 slop comments)
   Tests after wave:        √ pass
   Typecheck after wave:    √ pass
+  Worktrees removed:       √ pass (4 of 4)
   ____________________________
   Result:                  PASS
 ```

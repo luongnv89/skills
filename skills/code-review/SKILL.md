@@ -71,7 +71,7 @@ git fetch origin && git pull --rebase origin "$branch"
 - If `origin` is missing, or the pull or stash pop conflicts, stop and ask the user. Do not write any file.
 - If the target is not a git repo, `clean` skips the sync and notes that in its report.
 
-The full step, with recovery commands, is in `references/clean-mode.md` and `references/cleanup-mode.md`.
+The full step is in `references/clean-mode.md` (with stash recovery commands) and `references/cleanup-mode.md`.
 
 ## Run the mode's workflow
 

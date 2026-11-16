@@ -110,7 +110,7 @@ A run is acceptable only when all of the following are verifiable:
 - Produces an optimization report grouped by severity (Critical, High, Medium, Low) — assert at least one severity bucket appears or the "no issues found" branch fires.
 - Each reported issue includes `Location`, `Category`, `Problem`, `Impact`, and `Fix` — verify by checking the rendered template fields are non-empty.
 - Impact statement includes a quantitative estimate (e.g., "~500ms → ~50ms", "O(n²) → O(n log n)") — assert the Impact line contains a number, complexity class, or before/after pair.
-- This mode applies no fixes. Applying them is a separate, user-approved run (for example `mode:cleanup`), which owns its own sync, branch, and test gates.
+- This mode applies no fixes. Applying them is a separate, user-approved coding task outside this mode, which owns its own sync, branch, and test gates.
 - Each phase emits a Step Completion Report block with `Result: PASS | FAIL | PARTIAL` — assert the block is present in the transcript.
 
 ## Expected Output
