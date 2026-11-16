@@ -258,10 +258,10 @@
       "id": 19,
       "kind": "edge",
       "prompt": "/issue-work-loop --pr 88 with workers on mixed harnesses (agent_cli is pi for the reviewer and may be claude or opencode for the fixer); make every worker autonomous without skipping permissions.",
-      "expected_output": "Boots each worker bare per the per-harness matrix (pi autonomous by default with zero auto-mode parameters; Claude Code switched via Shift+Tab and verified by its mode indicator; opencode switched to the Build agent), never sends an auto-mode slash command, and repeats the gate after FRESHEN.",
+      "expected_output": "Boots each worker through the `--without bypass` launch-profile gate per the per-harness matrix (pi autonomous by default with zero auto-mode parameters; Claude Code switched via Shift+Tab and verified by its mode indicator; opencode switched to the Build agent), never sends an auto-mode slash command, and repeats the gate after FRESHEN.",
       "files": [],
       "expectations": [
-        "Launches each worker CLI bare with no invented auto-mode startup parameters (pi needs none — it is autonomous by default)",
+        "Starts each worker CLI through the selective launch-profile gate (`--without bypass`, never `--without flags`) with no invented auto-mode startup parameters (pi needs none — it is autonomous by default)",
         "Switches Claude Code with the Shift+Tab keystroke after boot and verifies the auto-accept-edits mode indicator before its role task",
         "Switches opencode to the full-permission Build agent via Tab or the switch_agent keybind (or settings) and verifies it",
         "Never sends an auto-mode slash command to any worker",

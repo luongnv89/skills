@@ -429,12 +429,12 @@ launch-profile contract. App runtime: split and start are one call,
 
 Every newly launched or FRESHENed reviewer, ISSUE implementer, and PR FIXER must pass this gate before receiving role work:
 
-1. Launch the configured interactive CLI **bare** — only its own verified flags (e.g. `pi` or `pi --thinking high`) — and complete the readiness wait. Do not pass auto-mode startup parameters: even where a harness exposes a mode flag, the post-boot switch below is the verified mechanism this skill relies on.
+1. Start the configured interactive CLI through the selective launch-profile gate (`--without bypass`), adding no auto-mode or skip-permissions startup flags — only its own verified flags (e.g. `pi` or `pi --thinking high`) — and complete the readiness wait. Do not pass auto-mode startup parameters: even where a harness exposes a mode flag, the post-boot switch below is the verified mechanism this skill relies on.
 2. Apply the per-harness switch:
 
    | Launcher | Startup | Switch after boot | Verify and record |
    |---|---|---|---|
-   | `pi` | Bare command; pass no auto-mode parameters | Nothing to activate — autonomous by default | Readiness wait passed; record `autonomous_mode: autonomous_by_default` |
+   | `pi` | Plain `pi`; pass no auto-mode parameters | Nothing to activate — autonomous by default | Readiness wait passed; record `autonomous_mode: autonomous_by_default` |
    | `claude` | Plain `claude` | Send the Shift+Tab keystroke (`herdr pane send-keys`, not a text message) until the auto-accept-edits mode is selected | Bounded pane read shows the auto-accept-edits mode indicator; record `autonomous_mode: verified` |
    | `opencode` | Plain `opencode` | Press Tab (or the configured `switch_agent` keybind) to select the full-permission Build agent; settings are the documented alternative | Bounded pane read shows the Build agent selected; record `autonomous_mode: verified` |
    | `codex` | Plain `codex` (its verified setup flags only) | None verified yet. The approval and sandbox settings that would remove prompts are the prohibited bypasses (`--ask-for-approval never`, `--sandbox danger-full-access`) | Fail closed: close the worker and stop with *Autonomous mode unavailable* naming `codex`. Add a switch here only after one that avoids those settings is verified live |
@@ -518,4 +518,4 @@ Run after the shared Phase 1 steps in SKILL.md, for the selected mode only.
 
 ## Autonomous worker boot gate invariants
 
-The invariants: launch the `agent_cli` executable **bare** with only its own verified flags, then apply the per-harness post-boot switch and verify it with a bounded pane read before dispatching work. Never send an auto-mode slash command, never pass auto-mode startup flags even where a harness exposes one, and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`. `codex` and any launcher not in the matrix fail closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
+The invariants: start the `agent_cli` executable through the selective launch-profile gate (`--without bypass`) with only its own verified flags, adding no auto-mode or skip-permissions startup flags, then apply the per-harness post-boot switch and verify it with a bounded pane read before dispatching work. Never send an auto-mode slash command, never pass auto-mode startup flags even where a harness exposes one, and never use `--dangerously-skip-permissions` or `--allow-dangerously-skip-permissions`. `codex` and any launcher not in the matrix fail closed with the autonomous-mode error rather than leaving a worker blocked mid-ROUND.
