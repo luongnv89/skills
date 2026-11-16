@@ -4,7 +4,7 @@ description: "Generate professional SVG logos from project context: 7 brand vari
 license: MIT
 effort: medium
 metadata:
-  version: 1.5.1
+  version: 1.5.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -105,7 +105,7 @@ Automatically analyze the current project to understand brand context:
 
 ### Phase 2: Logo Design
 
-Pick a style based on the detected project type (Developer/SaaS/Startup/Enterprise/Consumer), then design a minimalist, geometric mark that reads at every size from 16px favicon to hero banner. Use detected brand colors when present, else apply the Default Style Guide (dark base + neon-green highlights only — never as a fill). Confirm with the user how the product name should be cased in the wordmark before generating any text-bearing SVG.
+Pick a style based on the detected project type (Developer/SaaS/Startup/Enterprise/Consumer), then design a minimalist, geometric mark that reads at every size from 16px favicon to hero banner. Use detected brand colors when present, else apply the Default Style Guide (dark base + neon-green highlights only — never as a background fill). Confirm with the user how the product name should be cased in the wordmark before generating any text-bearing SVG.
 
 See `references/design-principles.md` for the style table, full visual/color/typography rules, and the Default Style Guide palette with system status colors.
 

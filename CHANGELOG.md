@@ -10,6 +10,7 @@
 ### Fixes
 
 - **`herdr-agent`: correct the unequal-width columns recovery advice (#530).** The troubleshooting row in `references/herdr-recipes.md` told agents to apply a resize plan from `next_grid_split.py`, which never prints one: it prints a single `split` line, and `--equalize` runs the resizes itself. The row now says to split the rightmost column, then run `next_grid_split.py --equalize`. `SKILL.md` is unchanged, so the skill stays at 3.3.2.
+- **`logo-designer` 1.5.1 → 1.5.2: neon green is banned only as a background fill (#533).** Phase 2 of `SKILL.md` said the default palette's neon green was for highlights only, "never as a fill", which also ruled out green mark shapes. `references/design-principles.md` and `agents/svg-generator.md` ban it only as a background fill. Phase 2 now says "never as a background fill", so all three files give the same rule.
 
 ## v4.4.0 — 2026-11-12
 
