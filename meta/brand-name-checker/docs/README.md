@@ -73,7 +73,7 @@ asm install github:luongnv89/skills:skills/brand-name-checker
 |---|---|
 | `agents/social-checker.md` | Search 6 social platforms (Twitter, Instagram, GitHub, LinkedIn, TikTok, Discord) in parallel |
 | `agents/registry-checker.md` | Check npm, PyPI, Homebrew, and apt availability with owner info |
-| `agents/domain-checker.md` | Check .com, .io, .app, .co, and regional TLD registration status |
+| `agents/domain-checker.md` | Check .com, .io and .app registration status, plus any TLD `prd.md` or the user names |
 | `agents/trademark-checker.md` | Search WIPO, EUIPO, and INPI trademark databases for conflicts |
 | `agents/synthesizer.md` | Apply the SKILL.md risk policy and produce the final recommendation with alternatives |
 | `references/source-checks.md` | Per-source queries, check URLs, and status rules for the social, registry, domain, and trademark checks |
@@ -87,4 +87,4 @@ asm install github:luongnv89/skills:skills/brand-name-checker
 
 ## Output
 
-A compact text report. The first line, `RESULT:`, gives the status (COMPLETE, PARTIAL when any check could not be verified, or BLOCKED when no name was given or web tools are unavailable) and how many of the 16 checks were verified. Then come one status per source for social media (6 platforms), package registries (npm, PyPI, Homebrew, apt), domains (.com, .io, .app), and trademark databases (WIPO, EUIPO, INPI), the evidence behind each status, skipped and unknown checks, the risk level with its triggering finding, and a Proceed/Modify/Abandon recommendation that ends with your next decision. A Proceed result suggests registration order: registries first, to prevent namespace squatting.
+A compact text report. The first line, `RESULT:`, gives the status (COMPLETE, PARTIAL when any check could not be verified, or BLOCKED when no name was given or web tools are unavailable) and how many of the checks (16 by default) were verified. Then come one status per source for social media (6 platforms), package registries (npm, PyPI, Homebrew, apt), domains (.com, .io, .app, plus one check for each extra TLD that `prd.md` or you name), and trademark databases (WIPO, EUIPO, INPI), the evidence behind each status, skipped and unknown checks, the risk level with its triggering finding, and a Proceed/Modify/Abandon recommendation that ends with your next decision. A Proceed result suggests registration order: registries first, to prevent namespace squatting.

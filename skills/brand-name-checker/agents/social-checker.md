@@ -24,33 +24,33 @@ Check each platform independently and in parallel:
 
 ### 1. Twitter / X
 - **Search query**: `"@[NAME]" site:twitter.com OR site:x.com`
-- **Taken if**: Account profile or handle reference found
-- **Return**: `available | taken | unclear`
+- **Taken (exact)**: a profile whose handle equals the name exactly. **Similar (non-exact)**: a close variant. **Unknown**: inconclusive.
+- **Return**: `available | taken (exact) | similar (non-exact) | unknown`
 
 ### 2. Instagram
 - **Search query**: `"@[NAME]" site:instagram.com`
-- **Taken if**: Instagram profile found with exact handle
-- **Return**: `available | taken | unclear`
+- **Taken (exact)**: a profile whose handle equals the name exactly. **Similar (non-exact)**: a close variant. **Unknown**: inconclusive.
+- **Return**: `available | taken (exact) | similar (non-exact) | unknown`
 
 ### 3. GitHub
 - **Search query**: `"[NAME]" site:github.com/[NAME]`
-- **Taken if**: GitHub user/org profile or active repo found
-- **Return**: `available | taken | unclear`
+- **Taken (exact)**: a profile whose handle equals the name exactly. **Similar (non-exact)**: a close variant. **Unknown**: inconclusive.
+- **Return**: `available | taken (exact) | similar (non-exact) | unknown`
 
 ### 4. LinkedIn
 - **Search query**: `"[NAME]" site:linkedin.com/company/[NAME]`
-- **Taken if**: Company page or personal profile found
-- **Return**: `available | taken | unclear`
+- **Taken (exact)**: a profile whose handle equals the name exactly. **Similar (non-exact)**: a close variant. **Unknown**: inconclusive.
+- **Return**: `available | taken (exact) | similar (non-exact) | unknown`
 
 ### 5. TikTok
 - **Search query**: `"@[NAME]" site:tiktok.com`
-- **Taken if**: TikTok creator account found
-- **Return**: `available | taken | unclear`
+- **Taken (exact)**: a profile whose handle equals the name exactly. **Similar (non-exact)**: a close variant. **Unknown**: inconclusive.
+- **Return**: `available | taken (exact) | similar (non-exact) | unknown`
 
 ### 6. Discord
 - **Search query**: `"[NAME]" site:discord.com` or direct check at discord.com/invite/[NAME]
-- **Taken if**: Discord server found with exact name
-- **Return**: `available | taken | unclear`
+- **Taken (exact)**: a profile whose handle equals the name exactly. **Similar (non-exact)**: a close variant. **Unknown**: inconclusive.
+- **Return**: `available | taken (exact) | similar (non-exact) | unknown`
 
 ## Output
 
@@ -62,42 +62,42 @@ Return JSON with this structure:
   "timestamp": "2026-03-24T10:30:00Z",
   "social_status": {
     "twitter": {
-      "status": "available|taken|unclear",
+      "status": "available|taken (exact)|similar (non-exact)|unknown",
       "handle": "@myproductname",
       "profile_url": "https://twitter.com/myproductname or null",
       "found_account": null,
       "confidence": "high|medium|low"
     },
     "instagram": {
-      "status": "available|taken|unclear",
+      "status": "available|taken (exact)|similar (non-exact)|unknown",
       "handle": "@myproductname",
       "profile_url": "https://instagram.com/myproductname or null",
       "found_account": null,
       "confidence": "high|medium|low"
     },
     "github": {
-      "status": "available|taken|unclear",
+      "status": "available|taken (exact)|similar (non-exact)|unknown",
       "handle": "myproductname",
       "profile_url": "https://github.com/myproductname or null",
       "found_account": null,
       "confidence": "high|medium|low"
     },
     "linkedin": {
-      "status": "available|taken|unclear",
+      "status": "available|taken (exact)|similar (non-exact)|unknown",
       "handle": "myproductname",
       "profile_url": "https://linkedin.com/company/myproductname or null",
       "found_account": null,
       "confidence": "high|medium|low"
     },
     "tiktok": {
-      "status": "available|taken|unclear",
+      "status": "available|taken (exact)|similar (non-exact)|unknown",
       "handle": "@myproductname",
       "profile_url": "https://tiktok.com/@myproductname or null",
       "found_account": null,
       "confidence": "high|medium|low"
     },
     "discord": {
-      "status": "available|taken|unclear",
+      "status": "available|taken (exact)|similar (non-exact)|unknown",
       "handle": "myproductname",
       "profile_url": "https://discord.gg/myproductname or null",
       "found_account": null,
@@ -110,8 +110,7 @@ Return JSON with this structure:
     "taken_count": 0,
     "available_count": 6
   },
-  "early_exit": false,
-  "notes": "All social handles available. Proceed to registry and domain checks."
+  "early_exit": false
 }
 ```
 

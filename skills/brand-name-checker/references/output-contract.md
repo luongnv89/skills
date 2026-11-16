@@ -6,7 +6,7 @@ Field rules and worked examples for the compact report in `SKILL.md` → *Output
 
 | Line | Rule |
 |------|------|
-| `RESULT` | First line. Status word, then counts: `N/M checks verified; U unknown, S skipped`. There are 16 checks: 6 social, 4 registry, 3 domain, 3 trademark. |
+| `RESULT` | First line. Status word, then counts: `N/M checks verified; U unknown, S skipped`. There are 16 checks by default: 6 social, 4 registry, 3 domain (`.com`, `.io`, `.app`), 3 trademark; each extra TLD that `prd.md` or the user names adds one domain check (`SKILL.md` → *Step 3*). |
 | `SOCIAL`, `REGISTRY`, `DOMAIN`, `TM` | One status per source, using the vocabulary in `references/source-checks.md` and `SKILL.md` → *Step 3*. `Unknown` and `Skipped (not cleared)` are statuses, never blanks. |
 | `EVIDENCE` | For each verified status, the URL or query that produced it and the check time. A status with no evidence is Unknown. |
 | `SKIPPED` | Checks omitted by the Early-Exit Rule, or `none`. |
