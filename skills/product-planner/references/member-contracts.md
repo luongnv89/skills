@@ -11,8 +11,10 @@ member is used **unedited**; these notes describe its current behavior, they do 
 - **Evidence:** the commit hash and GitHub links built from `git remote get-url origin` and the
   **current branch** (`blob/<branch>/...`, not `blob/main`). Copy them from this line into the
   orchestrator's Final Report; never rebuild them.
-- **Declined push or missing `origin`:** the member commits locally and reports `PARTIAL`, with the
-  hash marked `local only` and no links. The file exists, so the orchestrator asks before continuing.
+- **Declined push or missing `origin`:** tad-generator and tasks-generator commit locally and report
+  `PARTIAL` (hash `local only`, no links); the file exists, so the orchestrator asks before continuing.
+  prd-generator reports `PARTIAL` on a declined push but stops at Repo Sync with `BLOCKED` when
+  `origin` is missing. idea-validator stops and asks when `origin` is missing or a push fails.
 - **Repo Sync:** each member runs its own, scoped with `git -C`. Do not skip or suppress it.
 
 ## idea-validator

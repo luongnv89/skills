@@ -10,7 +10,7 @@ dependencies:
   - tasks-generator
   - brand-name-checker
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (detect artifacts → pick range → verdict gate → preflight → chain unedited members via file handoffs → one Final Report)"
 ---
@@ -284,7 +284,7 @@ Report PASS for a stage only after its file exists and its member report says `C
   and offer to include it; never invent the input.
 - **Member reports `BLOCKED`** (e.g. tad-generator on an unanswered thin-PRD question, tasks-generator
   without `python3`) → stop the chain; this run is `BLOCKED`.
-- **Member reports `PARTIAL`** (declined push, no `origin`) → ask before the next stage (step 6.7).
+- **Member reports `PARTIAL`** (declined push; no `origin` for tad- or tasks-generator) → ask before the next stage (step 6.7).
 - **Verdict line has no known token** → show it and ask (step 3.4).
 - **`tasks.md` wanted without `tad.md`** → allowed; tasks-generator needs only `prd.md`. Note the missing TAD.
 - **Brand check returns Abandon/Modify** → report it; continue only if the user agrees.
