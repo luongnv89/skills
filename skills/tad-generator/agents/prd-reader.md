@@ -54,16 +54,9 @@ Parse `prd.md` and extract:
 
 ### Step 2: Read Supporting Documents
 
-If `idea.md` exists:
-- Extract market research findings
-- Competitor analysis points
-- User pain points
-- Validation results
+If `idea.md` exists: target audience, goals, and Technical Context (stack, timeline, team, budget, constraints).
 
-If `validate.md` exists:
-- User feedback summary
-- Validated vs. invalidated assumptions
-- Refined feature priorities
+If `validate.md` exists: the Quick Verdict, Concerns, Competitive Landscape (including Open-source Alternatives and Build vs. Base Recommendation), Technical Risk, and Implementation Roadmap.
 
 ### Step 3: Generate Structured Extraction
 
@@ -71,158 +64,100 @@ Return comprehensive JSON extraction:
 
 ```json
 {
-  "project_path": "/path/to/project",
-  "extraction_timestamp": "2026-03-24T10:00:00Z",
+  "project_path": "<from prd.md, or null>",
+  "extraction_timestamp": "<from prd.md, or null>",
   "product": {
-    "name": "PinBoard",
-    "vision": "Visual bookmark management platform for teams to collect, organize, and share inspiration",
-    "target_users": ["designers", "product managers", "creative teams"],
-    "target_scale": "10,000 users year 1, 100,000 users by year 2"
+    "name": "<from prd.md, or null>",
+    "vision": "<from prd.md, or null>",
+    "target_users": [
+      "<from prd.md, or null>"
+    ],
+    "target_scale": "<from prd.md, or null>"
   },
   "core_features": [
     {
-      "id": 1,
-      "name": "Pin Creation & Management",
-      "description": "Users can save links, images, notes as pins",
-      "priority": "critical",
-      "complexity": "high"
-    },
-    {
-      "id": 2,
-      "name": "Board Organization",
-      "description": "Group pins into boards, organize by tags",
-      "priority": "critical",
-      "complexity": "medium"
-    },
-    {
-      "id": 3,
-      "name": "Team Collaboration",
-      "description": "Share boards, collaborative curation, permissions",
-      "priority": "high",
-      "complexity": "high"
+      "id": "<from prd.md, or null>",
+      "name": "<from prd.md, or null>",
+      "description": "<from prd.md, or null>",
+      "priority": "<from prd.md, or null>",
+      "complexity": "<from prd.md, or null>"
     }
   ],
   "platforms": {
     "web": {
-      "required": true,
-      "browsers": ["Chrome", "Firefox", "Safari", "Edge"],
-      "mobile_responsive": true
+      "required": "<from prd.md, or null>",
+      "browsers": [
+        "<from prd.md, or null>"
+      ],
+      "mobile_responsive": "<from prd.md, or null>"
     },
     "mobile": {
-      "required": false,
-      "ios": false,
-      "android": false
+      "required": "<from prd.md, or null>",
+      "ios": "<from prd.md, or null>",
+      "android": "<from prd.md, or null>"
     },
     "api": {
-      "required": true,
-      "public": false,
-      "partners": ["Figma", "Slack"]
+      "required": "<from prd.md, or null>",
+      "public": "<from prd.md, or null>",
+      "partners": [
+        "<from prd.md, or null>"
+      ]
     }
   },
   "integrations": [
     {
-      "service": "Figma",
-      "type": "plugin",
-      "purpose": "Direct pin save from Figma workspace",
-      "complexity": "medium"
-    },
-    {
-      "service": "Slack",
-      "type": "app",
-      "purpose": "Share boards in Slack channels",
-      "complexity": "low"
+      "service": "<from prd.md, or null>",
+      "type": "<from prd.md, or null>",
+      "purpose": "<from prd.md, or null>",
+      "complexity": "<from prd.md, or null>"
     }
   ],
   "data_model": {
-    "core_entities": ["users", "boards", "pins", "tags", "teams"],
-    "user_growth": "10K to 100K users",
-    "pin_volume": "1M pins by year 2",
-    "storage_per_pin": "~10MB average (with caching)",
-    "estimated_storage": "10TB by year 2"
+    "core_entities": [
+      "<from prd.md, or null>"
+    ],
+    "user_growth": "<from prd.md, or null>",
+    "pin_volume": "<from prd.md, or null>",
+    "storage_per_pin": "<from prd.md, or null>",
+    "estimated_storage": "<from prd.md, or null>"
   },
   "performance_requirements": {
-    "page_load": "< 2 seconds for board view",
-    "search_latency": "< 500ms for tag search across 1M pins",
-    "api_response": "< 200ms for pin operations",
-    "concurrent_users": "5,000 concurrent editing"
+    "page_load": "<from prd.md, or null>",
+    "search_latency": "<from prd.md, or null>",
+    "api_response": "<from prd.md, or null>",
+    "concurrent_users": "<from prd.md, or null>"
   },
   "nonfunctional_requirements": {
-    "authentication": "OAuth with Google/GitHub, email/password",
-    "authorization": "Role-based: owner, editor, viewer per board",
-    "data_privacy": "GDPR compliant, user data export",
-    "compliance": "SOC 2 Type II (target year 2)",
-    "uptime_sla": "99.5% (4.5 hours downtime/month)",
-    "disaster_recovery": "RPO: 1 hour, RTO: 2 hours"
+    "authentication": "<from prd.md, or null>",
+    "authorization": "<from prd.md, or null>",
+    "data_privacy": "<from prd.md, or null>",
+    "compliance": "<from prd.md, or null>",
+    "uptime_sla": "<from prd.md, or null>",
+    "disaster_recovery": "<from prd.md, or null>"
   },
   "constraints": {
-    "budget": "Series A: $2M runway",
-    "timeline": "MVP in 4 months, Series A features in 8 months",
-    "team_size": "4 engineers, 1 designer, 1 product manager",
-    "deployment": "Prefer cloud (AWS/Vercel recommended)"
+    "budget": "<from prd.md, or null>",
+    "timeline": "<from prd.md, or null>",
+    "team_size": "<from prd.md, or null>",
+    "deployment": "<from prd.md, or null>"
   },
   "success_metrics": [
     {
-      "metric": "Monthly Active Users",
-      "target_month_6": "5K",
-      "target_month_12": "50K"
-    },
-    {
-      "metric": "Pins per User",
-      "target": "avg 100 pins/user"
-    },
-    {
-      "metric": "Board Sharing Rate",
-      "target": "30% of boards shared with teams"
+      "metric": "<from prd.md, or null>",
+      "target_month_6": "<from prd.md, or null>",
+      "target_month_12": "<from prd.md, or null>"
     }
   ],
   "assumptions_validated": [
-    "Teams spend 20% of workflow on visual inspiration collection",
-    "Existing tools (Pinterest, Moodboard) lack team collaboration",
-    "Design/product teams will pay $10-20/seat/month"
+    "<from prd.md, or null>"
   ],
   "assumptions_invalidated": [],
   "open_questions": [
-    "Mobile app timing - demand signals unclear",
-    "Enterprise SSO requirements - confirm with first enterprise leads"
+    "<from prd.md, or null>"
   ],
   "research_areas_needed": [
-    "Technology Stack: Validate React/Node.js against storage/search scaling",
-    "Infrastructure: AWS vs. Vercel for media-heavy content",
-    "Security: Review encryption, compliance roadmap",
-    "Risk Assessment: Identify bottlenecks, vendor dependencies",
-    "Holistic Review: Ensure PRD alignment, startup feasibility"
+    "<from prd.md, or null>"
   ]
-}
-```
-
-## Output Requirements
-
-Pass to tech-researcher agent for parallel research rounds:
-
-```json
-{
-  "prd_extracted": true,
-  "extraction_complete": true,
-  "project": "PinBoard",
-  "research_areas": [
-    "Technology Stack",
-    "Infrastructure",
-    "Security",
-    "Risk Assessment",
-    "Holistic Review"
-  ],
-  "constraints": {
-    "budget": "$2M runway",
-    "timeline": "4 months MVP",
-    "team": "4 engineers"
-  },
-  "data_model": {
-    "core_entities": ["users", "boards", "pins", "tags", "teams"],
-    "scale": "10K to 100K users",
-    "storage": "10TB by year 2"
-  },
-  "ready_for_research": true,
-  "timestamp": "2026-03-24T10:00:00Z"
 }
 ```
 
