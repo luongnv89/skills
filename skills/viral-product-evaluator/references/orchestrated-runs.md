@@ -18,7 +18,7 @@ output-dir: /abs/path/run/reports
 | Key | Behavior |
 |---|---|
 | `orchestrated-by` | Name it in the report's verdict block and in each Step Completion Report header. |
-| `evidence-dir` | Read `manifest.json` first. Use `page.html` as the rendered landing page and `head.json` for `<title>`, description, `og:image` and `twitter:image` — do not call `/browse`. Fetch only what the manifest lacks; if it lacks `page.html`, fall back to the normal URL path (with its Dependency Preflight). Cite the saved file as evidence. |
+| `evidence-dir` | Read `manifest.json` first. Use `page.html` as the rendered landing page and `head.json` for `<title>`, description, `og:image` and `twitter:image` — do not call `/browse`. Fetch only what the manifest lacks; if it lacks `page.html`, fall back to the normal URL path (with its Dependency Preflight). Cite the saved file as evidence. With no codebase supplied, tag the codebase-dependent principles low-confidence and end PARTIAL, not BLOCKED. |
 | `skip-checks` | See below. |
 | `output-dir` | Write `viral-evaluation.md` there instead of the repo root. Repo Sync applies only when that path is inside a git repository. |
 

@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - browse
 metadata:
-  version: 1.8.2
+  version: 1.8.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -29,7 +29,8 @@ turning a README into a page (`landing-page-generator`), or bug-hunting code rev
 
 ## Prerequisites
 
-- Read access to the target codebase directory.
+- Read access to the target codebase directory (not needed for an orchestrated `evidence-dir`
+  run that supplies no codebase).
 - Landing page signal: public URL, local file, auto-detectable in the tree, or an
   orchestrator's `evidence-dir`.
 - The skill's `references/*.md` files present.
@@ -122,8 +123,12 @@ the user, then stash, sync and pop before the write.
    the file/line. Generic findings are not acceptable.
 4. Tag every `judgment`/`visual` principle (hero punch, emotional headline, OG-image design,
    founder presence, novelty, price-vs-competitor) **low-confidence** and record what a human
-   must eyeball. When a principle's evidence source was unavailable (no codebase access, a
-   failed fetch), tag it low-confidence as well and say why.
+   must eyeball. When only some principles' evidence could not be read (an unreadable file, a
+   failed fetch mid-run), tag those principles low-confidence as well, say why, and end
+   PARTIAL. An orchestrated `evidence-dir` run whose caller supplies no codebase is partial
+   evidence too: tag the codebase-dependent principles low-confidence and end PARTIAL. A
+   codebase that was given but cannot be read at all (a read error) is not partial evidence:
+   report the concrete error and stop with a BLOCKED response (`references/honest-evaluation.md`).
 5. Compute the **Virality Score** with `scripts/virality_score.py` — pass every verdict as
    `{"verdicts": {"<n>": "PASS|PARTIAL|FAIL", ...}}` (contract in `references/principles.md` →
    Scoring). Do not tally or round in prose.
