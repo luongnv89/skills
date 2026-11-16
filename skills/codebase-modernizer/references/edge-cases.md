@@ -49,4 +49,5 @@ the user names, or all of them if unspecified.
 
 ## Existing report files
 
-Back them up as `MODERNIZATION_REPORT_backup_YYYY_MM_DD_HHMMSS.md` before overwriting.
+Back them up as `MODERNIZATION_REPORT_backup_YYYY_MM_DD_HHMMSS.md` before overwriting, and list the
+backup in the report's Artifacts section. SKILL.md's *Read-only contract* allows this file.

@@ -121,6 +121,7 @@ complete.
 |---|---|
 | `MODERNIZATION_REPORT.md` | this report |
 | `MODERNIZATION_PLAN.md` | the derived plan |
+| `MODERNIZATION_REPORT_backup_<YYYY_MM_DD_HHMMSS>.md` | report backup — only when an earlier report was overwritten |
 | `CODE_REVIEW.md` | declared artifact — written by `code-review` mode `review` |
 | `obj/`, `.dart_tool/` | probe byproducts — created by `dotnet list package` / `flutter pub outdated` |
 

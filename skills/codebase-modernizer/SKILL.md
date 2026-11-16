@@ -7,7 +7,7 @@ dependencies:
   - code-review
   - dont-make-me-think
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -30,10 +30,11 @@ Produces exactly two files in the target repo root:
 This skill **never modifies source code, dependencies, lockfiles, or configuration** — no tracked
 file's content changes. On a clean tree that is `git diff --stat` empty. On a stale, already-dirty
 tree, `git status --porcelain` and `git diff` after the run must match a snapshot taken before it
-(declared artifacts set aside). Beyond the two reports, only two kinds of *new* file may appear,
-both enumerated in the report's Artifacts section: a **declared delegate artifact**
-(`CODE_REVIEW.md`, from `code-review` mode `review`) and **probe byproducts** (build dirs such as
-`obj/`, `.dart_tool/`, `target/`, `.gradle/`). Nothing else.
+(declared artifacts set aside). Beyond the two reports, only three kinds of *new* file may appear,
+all enumerated in the report's Artifacts section: a **report backup**
+(`MODERNIZATION_REPORT_backup_*.md`, made before overwriting an earlier report), a **declared
+delegate artifact** (`CODE_REVIEW.md`, from `code-review` mode `review`) and **probe byproducts**
+(build dirs such as `obj/`, `.dart_tool/`, `target/`, `.gradle/`). Nothing else.
 
 - Dependency upgrades become **planned tasks with migration steps** — never `npm update`, `ncu -u`,
   `cargo update`, `poetry update`, or any equivalent. A blind bulk upgrade on a stale tree produces a
@@ -252,8 +253,9 @@ checklist: outputs, the read-only contract, findings, the plan, and an understan
 The two bars this skill exists to keep:
 
 - [ ] **No tracked file's content changed** relative to the pre-run snapshot (*Read-only contract*).
-- [ ] Every new file in `git status --short` is one of the two reports, a **declared delegate
-      artifact** (`CODE_REVIEW.md`), or a probe byproduct listed in the report's Artifacts section.
+- [ ] Every new file in `git status --short` is one of the two reports, a report backup, a
+      **declared delegate artifact** (`CODE_REVIEW.md`), or a probe byproduct, each listed in the
+      report's Artifacts section.
 
 If any criterion fails, report it as a `FAIL` row in the Step Completion Report and set `Result:` by
 the rules below.
