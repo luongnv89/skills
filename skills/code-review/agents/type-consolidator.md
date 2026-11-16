@@ -60,7 +60,7 @@ Write down the lifecycle/bounded-context reasoning when you decide to merge — 
 
 ## Output Report
 
-`/.slop-cleanup/wave-2/type-consolidator.md`:
+`.slop-cleanup/wave-2/type-consolidator.md`:
 
 ```markdown
 # Type Consolidation Report

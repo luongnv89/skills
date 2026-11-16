@@ -151,14 +151,6 @@ This report was validated by independent review on 2026-03-24.
 See validation JSON for detailed corrections.
 ```
 
-## Graceful Degradation
-
-If Agent tool unavailable:
-- Skip validation phase
-- Return CODE_REVIEW.md from report-assembler as final output
-- Note in output that validation was skipped
-- User can manually review or run validator later
-
 ## Success Criteria
 
 - Validation catches >80% of false positives if they exist

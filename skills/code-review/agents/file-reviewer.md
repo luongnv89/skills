@@ -92,13 +92,6 @@ Return JSON with this structure:
 }
 ```
 
-## Graceful Degradation
-
-If Agent tool is unavailable:
-- Run this check inline in main SKILL.md
-- Use single-file review mode
-- Return findings in same JSON format
-
 ## Return to Report Assembler
 
 Pass the entire JSON output to the `report-assembler` agent for deduplication, severity ranking, and final markdown generation.

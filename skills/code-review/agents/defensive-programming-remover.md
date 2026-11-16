@@ -76,7 +76,7 @@ Equivalents by language:
 
 ## Output Report
 
-`/.slop-cleanup/wave-2/defensive-programming-remover.md`:
+`.slop-cleanup/wave-2/defensive-programming-remover.md`:
 
 ```markdown
 # Defensive Programming Removal Report

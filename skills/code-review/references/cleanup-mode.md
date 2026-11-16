@@ -15,16 +15,9 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
+If the working tree is not clean, stop and ask the user to commit or stash first (Safety gate 1); do not stash on their behalf.
 
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
-
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+If `origin` is missing, pull is unavailable, or rebase conflicts occur, stop and ask the user before continuing.
 
 ## Safety & Confirmation Gates
 
@@ -32,8 +25,8 @@ This skill **deletes and rewrites code aggressively**. That is the point. But be
 
 1. **Never run on uncommitted changes.** If `git status` is not clean, stop and ask the user to commit or stash.
 2. **Create a dedicated cleanup branch** before any edits (e.g., `chore/code-review-cleanup-YYYYMMDD`). Never work directly on `main`/`master`.
-3. **One category per commit.** Each subagent's changes land in their own commit with a clear message. This makes individual categories revertible without losing the rest.
-4. **Test gate between phases.** After each subagent completes, run the test suite and typecheck (if available). If tests fail, stop the pipeline and surface the failure — do not continue to the next subagent on a broken tree.
+3. **Commits never mix categories.** Each subagent commits only its own category's changes, with its category prefix, so any category can be reverted without losing the rest.
+4. **Test gate between waves.** After each wave finishes, run the test suite and typecheck (if available). If either fails, stop the pipeline and surface the failure — do not start the next wave on a broken tree.
 5. **Report before destructive deletion.** For subagents that delete code (unused code, legacy, duplicates), surface the deletion list to the user for approval when the deletion count exceeds 50 items or crosses module boundaries.
 
 ## Environment Check
@@ -126,8 +119,10 @@ Spawn subagents 3, 4, 5, and 8 in a single turn (multiple Agent tool calls in on
 
 - Absolute repo path
 - Stack summary (language, tooling, test command)
-- Instructions to write findings and edits to their own branch area and produce a per-category report at `.slop-cleanup/wave-1/<subagent>.md`
+- Instructions to produce a per-category report at `.slop-cleanup/wave-1/<subagent>.md`
+- Isolation: spawn each subagent with `isolation: "worktree"`, branched from the cleanup branch; it edits and commits only there. After the wave, merge each worktree's commits into the cleanup branch one at a time, then run the wave's test gate.
 - Edit budget: each subagent may edit directly. They must commit their changes with a dedicated message prefixed with their category.
+- Deletion cap: if this category would delete more than 50 items or cross a module boundary, return the list without deleting.
 
 Wait for all four to finish. Run tests and typecheck. If anything broke, stop and report which subagent's commit introduced the failure (bisect by commit).
 
@@ -234,7 +229,6 @@ After each wave and at the end, output a status report in this format:
 ··································································
   SLOP_CLEANUP.md written:   √ pass
   All commits have messages: √ pass
-  Branch pushed:             √ pass
   Summary delivered to user: √ pass
   ____________________________
   Result:                    PASS
@@ -250,7 +244,7 @@ After a full run on a TypeScript monorepo, the final `SLOP_CLEANUP.md` summary l
 # Slop Cleanup Report
 
 **Branch:** chore/code-review-cleanup-20260419
-**Commits:** 8  (one per category)
+**Commits:** 23  (across 8 categories)
 **Tests:** passing  |  **Typecheck:** clean
 
 ## Summary
@@ -272,7 +266,7 @@ And the terminal handoff message: "Cleaned up 8 categories across 43 files, remo
 A run passes when **all** of the following are true:
 
 - [ ] Working tree is clean at start; the run is on a dedicated cleanup branch (e.g., `chore/code-review-cleanup-YYYYMMDD`), not on `main`/`master`.
-- [ ] Each of the 8 cleanup categories produces its own commit with a descriptive message — never one monolithic commit.
+- [ ] Every commit belongs to exactly one of the 8 cleanup categories and carries its prefix — never one monolithic commit.
 - [ ] Test suite and typecheck pass between Wave 1 and Wave 2; the pipeline stops if either fails.
 - [ ] Final `SLOP_CLEANUP.md` report exists and lists per-category counts (files touched, lines removed, deletions skipped).
 - [ ] Deletions exceeding 50 items or crossing module boundaries were surfaced for user approval before being applied.
@@ -285,4 +279,4 @@ A run passes when **all** of the following are true:
 - **Required tool missing (e.g., knip not installed)**: Affected subagent falls back to grep-based manual cross-reference and notes degraded mode in its category report.
 - **Tests fail after a wave**: Pipeline stops immediately; the failing commit is identified by bisect; subsequent waves do not run on a broken tree.
 - **Subagent finds nothing in its category**: Records an empty findings table and moves on — not every codebase has every type of slop.
-- **Deletion count exceeds 50 or crosses module boundaries**: Subagent surfaces the deletion list to the user for explicit approval before writing changes.
+- **Deletion count exceeds 50 or crosses module boundaries**: the subagent returns the deletion list without applying it; the orchestrator shows it to the user and re-dispatches with the approved list.

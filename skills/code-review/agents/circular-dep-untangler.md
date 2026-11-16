@@ -62,7 +62,7 @@ Strategy 5 is a last resort — it's a signal the split was wrong, not a free pa
 
 ## Output Report
 
-`/.slop-cleanup/wave-1/circular-dep-untangler.md`:
+`.slop-cleanup/wave-1/circular-dep-untangler.md`:
 
 ```markdown
 # Circular Dependency Report

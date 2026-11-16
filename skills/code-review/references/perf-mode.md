@@ -89,7 +89,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase: Analysis** — checks: `Issue detection`, `Priority categories covered`, `Impact estimated`, `Findings sorted by severity`
 
-**Phase: Mutation Handoff** — checks: `Fix application deferred`, `User approval required`, `Freshness and stash-first contract`, `Existing tests required`, `No regressions requirement`, `Warnings documented`
+**Phase: Mutation Handoff** — checks: `Fix application deferred`, `Handoff named`
 
 ## Severity Levels
 
@@ -109,10 +109,7 @@ A run is acceptable only when all of the following are verifiable:
 - Produces an optimization report grouped by severity (Critical, High, Medium, Low) — assert at least one severity bucket appears or the "no issues found" branch fires.
 - Each reported issue includes `Location`, `Category`, `Problem`, `Impact`, and `Fix` — verify by checking the rendered template fields are non-empty.
 - Impact statement includes a quantitative estimate (e.g., "~500ms → ~50ms", "O(n²) → O(n log n)") — assert the Impact line contains a number, complexity class, or before/after pair.
-- This mode applies no fixes; any separately approved mutation handoff requires explicit user approval before edits.
-- A separately approved mutation workflow runs existing tests after each applied fix and reports the result; if no tests exist, it warns before applying changes.
-- A separately approved mutation workflow checks out a feature branch following the repo convention before edits; this mode does not create or switch branches.
-- The mutation handoff carries a fresh HEAD/status/tracking check and a stash-first sync contract.
+- This mode applies no fixes. Applying them is a separate, user-approved run (for example `mode:cleanup`), which owns its own sync, branch, and test gates.
 - Each phase emits a Step Completion Report block with `Result: PASS | FAIL | PARTIAL` — assert the block is present in the transcript.
 
 ## Expected Output
@@ -145,7 +142,7 @@ const rows = await db.query('SELECT * FROM orders WHERE user_id = ANY($1)', [ids
 \`\`\`
 ```
 
-Expected result: a markdown report with one block per issue, sorted Critical → Low, followed by a phase completion report. See `meta/code-review/docs/README.md` for a longer end-to-end example.
+Expected result: a markdown report with one block per issue, sorted Critical → Low, followed by a phase completion report.
 
 ## Edge Cases
 
