@@ -155,7 +155,7 @@ Newly spawned sessions default to a visible terminal tab inside the current app/
 **Opening the default app terminal tab:** use the terminal-tab facility of the app/environment invoking the skill, not an external OS terminal app unless the user asks. The new tab should run a command like:
 
 ```bash
-# Leave the agent command unquoted after `--` so multi-word TAC_AGENT_CMD expands to argv.
+# Leave a multi-word agent command unquoted after `--` so it expands to separate argv words.
 cd /path/to/project && exec tmux new-session -s myrepo-reviewer -c /path/to/project -- claude
 ```
 
@@ -211,12 +211,12 @@ This is best-effort — always sanity-check the result rather than trusting it b
 | --- | --- | --- |
 | Message typed but never submitted | TUI didn't accept `Enter` in the same call | Send `Enter` as its own `send-keys` call (SKILL.md Phase 3) |
 | Delivery check says `delivered` but no reply ever comes | Gated on the message *text* being present, not on *submission* — `capture-pane` shows input-box text and transcript text identically | Verify **submission**, not presence: after send+5s, gate on post-send activity (spinner / `esc to interrupt`), never on `grep -qF "<text>"` (SKILL.md Phase 3) |
-| `NOT-DELIVERED` — message didn't land | Unsubmitted `Enter` (rode in the same call) or a dropped/swallowed keystroke | No post-send activity after send+5s. Send a lone `Enter`, re-check; if still nothing, re-type. One remedy covers both causes — and it's distinct from a reply timeout, since nothing was submitted (SKILL.md Phase 3) |
+| `NOT-DELIVERED` — message didn't land | Unsubmitted `Enter` (rode in the same call) or a dropped/swallowed keystroke | No post-send activity after send+5s. Re-run `preflight_send.py`, then send one lone `Enter` and re-check once; if still unchanged, report not delivered and do not start the reply wait (SKILL.md Phase 3) |
 | `can't find session` / nothing happens | Wrong or non-existent target | `tmux has-session -t <name>`; then `tmux list-sessions` to find the real name |
 | Captured pane is empty or all chrome | Read too early, or wrong pane | Re-run `wait_for_idle.py`; check pane index with `tmux list-panes` |
 | Reply cut off | Bounded-tail window too small for this reply | Widen the tail stepwise — `-S -80`, then larger; unbounded `-S -` only as last resort (SKILL.md Phase 5; "Reading scrollback robustly" above) |
 | `;` or `$...` came out wrong / executed | Shell/tmux interpreted special chars | Quote the message; use `send-keys -l` or paste-buffer (see above) |
-| Agent stuck on a yes/no or trust prompt | It's waiting for a keypress, not a typed line | `wait_for_idle.py` flags this as exit 3 (BLOCKED) for known dialogs. Send the exact key it expects (e.g. `tmux send-keys -t agent1 "1" Enter`), but confirm with the user first for any permission/trust prompt |
+| Agent stuck on a yes/no or trust prompt | It's waiting for a keypress, not a typed line | `wait_for_idle.py` flags this as exit 3 (BLOCKED) for known dialogs. Show the human the dialog (visible tab, or print the attach command) and let them answer it (Critical Rule 7) |
 | Attached to the wrong session / can't find my agent's tab | Guessed a name instead of resolving it, or the spawn renamed on collision (`agent1-<timestamp>`) | Run `tmux has-session -t <name>` or `tmux list-sessions` first, then attach/open a tab to the confirmed name (see "Showing an agent's live terminal" above) |
 | `attach-session` errors with "sessions should be nested with care, unset $TMUX to force" | Ran `attach-session` from a shell that's already inside a tmux client | Use `tmux switch-client -t <name>` instead, or `unset TMUX` first if a nested attach is intentional |
 | Can't tell if the agent is stuck or still working | Trusting the helper's exit code without a look | Verdict is advisory — read the pane yourself (`-S -40`). Spinner / changing tail = working (wait); unchanged + no spinner + no completion = stalled (surface to user). SKILL.md Phase 4 |
