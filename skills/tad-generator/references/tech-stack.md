@@ -2,6 +2,8 @@
 
 This document describes general requirements and best practices when choosing and defining a technical stack for a software project. It is structured so you can quickly pick the guidance relevant to the type of project you're building: a library (Python/JavaScript), a full-stack web app, a RESTful API server, serverless functions, data/ML pipelines, or a mobile app. Each section lists recommended concerns, common libraries/tools, and a short checklist to use when planning or reviewing the stack.
 
+Every list here is a set of options, not a default. Choose each technology from the PRD's constraints and the Phase 3 research; no vendor or stack is preferred.
+
 Keep these high-level principles in mind across all project types:
 
 - Minimal surface area: pick the smallest set of well-supported, actively maintained dependencies that satisfy requirements.
@@ -21,7 +23,7 @@ Use case: a reusable library distributed to other applications or the Python Pac
 Key requirements:
 
 - Packaging: source distribution (sdist) and wheels. Use pyproject.toml (PEP 517/518) and modern build backends (setuptools, poetry, or flit).
-- Dependency management: use `uv` as the package manager (team preference). List runtime dependencies separately from dev dependencies and commit a lockfile for reproducible tests (for example: uv lockfile, poetry.lock, or pip-tools generated lockfiles).
+- Dependency management: uv, poetry, or pip-tools. List runtime dependencies separately from dev dependencies and commit a lockfile for reproducible tests (for example: uv lockfile, poetry.lock, or pip-tools generated lockfiles).
 - Testing: pytest with coverage, tests that run fast and in isolation.
 - Type hints: use mypy or pyright for static typing; include type stubs if needed.
 - CI: run tests on multiple Python versions, run linters and type checks.
@@ -61,7 +63,7 @@ Use case: reusable package published to npm or consumed internally.
 
 Key requirements:
 
-- Language: use plain JavaScript (do not use TypeScript) to keep the stack consistent with project conventions.
+- Language: JavaScript or TypeScript. TypeScript gives consumers type declarations; plain JavaScript skips a build step.
 - Module formats and targets: decide on ESM vs CommonJS and document the chosen format. Prefer ESM for modern projects.
 - Bundling: avoid unnecessary bundling for libraries — prefer shipped source with clear exports. If bundling is required, use Rollup or esbuild.
 - Testing: unit tests (Jest, Vitest), browser and Node environment testing if required.
@@ -81,16 +83,7 @@ Checklist:
 - [ ] Lockfile (package-lock.json, pnpm-lock.yaml)
 - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
 
-Style & linting recommendation:
-
-- Use the Airbnb JavaScript style guide as the baseline ESLint config for all JavaScript projects and React apps. It's widely adopted and enforces a consistent style across teams.
-
-Install snippet (npm):
-
-```bash
-npm install -D eslint-config-airbnb eslint-plugin-import eslint-plugin-react eslint-plugin-jsx-a11y eslint-plugin-react-hooks
-```
-Then extend `airbnb` in your `.eslintrc` or `.eslintrc.json`.
+Style & linting: pick one shared ESLint baseline (for example Airbnb, standard, or the framework's own config) and apply it to every package.
 
 ---
 
@@ -101,11 +94,11 @@ Use case: web application with user-facing frontend and a backend/API.
 Key requirements and architecture decisions:
 
 - Monorepo vs separate repos: for tightly coupled teams, a monorepo can simplify coordination; for independent teams, separate repos reduce blast radius.
-- Frontend framework: React (use React by default where a component-based UI is required). For styling always use Tailwind CSS.
-- React state management: use Redux with redux-saga for side-effect handling and complex flows.
-- Backend: Node.js with Express.js exposing RESTful APIs (REST-first design).
-- Data storage: choose the database based on requirements. Consider Supabase (managed Postgres + auth) as a strong managed option for many apps. Otherwise preferred order: MongoDB -> PostgreSQL -> MySQL. For very small projects or prototypes prefer SQLite.
-- Authentication & Authorization: use JWT for authentication. Document token lifecycle, rotation and revocation strategy.
+- Frontend framework: React/Next.js, Vue/Nuxt, SvelteKit, or server-rendered templates when the UI is simple. Styling: Tailwind CSS, CSS modules, or a component library.
+- State management: the framework's built-in state first; Redux Toolkit, Zustand, Pinia, or similar when shared client state grows.
+- Backend: Node.js (Express, NestJS), Python (FastAPI, Django), Go, Java (Spring Boot), or a backend-as-a-service; REST or GraphQL by the clients' needs.
+- Data storage: choose the database based on requirements: relational (PostgreSQL, MySQL, or managed Postgres such as Supabase), document (MongoDB), or SQLite for small projects and prototypes.
+- Authentication & Authorization: server sessions, tokens (JWT), or a managed auth provider. Document the session or token lifecycle, rotation and revocation strategy.
 - APIs: design with OpenAPI (Swagger) and version your API.
 - Deployment: containers (Docker) orchestrated by Kubernetes or managed services (Vercel for frontend; Heroku, Fly.io, Render, Cloud Run for backend).
 - Observability: structured logs, request tracing (OpenTelemetry), metrics (Prometheus + Grafana), and error tracking (Sentry).
@@ -120,55 +113,7 @@ Common tools & libraries:
 - Infra: Docker, Kubernetes, Terraform / Pulumi for infra as code
 - CI/CD / Hosting: GitHub Actions, GitLab CI, CircleCI, Cloudflare Pages (fast frontend builds + edge deploys)
 
-Vite React template (recommended)
-
-For React applications we recommend using Vite for fast local dev and small build output. The following is a minimal, copyable bootstrap sequence (zsh/bash) to create a JavaScript Vite app, add Tailwind CSS, and Redux + redux-saga. Tweak package manager (npm/pnpm/yarn) as preferred.
-
-```bash
-# create a JS Vite React app
-npm create vite@latest my-app -- --template react
-cd my-app
-
-# install deps
-npm install
-
-# add Tailwind CSS (postcss + autoprefixer)
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-# then add the recommended `content` paths to tailwind.config.js and import Tailwind in src/index.css
-
-# add Redux + redux-saga
-npm install redux react-redux redux-saga
-
-# add linting, formatting and test deps (example)
-npm install -D eslint prettier eslint-config-prettier eslint-plugin-react jest vitest eslint-config-airbnb eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-react-hooks
-
-# optionally set up ESLint with Airbnb config
-npx eslint --init
-
-# optional: create a small bootstrap script that runs install + lint/format/test + a quick security scan
-cat > dev.sh <<'EOF'
-#!/usr/bin/env bash
-set -e
-npm install
-npm run lint || true
-npm run format || true
-npm test || true
-# quick audit (optional, non-blocking)
-npm audit --audit-level=moderate || true
-EOF
-chmod +x dev.sh
-
-# now run the developer bootstrap:
-./dev.sh
-```
-
-Notes:
-- The snippet uses plain JavaScript, not TypeScript.
-- Add ESLint/Prettier configs and npm scripts (lint, format, test) to the `package.json` so the bootstrap script works.
-- For CI, run the same steps headlessly (install, lint, test, security checks) and fail the build on failures.
-
-Style note: enforce the Airbnb ESLint config and include it in pre-commit hooks to maintain consistent style.
+Bootstrap with the chosen framework's official scaffolder (for example `npm create vite@latest`, `create-next-app`, `django-admin startproject`), then add the lint, format and test scripts the developer bootstrap runs.
 
 Checklist:
 
@@ -188,11 +133,11 @@ Use case: small-to-medium independent service exposing business logic via HTTP/J
 Key requirements:
 
 - API design: OpenAPI contract, clear error model, versioning and backward compatibility plan.
-- Runtime: Node.js with Express.js is the default choice for services in this stack (for consistency). Prefer async patterns and middleware-based design.
+- Runtime: choose by the team's skills and the workload (Node.js, Python, Go, Java); prefer async patterns and middleware-based design.
 - Data storage and migrations: use a robust migration tool (for SQL: knex or prisma migrate; for MongoDB: migrate-mongo or native migration patterns).
 - Observability: request logs, structured fields (request id), distributed tracing.
 - Resilience: timeouts, retries with exponential backoff, circuit breakers if applicable.
-- Authentication: JWT-based authentication for service endpoints; document token handling and revocation.
+- Authentication: tokens (JWT), API keys, or mTLS between services; document token handling and revocation.
 
 Common tools & libraries:
 
@@ -205,7 +150,7 @@ Checklist:
 
 - [ ] OpenAPI spec and generated clients if helpful
 - [ ] Health checks and readiness/liveness probes
-- [ ] Rate limiting and authentication middleware (JWT)
+- [ ] Rate limiting and authentication middleware
 - [ ] CI that runs contract tests (if clients exist)
 - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
 
@@ -301,7 +246,7 @@ Checklist:
 
 - Developer bootstrap: provide a single, documented command (for example `./dev.sh bootstrap`, `make bootstrap`, or `npm run setup`) that installs dependencies, runs linters/formatters, runs tests, and optionally runs a quick static security scan. Recommended tools to enable this include `make`, small bootstrap scripts, task runners (just, npm scripts), or language-native CLIs (uv, poetry, pnpm).
 
-- Hosting & CDN guidance: prefer managed edge platforms for static frontends (Cloudflare Pages, Vercel) and Cloudflare R2 for cost-effective object storage and edge-backed asset serving. Document R2 bucket lifecycle, access controls, and caching rules as part of deployment docs.
+- Hosting & CDN: managed edge platforms (Cloudflare Pages, Vercel, Netlify) suit static frontends; S3-compatible object stores (AWS S3, Cloudflare R2, Google Cloud Storage) serve assets. Document the bucket lifecycle, access controls, and caching rules in the deployment docs.
 
 Examples: .env loading and logging to files
 

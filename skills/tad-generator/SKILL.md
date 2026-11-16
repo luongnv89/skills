@@ -4,7 +4,7 @@ description: "Generate a Technical Architecture Document (TAD) from a PRD. Use w
 license: MIT
 effort: max
 metadata:
-  version: 1.8.0
+  version: 1.8.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -110,7 +110,7 @@ Spawn **prd-reader** with `agents/prd-reader.md` as its prompt. Pass `PROJECT_DI
 
 | Decision | Options |
 |----------|---------|
-| Deployment | Vercel/Netlify (recommended), AWS, GCP, Self-hosted |
+| Deployment | Vercel/Netlify, AWS, GCP, Self-hosted |
 | Database | PostgreSQL, MongoDB, Supabase/Firebase, Multiple |
 | Auth | Social (OAuth), Email/password, Magic links, Enterprise SSO |
 | Budget | Free tier, <$50/mo, <$200/mo, Flexible |
