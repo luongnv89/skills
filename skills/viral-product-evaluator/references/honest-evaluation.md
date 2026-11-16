@@ -7,9 +7,10 @@ extra instructions justify a deliberate deviation (e.g. a strategic free tier), 
 principle as written and explain the trade-off in the caveats — don't silently pass it.
 
 On any failure to fetch the landing page, report the concrete error and stop — do not guess.
-A codebase that cannot be read at all gets the same: the concrete error, then a stop with a
-BLOCKED response. When only the evidence for some principles cannot be read (an unreadable file,
-a fetch that fails mid-run), that is partial evidence: tag those principles low-confidence, say
+A codebase that was given but cannot be read at all gets the same: the concrete read error,
+then a stop with a BLOCKED response. When only the evidence for some principles cannot be read
+(an unreadable file, a fetch that fails mid-run), or an orchestrated `evidence-dir` run supplies
+no codebase, that is partial evidence: tag those principles low-confidence, say
 why, continue, and end PARTIAL (SKILL.md Phase 2 and Edge cases). Confirm with the user before
 fetching inputs and before writing `viral-evaluation.md`. If a principle cannot be evidenced,
 mark FAIL or low-confidence; never invent.

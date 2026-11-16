@@ -29,7 +29,8 @@ turning a README into a page (`landing-page-generator`), or bug-hunting code rev
 
 ## Prerequisites
 
-- Read access to the target codebase directory.
+- Read access to the target codebase directory (not needed for an orchestrated `evidence-dir`
+  run that supplies no codebase).
 - Landing page signal: public URL, local file, auto-detectable in the tree, or an
   orchestrator's `evidence-dir`.
 - The skill's `references/*.md` files present.
@@ -124,8 +125,10 @@ the user, then stash, sync and pop before the write.
    founder presence, novelty, price-vs-competitor) **low-confidence** and record what a human
    must eyeball. When only some principles' evidence could not be read (an unreadable file, a
    failed fetch mid-run), tag those principles low-confidence as well, say why, and end
-   PARTIAL. A codebase that cannot be read at all is not partial evidence: report the concrete
-   error and stop with a BLOCKED response (`references/honest-evaluation.md`).
+   PARTIAL. An orchestrated `evidence-dir` run whose caller supplies no codebase is partial
+   evidence too: tag the codebase-dependent principles low-confidence and end PARTIAL. A
+   codebase that was given but cannot be read at all (a read error) is not partial evidence:
+   report the concrete error and stop with a BLOCKED response (`references/honest-evaluation.md`).
 5. Compute the **Virality Score** with `scripts/virality_score.py` — pass every verdict as
    `{"verdicts": {"<n>": "PASS|PARTIAL|FAIL", ...}}` (contract in `references/principles.md` →
    Scoring). Do not tally or round in prose.
