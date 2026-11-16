@@ -117,10 +117,10 @@ Detect the stack (language, package manager, test command, typecheck command) an
 
 Spawn subagents 3, 4, 5, and 8 in a single turn (multiple Agent tool calls in one message). Each receives:
 
-- Absolute path of the subagent's own worktree, where it edits and commits
+- `repo_path`: the subagent's own working directory (its isolated worktree); it never `cd`s to the orchestrator checkout, and it returns its absolute worktree path and branch with its result
 - Stack summary (language, tooling, test command)
 - Instructions to produce a per-category report at `.slop-cleanup/wave-1/<subagent>.md`
-- Isolation: spawn each subagent with `isolation: "worktree"`, branched from the cleanup branch; it edits and commits only there. After the wave, copy each worktree's `.slop-cleanup/wave-N/<subagent>.md` into the orchestrator checkout's `.slop-cleanup/`, so later waves and the final report can read it. Then cherry-pick each worktree's commits onto the cleanup branch one at a time (no merge commits), and run the wave's test gate.
+- Isolation: spawn each subagent with `isolation: "worktree"`, branched from the cleanup branch; it edits and commits only there. After the wave, copy each worktree's `.slop-cleanup/wave-N/<subagent>.md` to the same `.slop-cleanup/wave-N/<subagent>.md` path in the orchestrator checkout, using the worktree path the subagent returned, so later waves and the final report can read it. Then cherry-pick each worktree's commits onto the cleanup branch one at a time (no merge commits), and run the wave's test gate.
 - Edit budget: each subagent may edit directly. They must commit their changes with a dedicated message prefixed with their category.
 - Deletion cap: if this category would delete more than 50 items or cross a module boundary, return the list without deleting.
 
