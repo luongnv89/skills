@@ -19,9 +19,8 @@ You receive these parameters in your prompt:
 ### Step 1: Load the Plan and References
 
 Read the ASO plan markdown (all proposed metadata).
+Read `references/phase-3-compliance.md` → 3.1 for the Apple App Store and Google Play banned-term lists.
 Read `references/aso_best_practices.md` → "Store Policy Compliance" section for:
-- Apple App Store banned keywords list
-- Google Play Store banned keywords list
 - Trademark rules for both stores
 - Formatting rules (emojis, caps, special characters, etc.)
 - Content accuracy rules
@@ -30,21 +29,7 @@ Read `references/aso_best_practices.md` → "Store Policy Compliance" section fo
 
 For EACH field in the proposed metadata (name, subtitle, keywords, descriptions, promotional text, screenshot caption text), in EVERY locale, scan for banned terms. The lists are English: for localized fields, also scan the translated equivalents of each term (e.g. pt-BR "grátis", "melhor"; de-DE "kostenlos", "beste").
 
-**Apple App Store — Banned in title, subtitle, keywords:**
-- Pricing terms: "free", "sale", "discount", "limited time", "on sale"
-- Superlative claims: "best", "#1", "top-rated", "must-have", "top app", "number one"
-- Reserved terms: "For Kids", "For Children" (unless in Kids Category), "Editor's Choice"
-- Platform references: "Android", "Google Play", "Play Store"
-- Call-to-action phrases: "download now", "install now", "try now", "get now"
-- Competitor brand names: "WhatsApp", "Instagram", "Slack", etc.
-
-**Google Play — Banned in title, short description, developer name, icon:**
-- Performance claims: "top", "best", "#1", "number one", "popular", "fastest", "highest rated"
-- Pricing terms: "free", "no ads", "ad free", "without ads"
-- Promotional terms: "new", "hot", "first", "bonus", "discount", "sale", "million downloads", "limited time"
-- Ranking claims: "App of the Year", "Best Google Play App of [year]"
-- Call-to-action: "download now", "install now", "play now", "try now", "update now"
-- Competitor brand names (same as Apple)
+Scan against the banned-term lists in `references/phase-3-compliance.md` → 3.1.
 
 Create a compliance matrix:
 

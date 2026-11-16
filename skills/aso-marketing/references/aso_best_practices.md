@@ -363,12 +363,7 @@ Both Apple and Google enforce strict metadata policies. Violating these policies
 ### Apple App Store — Prohibited Metadata (Guidelines 2.3.7, 2.3.8, 5.2.1)
 
 #### Banned Words and Phrases in Title, Subtitle, and Keywords
-- **"free"** — pricing terms are not allowed in visible metadata
-- **"best"**, **"#1"**, **"top-rated"**, **"must-have"** — unverifiable superlative claims
-- **"#1 in the world"**, **"top app"** — ranking claims cannot be verified
-- **"limited time"**, **"sale"**, **"discount"** — promotional/pricing language
-- **"For Kids"**, **"For Children"** — reserved exclusively for the Kids Category
-- **"Editor's Choice"** — reserved; only Apple applies this badge automatically
+The banned-term list lives in `references/phase-3-compliance.md` → 3.1.
 
 #### Trademark and Competitor Restrictions
 - **Competitor brand names** — cannot appear in title, subtitle, keywords, or description (e.g., using "WhatsApp" in a messaging app's keywords)
@@ -396,12 +391,7 @@ Both Apple and Google enforce strict metadata policies. Violating these policies
 ### Google Play Store — Prohibited Metadata
 
 #### Banned Words and Phrases in Title, Short Description, Developer Name, and Icon
-- **"top"**, **"best"**, **"#1"**, **"number one"** — store performance claims
-- **"free"**, **"no ads"**, **"ad free"** — pricing/promotional terms
-- **"new"**, **"hot"**, **"first"**, **"bonus"** — promotional language
-- **"discount"**, **"sale"**, **"million downloads"** — promotional claims
-- **"App of the Year"**, **"Best Google Play App of 20XX"**, **"Popular"** — ranking claims
-- **"download now"**, **"install now"**, **"play now"**, **"try now"**, **"update now"** — call-to-action phrases
+The banned-term list lives in `references/phase-3-compliance.md` → 3.1.
 
 #### Trademark and Competitor Restrictions
 - **Competitor brand names** — cannot be used in title, short description, or full description to mislead users
