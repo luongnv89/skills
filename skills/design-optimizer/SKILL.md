@@ -135,7 +135,7 @@ Run members in this order, each with the orchestrated-run block (format in
 1. **website-agent-readiness** (live public URL only). Its gate G1 asks the user to send the URL
    to isitagentready.com. After it returns, check `evidence/agent-readiness/scan.json` exists and
    names the same URL. Then **finalize** `manifest.json` `owners` (case A, B or C in the ownership
-   file) before any other member runs. Its later gates (G3 plan, G4 issues) stay opt-in; a "no"
+   file) before any other member runs. Its later gates (G2 triage, G3 plan, G4 issues) stay opt-in; a "no"
    there still leaves the scan usable.
 2. **ux-ax-review** with `skip-checks` = `clarity`, plus the three scan-covered AX checks only in
    case A.
@@ -148,7 +148,7 @@ closing signal as it finishes — the `Result: PASS | PARTIAL | BLOCKED` line th
 ux-ax-review, viral-product-evaluator or website-agent-readiness run, or the `**Result:**` line
 under the `> Orchestrated by:` line in dont-make-me-think's report — and report it to the user.
 A member's BLOCKED, PARTIAL or errored run makes this run PARTIAL (see Safety), except a
-website-agent-readiness run the user stopped at a declined G1 or G3 (see Final response). When a member ends with
+website-agent-readiness run the user stopped at a declined G1, G2 or G3 (see Final response). When a member ends with
 a question for the user (e.g. ux-ax-review's choice-of-IDs implementation offer), relay it
 verbatim; never answer it on the user's behalf.
 
@@ -239,9 +239,9 @@ Close every run — audit, apply, or an early stop — with a chat response in t
   website-agent-readiness gate is a user-chosen scope reduction too, and neither case below
   makes the run PARTIAL by itself. Declined G1 (member ended BLOCKED): mark it
   `— skipped (gate declined)`; case B applies, so only `agent-readiness-scan` goes under
-  "Not covered". Declined G3 (member ended PARTIAL): the scan ran, so keep case A ownership,
-  its findings and its score; mark it `√ (score n/5; plan declined at G3)` and note only the
-  missing `agent-ready-plan.md` under `Uncertainty:`.
+  "Not covered". Declined G2 or G3 (member ended PARTIAL, scan done): keep case A ownership,
+  its findings and its score; mark it `√ (score n/5; declined at G2|G3)` (name the gate) and
+  note only the missing triage or `agent-ready-plan.md` under `Uncertainty:`.
 - `Evidence:` — the manifest path, each member report path with its `Result:` line, and the
   merged report path.
 - `Uncertainty:` — skipped members and their uncovered checks, untested interactions the members

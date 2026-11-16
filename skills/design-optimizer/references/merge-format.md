@@ -58,9 +58,10 @@ Every member has exactly one mark. A member that ended PARTIAL or BLOCKED is nev
 and the run's final `Result:` line (SKILL.md → Final response) is never PASS in that case. The
 exceptions are website-agent-readiness runs the user stopped at a declined gate, and neither
 blocks PASS by itself. A declined G1 (BLOCKED, no scan) is marked `— skipped (gate declined)`;
-case B applies, so only `agent-readiness-scan` goes under Not covered. A declined G3 (PARTIAL,
-scan done) is marked `√ (score n/5; plan declined at G3)`: case A ownership and the scan
-findings stay, and only the missing `agent-ready-plan.md` is noted as uncertainty.
+case B applies, so only `agent-readiness-scan` goes under Not covered. A declined G2 or G3
+(PARTIAL, scan done) is marked `√ (score n/5; declined at G2|G3)`, naming the gate: case A
+ownership and the scan findings stay, and only the missing triage or `agent-ready-plan.md` is
+noted as uncertainty.
 
 ## Priority
 
