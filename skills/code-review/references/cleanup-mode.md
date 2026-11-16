@@ -118,9 +118,10 @@ Detect the stack (language, package manager, test command, typecheck command) an
 Spawn subagents 3, 4, 5, and 8 in a single turn (multiple Agent tool calls in one message). Each receives:
 
 - `repo_path`: the subagent's own working directory (its isolated worktree); it never `cd`s to the orchestrator checkout, and it returns its absolute worktree path and branch with its result
+- `base_sha`: the full SHA of the cleanup-branch tip at dispatch time (for a deletion-cap re-dispatch, the current tip). Before any edit the subagent checks that `git status --porcelain` is empty, runs `git reset --keep <base_sha>`, and confirms `git rev-parse HEAD` equals `base_sha`; on any mismatch it stops and returns an error without editing, since the Agent tool may create the worktree from `origin`'s default branch rather than the unpushed cleanup branch
 - Stack summary (language, tooling, test command)
 - Instructions to produce a per-category report at `.slop-cleanup/wave-1/<subagent>.md`
-- Isolation: spawn each subagent with `isolation: "worktree"`, branched from the cleanup branch; it edits and commits only there. After the wave, copy each worktree's `.slop-cleanup/wave-N/<subagent>.md` to the same `.slop-cleanup/wave-N/<subagent>.md` path in the orchestrator checkout, using the worktree path the subagent returned, so later waves and the final report can read it. Then cherry-pick each worktree's commits onto the cleanup branch one at a time (no merge commits), and run the wave's test gate.
+- Isolation: spawn each subagent with `isolation: "worktree"`, pinned to `base_sha` as above; it edits and commits only there. After the wave, copy each worktree's `.slop-cleanup/wave-N/<subagent>.md` to the same `.slop-cleanup/wave-N/<subagent>.md` path in the orchestrator checkout, using the worktree path the subagent returned, so later waves and the final report can read it. Then cherry-pick exactly the commits in `<base_sha>..<returned branch>`, oldest first (`git rev-list --reverse`), onto the cleanup branch one at a time (no merge commits), and run the wave's test gate.
 - Edit budget: each subagent may edit directly. They must commit their changes with a dedicated message prefixed with their category.
 - Deletion cap: if this category would delete more than 50 items or cross a module boundary, return the list without deleting.
 
@@ -128,7 +129,7 @@ Wait for all four to finish. Run tests and typecheck. If anything broke, stop an
 
 ### 3. Dispatch Wave 2 in parallel
 
-Spawn subagents 1, 2, 6, and 7. Same protocol — parallel dispatch, per-category reports at `.slop-cleanup/wave-2/<subagent>.md`, dedicated commits. Pass `wave_1_reports` as absolute paths under the orchestrator checkout's `.slop-cleanup/wave-1/`, since the copied Wave 1 reports are not in the subagents' worktrees.
+Spawn subagents 1, 2, 6, and 7. Same protocol — parallel dispatch, `base_sha` set to the cleanup-branch tip after Wave 1's cherry-picks and passing test gate, per-category reports at `.slop-cleanup/wave-2/<subagent>.md`, dedicated commits. Pass `wave_1_reports` as absolute paths under the orchestrator checkout's `.slop-cleanup/wave-1/`, since the copied Wave 1 reports are not in the subagents' worktrees.
 
 Wait for all four to finish. Run tests and typecheck. Stop on failure.
 
