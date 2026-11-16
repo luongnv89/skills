@@ -10,8 +10,8 @@ Apply the first row that matches.
 
 | Status | When |
 |---|---|
-| `BLOCKED` | Nothing was scored and no report was written: no landing page input and no answer after one request; a live URL with `/browse` unavailable and no local file offered; a prerequisite is missing; the user stopped the run. |
-| `PARTIAL` | A report was produced and at least one holds: a principle's evidence source was unavailable (no codebase access, a failed fetch) so its verdict is low-confidence beyond the rubric's `judgment`/`visual` set; the user declined the write and the report was returned inline; the sync for an in-repo output path failed and the report went elsewhere. |
+| `BLOCKED` | Nothing was scored and no report was written: no landing page input and no answer after one request; a live URL with `/browse` unavailable and no local file offered; the codebase cannot be read at all (name the concrete error); a prerequisite is missing; the user stopped the run. |
+| `PARTIAL` | A report was produced and at least one holds: only some principles' evidence could not be read (an unreadable file, a failed fetch mid-run) so their verdicts are low-confidence beyond the rubric's `judgment`/`visual` set; the user declined the write and the report was returned inline; the sync for an in-repo output path failed and the report went elsewhere. |
 | `PASS` | All 32 principles were scored from full evidence (only the rubric's own `judgment`/`visual` flags remain) and `viral-evaluation.md` was written. |
 
 `PASS` describes evaluation coverage, not product quality. A `PASS` run can score 12/100.
