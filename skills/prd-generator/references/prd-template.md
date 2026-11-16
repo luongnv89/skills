@@ -55,7 +55,7 @@
 - **User Journey**: How they would use the product
 - **Quote**: A representative statement
 
-### Persona 2: [Name]
+### Persona 2: [Name], [Role]
 [Same structure]
 
 ---
