@@ -128,7 +128,7 @@ Wait for all four to finish. Run tests and typecheck. If anything broke, stop an
 
 ### 3. Dispatch Wave 2 in parallel
 
-Spawn subagents 1, 2, 6, and 7. Same protocol — parallel dispatch, per-category reports at `.slop-cleanup/wave-2/<subagent>.md`, dedicated commits.
+Spawn subagents 1, 2, 6, and 7. Same protocol — parallel dispatch, per-category reports at `.slop-cleanup/wave-2/<subagent>.md`, dedicated commits. Pass `wave_1_reports` as absolute paths under the orchestrator checkout's `.slop-cleanup/wave-1/`, since the copied Wave 1 reports are not in the subagents' worktrees.
 
 Wait for all four to finish. Run tests and typecheck. Stop on failure.
 
