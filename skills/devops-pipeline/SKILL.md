@@ -4,7 +4,7 @@ description: "Configure pre-commit hooks and lean, fast GitHub Actions for shift
 license: MIT
 effort: medium
 metadata:
-  version: 2.5.0
+  version: 2.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -25,7 +25,7 @@ Every check lands in exactly one lane. This table is the single source of truth;
 | GitHub Actions, pull request | As short as the slowest guard leg | Diff-scoped bypass guard |
 | GitHub Actions, default branch | Free on public repos, billed per minute on private | Full suite and version matrix (per merge, nightly on a busy private repo), cache seeding, secrets-dependent scans, clean-VM tests, coverage upload (public repos), deploy/release |
 
-A check that fits an earlier lane must not be repeated in a later one; the only deliberate overlaps are the bypass guard and the default-branch full run that backstops affected-test selection. CI re-running the whole hook set on every push is the failure mode this skill exists to prevent.
+A check that fits an earlier lane must not be repeated in a later one; the only deliberate overlaps are the bypass guard, the default-branch full run that backstops affected-test selection, and `security-setup`'s full-scan workflow, which that skill owns. CI re-running the whole hook set on every push is the failure mode this skill exists to prevent.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
@@ -60,9 +60,9 @@ This skill writes config into someone else's repository and installs git hooks:
 - **Show every new file as a diff before writing it.**
 - **Validate and dry-run before installing hooks**, in Step 2's order, so findings surface without blocking any commit.
 - **Check for an existing git hook before installing.** `pre-commit install` moves a foreign hook to `<hook>.legacy` and runs it in migration mode. Never pass `-f`/`--overwrite`, which deletes it silently; deleting it needs the user's explicit confirmation.
-- **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf.** A failing hook is a finding to report, not an obstacle to route around.
+- **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf**, except `security-setup`'s recorded-override commit. A failing hook is a finding to report, not an obstacle to route around.
 - **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, lower a coverage threshold, or delete or skip a test to turn a run green or make it faster. Report the failure and let the user decide.
-- **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid service such as Codecov on a private repo. Faster third-party runners exist; they are paid and out of scope.
+- **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid service such as Codecov on a private repo.
 - **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Step 1 and Edge Cases.
 
 ## Workflow
@@ -98,7 +98,7 @@ pip install pre-commit  # or brew install pre-commit
 
 When `pre-commit` is available, write `.pre-commit-config.yaml` for the detected stack, each check in its routing-table lane, with `default_stages: [pre-commit]` (a hook with no `stages:` otherwise also runs on every push). If the file exists, use the Safety Rails merge procedure. See [references/precommit-configs.md](references/precommit-configs.md) for tool choice and configs per language, and fast test runs.
 
-- **Fastest free tool per check.** Keep the repo's tools and propose faster ones in the diff, with a benchmark. JS/TS: Oxlint, with ESLint only for rules Oxlint lacks; set Oxlint's categories to `error`, since its warnings exit 0. Type-check: TypeScript 7's `tsc`, then `bun check` or `tsrs` only if faster with the same errors. Python: Ruff, mypy as arbiter.
+- **Fastest free tool per check.** Keep the repo's tools and propose faster ones in the diff, with a benchmark. JS/TS: Oxlint, with ESLint only for rules Oxlint lacks; set Oxlint's categories to `error`, since its warnings exit 0. Type-check: TypeScript 7's `tsc`, then `bun check` only if faster with the same errors (`tsrs` stays a local benchmark until 1.0). Python: Ruff, mypy as arbiter.
 - **Every hook tool is a dev dependency.** `pytest -n auto` needs `pytest-xdist`: when the dev extras lack it, add it in the same diff, or pytest fails with `unrecognized arguments: -n`.
 - **Related unit tests on commit.** The commit-stage unit hook keeps `pass_filenames` and `require_serial: true` and runs only the tests related to the staged files (`vitest related --run`, `scripts/related-tests.py`, changed Go packages), so the guard repeats only the diff's; `pre-push` runs the whole suite, with `always_run: true` so a deletion-only change still runs it (not in Multi-language, where the path-filtered matrices catch deletions).
 - **Affected tests on `pre-push`** when the whole suite exceeds 60 seconds: `scripts/affected-tests.sh`, which fails when source changed but no test was selected, and runs the whole suite when the diff deletes code.
@@ -122,7 +122,7 @@ Nothing local can stop `--no-verify` on a commit or push; the CI bypass guard ke
 
 ### 3. Create GitHub Actions Workflows (lean, fast CI)
 
-If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the CI Speed Audit first, then use the Safety Rails merge procedure, listing each step that duplicates a hook as a proposed removal; remove it only after the user confirms. Templates, for example the guard: [references/github-actions.md](references/github-actions.md).
+If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the CI Speed Audit first, then use the Safety Rails merge procedure, listing each step that duplicates a hook outside the deliberate overlaps as a proposed removal; remove it only after the user confirms. Templates, for example the guard: [references/github-actions.md](references/github-actions.md).
 
 CI runs exactly four kinds of thing:
 
@@ -173,11 +173,11 @@ An audit-only run writes nothing; it prints the per-job split and the proposed f
 A run passes when **all** of the following are true:
 
 - [ ] `.pre-commit-config.yaml` exists at the repo root and lists at least one hook for the detected primary language (formatter, linter, or type checker).
-- [ ] Every check sits in exactly one lane of the Check Routing Table: no hook `id` from `.pre-commit-config.yaml` appears in a workflow `run:` step other than the bypass guard and the default-branch full run, and no check runnable on a laptop is CI-only.
+- [ ] Every check sits in exactly one lane of the Check Routing Table: no hook `id` from `.pre-commit-config.yaml` appears in a workflow `run:` step outside the deliberate overlaps, and no check runnable on a laptop is CI-only.
 - [ ] Hook `stages:` use the modern names (`pre-commit`, `pre-push`, `manual`); no generated config emits the deprecated `commit` or `push`.
 - [ ] Both hook types are installed: `pre-commit install` **and** `pre-commit install --hook-type pre-push`.
 - [ ] At least one `.github/workflows/*.yml` exists and carries only the four CI responsibilities from step 3.
-- [ ] CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
+- [ ] Apart from `security-setup`'s workflow, CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
 - [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by the template's default-branch job when it has one (private Minimal has none by design); with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
 - [ ] No paid runner, larger runner, private-repo shard, private-repo Codecov step, or cache above 10 GB; parallel guard legs and shards only on public repos.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).

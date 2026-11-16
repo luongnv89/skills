@@ -655,7 +655,7 @@ exec npx vitest run --changed "$base" --passWithNoTests --no-fsModuleCache
 
 ### Vitest: `isolate: false`
 
-By default Vitest runs every test file in a fresh worker, child process, or VM context, re-importing the module graph each time. `isolate: false` (CLI `--no-isolate`) reuses workers: imported modules stay cached, so the app is imported once per worker instead of once per file. The report that prompted this section saw shards drop from 100 s to 35 s; measure on the repository before claiming a number.
+By default Vitest runs every test file in a fresh worker, child process, or VM context, re-importing the module graph each time. `isolate: false` (CLI `--no-isolate`) reuses workers: imported modules stay cached, so the app is imported once per worker instead of once per file. Measure on the repository before claiming a speedup.
 
 Adopt it when a benchmark on the repository shows it faster and the suite passes with the reset hook below; otherwise keep isolation. The cost is shared state. Module-level singletons, spies, environment and global stubs, fake timers, and the DOM leak from one file into the next. (Checked with Vitest 5.0.5: two files that each push to a module-level store pass with isolation and fail without it, and pass again with the reset hook.) Setup files run before every test file even with isolation off, so a top-level `afterAll` in a setup file is a per-file reset hook:
 
