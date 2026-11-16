@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Apply code-level fixes for user-approved FAIL items. Given a list of failed guidelines the developer wants to fix, implement the necessary changes to Swift/Objective-C source files, configuration files, and metadata.
+Apply code-level fixes for user-approved FAIL items: changes to Swift/Objective-C source files and project configuration such as Info.plist. Metadata fixes go back to the user as exact text.
 
 ## Critical Instruction
 
@@ -18,7 +18,7 @@ Apply code-level fixes for user-approved FAIL items. Given a list of failed guid
 
 Before starting, confirm:
 
-1. **Which FAILs to fix?** User specifies guideline IDs (e.g., "Fix 1.5-a, 3.1.1, 5.1.1")
+1. **Which FAILs to fix?** User specifies guideline IDs (e.g., "Fix 1.5-a, 3.1.1-restore, 5.1.1-ii")
 2. **Approval**: User explicitly approves each fix
 3. **Scope**: Only code-level fixes in this phase (not metadata, entitlements, or signing)
 
@@ -45,17 +45,15 @@ Not all FAIL verdicts are code-fixable. Categorize:
 5. **Deprecated API Usage** (UIWebView → WKWebView)
    - Fix: Replace UIWebView with WKWebView in code
 
-6. **Missing Demo Account** (for apps requiring login)
-   - Fix: Add demo account credential to app for reviewers to test
-
-7. **Missing Keyboard Return Key Handling**
+6. **Missing Keyboard Return Key Handling**
    - Fix: Add keyboard handling code
 
-8. **Missing Data Validation**
+7. **Missing Data Validation**
    - Fix: Add input validation, error handling
 
 ### NOT Fixable by This Agent
 
+- **Missing demo account (2.1-a-demo)**: not a code fix. Create a reviewer account with full access and enter its credentials (plus any QR code or hardware) in App Review Information in App Store Connect. A built-in demo mode needs Apple's prior approval. Never hardcode credentials or detect the review environment (2.5.19).
 - **Metadata issues** (description doesn't match app, keywords contain brand names, etc.) — Fix in App Store Connect
 - **Screenshot issues** (not showing real app UI) — Recreate and upload in App Store Connect
 - **Entitlements issues** (missing capability declaration) — Add in Xcode capabilities editor
@@ -117,7 +115,7 @@ If Info.plist is accessed via code:
 
 ### Fix Category 2: Restore Purchases (StoreKit)
 
-**Guideline:** 3.1.1 — Restore Purchases required if the app sells non-consumables or subscriptions (consumables-only apps need none)
+**Guideline:** 3.1.1-restore — Restore Purchases required if the app sells non-consumables or subscriptions (consumables-only apps need none)
 
 **Code fix pattern:**
 
@@ -322,66 +320,7 @@ class WebViewController: UIViewController {
 6. Test loading web pages on iOS device
 7. Remove old UIWebView references from Podfile if present
 
-### Fix Category 6: Demo Account (for login-required apps)
-
-**Guideline:** 2.1-a — Demo credentials must be available for App Store review
-
-**Code fix pattern:**
-
-```swift
-// Add demo credentials visible in app or in review notes
-
-// Option 1: Display demo credentials in UI (if appropriate)
-struct LoginView: View {
-    @State var email = ""
-    @State var password = ""
-    @State var showDemo = false
-
-    var body: some View {
-        VStack {
-            TextField("Email", text: $email)
-            SecureField("Password", text: $password)
-            Button("Login") { }
-
-            Button("Use Demo Account") {
-                email = "demo@example.com"
-                password = "DemoPassword123!"
-                showDemo = true
-            }
-            .font(.caption)
-            .foregroundColor(.gray)
-        }
-    }
-}
-
-// Option 2: Hardcode demo credentials in code for App Store review
-class DemoMode {
-    static let demoEmail = "appstore-review@example.com"
-    static let demoPassword = "AppStoreReview2026!"
-}
-
-// Option 3: Detect review environment and auto-login
-#if DEBUG || REVIEW_BUILD
-let isReviewBuild = true
-#endif
-
-if isReviewBuild {
-    // Auto-login with demo account
-}
-```
-
-**Steps:**
-1. Create a test account specifically for App Store reviewers
-2. Either hardcode credentials in code (in #DEBUG section), or
-3. Display demo credentials in UI (especially if app is demo-heavy), or
-4. Document in App Review Notes: "Demo credentials: [email] / [password]"
-5. Ensure demo account:
-   - Has all features unlocked/visible
-   - Is not a real user account (use test@example.com style)
-   - Has sufficient quota/limits for full testing
-   - Can be reset if needed (for multiple review submissions)
-
-### Fix Category 7: Input Validation & Error Handling
+### Fix Category 6: Input Validation & Error Handling
 
 **Guideline:** Various — Apps must not crash on invalid input
 

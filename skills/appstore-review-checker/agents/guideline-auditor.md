@@ -88,7 +88,7 @@ For each guideline, create a verdict with this structure:
   - Example: "Privacy policy URL present in metadata" ✓ Guideline passed.
 
 - **FAIL** — Clear violation found with specific evidence.
-  - Example: "App declares location permission but code search found no CoreLocation usage, and no NSLocationWhenInUseUsageDescription in Info.plist" ✗ Guideline failed.
+  - Example: "LocationService.swift:42 calls requestWhenInUseAuthorization() but Info.plist has no NSLocationWhenInUseUsageDescription" ✗ Guideline failed.
   - Only use FAIL if you have concrete evidence from the profile.
 
 - **WARNING** — Potential issue that requires developer verification or that the profile cannot fully verify.
