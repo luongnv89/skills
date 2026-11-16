@@ -31,14 +31,14 @@ Load the JSON from requirements-extractor and understand:
 Break the feature set into three phases:
 
 #### Phase 1: POC (Proof of Concept)
-- Duration: 1-2 sprints
+- Sprint: 1
 - Scope: The ONE feature that most directly proves the core value proposition
 - Goal: Validate the core idea works
 - Example: For a design tool, POC = ability to create shapes and export SVG
 - Rule: Minimal implementation, no polish, focused on demonstrating value
 
 #### Phase 2: MVP (Minimum Viable Product)
-- Duration: 2-4 sprints after POC
+- Sprints: 2 (MVP Foundation) and 3 (MVP Completion); add one only when the MVP scope needs it
 - Scope: Essential features for first public release
 - Goal: Complete, usable product that solves the core user problem
 - Must include: All core features, basic auth, data persistence, basic error handling
@@ -46,7 +46,7 @@ Break the feature set into three phases:
 - Rule: Feature-complete but not pixel-perfect
 
 #### Phase 3: Full Features
-- Duration: 4+ sprints after MVP
+- Sprints: 4 onward
 - Scope: Everything else (enhancements, integrations, nice-to-haves, polish)
 - Goal: Comprehensive product with competitive feature set
 - Rule: Lower priority, can iterate in response to user feedback
@@ -109,7 +109,7 @@ Save the sprint plan JSON:
       "rationale": "Proves core value..."
     },
     "mvp": {
-      "duration_sprints": 3,
+      "duration_sprints": 2,
       "features": ["FEATURE_ID_2", "FEATURE_ID_3", "..."],
       "rationale": "Essential for first release..."
     },
@@ -186,7 +186,5 @@ A valid JSON file at the specified output path with the structure above. The spr
 
 ## Tips
 
-- Be conservative with scope: POC should be truly minimal (could even be a prototype, not production code)
-- MVP should be complete but rough (can be polished in full features phase)
 - Document assumptions made to resolve ambiguities from the requirements
 - Identify potential bottlenecks (features that block many others) for early prioritization

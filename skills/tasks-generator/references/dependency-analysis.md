@@ -108,11 +108,3 @@ checks, pass the compact `{ "tasks": [...] }` graph to this helper. Consume
 recompute path sums, bottleneck counts, or cycle membership in prose. If the
 helper rejects the graph, stop before rendering `tasks.md`; the model may still
 explain the correction, but may not override the deterministic result.
-
-## Fixture command
-
-Run the local standard-library fixtures from the repository root:
-
-```bash
-python3 -m unittest discover -s meta/tasks-generator/tests -p 'test_*.py'
-```
