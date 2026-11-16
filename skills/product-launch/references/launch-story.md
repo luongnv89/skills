@@ -36,9 +36,8 @@ page and talks. It has five elements:
 - **Story owner:** one person keeps the story the same everywhere and approves changes
   to it. With the story-owner track on, the plan records the owner's role (founder, head
   of marketing), never a name; with it off, `Story owner: none (track off)`.
-- A plan written before this file existed has no `## Launch story` or
-  `## Campaign tracks` section. Treat every track as off, and write `copy.story.*` fields
-  only for elements a Profile row sources.
+- A plan with no `## Launch story` or `## Campaign tracks` section: treat every track as
+  off, and write `copy.story.*` fields only for elements a Profile row sources.
 
 ## 2. The copy test
 

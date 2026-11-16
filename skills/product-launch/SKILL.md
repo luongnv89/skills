@@ -9,7 +9,7 @@ dependencies:
   - logo-designer
   - seo-ai-optimizer
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -169,7 +169,7 @@ Spawn one explorer.
 
 - **Input:** `references/product-profile.md`, the user's request verbatim, the landing
   page, the local candidates, and the codebase path.
-- **Output:** the Profile, Blockers and Assets tables, in at most 1,500 words.
+- **Output:** the Profile, Blockers and Assets tables, and nothing else.
 
 Keep the three tables as they are: they go into the plan. If the explorer returns
 `BLOCKED: landing page unreachable`, ask the user for a local copy or saved HTML. Never
