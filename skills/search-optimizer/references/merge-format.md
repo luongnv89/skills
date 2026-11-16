@@ -7,7 +7,7 @@ label.
 ```markdown
 # Search Optimization: <target>
 
-Run: search-optimizer 1.1.0 · <UTC timestamp> · branch: web | store | both
+Run: search-optimizer <metadata.version from SKILL.md> · <UTC timestamp> · branch: web | store | both
 Evidence: <output>/evidence/manifest.json · scan case: A | B | C
 Members: seo-ai-optimizer √ · website-agent-readiness √ (3/5, scanned once) · viral-product-evaluator √ · aso-marketing ~ PARTIAL (user ended the run at the plan gate)
 
