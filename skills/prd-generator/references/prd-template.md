@@ -28,6 +28,8 @@
 
 ## 1. Product Overview
 
+> Source: idea.md, validate.md
+
 ### 1.1 Product Vision
 [Compelling vision statement from idea.md]
 
@@ -47,14 +49,13 @@
 
 ## 2. User Personas
 
-### Persona 1: [Name]
-- **Demographics**: Age, occupation, location
+### Persona 1: [Name], [Role]
 - **Goals**: What they want to achieve
 - **Pain Points**: Current frustrations
 - **User Journey**: How they would use the product
 - **Quote**: A representative statement
 
-### Persona 2: [Name]
+### Persona 2: [Name], [Role]
 [Same structure]
 
 ---
@@ -280,8 +281,8 @@ graph TB
 
 ### 9.3 Risks
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
 | [Risk] | [H/M/L] | [H/M/L] | [Strategy] |
 
 ---
@@ -304,4 +305,4 @@ graph TB
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | [Date] | [Author] | Initial draft |
+| 1.0 | [Date] | [Author] | v1.0 — initial PRD |
