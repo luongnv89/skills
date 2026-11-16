@@ -9,8 +9,8 @@ blockers and lists the assets that already exist.
 - **Input:** this file; the user's request, verbatim; the landing page (a URL or a
   local path); local landing-page candidates found in the codebase; the codebase path, or
   "none".
-- **Output:** one Markdown reply of no more than 1,500 words, containing the three tables
-  below in this order: Profile, Blockers, Assets. The reply holds nothing else.
+- **Output:** one Markdown reply containing only the three tables below, in this order:
+  Profile, Blockers, Assets.
 - **Constraints:**
   - Read-only. Write nothing into the project. Temporary downloads go into a fresh
     `mktemp -d` directory.

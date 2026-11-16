@@ -265,7 +265,7 @@ Free path total: $0. Paid options proposed: <each option, its price and what it 
 
 ## 7. Approval gate (Step 4, in chat)
 
-Print a summary of no more than 40 lines, in this order:
+Print a summary the user can scan on one screen, in this order:
 
 1. The product in one line.
 2. The blockers to fix.
