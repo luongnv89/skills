@@ -31,7 +31,7 @@ Three details are load-bearing, and dropping any one of them makes the job fail 
 - **`if: github.event_name == 'pull_request'`.** On a `push` event `github.event.before` is all zeros for a branch's first push, and stale after a force-push. Pull requests are where bypassed commits actually enter, so guard there.
 - **The project's toolchain in the same job.** Hooks declared `language: system` shell out to `npm`, `mypy`, `go`, or `cargo`; a bare Python job cannot run them.
 
-Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. Running `--all-files` in CI re-checks the entire repository on every push and is the cost blow-up this skill exists to avoid. `filter: blob:none` is a speed detail, not a load-bearing one; see [Blobless checkout](#blobless-checkout).
+Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. Running `--all-files` in CI re-checks the entire repository on every push and is the cost blow-up this skill exists to avoid. The one approved exception is `security-setup`'s offline security workflow (`security_check.py --all`), which that skill owns; leave it in place. `filter: blob:none` is a speed detail, not a load-bearing one; see [Blobless checkout](#blobless-checkout).
 
 ## Table of Contents
 
@@ -1289,11 +1289,11 @@ done
 | No cache under `refs/heads/<default>` | No job runs on the default branch | A default-branch matrix or full run (Minimal on a public repository: `seed-cache`) |
 | Pull request runs miss while the lockfile matches the default branch | Key mismatch: OS, tool version, or lockfile path | Identical setup step and version in the seeding job and the guard |
 | One job is always the slowest | It is the critical path | Split by stage (public); move side work out; affected-only tests; shard (public only) |
-| The same step in several jobs | Duplicated work | Run it once; hook checks belong to the guard |
+| The same step in several jobs | Duplicated work | Run it once; hook checks belong to the guard (`security-setup`'s offline security workflow is an approved exception) |
 | Matrix legs on `pull_request` | Version matrix on the hot path | Default branch only: per merge, or nightly on a busy private repository |
 | No `timeout-minutes` | 360-minute default | About three times the typical duration |
 
-Measure before cutting. Deleting tests is rarely the fix: in the report that prompted this section, the time was never in the tests, and in the example below the time *is* in the slowest job's work. The split says which case you are in. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests.
+Measure before cutting. Deleting tests is rarely the fix: the split shows whether the time is in queue, setup, or the slowest job's work, as in the example below. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests.
 
 ### 4. Report
 
