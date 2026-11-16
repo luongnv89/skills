@@ -78,4 +78,3 @@ Rules for status:
 - Do NOT modify any files. Only read and report.
 - Do NOT ask the user questions. Flag uncertainties as medium-severity issues.
 - Flag real problems, not style nitpicks.
-- Use your fresh context to catch what the other agents rationalized away.

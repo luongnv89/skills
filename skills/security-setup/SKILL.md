@@ -5,7 +5,7 @@ license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.6.2
+  version: 1.6.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -14,10 +14,6 @@ metadata:
 Install a local-first security hardening stack for a project. Favor checks that run
 offline at hook time, produce machine-readable output, and give developers a clear
 summary before code leaves their machine.
-
-<!-- Maintainer note — not runtime guidance: keep this orchestrator short for the
-agent's context budget; detailed matrices, templates, and long verification
-scenarios live in `references/`. Link, don't inline. -->
 
 This skill may trigger automatically per its description, but it never writes
 silently: Phase 1 always dry-runs the planned changes and waits for explicit
@@ -432,6 +428,8 @@ Optional and propose-only. After the run's result is delivered, run this check:
 8. The user opts out → stop proposing. With their approval, replace this section's body with `Off — the user opted out.`
 
 ## Resources
+
+Read each file only when its step needs it, to keep the context window small.
 
 - `references/tool-selection.md` - offline-first tool matrix and install notes
 - `references/templates.md` - target repo file templates

@@ -31,7 +31,7 @@ pre-commit migrate-config
 | Language | Formatter | Linter | Type Check | Security | Tests |
 |----------|-----------|--------|------------|----------|-------|
 | JS/TS | Prettier | Oxlint (+ ESLint for rules it lacks) | tsc 7 (benchmark `bun check`, `tsrs`) | npm audit | Vitest |
-| Python | Ruff/Black | Ruff | mypy (benchmark Pyrefly, ty) | Bandit + detect-secrets | pytest + pytest-xdist (a dev dependency) |
+| Python | Ruff/Black | Ruff | mypy (benchmark Pyrefly, ty) | Bandit | pytest + pytest-xdist (a dev dependency) |
 | Go | gofmt | golangci-lint | built-in | gosec | go test |
 | Rust | rustfmt | Clippy | built-in | cargo-audit | cargo test |
 | Java | google-java-format | Checkstyle | - | SpotBugs | mvn test |

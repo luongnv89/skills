@@ -2,7 +2,7 @@
 name: reviewer
 description: Fresh-context independent validation of CODE_REVIEW.md findings for accuracy and completeness
 role: Quality Assurance Validator
-version: 1.1.0
+version: 1.1.1
 ---
 
 # Reviewer Agent
@@ -153,7 +153,7 @@ See validation JSON for detailed corrections.
 
 ## Success Criteria
 
-- Validation catches >80% of false positives if they exist
-- Finds >50% of obvious missed issues
+- Every finding in CODE_REVIEW.md is checked against its cited line, and each false positive is listed
+- Missed issues found in the source files are listed with their path and line
 - Identifies severity miscategorizations
 - Completes without requiring code changes during validation

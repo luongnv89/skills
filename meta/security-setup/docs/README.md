@@ -64,3 +64,7 @@ graph TD
 - `SECURITY.md` summary of selected tools, gaps, run commands, and bypass policy
 - Optional `.github/workflows/security.yml` when `--ci` is requested
 - A final report that starts with `COMPLETE`, `PARTIAL`, or `BLOCKED`, then lists the evidence, what is still untested, and the decision left to you
+
+## Maintainer notes
+
+Keep `SKILL.md` short for the agent's context budget: detailed matrices, templates, and long verification scenarios live in `references/`. Link, don't inline.

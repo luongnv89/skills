@@ -141,7 +141,7 @@ Assign 1d (1 day), 2d (2 days), or 3d (3 days):
 - **1d**: Simple, straightforward work, low ambiguity
 - **2d**: Moderate complexity, some unknowns, moderate ambiguity
 - **3d**: Complex, significant unknowns, high ambiguity
-- Use 1d as default when in doubt
+- When unsure between two sizes, pick the larger: doubt is itself ambiguity
 
 ### Step 10: Validate Completeness
 

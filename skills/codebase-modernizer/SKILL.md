@@ -7,7 +7,7 @@ dependencies:
   - code-review
   - dont-make-me-think
 metadata:
-  version: 1.5.1
+  version: 1.5.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (baseline gate → parallel dimension audits → evidence report → phased sprint plan → validation)"
 ---
@@ -336,5 +336,5 @@ Read each file only when its phase needs it; that keeps the agent's context budg
 - `scripts/dep_scan.sh` — read-only ecosystem and dependency probe; prints a markdown summary.
 
 Agents (spawn with the Agent tool; run inline if unavailable): `agents/dependency-auditor.md`
-(`DEP`), `agents/dimension-auditor.md` (one delegated dimension per invocation),
+(`DEP`), `agents/dimension-auditor.md` (one non-`DEP` dimension per invocation),
 `agents/plan-architect.md` (report → plan), `agents/plan-validator.md` (fresh-context validation).

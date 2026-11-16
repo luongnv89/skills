@@ -25,7 +25,7 @@ Philosophy: **lean, fast CI**. pre-commit already handles format, lint, type-che
           pre-commit run --hook-stage pre-push --from-ref "$base" --to-ref HEAD
 ```
 
-Three details are load-bearing, and dropping any one of them makes the job fail on its first run:
+Beyond running both stages, three more details are load-bearing, and dropping any one of them makes the job fail on its first run:
 
 - **`fetch-depth: 0`.** `actions/checkout` clones at depth 1, so the base SHA is not in the object store and `--from-ref` dies on a bad object.
 - **`if: github.event_name == 'pull_request'`.** On a `push` event `github.event.before` is all zeros for a branch's first push, and stale after a force-push. Pull requests are where bypassed commits actually enter, so guard there.

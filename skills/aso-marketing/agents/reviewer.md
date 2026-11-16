@@ -118,7 +118,7 @@ Read `references/aso_best_practices.md` and verify:
 - [ ] Keywords field maximizes character budget (iOS)
   - Chars used: X/100
   - Utilization: X%
-  - Target: >85%
+  - Target: 90%+
   - Status: [✅ Optimal / ⚠️ Could use more / ❌ Under-utilized]
 
 - [ ] Description is conversion-optimized with keyword integration
@@ -284,7 +284,7 @@ The ASO implementation has been reviewed against:
 - Primary keyword "meditation" in Name ✅
 - Secondary keyword "sleep" in Subtitle ✅
 - Long-tail keywords in Description ✅
-- Keywords field at 90% utilization ✅ (exceeds 85% target)
+- Keywords field at 90% utilization ✅ (meets 90%+ target)
 
 ### Description Quality
 ✅ **PASS** — Description is conversion-optimized
@@ -415,7 +415,7 @@ Or, if issues found:
 ### 🟡 Medium: Keyword Utilization Below Target
 
 **Field**: iOS Keywords
-**Issue**: Using only 37/100 characters (37% utilization, target >85%)
+**Issue**: Using only 37/100 characters (37% utilization, target 90%+)
 **Current**: "guided,mindfulness,anxiety,relaxation" (37 chars)
 **Fix**: Add more single words that don't repeat the name or subtitle: "breathing,relief,bedtime,story,sounds,rest,unwind,night,deep"
 **Expected**: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep" (98 chars)
