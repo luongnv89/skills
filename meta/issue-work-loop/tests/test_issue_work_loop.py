@@ -643,6 +643,28 @@ class WorkerLaunchContractTests(unittest.TestCase):
         launch = section(LOOP_SKILL.read_text(encoding="utf-8"), "## Selective Worker Launch Profile")
         self.assertIn("except plain `opencode` with no", launch)
 
+    def test_app_codex_stops_before_the_start(self):
+        # #547: the app has no env readback and codex no on-screen mode, so an
+        # app codex worker is refused before the start, never started then closed.
+        backend = SKILL_DIR / "references" / "fleet-backend.md"
+        gate = self.selective_profile_section(backend, "## App launch-profile gate")
+        bullet = next(line for line in gate.splitlines() if line.startswith("- **codex:**"))
+        for phrase in ("no carve-out", "stops before the start",
+                       "*Autonomous mode unavailable*", "Never start an app codex worker"):
+            self.assertIn(phrase, bullet, phrase)
+        boot = self.selective_profile_section(backend, "## App boot gate")
+        boot_bullet = next(line for line in boot.splitlines()
+                           if line.startswith("- **codex:** no verified switch"))
+        self.assertNotIn("close that loop-owned worker", boot_bullet)
+        self.assertIn("never reaches this gate", boot_bullet)
+        self.assertIn("*App launch-profile gate* stops it before the start", boot_bullet)
+        edges = (SKILL_DIR / "references" / "edge-cases.md").read_text(encoding="utf-8")
+        row = next(line for line in edges.splitlines() if line.startswith("| `codex` worker"))
+        self.assertIn("TUI: launch passes the profile parser", row)
+        self.assertIn("App: stop before the start with *Autonomous mode unavailable*", row)
+        self.assertIn("no worker is started", row)
+        self.assertIn("`--ask-for-approval never` or `--sandbox danger-full-access`", row)
+
     def test_each_doc_section_requires_the_complete_worker_profile_policy(self):
         sections = (
             self.selective_profile_section(
