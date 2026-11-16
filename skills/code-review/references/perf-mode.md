@@ -20,7 +20,8 @@ or worktree during analysis. A named report artifact may be written only when th
 contract specifies one; otherwise findings are report output, not source files.
 
 Any source mutation is a separate, explicitly approved workflow. It must establish its own
-freshness check and stash-first sync contract before edits; this mode never performs that work.
+freshness check and sync/safety gates (cleanup mode stops on a dirty tree) before edits; this mode
+never performs that work.
 
 ## Workflow
 
@@ -44,8 +45,8 @@ Before analysis:
 This mode stops after presenting the optimization report; it never applies fixes or creates or
 switches branches. If the user separately approves a mutation workflow, that workflow must
 re-check `HEAD`, status, and local tracking observations, detect incoming changes, and use its
-stash-first sync contract before edits. It owns branch creation, source changes, per-fix tests,
-security scans, and rollback. No mutation step may be inferred from this report or run as part of
+own sync/safety gates (cleanup mode stops on a dirty tree) before edits. It owns branch creation,
+source changes, per-fix tests, security scans, and rollback. No mutation step may be inferred from this report or run as part of
 performance analysis.
 
 ## Response Format
@@ -89,7 +90,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase: Analysis** — checks: `Issue detection`, `Priority categories covered`, `Impact estimated`, `Findings sorted by severity`
 
-**Phase: Mutation Handoff** — checks: `Fix application deferred`, `User approval required`, `Freshness and stash-first contract`, `Existing tests required`, `No regressions requirement`, `Warnings documented`
+**Phase: Mutation Handoff** — checks: `Fix application deferred`, `Handoff named`
 
 ## Severity Levels
 
@@ -109,10 +110,7 @@ A run is acceptable only when all of the following are verifiable:
 - Produces an optimization report grouped by severity (Critical, High, Medium, Low) — assert at least one severity bucket appears or the "no issues found" branch fires.
 - Each reported issue includes `Location`, `Category`, `Problem`, `Impact`, and `Fix` — verify by checking the rendered template fields are non-empty.
 - Impact statement includes a quantitative estimate (e.g., "~500ms → ~50ms", "O(n²) → O(n log n)") — assert the Impact line contains a number, complexity class, or before/after pair.
-- This mode applies no fixes; any separately approved mutation handoff requires explicit user approval before edits.
-- A separately approved mutation workflow runs existing tests after each applied fix and reports the result; if no tests exist, it warns before applying changes.
-- A separately approved mutation workflow checks out a feature branch following the repo convention before edits; this mode does not create or switch branches.
-- The mutation handoff carries a fresh HEAD/status/tracking check and a stash-first sync contract.
+- This mode applies no fixes. Applying them is a separate, user-approved coding task outside this mode, which owns its own sync, branch, and test gates.
 - Each phase emits a Step Completion Report block with `Result: PASS | FAIL | PARTIAL` — assert the block is present in the transcript.
 
 ## Expected Output
@@ -145,14 +143,14 @@ const rows = await db.query('SELECT * FROM orders WHERE user_id = ANY($1)', [ids
 \`\`\`
 ```
 
-Expected result: a markdown report with one block per issue, sorted Critical → Low, followed by a phase completion report. See `meta/code-review/docs/README.md` for a longer end-to-end example.
+Expected result: a markdown report with one block per issue, sorted Critical → Low, followed by a phase completion report.
 
 ## Edge Cases
 
 - **No performance issues found**: emit a "code is already well-optimized" note and recommend runtime profiling tools (`perf`, `py-spy`, Chrome DevTools) — do NOT invent low-severity findings to fill the report.
 - **File exceeds 2000 lines**: stop and ask the user which functions/sections to focus on; do not silently truncate.
 - **Tests are absent**: the mutation handoff warns before applying any fix and requires explicit confirmation; this analysis mode never applies changes silently.
-- **Optimization regresses tests**: the separately approved mutation workflow confirms the diff scope, preserves work through its stash-first recovery contract, and requires approval before reverting; this mode never runs checkout, stash, or discard operations.
+- **Optimization regresses tests**: the separately approved mutation workflow confirms the diff scope, preserves work through its own safety gates, and requires approval before reverting; this mode never runs checkout, stash, or discard operations.
 - **Repo lacks `origin` or sync fails**: the mutation workflow stops before edits and reports the recovery path; performance analysis records its local observations and does not attempt recovery.
 - **Mixed-language project**: analyze each language with its own checklist; do not apply JavaScript heuristics to Python code.
 - **Premature optimization candidates**: skip micro-optimizations unless a measurable hot path is identified — flag them as Low only when a profile or benchmark backs the claim.

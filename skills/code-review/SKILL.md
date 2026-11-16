@@ -4,7 +4,7 @@ description: "Review or improve code — one skill, four modes: bug/security rev
 license: MIT
 effort: high
 metadata:
-  version: 2.3.1
+  version: 2.3.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
 ---
@@ -53,7 +53,7 @@ they must not otherwise mutate the index, refs, stash, branch, worktree, or remo
 - Review and perf analysis record `git rev-parse HEAD`, `git status`, and local tracking
   observations without claiming remote freshness. They do not fetch, stash, pull, rebase,
   checkout/switch, create or delete branches/worktrees, or apply source fixes. A separately
-  approved mutation workflow owns its own freshness and stash-first sync contract.
+  approved mutation workflow owns its own freshness check and sync gates.
 - **Confirm before the first write** in `cleanup`, and follow that mode's own gating.
 
 ## Repo Sync Before Edits (mandatory)
@@ -71,7 +71,7 @@ git fetch origin && git pull --rebase origin "$branch"
 - If `origin` is missing, or the pull or stash pop conflicts, stop and ask the user. Do not write any file.
 - If the target is not a git repo, `clean` skips the sync and notes that in its report.
 
-The full step, with recovery commands, is in `references/clean-mode.md` and `references/cleanup-mode.md`.
+The full step is in `references/clean-mode.md` (with stash recovery commands) and `references/cleanup-mode.md`.
 
 ## Run the mode's workflow
 

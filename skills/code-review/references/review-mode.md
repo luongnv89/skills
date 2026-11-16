@@ -9,8 +9,8 @@ First, record `git rev-parse HEAD`, `git status`, and local tracking observation
 claiming remote freshness. Review analysis is source-read-only: do not fetch, stash, pull, rebase,
 checkout/switch, create or delete branches/worktrees, or mutate the index, refs, stash, branch,
 or any other worktree path. The only permitted file write is the named `CODE_REVIEW.md` report
-artifact. Then complete the Environment Check to pick a mode (PR/diff vs full audit). Next, follow
-the Instructions phases (checklist scan -> findings synthesis -> validation). Finally, emit the
+artifact. Then complete the Environment Check to pick a mode (PR/diff vs full audit). Next, run
+the selected mode's process from Mode Selection against the Review Checklist. Finally, emit the
 Output Format report and verify Acceptance Criteria.
 
 ## Overview
@@ -21,7 +21,7 @@ The skill orchestrates parallel reviewer subagents over batched files, then runs
 
 Review mode never performs repository sync or source mutation during analysis. If a separately
 approved mutation is requested, hand it off to a workflow with its own freshness check and
-stash-first sync contract; this mode does not apply fixes.
+sync/safety gates (cleanup mode stops on a dirty tree); this mode does not apply fixes.
 
 ## Environment Check
 
@@ -44,7 +44,7 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
 **Mode 1: Small PR/Diff (Fast Path - Inline)**
 - Changed files: <50
 - Total lines changed: <5000
-- Process: Run complete review inline in [`references/review-mode.md`](./review-mode.md); no subagents needed
+- Process: run the Review Checklist inline over the changed lines; no subagents
 - Git commands:
   ```bash
   git diff --name-only <base>..HEAD
@@ -79,7 +79,7 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
   5. Full validation pass
 - Output: CODE_REVIEW.md with sampled findings + note about sampling strategy
 
-If the Agent tool is unavailable, use the inline workflow in [`references/review-mode.md`](./review-mode.md) sequentially instead of Mode 2/3 subagent batching.
+If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequentially, and note in the report that the validation pass was skipped.
 
 ## Review Checklist
 
@@ -179,6 +179,7 @@ Generate `CODE_REVIEW.md`:
 
 **Date**: YYYY-MM-DD
 **Scope**: [PR #123 | Full Audit]
+**Mode**: [1 — inline | 2 — batched | 3 — sampled]
 **Files Reviewed**: N
 
 ## Summary

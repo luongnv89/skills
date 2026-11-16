@@ -62,7 +62,7 @@ Deprecated code sometimes stays because someone external still uses it. Before d
 
 ## Output Report
 
-`/.slop-cleanup/wave-2/legacy-code-remover.md`:
+`.slop-cleanup/wave-2/legacy-code-remover.md`:
 
 ```markdown
 # Legacy Code Removal Report

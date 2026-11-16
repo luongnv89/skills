@@ -70,10 +70,7 @@ Full detail on the Pattern B+C (Parallel Workers + Review Loop) architecture use
 
 ## Graceful Degradation
 
-If the Agent tool is unavailable:
-- Fall back to the inline workflow in [`references/review-mode.md`](./review-mode.md)
-- Use sequential file processing instead of parallel batches
-- Return CODE_REVIEW.md without a validation pass
+If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequentially, and note in the report that the validation pass was skipped.
 - Log message: "Subagent architecture unavailable; running inline review"
 
 ## Risk Mitigation

@@ -58,12 +58,12 @@ If a candidate fails any check, keep it and note it in the "kept" section of the
 
 - **Exported but unused types**: if the project is a library, keep them. If an app, delete.
 - **Tests for deleted code**: delete the tests too. That's a feature, not a bug.
-- **Commented-out code**: delete it. Git preserves history.
+- **Commented-out code**: leave it; `slop-comment-cleaner` owns it in this wave.
 - **Unused dependencies in package.json/requirements.txt**: flag for deletion but only remove if confirmed unused at both import and runtime config layers.
 
 ## Output Report
 
-`/.slop-cleanup/wave-1/unused-code-killer.md`:
+`.slop-cleanup/wave-1/unused-code-killer.md`:
 
 ```markdown
 # Unused Code Elimination Report

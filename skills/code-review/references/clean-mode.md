@@ -21,7 +21,7 @@ Do **not** auto-trigger on general coding, bug-fixing, feature work, performance
 
 **Optional `CLEAN_CODE_AUDIT.html`** — a single self-contained, offline-safe visual report (dark-IDE theme: metric tiles, a severity donut, effort-by-phase bars, collapsible findings with a severity filter, visible count, and reset, and an interactive phased plan with progress tracking). Offer it after writing the `.md`; build it from `references/report-template.html` following `references/html-report-guide.md`. Same data as the `.md`, visual form — keep counts consistent between the two.
 
-This skill **does not edit source code.** It audits and plans; a human (or a follow-up skill like `code-review`/`test-coverage`) executes the tasks.
+This mode **does not edit source code.** It audits and plans; a human (or this skill's `cleanup` mode, or `test-coverage`) executes the tasks.
 
 ## Repo Sync Before Edits (mandatory)
 
