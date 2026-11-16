@@ -1,7 +1,5 @@
 # Step Completion Report & Edge Cases
 
-The two output/recovery contracts moved out of SKILL.md so the body stays lean. SKILL.md keeps a one-line pointer at each section; the full definitions live here.
-
 - Read the **Step Completion Report** section before emitting the report that closes every operation.
 - Read the **Edge cases** section when a phase hits one of the named conditions — not preemptively.
 
