@@ -270,10 +270,10 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**idea-validator**](skills/idea-validator/) | 1.10.1 | max | Market, feasibility, competitor checks for ideas |
 | [**viral-product-evaluator**](skills/viral-product-evaluator/) | 1.8.2 | high | Score codebase + landing page vs 32 viral principles |
 | [**product-launch**](skills/product-launch/) | 1.4.1 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan; submits to Product Hunt through its MCP only after you approve the preview |
-| [**brand-name-checker**](skills/brand-name-checker/) | 1.6.0 | max | Trademark, domain, social, registry conflicts |
+| [**brand-name-checker**](skills/brand-name-checker/) | 1.6.1 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](skills/prd-generator/) | 1.6.2 | max | Structured PRD from idea or validate notes |
-| [**tad-generator**](skills/tad-generator/) | 1.7.1 | max | Technical architecture document from PRD |
-| [**tasks-generator**](skills/tasks-generator/) | 1.6.1 | max | Sprint tasks and plan from PRD |
+| [**tad-generator**](skills/tad-generator/) | 1.7.2 | max | Technical architecture document from PRD |
+| [**tasks-generator**](skills/tasks-generator/) | 1.6.2 | max | Sprint tasks and plan from PRD |
 
 > **`plan-to-issues` moved to [luongnv89/idd](https://github.com/luongnv89/idd)** (idd#502), next to the `issue-creator` it depends on: `asm install https://github.com/luongnv89/idd --skill plan-to-issues`, or the idd Claude Code plugin.
 

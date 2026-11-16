@@ -49,7 +49,9 @@ single feature that proves the product hypothesis.
 
 **Dependencies**: None
 
-**Effort**: 2-3 days (M)
+**Blocks**: 1.2, 2.1
+
+**Effort**: 2 days
 
 **PRD Reference**: §3.2 Ranking
 
@@ -65,7 +67,7 @@ single feature that proves the product hypothesis.
 
 ## Critical Path
 
-`1.1 → 2.1 → 2.2 → 3.1 → 3.4` (estimated 11-14 days)
+`1.1 → 2.1 → 2.2 → 3.1 → 3.4` (12 days, `critical_path.effort_days`)
 
 ## Flagged Ambiguities
 
@@ -146,7 +148,7 @@ The agent's final message is the Final Report (SKILL.md → *Final Report*), wit
 ```
 
 **Critical Path Tasks**: 1.2 → 2.1 → 3.1 → 4.1
-**Estimated Length**: [X tasks]
+**Length**: [critical_path.effort_days] days
 
 > ⚠️ Delays on critical path tasks directly impact project completion.
 ```
@@ -168,6 +170,10 @@ The agent's final message is the Final Report (SKILL.md → *Final Report*), wit
 - [ ] [Specific, testable condition 3]
 
 **Dependencies**: [None / Task <sprint>.<index>]
+
+**Blocks**: [None / Task <sprint>.<index>]
+
+**Effort**: [1 day | 2 days | 3 days]
 
 **PRD Reference**: [Section or requirement]
 

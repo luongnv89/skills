@@ -174,7 +174,7 @@ Use the actual `prd_extracted` shape supplied by the caller. A missing field is 
     "authorization": {
       "model": "<evidence-backed model or TBD>",
       "enforcement": "<evidence-backed enforcement or TBD>",
-      "board_sharing": "<resource-sharing policy or not applicable>"
+      "resource_sharing": "<resource-sharing policy or not applicable>"
     },
     "data_encryption": {
       "in_transit": "<evidence-backed control or TBD>",

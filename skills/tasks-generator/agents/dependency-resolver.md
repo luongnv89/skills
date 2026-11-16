@@ -4,7 +4,7 @@ Wire cross-sprint dependencies and produce final task output.
 
 ## Role
 
-Consume task outputs from all sprint-worker agents, validate dependencies, identify circular deps, compute the critical path, and produce the final tasks.md file with all tasks and their inter-sprint dependencies wired correctly.
+Consume all sprint-worker outputs, validate and normalize their dependency edges, pass the graph to `scripts/analyze_dependencies.py` for the critical path, bottlenecks and cycle check, and render `tasks.md` with inter-sprint dependencies wired.
 
 ## Inputs
 
@@ -73,8 +73,8 @@ Examine all `depends_on` references:
 - Resolve each entry in a sprint output's `unresolved_dependencies` against
   the combined map — all sprint outputs are loaded here, so a prerequisite a
   parallel worker could not see may exist now; wire it as an explicit
-  `depends_on` edge when it resolves, otherwise surface it in the report
-  (e.g., Assumptions Made) as unresolved rather than inventing an ID
+  `depends_on` edge when it resolves, otherwise list it as unresolved under
+  the template's *Ambiguous Requirements* section rather than inventing an ID
 - These are the "critical path" candidates
 
 ### Step 6: Run Deterministic Graph Analysis
@@ -88,9 +88,10 @@ schema and output are in [../references/dependency-analysis.md](../references/de
 
 - Exit 0: consume `critical_path.task_ids`, `critical_path.effort_days`,
   `bottlenecks`, and the empty `cycles` list from the canonical JSON result.
-- Exit 2: stop before rendering `tasks.md`; surface the stable stderr
-  diagnostic and the offending graph contract. Do not repair the result by
-  guessing or continue with partial output.
+- Exit 2: write no `tasks.md`. Fix only the worker records named in the
+  `error[graph-input]` line, using their explicit `depends_on`/`blocks` fields,
+  and call the script once more. A second exit 2 stops the run; surface the
+  stderr line. Never guess an edge to make the graph pass.
 - The helper owns path sums, tie-breaking, derived blocks, direct-dependent
   counts, and cycle membership. The resolver owns feature coverage, task
   explanations, mitigation/parallel-opportunity judgments, and rendering.
@@ -120,136 +121,7 @@ Verify:
 
 ### Step 10: Generate tasks.md
 
-Create the final markdown file that will be checked into the repo:
-
-```markdown
-# Tasks — [Project Name]
-
-Generated: [ISO timestamp]
-Total Tasks: [X]
-Total Effort: [X days]
-Critical Path: [X days]
-Sprints: [X]
-
-## Summary
-
-- **POC Duration**: [X sprints] ([X days])
-- **MVP Duration**: [X sprints] ([X days])
-- **Full Features Duration**: [X+ sprints] ([X+ days])
-- **Total Effort**: [X dev-days]
-
-## Risk Analysis
-
-### Bottlenecks
-- **[TASK_ID]**: Blocks [X tasks], [Y workers can't proceed]
-  - Mitigation: Start early, allocate senior dev
-
-### Critical Path
-The longest dependency chain is [X days]:
-1. [TASK_ID]: [Title] ([effort])
-2. [TASK_ID]: [Title] ([effort])
-3. ...
-
-Any delay to a critical path task delays the entire project by the same amount.
-
-### Assumptions Made
-[List any assumptions if the PRD was ambiguous]
-
----
-
-## Sprint 1: [Title]
-
-**Duration**: [X weeks]
-**Phase**: [POC|MVP|Full Features]
-**Total Effort**: [X days]
-
-### Workstreams
-
-#### Project Setup
-- Task 1.1
-- Task 1.2
-
-#### Backend
-- Task 1.3
-- Task 1.4
-
-#### Frontend
-- Task 1.5
-
-### Tasks
-
-### Task 1.1: Initialize project repository and CI/CD pipeline
-
-**Description**: Set up the repo structure, package.json (or equivalent), and basic CI/CD workflow for automated testing and deployment.
-
-**Acceptance Criteria**:
-- [ ] Repository initialized with proper .gitignore and README stub
-- [ ] GitHub Actions workflow (or equivalent) triggers on push to main
-- [ ] Workflow runs linting and tests successfully
-- [ ] Dev environment setup documented in README
-
-**Effort**: 1 day
-
-**Dependencies**: None
-
-**Blocks**: Task 1.3, Task 1.5
-
-**PRD Reference**: Foundation for [feature name]
-
----
-
-[Continue for all tasks, organized by sprint]
-
----
-
-## Dependency Matrix
-
-| Task ID | Title | Sprint | Depends On | Blocks | Effort |
-|---------|-------|--------|-----------|--------|--------|
-| 1.1 | Initialize repo | 1 | None | 1.3, 1.5 | 1d |
-| 1.3 | Create DB schema | 1 | 1.1 | 1.4, 2.1 | 1d |
-[...]
-
----
-
-## Execution Guidance
-
-### Sprint 1 Execution Order
-
-**Week 1**:
-- Day 1: Start Task 1.1 (blocks others, do first)
-- Day 1-2 (parallel): Once setup is done, start Task 1.3 and Task 1.5 in parallel
-
-### Cross-Sprint Dependencies
-
-**Sprint 1 → Sprint 2**:
-- All Sprint 2 backend tasks depend on Sprint 1 data model tasks (Task 1.3)
-- All Sprint 2 frontend tasks depend on Sprint 1 API design (Task 1.4)
-
-Start Sprint 2 immediately after Sprint 1 is complete to maintain momentum.
-
----
-
-## Validation Checklist
-
-- [ ] All PRD requirements mapped to tasks
-- [ ] Each task has clear acceptance criteria
-- [ ] No circular dependencies
-- [ ] Effort estimates sum correctly per sprint
-- [ ] Critical path is realistic
-- [ ] Cross-sprint dependencies are clear
-- [ ] Ambiguities from requirements are documented
-
----
-
-## Next Steps
-
-1. **Review Sprint 1 tasks** with the team
-2. **Assign developers** to workstreams based on availability
-3. **Lock the API interface** (between backend and frontend) before Sprint 2 starts
-4. **Monitor critical path** — any delay to critical tasks delays the project
-5. **Re-evaluate after Sprint 1** — actual effort may differ from estimates; adjust Sprint 2+ scope if needed
-```
+Render `tasks.md` from [../references/tasks-template.md](../references/tasks-template.md). Take the critical path and bottlenecks from the Step 6 JSON. Write each bottleneck's mitigation from the tasks it blocks.
 
 ## Output Format
 
@@ -280,10 +152,3 @@ If circular dependencies are detected:
 If coverage gaps exist (PRD features not in tasks):
 - Report which features are missing
 - These are likely ambiguous in the PRD or need the sprint-planner to revisit scope
-
-## Tips
-
-- The tasks.md file is developer-facing. Write it to be clear, complete, and actionable.
-- Include examples and guidance where possible.
-- The critical path is the most important insight — highlight it prominently.
-- Cross-sprint dependencies should be visualized clearly so dependencies between sprints are obvious.

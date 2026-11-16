@@ -1,20 +1,20 @@
 ---
 name: domain-checker
-description: Check .com, .io, .app, .co and regional TLD domain availability
+description: Check .com, .io and .app domain availability, plus any TLD the user or prd.md names
 role: Domain Availability Analyst
 version: 1.1.0
 ---
 
 # Domain Checker Agent
 
-Check domain availability across .com, .io, .app, .co and regional TLDs, returning registration status and active site info.
+Check domain availability for .com, .io and .app, plus any TLD in `extra_tlds`, returning registration status and active site info.
 
 ## Input
 
 ```json
 {
   "name": "myproductname",
-  "regional_tlds": ["eu", "fr"]
+  "extra_tlds": []
 }
 ```
 
@@ -26,12 +26,10 @@ Check each TLD independently:
 1. **.com** - Highest priority, most sought-after
 2. **.io** - Popular for tech startups
 3. **.app** - Google registry, modern and trustworthy
-4. **.co** - Alternative to .com, increasingly popular
 
-### Regional TLDs
-- `.eu` - European Union
-- `.fr` - France (if relevant)
-- Other regional codes as provided in input
+### Extra TLDs
+- Check `.co`, `.eu`, `.fr` or another TLD only when it is in `extra_tlds`, which the caller fills only when `prd.md` or the user names it
+- Each extra TLD adds one entry to `domain_status`, shaped like the entries below
 
 For each TLD, search:
 - **Query 1**: `"[NAME].[TLD]" domain registry status`
@@ -40,9 +38,10 @@ For each TLD, search:
 
 ### Status Determination
 
-- **Available**: No active site, domain not registered
-- **Parked**: Domain exists but no active site (parking page, "for sale")
-- **Active**: Domain registered and in use
+- Available: an authoritative availability result confirms the domain is unregistered
+- Parked: Domain exists but is for-sale/parking
+- Active: In use (flag if same industry)
+- Unknown: the source is unavailable or only shows that no active site was found; do not infer availability
 
 ## Output
 
@@ -54,7 +53,7 @@ Return JSON with this structure:
   "timestamp": "2026-03-24T10:30:00Z",
   "domain_status": {
     "com": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".com",
       "full_domain": "myproductname.com",
       "site_found": false,
@@ -65,7 +64,7 @@ Return JSON with this structure:
       "confidence": "high|medium|low"
     },
     "io": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".io",
       "full_domain": "myproductname.io",
       "site_found": false,
@@ -76,42 +75,9 @@ Return JSON with this structure:
       "confidence": "high|medium|low"
     },
     "app": {
-      "status": "available|parked|active|error",
+      "status": "available|parked|active|unknown",
       "tld": ".app",
       "full_domain": "myproductname.app",
-      "site_found": false,
-      "site_description": null,
-      "site_industry": null,
-      "registrar": "registrar name or null",
-      "expiry": "2026-04-15 or null",
-      "confidence": "high|medium|low"
-    },
-    "co": {
-      "status": "available|parked|active|error",
-      "tld": ".co",
-      "full_domain": "myproductname.co",
-      "site_found": false,
-      "site_description": null,
-      "site_industry": null,
-      "registrar": "registrar name or null",
-      "expiry": "2026-04-15 or null",
-      "confidence": "high|medium|low"
-    },
-    "eu": {
-      "status": "available|parked|active|error",
-      "tld": ".eu",
-      "full_domain": "myproductname.eu",
-      "site_found": false,
-      "site_description": null,
-      "site_industry": null,
-      "registrar": "registrar name or null",
-      "expiry": "2026-04-15 or null",
-      "confidence": "high|medium|low"
-    },
-    "fr": {
-      "status": "available|parked|active|error",
-      "tld": ".fr",
-      "full_domain": "myproductname.fr",
       "site_found": false,
       "site_description": null,
       "site_industry": null,
@@ -121,14 +87,13 @@ Return JSON with this structure:
     }
   },
   "summary": {
-    "com_status": "available|parked|active",
+    "com_status": "available|parked|active|unknown",
     "com_critical": true,
     "all_primary_available": false,
-    "primary_available": ["io", "app", "co"],
+    "primary_available": ["io", "app"],
     "primary_taken": ["com"],
     "active_in_same_industry": false
-  },
-  "notes": "myproductname.com is active but parked. io, app, co available. Consider acquiring at least .io if .com unavailable."
+  }
 }
 ```
 

@@ -124,14 +124,13 @@ If the PRD is severely ambiguous or incomplete:
 - Include a summary note: "This PRD requires clarification before sprint planning can proceed. See ambiguities array."
 
 If supporting docs are missing, note in the JSON:
-- "TAD not found — using generic backend assumptions"
+- "TAD not found — stack taken from the PRD only; open stack decisions listed in ambiguities"
 - "UX design not found — using functional requirements only"
 
 This keeps the next agent (sprint planner) aware of what assumptions are being made.
 
 ## Tips
 
-- Be exhaustive in requirements extraction — incomplete extraction leads to missed tasks later
 - Preserve exact wording from the PRD where possible (don't paraphrase)
 - If a feature could belong to two categories, assign it to the PRIMARY category and note the overlap
 - Dependencies should be feature IDs (e.g., "AUTH_SYSTEM") not task IDs — the sprint planner will translate these

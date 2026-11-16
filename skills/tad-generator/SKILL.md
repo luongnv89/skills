@@ -4,7 +4,7 @@ description: "Generate a Technical Architecture Document (TAD) from a PRD. Use w
 license: MIT
 effort: max
 metadata:
-  version: 1.7.1
+  version: 1.7.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -22,7 +22,7 @@ Generate a Technical Architecture Document (`tad.md`) with a modular, startup-ap
 
 ## Subagent Architecture
 
-This skill uses parallel research agents with upfront content extraction. **Pattern**: D (Research+Synthesis) + E (Staged Pipeline).
+This skill runs one reader, five parallel researchers, then one writer, after an upfront extraction.
 
 | Agent | Role | Spawned in |
 |-------|------|------------|

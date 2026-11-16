@@ -4,7 +4,7 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.6.0
+  version: 1.6.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -52,7 +52,7 @@ Check npm, PyPI, Homebrew, and apt as Available, Taken (owner, last publish date
 
 ### Step 3: Domain Check (if Step 1 clear)
 
-Check `.com` first, then `.io`, `.app`, `.co`, `.eu`, `.fr`:
+Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD only when `prd.md` or the user names it, and add it to the DOMAIN line and the check count:
 
 - Available: an authoritative availability result confirms the domain is unregistered
 - Parked: Domain exists but is for-sale/parking
@@ -79,7 +79,7 @@ Risk precedence is **High > Moderate > Low**. Select the highest matching trigge
 
 Unknown policy: if checks or target intent are missing or unverifiable and there is no known High finding, use **provisional Moderate + Modify** pending verification. Unknown is not a confirmed collision and never Low clearance. An existing High finding remains High. No averaging or mitigation reduces High. Checks skipped by the Early-Exit Rule remain skipped, not cleared.
 
-The exact-handle Early-Exit Rule is unchanged: an exact handle collision on any of the 6 platforms immediately returns an Abandon recommendation and skips the remaining checks. Report those checks as skipped, not clear.
+Early-Exit Rule: an exact handle collision on any of the 6 platforms returns Abandon at once and skips the remaining checks. Report those checks as skipped, not clear.
 
 #### Recommendation semantics
 

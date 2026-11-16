@@ -74,21 +74,12 @@ Common tools & libraries:
 - Linting: ESLint, Prettier
 - Publishing: npm, pnpm, yarn; use semantic-release for automated releases
 
- - Common tools & libraries:
-
- - Frameworks: FastAPI (Python), Express/Nest (Node), Spring Boot (Java), Gin (Go)
- - Data layer: SQLAlchemy/Prisma/TypeORM/Knex (consider Supabase for managed Postgres needs)
- - Migrations: Alembic, Flyway, prisma migrate
- - Docs: OpenAPI/Swagger UI
- - Third-party integrations: Stripe (payments), Resend (transactional email). Implement secure webhook handling and idempotency for external callbacks.
-
 Checklist:
 
 - [ ] Clear package.json exports field
 - [ ] CI with tests and linting
 - [ ] Lockfile (package-lock.json, pnpm-lock.yaml)
 - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
- - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
 
 Style & linting recommendation:
 
@@ -113,8 +104,7 @@ Key requirements and architecture decisions:
 - Frontend framework: React (use React by default where a component-based UI is required). For styling always use Tailwind CSS.
 - React state management: use Redux with redux-saga for side-effect handling and complex flows.
 - Backend: Node.js with Express.js exposing RESTful APIs (REST-first design).
-- Data storage: choose the database based on requirements. Preferred order: MongoDB -> PostgreSQL -> MySQL. For very small projects or prototypes prefer SQLite.
- - Data storage: choose the database based on requirements. Consider Supabase (managed Postgres + auth) as a strong managed option for many apps. Otherwise preferred order: MongoDB -> PostgreSQL -> MySQL. For very small projects or prototypes prefer SQLite.
+- Data storage: choose the database based on requirements. Consider Supabase (managed Postgres + auth) as a strong managed option for many apps. Otherwise preferred order: MongoDB -> PostgreSQL -> MySQL. For very small projects or prototypes prefer SQLite.
 - Authentication & Authorization: use JWT for authentication. Document token lifecycle, rotation and revocation strategy.
 - APIs: design with OpenAPI (Swagger) and version your API.
 - Deployment: containers (Docker) orchestrated by Kubernetes or managed services (Vercel for frontend; Heroku, Fly.io, Render, Cloud Run for backend).
@@ -124,19 +114,11 @@ Key requirements and architecture decisions:
 Common tools & libraries:
 - Frontend: React/Next.js, Vue/Nuxt, SvelteKit
 - Backend: FastAPI, Django, Express, NestJS, Spring Boot, Go Gin
-- DB: PostgreSQL, Redis, MongoDB
+- DB & managed services: Supabase (managed Postgres + auth), PostgreSQL, Redis, MongoDB
+- Third-party services: Resend (transactional email), Stripe (payments)
+- Storage / CDN: Cloudflare R2 (S3-compatible object store + edge capabilities)
 - Infra: Docker, Kubernetes, Terraform / Pulumi for infra as code
-- CI/CD: GitHub Actions, GitLab CI, CircleCI
-
- - Common tools & libraries:
-
- - Frontend: React/Next.js, Vue/Nuxt, SvelteKit
- - Backend: FastAPI, Django, Express, NestJS, Spring Boot, Go Gin
- - DB & managed services: Supabase (managed Postgres + auth), PostgreSQL, Redis, MongoDB
- - Third-party services: Resend (transactional email), Stripe (payments)
- - Storage / CDN: Cloudflare R2 (S3-compatible object store + edge capabilities)
- - Infra: Docker, Kubernetes, Terraform / Pulumi for infra as code
- - CI/CD / Hosting: GitHub Actions, GitLab CI, CircleCI, Cloudflare Pages (fast frontend builds + edge deploys)
+- CI/CD / Hosting: GitHub Actions, GitLab CI, CircleCI, Cloudflare Pages (fast frontend builds + edge deploys)
 
 Vite React template (recommended)
 
@@ -196,7 +178,6 @@ Checklist:
 - [ ] Static analysis, dependency scanning, and security policy
 - [ ] Monitoring/alerting / SLOs defined
 - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
- - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
 
 ---
 
@@ -227,7 +208,6 @@ Checklist:
 - [ ] Rate limiting and authentication middleware (JWT)
 - [ ] CI that runs contract tests (if clients exist)
 - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
- - [ ] developer bootstrap: provide a single, documented command or script that installs dependencies and runs linting, formatting, tests, and an optional static security scan (where available)
 
 ---
 
