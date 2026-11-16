@@ -25,7 +25,7 @@ Decide after website-agent-readiness returns, from evidence — not from consent
 
 | Case | Condition | Scan-covered AX checks owner |
 |---|---|---|
-| **A** | G1 approved **and** `evidence/agent-readiness/scan.json` exists for the same URL | `website-agent-readiness` |
+| **A** | `evidence/agent-readiness/scan.json` exists for the same URL, from a G1-approved scan or a sibling scan website-agent-readiness reused (< 24 h; G1 skipped) | `website-agent-readiness` |
 | **B** | G1 declined, or member not installed, or target is not a public URL | `ux-ax-review` |
 | **C** | G1 approved but the scan failed (unreachable, private, password-walled) | `ux-ax-review`; report the scan failure |
 

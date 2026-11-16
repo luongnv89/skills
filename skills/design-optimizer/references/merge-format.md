@@ -6,7 +6,7 @@ appears exactly once across the Findings, Skipped and Not covered sections.
 ```markdown
 # Design Optimization: <target>
 
-Run: design-optimizer 1.1.0 · <UTC timestamp> · mode: audit | apply
+Run: design-optimizer <metadata.version from SKILL.md> · <UTC timestamp> · mode: audit | apply
 Evidence: <output>/evidence/manifest.json · AX ownership case: A | B | C
 Members: dont-make-me-think √ · ux-ax-review √ · website-agent-readiness √ (score 3/5) · viral-product-evaluator — skipped (not installed)
 
@@ -55,7 +55,13 @@ Each member on the `Members:` line carries the mark of its own closing `Result:`
 | `— skipped (reason)` | not installed, branch not reached, or gate declined |
 
 Every member has exactly one mark. A member that ended PARTIAL or BLOCKED is never shown as `√`,
-and the run's final `Result:` line (SKILL.md → Final response) is never PASS in that case.
+and the run's final `Result:` line (SKILL.md → Final response) is never PASS in that case. The
+exceptions are website-agent-readiness runs the user stopped at a declined gate, and neither
+blocks PASS by itself. A declined G1 (BLOCKED, no scan) is marked `— skipped (gate declined)`;
+case B applies, so only `agent-readiness-scan` goes under Not covered. A declined G2 or G3
+(PARTIAL, scan done) is marked `√ (score n/5; declined at G2|G3)`, naming the gate: case A
+ownership and the scan findings stay, and only the missing triage or `agent-ready-plan.md` is
+noted as uncertainty.
 
 ## Priority
 
