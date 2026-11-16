@@ -120,7 +120,7 @@ Next:        <remaining user action> | No approval needed
 
 ## Report reader checks
 
-Moved from SKILL.md → Acceptance Criteria. The report must also be understandable:
+The report must also be understandable:
 
 - The first line after the header gives PASS, PARTIAL or BLOCKED and the reason.
 - `Verified:` (checks run and their output) is separate from `Unverified:`.

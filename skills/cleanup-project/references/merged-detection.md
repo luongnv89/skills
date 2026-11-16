@@ -119,8 +119,6 @@ run `git fetch origin --prune`; SKILL.md Step 7 re-checks that no merged ref rem
 
 ## Step 7 re-check of skipped remote deletes
 
-Moved from SKILL.md Step 7, item 2.
-
 For each branch deleted locally whose remote delete was skipped, re-run the merge signals
 (ancestry, then squash evidence) on `origin/<b>` against `origin/main`. Report
 `re-check origin/<b>: still merged (<signal>)` or `re-check origin/<b>: not merged`. A ref
