@@ -9,7 +9,7 @@ Skip a tool if `command -v` already finds it and `--version` works.
 Preferred (native installer — check [Anthropic's current setup page](https://docs.anthropic.com/en/docs/claude-code/setup) if this drifts):
 
 ```bash
-# Unix — confirm URL with the user
+# Unix — mutating (remote-installer pipe): its own yes, with the URL shown first
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
@@ -35,7 +35,7 @@ Verify: `codex --version`.
 
 ## Pi
 
-This user's Pi is the [pi-coding-agent](https://www.npmjs.com/package/@mariozechner/pi-coding-agent) (see `pi-extensions` / `pi-web-access` notes):
+Pi is the [pi-coding-agent](https://www.npmjs.com/package/@mariozechner/pi-coding-agent):
 
 ```bash
 npm install -g @mariozechner/pi-coding-agent

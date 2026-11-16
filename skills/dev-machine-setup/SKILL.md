@@ -5,7 +5,7 @@ license: MIT
 compatibility: "macOS, Linux (Debian/Ubuntu/Fedora/Arch), Windows (winget/PowerShell). Needs network and a package manager or permission to install one. Additive by default; anything that changes a working install needs an explicit per-item yes."
 effort: high
 metadata:
-  version: 0.11.0
+  version: 0.11.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -18,7 +18,7 @@ later phase acts only on that report.
 **Gap-driven** is the whole design. Each phase self-skips when its slice of the report is empty, so a re-run
 on an already-good machine installs nothing and still verifies: idempotent by construction.
 
-**Self-contained:** no external scripts repo is cloned. The shell config the skill deploys ships in `assets/`.
+**Self-contained:** the shell config the skill deploys ships in `assets/`.
 This SKILL.md is the spine; per-OS command tables and per-phase detail live in `references/`, so only the
 current platform loads and the token budget stays on the machine in front of you.
 

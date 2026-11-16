@@ -22,9 +22,10 @@ is collected *before* the block is shown, never left as a `<placeholder>`.
 
 ## no-package-manager
 
-**additive.** Nothing installs until a manager exists.
+Nothing installs until a manager exists.
 
-macOS — Homebrew (*you run this*: the installer prompts for your password):
+macOS — Homebrew (**mutating** — remote-installer pipe, own yes with the URL shown; *you run this*: the
+installer prompts for your password):
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -164,8 +165,9 @@ Verify: `python3 -V`, or `uv python list` for the uv-managed ones.
 
 ## python-externally-managed
 
-**additive.** The system interpreter is PEP 668 marked, so `pip install` into it fails by design. Install
-`uv` and work per-project. Never suggest `--break-system-packages`.
+The system interpreter is PEP 668 marked, so `pip install` into it fails by design. Install `uv` and work
+per-project. Never suggest `--break-system-packages`. The installer below is a remote-installer pipe
+(**mutating**, own yes with the URL shown); the package-manager routes after it are additive.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -238,20 +240,21 @@ echo "$SHELL"
 Downloads and runs a remote installer, then deploys the shell config this skill ships in
 `assets/zshrc-config` — say both before asking.
 
-**The tag depends on the machine, and this is the one place to get it right:**
+Step 1 (the framework installer) is a remote-installer pipe, so it is always **mutating** — own yes, URL
+shown. Step 3's tag depends on the machine:
 
-| State of `~/.zshrc` | Tag | Why |
+| State of `~/.zshrc` | Step 3 tag | Why |
 |---------------------|-----|-----|
 | absent | **additive** | nothing working can be lost; batch-approvable |
 | exists | **mutating** | the config copy replaces a file the user may have tuned by hand — own yes + backup |
 
-A blanket "do everything" approval covers only the additive case. Check first, in its own inspect block:
+A blanket "do everything" approval covers only the additive steps. Check first, in its own inspect block:
 
 ```bash
 ls -l ~/.zshrc 2>/dev/null || echo "no ~/.zshrc — additive"
 ```
 
-**1 · framework** (additive — creates `~/.zshrc` only if absent):
+**1 · framework** (mutating — remote-installer pipe; creates `~/.zshrc` only if absent):
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

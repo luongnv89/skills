@@ -50,13 +50,14 @@ Open a **new** PowerShell so PATH updates. Then:
 node -v; npm -v; py -3 --version
 ```
 
-Install **uv** (user-level, no system pip pollution):
+Install **uv** (user-level, no system pip pollution; **mutating** — a remote-installer pipe, so its own yes
+with the URL shown first):
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-Confirm the URL with the user before running. Alternative: `winget install astral-sh.uv` if the package id resolves.
+Alternative: `winget install astral-sh.uv` if the package id resolves.
 
 ## Shell
 

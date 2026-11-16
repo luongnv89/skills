@@ -1,7 +1,7 @@
 # Linux setup
 
 Self-contained: every command below is a native package-manager command or copies a file this skill ships in
-`assets/`. There is no external scripts repo to clone.
+`assets/`.
 
 Tables cover **Debian/Ubuntu (apt), Fedora (dnf), Arch (pacman)**. On any other distro, use the same *intent*
 with that distro's manager and say so in the report rather than guessing a package name.
@@ -60,7 +60,8 @@ Verify: `python3 --version`, `uv --version`.
 | Fedora | `sudo dnf install -y zsh` |
 | Arch | `sudo pacman -S --needed zsh` |
 
-Oh My Zsh framework (**additive** — the installer creates `~/.zshrc` only when absent):
+Oh My Zsh framework (**mutating** — a remote-installer pipe, so its own yes with the URL shown; it creates
+`~/.zshrc` only when absent):
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

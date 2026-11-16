@@ -333,7 +333,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**rex-agent**](skills/rex-agent/) | 1.1.0 | medium | Manage Rex agent fleets: equal columns, prompt/wait/read via program status, steer, `help` |
 | [**issue-work-loop**](skills/issue-work-loop/) | 1.8.0 | max | Resolve one GitHub issue via a Herdr (TUI or desktop app) implementer→reviewer loop until CLEAN |
 | [**tmux-agent-comms**](skills/tmux-agent-comms/) | 2.5.0 | medium | Spawn, message, read CLI agents in tmux |
-| [**dev-machine-setup**](skills/dev-machine-setup/) | 0.11.0 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
+| [**dev-machine-setup**](skills/dev-machine-setup/) | 0.11.1 | high | Gap-driven dev machine setup/tune-up across macOS, Linux, Windows |
 
 ---
 
