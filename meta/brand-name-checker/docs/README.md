@@ -11,7 +11,7 @@
 
 ## Highlights
 
-- **Parallel subagents**: 5 agents run searches across social, registries, domains, trademarks independently (~4x speedup)
+- **Parallel subagents**: one source-checker per check (social, registries, domains, trademarks), the last three in parallel, then a synthesizer
 - Priority-based checking: social handles, package registries, domains, then trademarks
 - Package registry checks: npm, PyPI, Homebrew, apt — prevent namespace squatting
 - Critical stop rule if exact social handle is already taken
@@ -71,12 +71,9 @@ asm install github:luongnv89/skills:skills/brand-name-checker
 
 | Path | Description |
 |---|---|
-| `agents/social-checker.md` | Search 6 social platforms (Twitter, Instagram, GitHub, LinkedIn, TikTok, Discord) in parallel |
-| `agents/registry-checker.md` | Check npm, PyPI, Homebrew, and apt availability with owner info |
-| `agents/domain-checker.md` | Check .com, .io and .app registration status, plus any TLD `prd.md` or the user names |
-| `agents/trademark-checker.md` | Search WIPO, EUIPO, and INPI trademark databases for conflicts |
+| `agents/source-checker.md` | Run one check (social platforms, package registries, domains, or trademark databases) from `references/source-checks.md` and return a status and evidence per source |
 | `agents/synthesizer.md` | Apply the SKILL.md risk policy and produce the final recommendation with alternatives |
-| `references/source-checks.md` | Per-source queries, check URLs, and status rules for the social, registry, domain, and trademark checks |
+| `references/source-checks.md` | The single home of the per-source queries, check URLs, and status rules for the social, registry, domain, and trademark checks |
 | `references/output-contract.md` | Report field rules, status words, understanding criteria, and three worked examples |
 | `references/edge-cases.md` | Handling for rate limits, source outages, special characters, very short names, and typosquats |
 | `references/prd-integration.md` | Name Fit Assessment and Alternative Suggestions appended when `prd.md` exists |

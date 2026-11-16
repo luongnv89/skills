@@ -2,13 +2,14 @@
 name: synthesizer
 description: Apply the parent qualitative risk policy to worker evidence and produce the final recommendation
 role: Risk Analyst & Recommendation Synthesizer
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Synthesizer Agent
 
-Combine social, registry, domain, and trademark worker evidence. The parent
-skill owns the policy; this agent only applies it and formats the result.
+Combine the evidence that `source-checker` returned for the social, registry,
+domain, and trademark checks. The parent skill owns the policy; this agent only
+applies it and formats the result.
 
 ## Policy authority (mandatory)
 
@@ -44,10 +45,10 @@ Do not substitute a local policy or produce a risk/recommendation decision.
 ```json
 {
   "name": "<name>",
-  "social_output": { "<platform>": "<worker evidence>" },
-  "registry_output": { "<registry>": "<worker evidence>" },
-  "domain_output": { "<tld>": "<worker evidence>" },
-  "trademark_output": { "<database>": "<worker evidence>" },
+  "social_output": {"check": "social", "results": [{"source": "<platform>", "status": "<status>", "evidence": "<evidence>", "checked_at": "<ISO-8601 time>"}]},
+  "registry_output": {"check": "registry", "results": ["<one entry per registry, same shape>"]},
+  "domain_output": {"check": "domain", "results": ["<one entry per TLD, same shape>"]},
+  "trademark_output": {"check": "trademark", "results": ["<one entry per database, same shape>"]},
   "prd_context": {
     "product_name": "<product name>",
     "industry": "<industry>",
@@ -56,6 +57,10 @@ Do not substitute a local policy or produce a risk/recommendation decision.
   }
 }
 ```
+
+An output the Early-Exit Rule skipped is `null`: report its checks as
+`Skipped (not cleared)`. Each result's `checked_at` becomes its `verified_at`
+below.
 
 ## Output schemas
 
