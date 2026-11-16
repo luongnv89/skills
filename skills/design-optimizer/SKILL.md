@@ -11,7 +11,7 @@ dependencies:
   - frontend-design
   - browse
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (intake once → member audits with skip-checks → merged report → gated apply)"
 ---
@@ -147,7 +147,8 @@ Each member writes into `<output>/reports/<member>/`. Read each member's result 
 closing signal as it finishes — the `Result: PASS | PARTIAL | BLOCKED` line that ends a
 ux-ax-review, viral-product-evaluator or website-agent-readiness run, or the `**Result:**` line
 under the `> Orchestrated by:` line in dont-make-me-think's report — and report it to the user.
-A member's BLOCKED or errored run makes this run PARTIAL (see Safety). When a member ends with
+A member's BLOCKED or errored run makes this run PARTIAL (see Safety), except a
+website-agent-readiness gate the user declined (see Final response). When a member ends with
 a question for the user (e.g. ux-ax-review's choice-of-IDs implementation offer), relay it
 verbatim; never answer it on the user's behalf.
 
@@ -234,7 +235,10 @@ Close every run — audit, apply, or an early stop — with a chat response in t
   dont-make-me-think). PARTIAL: a member failed, errored, or itself ended PARTIAL.
   BLOCKED: a required member was missing or intake failed; no report was written. An optional
   member skipped at preflight is a declared scope reduction — listed under "Not covered" and
-  `Uncertainty:` — and does not by itself make the run PARTIAL.
+  `Uncertainty:` — and does not by itself make the run PARTIAL. A website-agent-readiness run
+  that ended BLOCKED at a declined G1, or PARTIAL at a declined G3, is a user-chosen scope
+  reduction too: mark it `— skipped (gate declined)` and list its checks under "Not covered"; it
+  does not by itself make the run PARTIAL.
 - `Evidence:` — the manifest path, each member report path with its `Result:` line, and the
   merged report path.
 - `Uncertainty:` — skipped members and their uncovered checks, untested interactions the members
