@@ -147,8 +147,8 @@ Each member writes into `<output>/reports/<member>/`. Read each member's result 
 closing signal as it finishes — the `Result: PASS | PARTIAL | BLOCKED` line that ends a
 ux-ax-review, viral-product-evaluator or website-agent-readiness run, or the `**Result:**` line
 under the `> Orchestrated by:` line in dont-make-me-think's report — and report it to the user.
-A member's BLOCKED or errored run makes this run PARTIAL (see Safety), except a
-website-agent-readiness gate the user declined (see Final response). When a member ends with
+A member's BLOCKED, PARTIAL or errored run makes this run PARTIAL (see Safety), except a
+website-agent-readiness run the user stopped at a declined G1 or G3 (see Final response). When a member ends with
 a question for the user (e.g. ux-ax-review's choice-of-IDs implementation offer), relay it
 verbatim; never answer it on the user's behalf.
 
@@ -235,10 +235,13 @@ Close every run — audit, apply, or an early stop — with a chat response in t
   dont-make-me-think). PARTIAL: a member failed, errored, or itself ended PARTIAL.
   BLOCKED: a required member was missing or intake failed; no report was written. An optional
   member skipped at preflight is a declared scope reduction — listed under "Not covered" and
-  `Uncertainty:` — and does not by itself make the run PARTIAL. A website-agent-readiness run
-  that ended BLOCKED at a declined G1, or PARTIAL at a declined G3, is a user-chosen scope
-  reduction too: mark it `— skipped (gate declined)` and list its checks under "Not covered"; it
-  does not by itself make the run PARTIAL.
+  `Uncertainty:` — and does not by itself make the run PARTIAL. A declined
+  website-agent-readiness gate is a user-chosen scope reduction too, and neither case below
+  makes the run PARTIAL by itself. Declined G1 (member ended BLOCKED): mark it
+  `— skipped (gate declined)`; case B applies, so only `agent-readiness-scan` goes under
+  "Not covered". Declined G3 (member ended PARTIAL): the scan ran, so keep case A ownership,
+  its findings and its score; mark it `√ (score n/5; plan declined at G3)` and note only the
+  missing `agent-ready-plan.md` under `Uncertainty:`.
 - `Evidence:` — the manifest path, each member report path with its `Result:` line, and the
   merged report path.
 - `Uncertainty:` — skipped members and their uncovered checks, untested interactions the members
