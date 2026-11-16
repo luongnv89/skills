@@ -79,7 +79,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 | P3 Clean & Harden | 2 | 12 | 18 Medium | M3 |
 | P4 Polish | 1 | 8 | 9 Low | M4 |
 
-**Critical path:** Task Pre.1 → Pre.2 → 0.1 → 0.3 → 1.2 → 2.1 → 2.4 (<N> days). Nothing in P0 starts before ME. Nothing in P2 starts before M0.
+**Critical path:** Task Pre.1 → Pre.3 → Pre.2 → 0.1 → 0.3 → 1.2 → 2.1 → 2.4 (<N> days). Nothing in P0 starts before ME. Nothing in P2 starts before M0.
 
 ## Phase Pre — Agent environment
 
@@ -113,7 +113,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 - [ ] `CLAUDE.md` exists at the repo root (create via `/agent-config` if absent)
 - [ ] `CLAUDE.md` imports `@AGENTS.md` as its first line and holds only Claude-specific lines; it repeats no rule from `AGENTS.md` (Claude Code reads `AGENTS.md` only through this import once a `CLAUDE.md` exists)
 
-**Dependencies**: Pre.1
+**Dependencies**: Pre.1, Pre.3 — `AGENTS.md` must exist first, or `/agent-config` takes its claude-only branch and writes a standalone `CLAUDE.md`
 
 **Effort**: S
 
@@ -145,7 +145,7 @@ finish first. Pre ACs only require documented install/run notes and create-or-up
 
 **Description**: What and why, referencing the finding.
 
-**Closes**: `F-TEST-01`, `F-CI-02`
+**Closes**: `F-TEST-001`, `F-CI-002`
 
 **Acceptance Criteria**:
 - [ ] <specific, checkable condition — a command, a file state, or a count>
@@ -180,9 +180,10 @@ run in parallel.
 | Wave | Tasks |
 |---|---|
 | 1 | Pre.1 |
-| 2 | Pre.2, Pre.3 |
-| 3 | 0.1, 0.2, 0.4 |
-| 4 | 0.3, 0.5 |
+| 2 | Pre.3 |
+| 3 | Pre.2 |
+| 4 | 0.1, 0.2, 0.4 |
+| 5 | 0.3, 0.5 |
 
 ## Milestones
 

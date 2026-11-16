@@ -88,12 +88,12 @@ Return JSON only.
   "findings": [
     {
       "severity": "must-fix",
-      "where": "MODERNIZATION_REPORT.md — F-BUG-07",
+      "where": "MODERNIZATION_REPORT.md — F-BUG-007",
       "problem": "Cites src/db/query.ts:204 but that file has 141 lines",
       "fix": "Re-locate the issue or drop the finding"
     }
   ],
-  "orphaned_findings": ["F-SEC-02"],
+  "orphaned_findings": ["F-SEC-002"],
   "untethered_tasks": ["Task 3.6"],
   "graph": {"cycles": [], "dangling_ids": []},
   "counts_reconcile": true

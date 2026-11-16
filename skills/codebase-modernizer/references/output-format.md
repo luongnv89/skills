@@ -86,7 +86,7 @@ Baseline: AMBER — builds; 41/58 tests pass; no coverage tool; CI absent
 Dimensions: 8 audited, 2 Not Assessed (UX — no UI detected; PERF — out of requested scope)
 Findings: 3 critical, 11 high, 24 medium, 9 low
 Outputs: MODERNIZATION_REPORT.md, MODERNIZATION_PLAN.md
-Plan: Pre + P0–P4, 10 sprints, 50 tasks — critical path Pre.1 → Pre.2 → 0.1 → 2.4
+Plan: Pre + P0–P4, 10 sprints, 50 tasks — critical path Pre.1 → Pre.3 → Pre.2 → 0.1 → 2.4
 Validation: plan-validator PASS, 0 must-fix
 Source files changed: 0
 ```

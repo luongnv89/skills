@@ -162,7 +162,7 @@ When two dimensions report the same `path:line`:
   ID; the other ID is discarded and never referenced again.
 - The finding is listed **once**, in the keeping dimension's table, with an `Also:` column naming the
   other dimension.
-- The other dimension's table gets a one-line cross-reference (`See F-BUG-04 — also a SEC issue`)
+- The other dimension's table gets a one-line cross-reference (`See F-BUG-004 — also a SEC issue`)
   that is **excluded from all counts**.
 
 Severity is the **higher** of the two dimensions' assessments — deduplicating must never downgrade a

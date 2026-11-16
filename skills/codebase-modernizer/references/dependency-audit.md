@@ -146,8 +146,8 @@ acceptance criterion is producing that guide. Never invent breaking changes from
 ```markdown
 | ID | Package | Ecosystem | Installed | Latest | Gap | Risk | Blast | Wave | Severity | Evidence |
 |---|---|---|---|---|---|---|---|---|---|---|
-| F-DEP-01 | react | npm | 16.14.0 | 19.2.0 | major×3 | none | 84 files | W5 | High | package.json:31 |
-| F-DEP-02 | lodash | npm | 4.17.19 | 4.17.21 | patch | vuln-high | 12 files | W1 | Critical | package-lock.json:2841 (GHSA-35jh-r3h4-6jhm) |
+| F-DEP-001 | react | npm | 16.14.0 | 19.2.0 | major×3 | none | 84 files | W5 | High | package.json:31 |
+| F-DEP-002 | lodash | npm | 4.17.19 | 4.17.21 | patch | vuln-high | 12 files | W1 | High | package-lock.json:2841 (GHSA-35jh-r3h4-6jhm) |
 ```
 
 `Evidence` is the manifest or lockfile path plus line, and the advisory ID when risk is a vuln.
