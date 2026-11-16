@@ -32,27 +32,36 @@ Determine if local metadata files exist. If they do, update them. If not, create
 
 #### iOS (App Store) Metadata Structure
 
+Update `metadata/app-info/{locale}.json` for `name` and `subtitle`, and `metadata/version/{version}/{locale}.json` for `keywords`, `description`, `whatsNew` and `promotionalText` (`references/phases-4-7.md` → 4.1). Use the locale codes the repo already uses (for example `en-US`).
+
 If it doesn't exist, create:
 ```
 metadata/
 ├── app-info/
-│   ├── en.json        # Name, subtitle, keywords, description per locale
-│   ├── de.json
+│   ├── en-US.json     # Name, subtitle per locale
+│   ├── de-DE.json
 │   └── ja.json
 └── version/
     └── 1.0.0/
-        ├── en.json    # What's New, version-specific metadata
+        ├── en-US.json # Keywords, description, What's New, promotional text
         └── ...
 ```
 
-Each JSON file format:
+`app-info/{locale}.json`:
 ```json
 {
   "name": "Sleep Meditation: ZenMind",
-  "subtitle": "Fall Asleep & Ease Stress",
+  "subtitle": "Fall Asleep & Ease Stress"
+}
+```
+
+`version/{version}/{locale}.json`:
+```json
+{
   "keywords": "guided,mindfulness,relaxation,...",
   "description": "Meditation and sleep made simple...",
-  "release_notes": "Latest update: Added 50 new..."
+  "whatsNew": "Latest update: Added 50 new...",
+  "promotionalText": "..."
 }
 ```
 
@@ -98,18 +107,18 @@ For each locale in the approved plan:
    - Example: `"subtitle": "Fall Asleep & Ease Stress"`
 
 3. **Keywords** (100 chars max):
-   - Update `metadata/app-info/{locale}.json` → "keywords" field
+   - Update `metadata/version/{version}/{locale}.json` → "keywords" field
    - Verify: comma-separated, no spaces, no duplicates of name/subtitle
    - Character count must be <= 100
    - Example: `"keywords": "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"`
 
 4. **Description**:
-   - Update `metadata/app-info/{locale}.json` → "description" field
+   - Update `metadata/version/{version}/{locale}.json` → "description" field
    - Full text (up to 4000 chars)
    - Verify: natural keyword integration, no keyword stuffing
 
 5. **What's New**:
-   - Update `metadata/version/{version}/{locale}.json` → "release_notes" field
+   - Update `metadata/version/{version}/{locale}.json` → "whatsNew" field
    - Keep up to 4000 chars
    - Example: "Latest update: Added 50 new guided sleep meditations, improved offline listening, fixed rare crash on app startup"
 
@@ -160,7 +169,11 @@ Example for Japanese:
 metadata/app-info/ja.json:
 {
   "name": "瞑想 – 睡眠と落ち着き",
-  "subtitle": "今夜の睡眠を改善する",
+  "subtitle": "今夜の睡眠を改善する"
+}
+
+metadata/version/{version}/ja.json:
+{
   "keywords": "瞑想,睡眠,マインドフルネス,...",
   ...
 }
@@ -180,17 +193,17 @@ Document what was created/modified:
 ## Files Created/Modified
 
 ### iOS Metadata
-- ✅ Created `metadata/app-info/en.json` (Name, Subtitle, Keywords, Description)
+- ✅ Created `metadata/app-info/en-US.json` (Name, Subtitle)
   - Name: "Sleep Meditation: ZenMind" (25/30 chars)
   - Subtitle: "Fall Asleep & Ease Stress" (25/30 chars)
-  - Keywords: (98/100 chars = 98% utilization)
-  - Description: [4000 chars] (2800/4000 chars = 70% utilization)
 
-- ✅ Created `metadata/app-info/de.json` (German localization)
+- ✅ Created `metadata/app-info/de-DE.json` (German localization)
   - Name: "Schlafmeditation: ZenMind" (25/30 chars)
   - [...]
 
-- ✅ Created `metadata/version/1.0.0/en.json` (Release Notes)
+- ✅ Created `metadata/version/1.0.0/en-US.json` (Keywords, Description, What's New)
+  - Keywords: (98/100 chars = 98% utilization)
+  - Description: [4000 chars] (2800/4000 chars = 70% utilization)
   - What's New: "Latest update: Added 50 new guided sleep meditations..."
 
 ### Android Metadata

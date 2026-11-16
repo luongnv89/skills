@@ -7,18 +7,20 @@ Validate every piece of proposed metadata against Apple App Store and Google Pla
 Check all proposed metadata fields (title, subtitle, keywords, short description, full description, promotional text, screenshot caption text) in every locale for prohibited terms. The lists below are English: for each localized field, also scan the translated equivalents of every term (for example "grátis" and "melhor" in pt-BR, "kostenlos" and "beste" in de-DE).
 
 **Apple App Store — Banned in title, subtitle, and keywords:**
-- Pricing terms: "free", "sale", "discount", "limited time"
-- Superlative claims: "best", "#1", "top-rated", "must-have", "top app"
+- Pricing terms: "free", "sale", "discount", "limited time", "on sale"
+- Superlative claims: "best", "#1", "top-rated", "must-have", "top app", "number one"
 - Reserved terms: "For Kids", "For Children" (unless Kids Category), "Editor's Choice"
 - Platform references: "Android", "Google Play", "Play Store"
-- Call-to-action: "download now", "install now", "try now"
+- Call-to-action: "download now", "install now", "try now", "get now"
+- Competitor brand names: "WhatsApp", "Instagram", "Slack", etc.
 
 **Google Play — Banned in title, short description, developer name, and icon:**
-- Performance claims: "top", "best", "#1", "number one", "popular"
-- Pricing terms: "free", "no ads", "ad free"
-- Promotional terms: "new", "hot", "first", "bonus", "discount", "sale", "million downloads"
+- Performance claims: "top", "best", "#1", "number one", "popular", "fastest", "highest rated"
+- Pricing terms: "free", "no ads", "ad free", "without ads"
+- Promotional terms: "new", "hot", "first", "bonus", "discount", "sale", "million downloads", "limited time"
 - Ranking claims: "App of the Year", "Best Google Play App of [year]"
 - Call-to-action: "download now", "install now", "play now", "try now", "update now"
+- Competitor brand names (same as Apple)
 
 ## 3.2 Trademark and Competitor Check
 

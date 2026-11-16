@@ -37,7 +37,7 @@ Extract:
 ### Step 2: Audit Current Metadata
 
 If iOS (App Store) metadata exists:
-- Check `metadata/app-info/{locale}.json` for: name, subtitle, keywords, description
+- Check `metadata/app-info/{locale}.json` for: name, subtitle
 - Check `metadata/version/{version}/{locale}.json` for: keywords, description, whatsNew, promotionalText
 - For each field, record:
   - Current value
@@ -178,7 +178,7 @@ Generate a comprehensive analysis report:
    - Priority: [...]
 
 #### Example Opportunities:
-- Integrate primary keyword [ABC] into iOS subtitle → +20% visibility for [ABC] searches
+- Integrate primary keyword [ABC] into iOS subtitle → improve visibility for [ABC] searches
 - Expand Android description to 2000+ chars, naturally repeating 3-5 target keywords → improve ranking for long-tail searches
 - Implement localization for Japanese market → tap untapped market segment
 - Create subtitle focusing on conversion (value proposition) not just keywords → improve install rate from listing page views

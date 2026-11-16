@@ -173,9 +173,9 @@ Read `references/aso_best_practices.md` and verify:
 
 Read the actual metadata files that were created:
 
-1. **iOS**: `metadata/app-info/en.json`
+1. **iOS**: `metadata/app-info/en-US.json` and `metadata/version/{version}/en-US.json`
    - Read the actual JSON
-   - Verify Name, Subtitle, Keywords fields match the approved plan
+   - Verify Name, Subtitle (`app-info`) and Keywords (`version/{version}`) match the approved plan
    - Check for typos, encoding issues
 
 2. **Android**: `fastlane/metadata/android/en-US/title.txt`, `short_description.txt`, `full_description.txt`
@@ -408,7 +408,7 @@ Or, if issues found:
 **Issue**: Contains "free" (banned on iOS)
 **Current**: "guided,mindfulness,free,relief,..."
 **Fix**: Remove "free"; use the characters for another relevant word
-**Action**: Update `metadata/app-info/en.json` → keywords field
+**Action**: Update `metadata/version/{version}/en-US.json` → keywords field
 
 ---
 
@@ -419,7 +419,7 @@ Or, if issues found:
 **Current**: "guided,mindfulness,anxiety,relaxation" (37 chars)
 **Fix**: Add more single words that don't repeat the name or subtitle: "breathing,relief,bedtime,story,sounds,rest,unwind,night,deep"
 **Expected**: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep" (98 chars)
-**Action**: Update `metadata/app-info/en.json` → keywords field
+**Action**: Update `metadata/version/{version}/en-US.json` → keywords field
 
 ---
 

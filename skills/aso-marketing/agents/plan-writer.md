@@ -118,8 +118,8 @@ Structure the plan as markdown:
 
 ## Objectives
 
-- **Primary Objective**: [e.g., "Increase organic installs by 50% in 6 months by improving search visibility for meditation and sleep keywords"]
-- **Secondary Objective**: [e.g., "Improve conversion rate from listing page views to installs by 20% through compelling value prop copy"]
+- **Primary Objective**: [e.g., "Grow organic installs from the tracked keywords"]
+- **Secondary Objective**: [e.g., "Improve conversion rate from listing page views to installs through compelling value prop copy"]
 - **Tertiary Objective**: [e.g., "Establish presence in Japanese market through localization"]
 
 ---
@@ -324,22 +324,8 @@ Start your first guided sleep session tonight and wake up rested.
 
 ---
 
-## Expected Impact Summary
-
-**Conservative Estimate** (first 3 months):
-- +30% visibility for primary keywords (meditation, sleep)
-- +15% conversion rate improvement (from better value prop copy)
-- +10% installs overall
-
-**Optimistic Estimate** (with localization + visuals):
-- +50% visibility for primary keywords
-- +25% conversion rate improvement
-- +30% installs overall
-
-**Long-term** (6+ months with ongoing optimization):
-- Establish as top-3 app in meditation category
-- Strong presence in Japan, Germany secondary markets
-- Consistent 4.5+ rating
+## Expected Impact
+- [Which metric each P0/P1 change should move, and why — marked unvalidated; no percentages without measured data. The Measurement Plan decides.]
 
 ---
 
