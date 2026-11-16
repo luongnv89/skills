@@ -288,7 +288,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**frontend-design**](skills/frontend-design/) | 1.5.1 | high | Production UIs with usability-first approach |
-| [**logo-designer**](skills/logo-designer/) | 1.5.1 | medium | 7 SVG logo variants from project context |
+| [**logo-designer**](skills/logo-designer/) | 1.5.2 | medium | 7 SVG logo variants from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.5.0 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
 | [**design-optimizer**](skills/design-optimizer/) | 1.2.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
 
