@@ -35,5 +35,6 @@ order and no others; rows newest first by folder date:
   `Skip it` → `Skip`), linked to `validate.md`; `—` before validation.
 - **Status**: `Active` for a new row; keep an existing row's status.
 
-Add or update only this idea's row. There is no TAD column: `tad-generator` runs the script when it is
+A run that creates the table adds one row for every idea folder; later runs add or update only this idea's
+row. There is no TAD column: `tad-generator` runs the script when it is
 present and otherwise leaves `README.md` untouched.
