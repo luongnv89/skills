@@ -20,9 +20,10 @@ Both bars below are restated in SKILL.md — they are the contract, not detail.
       `git diff --stat` is empty. On a stale already-dirty tree, `git status --porcelain` and
       `git diff` match the snapshot taken before the run (declared artifacts set aside). No
       source, manifest, lockfile, hook, workflow, test, or docs file was modified by the audit.
-- [ ] Every new file in `git status --short` is either one of the two reports, a **declared
-      delegate artifact** (`CODE_REVIEW.md`), or a probe byproduct listed in the report's
-      Artifacts section. Anything else is a contract breach.
+- [ ] Every new file in `git status --short` is either one of the two reports, a report backup
+      (`MODERNIZATION_REPORT_backup_*.md`), a **declared delegate artifact** (`CODE_REVIEW.md`), or
+      a probe byproduct, each listed in the report's Artifacts section. Anything else is a
+      contract breach.
 
 ## Findings
 

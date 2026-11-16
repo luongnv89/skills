@@ -2,7 +2,7 @@
 name: dimension-auditor
 description: Audit one review dimension (BUG, PERF, CLEAN, DEAD, UX, TEST, CI, SEC, or DOCS) read-only and return evidence-cited findings as JSON
 role: Dimension Auditor
-version: 1.0.0
+version: 1.0.1
 ---
 
 # Dimension Auditor Agent
@@ -25,15 +25,16 @@ Audit exactly **one** dimension of a codebase and return normalized finding reco
 }
 ```
 
-`invoke_delegate` is set **only** for `BUG`, `PERF`, and `UX` — the three delegates that write
-nothing. For the other six dimensions it is `null` and `plan_delegate` names the writing skill
+`invoke_delegate` is set **only** for `BUG`, `PERF`, and `UX` — the three delegates that change no
+tracked file. For the other six dimensions it is `null` and `plan_delegate` names the writing skill
 (`test-coverage`, `devops-pipeline`, `security-setup`, `doc-manager`, `code-review mode:clean`,
 `code-review mode:cleanup`) that the *plan* will schedule. Findings number from 1 under `id_prefix`;
 each dimension has its own prefix, so no ID coordination is needed.
 
 ## Hard constraints
 
-- **Read-only.** No edits, no file writes into the repo, no `cleanup`-style refactors, no installs, no
+- **Change no tracked file.** `code-review` mode `review` writes the declared artifact
+  `CODE_REVIEW.md`; write nothing else into the repo. No `cleanup`-style refactors, no installs, no
   starting servers. You analyze and report.
 - **Invoke a delegate only when `invoke_delegate` is set.** When it is `null`, the delegate for this
   dimension writes files (installs hooks, configures CI, generates tests, rewrites docs, refactors
