@@ -1,20 +1,20 @@
 ---
 name: domain-checker
-description: Check .com, .io, .app, .co and regional TLD domain availability
+description: Check .com, .io and .app domain availability, plus any TLD the user or prd.md names
 role: Domain Availability Analyst
 version: 1.1.0
 ---
 
 # Domain Checker Agent
 
-Check domain availability across .com, .io, .app, .co and regional TLDs, returning registration status and active site info.
+Check domain availability for .com, .io and .app, plus any TLD in `extra_tlds`, returning registration status and active site info.
 
 ## Input
 
 ```json
 {
   "name": "myproductname",
-  "regional_tlds": ["eu", "fr"]
+  "extra_tlds": []
 }
 ```
 
@@ -26,12 +26,10 @@ Check each TLD independently:
 1. **.com** - Highest priority, most sought-after
 2. **.io** - Popular for tech startups
 3. **.app** - Google registry, modern and trustworthy
-4. **.co** - Alternative to .com, increasingly popular
 
-### Regional TLDs
-- `.eu` - European Union
-- `.fr` - France (if relevant)
-- Other regional codes as provided in input
+### Extra TLDs
+- Check `.co`, `.eu`, `.fr` or another TLD only when it is in `extra_tlds`, which the caller fills only when `prd.md` or the user names it
+- Each extra TLD adds one entry to `domain_status`, shaped like the entries below
 
 For each TLD, search:
 - **Query 1**: `"[NAME].[TLD]" domain registry status`
@@ -86,46 +84,13 @@ Return JSON with this structure:
       "registrar": "registrar name or null",
       "expiry": "2026-04-15 or null",
       "confidence": "high|medium|low"
-    },
-    "co": {
-      "status": "available|parked|active|unknown",
-      "tld": ".co",
-      "full_domain": "myproductname.co",
-      "site_found": false,
-      "site_description": null,
-      "site_industry": null,
-      "registrar": "registrar name or null",
-      "expiry": "2026-04-15 or null",
-      "confidence": "high|medium|low"
-    },
-    "eu": {
-      "status": "available|parked|active|unknown",
-      "tld": ".eu",
-      "full_domain": "myproductname.eu",
-      "site_found": false,
-      "site_description": null,
-      "site_industry": null,
-      "registrar": "registrar name or null",
-      "expiry": "2026-04-15 or null",
-      "confidence": "high|medium|low"
-    },
-    "fr": {
-      "status": "available|parked|active|unknown",
-      "tld": ".fr",
-      "full_domain": "myproductname.fr",
-      "site_found": false,
-      "site_description": null,
-      "site_industry": null,
-      "registrar": "registrar name or null",
-      "expiry": "2026-04-15 or null",
-      "confidence": "high|medium|low"
     }
   },
   "summary": {
-    "com_status": "available|parked|active",
+    "com_status": "available|parked|active|unknown",
     "com_critical": true,
     "all_primary_available": false,
-    "primary_available": ["io", "app", "co"],
+    "primary_available": ["io", "app"],
     "primary_taken": ["com"],
     "active_in_same_industry": false
   }

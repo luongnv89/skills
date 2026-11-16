@@ -174,7 +174,16 @@ class WorkerAlignmentTests(unittest.TestCase):
 
     def test_trademark_worker_has_no_second_risk_matrix(self) -> None:
         text = worker_text("trademark-checker")
-        for token in ("Conflict Risk Scoring", "0.85", "0.60", "similarity_score", "conflict_risk", '"risk_level"'):
+        for token in (
+            "Conflict Risk Scoring",
+            "0.85",
+            "0.60",
+            "similarity_score",
+            "conflict_risk",
+            '"risk_level"',
+            "high_risk_conflicts",
+            "moderate_risk_conflicts",
+        ):
             with self.subTest(token=token):
                 self.assertNotIn(token, text)
 
@@ -193,6 +202,10 @@ class WorkerAlignmentTests(unittest.TestCase):
         self.assertNotIn("No active site", text)
         self.assertNotIn("|error", text)
         self.assertIn("no active site was found; do not infer availability", text)
+        self.assertIn('"com_status": "available|parked|active|unknown"', text)
+        for tld in ('"co": {', '"eu": {', '"fr": {', "regional_tlds"):
+            with self.subTest(tld=tld):
+                self.assertNotIn(tld, text)
 
     def test_skill_checks_the_three_reported_tlds(self) -> None:
         self.assertNotIn("`.app`, `.co`, `.eu`, `.fr`:", SKILL_TEXT)

@@ -96,8 +96,8 @@ Return JSON with this structure:
   },
   "summary": {
     "total_conflicts": 1,
-    "high_risk_conflicts": 1,
-    "moderate_risk_conflicts": 1,
+    "exact_conflicts": 1,
+    "similar_marks": 1,
     "live_marks": 2,
     "expired_marks": 0
   },
