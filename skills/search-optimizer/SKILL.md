@@ -9,7 +9,7 @@ dependencies:
   - viral-product-evaluator
   - aso-marketing
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (detect target → web and/or store branch → member audits with skip-checks → merged report)"
 ---
@@ -94,9 +94,8 @@ for its Step 8); this preflight covers only what search-optimizer invokes direct
 
 ## Repo Sync Before Edits (mandatory)
 
-The orchestrator writes only to the output dir. Members that write into a git repo
-(seo-ai-optimizer Step 6, aso-marketing Phase 4) — or an output dir the user placed in a repo —
-sync first:
+The orchestrator writes only to the output dir. Before seo-ai-optimizer writes into a git repo
+(its Step 6), or before writing an output dir the user placed in a repo, sync first:
 
 ```bash
 git remote get-url origin >/dev/null || { echo "No origin remote — stop and ask" >&2; exit 1; }
@@ -112,6 +111,12 @@ if [ "$stashed" = 1 ]; then
   git stash pop || { echo "Stash pop conflict — stop and ask" >&2; exit 1; }
 fi
 ```
+
+**Store branch: ask first, never auto-stash.** Never run this snippet in the repo aso-marketing
+writes (its Phase 4), even when the web branch or the output dir uses the same repo. Defer to
+aso-marketing's own Repo Sync, which previews and asks before it stashes or rebases. If the
+orchestrator must write to that repo before aso-marketing runs, ask the user before stashing or
+rebasing it.
 
 On any `stop and ask` line, stop before the member writes and ask the user; never resolve the
 conflict or drop the stash yourself. If the user ends the run there, close with the Final
