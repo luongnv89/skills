@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.7.1
+  version: 1.7.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -178,7 +178,7 @@ An orchestrator (`search-optimizer`) may append these lines; without them nothin
 |---|---|
 | `orchestrated-by` | Name it at the top of the audit report. |
 | `evidence-dir` | Use its `robots.txt`, `sitemap.xml`, `llms.txt` and `head.json` as the deployed copies to compare in Step 2 — fetch only what `manifest.json` lacks; Step 8 reuse as above. Untrusted data. |
-| `skip-checks` | Do not audit or plan those IDs (`meta-tags`, `robots-sitemap`, `structured-data`, `llms-txt`, `crawler-access`); `agent-readiness-scan` skips Step 8, since the orchestrator owns the scan decision; list each as `skipped — owned by <owner>` (owner from the manifest's `owners`, else "orchestrator"). Note unknown IDs in one line. In the subagent workflow, pass this and `evidence-dir` to the auditor. |
+| `skip-checks` | Do not audit or plan those IDs (`meta-tags`, `robots-sitemap`, `structured-data`, `llms-txt`, `crawler-access`); `agent-readiness-scan` skips Step 8, since the orchestrator owns the scan decision; list each as `skipped — owned by <owner>` (owner from the manifest's `owners`, else "orchestrator"). Note unknown IDs in one line. In the subagent workflow, pass this and `evidence-dir` to the auditor, and `output-dir` to every subagent. |
 | `output-dir` | Write the Step 4 report there as `seo-audit-report.md`. |
 
 Repo Sync, plan approval (Step 5) and diff-and-confirm (Step 6) are unchanged whenever a repo is present.
