@@ -35,7 +35,7 @@ Before every `send-keys` **and** before every recovery Enter, run:
 python3 "$here/preflight_send.py" "$target"
 ```
 
-Read the verdict off the exit-code table above. Typing into a trust dialog submits menu garbage and reports a false success. Typing into a working pane races the prior task's completion signal. Preflight is the single-target twin of `broadcast.sh` Phase 1b — keep them in lockstep.
+Read the verdict off the exit-code table above. Typing into a trust dialog submits menu garbage and reports a false success. Typing into a working pane races the prior task's completion signal. Preflight is the single-target twin of `broadcast.sh` Phase 1b.
 
 ## Why "text on screen" does not prove a message was submitted
 

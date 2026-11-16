@@ -4,7 +4,7 @@ description: "Generate a commit message, stage all changes, and push to remote a
 license: MIT
 effort: low
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -190,8 +190,6 @@ Agent inspection cannot confirm that a human understood the report. If no human 
 ## Handle Edge Cases and Errors
 
 For the edge-case table, per-phase step-completion report format, error-handling guidance, and alternative workflows (selective staging, interactive `git add -p`, PR flow), see [`references/edge-cases-and-reports.md`](./references/edge-cases-and-reports.md). Print a step completion report from that file after each step.
-
-Use individual git commands instead if you want more control over what gets committed.
 
 ## Self-Improve
 

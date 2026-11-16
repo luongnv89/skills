@@ -53,7 +53,7 @@ for cand in \
   ".claude/skills/herdr-agent/scripts" \
   "$HOME/.claude/skills/herdr-agent/scripts" \
   "$HOME/.agents/skills/herdr-agent/scripts"; do
-  if [ -f "$cand/launch_profile.py" ]; then here="$cand"; break; fi   # 3.1.0+ only
+  if [ -f "$cand/launch_profile.py" ]; then here="$cand"; break; fi
 done
 [ -n "$here" ] || { echo "Error: launch_profile.py not found in any known install location (repo, .agents/, .claude/, \$HOME). Fix the install or set \$here manually before retrying." >&2; exit 1; }
 

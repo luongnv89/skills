@@ -227,7 +227,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**code-review**](skills/code-review/) | 2.3.2 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
-| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.5.1 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
+| [**codebase-modernizer**](skills/codebase-modernizer/) | 1.5.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.6.0 | low | Target untested branches and edge cases |
 | [**user-test**](skills/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
 | [**dont-make-me-think**](skills/dont-make-me-think/) | 1.7.1 | medium | Usability review using Krug's principles |
@@ -255,11 +255,11 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**auto-push**](skills/auto-push/) | 1.2.1 | low | Commit message + stage + push with secret and size checks |
+| [**auto-push**](skills/auto-push/) | 1.2.2 | low | Commit message + stage + push with secret and size checks |
 | [**cleanup-project**](skills/cleanup-project/) | 1.1.0 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.5.1 | medium | Pre-commit + lean, fast GitHub Actions quality gates |
 | [**github-pages-publish**](skills/github-pages-publish/) | 1.1.1 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
-| [**security-setup**](skills/security-setup/) | 1.6.2 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
+| [**security-setup**](skills/security-setup/) | 1.6.3 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**ship**](skills/ship/) | 3.1.0 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 
 ### Product Planning

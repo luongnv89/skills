@@ -24,7 +24,7 @@ That single call does all of this server-side:
 `--until blocked`.
 
 Submission and waiting are atomic, so no pre-send transcript baseline or
-`HERDR_DONE_` completion marker is needed: there is no gap to race or confuse
+completion marker is needed: there is no gap to race or confuse
 this reply with earlier output.
 
 Exit status is 1 for a server error, 2 for a CLI syntax error, and the error
