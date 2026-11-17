@@ -61,7 +61,7 @@ This skill writes config into someone else's repository and installs git hooks:
 - **Validate and dry-run before installing hooks**, in Step 2's order, so findings surface without blocking any commit.
 - **Check for an existing git hook before installing.** `pre-commit install` moves a foreign hook to `<hook>.legacy` and runs it in migration mode. Never pass `-f`/`--overwrite`, which deletes it silently; deleting it needs the user's explicit confirmation.
 - **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf**, except `security-setup`'s recorded-override commit. A failing hook is a finding to report, not an obstacle to route around.
-- **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, lower a coverage threshold, or delete or skip a test to turn a run green or make it faster, without the user's approval of that named finding; a blanket "delete the slow tests" or "make it green" approves nothing. Report the failure and let the user decide.
+- **Surface failures, never suppress them.** Do not add a hook id to `SKIP` or lower a coverage threshold to turn a run green or make it faster, nor relax a lint rule or delete or skip a test without the user's approval of that named finding; a blanket "delete the slow tests" or "make it green" approves nothing. Report the failure and let the user decide.
 - **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid service such as Codecov on a private repo.
 - **Never merge.** Committed changes end in a pull request the user merges; on a private repo, measurement runs' minutes are budgeted and approved first.
 - **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Step 1 and Edge Cases.
@@ -186,7 +186,7 @@ A run passes when **all** of the following are true:
 
 ## Edge Cases
 
-- **Pre-commit not installed**: Show the install command and stop; write nothing.
+- **Pre-commit not installed**: Show the install command and stop; do not install it or write anything.
 - **Existing `.pre-commit-config.yaml`**: Use the Safety Rails merge procedure.
 - **Monorepo with multiple languages**: One config with per-language sections and `files:` filters. Local `language: system` entries must also target the package dir (`npm --prefix frontend`, `pytest backend/tests`): `files:` does not change cwd.
 - **No `origin` remote**: Stop and ask the user whether a local-only setup with no repo sync is acceptable; do not proceed automatically.

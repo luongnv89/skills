@@ -75,7 +75,9 @@ gh run list --repo "$repo" --workflow "$workflow" --created ">=$since" --limit 1
 jq -s --slurpfile counts counts.json -f billed-minutes.jq jobs.jsonl
 ```
 
-Monthly estimate = median billed minutes (and USD) per run of each event × that event's 30-day run count, summed. State its limits in the report: it covers one workflow (repeat per workflow file), it reads only the latest attempt of each run, and the audit drops cancelled runs and jobs, which still bill. So it is a floor.
+Monthly estimate = median billed minutes (and USD) per run of each event × that event's 30-day run count, summed. State its limits in the report: it covers one workflow (repeat per workflow file), it reads only the latest attempt of each run, the audit's medians leave out cancelled runs and jobs, and `counts.json` counts cancelled runs at the full median. It is an estimate, not the invoice.
+
+Without `gh` auth or run history, review the workflow statically: report findings with no billed numbers, and say under `Uncertainty:` that no runs were measured.
 
 ## 2. Critical path
 
@@ -153,7 +155,7 @@ Measured on <date> over <N> runs of <workflow>. Billed: <min>/run, ~<min>/month 
 
 Run on 2026-11-17 against two public repositories (free, so the dollar figures are at private-repo rates): `bash ci-speed-audit.sh <repo> ci.yml 30`, then the projection above. The `timing` endpoint returned `"total_ms": 0` for ripgrep run 44148873281.
 
-**`BurntSushi/ripgrep`** (Linux, Windows x64 and arm64, macOS). Hand-check of run 44148873281 (`pull_request`): macOS job 64 s → ceil 2 min × $0.062 = $0.124; Windows jobs 110 s and 100 s → 2 + 2 = 4 min × $0.010 = $0.04; Windows arm job 110 s → 2 min × $0.010 = $0.02; 19 Linux jobs, 2455 s (40.9 min) of work, billed 50 min × $0.006 = $0.30. Run total 58 billed minutes, $0.484. Rounding alone added 9 Linux minutes (22%).
+**`BurntSushi/ripgrep`** (Linux, Windows x64 and arm64, macOS; sample 30 runs: 14 `pull_request`, 1 `push`, 15 `schedule`). Hand-check of run 44148873281 (`pull_request`): macOS job 64 s → ceil 2 min × $0.062 = $0.124; Windows jobs 110 s and 100 s → 2 + 2 = 4 min × $0.010 = $0.04; Windows arm job 110 s → 2 min × $0.010 = $0.02; 19 Linux jobs, 2455 s (40.9 min) of work, billed 50 min × $0.006 = $0.30. Run total 58 billed minutes, $0.484. Rounding alone added 9 Linux minutes (22%).
 
 ```text
 per_event  runs  median_billed_min  median_usd  runs_30d  month_billed_min  month_usd
@@ -163,4 +165,4 @@ schedule     15  56                 0.466       31        1736              14.4
 month_total: 4894 billed min, $41.22
 ```
 
-**`luongnv89/asm`** (Linux only). Run 44124847105 (`push`): 12 jobs, 1036 s; per-job ceil 1+1+2+2+2+1+1+3+3+1+3+1 = 21 min × $0.006 = $0.126. 30-day counts: 141 `pull_request`, 55 `push` (8 `action_required` runs excluded) → 21 × 196 = 4116 billed min, $24.70 a month at private rates. Critical path: `build` (55 s) → `e2e-node (26)` (median 150 s, of which 92 s is `Run Node.js E2E tests` and 36 s `Install dependencies`). Top consumers: the three `e2e-node` legs (48-54 billed min each over 18 runs). Named findings: run the Node matrix off pull requests (one version there), and measure whether caching `node_modules` beats the 36 s install, warm and cold.
+**`luongnv89/asm`** (Linux only; sample 30 runs: 19 `pull_request`, 11 `push`). Run 44124847105 (`push`): 12 jobs, 1036 s; per-job ceil 1+1+2+2+2+1+1+3+3+1+3+1 = 21 min × $0.006 = $0.126, also the median for both events. 30-day counts: 141 `pull_request`, 55 `push` (8 `action_required` runs excluded) → 21 × 196 = 4116 billed min, $24.70 a month at private rates. Critical path: `build` (median 51 s) → `e2e-node (26)` (median 146 s, of which 89 s is `Run Node.js E2E tests` and 41 s `Install dependencies`). Top consumers: the three `e2e-node` legs (83-90 billed min each over 30 runs). Named findings: run the Node matrix off pull requests (one version there), and measure whether caching `node_modules` beats the 36 s install, warm and cold.
