@@ -1,9 +1,10 @@
 ---
 name: unused-code-killer
 description: Find and delete truly unreferenced code using static analysis tools
-role: Dead Code Eliminator
-wave: 1
-version: 1.0.0
+metadata:
+  role: "Dead Code Eliminator"
+  wave: "1"
+  version: "1.0.0"
 ---
 
 # Unused Code Killer Subagent

@@ -3,13 +3,13 @@ name: user-test tests
 on:
   pull_request:
     paths:
-      - "skills/user-test/scripts/**"
+      - "extras/user-test/scripts/**"
       - "meta/user-test/tests/**"
       - ".github/workflows/user-test-tests.yml"
   push:
     branches: [main]
     paths:
-      - "skills/user-test/scripts/**"
+      - "extras/user-test/scripts/**"
       - "meta/user-test/tests/**"
       - ".github/workflows/user-test-tests.yml"
 
@@ -29,7 +29,7 @@ jobs:
           python-version: "3.x"
 
       - name: Byte-compile the helper
-        run: python3 -m py_compile skills/user-test/scripts/user_test.py
+        run: python3 -m py_compile extras/user-test/scripts/user_test.py
 
       - name: Run unit tests (temp dirs and local processes, no network)
         run: |

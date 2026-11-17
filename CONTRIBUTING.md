@@ -81,10 +81,10 @@ Real skills in this repo use this frontmatter shape (example pattern from `skill
 name: skill-name
 description: "What it does and when to use it. Don't use for X."
 license: MIT
-effort: medium
 metadata:
   version: 1.0.0
   author: "Your Name"
+  effort: "medium"
 ---
 
 # Skill content...
@@ -100,6 +100,8 @@ Hard rules for this catalog (`CLAUDE.md:28-42`):
 6. Never hand-edit `dist/`; regenerate via `package_skill.py`.
 7. Do not commit `*-workspace/` contents or secrets.
 8. Run `quick_validate.py` on any skill you touched before opening a PR.
+9. **`skills/` vs `extras/`.** `skills/` is the **lstack** plugin and is submitted to the Claude plugin directory as is, so everything in it must pass the directory's community rules: only Markdown, text, JSON, YAML and PNG/JPEG/GIF/WebP/ICO files; nothing that starts with `#!`; no package-manager configuration. A skill that needs scripts, HTML/JS/CSS templates or other code goes in `extras/` (the **lstack-extras** plugin, offered only from this repository's marketplace). `tests/test-lstack-claude-packaging.py` enforces this.
+10. **Frontmatter keys in `skills/`.** Top level of a `SKILL.md`: only `name`, `description`, `license` and `metadata`. Everything else (`version`, `author`, `effort`, `dependencies` as one comma-separated string, `compatibility`) is a quoted value under `metadata`, one level deep. Skill-local `agents/*.md`: only `name` and `description` at the top level, with `role`, `wave` and `version` under `metadata`. Skills in `extras/` may keep the older top-level `effort`, `dependencies` and `compatibility`; released asm versions read `dependencies` only at the top level.
 
 ### Eval Suites (`evals/evals.json`)
 

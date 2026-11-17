@@ -32,9 +32,9 @@ else
   bad "bash on PATH" "bash not found"
 fi
 
-# --- Discovery: at least one skills/*/SKILL.md (install.sh:44-46) ---
-count="$(find skills -mindepth 2 -maxdepth 3 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')"
-[ "${count:-0}" -gt 0 ] && ok "discoverable SKILL.md count ($count)" || bad "discoverable SKILL.md" "none under skills/"
+# --- Discovery: at least one skills/*/SKILL.md or extras/*/SKILL.md (install.sh discover_skills) ---
+count="$(find skills extras -mindepth 2 -maxdepth 3 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')"
+[ "${count:-0}" -gt 0 ] && ok "discoverable SKILL.md count ($count)" || bad "discoverable SKILL.md" "none under skills/ or extras/"
 
 # --- TOOLS list includes documented agents (install.sh:23) ---
 if grep -q 'Google Antigravity' install.sh && grep -q 'Claude Code' install.sh; then

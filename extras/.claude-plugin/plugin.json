@@ -1,0 +1,23 @@
+{
+  "author": {
+    "name": "Luong NGUYEN"
+  },
+  "description": "32 more first-party skills: product, marketing, App Store, design/UX, agent fleets and machine setup. Many ship helper scripts; offered from this marketplace only.",
+  "homepage": "https://luongnv.com/skills/",
+  "icon": "./.claude-plugin/icon.png",
+  "keywords": [
+    "skills",
+    "product",
+    "marketing",
+    "seo",
+    "app-store",
+    "agents"
+  ],
+  "license": "MIT",
+  "name": "lstack-extras",
+  "repository": "https://github.com/luongnv89/skills",
+  "skills": [
+    "./"
+  ],
+  "version": "0.9.0"
+}

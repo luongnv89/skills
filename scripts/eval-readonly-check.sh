@@ -47,22 +47,22 @@ USAGE
 # TRANSCRIBED, not invented. Every entry below is quoted from the skill's own
 # contract text; the citation is the file:line it came from.
 #
-#   MODERNIZATION_REPORT.md  skills/codebase-modernizer/SKILL.md:279
+#   MODERNIZATION_REPORT.md  extras/codebase-modernizer/SKILL.md:279
 #                            ("MODERNIZATION_REPORT.md and MODERNIZATION_PLAN.md
 #                             both exist at the target repo root")
 #                            also references/report-template.md:122
-#   MODERNIZATION_PLAN.md    skills/codebase-modernizer/SKILL.md:279
+#   MODERNIZATION_PLAN.md    extras/codebase-modernizer/SKILL.md:279
 #                            also references/report-template.md:123
-#   CODE_REVIEW.md           skills/codebase-modernizer/SKILL.md:285-286
+#   CODE_REVIEW.md           extras/codebase-modernizer/SKILL.md:285-286
 #                            ("a **declared delegate artifact** (`CODE_REVIEW.md`)")
 #                            also SKILL.md:32, references/delegation-policy.md:26,
 #                            references/report-template.md:124
-#   obj/ .dart_tool/         skills/codebase-modernizer/SKILL.md:33-34
+#   obj/ .dart_tool/         extras/codebase-modernizer/SKILL.md:33-34
 #   target/ .gradle/         ("**probe byproducts** (build dirs some dependency probes
 #                             create, such as `obj/`, `.dart_tool/`, `target/`,
 #                             `.gradle/`)")
 #                            also references/dependency-audit.md:76-77
-#   coverage/ dist/          skills/codebase-modernizer/references/baseline.md:30
+#   coverage/ dist/          extras/codebase-modernizer/references/baseline.md:30
 #                            ("New *untracked* build output (`coverage/`, `dist/`,
 #                             `target/`) is acceptable")
 #

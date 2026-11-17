@@ -2,10 +2,10 @@
 name: oss-ready
 description: "Transform a project into a professional open-source repository by adding LICENSE, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, and GitHub issue/PR templates. Don't use for documentation overhauls, landing-page generation, or registry publishing."
 license: MIT
-effort: low
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "low"
 ---
 
 # OSS Ready
@@ -37,7 +37,7 @@ Record the stack, purpose, existing files, license, repo URL, README language, v
 
 ### Step 2: Create/Update Core Files
 
-Write `README.md` and `CONTRIBUTING.md` from the Step 1 values. Copy `LICENSE` from `assets/LICENSE-MIT` unless one exists or the user names another license. Copy `CODE_OF_CONDUCT.md` (Contributor Covenant 2.0) and `SECURITY.md` from `assets/`. Replace each placeholder with its Step 1 value. Section lists and per-file rules: `references/file-specs.md`.
+Write `README.md` and `CONTRIBUTING.md` from the Step 1 values. Copy `LICENSE` from `assets/LICENSE-MIT.txt` unless one exists or the user names another license. Copy `CODE_OF_CONDUCT.md` (Contributor Covenant 2.0) and `SECURITY.md` from `assets/`. Replace each placeholder with its Step 1 value. Section lists and per-file rules: `references/file-specs.md`.
 
 Take every usage example from the repo's code, scripts or `--help` output. Never invent a command or contact. A section with no source in the code is left out and listed under `Manual review`.
 
@@ -146,7 +146,7 @@ Optional and propose-only. After the run's result is delivered, run this check:
 
 ## Assets and References
 
-- `assets/`: `LICENSE-MIT`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.0), `SECURITY.md`, and `.github/` issue and PR templates
+- `assets/`: `LICENSE-MIT.txt`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.0), `SECURITY.md`, and `.github/` issue and PR templates
 - `references/repo-sync.md`: the Repo Sync block
 - `references/file-specs.md`: analysis values, per-file content, fill values, metadata, `.gitignore`
 - `references/final-report.md`: status rules, outcome table, examples, reader checks

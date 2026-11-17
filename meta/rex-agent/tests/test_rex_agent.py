@@ -25,7 +25,7 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent
-SKILL = HERE.parents[2] / "skills" / "rex-agent"
+SKILL = HERE.parents[2] / "extras" / "rex-agent"
 SCRIPTS = SKILL / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 

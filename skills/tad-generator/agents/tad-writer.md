@@ -1,8 +1,9 @@
 ---
 name: tad-writer
 description: Generate complete tad.md from PRD extraction and 5 parallel research rounds
-role: Technical Documentation Synthesizer
-version: 1.2.0
+metadata:
+  role: "Technical Documentation Synthesizer"
+  version: "1.2.0"
 ---
 
 # TAD Writer Agent

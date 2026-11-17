@@ -1,7 +1,7 @@
 # AGENTS.md — Agent Skills Catalog
 
 ## Project
-Skill **definitions** live in `skills/<name>/`. Installed copies under `~/.claude/skills/` and `~/.agents/skills/` are the runtime, not the source: edit only this repo.
+Skill **definitions** live in `skills/<name>/` (the lstack plugin, no code files) or `extras/<name>/` (the lstack-extras plugin, for skills that ship code). Installed copies under `~/.claude/skills/` and `~/.agents/skills/` are the runtime, not the source: edit only this repo.
 
 ## Commands
 - Validate one skill: `python3 ~/.claude/skills/skill-creator/scripts/quick_validate.py skills/<name>`
@@ -17,7 +17,9 @@ Skill **definitions** live in `skills/<name>/`. Installed copies under `~/.claud
 - Never: edit installed skill copies (`~/.claude/skills/`, `~/.agents/skills/`) from this repo
 - Never: hand-edit `dist/`; regenerate it with `package_skill.py`
 - Never: commit `*-workspace/`, `.asm-improver/`, `.claude/scheduled_tasks.lock`, secrets, `.env`, or `**/credentials*`
-- Never: add non-runtime files under `skills/` (the plugin folder is capped at 512 files). A skill's `docs/`, `evals/` and `tests/` go in `meta/<name>/`, mirroring the `skills/` path; eval fixtures go in `eval-fixtures/<name>/`
+- Never: add non-runtime files under `skills/` (the plugin folder is capped at 512 files).
+- Never: put code in `skills/` (any file that isn't Markdown, text, JSON, YAML or an image, or that starts with `#!`). It is submitted to the plugin directory as is. A skill that needs scripts or templates goes in `extras/<name>/` (the lstack-extras plugin)
+- Never: give a `skills/` SKILL.md frontmatter top-level keys beyond `name`, `description`, `license`, `metadata`; `effort`, `dependencies` (comma-separated string) and `compatibility` go under `metadata`. Skill-local `agents/*.md` keep only `name` and `description` at the top. `extras/` may keep the older top-level keys A skill's `docs/`, `evals/` and `tests/` go in `meta/<name>/`, mirroring the `skills/` path; eval fixtures go in `eval-fixtures/<name>/`
 - Never: commit or push without an explicit user request (drafting the message is fine)
 - Ask first: destructive ops (`rm -rf`, `git reset --hard`, force-push, branch delete)
 - Ask first: a change that touches more than one skill
@@ -31,7 +33,7 @@ Skill **definitions** live in `skills/<name>/`. Installed copies under `~/.claud
 - A skill that mutates a git repo has a `## Repo Sync Before Edits (mandatory)` section. A skill that invokes another skill has a `## Dependency Preflight (mandatory)` section
 - Small fix: make a minimal, targeted diff. Never rewrite a SKILL.md for a one-line change or refactor opportunistically
 - New skill: run `init_skill.py`, fill in SKILL.md, move the scaffolded `docs/README.md` to `meta/<name>/docs/README.md`, validate, then add a CHANGELOG entry under `## Unreleased`
-- Before creating a skill, grep `skills/*/SKILL.md` for one that already owns the behavior
+- Before creating a skill, grep `skills/*/SKILL.md` and `extras/*/SKILL.md` for one that already owns the behavior
 - Renaming a skill: change the frontmatter `name`, the directory, and the `README.md` catalog references in the same commit
 - Commits use Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`). Breaking changes go in the body, not the title
 

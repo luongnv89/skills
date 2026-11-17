@@ -42,13 +42,14 @@ detect_os() {
 }
 
 # ─── Discover skills (folders containing SKILL.md) ─────────────────────────
-# Walks top-level skills/*/ and one extra level skills/*/*/ so suite umbrellas
-# (e.g., diagram-generator/) and their child skills are both installable.
+# Walks skills/ (the lstack plugin) and extras/ (lstack-extras), top level plus one
+# extra level, so suite umbrellas (e.g., diagram-generator/) and their child
+# skills are both installable.
 discover_skills() {
   local dir desc prev_nullglob
   prev_nullglob=$(shopt -p nullglob)
   shopt -s nullglob
-  for dir in "$SCRIPT_DIR"/skills/*/ "$SCRIPT_DIR"/skills/*/*/; do
+  for dir in "$SCRIPT_DIR"/skills/*/ "$SCRIPT_DIR"/skills/*/*/ "$SCRIPT_DIR"/extras/*/ "$SCRIPT_DIR"/extras/*/*/; do
     [[ -f "$dir/SKILL.md" ]] || continue
     local name
     name="$(basename "$dir")"
@@ -66,7 +67,7 @@ discover_skills() {
   eval "$prev_nullglob"
 
   if [[ ${#SKILLS[@]} -eq 0 ]]; then
-    echo "${RED}No skills found (no subdirectories with SKILL.md in skills/).${RESET}"
+    echo "${RED}No skills found (no subdirectories with SKILL.md in skills/ or extras/).${RESET}"
     exit 1
   fi
 }

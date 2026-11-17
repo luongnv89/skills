@@ -1,9 +1,10 @@
 ---
 name: slop-comment-cleaner
 description: Remove AI slop, stubs, LARP, work-in-motion comments, and unhelpful noise
-role: Slop Hunter
-wave: 1
-version: 1.0.0
+metadata:
+  role: "Slop Hunter"
+  wave: "1"
+  version: "1.0.0"
 ---
 
 # Slop Comment Cleaner Subagent

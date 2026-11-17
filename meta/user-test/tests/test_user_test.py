@@ -9,7 +9,7 @@ import time
 import unittest
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().parents[3] / "skills" / "user-test" / "scripts" / "user_test.py"
+SCRIPT = Path(__file__).resolve().parents[3] / "extras" / "user-test" / "scripts" / "user_test.py"
 
 
 def ut(*args, cwd=None):

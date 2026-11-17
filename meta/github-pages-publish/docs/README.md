@@ -72,7 +72,7 @@ Requires `git`, an authenticated `gh` (with the `repo` scope, and `workflow` whe
 The helper's tests use only the standard library and throwaway git repos, so they need `git` and `python3` but no network or GitHub account. Run them from the skill folder:
 
 ```bash
-cd skills/github-pages-publish
+cd extras/github-pages-publish
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 

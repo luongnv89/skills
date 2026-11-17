@@ -49,7 +49,7 @@ npx skills@1.7.0 add https://github.com/luongnv89/skills --skill prd-generator
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/prd-generator
+asm install github:luongnv89/skills:extras/prd-generator
 ```
 
 ## Usage

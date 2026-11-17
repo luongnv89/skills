@@ -61,5 +61,5 @@ graph TD
 Required: `dont-make-me-think`, `ux-ax-review`. Optional: `website-agent-readiness`, `viral-product-evaluator`, `/browse`. `frontend-design` is needed only for apply.
 
 ```bash
-asm install github:luongnv89/skills:skills/design-optimizer -p claude --yes
+asm install github:luongnv89/skills:extras/design-optimizer -p claude --yes
 ```

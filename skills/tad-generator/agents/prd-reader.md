@@ -1,8 +1,9 @@
 ---
 name: prd-reader
 description: Read PRD and supporting docs, return structured extraction for architecture research
-role: Requirements Extractor
-version: 1.1.0
+metadata:
+  role: "Requirements Extractor"
+  version: "1.1.0"
 ---
 
 # PRD Reader Agent

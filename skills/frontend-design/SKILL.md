@@ -2,10 +2,10 @@
 name: frontend-design
 description: "Build production-grade frontend interfaces with distinctive aesthetics and working code. Use for UI components, pages, or frontend features. Don't use for backend/API work or usability-only audits."
 license: MIT
-effort: high
 metadata:
-  version: 1.5.2
+  version: 1.5.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "high"
 ---
 
 # Frontend Design

@@ -23,7 +23,7 @@ from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
-SCRIPTS = HERE.parents[2] / "skills" / "tmux-agent-comms" / "scripts"
+SCRIPTS = HERE.parents[2] / "extras" / "tmux-agent-comms" / "scripts"
 FAKE_BIN = HERE / "bin"
 
 

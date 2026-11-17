@@ -19,7 +19,7 @@ import unittest
 from pathlib import Path
 
 
-SKILL_DIR = Path(__file__).resolve().parents[3] / "skills" / "viral-product-evaluator"
+SKILL_DIR = Path(__file__).resolve().parents[3] / "extras" / "viral-product-evaluator"
 SCRIPT = SKILL_DIR / "scripts" / "virality_score.py"
 sys.path.insert(0, str(SCRIPT.parent))
 

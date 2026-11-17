@@ -2,10 +2,10 @@
 name: doc-manager
 description: "Generate or update docs to match the code, citing each claim to path:line and asking on ambiguity; runbook docs also get a check-only validation script. Don't use for API-reference autogen (JSDoc/Sphinx), landing pages, or CLAUDE.md/AGENTS.md."
 license: MIT
-effort: medium
 metadata:
-  version: 2.2.0
+  version: 2.2.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "medium"
 ---
 
 # Doc Manager

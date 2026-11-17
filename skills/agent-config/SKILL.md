@@ -2,10 +2,10 @@
 name: agent-config
 description: "Create, update, or audit AGENTS.md (default) or CLAUDE.md agent instructions: set up, prune, add a rule, or merge CLAUDE.md or .cursorrules into one file Claude Code, Codex, and Cursor all read. Don't use for READMEs, skills, or subagents."
 license: MIT
-effort: medium
 metadata:
-  version: 2.3.0
+  version: 2.3.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "medium"
 ---
 
 ## When to Use

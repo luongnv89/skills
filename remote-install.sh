@@ -187,13 +187,15 @@ download_skills() {
 }
 
 # ─── Discover skills (folders containing SKILL.md) ─────────────────────────
-# Walks top-level skills/*/ and one extra level skills/*/*/ so suite umbrellas
-# (e.g., diagram-generator/) and their child skills are both installable.
+# Walks skills/ (the lstack plugin) and its sibling extras/ (lstack-extras), top
+# level plus one extra level, so suite umbrellas (e.g., diagram-generator/) and
+# their child skills are both installable.
 discover_skills() {
   local dir desc prev_nullglob
   prev_nullglob=$(shopt -p nullglob)
   shopt -s nullglob
-  for dir in "$SKILLS_SRC_DIR"/*/ "$SKILLS_SRC_DIR"/*/*/; do
+  local extras_dir="${SKILLS_SRC_DIR%/skills}/extras"
+  for dir in "$SKILLS_SRC_DIR"/*/ "$SKILLS_SRC_DIR"/*/*/ "$extras_dir"/*/ "$extras_dir"/*/*/; do
     [[ -f "$dir/SKILL.md" ]] || continue
     local name
     name="$(basename "$dir")"

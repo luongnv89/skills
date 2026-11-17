@@ -3,18 +3,18 @@ name: rex-agent tests
 on:
   pull_request:
     paths:
-      - "skills/rex-agent/scripts/**"
+      - "extras/rex-agent/scripts/**"
       - "meta/rex-agent/tests/**"
-      - "skills/rex-agent/SKILL.md"
-      - "skills/rex-agent/references/**"
+      - "extras/rex-agent/SKILL.md"
+      - "extras/rex-agent/references/**"
       - ".github/workflows/rex-agent-tests.yml"
   push:
     branches: [main]
     paths:
-      - "skills/rex-agent/scripts/**"
+      - "extras/rex-agent/scripts/**"
       - "meta/rex-agent/tests/**"
-      - "skills/rex-agent/SKILL.md"
-      - "skills/rex-agent/references/**"
+      - "extras/rex-agent/SKILL.md"
+      - "extras/rex-agent/references/**"
       - ".github/workflows/rex-agent-tests.yml"
 
 permissions:
@@ -35,10 +35,10 @@ jobs:
       - name: Byte-compile Python scripts
         run: |
           python3 -m py_compile \
-            skills/rex-agent/scripts/agent.py \
-            skills/rex-agent/scripts/grid.py \
-            skills/rex-agent/scripts/launch_profile.py \
-            skills/rex-agent/scripts/rexlib.py \
+            extras/rex-agent/scripts/agent.py \
+            extras/rex-agent/scripts/grid.py \
+            extras/rex-agent/scripts/launch_profile.py \
+            extras/rex-agent/scripts/rexlib.py \
             meta/rex-agent/tests/fake_rex.py
 
       - name: Run unit tests (fake rex CLI, no Rex app needed)

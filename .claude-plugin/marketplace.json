@@ -1,14 +1,19 @@
 {
-  "description": "48 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+  "description": "16 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
   "name": "lstack",
   "owner": {
     "name": "Luong NGUYEN"
   },
   "plugins": [
     {
-      "description": "48 maintained first-party skills for Claude Code; external tools and skill prerequisites remain required.",
+      "description": "16 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
       "name": "lstack",
       "source": "./skills"
+    },
+    {
+      "description": "32 more first-party skills: product, marketing, App Store, design/UX, agent fleets and machine setup. Many ship helper scripts; offered from this marketplace only.",
+      "name": "lstack-extras",
+      "source": "./extras"
     }
   ]
 }

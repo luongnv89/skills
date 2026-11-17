@@ -26,8 +26,8 @@ Record each value. Steps 2-6 use them.
 
 | Token | Asset | Fill with | If the value is unknown |
 |-------|-------|-----------|-------------------------|
-| `[YEAR]` | `LICENSE-MIT` | Output of `date +%Y` | Not possible; `date` always answers |
-| `[COPYRIGHT HOLDER]` | `LICENSE-MIT` | The manifest author (`author` in `package.json`, `authors` in `pyproject.toml` or `Cargo.toml`). If none, the output of `git config user.name` | Ask the user. With no answer, leave the token; the run ends `PARTIAL` |
+| `[YEAR]` | `LICENSE-MIT.txt` | Output of `date +%Y` | Not possible; `date` always answers |
+| `[COPYRIGHT HOLDER]` | `LICENSE-MIT.txt` | The manifest author (`author` in `package.json`, `authors` in `pyproject.toml` or `Cargo.toml`). If none, the output of `git config user.name` | Ask the user. With no answer, leave the token; the run ends `PARTIAL` |
 | `[INSERT CONTACT METHOD]` | `CODE_OF_CONDUCT.md` | The conduct contact the user gives | Leave the token; the run ends `PARTIAL` |
 | `[INSERT SECURITY EMAIL]` | `SECURITY.md` | The security contact the user gives (email or form URL) | Leave the token; the run ends `PARTIAL` |
 
@@ -65,7 +65,7 @@ Include each item. Take commands from the manifest; take the default branch from
 
 | File | Source | Rule when the file exists |
 |------|--------|---------------------------|
-| `LICENSE` | `assets/LICENSE-MIT`, unless the user names another license | Never overwrite. Record its first line as the detected license and skip the file |
+| `LICENSE` | `assets/LICENSE-MIT.txt`, unless the user names another license | Never overwrite. Record its first line as the detected license and skip the file |
 | `CODE_OF_CONDUCT.md` | `assets/CODE_OF_CONDUCT.md` (Contributor Covenant 2.0) | Additive edit: append only template sections whose heading is missing |
 | `SECURITY.md` | `assets/SECURITY.md` | Additive edit: append only template sections whose heading is missing |
 

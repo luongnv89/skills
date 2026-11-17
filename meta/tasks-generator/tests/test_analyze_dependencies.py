@@ -19,7 +19,7 @@ import unittest
 from pathlib import Path
 
 
-SKILL_DIR = Path(__file__).resolve().parents[3] / "skills" / "tasks-generator"
+SKILL_DIR = Path(__file__).resolve().parents[3] / "extras" / "tasks-generator"
 SCRIPT = SKILL_DIR / "scripts" / "analyze_dependencies.py"
 sys.path.insert(0, str(SCRIPT.parent))
 

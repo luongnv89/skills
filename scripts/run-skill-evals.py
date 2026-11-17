@@ -95,15 +95,15 @@ def main() -> int:
                     help="write the full result set here")
     a = ap.parse_args()
 
-    matches = [p for p in REPO.glob(f"skills/*/{a.skill}") if (p / "SKILL.md").is_file()]
-    repo_skill = REPO / "skills" / a.skill
-    if not (repo_skill / "SKILL.md").is_file():
-        if not matches:
-            print(f"✗ no skill at skills/{a.skill}", file=sys.stderr)
-            return 2
-        repo_skill = matches[0]
+    matches = [p for root in ("skills", "extras")
+               for p in [REPO / root / a.skill, *REPO.glob(f"{root}/*/{a.skill}")]
+               if (p / "SKILL.md").is_file()]
+    if not matches:
+        print(f"✗ no skill at skills/{a.skill} or extras/{a.skill}", file=sys.stderr)
+        return 2
+    repo_skill = matches[0]
 
-    suite = REPO / "meta" / repo_skill.relative_to(REPO / "skills") / "evals" / "evals.json"
+    suite = REPO / "meta" / Path(*repo_skill.relative_to(REPO).parts[1:]) / "evals" / "evals.json"
     if not suite.is_file():
         print(f"✗ no eval suite at {suite.relative_to(REPO)}", file=sys.stderr)
         return 2

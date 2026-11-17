@@ -50,7 +50,7 @@ npx skills@1.7.0 add https://github.com/luongnv89/skills --skill logo-designer
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/logo-designer
+asm install github:luongnv89/skills:extras/logo-designer
 ```
 
 ## Usage

@@ -1,7 +1,7 @@
 # lstack
 
-**lstack 0.8.0** exposes this repository's maintained first-party Agent Skills
-as a native Claude Code plugin directly from the canonical `skills/` tree, which
+**lstack 0.9.0** exposes this repository's maintained first-party engineering
+Agent Skills as a native Claude Code plugin directly from the canonical `skills/` tree, which
 is itself the plugin folder.
 Optional platform-neutral, Claude and Codex ZIP exports remain available. It is
 a package, not a new skill or runtime. There are no plugin hooks, MCP servers,
@@ -32,11 +32,12 @@ claude --plugin-dir /absolute/path/to/checkout/skills
 
 The path is the checkout's `skills/` folder, not the repository root and not
 `skills/.claude-plugin/`. Only native metadata lives in that directory. The
-manifest's `./` entry discovers the 46 immediate members, and two further
-entries add **only** the nested diagram children. Together they expose 48
+manifest's `./` entry discovers the 14 immediate members, and two further
+entries add **only** the nested diagram children. Together they expose 16
 skills once, without flattening, copying or moving source files. Skill-local
 `agents/` files stay resources, not native agents. The repository-root
-`.claude-plugin/marketplace.json` lists the plugin with source `./skills`.
+`.claude-plugin/marketplace.json` lists the plugin with source `./skills`, and the companion **lstack-extras**
+plugin (32 more skills, many with helper scripts) with source `./extras`.
 Before 0.5.0 the repository root was the plugin folder; point an existing
 `--plugin-dir` at `skills/` instead.
 
@@ -56,22 +57,36 @@ See **Prerequisites and capability limits** before use.
 ### Directory portal and review caveats
 
 If the owner chooses to submit, use repository **luongnv89/skills**, plugin path
-**`skills`**, tracked branch **`directory`** (see *Directory edition* below). No
-separate plugin repository is needed. Paid login, connected GitHub account, contact information and accurate
-data-handling/legal disclosures are owner responsibilities. This implementation
-does not submit, publish, or claim acceptance/approval.
+**`skills`**, tracked branch **`main`**. No separate plugin repository or
+generated branch is needed. Paid login, connected GitHub account, contact
+information and accurate data-handling/legal disclosures are owner
+responsibilities. This implementation does not submit, publish, or claim
+acceptance/approval.
 
-Most portal checks read only the plugin folder, which is why it is `skills/` and
-not the repository root: the folder holds the 48 members, `skills/README.md`
-(the listing page and per-skill data-handling disclosure) and the native
-manifest, and stays under the portal's 512-file limit, with no symlinks, no
-non-image binaries and no file over 256 KiB.
-`tests/test-lstack-claude-packaging.py` enforces those limits. Root-only
-material such as `docs/`, `examples/` and `CLAUDE.md` is outside the plugin
-folder; repository-wide checks (total size, file names, `.gitattributes`) still
-apply. The `license` field in the manifest satisfies the license requirement;
-the root MIT `LICENSE` covers the repository. Only the portal's **Validate**
-result is authoritative.
+The directory accepts only Markdown, text, JSON, YAML and PNG/JPEG/GIF/WebP/ICO
+images from organizations Anthropic hasn't verified, refuses any file that
+starts with `#!` or holds package-manager settings, and allows only standard
+frontmatter keys (`LOCAL_CODE_FILE_TYPE`, `LOCAL_CODE_FRONTMATTER_KEY`). The
+`skills/` folder is kept inside those rules at the source, with no build step:
+
+- Only Markdown skills live in `skills/`. A skill that needs helper scripts,
+  HTML/JS templates or other code goes in `extras/` (the **lstack-extras**
+  plugin, listed only in this repository's marketplace).
+- Each `SKILL.md` frontmatter uses only `name`, `description`, `license` and a
+  `metadata` map of quoted text; `effort`, `dependencies` and `compatibility`
+  sit under `metadata`. Skill-local `agents/*.md` keep only `name` and
+  `description` at the top level, with `role`, `wave` and `version` under
+  `metadata`.
+
+The folder holds the 16 members, `skills/README.md` (the listing page and
+per-skill data-handling disclosure) and the native manifest, under the portal's
+512-file limit, with no symlinks, no non-image binaries and no file over
+256 KiB. `tests/test-lstack-claude-packaging.py` enforces those limits and the
+file-type and frontmatter rules. Root-only material such as `docs/`, `extras/`,
+`examples/` and `CLAUDE.md` is outside the plugin folder; repository-wide checks
+(total size, file names, `.gitattributes`) still apply. The `license` field in
+the manifest satisfies the license requirement; the root MIT `LICENSE` covers
+the repository. Only the portal's **Validate** result is authoritative.
 
 Members can mutate files/repos, commit/push, install tools and interact with
 websites, APIs and GitHub. Depending on the workflow and agent configuration,
@@ -80,67 +95,17 @@ and external services. Inspect each member's approval gates, credentials and
 dependencies first. The package makes no offline/no-collection claim and supplies
 no invented contact, retention or privacy guarantees.
 
-### Directory edition
-
-The directory accepts only Markdown, text, JSON, YAML and PNG/JPEG/GIF/WebP/ICO
-images from organizations Anthropic hasn't verified. It refuses any file that
-starts with `#!`, package-manager settings, and frontmatter keys outside its
-allowed list (`LOCAL_CODE_FILE_TYPE`, `LOCAL_CODE_FRONTMATTER_KEY`). Main ships
-helper scripts and skill-creator's `effort` and `dependencies` keys, so the
-directory follows a generated **`directory`** branch instead of `main`:
-
-- A member is left out when any of its files breaks the file rule, or when one
-  of its `dependencies` isn't in the edition (it would fetch that skill at run
-  time). The rule is computed on every build; there is no hand-kept list.
-- Each `SKILL.md` keeps only `name`, `description`, `license`, `compatibility`
-  and `metadata`; `effort` and `dependencies` move under `metadata` as quoted
-  text. Bodies and resource files are copied byte for byte.
-- Members are flattened to `skills/<name>/` as in the ZIP exports. They sit at
-  the plugin root, so the edition's `plugin.json` sets `"skills": ["./"]`
-  (Claude Code's default scan is only `./skills/`); the self-check refuses a
-  manifest that would load nothing. The edition writes its own `README.md`,
-  `LICENSE` and description with the real skill count, and a branch-root
-  `provenance.json` with the source commit and every file's SHA-256.
-- The build re-checks the output (file types, `#!`, UTF-8 and NUL, package
-  configuration, symlinks, 256 KiB, 512 files, frontmatter keys) and exits 1 on
-  any problem. `tests/test-lstack-directory.py` covers each rule. `.ico` and
-  `.svg` are refused too: the checklist holds `.ico` for a reviewer, and the
-  community rule doesn't list SVG.
-
-Build and publish from a clean checkout of the commit to publish:
-
-```bash
-python3 scripts/build-lstack-directory.py --list          # included/excluded, with reasons
-git fetch origin directory && git worktree add -B directory ../lstack-directory origin/directory
-#   first time only: git worktree add --orphan -b directory ../lstack-directory
-git -C ../lstack-directory rm -rq --ignore-unmatch .
-python3 scripts/build-lstack-directory.py --output ../lstack-directory
-git -C ../lstack-directory add -A
-claude --plugin-dir ../lstack-directory/skills plugin details lstack    # must list every skill
-git -C ../lstack-directory commit -m "chore(directory): lstack directory edition from $(git rev-parse --short HEAD)"
-git -C ../lstack-directory push origin directory
-python3 scripts/build-lstack-directory.py --check ../lstack-directory   # re-check any time
-git worktree remove ../lstack-directory
-```
-
-`git worktree add --orphan` needs git 2.42 or later.
-
-Then, in the developer portal, set the plugin's **Tracked branch or tag** to
-`directory` (Settings tab) and select **Check for new commits**, or validate a
-new submission with that branch. The full lstack still installs from this
-repository's marketplace on `main`.
-
 ## Contents and scope
 
-[manifest.json](manifest.json) explicitly lists all **48** current tracked skill
-definitions: 46 top-level skills plus `drawio-generator` and
+[manifest.json](manifest.json) explicitly lists all **16** current tracked skill
+definitions: 14 top-level skills plus `drawio-generator` and
 `excalidraw-generator`, the two children of `diagram-generator`. Native Claude
 loading uses the unchanged nested source layout. In optional ZIP exports every
 member becomes a separately discoverable `skills/<name>/SKILL.md` directory;
 the exported umbrella excludes the children's subtrees to avoid duplication.
 
 Exported files keep their original bytes and Git executable modes: `SKILL.md`,
-references, scripts, agents and assets. Package version 0.8.0
+references, scripts, agents and assets. Package version 0.9.0
 is independent of both the catalog release and member versions. Generated
 `provenance.json` records the full source commit, manifest/builder SHA-256,
 original member versions, and source/destination/hash/mode for every member file.
@@ -170,7 +135,7 @@ python3 scripts/build-lstack.py --check
 python3 scripts/build-lstack.py
 ```
 
-The default output is `dist/lstack-0.8.0.zip` (ignored by Git). The JSON result
+The default output is `dist/lstack-0.9.0.zip` (ignored by Git). The JSON result
 prints the exact commit, skill/file counts, output path and archive SHA-256.
 Inputs come **entirely from the selected committed Git tree**, never from local
 edits or installed skills. Commit intended packaging/member changes before
@@ -198,14 +163,14 @@ Inspect and extract a **trusted, locally built** archive into a new staging
 folder, not directly over an existing agent installation:
 
 ```bash
-python3 -m zipfile -l dist/lstack-0.8.0.zip
-python3 -m zipfile -e dist/lstack-0.8.0.zip /tmp/lstack-staging
+python3 -m zipfile -l dist/lstack-0.9.0.zip
+python3 -m zipfile -e dist/lstack-0.9.0.zip /tmp/lstack-staging
 ```
 
 Layout:
 
 ```text
-lstack-0.8.0/
+lstack-0.9.0/
   README.md
   LICENSE
   manifest.json
@@ -215,7 +180,7 @@ lstack-0.8.0/
     diagram-generator/SKILL.md
     drawio-generator/SKILL.md
     excalidraw-generator/SKILL.md
-    ... (48 independent member directories)
+    ... (16 independent member directories)
 ```
 
 Read a member's `SKILL.md` and prerequisites before using it. Supply that file
@@ -223,7 +188,7 @@ and its relative resources to a skill-capable agent, or manually install the
 **whole member directory** at that agent's documented skill location. For the
 existing member preflights this is commonly `~/.claude/skills/<name>/` or
 `~/.agents/skills/<name>/`. Review any existing copy and back it up before
-replacing it; don't nest the entire `lstack-0.8.0` directory as one skill. For
+replacing it; don't nest the entire `lstack-0.9.0` directory as one skill. For
 example, after installing `code-review`, ask the agent to review the target
 repository using that skill and verify it loaded the intended definition.
 There is no `/lstack` entry point or automatic dependency installation.
@@ -244,8 +209,8 @@ register its marketplace. The following uses ignored `dist/` under the clone:
 ```bash
 python3 scripts/build-lstack.py --target claude --check
 python3 scripts/build-lstack.py --target claude
-python3 -m zipfile -e dist/lstack-claude-0.8.0.zip dist/claude-staging
-marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.8.0"
+python3 -m zipfile -e dist/lstack-claude-0.9.0.zip dist/claude-staging
+marketplace="$(pwd)/dist/claude-staging/lstack-claude-0.9.0"
 plugin="$marketplace/plugins/lstack"
 claude plugin validate "$plugin"
 claude plugin validate "$marketplace"
@@ -256,16 +221,16 @@ files. The result JSON reports `marketplace_root` and `plugin_root` relative to
 the extraction directory. Its layout is:
 
 ```text
-lstack-claude-0.8.0/
+lstack-claude-0.9.0/
   .claude-plugin/marketplace.json   # lstack, source ./plugins/lstack
   plugins/lstack/
-    .claude-plugin/plugin.json     # name lstack, version 0.8.0
+    .claude-plugin/plugin.json     # name lstack, version 0.9.0
     .claude-plugin/icon.png        # plugin directory listing icon
     README.md
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md       # all 48 members, including flattened children
+    skills/<member>/SKILL.md       # all 16 members, including flattened children
 ```
 
 Only metadata goes inside `.claude-plugin/`; `skills/` is at the **plugin** root.
@@ -362,8 +327,8 @@ committed inputs, never selected by the installed Codex version.
 ```bash
 python3 scripts/build-lstack.py --target codex --check
 python3 scripts/build-lstack.py --target codex
-python3 -m zipfile -e dist/lstack-codex-0.8.0.zip dist/codex-staging
-marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.8.0"
+python3 -m zipfile -e dist/lstack-codex-0.9.0.zip dist/codex-staging
+marketplace="$(pwd)/dist/codex-staging/lstack-codex-0.9.0"
 codex plugin marketplace add "$marketplace"
 codex plugin marketplace list
 codex
@@ -385,15 +350,15 @@ codex plugin list --json --marketplace lstack-local
 The generated archive is self-contained:
 
 ```text
-lstack-codex-0.8.0/
+lstack-codex-0.9.0/
   .agents/plugins/marketplace.json  # lstack-local
   plugins/lstack/
-    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.8.0
+    plugin.json                    # Agent Plugins 1.0, name lstack, version 0.9.0
     README.md
     LICENSE
     manifest.json
     provenance.json
-    skills/<member>/SKILL.md        # 48 independent members
+    skills/<member>/SKILL.md        # 16 independent members
 ```
 
 The marketplace entry uses `source: {"source": "local", "path": "./plugins/lstack"}`,
@@ -476,15 +441,15 @@ artifact is emitted or silently substituted.
   installed-directory fallback supported by each member, or configure `asm`
   separately. Dependency-preflight success and runtime execution are not claimed
   by packaging or native skill metadata discovery.
-- External `browse` from [garrytan/gstack](https://github.com/garrytan/gstack) is
+- **lstack-extras:** external `browse` from [garrytan/gstack](https://github.com/garrytan/gstack) is
   used by live-browser branches in `design-optimizer`, `viral-product-evaluator`
   and the optional live-URL path in `dont-make-me-think`. Follow those members' fail-soft evidence options
   when unavailable; screenshots cannot be invented.
-- `website-agent-readiness` Phase 4 requires `plan-to-issues` from
+- **lstack-extras:** `website-agent-readiness` Phase 4 requires `plan-to-issues` from
   [luongnv89/idd](https://github.com/luongnv89/idd), its `issue-creator` dependency,
   and authenticated GitHub tools. Earlier phases have their own requirements.
   These external skills are **not vendored** or fetched by the builder.
-- `issue-work-loop` requires `issue-pr-review` from idd in both ISSUE and PR
+- **lstack-extras:** `issue-work-loop` requires `issue-pr-review` from idd in both ISSUE and PR
   modes, and `issue-resolver` from idd in ISSUE mode only. It also requires
   `asm`, Herdr, `git`, authenticated `gh`, and bundled `herdr-agent` resolved
   through its dependency preflight.
@@ -503,7 +468,7 @@ artifact is emitted or silently substituted.
   the original repository, not the extracted layout. Follow the manifest's
   source-to-name mapping; no member instructions are rewritten for this bundle.
 - Member-root tests/evals stay in the source repository. Packaging checks prove
-  artifact structure/parity/safety, not all 48 workflows' runtime behavior,
+  artifact structure/parity/safety, not all 16 workflows' runtime behavior,
   host compatibility, or that a human understood every report.
 
 ## Maintain and validate

@@ -2,10 +2,10 @@
 name: opencode-runner
 description: "Run coding tasks via opencode using free cloud models. Use when asked to offload work to opencode.ai or run a free model. Don't use for local models (Ollama, LM Studio), Claude/OpenAI calls, or when Claude should do the work itself."
 license: MIT
-effort: medium
 metadata:
-  version: 1.7.0
+  version: 1.7.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "medium"
 ---
 
 # OpenCode Runner

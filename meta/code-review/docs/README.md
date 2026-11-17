@@ -83,7 +83,7 @@ asm install github:luongnv89/skills:skills/code-review
 |---|---|---|
 | `references/review-mode.md` | review | Bug/security/quality review workflow (+ `agents/reviewer.md`, `file-reviewer.md`, `report-assembler.md`; `references/code-smells.md`, `subagent-architecture.md`) |
 | `references/perf-mode.md` | perf | Performance analysis workflow (+ `references/language-checks.md`) |
-| `references/clean-mode.md` | clean | Clean Code audit workflow (+ `clean-code-checklist.md`, `tdd-checklist.md`, `html-report-guide.md`, `report-template.html`) |
+| `references/clean-mode.md` | clean | Clean Code audit workflow (+ `clean-code-checklist.md`, `tdd-checklist.md`, `html-report-guide.md`) |
 | `references/cleanup-mode.md` | cleanup | Slop-cleanup refactor workflow (+ the 8 cleaner agents in `agents/`) |
 
 ## Output

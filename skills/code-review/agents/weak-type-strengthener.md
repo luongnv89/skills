@@ -1,9 +1,10 @@
 ---
 name: weak-type-strengthener
 description: Replace any/unknown/interface{}/Object with specific, researched types
-role: Type Strengthener
-wave: 1
-version: 1.0.0
+metadata:
+  role: "Type Strengthener"
+  wave: "1"
+  version: "1.0.0"
 ---
 
 # Weak Type Strengthener Subagent

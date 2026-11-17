@@ -72,7 +72,7 @@ Requires `python3` and a way to drive the app: browser automation tools in the s
 ## Tests
 
 ```bash
-cd skills/user-test
+cd extras/user-test
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
