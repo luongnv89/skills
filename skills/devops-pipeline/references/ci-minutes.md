@@ -29,10 +29,12 @@ GitHub rounds each job up to a whole minute, then prices it per runner. Standard
 | Linux 1-core (`ubuntu-slim`) | `actions_linux_slim` | 0.002 |
 | Windows 2-core x64 / arm64 | `actions_windows`, `actions_windows_arm` | 0.010 |
 | macOS 3- or 4-core | `actions_macos` | 0.062 |
+| macOS large (`macos-*-large`) | larger runner | 0.077 |
+| macOS xlarge (`macos-*-xlarge`) | larger runner | 0.102 |
 
 - **Public repositories:** standard runners are free, so the goal there is wall time, not minutes.
 - **Self-hosted runners:** free; they do not draw from included usage.
-- **Larger runners:** billed per minute at their own rates, even on public repositories. This mode never proposes them; the script reports them as `unknown` with no price, so a bill containing them is flagged as understated, never silently priced at the standard rate.
+- **Larger runners:** billed per minute at their own rates, even on public repositories. This mode never proposes them. The script prices the two macOS labels above and reports every other label (a custom, Linux or Windows larger runner, a third-party runner, or a job with several labels) as `unknown` with no price, so a bill containing them is flagged as understated, never silently priced at the standard rate. Labels match exactly, so `macos-15-xlarge` is never priced as `macos`.
 - **Included usage** is a monthly dollar amount per plan (see [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)), not a minute quota. Report spend in USD and billed minutes per SKU.
 
 Save as `billed-minutes.jq` next to `jobs.jsonl`:
@@ -40,16 +42,22 @@ Save as `billed-minutes.jq` next to `jobs.jsonl`:
 ```jq
 # Billed minutes per run, priced per runner SKU, and a 30-day projection.
 # Usage: jq -s --slurpfile counts counts.json -f billed-minutes.jq jobs.jsonl
-def sku: (.labels // [] | map(ascii_downcase) | join(" ")) as $l |
-  if ($l | test("self-hosted")) then "self-hosted"
-  elif ($l | test("large|core|gpu")) then "unknown"
-  elif ($l | test("macos")) then "macos"
-  elif ($l | test("windows")) then (if ($l | test("arm")) then "windows_arm" else "windows" end)
-  elif ($l | test("ubuntu")) then (if ($l | test("arm")) then "linux_arm" elif ($l | test("slim")) then "linux_slim" else "linux" end)
-  else "unknown" end;
+def sku: (.labels // [] | map(ascii_downcase)) as $l |
+  if any($l[]; . == "self-hosted") then "self-hosted"
+  elif ($l | length) != 1 then "unknown"
+  else $l[0] |
+    if test("^ubuntu-slim$") then "linux_slim"
+    elif test("^ubuntu-(latest|[0-9]{2}\\.[0-9]{2})-arm$") then "linux_arm"
+    elif test("^ubuntu-(latest|[0-9]{2}\\.[0-9]{2})$") then "linux"
+    elif test("^windows-11-arm$") then "windows_arm"
+    elif test("^windows-(latest|[0-9]{4})$") then "windows"
+    elif test("^macos-(latest|[0-9]{2})(-intel)?$") then "macos"
+    elif test("^macos-(latest|[0-9]{2})-large$") then "macos_large"
+    elif test("^macos-(latest|[0-9]{2})-xlarge$") then "macos_xlarge"
+    else "unknown" end end;
 def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
 {linux: 0.006, linux_arm: 0.005, linux_slim: 0.002, windows: 0.010, windows_arm: 0.010,
- macos: 0.062, "self-hosted": 0} as $rate |
+ macos: 0.062, macos_large: 0.077, macos_xlarge: 0.102, "self-hosted": 0} as $rate |
 map(. + {sku: sku, billed: ((.total / 60) | ceil)}) |
 (group_by(.run) | map({event: .[0].event, secs: (map(.total) | add), min: (map(.billed) | add),
    usd: (map(.billed * ($rate[.sku] // 0)) | add), unpriced: (map(select(.sku == "unknown")) | length)})) as $runs |
@@ -80,7 +88,7 @@ if [ -s jobs.jsonl ]; then jq -s --slurpfile counts counts.json -f billed-minute
 else echo 'no runs measured'; fi
 ```
 
-Monthly estimate = median billed minutes (and USD) per run of each event × that event's 30-day run count, summed. State its limits in the report: it covers one workflow (repeat per workflow file), it reads only the latest attempt of each run, the audit's medians leave out cancelled runs and jobs, and `counts.json` counts cancelled runs at the full median. `unsampled_events` lists events with 30-day runs but none in the sample; they are left out of `month_total`, so report them as unpriced and re-run the audit with a sample that includes at least one run of each. It is an estimate, not the invoice.
+Monthly estimate = median billed minutes (and USD) per run of each event × that event's 30-day run count, summed. State its limits in the report: it covers one workflow (repeat per workflow file), a run's billed minutes include its re-run attempts (a job carried over unchanged into a "Re-run failed jobs" attempt counts once), the audit's medians leave out cancelled runs and jobs, and `counts.json` counts cancelled runs at the full median. `unsampled_events` lists events with 30-day runs but none in the sample; they are left out of `month_total`, so report them as unpriced and re-run the audit with a sample that includes at least one run of each. It is an estimate, not the invoice.
 
 Without `gh` auth or run history, review the workflow statically: report findings with no billed numbers, and say under `Uncertainty:` that no runs were measured.
 
@@ -103,7 +111,15 @@ Optimize the longest chain first. A step that is neither on the critical path no
 
 ## 3. Duplicate runs and tiny jobs
 
-- **Duplicate runs per commit:** `push` on every branch plus `pull_request` runs the workflow twice for each pull request commit. Finding: `push` on the default branch only.
+- **Duplicate runs per commit (private and internal repositories):** `push` on every branch plus `pull_request` runs the workflow twice for each pull request commit. The audit records each run's `headSha`; this prints the median runs per commit (used in §7) and the commits that ran on both events:
+
+  ```bash
+  jq -r 'map(select(.event == "push" or .event == "pull_request")) | group_by(.headSha) | map(length) | sort
+    | if length == 0 then "no push or pull_request runs"
+      else "runs per commit: \(.[length / 2 | floor]), duplicate commits: \(map(select(. > 1)) | length)" end' runs.json
+  ```
+
+  Finding: `push` on the default branch only. On a public repository the second run costs no billed minutes and no wall time: list it, do not trial it.
 - **Tiny jobs (private repositories):** each job rounds up separately, so ten 15-second jobs bill 10 minutes for 2.5 minutes of work, each also repeating checkout and setup. Finding: merge them into one job's steps where they share a toolchain. On public repositories, keep them parallel if that shortens wall time.
 
 ## 4. Test scope
@@ -129,12 +145,33 @@ Propose a faster tool only when its step is on the critical path or in a top-con
 
 ## 7. Apply and measure
 
-1. **Budget first (private repositories):** estimate the minutes the measurement runs will bill (runs per change × billed minutes per run) and get the user's approval before triggering any.
-2. **Approval per finding:** list the findings by name; apply only those the user approves.
-3. **Branch:** create a branch; one atomic commit per approved change. Commit and push only with the user's approval.
-4. **Measure:** at least three runs before and three after each change, same workflow and event. Keep a change only when its median beats the before median by more than the run-to-run spread and all jobs pass.
-5. **Revert and log:** otherwise revert the commit and record the experiment in `.github/CI-BUDGET.md`.
-6. **Pull request:** open one PR with the before/after table and the budget file. The user reviews and merges; the skill never merges and never configures a paid or larger runner.
+Terms used below:
+
+- *Sample*: one attempt of a commit's measured run (its `pull_request` run, else its `push` run, else a dispatched run). *Per commit* = the sample's billed minutes × the commit's own `push` and `pull_request` runs of the workflow; a commit with none (dispatched samples) uses the runs per commit from the first audit (§3).
+- *Baseline*: the last kept state on the branch: the baseline commit's 3 samples at first, then the samples of the latest kept change.
+- *Beats noise*: all 3 samples of the change are below the baseline's minimum, the saving is at least 1 billed minute per commit (private, internal) or 10% of wall time (public), and every job passed in every sample. A change with no real effect passes this by chance about 1 time in 20.
+
+Print a commit's samples from a fresh audit of the branch (`ci-speed-audit.sh OWNER/REPO <workflow> 10 ci/minutes-<yyyymmdd>`, in a new subdirectory), with `sha` bound to the full commit SHA:
+
+```bash
+jq -rs --slurpfile runs runs.json --arg sha "$sha" '
+  ($runs[0] | map(select(.headSha == $sha))) as $r |
+  ($r | map(select(.event == "push" or .event == "pull_request")) | length) as $pp |
+  "commit \($sha[0:7]): \($pp) push/pull_request run(s)",
+  (map(select(.run as $id | $r | any(.databaseId == $id))) | group_by([.run, .attempt]) | .[] |
+   "run \(.[0].run) attempt \(.[0].attempt) \(.[0].event): billed \(map((.total / 60) | ceil) | add) min, " +
+   "wall \((map(.end) | max) - (map(.start) | min)) s, all passed: \(all(.[]; .conclusion == "success"))")' jobs.jsonl
+```
+
+1. **Approval per finding:** list the findings by name; apply only those the user approves.
+2. **One approval before anything is pushed**, on every repository: name the branch, the draft pull request, the runs the trials trigger, and the budget in billed minutes (free on a public repository's standard runners, but it still takes time). Budget = `(approved changes + 1) × (one push + 2 re-runs)`, plus the run that opening the pull request triggers, one push per change for a possible revert, and one for the final log commit. A push costs the billed minutes per commit of every workflow it triggers (doubled while duplicate runs exist); a re-run costs one attempt of the measured workflow. Declined → stop; nothing is pushed.
+3. **Branch in a separate worktree**, never in the user's working tree: `git fetch origin && git worktree add -b ci/minutes-<yyyymmdd> <scratch path> origin/<default-branch>` (add `-2`, `-3` when the branch exists). The user's uncommitted work stays where it is. Before each push, check the workflow's `on:` events, `branches`, `paths`/`paths-ignore`, `types`, and job `if:` conditions on drafts.
+4. **Baseline.** The first commit adds the budget file (§8). Push it and open the pull request: a draft, unless the workflow skips drafts, then ready and titled `Do not merge: measuring CI minutes`. Re-run the commit's measured run twice (`gh run rerun <run-id>`): 3 samples. If a path filter skips the commit and the workflow has `workflow_dispatch`, show the user that no job deploys, publishes or uses environment secrets under that event, get a yes naming the jobs that will run, then dispatch 3 times (`gh workflow run <workflow> --ref ci/minutes-<yyyymmdd>`); every later sample is dispatched the same way. Otherwise stop and report. If any job fails in the baseline, stop: no change can beat a red baseline.
+5. **One atomic commit per approved change**, in finding order, its diff shown and confirmed first; git history replaces the `.bak` copy here, so never commit a `.bak` file. Push, re-run twice (or dispatch 3 times), then print its samples. For a cache change, compare warm attempts with warm ones, and drop a change that wins warm but loses more on its cold first run.
+6. **Keep or revert.** Kept when it beats noise; its samples become the baseline. Otherwise `git revert --no-edit` it and push. Never force-push or rewrite the branch.
+7. **Stop conditions.** No run completes within 3 times the audit's median wall time: stop and report. Billed minutes on the branch reach the approved budget: revert every change not yet measured and log it `not measured`.
+8. **Log.** One row per change (kept, reverted, `not measured`) goes into `.github/CI-BUDGET.md` in one final commit, pushed and counted in the budget. Never mark it `[skip ci]`: a skipped head commit leaves the pull request's required checks Pending and blocks the merge.
+9. **Pull request:** mark it ready (or retitle it) as `ci: cut Actions minutes (<kept> of <tried> changes kept)`, with the before/after table (median and min–max per change), each reverted or unmeasured change and why, every required status check whose name the branch changes (so branch protection can be updated first), and what the numbers cannot show: samples from one short period on one branch, cancelled runs left out, list prices. The user reviews and merges; the skill never merges, never changes a branch protection rule, and never configures a paid or larger runner.
 
 ## 8. CI budget and experiment log
 
@@ -151,9 +188,9 @@ Measured on <date> over <N> runs of <workflow>. Billed: <min>/run, ~<min>/month 
 
 ## Experiment log
 
-| Date | Change | Before (median) | After (median) | Spread | Kept? | Why |
-|---|---|---|---|---|---|---|
-| 2026-11-17 | push on main only | 2 runs/commit | 1 run/commit | n/a | kept | halves pull request minutes |
+| Date | Change | Before (median, min–max) | After (median, min–max) | Kept? | Why |
+|---|---|---|---|---|---|
+| 2026-11-17 | push on main only | 12 billed min/commit (12–13) | 6 (6–7) | kept | one run per commit instead of two |
 ```
 
 ## Worked example

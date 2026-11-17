@@ -1220,29 +1220,48 @@ Audit mode for an existing pipeline. The audit is read-only: it needs an authent
 
 ### 1. Split every job into queue, setup, and work
 
-Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audit.sh OWNER/REPO ci.yml 150`. Each run costs one API call; 50 runs take about a minute. Only runs and jobs that ended in success or failure count: a run cancelled by a newer push would drag the medians down.
+Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audit.sh OWNER/REPO ci.yml 150` (an optional fourth argument limits it to one branch). Each run costs one API call; 50 runs take about a minute. Re-run attempts count as runs of their own (`filter=all`). Only runs and jobs that ended in success or failure count: a run cancelled by a newer push would drag the medians down. With no such run it exits 2 and says so: review the workflow statically.
 
 ```bash
 #!/usr/bin/env bash
-# CI speed audit (read-only): split every job of the last N runs into queue wait,
-# setup (job setup, checkout, toolchain, cache, install, post steps) and work.
-# Usage: ci-speed-audit.sh OWNER/REPO WORKFLOW [N]     Needs: gh (authenticated), jq.
+# CI speed audit (read-only): split every job of the last N runs, re-run attempts included,
+# into queue wait, setup (job setup, checkout, toolchain, cache, install, post steps) and work.
+# A job carried over unchanged into a "Re-run failed jobs" attempt (it started before that attempt
+# created it) is left out, so it is counted once.
+# Usage: ci-speed-audit.sh OWNER/REPO WORKFLOW [N] [BRANCH]   Needs: gh (authenticated), jq, column.
 set -euo pipefail
-repo="$1"; workflow="$2"; limit="${3:-150}"
+[ "$#" -ge 2 ] || { echo "usage: ci-speed-audit.sh OWNER/REPO WORKFLOW [N] [BRANCH]" >&2; exit 1; }
+repo="$1"; workflow="$2"; limit="${3:-150}"; branch="${4:-}"
 gh run list --repo "$repo" --workflow "$workflow" --status completed --limit "$limit" \
-  --json databaseId,event,conclusion,createdAt,updatedAt |
+  ${branch:+--branch "$branch"} --json databaseId,event,conclusion,createdAt,headSha |
   jq '[.[] | select(.conclusion == "success" or .conclusion == "failure")]' > runs.json
+if [ "$(jq length runs.json)" -eq 0 ]; then
+  : > jobs.jsonl
+  echo "0 completed success/failure runs of $workflow${branch:+ on $branch}: nothing to measure; review the workflow statically" >&2
+  exit 2
+fi
+jobs_of() {   # every attempt (filter=all); retry transient API errors (502/504) with smaller pages
+  local i out
+  for i in 1 2 3; do
+    out="$(gh api "repos/$repo/actions/runs/$1/jobs?filter=all&per_page=$([ "$i" -eq 1 ] && echo 100 || echo 30)" --paginate)" &&
+      { printf '%s\n' "$out"; return 0; }
+    if [ "$i" -lt 3 ]; then sleep $((i * 5)); fi
+  done
+  echo "warning: run $1 skipped after 3 failed API calls" >&2; return 1
+}
 jq -r '.[] | "\(.databaseId) \(.event)"' runs.json | while read -r run_id event; do
-  gh api "repos/$repo/actions/runs/$run_id/jobs?per_page=100" --paginate |
+  { jobs_of "$run_id" || true; } |
   jq -c --arg ev "$event" '
     def secs: if . == null then 0 else fromdateiso8601 end;
     def dur: (.completed_at | secs) - (.started_at | secs);
     .jobs[] | select((.conclusion == "success" or .conclusion == "failure") and .started_at != null) |
+    select((.started_at | secs) >= (.created_at | secs)) |
     ([.steps[]? | select(.name | test("^(Post |Complete job)|set ?up|checkout|cache|restore|install|npm ci|pnpm i|yarn|pip |uv sync"; "i")) | dur] | add // 0) as $setup |
-    {run: .run_id, event: $ev, job: .name, conclusion, labels,
+    {run: .run_id, attempt: (.run_attempt // 1), event: $ev, job: .name, conclusion, labels,
+     start: (.created_at | secs), end: (.completed_at | secs),
      queue: ((.started_at | secs) - (.created_at | secs)),
      setup: $setup, work: (dur - $setup), total: dur,
-     steps: [.steps[]? | {name, secs: dur}]}'
+     steps: [.steps[]? | select(.started_at != null) | {name, secs: dur}]}'
 done > jobs.jsonl
 echo "== Per job (medians, seconds; slowest first)"
 jq -rs 'def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
@@ -1250,14 +1269,11 @@ jq -rs 'def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
     setup: (map(.setup) | median), work: (map(.work) | median), total: (map(.total) | median)})
   | sort_by(-.total) | (["job", "runs", "queue", "setup", "work", "total"] | @tsv),
     (.[] | [.job, .runs, .queue, .setup, .work, .total] | @tsv)' jobs.jsonl | column -t -s $'\t'
-echo "== Per event: median run wall time (created -> last update) and the job most often slowest"
-jq -rs --slurpfile runs runs.json '
-  def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
-  ($runs[0] | map({key: (.databaseId | tostring),
-     value: ((.updatedAt | fromdateiso8601) - (.createdAt | fromdateiso8601))}) | from_entries) as $wall |
-  group_by(.run) | map({event: .[0].event, wall: $wall[.[0].run | tostring],
+echo "== Per event: median wall time per run attempt (first job created -> last job done) and the job most often slowest"
+jq -rs 'def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
+  group_by([.run, .attempt]) | map({event: .[0].event, wall: ((map(.end) | max) - (map(.start) | min)),
      slowest: (max_by(.queue + .total) | .job)}) | group_by(.event) | .[] |
-  "\(.[0].event): \(length) runs, median wall \(map(.wall) | median)s, slowest job: \(map(.slowest) | group_by(.) | max_by(length) | .[0])"' jobs.jsonl
+  "\(.[0].event): \(length) run attempts, median wall \(map(.wall) | median)s, slowest job: \(map(.slowest) | group_by(.) | max_by(length) | .[0])"' jobs.jsonl
 ```
 
 - `queue` — job created to job started: waiting for a runner. It is part of what the agent waits for.
@@ -1309,9 +1325,9 @@ e2e-node (26)         50    2      17     76    96
 e2e-node (24)         50    2      14     76    90
 unit-tests (22)       50    2      14     49    63
 lint                  50    2      14     10    24
-== Per event: median run wall time (created -> last update) and the job most often slowest
-pull_request: 31 runs, median wall 131s, slowest job: e2e-node (26)
-push: 19 runs, median wall 117s, slowest job: e2e-node (26)
+== Per event: median wall time per run attempt (first job created -> last job done) and the job most often slowest
+pull_request: 31 run attempts, median wall 131s, slowest job: e2e-node (26)
+push: 19 run attempts, median wall 117s, slowest job: e2e-node (26)
 caches: refs/heads/main 4 entries; last 5 pull request runs restored=12 missed=0
 ```
 
