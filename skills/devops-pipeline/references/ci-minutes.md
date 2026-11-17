@@ -62,12 +62,16 @@ map(. + {sku: sku, billed: ((.total / 60) | ceil)}) |
      | . + {month_billed_min: (.median_billed_min * .runs_30d),
             month_usd: (.median_usd * .runs_30d * 100 | round / 100)}))}
 | . + {month_total: {billed_min: (.per_event | map(.month_billed_min) | add // 0),
-                     usd: (.per_event | map(.month_usd) | (add // 0) * 100 | round / 100)}}
+                     usd: (.per_event | map(.month_usd) | (add // 0) * 100 | round / 100)},
+       unsampled_events: (($runs | map(.event)) as $seen | ($counts[0] // {}) | to_entries
+         | map(select(.key | IN($seen[]) | not) | {event: .key, runs_30d: .value}))}
 ```
 
-Count the last 30 days of runs per event, then project:
+Count the last 30 days of runs per event, then project. Bind `repo` and `workflow` to the values the audit script measured:
 
 ```bash
+repo=OWNER/REPO
+workflow=ci.yml   # the workflow file the audit measured
 since="$(jq -nr 'now - 30*86400 | strftime("%Y-%m-%d")')"
 gh run list --repo "$repo" --workflow "$workflow" --created ">=$since" --limit 1000 --json event,conclusion \
   --jq 'map(select(.conclusion != "action_required" and .conclusion != "skipped"))
@@ -76,7 +80,7 @@ if [ -s jobs.jsonl ]; then jq -s --slurpfile counts counts.json -f billed-minute
 else echo 'no runs measured'; fi
 ```
 
-Monthly estimate = median billed minutes (and USD) per run of each event × that event's 30-day run count, summed. State its limits in the report: it covers one workflow (repeat per workflow file), it reads only the latest attempt of each run, the audit's medians leave out cancelled runs and jobs, and `counts.json` counts cancelled runs at the full median. It is an estimate, not the invoice.
+Monthly estimate = median billed minutes (and USD) per run of each event × that event's 30-day run count, summed. State its limits in the report: it covers one workflow (repeat per workflow file), it reads only the latest attempt of each run, the audit's medians leave out cancelled runs and jobs, and `counts.json` counts cancelled runs at the full median. `unsampled_events` lists events with 30-day runs but none in the sample; they are left out of `month_total`, so report them as unpriced and re-run the audit with a sample that includes at least one run of each. It is an estimate, not the invoice.
 
 Without `gh` auth or run history, review the workflow statically: report findings with no billed numbers, and say under `Uncertainty:` that no runs were measured.
 
@@ -166,4 +170,4 @@ schedule     15  56                 0.466       31        1736              14.4
 month_total: 4894 billed min, $41.22
 ```
 
-**`luongnv89/asm`** (Linux only; sample 30 runs: 19 `pull_request`, 11 `push`). Run 44124847105 (`push`): 12 jobs, 1036 s; per-job ceil 1+1+2+2+2+1+1+3+3+1+3+1 = 21 min × $0.006 = $0.126, also the median for both events. 30-day counts: 141 `pull_request`, 55 `push` (8 `action_required` runs excluded) → 21 × 196 = 4116 billed min, $24.70 a month at private rates. Critical path: `build` (median 51 s) → `e2e-node (26)` (median 146 s, of which 89 s is `Run Node.js E2E tests` and 41 s `Install dependencies`). Top consumers: the three `e2e-node` legs (83-90 billed min each over 30 runs). Named findings: run the Node matrix off pull requests (one version there), and measure whether caching `node_modules` beats the 36 s install, warm and cold.
+**`luongnv89/asm`** (Linux only; sample 30 runs: 19 `pull_request`, 11 `push`). Run 44124847105 (`push`): 12 jobs, 1036 s; per-job ceil 1+1+2+2+2+1+1+3+3+1+3+1 = 21 min × $0.006 = $0.126, also the median for both events. 30-day counts: 141 `pull_request`, 55 `push` (8 `action_required` runs excluded) → 21 × 196 = 4116 billed min, $24.70 a month at private rates. Critical path: `build` (median 51 s) → `e2e-node (26)` (median 146 s, of which 89 s is `Run Node.js E2E tests` and 41 s `Install dependencies`). Top consumers: the three `e2e-node` legs (83-90 billed min each over 30 runs). Named findings: run the Node matrix off pull requests (one version there), and measure whether caching `node_modules` beats the 41 s install, warm and cold.
