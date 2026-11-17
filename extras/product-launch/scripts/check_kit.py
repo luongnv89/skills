@@ -33,7 +33,7 @@ PLACEHOLDER = re.compile(r"\bTODO\b|\bTBD\b|(?i:\[insert|\{\{|lorem ipsum|<place
 VOTE_ASKS = [
     re.compile(p, re.IGNORECASE)
     for p in (
-        r"\b(please|pls|kindly|help us|feel free to|don'?t forget to|do not forget to|"
+        r"\b(please|pls|kindly|help us|feel free to|don['’]?t forget to|do not forget to|"
         r"would you|could you|can you|go and|remember to)\b[^.!?\n]{0,40}\b(up-?vote|vote)",
         r"\b(up-?vote|vote for|vote on)\s+(us|me|our|my|it|this|the launch)\b",
         r"\b(every|your) (up-?)?vote (counts|matters|helps)\b",
@@ -195,6 +195,8 @@ def self_test():
                                         "<!-- field: hacker-news.title max=80 -->\n~~~\nShow HN: X\n~~~\n## Sources\n"},
          False, "founder-voice file"),
         ("vote request fails", {"copy-bank.md": "<!-- field: copy.outreach -->\n~~~\nWe're live! Please upvote us today.\n~~~\n"},
+         False, "vote request"),
+        ("curly apostrophe vote request fails", {"copy-bank.md": "<!-- field: copy.outreach -->\n~~~\nDon’t forget to vote today.\n~~~\n"},
          False, "vote request"),
         ("placeholder fails", {"copy-bank.md": "<!-- field: copy.pitch-80 max=80 -->\n~~~\nTODO write pitch\n~~~\n"},
          False, "placeholder"),
