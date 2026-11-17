@@ -85,6 +85,8 @@ Run `gh repo view --json visibility --jq .visibility` and record the answer in S
 
 **Out of scope because they cost money:** third-party runner services (they sell faster machines, and they are paid), GitHub larger runners (not free even on public repositories), sharding a private repository's tests across extra jobs, and raising the Actions cache limit above the free 10 GB per repository.
 
+Billed minutes per runner OS, the monthly estimate and the minutes-cutting mode: [ci-minutes.md](ci-minutes.md).
+
 ### The techniques
 
 | Technique | Public | Private | Where |
@@ -1214,7 +1216,7 @@ Every template here keeps `matrix-test` off pull requests: it runs on merges to 
 
 ## CI speed audit
 
-Audit mode for an existing pipeline. The audit is read-only: it needs an authenticated `gh` and `jq`, writes two scratch files (`runs.json`, `jobs.jsonl`) to the current directory, and changes nothing on GitHub or in the repository. Run it from a fresh scratch directory (`cd "$(mktemp -d)"`), never inside the audited repository, and run no hooks: an audit only reads.
+Audit mode for an existing pipeline. The audit is read-only: it needs an authenticated `gh` and `jq`, writes two scratch files (`runs.json`, `jobs.jsonl`) to the current directory, and changes nothing on GitHub or in the repository. Each `jobs.jsonl` line also carries the job's runner `labels` and per-step seconds, which [ci-minutes.md](ci-minutes.md) prices and reads for the critical path. Run it from a fresh scratch directory (`cd "$(mktemp -d)"`), never inside the audited repository, and run no hooks: an audit only reads.
 
 ### 1. Split every job into queue, setup, and work
 
@@ -1237,9 +1239,10 @@ jq -r '.[] | "\(.databaseId) \(.event)"' runs.json | while read -r run_id event;
     def dur: (.completed_at | secs) - (.started_at | secs);
     .jobs[] | select((.conclusion == "success" or .conclusion == "failure") and .started_at != null) |
     ([.steps[]? | select(.name | test("^(Post |Complete job)|set ?up|checkout|cache|restore|install|npm ci|pnpm i|yarn|pip |uv sync"; "i")) | dur] | add // 0) as $setup |
-    {run: .run_id, event: $ev, job: .name, conclusion,
+    {run: .run_id, event: $ev, job: .name, conclusion, labels,
      queue: ((.started_at | secs) - (.created_at | secs)),
-     setup: $setup, work: (dur - $setup), total: dur}'
+     setup: $setup, work: (dur - $setup), total: dur,
+     steps: [.steps[]? | {name, secs: dur}]}'
 done > jobs.jsonl
 echo "== Per job (medians, seconds; slowest first)"
 jq -rs 'def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
@@ -1293,7 +1296,7 @@ done
 | Matrix legs on `pull_request` | Version matrix on the hot path | Default branch only: per merge, or nightly on a busy private repository |
 | No `timeout-minutes` | 360-minute default | About three times the typical duration |
 
-Measure before cutting. Deleting tests is rarely the fix: the split shows whether the time is in queue, setup, or the slowest job's work, as in the example below. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests.
+Measure before cutting. Deleting tests is rarely the fix: the split shows whether the time is in queue, setup, or the slowest job's work, as in the example below. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests. The only exception is a named test-scope finding the user approves, in [ci-minutes.md](ci-minutes.md#4-test-scope).
 
 ### 4. Report
 
