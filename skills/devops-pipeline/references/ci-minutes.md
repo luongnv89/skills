@@ -61,8 +61,8 @@ map(. + {sku: sku, billed: ((.total / 60) | ceil)}) |
    | map(. + {runs_30d: ($counts[0][.event] // 0)}
      | . + {month_billed_min: (.median_billed_min * .runs_30d),
             month_usd: (.median_usd * .runs_30d * 100 | round / 100)}))}
-| . + {month_total: {billed_min: (.per_event | map(.month_billed_min) | add),
-                     usd: (.per_event | map(.month_usd) | add * 100 | round / 100)}}
+| . + {month_total: {billed_min: (.per_event | map(.month_billed_min) | add // 0),
+                     usd: (.per_event | map(.month_usd) | (add // 0) * 100 | round / 100)}}
 ```
 
 Count the last 30 days of runs per event, then project:
@@ -72,7 +72,8 @@ since="$(jq -nr 'now - 30*86400 | strftime("%Y-%m-%d")')"
 gh run list --repo "$repo" --workflow "$workflow" --created ">=$since" --limit 1000 --json event,conclusion \
   --jq 'map(select(.conclusion != "action_required" and .conclusion != "skipped"))
         | group_by(.event) | map({(.[0].event): length}) | add' > counts.json
-jq -s --slurpfile counts counts.json -f billed-minutes.jq jobs.jsonl
+if [ -s jobs.jsonl ]; then jq -s --slurpfile counts counts.json -f billed-minutes.jq jobs.jsonl
+else echo 'no runs measured'; fi
 ```
 
 Monthly estimate = median billed minutes (and USD) per run of each event × that event's 30-day run count, summed. State its limits in the report: it covers one workflow (repeat per workflow file), it reads only the latest attempt of each run, the audit's medians leave out cancelled runs and jobs, and `counts.json` counts cancelled runs at the full median. It is an estimate, not the invoice.
@@ -103,7 +104,7 @@ Optimize the longest chain first. A step that is neither on the critical path no
 
 ## 4. Test scope
 
-A large set of tests repeating one assertion (one template rendered for thousands of pages, one schema checked per fixture) can become representative cases plus a separate content validation (a schema or link check over all the data). This is a **named finding, proposed only**: it lists the tests affected, what keeps each behavior covered, and the measured time saved. It is applied only after the user approves that finding by name. "Delete the slow tests" or "just make it green" approves nothing. No test is deleted or skipped otherwise, and no lint rule or coverage threshold is relaxed.
+A large set of tests repeating one assertion (one template rendered for thousands of pages, one schema checked per fixture) can become representative cases plus a separate content validation (a schema or link check over all the data). This is a **named finding, proposed only**: it lists the tests affected, what keeps each behavior covered, and the measured time saved. It is applied only after the user approves that finding by name. "Delete the slow tests" or "just make it green" approves nothing. No test is deleted or skipped otherwise, no lint rule is relaxed except through an approved named finding (such as a tool swap's listed losses), and no coverage threshold is ever lowered.
 
 ## 5. Cache and parallelism
 
