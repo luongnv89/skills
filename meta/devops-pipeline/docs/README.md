@@ -19,6 +19,7 @@
 - Keep CI fast with free techniques only: caches seeded from the default branch, blobless checkout, superseded-run cancellation, affected-only tests with a default-branch full run, parallel jobs where they are free, everything generated for the repo's visibility, and job timeouts
 - Use the fastest free tools: Oxlint for JS/TS linting, TypeScript 7's `tsc` (benchmark `bun check`, `tsrs`), Vitest `isolate: false` with a per-file reset hook
 - Audit an existing pipeline's speed from real runs: queue wait, setup, and work per job, cache scope, and the slowest job
+- Cut Actions minutes: billed minutes per runner OS with a monthly estimate, the step-level critical path, and named findings the user approves one by one, each measured before and after on a branch and kept only when it beats noise, ending in a pull request the user merges
 
 ## When to Use
 
@@ -29,6 +30,7 @@
 | "Reduce GitHub Actions dependency" | Shift tests left into pre-commit, slim down CI |
 | "Add E2E tests for my CLI" | Enumerate commands and generate `scripts/e2e_test.sh` |
 | "Why is our CI so slow?" | Run the read-only CI speed audit and propose free fixes |
+| "Cut our GitHub Actions minutes" | Price billed minutes per OS, find the critical path, apply only approved findings with before/after runs, open a PR |
 | "Make CI faster for our coding agents" | Apply the free speed techniques; never paid or larger runners |
 
 ## How It Works
