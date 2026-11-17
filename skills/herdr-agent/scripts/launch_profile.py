@@ -73,9 +73,12 @@ def _codex_effort(level: str) -> list[str]:
 
 
 # Setup flags carried into a worker, with their arity. Verified against
-# `claude --help` 2.1.274, `pi --help`, and `codex --help` 0.153.4. A flag that
-# is not listed is dropped: that covers session, resume, print and prompt
-# flags, credentials (pi --api-key), and anything a newer CLI added.
+# `claude --help` 2.1.274, `pi --help`, and `codex --help` 0.167.0. Codex
+# `--approve-for-me` is not a bypass: a live 0.167.0 run showed it sends
+# approval requests to automatic review in the workspace-write sandbox, never
+# `never` or `danger-full-access`. A flag that is not listed is dropped: that
+# covers session, resume, print and prompt flags, credentials (pi --api-key),
+# and anything a newer CLI added.
 # `bypass` names permission or trust overrides that are inherited but disclosed:
 # None matches any use, a set matches those values only.
 KINDS: dict[str, dict] = {

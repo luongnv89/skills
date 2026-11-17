@@ -617,50 +617,75 @@ class WorkerLaunchContractTests(unittest.TestCase):
             "--kind", "opencode", "--model", "m", "--without", "bypass", start=False)
         self.assertNotEqual(refused.returncode, 0, refused.stderr)
 
-    def test_codex_fails_closed_at_the_boot_gate_in_every_doc(self):
-        # #547: codex passes the parser but has no verified non-bypass switch.
+    def test_helper_codex_approve_for_me_profile_passes_parser(self):
+        # #552: --approve-for-me is a verified setup flag, not a bypass, whether
+        # passed as a worker native argument or inherited from a codex root.
+        self.write_state({})
+        resolved = self.run_profile(
+            "--kind", "codex", "--without", "bypass", "--", "--approve-for-me", start=False)
+        self.assertEqual(resolved.returncode, 0, resolved.stderr)
+        profile = json.loads(resolved.stdout)
+        self.assertEqual(profile["bypass"], [])
+        self.assertIn("--approve-for-me", profile["explicit"])
+        self.assertEqual(self.run_profile_parser(profile).returncode, 0)
+        self.write_state({"kind": "codex", "processes": [["codex", "--approve-for-me"]]})
+        inherited = self.run_profile("--without", "bypass", start=False)
+        self.assertEqual(inherited.returncode, 0, inherited.stderr)
+        profile = json.loads(inherited.stdout)
+        self.assertEqual(profile["bypass"], [])
+        self.assertIn("--approve-for-me", profile["flags"])
+        self.assertEqual(self.run_profile_parser(profile).returncode, 0)
+
+    def test_codex_boot_gate_uses_approve_for_me_in_every_doc(self):
+        # #552: codex starts with --approve-for-me (verified live on 0.167.0)
+        # and /status verifies it; the prohibited bypasses stay refused.
         protocol = PROTOCOL.read_text(encoding="utf-8")
         gate = self.selective_profile_section(PROTOCOL, "## Autonomous worker boot gate")
         row = next(line for line in gate.splitlines() if line.strip().startswith("| `codex` |"))
-        for phrase in ("Fail closed", "Autonomous mode unavailable",
-                       "--ask-for-approval never", "--sandbox danger-full-access"):
+        for phrase in ("`codex --approve-for-me`", "`worker_native_args`", "0.167.0",
+                       "`/status`", "`Permissions: Workspace (Approve for me)`",
+                       "fail closed", "Autonomous mode unavailable", "blocked dialog",
+                       "--ask-for-approval never", "--sandbox danger-full-access",
+                       "--dangerously-bypass-approvals-and-sandbox"):
             self.assertIn(phrase, row, phrase)
-        self.assertIn("For `codex` and any CLI not in the matrix", gate)
+        self.assertIn("For any CLI not in the matrix", gate)
+        self.assertIn("The one exception is `codex`", gate)
         invariants = self.selective_profile_section(
             PROTOCOL, "## Autonomous worker boot gate invariants")
-        self.assertIn("`codex` and any launcher not in the matrix fail closed", invariants)
+        self.assertIn("codex's verified `--approve-for-me` startup flag", invariants)
+        self.assertIn("Any launcher not in the matrix fails closed", invariants)
         self.assertIn("Any other unmapped kind is rejected", protocol)
         errors = (SKILL_DIR / "references" / "error-messages.md").read_text(encoding="utf-8")
         error = errors.split("### Autonomous mode unavailable", 1)[1].split("\n### ", 1)[0]
-        self.assertIn("for codex", error)
-        self.assertIn("to pi, claude, or\n           opencode", error)
+        self.assertIn("for codex, relaunch through the launch-profile gate with --approve-for-me", error)
+        self.assertIn("the app\n           runtime refuses codex", error)
         backend = (SKILL_DIR / "references" / "fleet-backend.md").read_text(encoding="utf-8")
-        self.assertIn("- **codex:** no verified switch", backend)
+        self.assertIn("- **codex:** no verified app check", backend)
         prompts = AGENT_PROMPTS.read_text(encoding="utf-8")
-        self.assertIn("codex has no verified switch and fails closed", prompts)
+        self.assertIn("codex starts with `--approve-for-me` and is verified with `/status`", prompts)
         boot = section(LOOP_SKILL.read_text(encoding="utf-8"), "## Autonomous Worker Boot Gate")
-        self.assertIn("`codex` (which fails closed", boot)
+        self.assertIn("Only `codex` starts with a flag, `--approve-for-me`, checked by `/status`", boot)
         launch = section(LOOP_SKILL.read_text(encoding="utf-8"), "## Selective Worker Launch Profile")
         self.assertIn("except plain `opencode` with no", launch)
 
     def test_app_codex_stops_before_the_start(self):
-        # #547: the app has no env readback and codex no on-screen mode, so an
-        # app codex worker is refused before the start, never started then closed.
+        # #547, #552: the /status check is verified on the TUI only, so an app
+        # codex worker is refused before the start, never started then closed.
         backend = SKILL_DIR / "references" / "fleet-backend.md"
         gate = self.selective_profile_section(backend, "## App launch-profile gate")
         bullet = next(line for line in gate.splitlines() if line.startswith("- **codex:**"))
-        for phrase in ("no carve-out", "stops before the start",
+        for phrase in ("no carve-out", "verified on the Herdr TUI only", "stops before the start",
                        "*Autonomous mode unavailable*", "Never start an app codex worker"):
             self.assertIn(phrase, bullet, phrase)
         boot = self.selective_profile_section(backend, "## App boot gate")
         boot_bullet = next(line for line in boot.splitlines()
-                           if line.startswith("- **codex:** no verified switch"))
+                           if line.startswith("- **codex:** no verified app check"))
         self.assertNotIn("close that loop-owned worker", boot_bullet)
         self.assertIn("never reaches this gate", boot_bullet)
         self.assertIn("*App launch-profile gate* stops it before the start", boot_bullet)
         edges = (SKILL_DIR / "references" / "edge-cases.md").read_text(encoding="utf-8")
         row = next(line for line in edges.splitlines() if line.startswith("| `codex` worker"))
-        self.assertIn("TUI: launch passes the profile parser", row)
+        self.assertIn("TUI: launch passes the profile parser with `--approve-for-me`", row)
         self.assertIn("App: stop before the start with *Autonomous mode unavailable*", row)
         self.assertIn("no worker is started", row)
         self.assertIn("`--ask-for-approval never` or `--sandbox danger-full-access`", row)

@@ -67,7 +67,10 @@ def _codex_effort(level: str) -> list[str]:
 
 
 # Setup flags carried into a worker, with their arity. Checked against the
-# --help of claude 2.1.301, pi 1.3.0 and codex 0.162.1. An unlisted flag is
+# --help of claude 2.1.301, pi 1.3.0 and codex 0.167.0. Codex --approve-for-me
+# is not a bypass: a live 0.167.0 run showed it sends approval requests to
+# automatic review in the workspace-write sandbox, never `never` or
+# `danger-full-access`. An unlisted flag is
 # dropped: session, resume, print and prompt flags, credentials (pi --api-key),
 # and anything a newer CLI added. `bypass` names permission or trust overrides
 # that are inherited but disclosed: None matches any use, a set those values.

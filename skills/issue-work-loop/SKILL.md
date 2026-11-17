@@ -10,7 +10,7 @@ dependencies:
   - issue-pr-review
   - issue-resolver
 metadata:
-  version: 1.9.1
+  version: 1.10.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -172,7 +172,7 @@ are authoritative in `references/loop-protocol.md`.
 
 ## Autonomous Worker Boot Gate (mandatory)
 
-Every reviewer, ISSUE implementer, and PR FIXER passes this gate after its CLI is ready and before any task, and again after every FRESHEN (a restarted CLI is a new session). Start the CLI through the selective launch-profile gate (`--without bypass`), adding no auto-mode or skip-permissions startup flags; then switch after boot and verify. The per-harness matrix for `pi`, `claude`, `opencode`, and `codex` (which fails closed until a non-bypass switch is verified) in `references/loop-protocol.md` → *Autonomous worker boot gate* is authoritative; app keystrokes are in `references/fleet-backend.md`. A task prompt saying "work autonomously" does not satisfy this gate.
+Every reviewer, ISSUE implementer, and PR FIXER passes this gate after its CLI is ready and before any task, and again after every FRESHEN (a restarted CLI is a new session). Start the CLI through the selective launch-profile gate (`--without bypass`), adding no auto-mode or skip-permissions startup flags; then switch after boot and verify. Only `codex` starts with a flag, `--approve-for-me`, checked by `/status`. The per-harness matrix for `pi`, `claude`, `opencode`, and `codex` in `references/loop-protocol.md` → *Autonomous worker boot gate* is authoritative; app keystrokes are in `references/fleet-backend.md`. A task prompt saying "work autonomously" does not satisfy this gate.
 
 ## Workflow Overview
 
