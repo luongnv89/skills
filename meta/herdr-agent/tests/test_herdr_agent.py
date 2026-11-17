@@ -23,7 +23,7 @@ from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
-SCRIPTS = HERE.parents[2] / "skills" / "herdr-agent" / "scripts"
+SCRIPTS = HERE.parents[2] / "extras" / "herdr-agent" / "scripts"
 FAKE_BIN = HERE / "bin"
 
 

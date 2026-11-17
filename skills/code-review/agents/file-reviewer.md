@@ -1,8 +1,9 @@
 ---
 name: file-reviewer
 description: Review a batch of 5-10 files against the complete code-review checklist, returning structured JSON findings with severity levels
-role: Code Quality Analyzer
-version: 1.1.0
+metadata:
+  role: "Code Quality Analyzer"
+  version: "1.1.0"
 ---
 
 # File Reviewer Agent

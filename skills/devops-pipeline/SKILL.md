@@ -2,10 +2,10 @@
 name: devops-pipeline
 description: "Configure pre-commit hooks and lean, fast GitHub Actions for shift-left QA. Use when adding, auditing or speeding up CI/CD: maximize local checks, keep CI quick at no extra cost. Skip for Terraform/K8s, deployment pipelines, or non-GitHub CI."
 license: MIT
-effort: medium
 metadata:
-  version: 2.5.1
+  version: 2.5.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "medium"
 ---
 
 # DevOps Pipeline

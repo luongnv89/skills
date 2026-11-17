@@ -2,10 +2,10 @@
 name: auto-push
 description: "Generate a commit message, stage all changes, and push to remote after scanning for secrets, large files, and protected-branch risks. Skip for opening PRs, code review, or cutting releases/tags."
 license: MIT
-effort: low
 metadata:
-  version: 1.2.2
+  version: 1.2.3
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "low"
 ---
 
 # Commit and Push Everything

@@ -10,7 +10,7 @@ import re
 import unittest
 
 
-SKILL_DIR = Path(__file__).resolve().parents[3] / "skills" / "brand-name-checker"
+SKILL_DIR = Path(__file__).resolve().parents[3] / "extras" / "brand-name-checker"
 SKILL_TEXT = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
 SYNTH_TEXT = (SKILL_DIR / "agents" / "synthesizer.md").read_text(encoding="utf-8")
 
@@ -291,7 +291,7 @@ class SourceCheckerTests(unittest.TestCase):
     def test_catalog_row_matches_skill_version(self) -> None:
         version = re.search(r"^  version: (\S+)$", SKILL_TEXT, re.MULTILINE).group(1)
         readme = (SKILL_DIR.parents[1] / "README.md").read_text(encoding="utf-8")
-        self.assertIn(f"| [**brand-name-checker**](skills/brand-name-checker/) | {version} |", readme)
+        self.assertIn(f"| [**brand-name-checker**](extras/brand-name-checker/) | {version} |", readme)
 
     def test_skill_checks_the_three_reported_tlds(self) -> None:
         self.assertNotIn("`.app`, `.co`, `.eu`, `.fr`:", SKILL_TEXT)

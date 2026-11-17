@@ -19,7 +19,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 spec = importlib.util.spec_from_file_location(
-    "agent_profile", ROOT / "skills" / "agent-profile" / "scripts" / "agent_profile.py")
+    "agent_profile", ROOT / "extras" / "agent-profile" / "scripts" / "agent_profile.py")
 ap = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ap)
 

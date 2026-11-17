@@ -2,13 +2,11 @@
 name: diagram-generator
 description: "Generate a diagram and route to the right engine — draw.io XML (precise, editable, C4, swimlanes) or Excalidraw JSON (hand-drawn, sketch, wireframes). One entry for flowcharts, architecture, ER, sequence, mind maps. Don't use for Mermaid or slides."
 license: MIT
-effort: high
-dependencies:
-  - drawio-generator
-  - excalidraw-generator
 metadata:
-  version: 1.5.0
+  version: 1.5.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "high"
+  dependencies: "drawio-generator, excalidraw-generator"
 ---
 
 # Diagram Generator
@@ -49,7 +47,7 @@ the engine's Phase 1, never in the umbrella.
 
 ## Dependency Preflight (mandatory)
 
-This skill invokes the two engines declared in frontmatter `dependencies`, but each run needs only
+This skill invokes the two engines declared in frontmatter `metadata.dependencies`, but each run needs only
 the one that routing selects. Run this once, after routing and before the engine starts:
 
 ```bash

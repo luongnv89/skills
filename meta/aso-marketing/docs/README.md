@@ -58,7 +58,7 @@ npx skills@1.7.0 add https://github.com/luongnv89/skills --skill aso-marketing
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/aso-marketing
+asm install github:luongnv89/skills:extras/aso-marketing
 ```
 
 ## Usage

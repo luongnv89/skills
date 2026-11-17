@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-SCRIPT = Path(__file__).resolve().parents[3] / "skills" / "ux-ax-review" / "scripts" / "validate_report.py"
+SCRIPT = Path(__file__).resolve().parents[3] / "extras" / "ux-ax-review" / "scripts" / "validate_report.py"
 ASPECTS = (
     "clarity", "brand", "responsive", "accessibility", "performance", "conversion",
     "robots-sitemap", "structured-data", "markdown-pages", "llms-txt",

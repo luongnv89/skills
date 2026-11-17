@@ -2,10 +2,10 @@
 name: test-coverage
 description: "Generate unit tests for untested branches and edge cases. Use when coverage is low, CI flags gaps, or a release needs hardening. Not for integration/E2E suites, framework migrations, or fixing production bugs."
 license: MIT
-effort: low
 metadata:
-  version: 1.6.0
+  version: 1.6.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "low"
 ---
 
 # Test Coverage Expander

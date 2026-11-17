@@ -53,11 +53,11 @@ fi
 
 # --- Skill count parity: docs/index.html vs the catalog on disk ---
 # Counting rule (stated in full in the docs/index.html <head> comment): every
-# tracked SKILL.md anywhere under skills/, nested suite sub-skills included,
+# tracked SKILL.md anywhere under skills/ or extras/, nested suite sub-skills included,
 # because install.sh installs those children independently. Directories with no
 # SKILL.md (e.g. *-workspace/) never count.
 if [ -f docs/index.html ]; then
-  on_disk="$(git ls-files skills | grep -c '/SKILL\.md$' | tr -d '[:space:]')"
+  on_disk="$(git ls-files skills extras | grep -c '/SKILL\.md$' | tr -d '[:space:]')"
   # Every site that advertises the count matches "<n> skills" or "<n> installable".
   # The <head> comment enumerates them; a site reworded out of that shape would
   # otherwise go unchecked, so the number of matches is asserted as well.
@@ -72,7 +72,7 @@ if [ -f docs/index.html ]; then
   elif [ "$n_sites" -lt "$expected_sites" ]; then
     bad "docs/index.html skill count" "only $n_sites of the $expected_sites documented sites still match '<n> skills'/'<n> installable' — a reworded site would go unchecked"
   elif [ -n "$bad_sites" ]; then
-    bad "docs/index.html skill count" "advertises ${bad_sites}but ${on_disk} SKILL.md files are tracked under skills/"
+    bad "docs/index.html skill count" "advertises ${bad_sites}but ${on_disk} SKILL.md files are tracked under skills/ and extras/"
   else
     ok "docs/index.html skill count ($on_disk in $n_sites places)"
   fi

@@ -1,8 +1,9 @@
 ---
 name: reviewer
 description: Fresh-context independent validation of CODE_REVIEW.md findings for accuracy and completeness
-role: Quality Assurance Validator
-version: 1.1.1
+metadata:
+  role: "Quality Assurance Validator"
+  version: "1.1.1"
 ---
 
 # Reviewer Agent

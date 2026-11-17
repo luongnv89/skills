@@ -2,10 +2,10 @@
 name: tad-generator
 description: "Generate a Technical Architecture Document (TAD) from a PRD. Use when asked to design system architecture or define how a product is built. Updates tad.md and reports GitHub links. Don't use for PRD authoring, sprint tasks, or code implementation."
 license: MIT
-effort: max
 metadata:
-  version: 1.8.1
+  version: 1.8.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "max"
 ---
 
 # TAD Generator

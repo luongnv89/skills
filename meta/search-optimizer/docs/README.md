@@ -63,5 +63,5 @@ graph TD
 Web branch: `seo-ai-optimizer` required; `website-agent-readiness`, `viral-product-evaluator` optional. Store branch: `aso-marketing` required; `viral-product-evaluator` optional.
 
 ```bash
-asm install github:luongnv89/skills:skills/search-optimizer -p claude --yes
+asm install github:luongnv89/skills:extras/search-optimizer -p claude --yes
 ```

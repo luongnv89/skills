@@ -2,11 +2,11 @@
 name: code-review
 description: "Review or improve code — one skill, four modes: bug/security review (default), performance, clean-code audit, slop cleanup. Pass mode:review|perf|clean|cleanup or infer. Don't use for writing features or generating tests (use test-coverage)."
 license: MIT
-effort: high
 metadata:
-  version: 2.3.2
+  version: 2.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
+  effort: "high"
 ---
 
 # Code Review
@@ -80,7 +80,7 @@ uses (already colocated under this skill):
 
 - **review** → `references/review-mode.md` — agents `agents/reviewer.md`, `agents/file-reviewer.md`, `agents/report-assembler.md`; refs `references/subagent-architecture.md`, `references/code-smells.md`
 - **perf** → `references/perf-mode.md` — ref `references/language-checks.md`
-- **clean** → `references/clean-mode.md` — refs `references/clean-code-checklist.md`, `references/tdd-checklist.md`, `references/html-report-guide.md`, `references/report-template.html`
+- **clean** → `references/clean-mode.md` — refs `references/clean-code-checklist.md`, `references/tdd-checklist.md`, `references/html-report-guide.md`
 - **cleanup** → `references/cleanup-mode.md` — the 8 cleaner agents in `agents/` (`deduplicator.md`, `type-consolidator.md`, `unused-code-killer.md`, `circular-dep-untangler.md`, `weak-type-strengthener.md`, `defensive-programming-remover.md`, `legacy-code-remover.md`, `slop-comment-cleaner.md`)
 
 ## Environment Check

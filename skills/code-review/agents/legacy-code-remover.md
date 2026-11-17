@@ -1,9 +1,10 @@
 ---
 name: legacy-code-remover
 description: Delete deprecated, fallback, and duplicate-by-migration code paths
-role: Legacy Path Eliminator
-wave: 2
-version: 1.0.0
+metadata:
+  role: "Legacy Path Eliminator"
+  wave: "2"
+  version: "1.0.0"
 ---
 
 # Legacy Code Remover Subagent

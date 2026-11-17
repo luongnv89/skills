@@ -5,6 +5,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -185,7 +186,8 @@ class ClaudePackagingTests(unittest.TestCase):
             "git", "-C", str(ROOT), "ls-files", "-z", "skills", "packages/lstack",
             "scripts/build-lstack.py", "README.md", "LICENSE"]).decode().split("\0")
         paths += ["skills/.claude-plugin/plugin.json", "skills/.claude-plugin/icon.png",
-                  ".claude-plugin/marketplace.json", "skills/README.md"]
+                  ".claude-plugin/marketplace.json", "skills/README.md",
+                  "extras/.claude-plugin/plugin.json"]  # companion entry is checked on --check
         for relative in sorted(set(filter(None, paths))):
             source, destination = ROOT / relative, repo / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
@@ -203,7 +205,7 @@ class ClaudePackagingTests(unittest.TestCase):
         repo = self.snapshot_catalog()
         bundle, original = BUILDER.prepare(repo)
         claude, adapted = BUILDER.prepare(repo, target="claude")
-        self.assertEqual(len(adapted["skill_versions"]), 48)
+        self.assertEqual(len(adapted["skill_versions"]), 16)
         self.assertEqual(adapted["skill_versions"], original["skill_versions"])
         self.assertEqual(adapted["files"], original["files"])
         for path, value in bundle.items():
@@ -215,7 +217,7 @@ class ClaudePackagingTests(unittest.TestCase):
                         "/lstack:code-review", "issue-pr-review", "issue-resolver", "dont-make-me-think"):
             self.assertIn(command, doc)
         self.assertIn("lstack-claude-" + adapted["package_version"], doc)
-        self.assertEqual(adapted["package_version"], "0.8.0")
+        self.assertEqual(adapted["package_version"], "0.9.0")
         plugin = json.loads(claude["plugins/lstack/.claude-plugin/plugin.json"][0])
         self.assertNotIn("skills", plugin)  # Root additive paths do not exist in flattened exports.
         market = json.loads(claude[".claude-plugin/marketplace.json"][0])
@@ -224,7 +226,7 @@ class ClaudePackagingTests(unittest.TestCase):
         for flags in [("--check",), ("--target", "claude", "--check"),
                       ("--target", "codex", "--check"), ("--check-plugin-metadata",)]:
             result = json.loads(subprocess.check_output(cmd + list(flags)))
-            self.assertEqual((result["version"], result["skills"]), ("0.8.0", 48))
+            self.assertEqual((result["version"], result["skills"]), ("0.9.0", 16))
         first, second = self.artifact("catalog-one.zip"), self.artifact("catalog-two.zip")
         BUILDER.build(repo, output=first, target="claude")
         BUILDER.build(repo, output=second, target="claude")
@@ -237,17 +239,15 @@ class ClaudePackagingTests(unittest.TestCase):
                 self.assertEqual(codex["plugins/lstack/" + path], value)
         root_doc = (repo / "README.md").read_text()
         for command in ("claude plugin marketplace add luongnv89/skills",
-                        "--write-plugin-metadata", "--check-plugin-metadata", "lstack 0.8.0"):
+                        "--write-plugin-metadata", "--check-plugin-metadata", "lstack 0.9.0"):
             self.assertIn(command, root_doc)
         manifest = json.loads(bundle["manifest.json"][0])
-        prerequisites = {p["name"]: p for p in manifest["external_skill_prerequisites"]}
-        self.assertIn("dont-make-me-think", prerequisites["browse"]["used_by"])
-        for name in ("issue-pr-review", "issue-resolver"):
-            self.assertIn("issue-work-loop", prerequisites[name]["used_by"])
+        # Every member that needed an external skill moved to the lstack-extras companion.
+        self.assertEqual(manifest["external_skill_prerequisites"], [])
 
     def test_root_metadata_projection_and_additive_discovery_exactly_once(self):
         result = BUILDER.sync_plugin_metadata(ROOT)
-        self.assertEqual((result["version"], result["skills"]), ("0.8.0", 48))
+        self.assertEqual((result["version"], result["skills"]), ("0.9.0", 16))
         plugin_root = ROOT / "skills"
         plugin = json.loads((plugin_root / ".claude-plugin/plugin.json").read_bytes())
         market = json.loads((ROOT / ".claude-plugin/marketplace.json").read_bytes())
@@ -262,15 +262,32 @@ class ClaudePackagingTests(unittest.TestCase):
         self.assertEqual(market["plugins"][0]["description"], plugin["description"])
         self.assertEqual((ROOT / market["plugins"][0]["source"]).resolve(), plugin_root)
         paths = list(plugin_root.glob("*/SKILL.md"))
-        self.assertEqual(len(paths), 46)
+        self.assertEqual(len(paths), 14)
         paths += [plugin_root / source / "SKILL.md" for source in plugin["skills"][1:]]
-        self.assertEqual(len(paths), 48)
-        self.assertEqual(len({p.resolve() for p in paths}), 48)
+        self.assertEqual(len(paths), 16)
+        self.assertEqual(len({p.resolve() for p in paths}), 16)
         manifest = json.loads((ROOT / BUILDER.MANIFEST).read_bytes())
         self.assertEqual({p.parent.resolve() for p in paths},
                          {(ROOT / m["source"]).resolve() for m in manifest["members"]})
         self.assertEqual(len(manifest["claude"]), 8)
         self.assertEqual(len(manifest["codex"]), 5)
+        companion = market["plugins"][1]
+        self.assertEqual(len(market["plugins"]), 2)
+        self.assertEqual((companion["name"], companion["source"]), ("lstack-extras", "./extras"))
+        extras = json.loads((ROOT / "extras/.claude-plugin/plugin.json").read_bytes())
+        self.assertEqual(extras["name"], "lstack-extras")
+        self.assertEqual(len(list((ROOT / "extras").glob("*/SKILL.md"))), 32)
+
+    def test_companion_plugin_entries_are_validated(self):
+        manifest = json.loads((ROOT / BUILDER.MANIFEST).read_bytes())
+        for bad in ({"name": "lstack-extras", "source": "./skills", "description": "d"},
+                    {"name": "lstack-extras", "source": "../extras", "description": "d"},
+                    {"name": "lstack", "source": "./extras", "description": "d"},
+                    {"name": "other", "source": "./extras", "description": "d"},
+                    {"name": "lstack-extras", "source": "./extras"}):
+            with self.assertRaises(ValueError):
+                BUILDER.companion_plugins(ROOT, dict(manifest, companion_plugins=[bad]))
+        self.assertEqual(BUILDER.companion_plugins(ROOT, manifest), manifest["companion_plugins"])
 
     def test_plugin_folder_meets_directory_file_policy(self):
         """Directory portal holds: >512 files, non-image files over 256 KiB, other binaries."""
@@ -293,6 +310,54 @@ class ClaudePackagingTests(unittest.TestCase):
         prose = "".join(part for index, part in enumerate(listing.split("```")) if index % 2 == 0)
         self.assertGreaterEqual(len(prose.split()), 40)
         self.assertIn("claude plugin install lstack@lstack", listing)
+
+    def test_plugin_folder_meets_community_content_policy(self):
+        """LOCAL_CODE_FILE_TYPE and LOCAL_CODE_FRONTMATTER_KEY, enforced at the source so that
+        `skills/` on main can be submitted as is. Code-backed skills belong in extras/."""
+        tracked = subprocess.check_output(["git", "-C", str(ROOT), "ls-files", "-z", "skills"]).decode()
+        files = {f for f in filter(None, tracked.split("\0")) if (ROOT / f).exists()}
+        text = (".md", ".txt", ".json", ".yaml", ".yml")
+        magic = {".png": (b"\x89PNG\r\n\x1a\n",), ".jpg": (b"\xff\xd8\xff",), ".jpeg": (b"\xff\xd8\xff",),
+                 ".gif": (b"GIF87a", b"GIF89a"), ".webp": (b"RIFF",), ".ico": (b"\x00\x00\x01\x00",)}
+        package_config = {".npmrc", ".yarnrc", ".yarnrc.yml", ".pnpmrc", "pnpm-workspace.yaml", "package.json",
+                          "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "requirements.txt", "pip.conf",
+                          "pyproject.toml", "pipfile", "poetry.lock", "bunfig.toml", "uv.toml", ".pypirc"}
+        # Lines that can change where a package manager gets packages (refused even in prose).
+        registry = re.compile(r"(npm|yarn|pnpm|pip|uv|bun)\s+config\s+set\b|--registry[= ]|registry\s*=\s*https?:"
+                              r"|--(extra-)?index-url\b|--find-links\b|PIP_INDEX_URL|npm_config_registry|GOPROXY\s*=",
+                              re.IGNORECASE)
+        skill_keys = {"name", "description", "license", "metadata"}
+        resource_keys = {"name", "description", "metadata"}
+        for relative in sorted(files):
+            path = ROOT / relative
+            name = path.name.lower()
+            with self.subTest(path=relative):
+                self.assertNotIn(name, package_config)
+                self.assertNotIn(name, {"hooks.json", ".mcp.json", ".lsp.json", "monitors.json"})
+                self.assertFalse({"output-styles", "egress", ".claude"} & set(Path(relative).parts))
+                self.assertNotRegex(relative, r'[:\\*?"<>|]')
+                data = path.read_bytes()
+                suffix = path.suffix.lower()
+                if suffix in magic:
+                    self.assertTrue(data.startswith(magic[suffix]), "image bytes do not match " + suffix)
+                    continue
+                self.assertIn(suffix, text, "type outside Markdown, text, JSON, YAML and images")
+                self.assertFalse(data.lstrip(b"\xef\xbb\xbf").startswith(b"#!"))
+                self.assertNotIn(b"\0", data)
+                content = data.decode("utf-8")
+                self.assertIsNone(registry.search(content), "line that can change a package registry")
+                if suffix != ".md" or not content.startswith("---\n") or "/.github/ISSUE_TEMPLATE/" in relative:
+                    continue
+                block = content[4:content.index("\n---\n", 3)]
+                keys = set()
+                for line in block.splitlines():
+                    if line.startswith("  "):
+                        self.assertRegex(line, r"^  [A-Za-z][\w-]*: \S")  # one-level metadata map only
+                        continue
+                    self.assertRegex(line, r"^[a-z][\w-]*:( \S.*)?$")
+                    keys.add(line.split(":", 1)[0])
+                allowed = skill_keys if name == "skill.md" else resource_keys
+                self.assertLessEqual(keys, allowed, "frontmatter keys outside the allowed list")
 
     def test_native_modes_read_working_manifest_not_committed_archive(self):
         self.manifest["version"] = "0.4.0"

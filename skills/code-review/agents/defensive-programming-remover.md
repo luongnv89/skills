@@ -1,9 +1,10 @@
 ---
 name: defensive-programming-remover
 description: Remove try/catch and null-checks that hide errors without serving a real boundary
-role: Defensive Programming Auditor
-wave: 2
-version: 1.0.0
+metadata:
+  role: "Defensive Programming Auditor"
+  wave: "2"
+  version: "1.0.0"
 ---
 
 # Defensive Programming Remover Subagent

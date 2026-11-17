@@ -56,7 +56,7 @@ npx skills@1.7.0 add https://github.com/luongnv89/skills --skill seo-ai-optimize
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/seo-ai-optimizer
+asm install github:luongnv89/skills:extras/seo-ai-optimizer
 ```
 
 ## Usage
@@ -81,7 +81,7 @@ asm install github:luongnv89/skills:skills/seo-ai-optimizer
 
 ## Requires
 
-Step 8 invokes [`website-agent-readiness`](../../../skills/website-agent-readiness/). Install it with `asm install github:luongnv89/skills:skills/website-agent-readiness`; without it, Steps 1-7 still run and Step 8 is skipped.
+Step 8 invokes [`website-agent-readiness`](../../../extras/website-agent-readiness/). Install it with `asm install github:luongnv89/skills:extras/website-agent-readiness`; without it, Steps 1-7 still run and Step 8 is skipped.
 
 ## Output
 

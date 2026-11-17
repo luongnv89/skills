@@ -1,8 +1,9 @@
 ---
 name: tech-researcher
 description: Handle one research round (spawned 5x in parallel) for technology stack, infrastructure, security, risk assessment, or holistic review
-role: Technical Research Specialist
-version: 1.1.1
+metadata:
+  role: "Technical Research Specialist"
+  version: "1.1.1"
 ---
 
 # Tech Researcher Agent

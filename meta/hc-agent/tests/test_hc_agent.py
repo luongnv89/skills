@@ -23,7 +23,7 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SKILL = HERE.parents[2] / "skills" / "hc-agent"
+SKILL = HERE.parents[2] / "extras" / "hc-agent"
 SCRIPTS = SKILL / "scripts"
 BIN = HERE / "bin"
 SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"

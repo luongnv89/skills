@@ -15,7 +15,7 @@ import tempfile
 import unittest
 
 SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..",
-                      "skills", "github-pages-publish", "scripts", "pages_publish.py")
+                      "extras", "github-pages-publish", "scripts", "pages_publish.py")
 
 GIT_ENV = dict(os.environ, GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull,
                GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.com",

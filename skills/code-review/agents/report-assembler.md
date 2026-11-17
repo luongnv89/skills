@@ -1,8 +1,9 @@
 ---
 name: report-assembler
 description: Merge and deduplicate findings from all file-reviewer batches, rank by severity, and generate CODE_REVIEW.md
-role: Report Coordinator
-version: 1.1.0
+metadata:
+  role: "Report Coordinator"
+  version: "1.1.0"
 ---
 
 # Report Assembler Agent

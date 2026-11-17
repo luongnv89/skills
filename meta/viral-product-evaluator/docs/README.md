@@ -47,7 +47,7 @@ graph TD
 Install via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/viral-product-evaluator
+asm install github:luongnv89/skills:extras/viral-product-evaluator
 ```
 
 Live-URL audits also need gstack's `/browse`. The skill checks for it before fetching and, when `asm deps` is available, leases it for the run and releases it at the end. Local-file and orchestrated runs need nothing else.

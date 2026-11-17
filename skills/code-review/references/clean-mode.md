@@ -19,7 +19,7 @@ Do **not** auto-trigger on general coding, bug-fixing, feature work, performance
 1. **Findings** grouped by cheat-sheet category, each citing `file:line` and a principle/smell label.
 2. **A phased implementation plan** split by priority — Phase 1 (Critical) → Phase 2 (Major) → Phase 3 (Minor) — where every task has an ID, a target `file:line`, the principle it fixes, an effort estimate, and an acceptance check.
 
-**Optional `CLEAN_CODE_AUDIT.html`** — a single self-contained, offline-safe visual report (dark-IDE theme: metric tiles, a severity donut, effort-by-phase bars, collapsible findings with a severity filter, visible count, and reset, and an interactive phased plan with progress tracking). Offer it after writing the `.md`; build it from `references/report-template.html` following `references/html-report-guide.md`. Same data as the `.md`, visual form — keep counts consistent between the two.
+**Optional `CLEAN_CODE_AUDIT.html`** — a single self-contained, offline-safe visual report (dark-IDE theme: metric tiles, a severity donut, effort-by-phase bars, collapsible findings with a severity filter, visible count, and reset, and an interactive phased plan with progress tracking). Offer it after writing the `.md`; write it from the spec in `references/html-report-guide.md`. Same data as the `.md`, visual form — keep counts consistent between the two.
 
 This mode **does not edit source code.** It audits and plans; a human (or this skill's `cleanup` mode, or `test-coverage`) executes the tasks.
 
@@ -95,7 +95,7 @@ Order tasks within a phase so that enabling refactors (extract method, introduce
 
 Write `CLEAN_CODE_AUDIT.md` (format below). Then verify it against the **Acceptance Criteria**. Emit the **Step Completion Report**.
 
-Then **offer the optional HTML report**: "Want a visual `CLEAN_CODE_AUDIT.html` too?" If yes, build it from `references/report-template.html` per `references/html-report-guide.md` — fill every `{{placeholder}}`, expand the `REPEAT` blocks, and confirm zero `{{` tokens remain and counts match the `.md`.
+Then **offer the optional HTML report**: "Want a visual `CLEAN_CODE_AUDIT.html` too?" If yes, write it from the spec in `references/html-report-guide.md` and confirm its counts match the `.md`.
 
 ## Severity Levels
 
@@ -218,7 +218,7 @@ A run passes when **all** are true:
 - [ ] Phase assignment matches severity (Critical→Phase 1, Major→Phase 2, Minor→Phase 3).
 - [ ] No source files were modified by this skill.
 - [ ] If no issues exist, the report shows all-zero counts and an "LGTM" note instead of fabricated findings.
-- [ ] If the HTML report was produced: `CLEAN_CODE_AUDIT.html` has no remaining `{{` placeholder tokens, and its severity counts match the `.md` Summary table.
+- [ ] If the HTML report was produced: `CLEAN_CODE_AUDIT.html` follows `references/html-report-guide.md`, and its severity counts match the `.md` Summary table.
 
 ## Edge Cases
 
@@ -257,5 +257,4 @@ Use `√` for pass, `×` for fail, `—` for context. Skill-specific checks per 
 
 - [references/clean-code-checklist.md](references/clean-code-checklist.md) — Clean Code half: smells, SOLID, naming, methods, conditionals, exceptions, design, dependencies.
 - [references/tdd-checklist.md](references/tdd-checklist.md) — Clean ATDD/TDD half: test kinds, testability, test smells, TDD cycle, red/green patterns, test pyramid, CI.
-- [references/report-template.html](references/report-template.html) — self-contained dark-IDE HTML report template (placeholders + REPEAT blocks). Only loaded when producing the optional HTML output.
 - [references/html-report-guide.md](references/html-report-guide.md) — how to fill the HTML template: placeholder map, REPEAT-block expansion, percentage/effort math, and the pre-delivery self-check.

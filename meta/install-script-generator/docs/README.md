@@ -56,7 +56,7 @@ npx skills@1.7.0 add https://github.com/luongnv89/skills --skill install-script-
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/install-script-generator
+asm install github:luongnv89/skills:extras/install-script-generator
 ```
 
 ## Usage

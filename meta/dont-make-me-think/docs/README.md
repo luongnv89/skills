@@ -43,7 +43,7 @@ graph TD
 Install via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/dont-make-me-think
+asm install github:luongnv89/skills:extras/dont-make-me-think
 ```
 
 Live-URL reviews also need gstack's `/browse`. The skill checks for it before navigating and, when `asm deps` is available, leases it for the run and releases it at the end.

@@ -27,7 +27,7 @@ from pathlib import Path
 # Regression tests for the dependency lease lifecycle and final-report contract.
 # ============================================================================
 
-SKILL_DIR = Path(__file__).resolve().parents[3] / "skills" / "issue-work-loop"
+SKILL_DIR = Path(__file__).resolve().parents[3] / "extras" / "issue-work-loop"
 SKILL_MD = SKILL_DIR / "SKILL.md"
 OUTPUT_FORMAT = SKILL_DIR / "references" / "output-format.md"
 CLEANUP = SKILL_DIR / "references" / "cleanup.md"
@@ -255,7 +255,7 @@ class FinalReportContractTests(unittest.TestCase):
 # Focused regression tests for the issue-work-loop transport contract.
 # ============================================================================
 
-SKILL = Path(__file__).resolve().parents[3] / "skills"
+SKILL = Path(__file__).resolve().parents[3] / "extras"
 LOOP_PROTOCOL = SKILL / "issue-work-loop" / "references" / "loop-protocol.md"
 AGENT_PROMPTS = SKILL / "issue-work-loop" / "references" / "agent-prompts.md"
 HERDR_DELIVERY = SKILL / "herdr-agent" / "references" / "delivery-and-waiting.md"
@@ -387,7 +387,7 @@ class TransportContractTests(unittest.TestCase):
 # Regression tests for the issue-work-loop worker launch contract.
 # ============================================================================
 
-SKILLS = Path(__file__).resolve().parents[3] / "skills"
+SKILLS = Path(__file__).resolve().parents[3] / "extras"
 LOOP_SKILL = SKILLS / "issue-work-loop" / "SKILL.md"
 PROTOCOL = SKILLS / "issue-work-loop" / "references" / "loop-protocol.md"
 PROFILE = SKILLS / "herdr-agent" / "scripts" / "launch_profile.py"

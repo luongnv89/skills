@@ -6,4 +6,4 @@ These folders sit outside `skills/`, so the installers never copy them into your
 
 | Example | Skill | What it shows |
 |---|---|---|
-| [logo-designer/](logo-designer/) | [`logo-designer`](../skills/logo-designer/) | The Agent Skills logo, from brief to 26 concept sketches, a concept board, user decisions, 7 validated SVGs, and a brand showcase page |
+| [logo-designer/](logo-designer/) | [`logo-designer`](../extras/logo-designer/) | The Agent Skills logo, from brief to 26 concept sketches, a concept board, user decisions, 7 validated SVGs, and a brand showcase page |

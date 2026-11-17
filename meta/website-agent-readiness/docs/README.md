@@ -49,7 +49,7 @@ graph TD
 Install via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/website-agent-readiness
+asm install github:luongnv89/skills:extras/website-agent-readiness
 ```
 
 Phase 4 delegates filing to `/plan-to-issues`, maintained in [luongnv89/idd](https://github.com/luongnv89/idd). The skill checks for it before the plan is written and, when `asm deps` is available, leases it for the run and releases the lease at the end:
@@ -109,6 +109,6 @@ Two artifacts and a tracker state: `.agent-ready/` scratch (never committed) and
 | 1–3 (scan → triage → plan) | End-to-end against three live sites at different score levels — `example.com` (0/5), `stripe.com` (1/5), `isitagentready.com` (4/5). Task counts, effort bands and acceptance-criteria coverage matched triage on every run. |
 | 4 (file the issues) | Exercised end-to-end against a live repository (#114): a real 6-task plan rendered from the `isitagentready.com` scan was filed by `/plan-to-issues agent-ready-plan.md` into a throwaway repo — one epic created and bound to the plan (`<!-- plan-to-issues:plan=agent-ready-plan.md -->`), one issue per task (`Part of #<epic>`), and all six registered as native sub-issues. A second run on the same plan filed nothing — marker-based epic reuse and per-task dedup are confirmed idempotent. |
 
-The eval suite is executable: `python3 scripts/run-skill-evals.py website-agent-readiness` from the repo root (see CONTRIBUTING.md). It measures triggering of the **installed** skill (`~/.claude/skills/website-agent-readiness`), so install the current copy first (`asm install github:luongnv89/skills:skills/website-agent-readiness -p claude --yes`, or `install.sh`) — the runner warns on a description mismatch. The suite holds 13 cases (4 happy-path, 6 edge, 3 negative-trigger) with 46 transcript-level expectations, reported as `[MANUAL]`; cases 3, 4 and 13 declare `files:` fixtures and skip by design.
+The eval suite is executable: `python3 scripts/run-skill-evals.py website-agent-readiness` from the repo root (see CONTRIBUTING.md). It measures triggering of the **installed** skill (`~/.claude/skills/website-agent-readiness`), so install the current copy first (`asm install github:luongnv89/skills:extras/website-agent-readiness -p claude --yes`, or `install.sh`) — the runner warns on a description mismatch. The suite holds 13 cases (4 happy-path, 6 edge, 3 negative-trigger) with 46 transcript-level expectations, reported as `[MANUAL]`; cases 3, 4 and 13 declare `files:` fixtures and skip by design.
 
 Last recorded run (3 runs per case, recorded for #114 against the 1.2.4 suite): **8/8 triggering cases pass, 2 skipped as fixture-dependent** — including the two trigger-coverage gaps fixed by the 1.2.4 description widening — and the three negative-trigger cases stay at 0/3.

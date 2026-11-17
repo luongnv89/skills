@@ -1,6 +1,6 @@
 # logo-designer case study: the Agent Skills logo
 
-This folder holds a complete, real run of the [`logo-designer`](../../skills/logo-designer/) skill on this repository, kept as a worked example. Everything from the run is here: the brief, the project analysis, every concept sketch and test render, the concept board the user chose from, the decisions, the final files, and the validation report.
+This folder holds a complete, real run of the [`logo-designer`](../../extras/logo-designer/) skill on this repository, kept as a worked example. Everything from the run is here: the brief, the project analysis, every concept sketch and test render, the concept board the user chose from, the decisions, the final files, and the validation report.
 
 <p align="center">
   <img src="final/logo-icon.svg" alt="Agent Skills app icon" width="120">

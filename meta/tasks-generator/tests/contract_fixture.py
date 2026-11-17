@@ -1,6 +1,6 @@
 """Focused dependency contract fixture for tasks-generator.
 
-Moved from skills/tasks-generator/references/self-test.md. Usage:
+Moved from extras/tasks-generator/references/self-test.md. Usage:
 
     python3 meta/tasks-generator/tests/contract_fixture.py "$(git rev-parse --show-toplevel)"
 
@@ -18,10 +18,10 @@ import tempfile
 from pathlib import Path
 
 repo_root = Path(sys.argv[1]).resolve()
-worker = (repo_root / "skills/tasks-generator/agents/sprint-worker.md").read_text()
-resolver = (repo_root / "skills/tasks-generator/agents/dependency-resolver.md").read_text()
-template = (repo_root / "skills/tasks-generator/references/tasks-template.md").read_text()
-self_test = (repo_root / "skills/tasks-generator/references/self-test.md").read_text()
+worker = (repo_root / "extras/tasks-generator/agents/sprint-worker.md").read_text()
+resolver = (repo_root / "extras/tasks-generator/agents/dependency-resolver.md").read_text()
+template = (repo_root / "extras/tasks-generator/references/tasks-template.md").read_text()
+self_test = (repo_root / "extras/tasks-generator/references/self-test.md").read_text()
 
 # Execute the exact documented checklist command against valid and invalid inputs.
 checklist_line = next(

@@ -1,9 +1,10 @@
 ---
 name: circular-dep-untangler
 description: Detect and break circular dependencies using madge or language-specific tools
-role: Dependency Graph Surgeon
-wave: 1
-version: 1.0.0
+metadata:
+  role: "Dependency Graph Surgeon"
+  wave: "1"
+  version: "1.0.0"
 ---
 
 # Circular Dependency Untangler Subagent

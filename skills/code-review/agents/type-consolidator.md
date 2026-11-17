@@ -1,9 +1,10 @@
 ---
 name: type-consolidator
 description: Find duplicate type/interface/struct definitions and move truly shared ones into shared modules
-role: Type Consolidation Specialist
-wave: 2
-version: 1.0.0
+metadata:
+  role: "Type Consolidation Specialist"
+  wave: "2"
+  version: "1.0.0"
 ---
 
 # Type Consolidator Subagent

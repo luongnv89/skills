@@ -59,7 +59,7 @@ graph TD
 Install with [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/product-launch
+asm install github:luongnv89/skills:extras/product-launch
 ```
 
 Optional helpers:

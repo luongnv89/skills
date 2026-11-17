@@ -2,10 +2,10 @@
 name: excalidraw-generator
 description: "Generate diagrams as valid Excalidraw JSON — flowcharts, architecture, ER diagrams, mind maps, sequence diagrams, wireframes, C4 models, and more. Don't use for draw.io/Mermaid output, slide decks, or pixel-perfect brand graphics."
 license: MIT
-effort: high
 metadata:
-  version: 1.6.1
+  version: 1.6.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "high"
 ---
 
 # Excalidraw Diagram Generator

@@ -12,7 +12,7 @@ import unittest
 
 
 REPO = Path(__file__).resolve().parents[3]
-SKILL_DIR = REPO / "skills" / "dev-machine-setup"
+SKILL_DIR = REPO / "extras" / "dev-machine-setup"
 REFS = SKILL_DIR / "references"
 
 
@@ -122,7 +122,7 @@ class VersionTests(unittest.TestCase):
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
         version = re.search(r"^  version: (\S+)$", skill, re.M).group(1)
         readme = (REPO / "README.md").read_text(encoding="utf-8")
-        self.assertIn(f"| [**dev-machine-setup**](skills/dev-machine-setup/) | {version} |", readme)
+        self.assertIn(f"| [**dev-machine-setup**](extras/dev-machine-setup/) | {version} |", readme)
 
 
 if __name__ == "__main__":

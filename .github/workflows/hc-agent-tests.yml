@@ -3,13 +3,13 @@ name: hc-agent tests
 on:
   pull_request:
     paths:
-      - "skills/hc-agent/**"
+      - "extras/hc-agent/**"
       - "meta/hc-agent/tests/**"
       - ".github/workflows/hc-agent-tests.yml"
   push:
     branches: [main]
     paths:
-      - "skills/hc-agent/**"
+      - "extras/hc-agent/**"
       - "meta/hc-agent/tests/**"
       - ".github/workflows/hc-agent-tests.yml"
 
@@ -37,9 +37,9 @@ jobs:
       - name: Byte-compile Python scripts
         run: |
           python3 -m py_compile \
-            skills/hc-agent/scripts/agent.py \
-            skills/hc-agent/scripts/hclib.py \
-            skills/hc-agent/scripts/launch_profile.py \
+            extras/hc-agent/scripts/agent.py \
+            extras/hc-agent/scripts/hclib.py \
+            extras/hc-agent/scripts/launch_profile.py \
             meta/hc-agent/tests/fake_hc.py \
             meta/hc-agent/tests/fake_herdr_app.py
 

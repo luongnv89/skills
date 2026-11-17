@@ -2,10 +2,10 @@
 name: cli-builder
 description: "Build production-quality CLIs with language detection and a five-step approval-gated workflow. Use when wrapping an existing module or app. Don't use for GUI/TUI apps, web APIs, or one-off shell scripts."
 license: MIT
-effort: high
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
+  effort: "high"
 ---
 
 # CLI Builder

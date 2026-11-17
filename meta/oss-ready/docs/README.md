@@ -74,7 +74,7 @@ asm install github:luongnv89/skills:skills/oss-ready
 
 | Path | Description |
 |---|---|
-| `assets/LICENSE-MIT` | MIT license template |
+| `assets/LICENSE-MIT.txt` | MIT license template |
 | `assets/CODE_OF_CONDUCT.md` | Contributor Covenant 2.0 |
 | `assets/SECURITY.md` | Security policy template |
 | `assets/.github/ISSUE_TEMPLATE/bug_report.md` | Bug report issue template |

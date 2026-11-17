@@ -46,7 +46,7 @@ graph TD
 Install via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/ux-ax-review
+asm install github:luongnv89/skills:extras/ux-ax-review
 ```
 
 No other skill is required. Python 3 is optional and only runs the report validator.
@@ -101,7 +101,7 @@ or sent to third-party AI services as an “improvement.”
 
 ```bash
 python3 -m unittest discover -s meta/ux-ax-review/tests -v
-python3 skills/ux-ax-review/scripts/validate_report.py /path/to/ux-ax-findings.json --markdown /path/to/UX_AX_REVIEW.md
+python3 extras/ux-ax-review/scripts/validate_report.py /path/to/ux-ax-findings.json --markdown /path/to/UX_AX_REVIEW.md
 ```
 
 Behavioral eval results are stored in a separate ignored workspace, not shipped as claims

@@ -1,101 +1,65 @@
 # HTML Report Guide
 
-How to turn `references/report-template.html` into a delivered `CLEAN_CODE_AUDIT.html`. The template is a single self-contained file (no CDNs, no chart library, offline-safe) using a refined dark-IDE aesthetic. You fill placeholders — there is no build step.
+How to build the optional `CLEAN_CODE_AUDIT.html`. There is no template file: write one self-contained HTML file from this spec. Use inline `<style>` and one inline `<script>`, with no CDNs, web fonts or chart library, so it works offline. It is a sibling of `CLEAN_CODE_AUDIT.md`, not a replacement: same data in visual form, with the same counts and findings.
 
-## Procedure
+## Look
 
-1. Copy `references/report-template.html` to the repo root as `CLEAN_CODE_AUDIT.html`.
-2. **Delete the leading `<!-- Clean Code Audit — HTML report template … -->` instruction comment** (it contains literal `{{…}}` tokens that are documentation, not data).
-3. Replace every `{{PLACEHOLDER}}` with real audit data (table below).
-4. For each `<!-- REPEAT:name --> … <!-- /REPEAT:name -->` block: duplicate the inner markup once per item, fill it, then **delete the `REPEAT` comment markers** in the final file.
-5. Delete any optional element that doesn't apply (snippet `<pre>`, multi-site `<p class="sites">`).
-6. **Verify zero `{{` tokens remain** (`grep -c '{{' CLEAN_CODE_AUDIT.html` must return 0) and that the severity tile counts equal the donut legend counts equal the `## Summary` table in the `.md` report.
+A refined dark-IDE aesthetic. Define these tokens on `:root`:
 
-The HTML is a sibling of `CLEAN_CODE_AUDIT.md`, not a replacement — same data, visual form. Keep them consistent (same counts, same findings).
+| Token | Value | Use |
+| --- | --- | --- |
+| `--bg` / `--panel` / `--panel-2` | `#0d1117` / `#161b22` / `#1c232c` | page, cards, nested cards |
+| `--line` | `#283039` | borders and rules |
+| `--ink` / `--ink-soft` / `--ink-faint` | `#e6edf3` / `#aab2bd` / `#6e7681` | text levels |
+| `--green` | `#3fb950` | accent highlight only |
+| `--crit` / `--major` / `--minor` / `--info` | `#f85149` / `#f0883e` / `#d29922` / `#58a6ff` | severity |
+| `--mono` | `ui-monospace, "SFMono-Regular", Menlo, monospace` | file paths, code, numbers |
+| `--sans` | `"Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif` | body |
 
-## Scalar placeholders
+Severity and accent colors go on text, borders, dots and bars only, never as a fill behind text. Max content width is about 1180px. Grids collapse to one column below 720px, with no horizontal overflow at 375px.
 
-| Placeholder | Fill with |
-| --- | --- |
-| `{{PROJECT_NAME}}` | Repo/app name, e.g. `ask-milo`. Used in title, chrome, and the localStorage key — keep it stable. |
-| `{{DATE}}` | Audit date `YYYY-MM-DD`. |
-| `{{SCOPE}}` | Short scope string, e.g. `Full audit — 70 Swift files`. |
-| `{{FILES_AUDITED}}` | e.g. `70 (63 source + 7 test)`. |
-| `{{SOURCE_STANDARD}}` | `bbv Clean Code Cheat Sheet V2.2`. |
-| `{{HEADLINE_HTML}}` | The headline sentence(s). May contain `<strong>`. One or two sentences naming the dominant theme(s). |
-| `{{CRITICAL_COUNT}}` `{{MAJOR_COUNT}}` `{{MINOR_COUNT}}` `{{INFO_COUNT}}` | Consolidated counts per severity. |
-| `{{TOTAL_COUNT}}` | Sum of the four (consolidated, not raw). |
-| `{{RAW_COUNT}}` | Raw findings before consolidation (e.g. `124`). |
+## Structure, in order
 
-## Distribution
+1. **Window chrome bar**: three dots, the crumb `<b>PROJECT</b> / CLEAN_CODE_AUDIT.html`, and the tag `bbv Clean Code V2.2`.
+2. **Hero**: the eyebrow `Clean Code Audit · Static Analysis Report` and the title `Clean Code Audit`. Under them, a definition grid with Project, Date (`YYYY-MM-DD`), Scope (e.g. `Full audit — 70 Swift files`), Files audited (e.g. `70 (63 source + 7 test)`) and Standard (`bbv Clean Code Cheat Sheet V2.2`). Then a headline callout of one or two sentences naming the dominant themes; `<strong>` is allowed.
+3. **Table of contents**: anchor links to the four numbered sections below.
+4. **01 Metrics**: five tiles: Critical, Major, Minor, Info, and Consolidated (the total, with the subline `from N raw findings`).
+5. **02 Distribution**:
+   - A donut built from a CSS `conic-gradient` over the four severity percentages. These are integers that sum to 100; for 6/19/12/3 of 40 they are 15, 48, 30 and 7. Put the total in the center and a legend with counts beside it.
+   - Effort bars for Phase 1, 2 and 3. Sum each phase's task efforts, treating `~15m≈0.03d`, `~1h≈0.12d`, `~3h≈0.4d` and `~1d=1d`. Label each bar with the rounded sum, e.g. `~18d`. The largest phase is 100% width and the others are scaled to it.
+6. **03 Findings**:
+   - A filter bar of buttons `All`, `Critical`, `Major`, `Minor`, `Info` (using `aria-pressed`) and `Reset`, plus a live `Showing N of M findings` count (`aria-live="polite"`).
+   - One `<details open>` group per severity that has findings, in the order Critical, Major, Minor, Info. Each group shows a dot, its label and its count.
+   - Each finding is an `<article class="finding" data-sev="crit|major|minor|info">` containing:
+     - a severity badge and a title
+     - its `file:line`, linked to `…/blob/<sha>/path#Lline` when the repo has a web remote, plain text otherwise
+     - the principle
+     - a one-sentence description
+     - a `Fix →` line
+     - a short snippet in `<pre>` with `<`, `>` and `&` escaped. Without one, write `Snippet: unavailable` so missing evidence isn't mistaken for a clean site.
+     - for a consolidated finding, a `Sites:` list of its other `file:line` sites
+   - A Minor or Info themed group from the `.md` becomes one finding, titled with the theme, with its sites listed.
+7. **04 Implementation Plan**: one block per phase, with a left border in the phase color. Its header shows the phase title (e.g. `Phase 1 — Critical (do first)`), the effort sum, and a live `k/N done` counter. Each task has:
+   - a checkbox
+   - a stable ID (`1.1`, `2.3`, …)
+   - an imperative title
+   - the target `file:line`
+   - the principle it fixes
+   - the effort
+   - its dependencies (task IDs or `none`)
+   - its acceptance check
+8. **Notes**: one line each on the consolidation ratio, how the headline claims were verified, dependency-chain ordering, language scope and exclusions, and that no source was modified.
 
-- `{{PCT_CRITICAL}}` `{{PCT_MAJOR}}` `{{PCT_MINOR}}` `{{PCT_INFO}}` — each severity as a **percentage of total**, integers that sum to ~100. Example for 6/19/12/3 of 40: `15`, `48`, `30`, `7`. The donut is a CSS conic-gradient driven by these.
-- Effort bars per phase:
-  - `{{P1_EFFORT}}` `{{P2_EFFORT}}` `{{P3_EFFORT}}` — human-readable effort sum, e.g. `~18d`. Sum each phase's task efforts (treat `~15m≈0.03d`, `~1h≈0.12d`, `~3h≈0.4d`, `~1d=1d`; round sensibly).
-  - `{{P1_BARPCT}}` `{{P2_BARPCT}}` `{{P3_BARPCT}}` — bar width as a percentage of the **largest** phase effort (the biggest phase = `100`).
+## Behavior (the inline script)
 
-## Findings (`REPEAT:sevgroup` → `REPEAT:finding`)
-
-One `sevgroup` per severity that has findings (order: Critical, Major, Minor, Info). Per group:
-
-| Placeholder | Fill |
-| --- | --- |
-| `{{SEV_CLASS}}` | `crit` \| `major` \| `minor` \| `info` (drives color). |
-| `{{SEV_LABEL}}` | `Critical` \| `Major` \| `Minor` \| `Info`. |
-| `{{SEV_COUNT}}` | Number of findings in this group. |
-
-Per `finding` inside the group:
-
-| Placeholder | Fill |
-| --- | --- |
-| `{{SEV_CLASS}}` / `{{SEV_LABEL}}` | Same as the group (used by the badge and the severity filter's `data-sev`). |
-| `{{FINDING_TITLE}}` | Short title, e.g. `UserService does too much`. |
-| `{{FILE_LINE}}` | `path/to/file.ext:line`. For consolidated findings, the primary site. If the repo has a web remote, wrap it in `<a href="…/blob/<sha>/path#Lline">`; otherwise leave it as plain text. |
-| `{{PRINCIPLE}}` | Named principle/smell, e.g. `Single Responsibility Principle`. |
-| `{{DESCRIPTION}}` | One-sentence violation description. |
-| `{{FIX_DIRECTION}}` | One-sentence fix (the `Fix →` line). |
-| `{{CODE_SNIPPET}}` | Optional. A short before/after or offending snippet. **If none was captured, replace the whole `<pre class="snippet">…</pre>` with `<p class="principle">Snippet: unavailable</p>`**, so missing evidence is not mistaken for a clean site. Escape `<`,`>`,`&` as `&lt;`,`&gt;`,`&amp;`. |
-| `{{SITE_LIST}}` | Optional. Comma-separated extra `file:line` sites for a consolidated finding. **Delete the whole `<p class="sites">…</p>` for single-site findings.** |
-
-For Minor/Info themed groups (where the `.md` uses bullet groups), make each themed group one `finding` with the theme as the title and the sites in `{{SITE_LIST}}`.
-
-## Implementation Plan (`REPEAT:phase` → `REPEAT:task`)
-
-One `.phase` per phase. Per phase:
-
-| Placeholder | Fill |
-| --- | --- |
-| `{{PHASE_CLASS}}` | `p1` \| `p2` \| `p3` (color of the left border + bar). |
-| `{{PHASE_NUM}}` | `1` \| `2` \| `3` (groups the progress counter — must match the tasks' `data-phase`). |
-| `{{PHASE_TITLE}}` | e.g. `Phase 1 — Critical (do first)`. |
-| `{{PHASE_TASK_COUNT}}` | Number of tasks in the phase (the `0/N done` denominator; JS recomputes live). |
-| `{{PHASE_EFFORT}}` | Phase effort sum, e.g. `~18d`. |
-
-Per `task`:
-
-| Placeholder | Fill |
-| --- | --- |
-| `{{TASK_ID}}` | Stable id `1.1`, `2.3`… Used as the localStorage key and the `data-task` attribute — keep unique. |
-| `{{PHASE_NUM}}` | The owning phase number (also on the `<input data-phase>`). |
-| `{{TASK_TITLE}}` | Imperative task title. |
-| `{{TASK_FILE}}` | Target `file:line` (or short multi-file note). |
-| `{{TASK_PRINCIPLE}}` | Principle the task fixes. |
-| `{{TASK_EFFORT}}` | e.g. `~3h`. |
-| `{{TASK_DEPS}}` | Other task IDs that must precede it, or `none`. |
-| `{{TASK_ACCEPTANCE}}` | The verifiable done-check. |
-
-The checkbox state persists in `localStorage` under `cleanaudit:{{PROJECT_NAME}}`; the phase `… done` counters update live. No server needed.
-
-## Notes (`REPEAT:note`)
-
-One `.note` per methodology/caveat line. `{{NOTE_HTML}}` may contain inline `<code>`/`<strong>`. Cover: consolidation ratio, headline-claim verification, dependency-chain ordering, language scope/exclusions, and "no source modified".
+- Filter: show only the selected severity's findings and hide groups left empty. Update `Showing N of M`, where M is the number of `article.finding` elements. `All` and `Reset` restore every finding.
+- Checkboxes: save checkbox state in `localStorage` under `cleanaudit:<project>`, keyed by task ID. Wrap every `localStorage` call in try/catch so the page still works when storage is blocked. Recompute each phase's `k/N done` counter on every change.
 
 ## Self-check before delivering
 
-- `grep -c '{{' CLEAN_CODE_AUDIT.html` → `0`.
-- Open the file: donut renders, bars animate, severity counts match across tiles/legend/`.md`.
-- Checkboxes toggle and the phase counter updates.
-- Each severity filter button shows only that severity, hides groups left empty, and updates `Showing N of M findings`; `Reset` and `All` restore every finding. `M` equals the number of `article.finding` blocks in the file.
-- Every `file:line` link opens the cited line. If a link cannot be opened (no network, private remote), report it as untested.
-- Responsive: no horizontal overflow at 375px (the grids collapse via the media queries already in the template).
-- All four severity colors appear only on text/borders — never as a fill behind text (per the design's status-color rule).
+- The severity counts match across the tiles, the donut legend and the `## Summary` table in the `.md`.
+- The donut renders and the bars have the right relative widths.
+- Each filter button shows only its severity, and `Reset` and `All` restore everything.
+- Checkboxes toggle, the counters update, and the state survives a reload.
+- Every `file:line` link opens the cited line. If a link can't be opened (no network, private remote), report it as untested.
+- The page has no horizontal overflow at 375px.

@@ -148,6 +148,33 @@ def plugin_metadata_paths(repo):
     return paths
 
 
+def companion_plugins(repo, manifest):
+    """Marketplace entries for sibling plugins (e.g. extras/) that are listed only in this
+    repository's marketplace. Each needs its own hand-written .claude-plugin/plugin.json."""
+    companions = manifest.get("companion_plugins", [])
+    if not isinstance(companions, list):
+        raise ValueError("companion_plugins must be a list")
+    entries = []
+    for companion in companions:
+        if (not isinstance(companion, dict) or set(companion) != {"name", "source", "description"}
+                or not isinstance(companion["name"], str) or not NAME.fullmatch(companion["name"])
+                or companion["name"] == manifest["name"]
+                or not isinstance(companion["description"], str) or not companion["description"].strip()
+                or not isinstance(companion["source"], str) or not companion["source"].startswith("./")):
+            raise ValueError("invalid companion plugin entry")
+        folder = PurePosixPath(companion["source"][2:])
+        if len(folder.parts) != 1 or folder.parts[0] in {PLUGIN_ROOT, "packages", "scripts", ".git"}:
+            raise ValueError("companion plugin source must be one top-level folder: " + companion["source"])
+        native = Path(repo) / str(folder) / ".claude-plugin/plugin.json"
+        if native.is_symlink() or not native.is_file():
+            raise ValueError("missing companion plugin.json: " + str(native))
+        data = json.loads(native.read_bytes())
+        if not isinstance(data, dict) or data.get("name") != companion["name"]:
+            raise ValueError("companion plugin.json name mismatch: " + str(native))
+        entries.append(dict(companion))
+    return entries
+
+
 def native_metadata(repo):
     """Read authoring working-tree inputs, not the selected archive commit."""
     repo = Path(repo).resolve()
@@ -162,6 +189,7 @@ def native_metadata(repo):
     children = ["./" + str(PurePosixPath(source).relative_to(PLUGIN_ROOT))
                 for source in roots if len(PurePosixPath(source).parts) > 2]
     plugin, marketplace = claude_metadata(manifest, ["./", *children], source="./" + PLUGIN_ROOT)
+    marketplace["plugins"].extend(companion_plugins(repo, manifest))
     icon = repo / PLUGIN_ROOT / plugin.get("icon", ICONS[0])
     if "icon" in plugin and (icon.is_symlink() or not icon.is_file()):
         raise ValueError("missing or non-regular plugin icon: " + str(icon))
