@@ -417,7 +417,7 @@ and an empty working directory, with file-only credential storage and no copied
 credentials. Marketplace registration/listing, local installation and skill
 metadata discovery are checked without model execution. This proves native
 loading, not successful execution of every workflow. Desktop installation/UI,
-authenticated model sessions and all 48 workflows are not exercised. The
+authenticated model sessions and all 16 workflows are not exercised. The
 current official overview supports CLI `/plugins` and Codex in the ChatGPT
 desktop app, but **not the IDE extension**. This local shell-oriented artifact
 is not a public-directory submission or a promise of web/mobile/cloud support.
