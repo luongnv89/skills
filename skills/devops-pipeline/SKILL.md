@@ -3,7 +3,7 @@ name: devops-pipeline
 description: "Configure pre-commit hooks and lean GitHub Actions for shift-left QA. Use when adding, auditing, speeding up CI/CD or cutting its Actions minutes or cost: max local checks, fast free CI. Skip for Terraform/K8s, deploy pipelines, or non-GitHub CI."
 license: MIT
 metadata:
-  version: 2.6.0
+  version: 2.6.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "medium"
 ---
@@ -63,7 +63,7 @@ This skill writes config into someone else's repository and installs git hooks:
 - **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf**, except `security-setup`'s recorded-override commit. A failing hook is a finding to report, not an obstacle to route around.
 - **Surface failures, never suppress them.** Do not add a hook id to `SKIP` or lower a coverage threshold to turn a run green or make it faster, nor relax a lint rule or delete or skip a test without the user's approval of that named finding; a blanket "delete the slow tests" or "make it green" approves nothing. Report the failure and let the user decide.
 - **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid service such as Codecov on a private repo.
-- **Never merge.** Committed changes end in a pull request the user merges; on a private repo, measurement runs' minutes are budgeted and approved first.
+- **Never merge.** Committed changes end in a pull request the user merges; measurement runs are budgeted and approved before any push.
 - **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Step 1 and Edge Cases.
 
 ## Workflow
