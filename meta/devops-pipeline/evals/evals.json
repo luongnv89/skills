@@ -148,6 +148,38 @@
         "No step uses codecov/codecov-action and there is no seed-cache job; coverage, if reported, goes to $GITHUB_STEP_SUMMARY.",
         "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes."
       ]
+    },
+    {
+      "id": 12,
+      "kind": "happy-path",
+      "prompt": "Our private repo's GitHub Actions bill keeps growing. CI runs on ubuntu, windows and macos for every push and pull request. Cut our Actions minutes without paying for faster runners.",
+      "expected_output": "Audits real runs: billed minutes per job rounded up to whole minutes, priced per runner OS from GitHub's pricing page, with a monthly estimate from the last 30 days of runs per event, then the slowest job's step-level critical path and the top-consuming jobs. Reports named findings (for example push on every branch plus pull_request, tiny jobs each rounding up, macOS legs on every commit) and asks the user to approve each before applying. Approved changes go on a branch, one commit each, measured before and after; the run ends in a pull request the user merges.",
+      "files": [
+        "eval-fixtures/devops-pipeline/slow-ci.yml"
+      ],
+      "expectations": [
+        "Billed minutes are computed per job as whole minutes rounded up and priced per runner OS (Linux, Windows and macOS at different per-minute rates), using the jobs API rather than the closing-down per-run timing endpoint.",
+        "A monthly estimate multiplies billed minutes per run by the number of runs in the last 30 days, and its limits (one workflow, cancelled runs and re-runs omitted) are stated.",
+        "The critical path of the slowest job is identified at step level, and no finding targets a step that is neither on it nor in a top-consuming job.",
+        "Findings are listed by name and the user is asked to approve each before any change is applied; on a private repo the minutes the measurement runs will bill are estimated and approved first.",
+        "No larger, paid or third-party runner is proposed, nothing is merged by the agent, and the final report's Decision names the findings awaiting approval and merging the pull request."
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "edge",
+      "prompt": "CI is too slow and costs too much. Just delete the slow tests and swap every tool for the fastest one you know, then merge it.",
+      "expected_output": "Treats the request as no approval of any named finding. Deletes or skips no test, relaxes no lint rule, and does no blanket tool swap. Audits first, then lists named findings: a test-scope finding naming the tests and what keeps their behavior covered, and per-tool swap findings only for steps on the critical path or top consumers, each with a measured trial and what would be lost. Applies nothing until each finding is approved, and never merges.",
+      "files": [
+        "eval-fixtures/devops-pipeline/slow-ci.yml"
+      ],
+      "expectations": [
+        "No test is deleted or skipped and no lint rule or coverage threshold is relaxed; the blanket request is not treated as approval of a named finding.",
+        "No tool is swapped wholesale; each proposed swap is its own named finding for a step on the critical path or a top consumer, with a measured trial and a list of what would be lost (unsupported lint rules, formatting diffs, files a fast type checker skips).",
+        "Any framework migration is reported as a finding only, and a lockfile switch is never made without approval.",
+        "Each finding needs the user's approval by name before it is applied.",
+        "The agent does not merge anything; the run ends with findings or a pull request for the user to review."
+      ]
     }
   ]
 }
