@@ -38,7 +38,7 @@ git pull --rebase origin "$branch"
 
 If the working tree is not clean, run `git stash push -u -m "pre-sync"` first and `git stash pop` after the sync.
 
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing. CI minutes mode uses its own worktree instead.
 
 ## Safety Rails
 

@@ -1224,13 +1224,17 @@ Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audi
 #!/usr/bin/env bash
 # CI speed audit (read-only): split every job of the last N runs, re-run attempts included,
 # into queue wait, setup (job setup, checkout, toolchain, cache, install, post steps) and work.
+# A job carried over unchanged into a "Re-run failed jobs" attempt (it started before that attempt
+# created it) is left out, so it is counted once.
 # Usage: ci-speed-audit.sh OWNER/REPO WORKFLOW [N] [BRANCH]   Needs: gh (authenticated), jq, column.
 set -euo pipefail
+[ "$#" -ge 2 ] || { echo "usage: ci-speed-audit.sh OWNER/REPO WORKFLOW [N] [BRANCH]" >&2; exit 1; }
 repo="$1"; workflow="$2"; limit="${3:-150}"; branch="${4:-}"
 gh run list --repo "$repo" --workflow "$workflow" --status completed --limit "$limit" \
   ${branch:+--branch "$branch"} --json databaseId,event,conclusion,createdAt,updatedAt,headSha |
   jq '[.[] | select(.conclusion == "success" or .conclusion == "failure")]' > runs.json
 if [ "$(jq length runs.json)" -eq 0 ]; then
+  : > jobs.jsonl
   echo "0 completed success/failure runs of $workflow${branch:+ on $branch}: nothing to measure; review the workflow statically" >&2
   exit 2
 fi
@@ -1249,6 +1253,7 @@ jq -r '.[] | "\(.databaseId) \(.event)"' runs.json | while read -r run_id event;
     def secs: if . == null then 0 else fromdateiso8601 end;
     def dur: (.completed_at | secs) - (.started_at | secs);
     .jobs[] | select((.conclusion == "success" or .conclusion == "failure") and .started_at != null) |
+    select((.started_at | secs) >= (.created_at | secs)) |
     ([.steps[]? | select(.name | test("^(Post |Complete job)|set ?up|checkout|cache|restore|install|npm ci|pnpm i|yarn|pip |uv sync"; "i")) | dur] | add // 0) as $setup |
     {run: .run_id, attempt: (.run_attempt // 1), event: $ev, job: .name, conclusion, labels,
      start: (.created_at | secs), end: (.completed_at | secs),
