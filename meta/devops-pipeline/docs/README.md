@@ -19,6 +19,7 @@
 - Keep CI fast with free techniques only: caches seeded from the default branch, blobless checkout, superseded-run cancellation, affected-only tests with a default-branch full run, parallel jobs where they are free, everything generated for the repo's visibility, and job timeouts
 - Use the fastest free tools: Oxlint for JS/TS linting, TypeScript 7's `tsc` (benchmark `bun check`, `tsrs`), Vitest `isolate: false` with a per-file reset hook
 - Audit an existing pipeline's speed from real runs: queue wait, setup, and work per job, cache scope, and the slowest job
+- Cut GitHub Actions minutes: billed minutes per job and per month, the slowest steps, ranked findings, then each approved change measured on a branch against its own baseline, kept or reverted, and a pull request the skill never merges
 
 ## When to Use
 
@@ -30,6 +31,7 @@
 | "Add E2E tests for my CLI" | Enumerate commands and generate `scripts/e2e_test.sh` |
 | "Why is our CI so slow?" | Run the read-only CI speed audit and propose free fixes |
 | "Make CI faster for our coding agents" | Apply the free speed techniques; never paid or larger runners |
+| "Our Actions bill is too high" | Measure billed minutes, rank the findings, apply the approved ones on a branch with before/after timings, and open a pull request |
 
 ## How It Works
 
@@ -68,6 +70,7 @@ graph TD
 |---|---|
 | `references/precommit-configs.md` | Language-specific pre-commit configs, fast linters and type checkers, affected tests, Vitest/pytest speedups |
 | `references/github-actions.md` | Lean, fast CI workflow templates, the free speed techniques, the CI speed audit, and sources |
+| `references/ci-minutes.md` | CI minutes optimization: billed-minutes and step scripts, the findings table, tool-swap trials, measured changes on a branch, and the CI budget file |
 | `references/cli-e2e.md` | CLI command discovery, the E2E script template, and its `pre-push` hook |
 | `references/final-report.md` | Final report parts, status rules (`COMPLETE`, `PARTIAL`, `BLOCKED`), examples, and reader checks |
 | `evals/evals.json` | Trigger and behavior test prompts with expectations |
@@ -80,5 +83,6 @@ graph TD
 - `scripts/affected-tests.sh` (when the suite exceeds the push budget)
 - `scripts/related-tests.py` (Python projects: the unit tests related to the changed files, for the commit hook)
 - For an audit-only run: the per-job queue/setup/work split and a table of free fixes, with no file written
+- For a CI minutes run: a `ci/minutes-<date>` branch with `.github/CI-BUDGET.md`, one commit per kept change, and an unmerged pull request with before/after numbers
 - Configured and verified local pre-commit environment (both commit and push hooks)
-- A final report: `Result:` (`COMPLETE`, `PARTIAL` or `BLOCKED`), `Evidence:` with the commands that ran and their exit codes, `Uncertainty:` (always the CI workflow that has not run yet), and `Decision:` (the approval needed, or `No approval needed.`)
+- A final report: `Result:` (`COMPLETE`, `PARTIAL` or `BLOCKED`), `Evidence:` with the commands that ran and their exit codes, `Uncertainty:` (the CI workflow that has not run yet; for a CI minutes run, the limits of the estimate), and `Decision:` (the approval needed, or `No approval needed.`)

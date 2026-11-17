@@ -1,9 +1,9 @@
 ---
 name: devops-pipeline
-description: "Configure pre-commit hooks and lean, fast GitHub Actions for shift-left QA. Use when adding, auditing or speeding up CI/CD: maximize local checks, keep CI quick at no extra cost. Skip for Terraform/K8s, deployment pipelines, or non-GitHub CI."
+description: "Configure pre-commit hooks and lean, fast GitHub Actions for shift-left QA. Use when adding, auditing or speeding up CI/CD, or cutting Actions minutes and cost. Skip for Terraform/K8s, deploy pipelines, or non-GitHub CI."
 license: MIT
 metadata:
-  version: 2.5.2
+  version: 2.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "medium"
 ---
@@ -12,11 +12,11 @@ metadata:
 
 Implement DevOps quality gates adapted to the project, **shift-left**: run as many checks as possible locally via pre-commit, so feedback is fast and CI is a safety net, not the primary gate. What remains in CI is tuned for speed, because coding agents push, wait, fix, and push again.
 
-**Core principle**: if a check can run on a developer's machine, it runs there. GitHub Actions runs only what a laptop genuinely cannot — matrix version testing, secrets-dependent scans, deployment, coverage publishing — plus one cheap job proving the hooks were not bypassed. Speed comes only from free techniques.
+**Core principle**: if a check can run on a developer's machine, it runs there. GitHub Actions runs only what a laptop genuinely cannot — matrix version testing, secrets-dependent scans, deployment, coverage publishing — plus one cheap job proving the hooks were not bypassed.
 
 ## Check Routing Table
 
-Every check lands in exactly one lane. This table is the single source of truth; steps 2–3, the references, and generated config must agree with it.
+Every check lands in exactly one lane. This table is the single source of truth for steps 2–3, the references, and generated config.
 
 | Lane | Time budget | What runs there |
 |------|-------------|-----------------|
@@ -25,10 +25,10 @@ Every check lands in exactly one lane. This table is the single source of truth;
 | GitHub Actions, pull request | As short as the slowest guard leg | Diff-scoped bypass guard |
 | GitHub Actions, default branch | Free on public repos, billed per minute on private | Full suite and version matrix (per merge, nightly on a busy private repo), cache seeding, secrets-dependent scans, clean-VM tests, coverage upload (public repos), deploy/release |
 
-A check that fits an earlier lane must not be repeated in a later one; the only deliberate overlaps are the bypass guard, the default-branch full run that backstops affected-test selection, and `security-setup`'s full-scan workflow, which that skill owns. CI re-running the whole hook set on every push is the failure mode this skill exists to prevent.
+A check that fits an earlier lane must not be repeated in a later one; the only deliberate overlaps are the bypass guard, the default-branch full run that backstops affected-test selection, and `security-setup`'s full-scan workflow, which that skill owns.
 
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+Before changing files in an existing repository, sync the current branch:
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -36,14 +36,7 @@ git fetch origin
 git pull --rebase origin "$branch"
 ```
 
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin && git pull --rebase origin "$branch"
-git stash pop
-```
+If the working tree is not clean, run `git stash push -u -m "pre-sync"` first and `git stash pop` after the sync.
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
 
@@ -56,12 +49,12 @@ This skill writes config into someone else's repository and installs git hooks:
   2. Prepare the merged content. Keep user-defined hooks, jobs, and pinned `rev:` values.
   3. Show the user the diff between `<file>.bak` and the merged content.
   4. If the user confirms, write the merged file. If the user declines, leave the original file unchanged and record the merge as declined.
-  5. Keep `<file>.bak` until the user confirms the written result.
+  5. Keep `<file>.bak` until the user confirms the written result. In CI minutes mode the branch commit replaces `.bak`: still confirm the diff, never commit a `.bak`.
 - **Show every new file as a diff before writing it.**
-- **Validate and dry-run before installing hooks**, in Step 2's order, so findings surface without blocking any commit.
+- **Validate and dry-run before installing hooks**, in Step 2's order.
 - **Check for an existing git hook before installing.** `pre-commit install` moves a foreign hook to `<hook>.legacy` and runs it in migration mode. Never pass `-f`/`--overwrite`, which deletes it silently; deleting it needs the user's explicit confirmation.
 - **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf**, except `security-setup`'s recorded-override commit. A failing hook is a finding to report, not an obstacle to route around.
-- **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, lower a coverage threshold, or delete or skip a test to turn a run green or make it faster. Report the failure and let the user decide.
+- **Surface failures, never suppress them.** Do not add a hook id to `SKIP`, relax a lint rule, lower a coverage threshold, or delete or skip a test to turn a run green or make it faster. Report the failure and let the user decide. A minutes-mode test-scope finding needs its own approval by name.
 - **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid service such as Codecov on a private repo.
 - **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Step 1 and Edge Cases.
 
@@ -79,22 +72,15 @@ gh repo view --json visibility --jq .visibility   # PUBLIC or PRIVATE
 ```
 
 Identify:
-- **Languages**: JS/TS, Python, Go, Rust, Java, C#, etc.
-- **Frameworks**: React, Next.js, Django, FastAPI, etc.
-- **Build system**: npm, yarn, pnpm, pip, poetry, cargo, go, maven, gradle
-- **Existing tooling**: Linters, formatters, type checkers already configured
+- **Stack**: languages, frameworks, build system (npm, pnpm, uv, poetry, cargo, go, maven, gradle), and the linters, formatters and type checkers already configured
 - **Visibility**: public (standard runners free, 4 vCPU) or private, `INTERNAL` included (billed per minute, each job rounded up, 2 vCPU). Step 3 generates the workflow for it; if `gh` cannot read it, ask, and assume private meanwhile. For a private repo, count default-branch commits over 30 days: `git rev-list --count --first-parent --since=30.days <default-branch>`.
-- **Is this a CLI tool?** — if yes, enumerate all commands/subcommands (check README, `--help`, `click`/`argparse`/`cobra` source) to build an E2E test suite
+- **Is this a CLI tool?** — if yes, list every command and subcommand (README, `--help`, parser source) for the E2E suite
 
-If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the language, build system, existing tooling, existing config files, visibility, and CLI status (with its command list) are recorded.
+If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the stack, existing config files, visibility, and CLI status (with its command list) are recorded.
 
 ### 2. Configure Pre-commit Hooks (maximize local coverage)
 
-If `pre-commit` is absent, show the install command and stop — see [Edge Cases](#edge-cases).
-
-```bash
-pip install pre-commit  # or brew install pre-commit
-```
+If `pre-commit` is absent, show the install command (`pip install pre-commit` or `brew install pre-commit`) and stop — see [Edge Cases](#edge-cases).
 
 When `pre-commit` is available, write `.pre-commit-config.yaml` for the detected stack, each check in its routing-table lane, with `default_stages: [pre-commit]` (a hook with no `stages:` otherwise also runs on every push). If the file exists, use the Safety Rails merge procedure. See [references/precommit-configs.md](references/precommit-configs.md) for tool choice and configs per language, and fast test runs.
 
@@ -122,29 +108,33 @@ Nothing local can stop `--no-verify` on a commit or push; the CI bypass guard ke
 
 ### 3. Create GitHub Actions Workflows (lean, fast CI)
 
-If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the CI Speed Audit first, then use the Safety Rails merge procedure, listing each step that duplicates a hook outside the deliberate overlaps as a proposed removal; remove it only after the user confirms. Templates, for example the guard: [references/github-actions.md](references/github-actions.md).
+If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the CI Speed Audit first, then use the Safety Rails merge procedure, listing each step that duplicates a hook outside the deliberate overlaps as a proposed removal; remove it only after the user confirms. Example templates: [references/github-actions.md](references/github-actions.md).
 
 CI runs exactly four kinds of thing:
 
-1. **Bypass guard** — re-runs both hook stages over the pull request's diff. The one deliberate overlap with pre-commit, because `--no-verify` otherwise makes local gates optional.
+1. **Bypass guard** — re-runs both hook stages over the pull request's diff: the one deliberate overlap with pre-commit.
 2. **Version matrix** — the only lane needing several runners, doubling as the full-suite backstop. Per merge; nightly only on a private repo with 30 or more default-branch commits a month.
 3. **Secrets-dependent work** — scans and uploads needing tokens a laptop should not hold.
 4. **Deploy / release** — on merge to the default branch.
 
 The guard's four load-bearing details are explained with its template: **both** stages (`pre-commit run` alone skips `pre-push` hooks), `fetch-depth: 0`, `pull_request` only, and the project toolchain in the same job.
 
-**Make it fast, free techniques only**: apply every item of [references/github-actions.md](references/github-actions.md#fast-ci-at-no-extra-cost) → _Generated-workflow checklist_ (visibility, cache seeding, blobless guard checkout, `concurrency`, affected-only tests, workers, timeouts, shards).
+**Make it fast, free techniques only**: apply every item of [references/github-actions.md](references/github-actions.md#fast-ci-at-no-extra-cost) → _Generated-workflow checklist_.
 
 #### CI Speed Audit (existing pipelines)
 
 Run it before changing an existing workflow, or alone when the user asks why CI is slow. It is read-only and runs no hooks; follow [references/github-actions.md](references/github-actions.md#ci-speed-audit). Done when each job's queue/setup/work split comes from real runs, or the report says why none were measured.
+
+#### CI Minutes Optimization (existing pipelines)
+
+Only when the user asks about Actions minutes or cost, or for measured changes on a branch, continue with [references/ci-minutes.md](references/ci-minutes.md): ranked findings, then each approved change on its own branch, kept only when three runs beat the baseline, ending in an unmerged pull request. It is the only mode that commits and pushes, after one approval. Done when each approved change is kept or reverted with its numbers.
 
 ### 4. Verify Pipeline
 
 Each command below is expected to exit 0:
 
 1. Stage the workflow too, then run `pre-commit run --all-files`.
-2. Run `pre-commit run --all-files --hook-stage pre-push`; the first command skips push-stage hooks (full suite, E2E).
+2. Run `pre-commit run --all-files --hook-stage pre-push`; the first command skips push-stage hooks.
 3. For a CLI tool, run `bash scripts/e2e_test.sh`.
 4. Run `actionlint` on each written workflow, or parse its YAML when actionlint is absent.
 5. Record any non-zero exit, with its hook id and output, as a finding; never edit the config, add `SKIP`, or lower a threshold to pass.
@@ -153,7 +143,7 @@ Step 4 is done when each command has a recorded exit code. The workflow first ru
 
 ## Write the Final Report
 
-After the last Step Completion Report, print the final report from [references/final-report.md](references/final-report.md): `Result:` (`COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason`), `Evidence:` (only commands that ran, with exit codes), `Uncertainty:` (always the unrun CI workflow), and `Decision:`. An audit-only run uses the same report.
+After the last Step Completion Report, print the final report from [references/final-report.md](references/final-report.md): `Result:` (`COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason`), `Evidence:` (only commands that ran, with exit codes), `Uncertainty:` (what was not run or measured), and `Decision:`. An audit-only run uses the same report.
 
 ## Expected Output
 
@@ -166,7 +156,7 @@ After running the skill, the repository contains:
 5. **`scripts/related-tests.py`** (Python projects) — the commit hook's selection of the unit tests related to the changed files.
 6. **A final report** in the shape of [references/final-report.md](references/final-report.md).
 
-An audit-only run writes nothing; it prints the per-job split and the proposed free fixes.
+An audit-only run writes nothing; it prints the per-job split and the proposed free fixes. A minutes run adds a branch, `.github/CI-BUDGET.md`, and an unmerged pull request.
 
 ## Acceptance Criteria
 
@@ -180,8 +170,9 @@ A run passes when **all** of the following are true:
 - [ ] Apart from `security-setup`'s workflow, CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
 - [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by the template's default-branch job when it has one (private Minimal has none by design); with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
 - [ ] No paid runner, larger runner, private-repo shard, private-repo Codecov step, or cache above 10 GB; parallel guard legs and shards only on public repos.
-- [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).
+- [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed, or their failures are reported to the user.
 - [ ] For CLI projects, the E2E script is wired to the `pre-push` stage per the language reference files.
+- [ ] Minutes mode: kept changes beat the branch baseline with every job green; the rest are logged; the pull request stays unmerged.
 - [ ] The final report passes the four reader checks in [references/final-report.md](references/final-report.md); without user feedback, human understanding stays unconfirmed.
 
 ## Edge Cases
@@ -193,7 +184,7 @@ A run passes when **all** of the following are true:
 - **Tests take >60 seconds**: Select affected tests on `pre-push` (default-branch full run as backstop) or demote to the next lane; record the measured time in a hook comment.
 - **User asks for a faster paid runner**: Decline (it raises the bill) and offer step 3's free techniques, starting with the audit.
 - **Audit without `gh` auth or run history**: Review the workflow statically; say under `Uncertainty:` that no runs were measured.
-- **Team bypasses hooks with `--no-verify`**: Local gates cannot stop this. Keep the CI bypass guard, and report the bypass rate rather than adding more hooks.
+- **Team bypasses hooks with `--no-verify`**: keep the CI bypass guard; report the bypass rate instead of adding hooks.
 - **Windows-only repo**: Substitute PowerShell-compatible hook entries and flag any Unix-specific commands.
 
 ## Step Completion Reports
@@ -233,5 +224,6 @@ Optional and propose-only. After the run's result is delivered, run this check:
 
 - [references/precommit-configs.md](references/precommit-configs.md) — tool choice and hook configs by language, fast tools, fast test runs
 - [references/github-actions.md](references/github-actions.md) — fast workflow templates and the CI speed audit
+- [references/ci-minutes.md](references/ci-minutes.md) — billed minutes, ranked findings, measured changes on a branch, and the CI budget file
 - [references/cli-e2e.md](references/cli-e2e.md) — CLI command discovery, the E2E script template, and its `pre-push` hook
 - [references/final-report.md](references/final-report.md) — final report parts, status rules, examples, reader checks, and step report check names

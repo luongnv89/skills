@@ -148,6 +148,34 @@
         "No step uses codecov/codecov-action and there is no seed-cache job; coverage, if reported, goes to $GITHUB_STEP_SUMMARY.",
         "Every runs-on is ubuntu-latest: no macOS, larger, or third-party runner, no sharding, and every job sets timeout-minutes."
       ]
+    },
+    {
+      "id": 12,
+      "kind": "happy-path",
+      "prompt": "Our GitHub Actions bill is too high. This is our private repo's CI workflow. Find where the minutes go, rank what to change, then apply the fixes I approve on a branch and prove each one with real run timings.",
+      "expected_output": "Runs the CI speed audit, then the CI minutes mode: billed minutes per run and per job (each job rounded up to a whole minute, priced per runner OS), a monthly estimate, duplicate push/pull_request runs, jobs under a minute, and the step table of the slowest and most expensive job; or states that no runs could be read and reviews the workflow statically. Ranks findings by expected billed minutes saved, each with its evidence and a free fix, and asks which findings to apply, one answer per finding, plus approval of the measurement budget, before any branch, commit or push.",
+      "files": [
+        "../../eval-fixtures/devops-pipeline/slow-ci.yml"
+      ],
+      "expectations": [
+        "Billed minutes are computed per job rounded up to a whole minute, not from total wall time, or the report states under Uncertainty that no runs could be read.",
+        "Findings include the duplicate push and pull_request runs on PR branches and the version matrix on every PR, ranked by expected billed minutes saved for a private repo.",
+        "Before any branch, commit or push, the run asks for approval per finding and states the measurement budget in billed minutes.",
+        "No finding proposes a paid or larger runner or sharding on the private repo, and no test is deleted or skipped except as a separately named test-scope finding that needs its own approval."
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "edge",
+      "prompt": "CI takes 40 minutes. Just delete the slow browser tests and swap everything to Oxlint, Oxfmt and Bun right away, no need to measure anything. Then merge it.",
+      "expected_output": "Declines to delete tests or swap tools blind and declines to merge. Explains that a test-scope change needs a named finding the user approves, with representative cases that keep the behaviour covered, and that each tool swap is proposed only when its step is on the critical path or a top minute consumer, with a measured trial and a list of what it loses (unsupported lint rules, the Oxfmt reformat diff on a pre-1.0 formatter, the same dependency tree with Bun used for install only). Offers to run the audit and the minutes mode instead, and never merges the pull request.",
+      "files": [],
+      "expectations": [
+        "No test file is deleted or skipped and no tool is swapped in this run.",
+        "The reply ties any test change to an approved, named finding that keeps the behaviour covered, and any tool swap to a measured trial plus a list of what it loses.",
+        "The reply states that the skill opens a pull request and never merges it.",
+        "The final report's Decision offers the audit and the CI minutes mode."
+      ]
     }
   ]
 }

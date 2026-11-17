@@ -44,7 +44,7 @@ Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. 
 - [Java (Maven)](#java-maven)
 - [Multi-language](#multi-language)
 - [Common Additions](#common-additions)
-- [CI speed audit](#ci-speed-audit)
+- [CI speed audit](#ci-speed-audit) (billed minutes and measured changes: [ci-minutes.md](ci-minutes.md))
 - [Sources](#sources)
 
 ---
@@ -1214,32 +1214,47 @@ Every template here keeps `matrix-test` off pull requests: it runs on merges to 
 
 ## CI speed audit
 
-Audit mode for an existing pipeline. The audit is read-only: it needs an authenticated `gh` and `jq`, writes two scratch files (`runs.json`, `jobs.jsonl`) to the current directory, and changes nothing on GitHub or in the repository. Run it from a fresh scratch directory (`cd "$(mktemp -d)"`), never inside the audited repository, and run no hooks: an audit only reads.
+Audit mode for an existing pipeline. For billed minutes and measured changes on a branch, continue with [CI minutes optimization](ci-minutes.md), which reads this audit's files. The audit is read-only: it needs an authenticated `gh` and `jq`, writes two scratch files (`runs.json`, `jobs.jsonl`, which keeps each job's runner labels and steps) to the current directory, and changes nothing on GitHub or in the repository. Run it from a fresh scratch directory (`cd "$(mktemp -d)"`), never inside the audited repository, and run no hooks: an audit only reads.
 
 ### 1. Split every job into queue, setup, and work
 
-Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audit.sh OWNER/REPO ci.yml 150`. Each run costs one API call; 50 runs take about a minute. Only runs and jobs that ended in success or failure count: a run cancelled by a newer push would drag the medians down.
+Save as `ci-speed-audit.sh` in the scratch directory and run `bash ci-speed-audit.sh OWNER/REPO ci.yml 150` (an optional fourth argument limits it to one branch). Each run costs one API call; 50 runs take about a minute. Re-run attempts count as runs of their own (`filter=all`). Only runs and jobs that ended in success or failure count: a run cancelled by a newer push would drag the medians down. With no such run it exits 2 and says so: review the workflow statically.
 
 ```bash
 #!/usr/bin/env bash
-# CI speed audit (read-only): split every job of the last N runs into queue wait,
-# setup (job setup, checkout, toolchain, cache, install, post steps) and work.
-# Usage: ci-speed-audit.sh OWNER/REPO WORKFLOW [N]     Needs: gh (authenticated), jq.
+# CI speed audit (read-only): split every job of the last N runs, re-run attempts included,
+# into queue wait, setup (job setup, checkout, toolchain, cache, install, post steps) and work.
+# Usage: ci-speed-audit.sh OWNER/REPO WORKFLOW [N] [BRANCH]   Needs: gh (authenticated), jq, column.
 set -euo pipefail
-repo="$1"; workflow="$2"; limit="${3:-150}"
+repo="$1"; workflow="$2"; limit="${3:-150}"; branch="${4:-}"
 gh run list --repo "$repo" --workflow "$workflow" --status completed --limit "$limit" \
-  --json databaseId,event,conclusion,createdAt,updatedAt |
+  ${branch:+--branch "$branch"} --json databaseId,event,conclusion,createdAt,updatedAt,headSha |
   jq '[.[] | select(.conclusion == "success" or .conclusion == "failure")]' > runs.json
+if [ "$(jq length runs.json)" -eq 0 ]; then
+  echo "0 completed success/failure runs of $workflow${branch:+ on $branch}: nothing to measure; review the workflow statically" >&2
+  exit 2
+fi
+jobs_of() {   # every attempt (filter=all); retry transient API errors (502/504) with smaller pages
+  local i out
+  for i in 1 2 3; do
+    out="$(gh api "repos/$repo/actions/runs/$1/jobs?filter=all&per_page=$([ "$i" -eq 1 ] && echo 100 || echo 30)" --paginate)" &&
+      { printf '%s\n' "$out"; return 0; }
+    if [ "$i" -lt 3 ]; then sleep $((i * 5)); fi
+  done
+  echo "warning: run $1 skipped after 3 failed API calls" >&2; return 1
+}
 jq -r '.[] | "\(.databaseId) \(.event)"' runs.json | while read -r run_id event; do
-  gh api "repos/$repo/actions/runs/$run_id/jobs?per_page=100" --paginate |
+  { jobs_of "$run_id" || true; } |
   jq -c --arg ev "$event" '
     def secs: if . == null then 0 else fromdateiso8601 end;
     def dur: (.completed_at | secs) - (.started_at | secs);
     .jobs[] | select((.conclusion == "success" or .conclusion == "failure") and .started_at != null) |
     ([.steps[]? | select(.name | test("^(Post |Complete job)|set ?up|checkout|cache|restore|install|npm ci|pnpm i|yarn|pip |uv sync"; "i")) | dur] | add // 0) as $setup |
-    {run: .run_id, event: $ev, job: .name, conclusion,
+    {run: .run_id, attempt: (.run_attempt // 1), event: $ev, job: .name, conclusion, labels,
+     start: (.created_at | secs), end: (.completed_at | secs),
      queue: ((.started_at | secs) - (.created_at | secs)),
-     setup: $setup, work: (dur - $setup), total: dur}'
+     setup: $setup, work: (dur - $setup), total: dur,
+     steps: [.steps[]? | select(.started_at != null) | {name, s: dur}]}'
 done > jobs.jsonl
 echo "== Per job (medians, seconds; slowest first)"
 jq -rs 'def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
@@ -1247,14 +1262,11 @@ jq -rs 'def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
     setup: (map(.setup) | median), work: (map(.work) | median), total: (map(.total) | median)})
   | sort_by(-.total) | (["job", "runs", "queue", "setup", "work", "total"] | @tsv),
     (.[] | [.job, .runs, .queue, .setup, .work, .total] | @tsv)' jobs.jsonl | column -t -s $'\t'
-echo "== Per event: median run wall time (created -> last update) and the job most often slowest"
-jq -rs --slurpfile runs runs.json '
-  def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
-  ($runs[0] | map({key: (.databaseId | tostring),
-     value: ((.updatedAt | fromdateiso8601) - (.createdAt | fromdateiso8601))}) | from_entries) as $wall |
-  group_by(.run) | map({event: .[0].event, wall: $wall[.[0].run | tostring],
+echo "== Per event: median wall time per run attempt (first job created -> last job done) and the job most often slowest"
+jq -rs 'def median: sort | if length == 0 then 0 else .[length / 2 | floor] end;
+  group_by([.run, .attempt]) | map({event: .[0].event, wall: ((map(.end) | max) - (map(.start) | min)),
      slowest: (max_by(.queue + .total) | .job)}) | group_by(.event) | .[] |
-  "\(.[0].event): \(length) runs, median wall \(map(.wall) | median)s, slowest job: \(map(.slowest) | group_by(.) | max_by(length) | .[0])"' jobs.jsonl
+  "\(.[0].event): \(length) run attempts, median wall \(map(.wall) | median)s, slowest job: \(map(.slowest) | group_by(.) | max_by(length) | .[0])"' jobs.jsonl
 ```
 
 - `queue` — job created to job started: waiting for a runner. It is part of what the agent waits for.
@@ -1293,7 +1305,7 @@ done
 | Matrix legs on `pull_request` | Version matrix on the hot path | Default branch only: per merge, or nightly on a busy private repository |
 | No `timeout-minutes` | 360-minute default | About three times the typical duration |
 
-Measure before cutting. Deleting tests is rarely the fix: the split shows whether the time is in queue, setup, or the slowest job's work, as in the example below. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests.
+Measure before cutting. Deleting tests is rarely the fix: the split shows whether the time is in queue, setup, or the slowest job's work, as in the example below. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests to save time. Narrowing tests that repeat one assertion is a separate finding, approved per finding: see [CI minutes optimization](ci-minutes.md#2-find).
 
 ### 4. Report
 
@@ -1306,9 +1318,9 @@ e2e-node (26)         50    2      17     76    96
 e2e-node (24)         50    2      14     76    90
 unit-tests (22)       50    2      14     49    63
 lint                  50    2      14     10    24
-== Per event: median run wall time (created -> last update) and the job most often slowest
-pull_request: 31 runs, median wall 131s, slowest job: e2e-node (26)
-push: 19 runs, median wall 117s, slowest job: e2e-node (26)
+== Per event: median wall time per run attempt (first job created -> last job done) and the job most often slowest
+pull_request: 31 run attempts, median wall 131s, slowest job: e2e-node (26)
+push: 19 run attempts, median wall 117s, slowest job: e2e-node (26)
 caches: refs/heads/main 4 entries; last 5 pull request runs restored=12 missed=0
 ```
 
