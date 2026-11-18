@@ -424,6 +424,12 @@ jobs:
     #   if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    # For the Codecov upload: it signs in with GitHub OIDC, no stored token.
+    # A private repo has no upload, so drop this block with it. A job-level
+    # block drops every scope it does not name, so checkout's read is listed.
+    permissions:
+      contents: read
+      id-token: write
     timeout-minutes: 20
 
     strategy:
@@ -475,7 +481,7 @@ jobs:
         uses: codecov/codecov-action@v7
         if: matrix.node-version == 24
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
 ```
 
 ### With pnpm
@@ -598,6 +604,12 @@ jobs:
     #   if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    # For the Codecov upload: it signs in with GitHub OIDC, no stored token.
+    # A private repo has no upload, so drop this block with it. A job-level
+    # block drops every scope it does not name, so checkout's read is listed.
+    permissions:
+      contents: read
+      id-token: write
     timeout-minutes: 20
 
     strategy:
@@ -647,7 +659,7 @@ jobs:
         uses: codecov/codecov-action@v7
         if: matrix.python-version == '3.12'
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
 ```
 
 ### With uv
@@ -761,6 +773,12 @@ jobs:
 
   matrix-test:
     runs-on: ubuntu-latest
+    # For the Codecov upload: it signs in with GitHub OIDC, no stored token.
+    # A private repo has no upload, so drop this block with it. A job-level
+    # block drops every scope it does not name, so checkout's read is listed.
+    permissions:
+      contents: read
+      id-token: write
     timeout-minutes: 20
     if: github.event_name == 'push'
 
@@ -790,7 +808,7 @@ jobs:
         uses: codecov/codecov-action@v7
         if: matrix.go-version == '1.27'
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           files: coverage.out
 ```
 
@@ -1147,14 +1165,14 @@ Codecov's team use on private repositories is paid, so write the upload in only 
       - name: Upload coverage to Codecov   # public repositories only
         uses: codecov/codecov-action@v7
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true                   # job needs id-token: write
 ```
 
-The upload still needs the token on a public repository: since v5, only pull requests from forks upload tokenless, unless the Codecov organization opts out of the token. `use_oidc: true` replaces the secret but needs `permissions: id-token: write` on the job. That block must also list `contents: read`, since a job-level `permissions:` drops every scope it does not name.
+The templates authenticate with `use_oidc: true`, so no Codecov token is stored or read. Since v5, only pull requests from forks upload tokenless otherwise. OIDC needs `permissions: id-token: write` on the job; that block must also list `contents: read`, since a job-level `permissions:` drops every scope it does not name. Fork pull requests get no OIDC token, which is why the upload runs only on the default branch.
 
 ### PR status comment
 
-Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token. The job also needs `pull-requests: write` to post the comment; on pull requests from forks `GITHUB_TOKEN` stays read-only whatever `permissions:` says, so the comment cannot post there.
+Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token. The job also needs `pull-requests: write` to post the comment; on pull requests from forks the workflow's own token stays read-only whatever `permissions:` says, so the comment cannot post there.
 
 ```yaml
       - name: Comment PR

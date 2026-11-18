@@ -4,7 +4,7 @@ Auto mode publishes without asking, so this file decides **whether** to publish 
 
 ## Decide per registry (in Step 2, before any file changes)
 
-A registry applies when the project has a `package.json` with a `"name"` (npm), or a `pyproject.toml` with a `[build-system]` table and a package name in `[project]` or `[tool.poetry]`, or a `setup.py` (PyPI). For each one, select the publisher in check 1, then run checks 2–4 for both local and CI publishers before any file changes. The first failed gate decides the outcome, and Step 9 acts on it. Check 5 applies only to an unfinished local upload. On resume, verify an existing target version instead of blocking on check 4 (`resume.md`); no upload credentials are needed for that completed publication.
+A registry applies when the project has a `package.json` with a `"name"` (npm), or a `pyproject.toml` with a `[build-system]` table and a package name in `[project]` or `[tool.poetry]`, or a `setup.py` (PyPI). For each one, select the publisher in check 1, then run checks 2–4 for both local and CI publishers before any file changes. The first failed gate decides the outcome, and Step 9 acts on it. On resume, verify an existing target version instead of blocking on check 4 (`resume.md`). Upload credentials are never checked ahead: the upload tool uses its own configuration, and an authentication failure is handled at Step 9 (_Handle publish failures_).
 
 | # | Check | npm | PyPI | Failure or selection outcome |
 |---|---|---|---|---|
@@ -12,9 +12,8 @@ A registry applies when the project has a `package.json` with a `"name"` (npm), 
 | 2 | Not private | No `"private": true` | No `Private :: Do Not Upload` classifier | Local: skip; note "not a published package" under `Evidence`. CI: stop with `BLOCKED — CI publication not authorized` |
 | 3 | Published by this project | `npm view <name> repository.url` names the same repository as `git remote get-url origin` | `https://pypi.org/pypi/<name>/json` exists, and its `info.project_urls` or `info.home_page` names the same repository | Name not on the registry: publish only if the request names the registry ("publish to npm"); otherwise local skips, CI stops with `BLOCKED — CI publication not authorized`. Name owned by another project: local skips, CI stops with the same `BLOCKED`; put the name conflict under `Decision` |
 | 4 | Version is new | `npm view <name>@X.Y.Z version` prints nothing | `https://pypi.org/pypi/<name>/X.Y.Z/json` returns 404 | Stop before any file changes: `BLOCKED — X.Y.Z already on <registry>` |
-| 5 | Local upload credentials | `npm whoami` succeeds | `TWINE_PASSWORD` is set or `~/.pypirc` exists | Skip this check for CI or a completed resume publication. Otherwise skip at Step 9: `PARTIAL — no <registry> credentials`, the setup under `Decision` |
 
-A rejected CI eligibility gate stops before any release file changes, tag push, or GitHub release creation: those events can publish even when the local upload is skipped. Record the rejected gate under `Evidence`. A local registry skip does not make the release `PARTIAL`, except for missing credentials and a one-time-password prompt.
+A rejected CI eligibility gate stops before any release file changes, tag push, or GitHub release creation: those events can publish even when the local upload is skipped. Record the rejected gate under `Evidence`. A local registry skip does not make the release `PARTIAL`, except for an authentication failure and a one-time-password prompt.
 
 ### CI-owned publishing
 
@@ -67,7 +66,7 @@ Proceed? Once published, this version cannot be overwritten on PyPI."
 In auto mode, upload when the Step 2 decision for PyPI is "publish":
 
 ```bash
-twine upload dist/*
+twine upload --non-interactive dist/*   # fail fast instead of prompting for credentials
 ```
 
 Record the URL: `https://pypi.org/project/<package-name>/X.Y.Z/`
@@ -99,9 +98,9 @@ Record the URL: `https://www.npmjs.com/package/<package-name>/v/X.Y.Z`
 
 ## Handle publish failures
 
-- **Authentication error**: skip the registry and put the setup under `Decision`:
-  - PyPI: an API token via `TWINE_USERNAME=__token__` and `TWINE_PASSWORD=<token>`, or `~/.pypirc`
-  - npm: `npm login`, or an `NPM_TOKEN` environment variable
+- **Authentication error**: skip the registry with `PARTIAL — no <registry> credentials` and put the setup under `Decision`. Never read, print, or ask for the credential:
+  - PyPI: create an API token on pypi.org and configure twine with it (twine's documentation, _Configuration_)
+  - npm: run `npm login`
 - **Version conflict**: the version already exists on the registry: `BLOCKED`. The fix is a new version.
 - **Package name conflict**: the name is taken: `BLOCKED`. Suggest a scoped or different name under `Decision`.
 - **Build error**: re-run Step 6 and fix it before retrying.
