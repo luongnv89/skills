@@ -3,7 +3,7 @@ name: test-coverage
 description: "Generate unit tests for untested branches and edge cases. Use when coverage is low, CI flags gaps, or a release needs hardening. Not for integration/E2E suites, framework migrations, or fixing production bugs."
 license: MIT
 metadata:
-  version: 1.6.1
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "low"
 ---
@@ -78,11 +78,13 @@ Review the low-coverage code for:
 - Boundary values: empty, null, zero, min, max, and off-by-one
 - Normal paths that no existing test covers
 
+Leave trivial code out of the gap list: getters and setters, plain data classes and DTOs, constants, and one-line calls straight into a library or framework. A test there checks the language or the framework, not this project. Cover such code only through a test of logic that uses it, and list the skipped files under `Uncertainty:`.
+
 ### 3. Write Tests
 
 1. Read `references/unit-test-quality.md`.
 2. Write tests for the Step 2 gaps with the test framework for the detected [Stack](#stack-detect-before-step-1-of-workflow), following that file's rules: deterministic, isolated, fast, one behavior per test, and assertions on behavior rather than implementation.
-3. Check each new test against the file's four self-check questions. Rewrite any test that fails one.
+3. Check each new test against the file's five self-check questions and its useless-test patterns. Rewrite any test that fails one.
 
 ### 4. Verify Improvement
 
@@ -91,11 +93,12 @@ Review the low-coverage code for:
    - **The code is wrong** (the test checks behavior that the code's docstring, types, or name promise): this is a suspected bug. Remove the test, and any import or fixture only it used, then rerun item 1. Do not change production code, and do not loosen the assertion to match the code. Report the bug under `Decision:` with the test's code and failure output. The run can still be `COMPLETE`; name the bug in the `Result:` line. That test becomes the regression test for the fix.
    - **You cannot tell which side is wrong**: treat it as a suspected bug.
 2. Run only the new tests on their own, twice (for example `pytest tests/test_parser.py`, `go test ./internal/store -count=1 -run '^TestKey'`, `cargo test key_`). If a new test fails in either run, it depends on test order, shared state, or timing. Fix it once from the flakiness table in `references/unit-test-quality.md` and repeat items 1 and 2. If it still fails, remove it and list it under `Uncertainty:`.
-3. Run the same coverage command as Step 1.
-4. Compare the new total with the Step 1 baseline. If it is not strictly higher, report PARTIAL and list the Step 2 gaps that are still untested.
-5. If the full suite passed in item 1 and the new test files passed in item 2, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered. Stage each test file this run wrote by explicit path (`git add tests/test_parser.py`); never `git add -A`, `git add .` or `git commit -a`, which would sweep in user work Repo Sync restored. Never stage a path on the pre-sync list. Stage a changed manifest or lockfile (*Coverage tool not installed*) only with its reason in the commit message. Check `git diff --cached --name-only` before committing. Under `Uncertainty:`, list each changed file left unstaged, or every new test file when the commit is skipped (failed suite or regression).
-6. Print the final report. It opens with `Result:` — `COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason` — followed by:
-   - `Evidence:` the commands that ran, with before/after totals, pass/fail counts, and the item 2 rerun result
+3. Break check: for each new test, plant one realistic bug in the source line or branch it targets (flip a comparison, shift a boundary by one, drop a raised error), run that test alone, and confirm it fails. Then restore the file with `git checkout -- <file>` and confirm `git diff --name-only` no longer lists it. Never plant a bug in a file on the pre-sync list, because the checkout would erase the user's changes; list those tests under `Uncertainty:` as not break-checked. A test that still passes against the bug protects nothing: strengthen its assertion once and repeat the check. If it passes again, remove it and list it under `Uncertainty:`.
+4. Run the same coverage command as Step 1.
+5. Compare the new total with the Step 1 baseline. If it is not strictly higher, report PARTIAL and list the Step 2 gaps that are still untested.
+6. If the full suite passed in item 1 and the new test files passed in item 2, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered. Stage each test file this run wrote by explicit path (`git add tests/test_parser.py`); never `git add -A`, `git add .` or `git commit -a`, which would sweep in user work Repo Sync restored. Never stage a path on the pre-sync list. Stage a changed manifest or lockfile (*Coverage tool not installed*) only with its reason in the commit message. Check `git diff --cached --name-only` before committing. Under `Uncertainty:`, list each changed file left unstaged, or every new test file when the commit is skipped (failed suite or regression).
+7. Print the final report. It opens with `Result:` — `COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason` — followed by:
+   - `Evidence:` the commands that ran, with before/after totals, pass/fail counts, the item 2 rerun result, and the item 3 break-check count
    - `Uncertainty:` what was not checked (e.g., excluded paths, CI not run, covered lines without output assertions)
    - `Decision:` the action that needs approval, or `No approval needed`, then any remaining user action (e.g., push the branch, open a PR)
    - The number of new test cases and the files with the biggest coverage gains
@@ -109,7 +112,8 @@ Result:       COMPLETE — coverage 61% → 84%, all tests pass
 Evidence:     pytest --cov=. --cov-report=term-missing (before): 61% (47/77 statements), 47 passed
               same command (after): 84% (65/77 statements), 56 passed, 0 failed
               9 new tests run on their own, twice: 9 passed both runs
-Uncertainty:  CI not run; src/vendor/ excluded from coverage
+              break check: 9/9 new tests failed on a planted bug; sources restored
+Uncertainty:  CI not run; src/vendor/ excluded from coverage; src/models.py skipped (getters only)
 Decision:     No approval needed. Next: push feat/test-coverage and open a PR.
 
 New tests added: 9
@@ -123,9 +127,10 @@ Files improved:
 A run passes when **all** of the following are true:
 
 - [ ] Coverage report exists from a runnable command for the detected stack (e.g., `jest --coverage`, `pytest --cov`, `go test -cover`).
-- [ ] Post-run total coverage is strictly higher than the pre-run baseline — no test additions that fail to move the metric. A 100% baseline is the one exception (see Edge Cases).
+- [ ] Post-run total coverage is strictly higher than the pre-run baseline — no test additions that fail to move the metric. The exceptions are a 100% baseline and a gap list that holds only trivial code (see Edge Cases).
 - [ ] New tests target previously-untested branches, error paths, or boundary values — not duplicates of existing assertions.
 - [ ] Every new test asserts on a return value, a raised error, or an observable effect. A test that only executes code does not count.
+- [ ] Every committed test failed the Step 4 break check against a planted bug, and every planted bug was reverted. No test targets trivial code alone.
 - [ ] No new test uses the network, the wall clock, unseeded randomness, or `sleep()`, or a real database other than a test-database fixture the existing unit tests already use.
 - [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.), and the new tests pass when run on their own, twice.
 - [ ] A new test that exposed a suspected bug is left out of the commit and reported under `Decision:`. No assertion was loosened to match the code.
@@ -149,6 +154,7 @@ These are instruction checks. Without reviewer feedback, human understanding of 
 - **No test framework detected**: Skill checks `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` for test dependencies; if none found, asks the user which framework to use before writing any tests.
 - **Coverage tool not installed**: If the coverage command fails because the tool is missing, install it as a dev dependency (`pytest-cov`, `nyc`, `cargo tarpaulin`, etc.) and rerun the command once. If it fails again, stop and report `BLOCKED` with the error output.
 - **Existing tests are already failing**: If the Step 1 baseline run reports failing tests, do not write new tests. Stop and report `BLOCKED` with the names of the failing tests.
+- **Only trivial code is uncovered**: If every Step 2 gap is trivial code, add no tests. Report `COMPLETE` with the baseline as evidence and list the skipped files under `Uncertainty:`.
 - **100% coverage already reached**: If the Step 1 baseline is 100%, add no tests. Report `COMPLETE` with the baseline as evidence and stop.
 - **Generated code or vendored files in coverage report**: Leave auto-generated and third-party paths (e.g., `node_modules/`, `vendor/`, `dist/`, `build/`, files with a generated-code header) out of the Step 2 gap list, and list them under `Uncertainty:`.
 - **Async / concurrent code paths**: Use the framework's async test utilities (for example `pytest-asyncio` or Jest fake timers). Never use a bare sync wrapper, and never `sleep()` to wait for async work.
@@ -176,9 +182,9 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Analysis phase checks:** `Coverage report parsed`, `Gaps identified`, `Priority ranked`
 
-**Test Writing phase checks:** `Tests written`, `Self-check passed`, `No network, DB, clock, randomness, or sleep`, `Framework conventions followed`
+**Test Writing phase checks:** `Tests written`, `Trivial code skipped`, `Self-check passed`, `No network, DB, clock, randomness, or sleep`, `Framework conventions followed`
 
-**Verification phase checks:** `Tests pass`, `New tests pass on their own`, `Coverage improved`, `No regressions`
+**Verification phase checks:** `Tests pass`, `New tests pass on their own`, `Break check passed`, `Coverage improved`, `No regressions`
 
 ## Guidelines
 
