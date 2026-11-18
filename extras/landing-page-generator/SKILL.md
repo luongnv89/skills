@@ -1,35 +1,29 @@
 ---
 name: landing-page-generator
-description: "Write landing pages (PAS, AIDA, StoryBrand) from a brief or README, as HTML with privacy, terms, changelog, setup pages. Use for sales copy, hero sections, CTAs, README rewrites. Don't use for blogs, release notes, project docs, or coding mockups."
+description: "Write landing pages (PAS, AIDA, StoryBrand) from a brief or README, as HTML with privacy, terms, changelog, setup pages. Use for sales copy, hero sections, CTAs. Don't use for README edits, blogs, release notes, project docs, or coding mockups."
 license: MIT
 effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 1.9.0
+  version: 2.0.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Landing Page Generator
 
-Generate landing pages using proven copywriting frameworks (PAS, AIDA, StoryBrand). One skill,
-two modes: write conversion-focused marketing copy from a product brief, or transform an existing
-project README into a scannable, visual landing page. A full landing page ships with the companion
-pages its footer links to: Privacy Policy, Terms of Use, Changelog, and Docs, each where it applies.
-The last step builds the landing page and those pages as HTML with `frontend-design`.
+Generate landing pages using proven copywriting frameworks (PAS, AIDA, StoryBrand): conversion-focused
+marketing copy from a product brief, or from a project README read as the brief. A full landing page
+ships with the companion pages its footer links to: Privacy Policy, Terms of Use, Changelog, and Docs,
+each where it applies. The last step builds the landing page and those pages as HTML with `frontend-design`.
 
-## Two Modes
+## Input
 
-Pick the mode that matches the input and deliverable:
-
-| Mode | Use when | Input | Output | Where |
-|---|---|---|---|---|
-| **A — Landing copy** | You need marketing copy for a sales/landing page | Product/service brief | Conversion-focused copy (hero → CTA) + A/B notes + companion page copy, in chat; the built pages in `landing-page/` | This file, below |
-| **B — README landing page** | You have an existing project `README.md` to make persuasive and scannable | Repo `README.md` + project files | Rewritten `README.md` (mermaid, tables, collapsed details) + `README.backup.md` + companion page files + the built pages in `landing-page/` | `references/readme-mode.md` |
-
-If the user asks to "turn my README into a landing page", "make my GitHub page sell the project",
-or similar, follow **Mode B** in `references/readme-mode.md`. Otherwise use **Mode A** below. When
-unsure which applies, ask.
+The brief is the user's product description, or a project's `README.md` read as the brief ("turn my
+README into a landing page"). This skill never edits `README.md`. If the user wants the README file
+itself written or restructured, say that the `readme-generator` skill does that, and stop. When the
+brief is a README, take the Step 1 inputs from it, and the companion-page facts from the project files
+named in `references/companion-pages.md` → *Sources and gap markers*.
 
 ## Companion Pages
 
@@ -40,16 +34,15 @@ each decision with its reason:
 |---|---|
 | Privacy Policy | Always |
 | Terms of Use | The product has user accounts, a paid plan, a free trial, or a subscription. An open-source tool with none of these gets no Terms page: its license governs use |
-| Changelog | Always. Mode B links an existing history file instead of writing one |
+| Changelog | Always |
 | Docs | The product is a CLI, library/SDK, self-hosted service, plugin/extension, or API, or the brief or project names a setup step the product's users perform outside its UI (install command, API key, environment variable, config file, DNS record). Contributor setup does not count |
 
 - If the user asks for a single section or says "landing page only", skip every companion page and record the skip.
 - If the user names extra pages, add them to the pages the table applies. If the user says "only" those pages, write only them and record the rest as `skipped — not requested`.
-- If the user asks for one companion page alone, write only that page and name the footer link it needs. Mode A runs Step 6 for it and asks only for a missing product name; a repo file follows `references/readme-mode.md` → *Edge Cases*.
+- If the user asks for one companion page alone, write only that page and name the footer link it needs. Run Step 6 for it, and ask only for a missing product name.
 
-Mode A delivers each page as a copy block in chat. Mode B writes `PRIVACY.md`, `TERMS.md`,
-`CHANGELOG.md`, and `docs/getting-started.md`, and never overwrites an existing file. Sources,
-templates, and checks: `references/companion-pages.md`.
+Each page is delivered as a copy block in chat, then built as HTML in Step 7. No page is written
+into the project as a Markdown file. Sources, templates, and checks: `references/companion-pages.md`.
 
 ## Anti-Slop Rules
 
@@ -59,9 +52,9 @@ AI-generated marketing copy has predictable tells that kill credibility. See `re
 
 ## Default Quality Bar
 
-In both modes, the final deliverable (Mode A copy and its structure; Mode B README layout; the companion pages; the built pages) must be professional, production-ready, elegant, and premium, even when the user never asks. The brief or project voice decides the tone; this bar decides the finish:
+The final deliverable (the copy and its structure, the companion pages, the built pages) must be professional, production-ready, elegant, and premium, even when the user never asks. The brief or project voice decides the tone; this bar decides the finish:
 - **Professional**: precise and credible; no hype
-- **Production-ready**: ship-ready, every section complete; the only allowed gaps are labeled `[proof needed]` (Mode A) or `[placeholder]` (Mode B) markers
+- **Production-ready**: ship-ready, every section complete; the only allowed gaps are labeled `[proof needed]` markers
 - **Elegant**: concise, one consistent voice, clean scannable hierarchy
 - **Premium**: confident restraint, specific claims, polished formatting
 
@@ -82,7 +75,7 @@ metrics, guarantees, scarcity, compliance claims, or commands.
 ## Dependency Preflight (mandatory)
 
 This skill optionally invokes `frontend-design`, declared in frontmatter `dependencies`, for
-the page build only (Mode A Step 7, Mode B Step 8). Before the first write:
+the page build only (Step 7). Before the first write:
 
 ```bash
 command -v asm >/dev/null || echo "asm not installed: npm install -g agent-skill-manager"
@@ -100,13 +93,13 @@ it never skips the page silently.
 
 ## Repo Sync Before Edits (mandatory)
 
-Mode B rewrites `README.md` and writes companion page files inside the repo; the page build writes `landing-page/`. Sync before those writes to avoid clobbering remote work. If the working tree is not clean, stash first, sync, then restore:
+The page build writes `landing-page/` inside the project. Sync before that write to avoid clobbering remote work. If tracked files are modified, stash them first, sync, then restore (untracked files stay in place, because other sessions may own them):
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
 dirty=0
-if [ -n "$(git status --porcelain)" ]; then
-  git stash push -u -m "pre-sync"
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  git stash push -m "pre-sync"
   dirty=1
 fi
 git fetch origin
@@ -116,11 +109,9 @@ if [ "$dirty" -eq 1 ]; then
 fi
 ```
 
-If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing. If a command after `git stash push` fails, run `git rebase --abort` (when a rebase is in progress), then `git stash pop`, then stop. Skip the sync and record `sync: skipped (<reason>)` when the user says to skip it, or when `git rev-parse --show-toplevel` is not the project directory (ask before syncing a parent repo). Mode A runs this section only before its page build writes into an existing folder (`references/page-build.md` → *Output folder*).
+If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing. If a command after `git stash push` fails, run `git rebase --abort` (when a rebase is in progress), then `git stash pop`, then stop. Skip the sync and record `sync: skipped (<reason>)` when the user says to skip it, or when `git rev-parse --show-toplevel` is not the project directory (ask before syncing a parent repo). Run this section only before the page build writes into an existing folder (`references/page-build.md` → *Output folder*).
 
-## Workflow (Mode A — Landing copy)
-
-> Mode B (README landing page) has its own self-contained workflow in `references/readme-mode.md`.
+## Workflow
 
 ### Step 1: Gather Product/Service Information
 
@@ -139,6 +130,7 @@ Collect before writing:
 | Release history: versions, dates, changes | Changelog |
 | Install and setup steps | Docs |
 | `copy.story.*` and facts in `launch-kit/copy-bank.md`, when it exists | Reuse the launch story |
+| The project `README.md`, when it is the brief | Name, audience, problem, install, proof; read only, never edited |
 
 If any **core** input is missing—product/service name, target audience, problem solved, or primary
 CTA—ask before proceeding. For missing proof, pricing, guarantee, or companion-page details, proceed
@@ -214,7 +206,7 @@ The pages carry the copy's sections, CTAs, and `[proof needed]` markers verbatim
 
 ## Expected Output Example
 
-Mode A input and output for a PAS brief, and example trigger phrases: `references/section-templates.md` → *Expected Output Example (Mode A)* and *Example Triggers*.
+Input and output for a PAS brief, and example trigger phrases: `references/section-templates.md` → *Expected Output Example* and *Example Triggers*.
 
 ## Safety & Guardrails
 
@@ -261,7 +253,7 @@ Verify before delivering. When the run delivers companion pages only, only the c
 - Copy passes `references/anti-slop-rules.md`.
 - Output meets the Default Quality Bar (professional, production-ready, elegant, premium) without the user asking.
 - Final response includes A/B test ideas and conversion tips unless the user asked for a single section.
-- Each companion page is recorded as delivered, linked, or skipped with its reason, and each delivered
+- Each companion page is recorded as delivered or skipped with its reason, and each delivered
   page passes the companion checks in `references/companion-pages.md`.
 - The run records a `page:` entry: built pages pass the page checks in `references/page-build.md`
   (sections, CTAs, and gap markers carried verbatim; nothing added), or the skip or fallback reason is stated.
@@ -270,7 +262,7 @@ Verify before delivering. When the run delivers companion pages only, only the c
 
 ## Step Completion Reports
 
-After each major step, emit a compact status block — per-check `√`/`×` lines and a closing `Result: PASS | FAIL | PARTIAL` line. Mode A uses the format and per-step checks in `references/step-reports.md`; Mode B uses `references/readme-step-reports.md`.
+After each major step, emit a compact status block — per-check `√`/`×` lines and a closing `Result: PASS | FAIL | PARTIAL` line. Format and per-step checks: `references/step-reports.md`.
 
 ## Self-Improve
 

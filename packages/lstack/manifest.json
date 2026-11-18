@@ -4,7 +4,7 @@
   "version": "0.10.0",
   "description": "Platform-neutral distribution of the maintained first-party Agent Skills catalog.",
   "claude": {
-    "description": "16 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
+    "description": "17 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
     "author": {
       "name": "Luong NGUYEN"
     },
@@ -24,7 +24,7 @@
     "marketplace_name": "lstack"
   },
   "codex": {
-    "description": "16 first-party engineering skills for Codex: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
+    "description": "17 first-party engineering skills for Codex: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
     "author": {
       "name": "Luong NGUYEN"
     },
@@ -54,6 +54,7 @@
     {"name": "frontend-design", "source": "skills/frontend-design"},
     {"name": "opencode-runner", "source": "skills/opencode-runner"},
     {"name": "oss-ready", "source": "skills/oss-ready"},
+    {"name": "readme-generator", "source": "skills/readme-generator"},
     {"name": "ship", "source": "skills/ship"},
     {"name": "tad-generator", "source": "skills/tad-generator"},
     {"name": "test-coverage", "source": "skills/test-coverage"}

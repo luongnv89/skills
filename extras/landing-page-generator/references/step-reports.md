@@ -1,8 +1,7 @@
-# Step Completion Reports — Mode A
+# Step Completion Reports
 
-After completing each major Mode A step, output a status report in this format (Mode B
-uses `references/readme-step-reports.md` instead). The seven reports match the seven Mode A
-workflow steps in `SKILL.md`:
+After completing each major step, output a status report in this format. The seven reports
+match the seven workflow steps in `SKILL.md`:
 
 ```
 ◆ [Step Name] (step N of 7 — [context])
@@ -26,7 +25,7 @@ with a recorded gap, `FAIL` when a check is blocked and the run cannot continue.
 ### Step 1 — Gather Product/Service Information
 
 ```
-◆ Gather Information (step 1 of 7 — Mode A inputs)
+◆ Gather Information (step 1 of 7 — brief inputs)
 ··································································
   Core inputs present:     √ pass (name, audience, problem, CTA) | × fail — asked the user
   Proof points:            √ pass | — [proof needed] markers planned

@@ -322,7 +322,7 @@ Conversion Tips:
 
 ## Copywriting Best Practices
 
-Mode A Step 5 (SKILL.md → *Workflow*):
+Step 5 (SKILL.md → *Workflow*):
 
 - Active voice, present tense
 - Benefits over features
@@ -339,11 +339,11 @@ Mode A Step 5 (SKILL.md → *Workflow*):
 - Proof of work up top: what the product does today, shown (a demo, a command, a screenshot the brief names).
 - The problem: how the world works today for this audience, in the subheadline.
 - The contrarian take, when the brief or the launch story gives one. When neither does, leave it out and say so on the Final Report's `Uncertainty:` line; `[proof needed]` marks missing proof only.
-- One big number from the brief, with its source, or `[proof needed]` (Mode B: `[placeholder]`).
+- One big number from the brief, with its source, or `[proof needed]`.
 - Slots: problem = subheadline sentence 1; contrarian take = subheadline sentence 2, or omitted; big number = trust bar, or `[proof needed]`; proof of work = trust bar, next to the number (the demo, command or screenshot the brief names). When the brief gives neither, the trust bar holds one `[proof needed]` marker that names both gaps. The subheadline stays 1-2 sentences.
 - When `launch-kit/copy-bank.md` exists, reuse its launch story (`copy.story.hero` is the story's protagonist, the customer, not the page headline; `.villain`, `.contrarian`) and its facts instead of writing a new one.
 
-## Expected Output Example (Mode A)
+## Expected Output Example
 
 Example input:
 

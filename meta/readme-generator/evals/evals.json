@@ -1,0 +1,156 @@
+{
+  "skill_name": "readme-generator",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "name": "rewrite-cli-readme",
+      "prompt": "Copy the project in ../../eval-fixtures/readme-generator/logtail-cli to a scratch directory and rewrite its README there so a new user can install it and run it within a minute. The copy has no git remote, so skip the repo sync.",
+      "expected_output": "Fixture logtail-cli. Rewrite mode: README.backup.md holds the original. README.md opens with # logtail, a one-sentence pitch, ## Install (Node.js 18 prerequisite, then npm install -g logtail-cli in its own block), and ## Quick start (a logtail command taken from the original README, then its result). The options table, the ~/.logtailrc configuration, the development commands and the MIT license all come after the landing section. The options table includes --since from src/cli.js. The run closes with a Final Report.",
+      "files": [
+        "../../eval-fixtures/readme-generator/logtail-cli"
+      ],
+      "expectations": [
+        "Created README.backup.md before writing README.md, and recorded sync: skipped with its reason",
+        "README.md starts with the H1 `# logtail`, then a pitch of one sentence of 25 words or fewer, before any `##` heading",
+        "Outside <details>, the first fenced code block is `npm install -g logtail-cli`, under an Install heading that states the Node.js 18 requirement",
+        "The second fenced code block is a logtail command taken from the original README (for example `my-server | logtail --level warn`), under a Quick start heading",
+        "No mermaid block, table, or other `##` heading appears before the Quick start command's output or result sentence",
+        "The Quick start result is either output copied from a source or one sentence describing the result, and the run labels it as not run (no invented output block)",
+        "The original Options, Configuration (~/.logtailrc), Development and License content is all present after the landing section, and the run lists where each original section went",
+        "The options table includes --since, with its description taken from src/cli.js",
+        "Printed a Step Completion Report after each step, ending with a Self-review report of 8 checks",
+        "The Final Report opens with `Result:` and a status matching the checks, cites the install and Quick start sources as path:line on `Evidence:`, labels assumptions on `Uncertainty:`, and its `Decision:` line names the pending choice or says No approval needed"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "name": "create-library-readme",
+      "prompt": "Copy the project in ../../eval-fixtures/readme-generator/slugkit to a scratch directory and write a README for it there. It has no git remote, so skip the repo sync.",
+      "expected_output": "Fixture slugkit (no README). Create mode: no backup. README.md opens with # slugkit, a one-sentence pitch, ## Install (Python 3.9+ prerequisite from pyproject.toml, then pip install slugkit, because .github/workflows/release.yml publishes to PyPI), and ## Quick start (from slugkit import slugify; slugify(\"Hello, World!\") with the result hello-world taken from tests/test_slugify.py). Usage covers separator and max_length; License names MIT. No CLI command is invented. The run closes with a Final Report.",
+      "files": [
+        "../../eval-fixtures/readme-generator/slugkit"
+      ],
+      "expectations": [
+        "Picked Create mode and wrote README.md; no file other than README.md was created or changed",
+        "The first fenced code block is `pip install slugkit`, and the run cites .github/workflows/release.yml (the PyPI publish step) or pyproject.toml as its source",
+        "The Install section states the Python 3.9 or later requirement from pyproject.toml",
+        "The Quick start code imports slugify from slugkit and calls it on an input from tests/test_slugify.py, and shows the matching output from that test (for example hello-world)",
+        "Nothing but the H1, the pitch and the two landing headings appears before the Quick start output",
+        "The Usage section covers the separator and max_length parameters, taken from src/slugkit/__init__.py, and invents no other parameter or CLI command",
+        "A License section names MIT",
+        "Printed a Step Completion Report after each step",
+        "The Final Report opens with `Result:` and a status matching the checks, its `Evidence:` line names the sources of the install command and the Quick start, and its `Decision:` line names the pending choice or says No approval needed"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "name": "landing-only-fix",
+      "prompt": "Copy the project in ../../eval-fixtures/readme-generator/logtail-cli to a scratch directory. The rest of its README is fine, so only fix the top there: install and a quick example should come first. No git remote, so skip the sync.",
+      "expected_output": "Landing only mode: README.backup.md holds the original. Only the old opening (the title, the intro line and the Installation section) changes: H1, pitch, Install with npm install -g logtail-cli, and Quick start with a logtail command from the README. Every section after the old opening (Usage with its Options table, Configuration, Development, License) matches the backup byte for byte. The run closes with a Final Report.",
+      "files": [
+        "../../eval-fixtures/readme-generator/logtail-cli"
+      ],
+      "expectations": [
+        "Picked Landing only mode and created README.backup.md before writing",
+        "The new opening has the H1, a one-sentence pitch, an Install heading with `npm install -g logtail-cli` in a fenced block, and a Quick start heading with a logtail command from the original README in a fenced block",
+        "The Usage, Configuration, Development and License sections are byte-identical to README.backup.md",
+        "Did not add an options table entry, a diagram, or any new section below the opening",
+        "The Final Report opens with `Result:` and a status matching the checks, its `Evidence:` line reports the byte-for-byte check of the later sections, and its `Decision:` line names the pending choice or says No approval needed"
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "happy-path",
+      "name": "sell-the-project",
+      "prompt": "make my README sell the project — I want more GitHub stars and contributors",
+      "expected_output": "Rewrite mode with a benefit-led pitch and features, but the landing section stays first: pitch, Install, Quick start. A Contributing section appears in the detail area. No fabricated stars, downloads or testimonials. README.backup.md created. The run closes with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Created README.backup.md before rewriting README.md",
+        "The pitch is one benefit-led sentence that passes the copy test (visualizable, falsifiable, specific to this project), placed under the project-name H1",
+        "Install and Quick start still come before any features, diagram, or social proof",
+        "A Contributing or Development section in the detail area tells contributors how to set up and run the tests, from the project's files",
+        "Used real numbers or [placeholder] markers; no fabricated stars, downloads, users or testimonials",
+        "The Final Report opens with `Result:` and a status matching the checks, and its `Evidence:` line cites only checks that ran"
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "happy-path",
+      "name": "framework-keeps-landing-order",
+      "prompt": "rewrite my README as a landing page, use the StoryBrand framework",
+      "expected_output": "Rewrite mode. StoryBrand shapes the pitch and the first detail section (the user as hero, the project as guide), and the run says so. The landing order does not change: pitch, Install, Quick start come first. README.backup.md created. The run closes with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Told the user that StoryBrand applies to the pitch and the first detail section, and that the opening order stays pitch, Install, Quick start",
+        "The README still opens with the H1, the pitch, Install and Quick start, in that order, before any StoryBrand section",
+        "The first detail section frames the reader as the hero and the project as the guide",
+        "Created README.backup.md before rewriting",
+        "Did not build an HTML page or write any file other than README.md and its backup",
+        "The Final Report opens with `Result:` and a status matching the checks"
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "happy-path",
+      "name": "github-action-merged-snippet",
+      "prompt": "Write the README for my GitHub Action in this repo. action.yml is at the root, and the existing README only has a title.",
+      "expected_output": "Rewrite mode: the title-only README is backed up to README.backup.md. The landing section merges Install and Quick start into one workflow snippet under ## Quick start, with the action's inputs taken from action.yml; there is no separate ## Install. An inputs table from action.yml follows in the detail area. The run closes with a Final Report.",
+      "files": [],
+      "expectations": [
+        "Picked Rewrite mode and created README.backup.md before writing, because a README already exists",
+        "The opening has no `## Install` heading; one workflow YAML snippet under a Quick start heading shows a `uses:` line for the action",
+        "Every input in the snippet and in the inputs table comes from action.yml; none is invented",
+        "No diagram, table or other heading appears before the snippet",
+        "The Final Report opens with `Result:` and a status matching the checks, and cites action.yml as the source of the snippet"
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative-trigger",
+      "prompt": "Build an HTML landing page with a pricing section and a signup button for my SaaS, using its README as the brief.",
+      "expected_output": "The skill does not trigger: an HTML landing page is out of scope (the description excludes HTML landing pages). If it is already running, it says it writes only README.md and stops.",
+      "files": [],
+      "expectations": [
+        "readme-generator did not trigger, or stopped and said it writes only README.md",
+        "README.md was not rewritten and no README.backup.md was created"
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative-trigger",
+      "prompt": "Update everything in docs/ so each command and flag matches the current CLI source.",
+      "expected_output": "The skill does not trigger: reconciling docs with the code is excluded by the description (docs synced to code).",
+      "files": [],
+      "expectations": [
+        "readme-generator did not trigger",
+        "No landing section, README.backup.md, or readme-generator Final Report was produced"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "negative-trigger",
+      "prompt": "Make my repo ready to open-source: add a LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md and GitHub issue templates.",
+      "expected_output": "The skill does not trigger: OSS community files are excluded by the description.",
+      "files": [],
+      "expectations": [
+        "readme-generator did not trigger",
+        "No README.backup.md was created and README.md was not restructured"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "negative-trigger",
+      "prompt": "Generate API reference documentation for every public function in src/.",
+      "expected_output": "The skill does not trigger: an API reference is not a README.",
+      "files": [],
+      "expectations": [
+        "readme-generator did not trigger",
+        "No landing section or readme-generator Final Report was produced"
+      ]
+    }
+  ]
+}

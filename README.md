@@ -80,7 +80,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.10.0](packages/lstack/README.md) is the engineering core: the `skills/` folder
-holds 14 top-level definitions plus the two nested diagram-generator children, **16**
+holds 15 top-level definitions plus the two nested diagram-generator children, **17**
 namespaced skills, all plain Markdown instructions with no helper scripts. The other 32
 skills (product, marketing, App Store, design/UX, agent fleets, machine setup; 22 of them
 ship helper scripts) live in `extras/` as a second plugin, **lstack-extras**, offered only
@@ -223,7 +223,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 |---|---|
 | Prepare an app store submission | aso-marketing → appstore-assets → appstore-review-checker |
 | Harden and ship a repo | security-setup → devops-pipeline → ship (auto-push and cleanup-project for day-to-day work) |
-| Open-source a project | oss-ready → doc-manager → landing-page-generator → github-pages-publish |
+| Open-source a project | oss-ready → readme-generator → doc-manager → landing-page-generator → github-pages-publish |
 | Brand and launch | brand-name-checker → logo-designer → landing-page-generator → github-pages-publish → product-launch |
 | Run an agent fleet | herdr-agent (Herdr TUI) *or* hc-agent (Herdr desktop app) *or* rex-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr TUI or desktop app) · opencode-runner · agent-profile |
 
@@ -322,7 +322,8 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.2.1 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**landing-page-generator**](extras/landing-page-generator/) | 1.9.0 | high | Landing pages: marketing copy from a brief, or a README-to-landing rewrite, with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
+| [**readme-generator**](skills/readme-generator/) | 1.0.0 | high | Write or rewrite a README onboarding-first: pitch, install, the most common use with its output, then every detail |
+| [**landing-page-generator**](extras/landing-page-generator/) | 2.0.0 | high | Landing pages: marketing copy from a brief or a README (read only), with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
 | [**search-optimizer**](extras/search-optimizer/) | 1.2.1 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
 | [**seo-ai-optimizer**](extras/seo-ai-optimizer/) | 1.7.2 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](extras/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
