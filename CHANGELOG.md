@@ -2,14 +2,32 @@
 
 ## Unreleased
 
-### Added
+## v5.1.0 — 2026-11-18
+
+This catalog release makes `test-coverage` stop writing tests that check nothing, lets `logo-designer` export a PNG of every logo asset, and removes the last credential reads from lstack so the Claude plugin directory's credential policy hold can clear: `devops-pipeline` now uploads coverage to Codecov through OIDC instead of a `CODECOV_TOKEN` secret, and `ship` no longer prechecks registry credentials. Nothing is breaking. The catalog release version is 5.1.0. The lstack package and plugin version is 0.10.0 (was 0.9.0), with the same 16 members (14 top-level), and lstack-extras is also 0.10.0 (was 0.9.0), with 32 members; each member keeps its independent version. This release attaches `lstack-0.10.0.zip`, `lstack-claude-0.10.0.zip` and `lstack-codex-0.10.0.zip`, each with the 16 core skills.
+
+### Release Summary
+
+- Get only tests that earn their place from `test-coverage` 1.7.0: trivial code (getters and setters, plain data classes, constants, one-line library calls) is left out of the gap list, every new test must fail against a realistic bug planted in the code it targets before it is kept, and a test that still passes after one strengthening attempt is removed. ([#617](https://github.com/luongnv89/skills/pull/617)) @luongnv89
+- Get upload-ready PNGs from `logo-designer` 1.6.0 (lstack-extras): every run renders the icon, mark, full, white, black, wordmark and favicon sizes from the verified SVGs with the first rasterizer it finds, reports each PNG's measured dimensions, and draws wordmarks as outlined paths so no PNG depends on an installed font. ([#615](https://github.com/luongnv89/skills/issues/615), [#616](https://github.com/luongnv89/skills/pull/616)) @luongnv89
+- Install lstack without it reading any credential: `devops-pipeline` 2.6.2 generates CI that uploads coverage to Codecov with `use_oidc: true` and a job-level `permissions:` block instead of a `CODECOV_TOKEN` secret, and `ship` 3.1.2 drops its upload-credential precheck while still skipping a registry with `PARTIAL` when authentication fails at upload. ([#613](https://github.com/luongnv89/skills/pull/613)) @luongnv89
+
+The Unreleased entries below are preserved verbatim as developer history and grouped by change type. This release ships lstack 0.10.0 with `test-coverage` 1.7.0, `devops-pipeline` 2.6.2 and `ship` 3.1.2 changed and the other 13 core members unchanged, and lstack-extras 0.10.0 with `logo-designer` 1.6.0 changed. Other Changes adds [e0441fb](https://github.com/luongnv89/skills/commit/e0441fb), which had no Unreleased entry.
+
+### Features
 
 - **`logo-designer` 1.5.2 → 1.6.0: export a PNG of every logo asset (#615).** Most upload targets (plugin and marketplace avatars, GitHub social previews, app stores, social profiles) take only raster images, and every run ended by telling the user to export PNGs themselves. A new Phase 3b renders PNGs from the verified SVGs into `assets/logo/png/`: `logo-icon` at 512 and 1024, `logo-mark` at 512 with a transparent background, `logo-full`, `logo-white` and `logo-black` at 1280×288, `logo-wordmark` at 720×160, `favicon` at 16, 32 and 48, plus an optional `favicon.ico`. It uses the first rasterizer found (`rsvg-convert`, `magick`, `inkscape`, then headless Chrome); the commands live in the new `references/png-export.md` and were run against the repository's own logo with `rsvg-convert`, `magick` and Chrome. The Final Report's `Evidence:` lists each PNG's measured dimensions, the "export PNG sizes yourself" advice is gone, and with no rasterizer the run keeps the SVGs and ends `PARTIAL` with `brew install librsvg` or `sudo apt install librsvg2-bin` under `Decision:`. Wordmarks are now outlined `<path>` letterforms: `svg-generator` no longer writes `<text>`, and `svg-reviewer` fails any `<text>`, `<tspan>` or `@font-face`, so no PNG depends on an installed font. `brand-showcase.html` links each rendered PNG next to its SVG and leaves out links to PNGs that were not rendered. The skill stays Markdown-only: no script was added.
 - **`test-coverage` 1.6.1 → 1.7.0: stop writing useless tests.** Step 2 leaves trivial code (getters and setters, plain data classes, constants, one-line library calls) out of the gap list and lists it under `Uncertainty:`; a gap list of only trivial code ends `COMPLETE` with no tests. Step 4 adds a break check: each new test must fail against a realistic bug planted in the code it targets, the source is restored with `git checkout` and confirmed clean, and files on the pre-sync list are never touched. A test that still passes is strengthened once, then removed. `references/unit-test-quality.md` adds a fifth self-check question (does it check something no existing test checks?) and a table of useless-test patterns: tautological, tests the language or framework, mock-only, assertion-free, duplicate, and private access.
 
-### Fixed
+### Fixes
 
 - lstack no longer reads a credential, so the Claude plugin directory's credential policy hold can clear. `devops-pipeline` 2.6.2: the generated CI uploads coverage to Codecov with `use_oidc: true` and a job-level `permissions:` block (`contents: read`, `id-token: write`) instead of a `CODECOV_TOKEN` secret. `ship` 3.1.2: drops the upload-credential precheck (environment variable, `~/.pypirc`, `npm whoami`); an authentication failure at upload still skips that registry with `PARTIAL` and puts the setup under `Decision`.
+
+### Other Changes
+
+- **`docs/assets/logo/png/`: add PNG exports of the catalog logo.** Ten PNGs rendered from the repository's SVG logo: `logo-icon` at 512 and 1024, `logo-mark` at 512, `logo-full`, `logo-white`, `logo-black`, `logo-wordmark`, and `favicon` at 16, 32 and 48. ([e0441fb](https://github.com/luongnv89/skills/commit/e0441fb)) @luongnv89
+
+**Full Changelog**: https://github.com/luongnv89/skills/compare/v5.0.0...v5.1.0
 
 ## v5.0.0 — 2026-11-18
 
