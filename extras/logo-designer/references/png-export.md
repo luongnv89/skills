@@ -60,14 +60,14 @@ the table:
 | Tool | Command |
 |------|---------|
 | `rsvg-convert` | `rsvg-convert -w W -h H IN.svg -o OUT.png` |
-| `magick` | `magick -background none -density D IN.svg -resize 'WxH!' -depth 8 OUT.png` |
+| `magick` | `magick -background none -density D IN.svg -resize 'WxH!' -depth 8 PNG32:OUT.png` |
 | `inkscape` (1.x) | `inkscape IN.svg --export-type=png --export-filename=OUT.png -w W -h H` |
 | Chrome | `"$CHROME" --headless=new --disable-gpu --hide-scrollbars --default-background-color=00000000 --window-size=W,H --screenshot=OUT.png "file://$PWD/IN.svg"` |
 
 - **magick:** `-background none` and `-density` go *before* the input, or the PNG is
   blurred and the transparent background turns opaque. Set `D` to
   `72 × W ÷ viewBox width`, rounded up (for example 576 for the 512 px mark), and keep
-  `-depth 8`, or magick writes 16-bit PNGs.
+  `-depth 8`, or magick writes 16-bit PNGs. The `PNG32:` prefix keeps the output RGBA, since magick may otherwise save a palette PNG.
 - **inkscape 0.92** uses `--export-png=OUT.png -w W -h H` instead.
 - **Chrome** renders the SVG at the window size; the 8-digit background color keeps it
   transparent.

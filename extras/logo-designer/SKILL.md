@@ -195,7 +195,7 @@ End every run, stops included, with this compact text block. Status is `COMPLETE
 
 ```text
 Result: COMPLETE. Wrote 7 SVGs, 10 PNGs in png/ and brand-showcase.html to /assets/logo/.
-Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. PNGs (rsvg-convert, measured with file): logo-icon-512 512x512, logo-icon-1024 1024x1024, logo-mark-512 512x512 RGBA, logo-full/white/black 1280x288, logo-wordmark 720x160, favicon-16/32/48. Default Quality Bar passed. sync: skipped (not a git repo)
+Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. PNGs (rsvg-convert, measured with file): logo-icon-512 512x512, logo-icon-1024 1024x1024, logo-mark-512 512x512 RGBA, logo-full/white/black 1280x288, logo-wordmark 720x160, favicon-16 16x16, favicon-32 32x32, favicon-48 48x48. Default Quality Bar passed. sync: skipped (not a git repo)
 Uncertainty: Assumed a developer-tool audience from the CLI entry point; the user did not say.
 Decision: No approval needed.
 ```
