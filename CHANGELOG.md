@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- lstack no longer sends any credential off its own vendor, so the Claude plugin directory's credential policy hold can clear. `devops-pipeline` 2.6.3: the generated CI writes coverage to `$GITHUB_STEP_SUMMARY` on every repository instead of uploading it to Codecov through OIDC, and the matrix jobs drop their `id-token: write` permission block; the references and `skills/README.md` disclosures no longer describe token handling.
+
 ## v5.1.0 — 2026-11-18
 
 This catalog release makes `test-coverage` stop writing tests that check nothing, lets `logo-designer` export a PNG of every logo asset, and removes the last credential reads from lstack so the Claude plugin directory's credential policy hold can clear: `devops-pipeline` now uploads coverage to Codecov through OIDC instead of a `CODECOV_TOKEN` secret, and `ship` no longer prechecks registry credentials. Nothing is breaking. The catalog release version is 5.1.0. The lstack package and plugin version is 0.10.0 (was 0.9.0), with the same 16 members (14 top-level), and lstack-extras is also 0.10.0 (was 0.9.0), with 32 members; each member keeps its independent version. This release attaches `lstack-0.10.0.zip`, `lstack-claude-0.10.0.zip` and `lstack-codex-0.10.0.zip`, each with the 16 core skills.

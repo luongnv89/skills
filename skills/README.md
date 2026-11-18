@@ -30,11 +30,12 @@ helper scripts: `claude plugin install lstack-extras@lstack --scope user`.
 
 ## Before you run a skill
 
-- **Some skills act with your credentials.** They use your local `git`, `gh`,
-  PyPI and npm logins. `ship` commits, tags, pushes, creates a GitHub release
+- **Some skills act as you.** They run your own `git`, `gh`, `twine` and
+  `npm`, signed in however you set them up; no skill reads a sign-in itself.
+  `ship` commits, tags, pushes, creates a GitHub release
   and publishes to PyPI and npm **without asking by default**; pass `--no-auto`
   to confirm each step. `auto-push` stages everything, commits and pushes once
-  its secret and large-file scan passes. Other skills that push, delete
+  its sensitive-file and large-file scan passes. Other skills that push, delete
   branches or open PRs ask first.
 - **Some skills install dev dependencies.** `test-coverage` installs missing
   coverage tools, and `cli-builder` adds CLI framework dependencies to the
@@ -44,7 +45,7 @@ helper scripts: `claude plugin install lstack-extras@lstack --scope user`.
   services have their own terms; lstack makes no promise about how they handle
   data. `opencode-runner` sends the task to OpenCode's free cloud models, which
   may use it for training.
-- Some skills need external tools: authenticated `gh`, OpenCode or `asm`. The
+- Some skills need external tools: `gh`, OpenCode or `asm`. The
   plugin bundles none of them. See each skill's `SKILL.md` for its
   prerequisites.
 
@@ -53,14 +54,14 @@ helper scripts: `claude plugin install lstack-extras@lstack --scope user`.
 "Your git remote" means `git fetch`/`pull` against the repository you are
 working in. That is the only network access many skills make.
 
-| Skill | Network destinations | Data sent | Actions with your credentials | Tools it runs |
+| Skill | Network destinations | Data sent | Actions taken as you | Tools it runs |
 |---|---|---|---|---|
 | agent-config | your git remote | none | none; writes local files only | git |
 | auto-push | your git remote | all working-tree changes and the commit message | `git add`, commit and push, automatic once the safety scan passes | git |
 | cleanup-project | your git remote, GitHub API via `gh` | branch names; on confirmation, commits, branches and PR text | after one confirmation: delete remote branches, push main or archive branches, `gh pr create` | git, gh |
 | cli-builder | your git remote; package registries when adding CLI framework dependencies | dependency names | local branch and commits only | git, pip, npm, go, `npx oclif`, project test runner |
 | code-review | your git remote; Context7 MCP (optional) | library doc queries | local commits per cleanup category (cleanup mode); no push | git, knip, madge, ts-prune, vulture, jscpd, pylint and similar linters |
-| devops-pipeline | your git remote; generated hooks and CI fetch pre-commit hook repos, npm packages, GitHub Actions and Codecov when they run | the generated CI uploads coverage to Codecov through GitHub OIDC; no token is stored or read | writes pre-commit and CI config, installs git hooks; no commit or push | git, pre-commit; generated hooks run prettier, eslint, tsc |
+| devops-pipeline | your git remote; generated hooks and CI fetch pre-commit hook repos, npm packages, and GitHub Actions when they run | none; the generated CI writes coverage to the job summary on GitHub | writes pre-commit and CI config, installs git hooks; no commit or push | git, pre-commit; generated hooks run prettier, eslint, tsc |
 | diagram-generator | none | none | none | asm; routes to drawio-generator or excalidraw-generator |
 | doc-manager | your git remote; your own health endpoint when the generated check script runs | a GET to your endpoint | creates a feature branch and writes docs; no commit unless asked | git, bash, mmdc (optional) |
 | drawio-generator | your git remote, before writing into a repo | none | none | git |
@@ -68,7 +69,7 @@ working in. That is the only network access many skills make.
 | frontend-design | your git remote; optional browser for render checks | none | writes UI files after approval; runs your build, lint and test commands | git, project tooling |
 | opencode-runner | OpenCode Zen (opencode.ai) and its free-model providers; your git remote | the task prompt, files passed with `--file`, and repository files OpenCode reads. Free models may use this data for training | OpenCode may edit files in the working directory; the skill does not commit | opencode, git |
 | oss-ready | GitHub API via `gh repo view`; your git remote | the repository name (read-only) | creates a local branch; no commit or push | git, gh, python3 |
-| ship | your git remote, GitHub API via `gh`, PyPI (`pypi.org` JSON API, `twine upload`), npm registry | release commits, tags, release notes, built packages, package lookups | **automatic by default**: commit, tag, push, `gh release create`, `twine upload`, `npm publish`; `--no-auto` asks first; never force-pushes. Never reads upload credentials: `twine` and `npm` use their own login, and an auth failure skips that registry | git, gh, curl, python -m build, twine, npm, your project's build |
+| ship | your git remote, GitHub API via `gh`, PyPI (`pypi.org` JSON API, `twine upload`), npm registry | release commits, tags, release notes, built packages, package lookups | **automatic by default**: commit, tag, push, `gh release create`, `twine upload`, `npm publish`; `--no-auto` asks first; never force-pushes. A registry that refuses the upload is skipped and reported | git, gh, curl, python -m build, twine, npm, your project's build |
 | tad-generator | web search/fetch for technology research; your git remote | stack research queries; `tad.md` commits | commit, then push only after you approve | git, mmdc (optional) |
 | test-coverage | npm registry if `npx jest`/`npx vitest` is not installed locally; package registries for coverage tools (pytest-cov, nyc, cargo-tarpaulin); your git remote | package names | creates a feature branch and commits new tests locally; installs missing coverage dev dependencies; no push | your test runner, git |
 

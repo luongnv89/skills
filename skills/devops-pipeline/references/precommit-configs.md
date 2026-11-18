@@ -1,6 +1,6 @@
 # Pre-commit Configurations by Language
 
-Philosophy: **run as much as possible locally, with the fastest free tools**. `pre-commit`-stage hooks catch issues immediately (budget: under 10 seconds on changed files); `pre-push`-stage hooks run the whole test suite while it fits, then only the tests the push affects, plus E2E tests, before code leaves the machine (budget: under 60 seconds). GitHub Actions keeps only the version matrix, secrets-dependent work, deploys, and a diff-scoped bypass guard.
+Philosophy: **run as much as possible locally, with the fastest free tools**. `pre-commit`-stage hooks catch issues immediately (budget: under 10 seconds on changed files); `pre-push`-stage hooks run the whole test suite while it fits, then only the tests the push affects, plus E2E tests, before code leaves the machine (budget: under 60 seconds). GitHub Actions keeps only the version matrix, CI-only scans, deploys, and a diff-scoped bypass guard.
 
 **Stage names.** pre-commit 3.2 renamed `commit` to `pre-commit` and `push` to `pre-push`. The old names still work on 4.x but emit a deprecation warning and are scheduled for removal, so every config below uses the new names, and pins `pre-commit-hooks` v6.0.0, whose manifest uses them too. To upgrade an existing file in place:
 
@@ -943,5 +943,5 @@ Fetched 2026-11-01; tool versions move fast, so re-check before changing a templ
 - ty (Astral, beta): https://github.com/astral-sh/ty
 - Pyrefly (Meta, 1.4.0): https://github.com/facebook/pyrefly
 - pre-commit (`PRE_COMMIT_FROM_REF`/`PRE_COMMIT_TO_REF`, `pass_filenames`, `require_serial`, `always_run`: "this hook will run even if there are no matching files", `--from-ref`/`--to-ref` files): https://pre-commit.com/
-- Python template hook revs, each the latest release or tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest` (tags sorted by version where a repo publishes no releases), hook ids checked in each rev's `.pre-commit-hooks.yaml`: `astral-sh/ruff-pre-commit` v0.17.3 (`ruff-check`, `ruff-format`, and `ruff` as a legacy alias), `pre-commit/mirrors-mypy` v2.4.1 (`mypy`), `PyCQA/bandit` 1.9.4 (`bandit`), `psf/black` 26.10.1 (`black`), `pycqa/isort` 9.0.2 (`isort`); `pre-commit/pre-commit-hooks` v6.0.0 is still the latest
+- Python template hook revs, each the latest release or tag, read 2026-11-01 from each repository's latest release page (tags sorted by version where a repo publishes no releases), hook ids checked in each rev's `.pre-commit-hooks.yaml`: `astral-sh/ruff-pre-commit` v0.17.3 (`ruff-check`, `ruff-format`, and `ruff` as a legacy alias), `pre-commit/mirrors-mypy` v2.4.1 (`mypy`), `PyCQA/bandit` 1.9.4 (`bandit`), `psf/black` 26.10.1 (`black`), `pycqa/isort` 9.0.2 (`isort`); `pre-commit/pre-commit-hooks` v6.0.0 is still the latest
 - mypy 2.0 release notes (`--local-partial-types` and `--strict-bytes` on by default), fetched 2026-11-01: https://github.com/python/mypy/blob/master/CHANGELOG.md
