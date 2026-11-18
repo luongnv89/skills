@@ -1,6 +1,6 @@
 # GitHub Actions Workflow Templates
 
-Philosophy: **lean, fast CI**. pre-commit already handles format, lint, type-check, unit tests, and E2E tests locally, so GitHub Actions carries only the four responsibilities the SKILL's Check Routing Table assigns it: a diff-scoped bypass guard, multi-version matrix testing (which doubles as the default-branch full-suite run), secrets-dependent work, and deployment. Each job is also tuned for feedback speed, with free techniques only: an agent that pushes, waits for CI, fixes, and pushes again spends most of its loop waiting on the slowest job.
+Philosophy: **lean, fast CI**. pre-commit already handles format, lint, type-check, unit tests, and E2E tests locally, so GitHub Actions carries only the four responsibilities the SKILL's Check Routing Table assigns it: a diff-scoped bypass guard, multi-version matrix testing (which doubles as the default-branch full-suite run), CI-only scans, and deployment. Each job is also tuned for feedback speed, with free techniques only: an agent that pushes, waits for CI, fixes, and pushes again spends most of its loop waiting on the slowest job.
 
 ## The one rule every template here follows
 
@@ -57,7 +57,7 @@ A pull request takes as long as its slowest job, plus the time that job waited f
 
 Every workflow Step 3 writes or merges applies all of these:
 
-- **Generated for the recorded visibility.** Only the guard's leg split reads visibility at run time: one leg per hook stage on public repos, otherwise one leg, commit stage first. Codecov upload, `seed-cache`, macOS legs, and the matrix trigger are written in or left out for Step 1's answer; a private repo gets a coverage summary instead of Codecov.
+- **Generated for the recorded visibility.** Only the guard's leg split reads visibility at run time: one leg per hook stage on public repos, otherwise one leg, commit stage first. `seed-cache`, macOS legs, and the matrix trigger are written in or left out for Step 1's answer. Coverage goes to `$GITHUB_STEP_SUMMARY` on every repo, never to a third-party service.
 - **Caches seeded from the default branch.** A pull request's caches serve only that pull request. Seed from the default-branch matrix (Minimal: a per-merge `seed-cache` on public repos), cache `~/.cache/pre-commit`, and cache `node_modules` only when measured.
 - **Blobless full history** in the guard: `fetch-depth: 0` plus `filter: blob:none`. Never shallow where history is read.
 - **`concurrency`** on the pull request number (fallback `github.run_id`) with `cancel-in-progress`.
@@ -72,7 +72,6 @@ Run `gh repo view --json visibility --jq .visibility` and record the answer in S
 |---|---|---|
 | Guard legs (run-time split) | One per hook stage | One, commit stage first |
 | Version matrix, and Minimal's `full` (only with affected-test selection) | Every merge | Every merge under 30 default-branch commits a month; nightly from 30 |
-| Codecov upload | One matrix leg, no run-time visibility test | Left out; coverage summary in `$GITHUB_STEP_SUMMARY` |
 | `seed-cache` (Minimal only) | Every merge | Left out |
 | Rust macOS legs | In the matrix | Left out; a macOS job only when the user asks for it (opt-in, billed at about 10× Linux), preferably on release tags |
 
@@ -138,7 +137,7 @@ A cache saved by a `pull_request` run belongs to `refs/pull/<n>/merge`: later ru
 
 `actions/checkout` fetches one commit by default. The guard needs history (`--from-ref` dies on a missing base SHA), and so do `nx affected`, `turbo --affected`, and `vitest --changed`. `fetch-depth: 0` provides it, but it also downloads every past version of every file. Adding `filter: blob:none` keeps every commit and tree, fetches file contents only for the checked-out commit, and lets git download an older blob on demand. checkout applies the filter together with full history: with `fetch-depth: 0` it drops the depth argument and keeps the filter.
 
-Keep `persist-credentials` at its default so on-demand fetches can authenticate on a private repository. Since checkout v6 the token sits in a file under `$RUNNER_TEMP` that `.git/config` includes, so later git commands in the job still authenticate. Never speed up a history reader with a shallow clone: `--from-ref` fails, and Turborepo treats a too-shallow checkout as "every package changed". Jobs that read no history keep the default single-commit fetch.
+Leave checkout's other inputs at their defaults so on-demand fetches work on a private repository. Never speed up a history reader with a shallow clone: `--from-ref` fails, and Turborepo treats a too-shallow checkout as "every package changed". Jobs that read no history keep the default single-commit fetch.
 
 ### Parallel jobs on public repositories, one job on private ones
 
@@ -329,8 +328,8 @@ on:
 
 Add matrix version testing — the part pre-commit can't do locally — as the default-branch full-suite run, with the guard tuned for fast feedback. Generate it for the visibility Step 1 recorded:
 
-- **Public:** as shown. The matrix runs on every merge (free), seeds the caches every pull request restores, and uploads coverage to Codecov from one leg.
-- **Private, under 30 default-branch commits a month:** as shown, with the Codecov step replaced by the commented coverage summary.
+- **Public:** as shown. The matrix runs on every merge (free), seeds the caches every pull request restores, and writes a coverage summary from one leg.
+- **Private, under 30 default-branch commits a month:** as shown.
 - **Private, 30 or more:** also switch the matrix to its commented nightly `if:` and add the commented `schedule:` trigger; keep `push` only when another job, such as a deploy, runs on it.
 
 ```yaml
@@ -424,12 +423,6 @@ jobs:
     #   if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    # For the Codecov upload: it signs in with GitHub OIDC, no stored token.
-    # A private repo has no upload, so drop this block with it. A job-level
-    # block drops every scope it does not name, so checkout's read is listed.
-    permissions:
-      contents: read
-      id-token: write
     timeout-minutes: 20
 
     strategy:
@@ -468,20 +461,14 @@ jobs:
       - if: matrix.node-version == 24
         run: pip install pre-commit && pre-commit install-hooks
 
-      # Public repos only, written in from Step 1's visibility, not tested at
-      # run time. Codecov's team use on private repos is paid, so a private
-      # repo gets this step instead. It reads coverage/coverage-summary.json:
-      # add 'json-summary' to Vitest's `coverage.reporter` in vitest.config.
-      # - name: Coverage summary
-      #   if: matrix.node-version == 24
-      #   run: |
-      #     jq -r '.total | "Lines \(.lines.pct)%, branches \(.branches.pct)%"' \
-      #       coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload coverage
-        uses: codecov/codecov-action@v7
+      # Coverage stays on GitHub: no third-party upload. It reads
+      # coverage/coverage-summary.json: add 'json-summary' to Vitest's
+      # `coverage.reporter` in vitest.config.
+      - name: Coverage summary
         if: matrix.node-version == 24
-        with:
-          use_oidc: true
+        run: |
+          jq -r '.total | "Lines \(.lines.pct)%, branches \(.branches.pct)%"' \
+            coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
 ```
 
 ### With pnpm
@@ -517,8 +504,8 @@ With a warm store, pnpm links packages from it instead of downloading them. Meas
 
 Generate the workflow for the visibility Step 1 recorded:
 
-- **Public:** as shown. The matrix runs on every merge (free), seeds the caches every pull request restores, and uploads coverage to Codecov from one leg.
-- **Private, under 30 default-branch commits a month:** as shown, with the Codecov step replaced by the commented coverage summary (`coverage report --format=markdown`).
+- **Public:** as shown. The matrix runs on every merge (free), seeds the caches every pull request restores, and writes a coverage summary from one leg.
+- **Private, under 30 default-branch commits a month:** as shown.
 - **Private, 30 or more:** also switch the matrix to its commented nightly `if:` and add the commented `schedule:` trigger; keep `push` only when another job, such as a deploy, runs on it.
 
 ```yaml
@@ -604,12 +591,6 @@ jobs:
     #   if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    # For the Codecov upload: it signs in with GitHub OIDC, no stored token.
-    # A private repo has no upload, so drop this block with it. A job-level
-    # block drops every scope it does not name, so checkout's read is listed.
-    permissions:
-      contents: read
-      id-token: write
     timeout-minutes: 20
 
     strategy:
@@ -617,7 +598,7 @@ jobs:
         # The floor and the two newest supported versions. Each leg is a billed
         # job on a private repo; a public repo can add '3.13' at no cost.
         # fail-fast (the default) cancels the 3.12 leg, which seeds the caches
-        # and uploads coverage, when 3.15 fails first; that saves billed
+        # and writes the coverage summary, when 3.15 fails first; that saves billed
         # minutes, and a public repo can set `fail-fast: false`.
         python-version: ['3.12', '3.14', '3.15']
 
@@ -649,17 +630,10 @@ jobs:
       - if: matrix.python-version == '3.12'
         run: pip install pre-commit && pre-commit install-hooks
 
-      # Public repos only, written in from Step 1's visibility, not tested at
-      # run time. Codecov's team use on private repos is paid, so a private
-      # repo gets this step instead:
-      # - name: Coverage summary
-      #   if: matrix.python-version == '3.12'
-      #   run: coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload coverage
-        uses: codecov/codecov-action@v7
+      # Coverage stays on GitHub: no third-party upload.
+      - name: Coverage summary
         if: matrix.python-version == '3.12'
-        with:
-          use_oidc: true
+        run: coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
 ```
 
 ### With uv
@@ -773,12 +747,6 @@ jobs:
 
   matrix-test:
     runs-on: ubuntu-latest
-    # For the Codecov upload: it signs in with GitHub OIDC, no stored token.
-    # A private repo has no upload, so drop this block with it. A job-level
-    # block drops every scope it does not name, so checkout's read is listed.
-    permissions:
-      contents: read
-      id-token: write
     timeout-minutes: 20
     if: github.event_name == 'push'
 
@@ -801,15 +769,10 @@ jobs:
       - name: Build
         run: go build ./...
 
-      # Public repos only, written in from Step 1's visibility: Codecov's team
-      # use on private repos is paid. A private repo writes
-      # `go tool cover -func=coverage.out | tail -n 1` to $GITHUB_STEP_SUMMARY instead.
-      - name: Upload coverage
-        uses: codecov/codecov-action@v7
+      # Coverage stays on GitHub: no third-party upload.
+      - name: Coverage summary
         if: matrix.go-version == '1.27'
-        with:
-          use_oidc: true
-          files: coverage.out
+        run: go tool cover -func=coverage.out | tail -n 1 >> "$GITHUB_STEP_SUMMARY"
 ```
 
 ---
@@ -1157,22 +1120,13 @@ A filter lists what may trigger a run, so add shared paths a language depends on
 
 ## Common Additions
 
-### Upload coverage to Codecov
+### Coverage report
 
-Codecov's team use on private repositories is paid, so write the upload in only for a public repository, from Step 1's visibility. Never gate it at run time: a scheduled run's payload carries no repository, so a runtime visibility test would skip every nightly upload. On a private repository, write the coverage summary to `$GITHUB_STEP_SUMMARY` instead (`coverage report --format=markdown` for coverage.py; for Vitest, add `json-summary` to `coverage.reporter` and read `coverage/coverage-summary.json` with `jq`).
-
-```yaml
-      - name: Upload coverage to Codecov   # public repositories only
-        uses: codecov/codecov-action@v7
-        with:
-          use_oidc: true                   # job needs id-token: write
-```
-
-The templates authenticate with `use_oidc: true`, so no Codecov token is stored or read. Since v5, only pull requests from forks upload tokenless otherwise. OIDC needs `permissions: id-token: write` on the job; that block must also list `contents: read`, since a job-level `permissions:` drops every scope it does not name. Fork pull requests get no OIDC token, which is why the upload runs only on the default branch.
+Write coverage to `$GITHUB_STEP_SUMMARY`, as the templates do, on public and private repositories alike. Never add a third-party coverage service (Codecov, Coveralls): it sends the report off GitHub, and its team use on private repositories is paid. For coverage.py use `coverage report --format=markdown`; for Vitest, add `json-summary` to `coverage.reporter` and read `coverage/coverage-summary.json` with `jq`; for Go, `go tool cover -func=coverage.out | tail -n 1`.
 
 ### PR status comment
 
-Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client, or the injected `getOctokit` for a second token. The job also needs `pull-requests: write` to post the comment; on pull requests from forks the workflow's own token stays read-only whatever `permissions:` says, so the comment cannot post there.
+Since github-script v9, a script cannot `require('@actions/github')`. Use the injected `github` client. The job also needs `pull-requests: write` to post the comment; on pull requests from forks the workflow stays read-only whatever `permissions:` says, so the comment cannot post there.
 
 ```yaml
       - name: Comment PR
@@ -1228,7 +1182,7 @@ Skip sparingly. Every skipped hook is a check that now runs nowhere, since the g
 
 ### Keeping the matrix off the hot path
 
-Every template here keeps `matrix-test` off pull requests: it runs on merges to the default branch, or nightly (`schedule:` and `workflow_dispatch`) on a private repository with 30 or more default-branch commits a month. Keep it there. A three-version matrix on every pull request commit triples the bill on a private repository, and on any repository it takes three of the plan's concurrent-job slots from the agents' pull request runs, to re-confirm a signal the hooks already gave locally. On a public repository, if the audit shows queue waits at the concurrent-job limit, move it to nightly too; the generated Codecov upload then runs nightly. For a library where version skew is the main risk, widen it to `pull_request` only on the release branch, never on every push to a feature branch.
+Every template here keeps `matrix-test` off pull requests: it runs on merges to the default branch, or nightly (`schedule:` and `workflow_dispatch`) on a private repository with 30 or more default-branch commits a month. Keep it there. A three-version matrix on every pull request commit triples the bill on a private repository, and on any repository it takes three of the plan's concurrent-job slots from the agents' pull request runs, to re-confirm a signal the hooks already gave locally. On a public repository, if the audit shows queue waits at the concurrent-job limit, move it to nightly too; the coverage summary then comes nightly. For a library where version skew is the main risk, widen it to `pull_request` only on the release branch, never on every push to a feature branch.
 
 ---
 
@@ -1369,9 +1323,9 @@ Fetched 2026-11-01. Re-check them when a template changes; runner specs and pric
 - `actions/cache` examples (caching `node_modules` not recommended: breaks across Node versions, incompatible with `npm ci`): https://github.com/actions/cache/blob/main/examples.md
 - `actions/setup-node` v7.1.0 README (`cache` does not cache `node_modules`; `package-manager-cache`), `src/cache-restore.ts` (key `node-cache-<platform>-<arch>-<pm>-<hash>` with no Node version; no restore keys except Yarn Berry, so `cache-hit` is an exact match; `cache-primary-key` and `cache-matched-key` outputs since v7) and `src/main.ts` (npm auto-caching from `packageManager` or `devEngines.packageManager`; v5 auto-cached every package manager, v6 limited it to npm): https://github.com/actions/setup-node
 - `actions/setup-python` v7.1.0 `src/cache-distributions/pip-cache.ts` (key `setup-python-<os>-<arch>[-<linux release>]-python-<resolved version>-pip-<hash>`; the restore key keeps the version) and `cache-distributor.ts` (`cache-hit` is true only on an exact key match); `src/find-python.ts` still exports `pythonLocation`: https://github.com/actions/setup-python
-- `actions/checkout` v7.0.1 README (`filter`, `fetch-depth`, `persist-credentials`; since v6 the token lives in a `$RUNNER_TEMP` file that `.git/config` includes; since v7 fork pull request code is refused under `pull_request_target` and `workflow_run`), `src/git-source-provider.ts` and `src/git-command-manager.ts` (with `fetch-depth: 0` the filter is passed and the depth omitted): https://github.com/actions/checkout
-- Action majors pinned in the templates, each the `releases/latest` tag, fetched 2026-11-01 with `gh api repos/<owner>/<repo>/releases/latest`: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/setup-python` v7.1.0, `actions/cache` v6.1.0, `actions/setup-go` v7.0.0, `actions/setup-java` v6.1.0, `actions/github-script` v9.0.0, `codecov/codecov-action` v7.1.1, `dorny/paths-filter` v4.0.3, `pnpm/action-setup` v6.1.0 (pinned as the exact release, since its floating v6 tag is stale, pnpm/action-setup#289), `astral-sh/setup-uv` v10.3.3 (no floating major tag), `snok/install-poetry` v1.4.2, `Swatinem/rust-cache` v2.9.3; `dtolnay/rust-toolchain` is pinned by its `stable` and `master` branches, as its README shows. `pre-commit/action`, mentioned in the opening section, is at v3.0.1. The templates pin the major tag; pinning a full commit SHA is the stricter option. Every pinned JavaScript action runs on Node 24 and needs runner v2.327.1 or newer, which GitHub-hosted runners have; update self-hosted runners first.
-- Release notes for each major crossed: `actions/cache` v5 to v6 (Node 24, ESM; a read-only cache token, as on fork pull requests, makes the save warn instead of fail), `actions/setup-java` v5 to v6 (Maven key adds `.mvn/extensions.xml`; legacy Adopt distributions removed), `actions/setup-go` v6 to v7 (toolchain selection reworked in v6), `codecov/codecov-action` v5 to v7 (`file` deprecated for `files`; `use_oidc`), `actions/github-script` v8 to v9 (`require('@actions/github')` removed; injected `getOctokit`), `pnpm/action-setup` v3 to v6 (v2 stopped working on newer Node; since v4 a `version` that differs from `packageManager` fails; v6 supports pnpm 11 and 12), each at `https://github.com/<owner>/<repo>/releases`, fetched 2026-11-01
+- `actions/checkout` v7.0.1 README (`filter`, `fetch-depth`; since v7 fork pull request code is refused under `pull_request_target` and `workflow_run`), `src/git-source-provider.ts` and `src/git-command-manager.ts` (with `fetch-depth: 0` the filter is passed and the depth omitted): https://github.com/actions/checkout
+- Action majors pinned in the templates, each the `releases/latest` tag, read 2026-11-01 from each repository's latest release page: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/setup-python` v7.1.0, `actions/cache` v6.1.0, `actions/setup-go` v7.0.0, `actions/setup-java` v6.1.0, `actions/github-script` v9.0.0, `dorny/paths-filter` v4.0.3, `pnpm/action-setup` v6.1.0 (pinned as the exact release, since its floating v6 tag is stale, pnpm/action-setup#289), `astral-sh/setup-uv` v10.3.3 (no floating major tag), `snok/install-poetry` v1.4.2, `Swatinem/rust-cache` v2.9.3; `dtolnay/rust-toolchain` is pinned by its `stable` and `master` branches, as its README shows. `pre-commit/action`, mentioned in the opening section, is at v3.0.1. The templates pin the major tag; pinning a full commit SHA is the stricter option. Every pinned JavaScript action runs on Node 24 and needs runner v2.327.1 or newer, which GitHub-hosted runners have; update self-hosted runners first.
+- Release notes for each major crossed: `actions/cache` v5 to v6 (Node 24, ESM; a read-only cache, as on fork pull requests, makes the save warn instead of fail), `actions/setup-java` v5 to v6 (Maven key adds `.mvn/extensions.xml`; legacy Adopt distributions removed), `actions/setup-go` v6 to v7 (toolchain selection reworked in v6), `actions/github-script` v8 to v9 (`require('@actions/github')` removed; injected `getOctokit`), `pnpm/action-setup` v3 to v6 (v2 stopped working on newer Node; since v4 a `version` that differs from `packageManager` fails; v6 supports pnpm 11 and 12), each at `https://github.com/<owner>/<repo>/releases`, fetched 2026-11-01
 - Node.js release schedule (18 ended 2025-04-30, 20 ended 2026-04-30; 22, 24 and 26 supported), fetched 2026-11-01: https://github.com/nodejs/Release/blob/main/schedule.json
 - Python supported versions (3.10 reached end of life on 2026-10-01; 3.11 to 3.15 supported; 3.15.0 released 2026-10-09), fetched 2026-11-01: https://devguide.python.org/versions/ and https://peps.python.org/api/release-cycle.json
 - `actions/setup-python` can install 3.15: `actions/python-versions` `versions-manifest.json` lists 3.15.0, 3.15.1 and 3.15.2 as stable with `linux-24.04-x64` builds, and `ubuntu-latest` is Ubuntu 24.04 (its image README already lists 3.15.1), fetched 2026-11-01: https://github.com/actions/python-versions/blob/main/versions-manifest.json and https://github.com/actions/runner-images
