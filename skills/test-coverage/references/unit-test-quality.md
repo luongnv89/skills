@@ -45,11 +45,25 @@ def test_parse_packet_rejects_truncated_header():
 
 ## Self-check
 
-Ask these four questions of each new test before Step 4. Rewrite a test that fails any of them:
+Ask these five questions of each new test before Step 4. Rewrite a test that fails any of them:
 
 1. Would it fail if the behavior it covers broke? A test that only runs the code, or asserts only that a result is not null, fails this question.
 2. Would it keep passing through a refactor that preserves the behavior?
 3. Can it run alone, offline, and in any order?
 4. Does its failure message point at the cause? Use the framework's comparison assertions so a failure shows expected against actual. In Go, put the input, `got`, and `want` in the `t.Errorf` message.
+5. Does it check something no existing test already checks? A test that repeats another test's assertion adds run time, not protection.
+
+## Useless-test patterns
+
+Each of these raises coverage without catching a bug. Delete or rewrite a new test that matches one:
+
+| Pattern | Example | Instead |
+|---|---|---|
+| Tautological | Expected value computed with the same formula as the code: `assert price(x) == x * 1.2` | Hard-code the expected value from the spec: `assert price(100) == 120` |
+| Tests the language or framework | A setter sets, the ORM saves, `list.append` appends | Skip it; cover the project logic that uses it |
+| Mock-only | Every collaborator mocked, and the only assertion is that a mock was called | Assert on the returned value or resulting state; keep call assertions for a faked external boundary |
+| Assertion-free | Runs the code and passes when nothing throws, or asserts only "not null" | Assert the exact value, error type, or effect |
+| Duplicate | Same input and assertion as an existing test | Drop it, or pick an input from an untested partition or boundary |
+| Private access | Calls a private method or reads a private field | Reach the branch through the public interface |
 
 Coverage is a signal, not a target. A line executed by a test with no meaningful assertion counts as covered but is still untested, and 100% coverage with weak assertions proves nothing.
