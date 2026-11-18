@@ -15,7 +15,7 @@
 - Configure language-specific linters, formatters, type checkers, and security scanners
 - Run the unit tests related to the changed files on every commit, full test suite + E2E tests on push
 - Enumerate all CLI commands and generate end-to-end smoke tests (for CLI tools)
-- Keep GitHub Actions lean — a diff-scoped bypass guard, matrix version testing, secrets-dependent work, and deploys only
+- Keep GitHub Actions lean — a diff-scoped bypass guard, matrix version testing, CI-only scans, and deploys only
 - Keep CI fast with free techniques only: caches seeded from the default branch, blobless checkout, superseded-run cancellation, affected-only tests with a default-branch full run, parallel jobs where they are free, everything generated for the repo's visibility, and job timeouts
 - Use the fastest free tools: Oxlint for JS/TS linting, TypeScript 7's `tsc` (benchmark `bun check`, `tsrs`), Vitest `isolate: false` with a per-file reset hook
 - Audit an existing pipeline's speed from real runs: queue wait, setup, and work per job, cache scope, and the slowest job
@@ -52,7 +52,7 @@ graph TD
 | Format / lint / type check | ✓ | — | — |
 | Unit tests related to the changed files | ✓ | — | ✓ (PR guard, the diff's) |
 | Tests the push affects (whole suite when it fits) | — | ✓ | ✓ (PR guard, affected only) |
-| Full test suite + version matrix | — | — | ✓ (per merge, or nightly on a busy private repo; coverage upload on public repos) |
+| Full test suite + version matrix | — | — | ✓ (per merge, or nightly on a busy private repo; coverage summary in the job summary) |
 | CLI end-to-end tests | — | ✓ | — |
 | Bypass guard (both hook stages, PR diff only) | — | — | ✓ |
 | Cache seeding from the default branch (when the template has a default-branch job; private Minimal has none) | — | — | ✓ |
@@ -78,7 +78,7 @@ graph TD
 
 - `.pre-commit-config.yaml` with `pre-commit`-stage and `pre-push`-stage hooks
 - `scripts/e2e_test.sh` or `tests/e2e/test_cli.py` (for CLI tools)
-- `.github/workflows/ci.yml` — lean, fast CI: a diff-scoped bypass guard, default-branch matrix testing, secrets-dependent work, and deploys, with cache seeding, concurrency, and timeouts
+- `.github/workflows/ci.yml` — lean, fast CI: a diff-scoped bypass guard, default-branch matrix testing, CI-only scans, and deploys, with cache seeding, concurrency, and timeouts
 - `scripts/affected-tests.sh` (when the suite exceeds the push budget)
 - `scripts/related-tests.py` (Python projects: the unit tests related to the changed files, for the commit hook)
 - For an audit-only run: the per-job queue/setup/work split and a table of free fixes, with no file written
