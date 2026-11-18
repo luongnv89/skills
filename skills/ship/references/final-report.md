@@ -54,10 +54,10 @@ Evidence:
 - Version bumped: package.json, package-lock.json (1.3.1 → 2.4.0)
 - Git tag: v2.4.0 (annotated) pushed to origin (confirmed by git ls-remote)
 - GitHub release: https://github.com/owner/repo/releases/tag/v2.4.0
-- npm: skipped — npm whoami failed
+- npm: skipped — npm publish failed authentication (ENEEDAUTH)
 
 Uncertainty:
-- npm publish not attempted
+- npm package 2.4.0 not published
 
 Decision: Run npm login, then npm publish (version 2.4.0 is tagged and ready).
 ```

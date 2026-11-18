@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- lstack no longer reads a credential, so the Claude plugin directory's credential policy hold can clear. `devops-pipeline` 2.6.2: the generated CI uploads coverage to Codecov with `use_oidc: true` and a job-level `permissions:` block (`contents: read`, `id-token: write`) instead of a `CODECOV_TOKEN` secret. `ship` 3.1.2: drops the upload-credential precheck (environment variable, `~/.pypirc`, `npm whoami`); an authentication failure at upload still skips that registry with `PARTIAL` and puts the setup under `Decision`.
+
 ## v5.0.0 — 2026-11-18
 
 This catalog release splits lstack in two. The lstack plugin becomes a 16-skill engineering core of Markdown instructions, so `skills/` on `main` passes the Claude plugin directory's community rules, and the other 32 skills move to a new companion plugin, lstack-extras, which the same marketplace lists. lstack plugin users who rely on any of those 32 skills must install lstack-extras, and the Codex and ZIP exports now contain only the 16 core skills; `install.sh` and `remote-install.sh` still offer all 48. `devops-pipeline` adds a CI minutes optimization mode that measures every change it applies, `product-launch` can draft and submit a Product Hunt launch through Product Hunt's official MCP, `issue-work-loop` runs codex workers with `--approve-for-me` and accepts plain opencode workers, `brand-name-checker` merges its four source workers into one, and the four planning skills share one ideas-index rule. A prompt audit of the catalog fixed instructions that contradicted their own references, templates or examples in more than 30 skills. The catalog release version is 5.0.0. The lstack package and plugin version is 0.9.0, first released by this tag, with 16 members (14 top-level); lstack-extras is also 0.9.0, with 32 members, and each member keeps its independent version.

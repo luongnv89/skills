@@ -765,16 +765,16 @@ set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'; GREEN='\033[0;32m'; NC='\033[0m'
-PASS=0; FAIL=0
+PASSED=0; FAILED=0
 
 check() {
   local desc="$1"; shift
   if "$@" > /dev/null 2>&1; then
     echo -e "  ${GREEN}✓${NC} $desc"
-    ((PASS++))
+    ((PASSED++))
   else
     echo -e "  ${RED}✗${NC} $desc (cmd: $*)"
-    ((FAIL++))
+    ((FAILED++))
   fi
 }
 
@@ -783,10 +783,10 @@ check_output() {
   local out; out=$("$@" 2>&1)
   if echo "$out" | grep -q "$pattern"; then
     echo -e "  ${GREEN}✓${NC} $desc"
-    ((PASS++))
+    ((PASSED++))
   else
     echo -e "  ${RED}✗${NC} $desc — expected '$pattern' in output"
-    ((FAIL++))
+    ((FAILED++))
   fi
 }
 
@@ -814,8 +814,8 @@ check_output "unknown command exits non-zero" "error\|Error\|unknown" \
 # rm -rf /tmp/e2e-test-*
 
 echo ""
-echo "=== Results: ${PASS} passed, ${FAIL} failed ==="
-[ "$FAIL" -eq 0 ] || exit 1
+echo "=== Results: ${PASSED} passed, ${FAILED} failed ==="
+[ "$FAILED" -eq 0 ] || exit 1
 ```
 
 ### E2E test script template (Python)

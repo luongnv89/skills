@@ -3,7 +3,7 @@ name: ship
 description: "Run a release end to end, autonomous by default: version bump everywhere, changelog, docs, landing page, tag, push, GitHub release, PyPI/npm. Use to ship, cut, or tag a release. Don't use for routine commits, pull requests, or marketplace publishing."
 license: MIT
 metadata:
-  version: 3.1.1
+  version: 3.1.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "max"
 ---
