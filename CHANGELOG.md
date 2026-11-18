@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **`logo-designer` 1.5.2 → 1.6.0: export a PNG of every logo asset (#615).** Most upload targets (plugin and marketplace avatars, GitHub social previews, app stores, social profiles) take only raster images, and every run ended by telling the user to export PNGs themselves. A new Phase 3b renders PNGs from the verified SVGs into `assets/logo/png/`: `logo-icon` at 512 and 1024, `logo-mark` at 512 with a transparent background, `logo-full`, `logo-white` and `logo-black` at 1280×288, `logo-wordmark` at 720×160, `favicon` at 16, 32 and 48, plus an optional `favicon.ico`. It uses the first rasterizer found (`rsvg-convert`, `magick`, `inkscape`, then headless Chrome); the commands live in the new `references/png-export.md` and were run against the repository's own logo with `rsvg-convert`, `magick` and Chrome. The Final Report's `Evidence:` lists each PNG's measured dimensions, the "export PNG sizes yourself" advice is gone, and with no rasterizer the run keeps the SVGs and ends `PARTIAL` with `brew install librsvg` or `sudo apt install librsvg2-bin` under `Decision:`. Wordmarks are now outlined `<path>` letterforms: `svg-generator` no longer writes `<text>`, and `svg-reviewer` fails any `<text>`, `<tspan>` or `@font-face`, so no PNG depends on an installed font. `brand-showcase.html` links each rendered PNG next to its SVG and leaves out links to PNGs that were not rendered. The skill stays Markdown-only: no script was added.
+
 ### Fixed
 
 - lstack no longer reads a credential, so the Claude plugin directory's credential policy hold can clear. `devops-pipeline` 2.6.2: the generated CI uploads coverage to Codecov with `use_oidc: true` and a job-level `permissions:` block (`contents: read`, `id-token: write`) instead of a `CODECOV_TOKEN` secret. `ship` 3.1.2: drops the upload-credential precheck (environment variable, `~/.pypirc`, `npm whoami`); an authentication failure at upload still skips that registry with `PARTIAL` and puts the setup under `Decision`.

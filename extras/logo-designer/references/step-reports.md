@@ -46,6 +46,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ··································································
   7 variants generated:       √ pass | × fail — [missing files]
   Files written:              √ pass (/assets/logo/ populated)
+  PNGs rendered:              √ pass ([rasterizer], N PNGs, sizes measured) | × fail — no rasterizer, [install hint]
   ____________________________
   Result:                     PASS | FAIL | PARTIAL
 ```

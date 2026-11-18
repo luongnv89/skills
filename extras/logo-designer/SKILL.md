@@ -1,16 +1,16 @@
 ---
 name: logo-designer
-description: "Generate professional SVG logos from project context: 7 brand variants plus a showcase HTML page. Use for product marks, wordmarks, icons, and favicons. Don't use for raster-only logos, illustrations, or full brand guidelines."
+description: "Generate professional SVG logos from project context: 7 brand variants, PNG exports of each, and a showcase HTML page. Use for product marks, wordmarks, icons, and favicons. Don't use for raster-only logos, illustrations, or full brand guidelines."
 license: MIT
 effort: medium
 metadata:
-  version: 1.5.2
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
 # Logo Designer
 
-Design modern, professional logos by analyzing project context and generating SVG-based brand assets.
+Design modern, professional logos by analyzing project context and generating SVG-based brand assets, with PNG exports for upload targets that take only raster images.
 
 ## Environment Check
 
@@ -38,7 +38,9 @@ Phase 3: Generate All 7 SVGs
 Phase 4: SVG Validation
   ↓ (svg-reviewer agent)
   ↓
-Final Output: 7 SVG files in /assets/logo/ + brand-showcase.html + Design Rationale
+Phase 3b: PNG Export (main agent, from the verified SVGs)
+  ↓
+Final Output: 7 SVG files in /assets/logo/ + PNGs in /assets/logo/png/ + brand-showcase.html + Design Rationale
 ```
 
 **Agents**:
@@ -128,16 +130,25 @@ Output structure:
 ├── favicon.svg            # 16×16 simplified 2-layer mark
 ├── logo-white.svg         # 320×72 white (for dark backgrounds)
 ├── logo-black.svg         # 320×72 black (for light backgrounds)
+├── png/                   # PNG exports (Phase 3b)
 └── brand-showcase.html    # Self-contained brand identity page
 ```
+
+Draw the wordmark as outlined `<path>` letterforms, never `<text>`, so no SVG or PNG depends on an installed font.
 
 After writing all 7 files, read back mark, full, icon, white, and black variants and verify `d=""` strings are identical (or correctly scaled via `transform`). Fix divergences before continuing.
 
 See `references/svg-deliverables.md` for full variant specifications, scale calculations, favicon simplification rules, and SVG requirements.
 
+### Phase 3b: PNG Export
+
+Once the geometry read-back and `svg-reviewer` pass, render a PNG of every variant from those final SVGs into `/assets/logo/png/`: `logo-icon` at 512 and 1024, `logo-mark` at 512 with a transparent background, `logo-full`, `logo-white` and `logo-black` at 1280×288, `logo-wordmark` at 720×160, and `favicon` at 16, 32 and 48. Use the first rasterizer found: `rsvg-convert`, `magick`, `inkscape`, then headless Chrome. Measure each PNG's dimensions afterwards. No rasterizer: keep the SVGs, skip the PNGs, and end `PARTIAL` with the install command under `Decision:`.
+
+See `references/png-export.md` for the font check, detection, per-tool commands, the optional `favicon.ico`, and the dimension check.
+
 ### Phase 4–5: Documentation & Brand Showcase
 
-After SVGs are written, output the design rationale (symbol meaning, color choices, typography reasoning), a hex-code color specification, and a Tailwind config snippet. Then generate `/assets/logo/brand-showcase.html` — a self-contained presentation page (hero, design concept, variant grid, palette, typography, dev reference, footer) and open it in the browser.
+After SVGs are written, output the design rationale (symbol meaning, color choices, typography reasoning), a hex-code color specification, and a Tailwind config snippet. Then generate `/assets/logo/brand-showcase.html` — a self-contained presentation page (hero, design concept, variant grid with PNG download links, palette, typography, dev reference, footer) and open it in the browser.
 
 See `references/brand-showcase.md` for the full HTML page structure, design guidelines, and the documentation template.
 
@@ -154,6 +165,8 @@ For a CLI tool called "fastbuild", the skill produces:
 ├── favicon.svg            — 16×16 simplified 2-layer mark
 ├── logo-white.svg         — 320×72 full logo in white (for dark backgrounds)
 ├── logo-black.svg         — 320×72 full logo in black (for light backgrounds)
+├── png/                   — logo-icon-512/1024, logo-mark-512, logo-full, logo-white,
+│                            logo-black, logo-wordmark, favicon-16/32/48 (.png)
 └── brand-showcase.html    — self-contained brand identity presentation page
 ```
 
@@ -178,13 +191,13 @@ Typography: Inter Bold for wordmark
 
 ## Final Report
 
-End every run, stops included, with this compact text block. Status is `COMPLETE` (all 7 SVGs and `brand-showcase.html` written, geometry verification passed), `PARTIAL` (files written, a check still fails), or `BLOCKED` (no files written). A question that awaits the user's answer does not end the run; if the user ends the run without answering, the status is `BLOCKED`. Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
+End every run, stops included, with this compact text block. Status is `COMPLETE` (all 7 SVGs, every PNG and `brand-showcase.html` written, geometry verification passed), `PARTIAL` (files written, a check still fails or no rasterizer was found), or `BLOCKED` (no files written). A question that awaits the user's answer does not end the run; if the user ends the run without answering, the status is `BLOCKED`. Fill rules, `PARTIAL` and `BLOCKED` examples, and reader checks: `references/final-report.md`. Example:
 
 ```text
-Result: COMPLETE. Wrote 7 SVGs and brand-showcase.html to /assets/logo/.
-Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters. Default Quality Bar passed. sync: skipped (not a git repo)
+Result: COMPLETE. Wrote 7 SVGs, 10 PNGs in png/ and brand-showcase.html to /assets/logo/.
+Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. PNGs (rsvg-convert, measured with file): logo-icon-512 512x512, logo-icon-1024 1024x1024, logo-mark-512 512x512 RGBA, logo-full/white/black 1280x288, logo-wordmark 720x160, favicon-16/32/48. Default Quality Bar passed. sync: skipped (not a git repo)
 Uncertainty: Assumed a developer-tool audience from the CLI entry point; the user did not say.
-Decision: No approval needed. Export PNG sizes from logo-icon.svg if you need raster assets.
+Decision: No approval needed.
 ```
 
 ## Acceptance Criteria
@@ -192,9 +205,12 @@ Decision: No approval needed. Export PNG sizes from logo-icon.svg if you need ra
 - [ ] All 7 SVG files are written to `/assets/logo/` with the correct filenames
 - [ ] `logo-mark.svg` is created first and its `d=""` path strings are used verbatim in all derived variants
 - [ ] Every SVG has a correct `viewBox` attribute and contains no embedded rasters
+- [ ] No SVG contains `<text>`: the wordmark is outlined paths, so neither the SVGs nor the PNGs need an installed font
+- [ ] A PNG of each of the 7 variants is rendered from the verified SVGs into `/assets/logo/png/` at the Phase 3b sizes, and each one's measured dimensions appear in `Evidence:`
+- [ ] With no rasterizer found, the run still delivers the SVGs and ends `PARTIAL` with the install command under `Decision:`
 - [ ] Monochrome variants (`logo-white.svg`, `logo-black.svg`) differ from `logo-full.svg` only in color, not geometry
 - [ ] `favicon.svg` is a simplified 2-layer version of the mark at 16×16
-- [ ] `brand-showcase.html` is written and opens correctly in a browser
+- [ ] `brand-showcase.html` is written, opens correctly in a browser, and links each rendered PNG next to its SVG
 - [ ] Design rationale (symbol meaning, color choices, typography) is documented in the response
 - [ ] Color specification includes hex codes for all palette roles
 - [ ] Wordmark casing is confirmed with the user before any SVG containing text is generated

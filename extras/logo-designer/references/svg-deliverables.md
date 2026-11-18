@@ -29,7 +29,7 @@ Generate the remaining 6 files. If using the svg-generator agent, its prompt **m
 **When prompting the svg-generator agent, include:**
 1. The exact `<path d="...">` elements from logo-mark.svg (copy-paste, not paraphrase)
 2. The exact fill/stroke/opacity values for each layer
-3. The exact wordmark text and formatting (casing, font, weight, colors)
+3. The exact wordmark text and formatting (casing, font, weight, colors), to be drawn as outlined `<path>` letterforms
 4. The target viewBox and any transform/scale needed
 
 **Variant specifications:**
@@ -69,6 +69,7 @@ If any file has diverged, fix it before proceeding.
 ├── favicon.svg            # 16x16 simplified
 ├── logo-white.svg         # Full logo in white (for dark backgrounds)
 ├── logo-black.svg         # Full logo in black (for light backgrounds)
+├── png/                   # PNG exports of every variant (references/png-export.md)
 └── brand-showcase.html    # Self-contained brand identity presentation page
 ```
 
@@ -76,6 +77,7 @@ If any file has diverged, fix it before proceeding.
 
 - Vector-style, crisp edges
 - No embedded rasters
+- No `<text>`, `<tspan>` or `@font-face`: draw the wordmark as outlined `<path>` letterforms, so the SVG and its PNG render the same without an installed font
 - Optimized paths — use `<path>` elements, not `<rect>` + separate `<polygon>` combos
 - viewBox properly set
 - All marks use `<path>` with the canonical `d` strings (scaled via `transform` where needed)
