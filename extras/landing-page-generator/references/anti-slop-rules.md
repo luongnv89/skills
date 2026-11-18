@@ -1,6 +1,6 @@
 # Anti-Slop Rules
 
-AI-generated marketing copy and READMEs have predictable tells that make readers distrust the page — visitors on a landing page, developers skimming a repo. Avoid all of these patterns in both modes.
+AI-generated marketing copy has predictable tells that make visitors distrust the page. Avoid all of these patterns.
 
 ## Banned phrases — never write these or close variants
 
@@ -40,7 +40,7 @@ AI-generated marketing copy and READMEs have predictable tells that make readers
 
 Read each sentence and ask "does this give the reader information they didn't already have?" If not, cut it.
 
-Then run the three-part copy test on every line of marketing copy: headlines, subheadlines, body copy, features and FAQ answers. It skips CTA buttons (the CTA Button Rules govern them), code and commands, content preserved in `<details>` blocks, and companion pages. A line that fails gets rewritten from the brief's facts, or cut:
+Then run the three-part copy test on every line of marketing copy: headlines, subheadlines, body copy, features and FAQ answers. It skips CTA buttons (the CTA Button Rules govern them), code and commands, and companion pages. A line that fails gets rewritten from the brief's facts, or cut:
 
 1. **Visualizable:** the reader can picture a person, an object or an action. "Invoices that chase late payments for you" passes; "Streamline your billing" fails.
 2. **Falsifiable:** the reader can check it, and it would be false if the product did not do what it says; a fact from the brief or the project stands behind it. A stated belief, such as a contrarian take, is judged on questions 1 and 3 only.

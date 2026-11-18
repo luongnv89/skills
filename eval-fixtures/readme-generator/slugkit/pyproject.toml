@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "slugkit"
+version = "1.2.0"
+description = "Turn any title into a clean URL slug"
+requires-python = ">=3.9"
+license = "MIT"
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/acme/slugkit"

@@ -152,8 +152,8 @@ class CodexPackagingTests(unittest.TestCase):
     def test_real_catalog_parity_and_runbook_contract(self):
         bundle, original = BUILDER.prepare(ROOT)
         codex, adapted = BUILDER.prepare(ROOT, target="codex")
-        self.assertEqual(len(adapted["skill_versions"]), 16)
-        self.assertEqual(len(adapted["files"]), 121)
+        self.assertEqual(len(adapted["skill_versions"]), 17)
+        self.assertEqual(len(adapted["files"]), 127)
         self.assertEqual(original["skill_versions"], adapted["skill_versions"])
         self.assertEqual(original["files"], adapted["files"])
         for path, value in bundle.items():

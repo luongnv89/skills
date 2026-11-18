@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 16 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 17 first-party Agent Skills for everyday
 engineering work: code review, test generation, documentation, diagrams,
 CI pipelines, release shipping, repository cleanup, open-source readiness,
 architecture documents and agent instruction files. Each skill is a plain-text
@@ -69,6 +69,7 @@ working in. That is the only network access many skills make.
 | frontend-design | your git remote; optional browser for render checks | none | writes UI files after approval; runs your build, lint and test commands | git, project tooling |
 | opencode-runner | OpenCode Zen (opencode.ai) and its free-model providers; your git remote | the task prompt, files passed with `--file`, and repository files OpenCode reads. Free models may use this data for training | OpenCode may edit files in the working directory; the skill does not commit | opencode, git |
 | oss-ready | GitHub API via `gh repo view`; your git remote | the repository name (read-only) | creates a local branch; no commit or push | git, gh, python3 |
+| readme-generator | your git remote | none | writes `README.md` and a backup of the old one; no commit unless asked | git |
 | ship | your git remote, GitHub API via `gh`, PyPI (`pypi.org` JSON API, `twine upload`), npm registry | release commits, tags, release notes, built packages, package lookups | **automatic by default**: commit, tag, push, `gh release create`, `twine upload`, `npm publish`; `--no-auto` asks first; never force-pushes. A registry that refuses the upload is skipped and reported | git, gh, curl, python -m build, twine, npm, your project's build |
 | tad-generator | web search/fetch for technology research; your git remote | stack research queries; `tad.md` commits | commit, then push only after you approve | git, mmdc (optional) |
 | test-coverage | npm registry if `npx jest`/`npx vitest` is not installed locally; package registries for coverage tools (pytest-cov, nyc, cargo-tarpaulin); your git remote | package names | creates a feature branch and commits new tests locally; installs missing coverage dev dependencies; no push | your test runner, git |
