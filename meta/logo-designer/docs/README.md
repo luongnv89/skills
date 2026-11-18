@@ -9,13 +9,14 @@
 
 > Design professional, modern logos with automatic project context detection and multiple SVG deliverables.
 
-Version: **1.5.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.6.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
 - Analyze project type (CLI, SaaS, Startup, Enterprise, Consumer) for style selection
 - Apply design principles: simplicity, scalability, memorability, versatility
-- Generate 7 SVG variants (full, mark, wordmark, icon, favicon, white, black)
+- Generate 7 SVG variants (full, mark, wordmark, icon, favicon, white, black), with the wordmark outlined so nothing depends on an installed font
+- Export a PNG of every variant (icon 512/1024, mark 512, full/white/black 1280×288, wordmark 720×160, favicon 16/32/48) with `rsvg-convert`, `magick`, `inkscape` or headless Chrome
 - Default quality bar: every SVG and the showcase page are professional, production-ready, elegant, and premium without being asked
 - Provide color specs with hex codes and Tailwind config
 
@@ -66,10 +67,12 @@ asm install github:luongnv89/skills:extras/logo-designer
 | `agents/brand-researcher.md` | Read project files to produce structured brand brief |
 | `agents/svg-generator.md` | Generate all 7 SVG logo files (full, mark, wordmark, icon, favicon, white, black) |
 | `agents/svg-reviewer.md` | Validate SVG structure, completeness, and compatibility |
+| `references/png-export.md` | Rasterizer detection, per-tool PNG commands, sizes, and the dimension check |
 
 ## Output
 
 - 7 SVG files in `/assets/logo/` (full, mark, wordmark, icon, favicon, white, black)
+- PNG exports in `/assets/logo/png/`, linked from `brand-showcase.html`; with no rasterizer installed the run ends `PARTIAL` and names the install command
 - Design rationale document with color specifications
 - Brand kit suggestions with Tailwind config
 - A closing Final Report that opens with `Result: COMPLETE | PARTIAL | BLOCKED`, then Evidence, Uncertainty and Decision

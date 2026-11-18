@@ -21,9 +21,10 @@ The showcase page must:
      - `favicon.svg` on dark background (shown at 64px with "16×16px" caption)
      - `logo-black.svg` on light background (full width)
      - Each card shows: a label (top-left), the SVG image, and the filename (bottom-right, monospace)
+     - Next to the filename, a download link for each PNG rendered from that SVG in Phase 3b, labeled with its size (e.g. `<a href="png/logo-icon-512.png" download>PNG 512</a>` and `<a href="png/logo-icon-1024.png" download>PNG 1024</a>`). Link only PNGs that exist: when no rasterizer was found, show the SVG filename alone, so the page has no broken links
    - **Color Palette** — grid of color chips, each showing: colored swatch with hex code overlay, color name, and role description
    - **Typography** — specimen block showing the font at different weights (Bold for headings, Regular for body) with sample text
-   - **Developer Reference** — Tailwind config as a syntax-highlighted code block, plus a file tree listing all 7 SVG files with descriptions
+   - **Developer Reference** — Tailwind config as a syntax-highlighted code block, plus a file tree listing all 7 SVG files and the `png/` exports with descriptions
    - **Footer** — product name, "Brand Identity", creator/company name
 
 4. **Design quality guidelines** for the HTML page:

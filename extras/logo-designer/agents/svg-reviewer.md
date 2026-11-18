@@ -71,7 +71,7 @@ Scan the file content for:
 - `src=` attributes (SVG shouldn't have these) — ❌ FAIL
 
 ✅ PASS if:
-- Only `<path>`, `<rect>`, `<circle>`, `<text>`, `<g>`, `<line>`, `<polygon>`, etc.
+- Only `<path>`, `<rect>`, `<circle>`, `<g>`, `<line>`, `<polygon>`, etc. (`<text>` fails 2.6)
 - No `<image>` or data URIs
 
 #### 2.4 Valid SVG Namespace
@@ -92,26 +92,21 @@ Example checks:
 ❌ Invalid: d="M10 10 L20 20 Q" (incomplete)
 ```
 
-#### 2.6 Proper Text Elements
+#### 2.6 Outlined Text (no font dependency)
 
-For all `<text>` elements:
-- [ ] `x`, `y` attributes present
-- [ ] `font-family` specified (e.g., "Inter, sans-serif")
-- [ ] `font-size` specified
-- [ ] Content is the product name (no Lorem Ipsum, no placeholders like `[name]`)
-- [ ] Text is readable (not overflowing viewBox)
+The wordmark must be outlined `<path>` letterforms, because the PNG export renders these files and a rasterizer substitutes an installed font for `<text>`:
+- [ ] No `<text>` or `<tspan>` element — ❌ FAIL, naming the file
+- [ ] No `@font-face` rule or font `<link>` — ❌ FAIL
+- [ ] The outlined letters spell the confirmed product name with its confirmed casing (no placeholder like `[name]`)
+- [ ] The letters stay inside the viewBox and are readable at the file's size
 
 Example check:
 ```
-❌ Invalid (placeholder):
-  <text x="10" y="35" font-family="Inter" font-size="32">
-    [Product Name]
-  </text>
+❌ Invalid (font-dependent):
+  <text x="10" y="35" font-family="Inter, sans-serif" font-size="32">fastbuild</text>
 
-✅ Valid (actual name):
-  <text x="10" y="35" font-family="Inter, sans-serif" font-size="32" fill="#FAFAFA" font-weight="600">
-    fastbuild
-  </text>
+✅ Valid (outlined):
+  <g fill="#FAFAFA" aria-label="fastbuild"><path d="M10 12 H22 V16 H14 V22 H20 V26 H14 V36 H10 Z"/> …</g>
 ```
 
 #### 2.7 Color Validation
@@ -211,8 +206,8 @@ If ANY inconsistency is found: ❌ **FAIL** — report which files diverge and h
 
 For files with wordmarks (logo-full, logo-wordmark, logo-white, logo-black):
 - [ ] Product name text is identical (same casing, same spelling)
-- [ ] Font family is identical across all wordmark files
-- [ ] Font weight is identical
+- [ ] The outlined letter paths are identical across all wordmark files (or scaled via `transform`)
+- [ ] Letter weight is identical
 - [ ] Text positioning relative to mark is consistent (logo-full vs logo-white vs logo-black)
 
 ### Step 5: Encoding and Format Checks
@@ -255,7 +250,7 @@ Write a concise, unfilled validation report to `output_path`. It must contain ob
 | Each root has its expected `viewBox` and SVG namespace | [ ] | |
 | No `<image>`, data URI, or `src=` raster embedding | [ ] | |
 | Every path has non-empty, valid `d` data | [ ] | |
-| Text elements have coordinates, font, size, and the actual product name | [ ] | |
+| Wordmark is outlined paths (no `<text>`, `<tspan>` or `@font-face`) spelling the actual product name | [ ] | |
 | Colors follow the brand palette and contrast requirements | [ ] | |
 | File size and trailing whitespace are reasonable | [ ] | |
 
@@ -296,7 +291,7 @@ Before PASS:
 - [ ] No rasters embedded (pure vector only)
 - [ ] Valid SVG XML structure
 - [ ] **Mark consistency**: identical `d=""` paths across logo-mark, logo-full, logo-icon, logo-white, logo-black
-- [ ] **Wordmark consistency**: identical text, font, weight across logo-full, logo-wordmark, logo-white, logo-black
+- [ ] **Wordmark consistency**: identical outlined letter paths, casing and weight across logo-full, logo-wordmark, logo-white, logo-black
 - [ ] Colors from brand palette
 - [ ] Product name is correct (not placeholder)
 - [ ] Text is readable and properly positioned
@@ -306,6 +301,6 @@ Before PASS:
 
 - This is a fresh-context review — check the actual files, don't trust the generator's summary
 - favicon.svg is the hardest to get right — it must be bold and simplified
-- Text elements must have the actual product name, not placeholder text
+- The outlined wordmark must spell the actual product name, not placeholder text
 - Raster detection is critical — even one `<image>` tag is a fail
 - Viewbox must be present and correct — width/height attributes won't work

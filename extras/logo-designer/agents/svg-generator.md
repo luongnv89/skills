@@ -86,7 +86,7 @@ viewBox="0 0 320 72"
 ```
 
 - Mark: Same `<path>` elements from logo-mark.svg, wrapped in `<g transform="translate(4,4)">`
-- Wordmark: Product name text to the right of the mark using the specified formatting and colors
+- Wordmark: Product name to the right of the mark using the specified formatting and colors, drawn as outlined `<path>` letterforms (no `<text>`)
 
 #### 4.3 logo-wordmark.svg (Text Only)
 
@@ -94,7 +94,7 @@ viewBox="0 0 320 72"
 viewBox="0 0 180 40"
 ```
 
-- No mark — just the product name text with the specified formatting
+- No mark — just the product name with the specified formatting, drawn as outlined `<path>` letterforms (no `<text>`) so the SVG and its PNG export need no installed font
 
 #### 4.4 logo-icon.svg (App Icon, Padded Square)
 
@@ -147,6 +147,7 @@ For ALL generated SVGs:
 4. **Proper structure**: Use `<g>` groups. Add brief comments for sections.
 5. **Correct naming**: Exactly 7 files with the standard names.
 6. **Default quality bar**: Even if the brief never asks, every file must look professional, production-ready, elegant, and premium: optical balance, consistent stroke weights, clean minimal paths, legible at 16px, refined wordmark kerning. Premium means craft and restraint, not ornament.
+7. **Outlined text**: No `<text>`, `<tspan>` or `@font-face`. Draw each wordmark letter as a `<path>` in the brief's typeface proportions, and reuse the same letter paths in logo-full, logo-white, logo-black and logo-wordmark (scaled via `transform` where sizes differ). The PNG export renders these files, and a rasterizer would substitute an installed font for `<text>`.
 
 ### Step 6: Verify Consistency
 
