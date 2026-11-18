@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **`test-coverage` 1.6.1 → 1.7.0: stop writing useless tests.** Step 2 leaves trivial code (getters and setters, plain data classes, constants, one-line library calls) out of the gap list and lists it under `Uncertainty:`; a gap list of only trivial code ends `COMPLETE` with no tests. Step 4 adds a break check: each new test must fail against a realistic bug planted in the code it targets, the source is restored with `git checkout` and confirmed clean, and files on the pre-sync list are never touched. A test that still passes is strengthened once, then removed. `references/unit-test-quality.md` adds a fifth self-check question (does it check something no existing test checks?) and a table of useless-test patterns: tautological, tests the language or framework, mock-only, assertion-free, duplicate, and private access.
+
 ### Fixed
 
 - lstack no longer reads a credential, so the Claude plugin directory's credential policy hold can clear. `devops-pipeline` 2.6.2: the generated CI uploads coverage to Codecov with `use_oidc: true` and a job-level `permissions:` block (`contents: read`, `id-token: write`) instead of a `CODECOV_TOKEN` secret. `ship` 3.1.2: drops the upload-credential precheck (environment variable, `~/.pypirc`, `npm whoami`); an authentication failure at upload still skips that registry with `PARTIAL` and puts the setup under `Decision`.
