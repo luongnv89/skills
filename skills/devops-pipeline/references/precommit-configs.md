@@ -1,6 +1,6 @@
 # Pre-commit Configurations by Language
 
-Philosophy: **run as much as possible locally, with the fastest free tools**. `pre-commit`-stage hooks catch issues immediately (budget: under 10 seconds on changed files); `pre-push`-stage hooks run the whole test suite while it fits, then only the tests the push affects, plus E2E tests, before code leaves the machine (budget: under 60 seconds). GitHub Actions keeps only the version matrix, secrets-dependent work, deploys, and a diff-scoped bypass guard.
+Philosophy: **run as much as possible locally, with the fastest free tools**. `pre-commit`-stage hooks catch issues immediately (budget: under 10 seconds on changed files); `pre-push`-stage hooks run the whole test suite while it fits, then only the tests the push affects, plus E2E tests, before code leaves the machine (budget: under 60 seconds). GitHub Actions keeps only the version matrix, CI-only scans, deploys, and a diff-scoped bypass guard.
 
 **Stage names.** pre-commit 3.2 renamed `commit` to `pre-commit` and `push` to `pre-push`. The old names still work on 4.x but emit a deprecation warning and are scheduled for removal, so every config below uses the new names, and pins `pre-commit-hooks` v6.0.0, whose manifest uses them too. To upgrade an existing file in place:
 

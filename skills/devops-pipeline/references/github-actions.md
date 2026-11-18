@@ -467,8 +467,12 @@ jobs:
       - name: Coverage summary
         if: matrix.node-version == 24
         run: |
-          jq -r '.total | "Lines \(.lines.pct)%, branches \(.branches.pct)%"' \
-            coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
+          if [ -f coverage/coverage-summary.json ]; then
+            jq -r '.total | "Lines \(.lines.pct)%, branches \(.branches.pct)%"' \
+              coverage/coverage-summary.json >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No coverage/coverage-summary.json: add json-summary to the coverage reporters' >> "$GITHUB_STEP_SUMMARY"
+          fi
 ```
 
 ### With pnpm
