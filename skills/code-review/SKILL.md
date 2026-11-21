@@ -1,9 +1,9 @@
 ---
 name: code-review
-description: "Review or improve code — one skill, four modes: bug/security review (default), performance, clean-code audit, slop cleanup. Pass mode:review|perf|clean|cleanup or infer. Don't use for writing features or generating tests (use test-coverage)."
+description: "Review or improve code in four modes: bug/security review (default), performance, clean-code audit, slop cleanup (mode:review|perf|clean|cleanup). Don't use for features, tests (test-coverage) or a full comment audit (comment-audit)."
 license: MIT
 metadata:
-  version: 2.4.0
+  version: 2.4.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
   effort: "high"
