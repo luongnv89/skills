@@ -16,6 +16,8 @@
 - Adapt to any testing framework (Jest, Vitest, pytest, Go, Rust)
 - Write deterministic, isolated tests: no network, real database, wall clock, unseeded randomness, or `sleep()`, and every test asserts on behavior, not just executed lines
 - Rerun the new tests on their own to catch flaky ones. A test that exposes a suspected bug is reported to you, never weakened to pass
+- Leave your existing tests alone: it never edits, skips, retries or deletes a test that was there before, and never adds a retry or rerun marker to make a test pass
+- Never mocks a whole module (`vi.mock`, `jest.mock`): code reachable only that way is reported as an untested gap instead, so JavaScript coverage gains can be smaller
 - Create feature branch automatically before adding tests
 - Final report states the result, the commands that ran, what was not checked, and any action left to you
 
@@ -63,7 +65,7 @@ asm install github:luongnv89/skills:skills/test-coverage
 
 | Path | Description |
 |---|---|
-| `references/unit-test-quality.md` | The standard every new test meets: rules, fakes, layout, flakiness fixes, and a four-question self-check |
+| `references/unit-test-quality.md` | The standard every new test meets: rules, fakes, layout, flakiness fixes, and a five-question self-check |
 
 ## Output
 

@@ -254,7 +254,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 |---|---|---|---|
 | [**code-review**](skills/code-review/) | 2.4.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**codebase-modernizer**](extras/codebase-modernizer/) | 1.5.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
-| [**test-coverage**](skills/test-coverage/) | 1.7.0 | low | Target untested branches and edge cases |
+| [**test-coverage**](skills/test-coverage/) | 1.8.0 | low | Target untested branches and edge cases |
 | [**user-test**](extras/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
 | [**dont-make-me-think**](extras/dont-make-me-think/) | 1.7.1 | medium | Usability review using Krug's principles |
 | [**ux-ax-review**](extras/ux-ax-review/) | 1.3.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
