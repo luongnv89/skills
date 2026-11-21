@@ -46,14 +46,14 @@ Reply: approve all · approve <IDs> · skip · stop
 ## Highlights
 
 - **Four kinds, one action each:**
-  - Tautology and Stale comments are deleted.
+  - Tautology and Stale comments are deleted. A doc comment that only describes what something is or does counts as a Tautology; only reasons go into ADRs.
   - Excuse comments become an issue for the hack, then are deleted.
   - Decision Records move into an ADR, then are deleted.
-- **A plan before every change:** ADRs, issues, deletions and the lint ratchet each get their own plan. Approve all of it, some IDs, skip it, or stop. Nothing changes without a reply to that plan
+- **A plan before every change:** preparing the repo (pull, branch, running your checks), ADRs, issues, deletions and the lint ratchet each get their own plan. Approve all of it, some IDs, skip it, or stop. Nothing changes, not even a branch, without a reply to that plan
 - **Nothing lost:** an Excuse comment is deleted only after its issue exists, and a Decision Record only after its ADR exists
-- **Safe deletions:** directives, license headers, doctests and other machine-read comments are never touched. A diff check allows only the approved comment lines to go, and your tests must still pass with no fewer tests run
+- **Safe deletions:** directives, license headers, doctests, `// falls through` and other machine-read comments are never touched. A diff check allows only the approved comment lines to go, your uncommitted work is never edited or committed, and your checks must still pass with no fewer tests passed. If your checks cannot run on the machine, the plan says so before you approve
 - **A ratchet, not a big bang:** existing comments go into a baseline and each file's count may only go down. It uses ESLint's bulk suppressions for JS/TS, and a small check script for other stacks
-- **Two numbers:** the lines you would shed by deleting every comment, and the lines this run actually removed
+- **Two numbers:** the lines you would shed by deleting every comment, and the comment lines this run actually removed
 
 ## When to Use
 
@@ -69,7 +69,7 @@ It does not write docs or docstrings, and it is not the quick slop pass inside a
 
 ```mermaid
 graph TD
-    A["Prepare: sync, scope, base, baseline checks"] --> B["Inventory every comment; set machine-read ones aside"]
+    A["Prepare: scope; Gate 0 for sync, branch and checks"] --> B["Inventory every comment; set machine-read ones aside"]
     B --> C["Sort: Stale, Excuse, Decision Record, Tautology"]
     C --> D["Estimate lines shed"]
     D --> E{"Read-only?"}
@@ -90,6 +90,7 @@ graph TD
 | `references/categories.md` | The four kinds: signals, the sorting order, tie rules, unsure entries, examples |
 | `references/comment-syntax.md` | How to find comments per language, comment units, the machine-read list, files left out |
 | `references/plans.md` | The plan shown at each gate and how replies are handled |
+| `references/deletion.md` | How comments are deleted, the deletion check, re-running checks, unverified deletions, commits |
 | `references/adr-and-issues.md` | ADR folder and format detection, the default ADR template, issue search, body and labels |
 | `references/lint-ratchet.md` | The ESLint route, the check script for other stacks, wiring, and the probes that prove it |
 | `references/step-reports.md` | The step completion report format and per-step checks |
@@ -99,5 +100,5 @@ graph TD
 
 - An audit file outside the repository listing every comment, its kind and the reason
 - ADR files, issues, comment deletions and a comment ban with its baseline, each only after you approve its plan
-- One local commit per approved group. Nothing is pushed unless you ask
+- One local commit each for the ADRs, the deletions and the ratchet, holding only the files that plan named. Nothing is pushed unless you ask
 - A Final Report: `Result` (COMPLETE / PARTIAL / BLOCKED), `Evidence`, `Uncertainty`, `Decision`

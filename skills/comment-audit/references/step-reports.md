@@ -20,14 +20,14 @@ Adapt the check names to what the step actually checked.
 
 | Step | Checks |
 |---|---|
-| 0 Prepare | `Git repository`, `Repo synced` (or skipped, with the reason), `Scope listed`, `Base recorded`, `Baseline checks run`, `Branch ready` (Full mode) |
+| 0 Prepare | `Git repository`, `Pre-sync list saved`, `Scope listed`, `Checks found`, `Gate 0 plan shown` (Full mode), `Approval received` (or no-change path, with the reason), `Base recorded`, `Baseline checks run` (or not run, with the reason) |
 | 1 Inventory | `Scope listed`, `Tokenizer used` (or scanner, as an approximation), `Units recorded`, `Machine-read listed`, `Audit file written` |
-| 2 Sort | `Every unit has a kind or is unsure`, `Stale entries cite evidence`, `Decisions grouped`, `Hacks grouped` |
+| 2 Sort | `Every unit has a kind or is unsure`, `Stale entries cite evidence`, `ADRs grouped by subsystem`, `Hacks grouped` |
 | 3 Estimate | `Own lines summed`, `Inline and machine-read counted apart`, `Share of scope computed` |
-| 4 Gate A | `Plan shown`, `Approval received` (or skipped), `ADRs written`, `ADR commit made` |
+| 4 Gate A | `Plan shown`, `Approval received` (or skipped), `ADRs written`, `ADR commit made with only ADR paths` |
 | 5 Gate B | `Duplicates searched`, `Plan shown`, `Approval received` (or skipped), `Issues filed or drafted` |
-| 6 Gate C | `Plan shown`, `Approval received` (or skipped), `Deletion check clean`, `Baseline checks still pass`, `Tests passed not lower`, `Deletion commit made` |
-| 7 Gate D | `Plan shown`, `Approval received` (or skipped), `Baseline written`, `Probe: passes on tree`, `Probe: fails on added comment`, `Probe: lowers on deletion`, `Ratchet commit made` |
-| 8 Report | `Estimate and lines shed reported apart`, `Unchanged items listed`, `Final Report printed` |
+| 6 Gate C | `Plan shown`, `Approval received` (or skipped), `Deletion check clean`, `Baseline checks still pass` (or unverified), `Tests passed not lower`, `Deletion commit made with only source paths` |
+| 7 Gate D | `Plan shown`, `Approval received` (or skipped), `Baseline written`, `Ratchet commit made`, `Probe: passes on tree`, `Probe: fails on added comment`, `Probe: lowers on deletion`, `Probe: directive still passes` |
+| 8 Report | `Estimate and lines deleted reported apart`, `Unchanged items listed`, `Final Report printed` |
 
-A skipped gate reports `Approval received: — skipped by the user` and `Result: PASS`. A gate that stops with no user to answer reports `Result: PARTIAL`.
+A skipped gate reports `Approval received: — skipped by the user` and `Result: PASS`. A gate that stops with no user to answer reports `Result: PARTIAL`. A gate with no items reports `— nothing to do` and `Result: PASS`.

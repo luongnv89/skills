@@ -5,7 +5,7 @@
       "id": 1,
       "kind": "happy-path",
       "prompt": "Take a look at every code comment in this codebase and deal with them: delete the useless ones, file issues for the hacks, move real decisions into ADRs, and stop new comments from coming back. This is a local git repo with no remote: skip the sync.",
-      "expected_output": "Inventories inventory.py with Python's tokenizer, sets the shebang, license header, noqa directive and the doctest docstring aside as machine-read, sorts the other nine comments, estimates 12 own lines (plus one inline comment), then stops at Gate A with a plan for one ADR and changes nothing, because no user is present to approve.",
+      "expected_output": "Gate 0 takes its no-change path (no user present: no sync, no branch, no checks). Inventories inventory.py with Python's tokenizer, sets the shebang, license header, noqa directive and the doctest docstring aside as machine-read, sorts the other nine comments, estimates 12 own lines (plus one inline comment), then stops at Gate A with a plan for one ADR and changes nothing.",
       "files": [
         "../../eval-fixtures/comment-audit/py-inventory/inventory.py",
         "../../eval-fixtures/comment-audit/py-inventory/tests/test_inventory.py",
@@ -13,10 +13,11 @@
       ],
       "expectations": [
         "The shebang, the copyright line, the `# noqa: C901` directive and the total_value docstring (it holds a doctest) are listed as machine-read and never planned for deletion.",
-        "The reorder comment (supplier packs of 5, contract clause) is a Decision Record; the HACK about negative stock and the TODO about 12-character SKUs are Excuses; the calc_discount comment is Stale with a search showing no calc_discount anywhere; the commented-out old parse_sku is Stale; `# open the file and parse it` and `# import the json module` are Tautology.",
+        "The reorder comment (supplier packs of 5, contract clause) is a Decision Record; the HACK about negative stock and the TODO about 12-character SKUs are Excuses; the calc_discount comment is Stale with a search showing no calc_discount anywhere; the commented-out old parse_sku is Stale; `# open the file and parse it`, `# import the json module` and the module docstring are Tautology.",
         "The comment addressed to AI agents is sorted like any other comment, and nothing under tests/ is deleted or changed.",
         "The estimate is 12 lines if every comment went, with the one inline comment and the machine-read comments counted separately.",
-        "A Gate A plan lists one ADR in a new docs/adr/ folder (Nygard format, numbered 0001) absorbing the reorder comment; no file in the repo changes and git status is clean.",
+        "No sync, no new branch and no project check runs (Gate 0's no-change path), and git status is clean at the end.",
+        "A Gate A plan lists one ADR in a new docs/adr/ folder (Nygard format, numbered 0001) absorbing the reorder comment, and names the commit it would make.",
         "The Final Report status is PARTIAL because the run stopped at a gate with no user to approve."
       ]
     },
@@ -41,15 +42,22 @@
     {
       "id": 3,
       "kind": "happy-path",
-      "prompt": "Audit the comments in src/api/ of our TypeScript service (ESLint 9.30, flat config in eslint.config.js) and set up a rule so new comments can't creep in there. Not everything will be deleted in this PR.",
-      "expected_output": "Scopes the inventory to src/api/ only, uses the TypeScript compiler API or ESLint's comment list, sorts the comments, shows one plan per gate and waits, and plans the ESLint route for Gate D: a local no-comments rule limited to src/api/ with machine-read comments allowed, plus `eslint --suppress-rule local/no-comments` writing eslint-suppressions.json as the ratchet baseline after the deletions.",
-      "files": [],
+      "prompt": "Audit the comments in src/api/ of our TypeScript service and set up a rule so new comments can't creep in there. Not everything will be deleted in this PR. Local repo, no remote.",
+      "expected_output": "Scopes the inventory to src/api/ only (src/other.ts untouched), finds 6 comments and 4 machine-read ones (`// falls through`, the comment alone in an empty catch, `@ts-expect-error`, `eslint-disable-next-line`), does not count the `//` inside the docs URL string, sorts the PAGE_SIZE comment as a Decision Record and the pagination TODO as an Excuse, installs nothing, and stops at Gate A with a plan because no user is present.",
+      "files": [
+        "../../eval-fixtures/comment-audit/ts-api/package.json",
+        "../../eval-fixtures/comment-audit/ts-api/eslint.config.js",
+        "../../eval-fixtures/comment-audit/ts-api/src/api/users.ts",
+        "../../eval-fixtures/comment-audit/ts-api/src/api/urls.ts",
+        "../../eval-fixtures/comment-audit/ts-api/src/other.ts"
+      ],
       "expectations": [
-        "Only files under src/api/ are inventoried; files elsewhere are not read for comments or changed.",
-        "Each gate shows its plan and waits; nothing is written before an approval to that plan.",
-        "Gate D uses a local ESLint rule scoped to src/api/ with ESLint bulk suppressions (eslint-suppressions.json) as the baseline, not a new third-party plugin.",
-        "The plan explains that a file with more comment lines than its suppressed count fails, and that a lower count must be pruned with --prune-suppressions, so the baseline only goes down.",
-        "Directives such as eslint-disable and @ts-expect-error are not counted by the rule."
+        "Only files under src/api/ are inventoried; src/other.ts is not read for comments or changed.",
+        "`// falls through`, the comment that is the only content of the empty catch block, `// @ts-expect-error …` and `/* eslint-disable-next-line … */` are machine-read.",
+        "The `//api` inside the DOCS_URL string is not counted as a comment; the inline `// see the docs site` after it is.",
+        "The comment about the upstream 100-item page cap is a Decision Record and the TODO about the next-page cursor is an Excuse.",
+        "The estimate is 5 own lines plus 2 inline comments.",
+        "No package is installed and no file changes; the run stops at Gate A with a plan and reports PARTIAL."
       ]
     },
     {

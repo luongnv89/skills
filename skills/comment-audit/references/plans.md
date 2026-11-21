@@ -1,29 +1,44 @@
 # Gate plans
 
-Every approval gate prints one plan for its action group alone, then asks one question and waits. Keep each plan short enough to read on one screen. When it has more than 30 items, print the summary and the first 30 items, and put the full list in `plan-<gate>.md` in the audit folder. Give that path in the plan.
+Every approval gate prints one plan for its action group alone, then asks one question and waits. Keep each plan short enough to read on one screen. With more than 30 items, print the summary and the first 30 items, put the full list in `plan-<gate>.md` in the audit folder, and give that path. An item that absorbs many comments shows its count and its first five IDs; the full list goes in the file.
 
 ## Shape
 
 ```text
-Gate <A|B|C|D> — <action group> (<N> items)
+Gate <0|A|B|C|D> — <action group> (<N> items)
 Scope: <scope> · base <7-char SHA> · branch <branch>
 Changes: <files created or changed, or issues filed>, nothing else
+Commit: "<message>" with only <paths>, on <branch> (or: no commit)
 Items:
   <ID>  <one line per item>
   ...
-Not in this plan: <unsure entries, skipped kinds, pre-sync paths, with counts>
+Not in this plan: <unsure entries, skipped kinds, pre-sync paths, linter-required doc comments, with counts>
 Reply: approve all · approve <IDs> · skip · stop
 ```
 
+A gate with no items prints `Gate <X> — <action group>: nothing to do (<reason>)` and moves on without asking.
+
 ## Per gate
 
-**Gate A, ADRs.** One item per ADR: `ADR-<number> <path> "<title>" ← C012, C044: <two-line summary>`. Name the format (the repo's existing template, or the default in `references/adr-and-issues.md`) and say whether an index file changes.
+**Gate 0, prepare.** Three items:
+- `P1 sync`: the commands from *Repo Sync Before Edits*, and whether a stash is needed (the user has uncommitted changes).
+- `P2 branch`: its name.
+- `P3 checks`: each check command and what it may write (build folders, caches).
 
-**Gate B, issues.** One item per hack: `I<n> "<title>" ← C031 (src/sync.py:88), labels: <existing labels or none>`. If the duplicate search found an issue, the item reads `link to #<number> (open|closed): <title>` instead of filing. Name the tracker and repository (`gh`, `owner/repo`).
+Replies: approve all, approve some (for example `approve P2 P3`, so no sync), skip (no sync, no branch, no checks), stop.
 
-**Gate C, deletion.** Start with the counts: per kind, and the own lines removed. Then one item per comment, `C007 Tautology src/load.py:13 "# open the file and parse it"`, grouped by file. Then list every forced code change separately (`src/base.py:40 empty body → ...`). Leave out Excuse entries without an issue number and Decision Record entries without an ADR, and say why.
+**Gate A, ADRs.** One item per ADR: `ADR-<number> <path> "<title>" ← 12 comments (C012, C044, …): <two-line summary>`. Name the format (the repo's existing template, or the default in `references/adr-and-issues.md`) and say whether an index file changes.
 
-**Gate D, ratchet.** The mechanism and why it fits the stack, every file added or changed with the change in one line, the command that runs the check and where it is wired, the baseline total (comment lines in how many files), and the known gaps from `references/lint-ratchet.md`.
+**Gate B, issues.** One item per hack: `I<n> "<title>" ← C031 (src/sync.py:88), labels: <existing labels or none>`. If the duplicate search found an issue, the item reads `link to #<number> (open|closed): <title>` instead of filing. Name the tracker and repository (`gh`, `owner/repo`), or say the issues become drafts in the audit folder because no tracker can be written to.
+
+**Gate C, deletion.** Start with the counts:
+- per kind, with how many of the Tautologies are descriptive doc comments;
+- the comment lines removed, and the blank lines and inline edits apart;
+- the verification line: the checks that will be re-run, or the `UNVERIFIED` block from `references/deletion.md`.
+
+Then one item per comment, `C007 Tautology src/load.py:13 "# open the file and parse it"`, grouped by file. List every forced code change separately (`src/base.py:40 empty body → ...`). Leave out Excuse entries without an issue number and Decision Record entries without an ADR, and say why. If a linter requires doc comments, ask here whether to keep them or also change the lint config.
+
+**Gate D, ratchet.** One item per file, with an ID: `D1 scripts/check_comments.py (new)`, `D2 comment-baseline.json (new, 214 lines in 31 files)`, `D3 package.json: "lint" script runs the check`. Then the mechanism and why it fits the stack, the command that runs the check, and the known gaps from `references/lint-ratchet.md`.
 
 ## Replies
 
