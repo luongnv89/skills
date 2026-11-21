@@ -45,6 +45,32 @@ def test_parse_packet_rejects_truncated_header():
 | Real ports or temp files | Use in-memory fakes, or a per-test temp dir (`tmp_path`, `t.TempDir()`) |
 | A retry, rerun flag or skip marker | Never a fix: it hides the cause and teaches the next run to retry instead of looking for it. Fix the cause with a row above, or remove the new test and list it under `Uncertainty:` |
 
+## Integrity check
+
+Step 4 runs this before and after the commit. It passes only when the run left every pre-existing test (a test in a file tracked at the Step 0 base) checking exactly what it checked before.
+
+Read the changes against the base, staged and unstaged together, with no diff drivers: `git diff --no-ext-diff --no-textconv --no-color -U0 <base>`, plus the new files from `git status --porcelain --untracked-files=all`. The check fails when any of these holds:
+
+1. A pre-existing test file loses a line that is not an allowed change below.
+2. Any test file gains a line that skips, selects, marks or retries tests (table below).
+3. A new test reuses the name of a test already defined in the same file or module, so it replaces the old one.
+4. Test-selection config changed or appeared: `conftest.py`, `pytest.ini`, `tox.ini`, `setup.cfg`, the pytest, Jest or Vitest sections of `pyproject.toml` or `package.json`, `jest.config.*`, `vitest.config.*`, a Go `TestMain`. A manifest may change only to add the coverage tool (SKILL.md → Edge Cases).
+
+Allowed changes to a pre-existing line:
+
+- **An extended import**: the same module, every original name and alias kept, at least one name added. It may be rewrapped over several lines: a parenthesised Python import, JavaScript braces, a Go import block replacing a single import, a rustfmt `use` tree.
+- **The last line** removed and re-added unchanged, because a newline was added at the end of the file.
+- **Outside Python**, a line in that import block re-added with only the whitespace the project's formatter changed (gofmt alignment).
+
+A new row in an existing table test is an edit of that test: add a new test function instead. Keep each file's line endings; rewriting CRLF as LF changes every line.
+
+| Stack | Never added |
+|---|---|
+| Python | `pytest.mark.skip`, `skipif`, `xfail`, `flaky`, `pytestmark`, `pytest.skip(`, `unittest.skip`, `reruns` |
+| JavaScript/TypeScript | `.skip`, `.only`, `.todo`, `xit`, `xdescribe`, `fit`, `fdescribe`, `jest.retryTimes`, `retry:` |
+| Go | `t.Skip`, `TestMain`, a `testing.Short()` guard |
+| Rust | `#[ignore]` |
+
 ## Self-check
 
 Ask these five questions of each new test before Step 4. Rewrite a test that fails any of them:
