@@ -64,7 +64,7 @@ asm install github:luongnv89/skills:skills/test-coverage
 
 | Path | Description |
 |---|---|
-| `references/unit-test-quality.md` | The standard every new test meets: rules, fakes, layout, flakiness fixes, and a four-question self-check |
+| `references/unit-test-quality.md` | The standard every new test meets: rules, fakes, layout, flakiness fixes, and a five-question self-check |
 
 ## Output
 

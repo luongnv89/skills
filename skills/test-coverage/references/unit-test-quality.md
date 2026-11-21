@@ -51,19 +51,21 @@ Step 4 runs this before the commit and again on `<base>..HEAD` after it. It pass
 
 Read every change against the base, staged and unstaged together, with renames split and no diff drivers: `git diff --no-ext-diff --no-textconv --no-color --no-renames --text -U0 <base>`, plus the new files from `git status --porcelain --untracked-files=all`. Leave paths on the pre-sync list out of the check (they are the user's work, which this run never writes to) and name them under `Uncertainty:`, since the suite ran with them.
 
+**Every new test, fixture and helper**, in any file, restores everything it changes (patch with the framework's tools, which undo the patch afterwards) and leaves shared state as it found it. An unrestored assignment to a module global, another module's attribute, or the environment fails the check. A class body holds only definitions, and no code runs at import or package load beyond imports, constants and definitions: no autouse or session-wide fixture, no Go `func init()` or package-level `var` with a function call.
+
 **A pre-existing test file may change only like this:**
 
-- **Added lines** belong to a new top-level test (function, class, or `#[test]` item) whose name is not defined anywhere in the file at the base, together with its body, or to an import below. No other added line: no module-level statement, fixture, assignment, build tag, or line inside an existing test.
-- **An extended import**: the same module, every original name and alias kept unchanged, at least one name added, and no added name already bound in the file. It may be rewrapped over several lines (a parenthesised Python import, JavaScript braces, a Go import block replacing a single import, a rustfmt `use` tree). A new import line follows the same rule: it binds no name the file already binds.
+- **Added lines** belong to a new test whose name is not defined in the file (or Go package) at the base, together with its body and blank separator lines, or to an import below. A new test may sit at top level or directly inside an existing test container (a test class, a `describe` block, a Rust `#[cfg(test)]` module), never inside an existing test's body. No other added line: no module-level statement, fixture, assignment, build tag, or line inside an existing test.
+- **An import**: an existing one extended from the same module, every original name and alias kept unchanged, at least one name added; or a new import line. Neither may bind a name the file already binds. Either may be wrapped over several lines (a parenthesised Python import, JavaScript braces, a Go import block replacing a single import, a rustfmt `use` tree).
 - **Removed lines** only from such an import, or the last line re-added unchanged because a final newline was added. Outside Python, a line in that import block may come back with only the whitespace the project's formatter changed (gofmt alignment).
 
-A pre-existing test file that is deleted, renamed or moved fails the check. A new row in an existing table test is an edit of that test: add a new test function instead. Keep each file's line endings; rewriting CRLF as LF changes every line.
+A pre-existing test file that is deleted, renamed or moved fails the check. A new row in an existing table test is an edit of that test: add a new test instead. Keep each file's line endings; rewriting CRLF as LF changes every line.
 
-**A new file** may hold tests, plus fixtures and helpers that only those tests use and that restore everything they change. It may not run code at import time beyond imports, constants and definitions, define an autouse or session-wide fixture, patch shared state for other tests, or reuse a pre-existing test's name.
+**A new file** holds only new tests and the fixtures and helpers they alone use, under the rule above. Its test names may not repeat a pre-existing test's name in the same Go package.
 
-**Never changed or added:** test-selection config and anything that passes runner options: `conftest.py`, `pytest.ini`, `pytest.toml`, `tox.ini`, `setup.cfg`, the test sections of `pyproject.toml` or `package.json` (including its `scripts`), `jest.config.*`, `vitest.config.*`, a Makefile or CI workflow, `.gitattributes`, a Go `TestMain`. A manifest may change only to add the coverage tool (SKILL.md → Edge Cases).
+**Never changed or added:** test-selection config and anything that passes runner options: `conftest.py`, `pytest.ini`, `pytest.toml`, `tox.ini`, `setup.cfg`, the test sections of `pyproject.toml` or `package.json` (including its `scripts`), `jest.config.*`, `vitest.config.*`, a Makefile or CI workflow, `.gitattributes`, a Go `TestMain`. The run sets no environment variable and installs nothing but the coverage tool (SKILL.md → Edge Cases), which is the only manifest change allowed. Files the test and coverage tools generate (`.coverage`, caches), left untracked and unstaged, are not changes.
 
-These markers never appear in an added line. Match them as code (a decorator, call, attribute or option), not inside a name or a comment:
+These markers never appear in an added line. Match them as the test framework's API (a decorator, call, attribute or option), not inside a name, a comment, or another library's method:
 
 | Stack | Never added |
 |---|---|
@@ -74,14 +76,18 @@ These markers never appear in an added line. Match them as code (a decorator, ca
 
 If the check fails after the commit, push nothing: report `PARTIAL — existing test changed` with the line, and leave the commit for the user to inspect.
 
+## Reading a test result
+
+A solo run, a break check and the base check below are judged by the test's own reported result (passed, failed, error), never by the command's exit status. A run in which the test was not collected or did not execute, or whose only failure is a coverage threshold, gives **no result**.
+
 ## Failing pre-existing tests
 
 When a test that passed at baseline fails in Step 4, decide at the base, never on the branch:
 
-1. `git worktree add --detach <scratch-dir> <base>`, then run that test there alone by its test id, three times, with Step 1's command.
-2. It fails at least once there → a **pre-existing flake**: put it and its visible cause under `Decision:`; it does not block the commit.
-3. It passes all three times there → **this run broke it**: report `PARTIAL` and name it, even if it passes alone on the branch. A rare flake can pass three times and be blamed here; that errs on the safe side, since nothing is committed.
-4. Remove the worktree with `git worktree remove --force <scratch-dir>`.
+1. `git worktree add --detach <dir outside the repo> <base>`, and run that test there alone by its test id with Step 1's command and environment (the same interpreter, virtualenv or installed dependencies; point to them rather than installing anything). Run it up to three times and stop at the first failure.
+2. It fails there → a **pre-existing flake**: put it and its visible cause under `Decision:`; it does not block the commit, and the `Result:` names it. A later failure of the same test in this run keeps this decision.
+3. It passes all three times, or gives no result in any run → **this run broke it**: report `PARTIAL` and name it, even if it passes alone on the branch. A flake that fails one run in three still passes three runs in a row about a third of the time and is blamed here; that errs on the safe side, since nothing is committed.
+4. Remove the worktree with `git worktree remove --force` in every outcome, then confirm `git worktree list` no longer shows it.
 
 ## Self-check
 

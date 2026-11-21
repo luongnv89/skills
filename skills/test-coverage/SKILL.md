@@ -33,7 +33,7 @@ Detect the project's language from its manifest file and use the matching comman
 If none of these manifests is found, see [Edge Cases](#edge-cases) — "No test framework detected".
 
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote. First save `git status --porcelain` as the pre-sync list, even when the user says to skip the sync; Step 4 never stages those paths.
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote. First save `git status --porcelain --untracked-files=all` as the pre-sync list, even when the user says to skip the sync; Step 4 never stages those paths.
 
 ```bash
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -90,7 +90,7 @@ Leave trivial code out of the gap list: getters and setters, plain data classes 
 
 ### 4. Verify Improvement
 
-Use Step 1's exact commands throughout, adding only test ids for solo runs.
+Use Step 1's exact commands throughout, adding only test ids for solo runs, and judge each test by its own reported result (`references/unit-test-quality.md` → *Reading a test result*).
 
 1. Run the full test suite. If a previously passing test now fails, decide at the base as *Failing pre-existing tests* in `references/unit-test-quality.md` says: only a test that also fails at the base is a pre-existing flake, put under `Decision:` with its visible cause; otherwise the run broke it: report PARTIAL and name it. Never rerun the full suite to replace a red result with a green one. If a new test fails, run it on its own twice more, as diagnosis, not a retry: if it passes in either solo run, it is flaky: handle it as in item 2. Only if it fails all three times, read the failure and decide which side is wrong:
    - **The test is wrong** (bad setup, or an expectation the code never promised): fix the test, then rerun.
@@ -136,7 +136,7 @@ A run passes when **all** of the following are true:
 - [ ] Every new test asserts on a return value, a raised error, or an observable effect. A test that only executes code does not count.
 - [ ] Every committed test failed the Step 4 break check against a planted bug, and every planted bug was reverted. No test targets trivial code alone.
 - [ ] No new test uses the network, the wall clock, unseeded randomness, or `sleep()`, or a real database other than a test-database fixture the existing unit tests already use.
-- [ ] Pre-existing tests are unchanged apart from extended imports, the *Integrity check* passed before and after the commit, and the run added nothing that skips, selects or retries tests.
+- [ ] Pre-existing tests are unchanged apart from added imports, the *Integrity check* passed before and after the commit, and the run added nothing that skips, selects or retries tests.
 - [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.), apart from a pre-existing test shown flaky at the base and named under `Decision:`, and the new tests pass when run on their own, twice.
 - [ ] A new test that exposed a suspected bug is left out of the commit and reported under `Decision:`. No assertion was loosened to match the code.
 - [ ] All new tests live on a feature branch (e.g., `feat/test-coverage`), never on `main`/`master`.
