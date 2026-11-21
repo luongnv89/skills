@@ -90,7 +90,7 @@ Leave trivial code out of the gap list: getters and setters, plain data classes 
 
 ### 4. Verify Improvement
 
-Use Step 1's exact commands throughout, adding only test ids and cache-disabling flags (`-count=1`) for solo runs, and judge each test by its own reported result (`references/unit-test-quality.md` → *Reading a test result*).
+Use Step 1's exact commands throughout, adding only test ids (and Go's `-count=1`) for solo runs, and judge each test by its own reported result (`references/unit-test-quality.md` → *Reading a test result*).
 
 1. Run the full test suite. If a previously passing test now fails, decide at the base as *Failing pre-existing tests* in `references/unit-test-quality.md` says: only a test that also fails at the base is a pre-existing flake, put under `Decision:` with its visible cause; otherwise the run broke it: report PARTIAL and name it. Never rerun the full suite to replace a red result with a green one. If a new test fails, run it on its own twice more, as diagnosis, not a retry: if it passes in either solo run, it is flaky: handle it as in item 2. Only if it fails all three times, read the failure and decide which side is wrong:
    - **The test is wrong** (bad setup, or an expectation the code never promised): fix the test, then rerun.
