@@ -16,7 +16,7 @@ Prefer a tokenizer or parser, because it never mistakes `#` or `//` inside a str
 | Java, Kotlin, C, C++, C#, Scala, Dart | `//`, `/* */`, `/** */` | A scanner that skips string and char literals, text blocks, raw strings and verbatim strings. Kotlin and Scala block comments nest |
 | PHP | `//`, `#`, `/* */` | A scanner that skips strings and here/nowdocs. `#[` starts an attribute, not a comment |
 | Ruby | `#`, `=begin … =end` | `Ripper.lex` (`:on_comment` tokens) through `ruby -e`, else a scanner |
-| Shell (`.sh .bash .zsh`, and files whose shebang names a shell) | `#` | A scanner that skips quoted strings and here-documents. `#` starts a comment only at the start of a word: after a space, a tab, a line start, or `;` `\|` `&` `(` `)`. So `$#`, `${#var}`, `${var#x}`, `${var##*/}`, `$((16#ff))` and `a#b` are code |
+| Shell (`.sh .bash .zsh`, Bats test files `.bats`, and files whose shebang names a shell or `bats`) | `#` | A scanner that skips quoted strings and here-documents. `#` starts a comment only at the start of a word: after a space, a tab, a line start, or `;` `\|` `&` `(` `)`. So `$#`, `${#var}`, `${var#x}`, `${var##*/}`, `$((16#ff))` and `a#b` are code |
 | SQL | `--`, `/* */` | A scanner that skips quoted strings |
 | CSS, SCSS, Less | `/* */` (SCSS and Less also `//`) | A scanner that skips strings and `url(...)` |
 
