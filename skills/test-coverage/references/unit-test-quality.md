@@ -47,29 +47,41 @@ def test_parse_packet_rejects_truncated_header():
 
 ## Integrity check
 
-Step 4 runs this before and after the commit. It passes only when the run left every pre-existing test (a test in a file tracked at the Step 0 base) checking exactly what it checked before.
+Step 4 runs this before the commit and again on `<base>..HEAD` after it. It passes only when every pre-existing test (a test in a file tracked at the Step 0 base) still runs and checks exactly what it checked before. It is an allow-list: a change it does not allow fails the check, however harmless it looks.
 
-Read the changes against the base, staged and unstaged together, with no diff drivers: `git diff --no-ext-diff --no-textconv --no-color -U0 <base>`, plus the new files from `git status --porcelain --untracked-files=all`. The check fails when any of these holds:
+Read every change against the base, staged and unstaged together, with renames split and no diff drivers: `git diff --no-ext-diff --no-textconv --no-color --no-renames --text -U0 <base>`, plus the new files from `git status --porcelain --untracked-files=all`. Leave paths on the pre-sync list out of the check (they are the user's work, which this run never writes to) and name them under `Uncertainty:`, since the suite ran with them.
 
-1. A pre-existing test file loses a line that is not an allowed change below.
-2. Any test file gains a line that skips, selects, marks or retries tests (table below).
-3. A new test reuses the name of a test already defined in the same file or module, so it replaces the old one.
-4. Test-selection config changed or appeared: `conftest.py`, `pytest.ini`, `tox.ini`, `setup.cfg`, the pytest, Jest or Vitest sections of `pyproject.toml` or `package.json`, `jest.config.*`, `vitest.config.*`, a Go `TestMain`. A manifest may change only to add the coverage tool (SKILL.md → Edge Cases).
+**A pre-existing test file may change only like this:**
 
-Allowed changes to a pre-existing line:
+- **Added lines** belong to a new top-level test (function, class, or `#[test]` item) whose name is not defined anywhere in the file at the base, together with its body, or to an import below. No other added line: no module-level statement, fixture, assignment, build tag, or line inside an existing test.
+- **An extended import**: the same module, every original name and alias kept unchanged, at least one name added, and no added name already bound in the file. It may be rewrapped over several lines (a parenthesised Python import, JavaScript braces, a Go import block replacing a single import, a rustfmt `use` tree). A new import line follows the same rule: it binds no name the file already binds.
+- **Removed lines** only from such an import, or the last line re-added unchanged because a final newline was added. Outside Python, a line in that import block may come back with only the whitespace the project's formatter changed (gofmt alignment).
 
-- **An extended import**: the same module, every original name and alias kept, at least one name added. It may be rewrapped over several lines: a parenthesised Python import, JavaScript braces, a Go import block replacing a single import, a rustfmt `use` tree.
-- **The last line** removed and re-added unchanged, because a newline was added at the end of the file.
-- **Outside Python**, a line in that import block re-added with only the whitespace the project's formatter changed (gofmt alignment).
+A pre-existing test file that is deleted, renamed or moved fails the check. A new row in an existing table test is an edit of that test: add a new test function instead. Keep each file's line endings; rewriting CRLF as LF changes every line.
 
-A new row in an existing table test is an edit of that test: add a new test function instead. Keep each file's line endings; rewriting CRLF as LF changes every line.
+**A new file** may hold tests, plus fixtures and helpers that only those tests use and that restore everything they change. It may not run code at import time beyond imports, constants and definitions, define an autouse or session-wide fixture, patch shared state for other tests, or reuse a pre-existing test's name.
+
+**Never changed or added:** test-selection config and anything that passes runner options: `conftest.py`, `pytest.ini`, `pytest.toml`, `tox.ini`, `setup.cfg`, the test sections of `pyproject.toml` or `package.json` (including its `scripts`), `jest.config.*`, `vitest.config.*`, a Makefile or CI workflow, `.gitattributes`, a Go `TestMain`. A manifest may change only to add the coverage tool (SKILL.md → Edge Cases).
+
+These markers never appear in an added line. Match them as code (a decorator, call, attribute or option), not inside a name or a comment:
 
 | Stack | Never added |
 |---|---|
-| Python | `pytest.mark.skip`, `skipif`, `xfail`, `flaky`, `pytestmark`, `pytest.skip(`, `unittest.skip`, `reruns` |
-| JavaScript/TypeScript | `.skip`, `.only`, `.todo`, `xit`, `xdescribe`, `fit`, `fdescribe`, `jest.retryTimes`, `retry:` |
-| Go | `t.Skip`, `TestMain`, a `testing.Short()` guard |
+| Python | `pytest.mark.skip`, `skipif`, `xfail`, `flaky`, `pytestmark`, `pytest.skip(`, `unittest.skip`, `reruns`, `__test__ = False` |
+| JavaScript/TypeScript | `.skip`, `.only`, `.todo`, `xit`, `xdescribe`, `fit`, `fdescribe`, `jest.retryTimes`, a `retry` option |
+| Go | `t.Skip`, `TestMain`, a `testing.Short()` guard, a `//go:build` line |
 | Rust | `#[ignore]` |
+
+If the check fails after the commit, push nothing: report `PARTIAL — existing test changed` with the line, and leave the commit for the user to inspect.
+
+## Failing pre-existing tests
+
+When a test that passed at baseline fails in Step 4, decide at the base, never on the branch:
+
+1. `git worktree add --detach <scratch-dir> <base>`, then run that test there alone by its test id, three times, with Step 1's command.
+2. It fails at least once there → a **pre-existing flake**: put it and its visible cause under `Decision:`; it does not block the commit.
+3. It passes all three times there → **this run broke it**: report `PARTIAL` and name it, even if it passes alone on the branch. A rare flake can pass three times and be blamed here; that errs on the safe side, since nothing is committed.
+4. Remove the worktree with `git worktree remove --force <scratch-dir>`.
 
 ## Self-check
 
