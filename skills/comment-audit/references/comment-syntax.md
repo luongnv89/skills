@@ -27,7 +27,7 @@ HTML, Vue and Svelte templates are in scope only when the user names them (`<!--
 - A run of line comments on consecutive lines, with nothing else on those lines, is one unit. A blank line, a code line or a machine-read comment ends the run, so a shebang followed by a license line gives two machine-read entries, not one.
 - A block comment, doc comment or docstring is one unit, however many lines it spans.
 - A comment after code on the same line, or between code on the same line, is an inline unit. It has no own lines.
-- Text marked as a comment inside an embedded program (a here-document, a quoted `bash -c '…'`, `awk '…'` or `python3 -c '…'` program) is part of that string, not a comment of the file. Leave it out.
+- Text marked as a comment inside an embedded program (a here-document, a quoted `bash -c '…'`, `awk '…'` or `python3 -c '…'` program) is part of that string, not a comment of the file. Leave it out, and report how many such lines were left out under `Uncertainty:`.
 - **Own lines** are the lines that hold only comment text and whitespace. A docstring's own lines are all the lines of its string statement.
 
 ## Machine-read comments
@@ -57,10 +57,10 @@ If deleting a comment makes a baseline check fail or lowers the number of tests 
 
 Tests and scripts often check source files with `grep`, `sed`, `awk`, `rg` or a file read plus a regex: a banner a test looks for, a schema block a test parses, a word every probe line must carry. Those comments are machine-read, and running the tests is not enough to find them, because the tests may not run on this machine. Find them statically in Step 1:
 
-1. Collect the source-reading commands in the tests, scripts and CI config: each `grep`, `sed`, `awk`, `rg`, `cat … |`, or file read whose input is a path in the scope.
+1. Collect the source-reading commands in the tests, scripts and CI config: each `grep`, `rg`, `sed`, `awk` or file read whose input is a path in the scope.
 2. Make two copies in the audit folder: the base (`git archive HEAD | tar -x`) and the same tree with every `C` entry deleted.
-3. Run each collected command against both copies, with the repo paths pointed at the copy. A command whose output or exit status differs read a comment.
-4. Mark each comment it read as machine-read. When it reads only some lines of a unit, the whole unit is machine-read, so the text the reader needs stays together.
+3. Run only these forms, yourself, as an argument list with no shell, every path rewritten to the copy, and no network: `grep` and `rg` without `--pre`; `sed -n` whose script only selects and prints (line numbers, regex addresses, `p`; never `e`, `w`, `r`, `W`, `R` or an `s///` flag other than `g` and `p`); `awk` whose program has no `system(`, no `|`, no `>` and no `getline`. A command with any other form, or a path built at run time (`git rev-parse`, `$BATS_TEST_DIRNAME`, an absolute path outside the copy), is not run: read it, and judge from its pattern which comments it needs. A file read inside test code is judged the same way. Never run a test here; tests run only as Gate 0 checks.
+4. A command whose output or exit status differs between the copies read a comment. Mark each comment it read as machine-read. When it reads only some lines of a unit, the whole unit is machine-read, so the text the reader needs stays together.
 
 A repo-specific reader ("every probe line must contain the word timeout") also goes into the ratchet's known gaps, since the ratchet must allow that comment by a pattern.
 

@@ -16,7 +16,7 @@ Not in this plan: <unsure entries, skipped kinds, pre-sync paths, linter-require
 Reply: approve all · approve <IDs> · skip · stop
 ```
 
-A gate with no items prints `Gate <X> — <action group>: nothing to do (<reason>)` and moves on without asking.
+A gate with no items prints `Gate <X> — <action group>: nothing to do (<reason>)` and moves on without asking. A gate that would edit or commit while the repo is on its default branch (the user skipped Gate 0's branch) stops and asks for a branch first.
 
 ## Per gate
 
@@ -27,7 +27,7 @@ A gate with no items prints `Gate <X> — <action group>: nothing to do (<reason
 
 Replies: approve all, approve some (for example `approve P2 P3`, so no sync), skip (no sync, no branch, no checks), stop.
 
-**Gate A, ADRs.** One item per ADR: `ADR-<number> <path> "<title>" ← 12 comments (C012, C044, …): <two-line summary>`. Decision Records already recorded in a repo doc get one item each: `R<n> already recorded at <path>:<line> ← C031`. Name the format (the repo's existing template, or the default in `references/adr-and-issues.md`) and say whether an index file changes. If the user skipped Gate 0's branch, the plan stops here and asks for one: nothing is committed on the default branch.
+**Gate A, ADRs.** One item per ADR: `ADR-<number> <path> "<title>" ← 12 comments (C012, C044, …): <two-line summary>`. Decision Records already recorded in a repo doc get one item each: `R<n> already recorded at <path>:<line> ← C031`. Name the format (the repo's existing template, or the default in `references/adr-and-issues.md`) and say whether an index file changes.
 
 **Gate B, issues.** One item per hack: `I<n> "<title>" ← C031 (src/sync.py:88), labels: <existing labels or none>`. If the duplicate search found an issue, the item reads `link to #<number> (open|closed): <title>` instead of filing. Name the tracker and repository (`gh`, `owner/repo`), or say the issues become drafts in the audit folder because no tracker can be written to.
 
@@ -36,9 +36,9 @@ Replies: approve all, approve some (for example `approve P2 P3`, so no sync), sk
 - the comment lines removed, and the blank lines and inline edits apart;
 - the verification line: the checks that will be re-run, or the `UNVERIFIED` block from `references/deletion.md`.
 
-Then one item per comment, `C007 Tautology src/load.py:13 "# open the file and parse it"`, grouped by file. List every forced code change separately (`src/base.py:40 empty body → ...`). Leave out Excuse entries without an issue number and Decision Record entries without an ADR, and say why. If a linter requires doc comments, ask here whether to keep them or also change the lint config.
+With the degraded sort, add its agreement rate and ask whether to include the entries sorted only by signal words. Then one item per comment, `C007 Tautology src/load.py:13 "# open the file and parse it"`, grouped by file. List every forced code change separately (`src/base.py:40 empty body → ...`). Leave out Excuse entries without an issue number and Decision Record entries without an ADR, and say why. If a linter requires doc comments, ask here whether to keep them or also change the lint config.
 
-**Gate D, ratchet.** One item per file, with an ID: `D1 scripts/check_comments.py (new)`, `D2 comment-baseline.json (new, 214 lines in 31 files)`, `D3 package.json: "lint" script runs the check`. Then the mechanism and why it fits the stack, the command that runs the check, and the known gaps from `references/lint-ratchet.md`.
+**Gate D, ratchet.** Two commits: the ratchet files, then the baseline built from the committed tree (`references/lint-ratchet.md`). One item per file, with an ID: `D1 scripts/check_comments.py (new)`, `D2 comment-baseline.json (new, 214 lines in 31 files)`, `D3 package.json: "lint" script runs the check`. Then the mechanism and why it fits the stack, the command that runs the check, and the known gaps from `references/lint-ratchet.md`.
 
 ## Replies
 

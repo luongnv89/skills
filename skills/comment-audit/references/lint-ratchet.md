@@ -22,7 +22,7 @@ Check the version first: `npx --no-install eslint --version`. Add a config objec
 
 ```js
 const MACHINE_READ = /^\s*(eslint-disable|eslint-enable|eslint-env\b|eslint\s+[\w@/-]+\s*:|globals?\s+\w|exported\s+\w|@ts-|@flow\b|prettier-ignore|istanbul\s+ignore|[cv]8\s+ignore|webpack(ChunkName|Prefetch|Preload|Mode|Include|Exclude|Exports|Ignore)\s*:|@vite-ignore|@jsx|@jest-environment|@vitest-environment|[#@]__PURE__|#__NO_SIDE_EFFECTS__|falls?\s?through\s*$|\/\s*<reference\s)/i;
-const KEEP_TAGS = /@(deprecated|internal)\b/;
+const KEEP_TAGS = /^\s*\*?\s*@(deprecated|internal)\b/m;
 
 const noComments = {
   meta: { type: "suggestion", schema: [], messages: { banned: "New code comments are banned here: record decisions in an ADR and work in an issue." } },
@@ -31,7 +31,7 @@ const noComments = {
       Program() {
         for (const comment of context.sourceCode.getAllComments()) {
           if (comment.type === "Shebang" || MACHINE_READ.test(comment.value)) continue;
-          if (comment.type === "Block" && KEEP_TAGS.test(comment.value)) continue;
+          if (comment.type === "Block" && comment.value.startsWith("*") && KEEP_TAGS.test(comment.value)) continue;
           const holder = context.sourceCode.getNodeByRangeIndex(comment.range[0]);
           if (holder && holder.type === "BlockStatement" && holder.body.length === 0 && context.sourceCode.getCommentsInside(holder).length === 1) continue;
           for (let line = comment.loc.start.line; line <= comment.loc.end.line; line += 1) {
@@ -53,7 +53,7 @@ export default [
 ];
 ```
 
-Extend `MACHINE_READ` with any other machine-read form the inventory found (license headers, JSDoc type blocks in checked JS). The rule also skips a doc comment carrying `@deprecated` or `@internal`, and a comment that is the only content of an empty block, which `no-empty` relies on (a second comment in that block is counted). The config file is code under the ban too, so it carries no comments of its own; remove the placeholder line above when you edit the real file. The snippet is an ES module config (`eslint.config.js` with `"type": "module"`, or `.mjs`); for a CommonJS config, assign the array to `module.exports` instead.
+Extend `MACHINE_READ` with any other machine-read form the inventory found (license headers, JSDoc type blocks in checked JS). The rule also skips a doc comment (`/** … */`) with a line starting with `@deprecated` or `@internal`, and a comment that is the only content of an empty block, which `no-empty` relies on (a second comment in that block is counted). The config file is code under the ban too, so it carries no comments of its own; remove the placeholder line above when you edit the real file. The snippet is an ES module config (`eslint.config.js` with `"type": "module"`, or `.mjs`); for a CommonJS config, assign the array to `module.exports` instead.
 
 Then write the baseline from the committed tree (*Baseline from the committed tree*): `npx eslint --suppress-rule local/no-comments <scope>`. That creates `eslint-suppressions.json`, which counts violations per file and rule. It must be committed. From then on:
 
@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
 The script carries no comments, because it is under the ban too. Known gaps, which go in the Gate D plan:
 
-- Deleting one comment and adding another in the same file keeps the count, so it passes. So does adding comments to a new file while deleting a file that had as many.
+- Deleting one comment and adding another in the same file keeps the count, so it passes. So does adding comments to a new or comment-free file while deleting a file that had as many.
 - Prose added to a docstring that holds doctests or is read by a Click or Typer command is not counted.
 - A real comment that starts with a directive word (`# noqa this looks odd`) or a header word at the top of a file (`# Copyright-free note`) is not counted.
 - A file that does not parse fails the check with its name, without counting.
@@ -232,7 +232,7 @@ Keep the same three modes, the same JSON format and line counting. The counter f
 
 ### Baseline from the committed tree
 
-A baseline must count what is committed, not the working tree: an untracked file or a file the user changed before the run would otherwise enter the baseline. It would pass locally and fail on a clean clone or in CI. After the ratchet files are written and committed, if the pre-sync list is empty, generate the baseline in the repo. Otherwise generate it in a detached worktree of `HEAD` inside the audit folder (`git worktree add --detach <audit folder>/base HEAD`; link `node_modules` there for ESLint). Copy the baseline file back, commit it, and remove the worktree.
+A baseline must count what is committed, not the working tree: an untracked file or a file the user changed before the run would otherwise enter the baseline. It would pass locally and fail on a clean clone or in CI. After the ratchet files are written and committed, if the pre-sync list is empty, generate the baseline in the repo. Otherwise generate it in a detached worktree of `HEAD` inside the audit folder (`git worktree add --detach <audit folder>/base HEAD`; link `node_modules` there for ESLint). Copy the baseline file back and commit it as a second commit (`build(lint): add the comment ratchet baseline`). Keep the worktree until the probes are done, then remove it.
 
 ## Wiring
 
@@ -246,7 +246,7 @@ When the repo has none of these, the Gate D plan offers three options and the us
 
 ## Proving it
 
-Run the probes after the ratchet commit, so every probe can be undone with `git checkout -- <file>` (and `git clean` of a probe file this run created). Never probe in a file on the pre-sync list. Run each probe and revert it:
+Run the probes after the ratchet commit, so every probe can be undone with `git checkout -- <file>` (and `git clean` of a probe file this run created). Never probe in a file on the pre-sync list. When the pre-sync list is not empty, the tree the user has differs from the baseline, so run the probes in the baseline worktree instead. Run each probe and revert it:
 
 1. The check passes on the tree.
 2. Add one comment line inside a file in scope, including directly under an existing comment. The check fails and names the file.

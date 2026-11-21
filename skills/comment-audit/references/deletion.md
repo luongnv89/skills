@@ -26,7 +26,7 @@ Re-run each baseline check with the exact command from Gate 0. Each one that pas
 
 ## Unverified
 
-When no build or test check can run on this machine (the toolchain is missing, the project builds only on another OS, the checks need services that are down), say so in the Gate C plan, before approval. When only some checks run (a syntax check but not the tests), the plan names those that ran and those that could not, and the deletion counts as unverified for what only the missing checks cover:
+When no build or test check can run on this machine (the toolchain is missing, the project builds only on another OS, the checks need services that are down), say so in the Gate C plan, before approval. When only some checks run, the plan names those that ran and those that could not. Syntax and lint checks alone do not verify a deletion: without a build or test check, it is unverified and the report is `PARTIAL`:
 
 ```text
 UNVERIFIED: no build or test check can run here (<reason>). Deleting these comments cannot be checked on this machine.
@@ -37,4 +37,4 @@ The user may still approve. After the deletion, the report is `PARTIAL`, and `De
 
 ## Commits
 
-Commit only the paths this gate changed, by name: `git commit -m "<message>" -- <path> <path> …`. The `--` form commits those paths alone, so anything the user had staged stays staged and out of the commit. A new file must be added first (`git add -- <new path>`), because `git commit -- <path>` refuses an untracked path. Before committing, confirm that each named path is in the plan and that none is on the pre-sync list. Never commit on the default branch.
+This applies to every gate that commits (A, C, D). Commit only the paths this gate changed, by name: `git commit -m "<message>" -- <path> <path> …`. The `--` form commits those paths alone, so anything the user had staged stays staged and out of the commit. A new file must be added first (`git add -- <new path>`), because `git commit -- <path>` refuses an untracked path. Before committing, confirm that each named path is in the plan and that none is on the pre-sync list. Never commit on the default branch.

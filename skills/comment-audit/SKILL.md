@@ -44,14 +44,14 @@ Each action group gets its own **approval gate**, in this order:
 | A | Decision Records → ADRs | ADR files, one commit |
 | B | Excuses → issues | Issues in the tracker |
 | C | Comment deletion | Source files, one commit |
-| D | Comment ban with a ratchet | Lint config or check script, baseline, one commit |
+| D | Comment ban with a ratchet | Lint config or check script, then the baseline: two commits |
 
 ADRs and issues come first, so each Decision Record and Excuse is saved before its comment goes. At each gate:
 
 1. Print the plan for that group alone, in the format in `references/plans.md`: every item with its ID, the files, issues and commits it creates or changes, the branch, and counts. The plan is a dry run: it changes nothing.
 2. Ask the user to confirm with one question: approve all, approve some (by ID), skip this group, or stop.
 3. Wait. Only the user's reply to this plan approves it. These do not count: an approval given before the plan was shown, a "do everything" in the request, a reply to another question, or another agent's reply.
-4. Apply only the approved items, and commit only the paths the plan named, never on the default branch. If the plan has to change after approval, show the changed part and ask again.
+4. Apply only the approved items, and commit only the paths the plan named (`references/deletion.md` → *Commits*). Never edit or commit on the default branch. If the plan changes after approval, show the changed part and ask again.
 
 A question or change request is not an approval: answer or revise, then ask again. Skipped and unapproved items stay and are listed in the report. A gate with no items says so in one line and moves on.
 
@@ -82,7 +82,7 @@ fi
 ```
 
 - If the pull, rebase or stash pop fails, stop and ask the user. Before you stop, run `git rebase --abort` when a rebase is in progress, then `git stash pop` when `stashed=1`.
-- Record `sync: skipped (<reason>)` when the user skips it at Gate 0, the repo has no `origin`, no user is present, or the mode is Read-only.
+- Record `sync: skipped (<reason>)` when the user skips it, the repo has no `origin`, HEAD is detached, no user is present, a user continues an unattended run, or the mode is Read-only.
 
 ## Workflow
 
@@ -127,7 +127,7 @@ Without a tracker this run can write to, the plan says the issues become drafts.
 
 ### Step 6: Gate C — Delete comments
 
-1. **Deletable:** Tautology and Stale entries, Excuses with an issue number, Decision Records with an ADR. Leave out doc comments a linter rule requires unless the user decides otherwise. Plan by kind and file, with the count of descriptive doc comments, the forced code changes, and whether the deletion can be verified. The user may approve part; the ratchet covers the rest.
+1. **Deletable:** Tautology and Stale entries, Excuses with an issue number, Decision Records with an ADR or already recorded in a repo doc. Leave out doc comments a linter rule requires unless the user decides otherwise. Plan by kind and file, with the count of descriptive doc comments, the forced code changes, and whether the deletion can be verified. The user may approve part; the ratchet covers the rest.
 2. Delete with the mechanics in `references/deletion.md`. Never edit a path on the pre-sync list.
 3. Run the **deletion check** and re-run the baseline checks as `references/deletion.md` says. Every check that passed must still pass, with no fewer tests passed. If no build or test check could run, the deletion is **unverified**: the plan must have said so before approval, and the report is `PARTIAL`.
 4. Commit only the changed source files: `git commit -m "chore: delete <N> code comments" -- <paths>`, with the count per kind and the ADR and issue references in the body.
@@ -136,7 +136,7 @@ Without a tracker this run can write to, the plan says the issues become drafts.
 
 Pick the mechanism from `references/lint-ratchet.md`: the linter's own baseline where one exists (ESLint), otherwise a check script and a baseline file. It covers only the scope, allows machine-read comments, and takes its baseline after Step 6. The plan gives each file an ID (`D1`, …) and says where the check runs, offering the *Wiring* options when the repo has no lint command, hook or CI job.
 
-After approval, write it, generate the baseline, commit only those files (`build(lint): ban new code comments in <scope> with a ratchet`), then run the probes in `references/lint-ratchet.md` → *Proving it* and revert each with `git checkout -- <file>`. If the repo already has a comment ban or baseline, extend it instead of adding a second one.
+After approval, commit the ratchet files (`build(lint): ban new code comments in <scope> with a ratchet`), then the baseline built from the committed tree, then run the probes in `references/lint-ratchet.md` → *Proving it*, reverting each. If the repo already has a comment ban or baseline, extend it instead of adding a second one.
 
 ### Step 8: Report
 
