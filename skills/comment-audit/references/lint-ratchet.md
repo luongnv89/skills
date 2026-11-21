@@ -220,7 +220,7 @@ The script carries no comments, because it is under the ban too. Known gaps, whi
 
 - Deleting one comment and adding another in the same file keeps the count, so it passes. So does adding comments to a new or comment-free file while deleting a file that had as many.
 - Prose added to a docstring that holds doctests or is read by a Click or Typer command is not counted.
-- A real comment that starts with a directive word (`# noqa this looks odd`) or a header word at the top of a file (`# Copyright-free note`) is not counted.
+- A real comment that starts with a directive word (`# noqa this looks odd`) is not counted, nor is any comment in a file's top comment block above its last license or copyright line (`# Copyright-free note`, or a note between the shebang and the license).
 - A file that does not parse fails the check with its name, without counting.
 - A comment a repo-specific reader needs (a test requiring a word on certain lines) is allowed by a pattern, which anyone can reuse.
 
@@ -246,7 +246,7 @@ When the repo has none of these, the Gate D plan offers three options and the us
 
 ## Proving it
 
-Run the probes after the ratchet commit, so every probe can be undone with `git checkout -- <file>` (and `git clean` of a probe file this run created). Never probe in a file on the pre-sync list. When the pre-sync list is not empty, the tree the user has differs from the baseline, so run the probes in the baseline worktree instead. Run each probe and revert it:
+Run the probes after the ratchet commit, so every probe can be undone with `git checkout -- <file>` (and `git clean` of a probe file this run created). Never probe in a file on the pre-sync list. When the pre-sync list is not empty, the tree the user has differs from the baseline, so run the probes in the baseline worktree instead, after `git checkout --detach <baseline commit>` there so the baseline file is tracked. Run each probe and revert it:
 
 1. The check passes on the tree.
 2. Add one comment line inside a file in scope, including directly under an existing comment. The check fails and names the file.
