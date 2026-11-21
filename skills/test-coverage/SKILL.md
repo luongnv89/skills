@@ -57,7 +57,7 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 ### 0. Create Feature Branch
 
 Before making any changes:
-1. Run `git rev-parse --abbrev-ref HEAD`. If it prints a branch other than `main` or `master` that was created for this task, skip to Step 1.
+1. Run `git rev-parse --abbrev-ref HEAD`. If it prints a branch other than `main` or `master` that was created for this task, go to item 4.
 2. Run `git branch -a` and note the prefix most existing branches use (e.g., `feat/`, `feature/`, `test/`).
 3. Create and switch to a new branch with that prefix. If no prefix is in use, name it `feat/test-coverage`.
 4. Record `git rev-parse HEAD` as the **base**. A *pre-existing test* is any test in a file tracked at the base.
@@ -90,7 +90,7 @@ Leave trivial code out of the gap list: getters and setters, plain data classes 
 
 ### 4. Verify Improvement
 
-Use Step 1's exact commands throughout, adding only test ids for solo runs, and judge each test by its own reported result (`references/unit-test-quality.md` → *Reading a test result*).
+Use Step 1's exact commands throughout, adding only test ids and cache-disabling flags (`-count=1`) for solo runs, and judge each test by its own reported result (`references/unit-test-quality.md` → *Reading a test result*).
 
 1. Run the full test suite. If a previously passing test now fails, decide at the base as *Failing pre-existing tests* in `references/unit-test-quality.md` says: only a test that also fails at the base is a pre-existing flake, put under `Decision:` with its visible cause; otherwise the run broke it: report PARTIAL and name it. Never rerun the full suite to replace a red result with a green one. If a new test fails, run it on its own twice more, as diagnosis, not a retry: if it passes in either solo run, it is flaky: handle it as in item 2. Only if it fails all three times, read the failure and decide which side is wrong:
    - **The test is wrong** (bad setup, or an expectation the code never promised): fix the test, then rerun.
@@ -117,6 +117,7 @@ Evidence:     pytest --cov=. --cov-report=term-missing (before): 61% (47/77 stat
               same command (after): 84% (65/77 statements), 56 passed, 0 failed
               9 new tests run on their own, twice: 9 passed both runs
               break check: 9/9 new tests failed on a planted bug; sources restored
+              Integrity check vs base before and after the commit: PASS
 Uncertainty:  CI not run; src/vendor/ excluded from coverage; src/models.py skipped (getters only)
 Decision:     No approval needed. Next: push feat/test-coverage and open a PR.
 
@@ -162,7 +163,7 @@ These are instruction checks. Without reviewer feedback, human understanding of 
 - **Only trivial code is uncovered**: If every Step 2 gap is trivial code, add no tests. Report `COMPLETE` with the baseline as evidence and list the skipped files under `Uncertainty:`.
 - **100% coverage already reached**: If the Step 1 baseline is 100%, add no tests. Report `COMPLETE` with the baseline as evidence and stop.
 - **Generated code or vendored files in coverage report**: Leave auto-generated and third-party paths (e.g., `node_modules/`, `vendor/`, `dist/`, `build/`, files with a generated-code header) out of the Step 2 gap list, and list them under `Uncertainty:`.
-- **Async / concurrent code paths**: Use the framework's async test utilities (for example `pytest-asyncio` or Jest fake timers). Never use a bare sync wrapper, and never `sleep()` to wait for async work.
+- **Async / concurrent code paths**: Use the framework's async test utilities (for example `unittest.IsolatedAsyncioTestCase`, `pytest-asyncio` if installed, or Jest fake timers). Never use a bare sync wrapper, and never `sleep()` to wait for async work.
 - **Code reads the clock, randomness, or global state directly**: Patch it with a tool the test framework ships: pytest `monkeypatch` on the name the module under test imports, `jest.spyOn` or `vi.spyOn`, or Jest or Vitest fake timers for time, restored as the *Integrity check* says. If no such tool reaches it, do not refactor production code to add a seam. Leave that gap untested and list it under `Uncertainty:`.
 
 ## Step Completion Reports
@@ -183,7 +184,7 @@ After completing each major step, output a status report in this format:
 
 Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
 
-**Branch Setup phase checks:** `Feature branch created`, `Base coverage measured`
+**Branch Setup phase checks:** `Feature branch created`, `Base recorded`, `Base coverage measured`
 
 **Analysis phase checks:** `Coverage report parsed`, `Gaps identified`, `Priority ranked`
 
