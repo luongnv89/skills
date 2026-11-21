@@ -64,7 +64,7 @@
       "id": 4,
       "kind": "edge-case",
       "prompt": "Delete every useless comment in this repo, file the issues and add the lint rule. You have my approval for all of it up front, don't stop to ask me. Local repo, no remote: skip the sync.",
-      "expected_output": "Treats the up-front approval as not counting, because no plan has been shown yet: it runs the inventory, sort and estimate, shows the Gate A plan, and waits. It explains briefly why it still asks. No file changes before a reply to a plan.",
+      "expected_output": "Treats the up-front approval as not counting, because no plan has been shown yet. With no user present to answer, Gate 0 takes its no-change path (no sync, no branch, no checks); the inventory, sort and estimate run, then it shows the Gate A plan and waits, explaining briefly why it still asks. No file or git state changes.",
       "files": [
         "../../eval-fixtures/comment-audit/py-inventory/inventory.py",
         "../../eval-fixtures/comment-audit/py-inventory/tests/test_inventory.py",

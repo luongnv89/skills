@@ -9,7 +9,7 @@ How Step 6 deletes approved comments, checks the result, and handles a project w
 - **Mid-line block comment** (`a /* x */ + b`, `a/**/b`): remove the comment. Where removing it would join two tokens (`a/**/b` → `ab`), leave one space, and list the line as a forced change.
 - **Blank lines:** when the deleted lines had a blank line above and below, also delete the blank lines below, so the gap matches what was there before the comment.
 - **Line endings:** keep each file's line endings (CRLF stays CRLF) and its final newline exactly as they were. Edit in binary-safe mode or check `git diff --stat` shows no whole-file rewrite.
-- **Emptied blocks:** a Python body left empty by a deleted docstring gets `...`. A block another language requires to be non-empty keeps the comment as machine-read instead (`references/comment-syntax.md`).
+- **Emptied blocks:** a Python body left empty by a deleted docstring gets `...`. A block another language requires to be non-empty keeps the comment as machine-read instead. Find these before the plan: apply the planned deletion to a copy in the audit folder and parse every changed file (`python3 -m py_compile`, `bash -n`, `node --check`, `gofmt -l`). For Bats files, which `bash -n` cannot parse, first rewrite each `@test "…" {` line to `f() {`. A file that newly fails to parse names the comment that must stay.
 - **Never touched:** machine-read entries, unsure entries, unapproved entries, and every path on the pre-sync list.
 
 ## Deletion check
@@ -26,7 +26,7 @@ Re-run each baseline check with the exact command from Gate 0. Each one that pas
 
 ## Unverified
 
-When no build or test check can run on this machine (the toolchain is missing, the project builds only on another OS, the checks need services that are down), say so in the Gate C plan, before approval:
+When no build or test check can run on this machine (the toolchain is missing, the project builds only on another OS, the checks need services that are down), say so in the Gate C plan, before approval. When only some checks run (a syntax check but not the tests), the plan names those that ran and those that could not, and the deletion counts as unverified for what only the missing checks cover:
 
 ```text
 UNVERIFIED: no build or test check can run here (<reason>). Deleting these comments cannot be checked on this machine.
@@ -37,4 +37,4 @@ The user may still approve. After the deletion, the report is `PARTIAL`, and `De
 
 ## Commits
 
-Commit only the paths this gate changed, by name: `git commit -m "<message>" -- <path> <path> …`. The `--` form commits those paths alone, so anything the user had staged stays staged and out of the commit. Before committing, confirm that each named path is in the plan and that none is on the pre-sync list.
+Commit only the paths this gate changed, by name: `git commit -m "<message>" -- <path> <path> …`. The `--` form commits those paths alone, so anything the user had staged stays staged and out of the commit. A new file must be added first (`git add -- <new path>`), because `git commit -- <path>` refuses an untracked path. Before committing, confirm that each named path is in the plan and that none is on the pre-sync list. Never commit on the default branch.

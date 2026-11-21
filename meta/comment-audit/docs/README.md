@@ -37,6 +37,7 @@ It reads and sorts every comment, then stops at the first plan and waits for you
 Gate A — Decision Records → ADRs (2 items)
 Scope: src/billing/ · base 3f2a9c1 · branch chore/comment-audit
 Changes: docs/adr/0007-round-half-even.md, docs/adr/0008-invoice-ids.md, nothing else
+Commit: "docs(adr): record decisions found in code comments" with only those 2 files, on chore/comment-audit
 Items:
   ADR-0007 "Round money half-even" ← C012, C044: the ledger and the tax export must agree to the cent
   ADR-0008 "Invoice ids are never reused" ← C090: auditors match ids across years

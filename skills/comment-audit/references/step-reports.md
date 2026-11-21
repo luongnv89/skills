@@ -3,7 +3,7 @@
 After each step, print a compact status block. Use `√` for pass, `×` for fail, and `—` to add brief context. The `Criteria` line counts the checks met, and the `Result` line gives the step's verdict.
 
 ```text
-◆ Inventory (step 1 of 8 — comment inventory)
+◆ Inventory (step 1 of steps 0–8 — comment inventory)
 ··································································
   Scope listed:          √ 42 files (9 generated, 3 vendored left out)
   Tokenizer used:        √ Python tokenize + ast for 42/42 files

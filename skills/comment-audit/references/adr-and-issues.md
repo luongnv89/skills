@@ -9,6 +9,8 @@
 
 If found, copy its template (the headings of its most recent ADR), its numbering (next free number, same zero padding) and its file naming. Update its index file (`README.md` or `index.md` listing the ADRs) if it has one.
 
+**Decisions already written down.** Before planning, check whether the repo already records a decision elsewhere: a design doc, `CONTRIBUTING.md`, `docs/`, or a doc the comment itself points to. A Decision Record whose reason is already there with the same rule gets no new ADR entry. The Gate A plan lists it as `already recorded at <path>:<line>`, and the comment becomes deletable like one with an ADR. When the doc says less than the comment, the ADR entry holds the difference and cites the doc.
+
 If none exists, create `docs/adr/` and use Michael Nygard's format ("Documenting Architecture Decisions", 2011), numbered from `0001`:
 
 ```markdown
@@ -39,6 +41,9 @@ Moved from code comments at <base SHA>: <path>:<lines> (<symbol>), one line per 
 
 **Grouping.** A decision that stands alone gets its own ADR. Decisions that belong to one subsystem (a module, a service, a feature area) go into one ADR for that subsystem, each as its own numbered entry under Decision, with its own reason. Never make one ADR per comment when many comments share a subsystem, and never put unrelated subsystems in one ADR.
 
+- **Repeated comments are one decision.** The same comment, word for word or nearly, in many files becomes one entry, and its Source line lists every copy.
+- **Size.** Keep an ADR to about 30 decision entries. Split a larger subsystem by topic. Reasons for test fixture values go into ADRs per test area (one per feature under test), not one ADR for the whole suite.
+
 **Content rules:**
 
 - Status is `Accepted`, because the code already follows the decision.
@@ -50,7 +55,7 @@ Moved from code comments at <base SHA>: <path>:<lines> (<symbol>), one line per 
 
 **Tracker.** Use GitHub through `gh` when `gh auth status` succeeds and `origin` is a GitHub repository. Any other case (no `gh`, no remote, another tracker, no write access) is the no-tracker path below.
 
-**Duplicate search, before the plan.** For each hack, run `gh issue list --state all --search "<file name> <key words of the hack>" --limit 10`. An open issue that describes the same hack is linked, not re-filed. A closed one is linked and noted, because the hack may have come back.
+**Duplicate search, before the plan.** GitHub's search requires every word to match, so search twice for each hack and merge the results: once by its key phrase alone (`gh issue list --state all --search '"per-test timeout"' --limit 10`) and once by the file name alone. Read each result. An open issue that describes the same hack is linked, not re-filed. A closed one is linked and noted, because the hack may have come back or the fix may have missed it.
 
 **One issue per hack.** Excuse comments about the same shortcut, even in several files, become one issue.
 

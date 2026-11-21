@@ -21,7 +21,8 @@ In a repo with several languages, cover each language in scope: the ESLint route
 Check the version first: `npx --no-install eslint --version`. Add a config object for the scope to the existing `eslint.config.*`:
 
 ```js
-const MACHINE_READ = /^\s*(eslint|global\s|globals\s|exported\s|@ts-|@flow|prettier-ignore|istanbul\s|c8\s|v8\s|webpack|@vite-ignore|@jsx|@jest-environment|@vitest-environment|[#@]__PURE__|#__NO_SIDE_EFFECTS__|falls?\s?through|\/\s*<reference\s)/i;
+const MACHINE_READ = /^\s*(eslint-disable|eslint-enable|eslint-env\b|eslint\s+[\w@/-]+\s*:|globals?\s+\w|exported\s+\w|@ts-|@flow\b|prettier-ignore|istanbul\s+ignore|[cv]8\s+ignore|webpack(ChunkName|Prefetch|Preload|Mode|Include|Exclude|Exports|Ignore)\s*:|@vite-ignore|@jsx|@jest-environment|@vitest-environment|[#@]__PURE__|#__NO_SIDE_EFFECTS__|falls?\s?through\s*$|\/\s*<reference\s)/i;
+const KEEP_TAGS = /@(deprecated|internal)\b/;
 
 const noComments = {
   meta: { type: "suggestion", schema: [], messages: { banned: "New code comments are banned here: record decisions in an ADR and work in an issue." } },
@@ -30,8 +31,9 @@ const noComments = {
       Program() {
         for (const comment of context.sourceCode.getAllComments()) {
           if (comment.type === "Shebang" || MACHINE_READ.test(comment.value)) continue;
+          if (comment.type === "Block" && KEEP_TAGS.test(comment.value)) continue;
           const holder = context.sourceCode.getNodeByRangeIndex(comment.range[0]);
-          if (holder && holder.type === "BlockStatement" && holder.body.length === 0) continue;
+          if (holder && holder.type === "BlockStatement" && holder.body.length === 0 && context.sourceCode.getCommentsInside(holder).length === 1) continue;
           for (let line = comment.loc.start.line; line <= comment.loc.end.line; line += 1) {
             context.report({ loc: { start: { line, column: 0 }, end: { line, column: 0 } }, messageId: "banned" });
           }
@@ -51,14 +53,16 @@ export default [
 ];
 ```
 
-Extend `MACHINE_READ` with any other machine-read form the inventory found (license headers, JSDoc type blocks in checked JS). The rule also skips a comment that is the only content of an empty block, which `no-empty` relies on. The config file is code under the ban too, so it carries no comments of its own; remove the placeholder line above when you edit the real file. The snippet is an ES module config (`eslint.config.js` with `"type": "module"`, or `.mjs`); for a CommonJS config, assign the array to `module.exports` instead.
+Extend `MACHINE_READ` with any other machine-read form the inventory found (license headers, JSDoc type blocks in checked JS). The rule also skips a doc comment carrying `@deprecated` or `@internal`, and a comment that is the only content of an empty block, which `no-empty` relies on (a second comment in that block is counted). The config file is code under the ban too, so it carries no comments of its own; remove the placeholder line above when you edit the real file. The snippet is an ES module config (`eslint.config.js` with `"type": "module"`, or `.mjs`); for a CommonJS config, assign the array to `module.exports` instead.
 
-Then write the baseline: `npx eslint --suppress-rule local/no-comments <scope>`. That creates `eslint-suppressions.json`, which counts violations per file and rule. It must be committed. From then on:
+Then write the baseline from the committed tree (*Baseline from the committed tree*): `npx eslint --suppress-rule local/no-comments <scope>`. That creates `eslint-suppressions.json`, which counts violations per file and rule. It must be committed. From then on:
 
 - a file with more comment lines than its suppressed count fails `eslint`;
 - a file with fewer also fails, with "There are suppressions left that do not occur anymore", until someone runs `npx eslint --prune-suppressions` and commits the lower count. That is the ratchet tightening.
 
 If the project passes `--suppressions-location`, use the same path in every command.
+
+Known gaps of the ESLint route, which go in the Gate D plan: deleting one comment and adding another in the same file keeps the count; one comment alone in an empty block (`if (x) { /* HACK */ }`) is allowed, because `no-empty` needs it; a comment that starts like a directive (`// eslint-env is weird here`) is not counted; files ESLint ignores are not checked.
 
 ## Check script (Python)
 
@@ -68,7 +72,7 @@ Put it where the repo keeps tooling scripts (`scripts/check_comments.py`), set `
 |---|---|
 | `python3 scripts/check_comments.py --init` | Writes `comment-baseline.json` from the tree. Refuses if the file already exists |
 | `python3 scripts/check_comments.py` | Fails when a file has more comment lines than its baseline, naming the lines. Also fails when a count went down, until the baseline is updated |
-| `python3 scripts/check_comments.py --update` | Lowers the baseline to the current counts and drops deleted files. Refuses to raise any count, except that a renamed file may carry the count of the path it replaced |
+| `python3 scripts/check_comments.py --update` | Lowers the baseline to the current counts and drops deleted files. Refuses to raise the count of any file already in the baseline. A file new to the baseline may carry at most the counts of the files that disappeared (a rename) |
 
 ```python
 import ast
@@ -183,17 +187,21 @@ def main(argv):
     baseline = json.loads(BASELINE.read_text())
     if argv[1:] == ["--update"]:
         moved = sum(n for p, n in baseline.items() if p not in counts)
-        raised = {p: n - baseline.get(p, 0) for p, n in counts.items() if n > baseline.get(p, 0)}
-        if sum(raised.values()) > moved:
-            sys.exit("refusing to raise the baseline for: " + ", ".join(sorted(raised)))
+        raised = sorted(p for p, n in counts.items() if p in baseline and n > baseline[p])
+        added = {p: n for p, n in counts.items() if p not in baseline and n}
+        if raised or sum(added.values()) > moved:
+            sys.exit("refusing to raise the baseline for: " + ", ".join(raised + sorted(added)))
         write(counts)
         print(f"baseline lowered to {plural(sum(counts.values()), 'comment line')}")
         return 0
     failed = False
     moved = sum(n for p, n in baseline.items() if p not in counts)
-    for path, n in counts.items():
+    for path, n in sorted(counts.items()):
         allowed = baseline.get(path, 0)
-        if n > allowed and not (path not in baseline and n <= moved):
+        if path not in baseline and 0 < n <= moved:
+            moved -= n
+            continue
+        if n > allowed:
             rows = ", ".join(str(r) for r in comment_rows(path))
             print(f"{path}: {plural(n, 'comment line')}, baseline {allowed} (lines {rows}); new comments are banned")
             failed = True
@@ -214,16 +222,21 @@ The script carries no comments, because it is under the ban too. Known gaps, whi
 - Prose added to a docstring that holds doctests or is read by a Click or Typer command is not counted.
 - A real comment that starts with a directive word (`# noqa this looks odd`) or a header word at the top of a file (`# Copyright-free note`) is not counted.
 - A file that does not parse fails the check with its name, without counting.
+- A comment a repo-specific reader needs (a test requiring a word on certain lines) is allowed by a pattern, which anyone can reuse.
 
 The check guards against habit, not against someone working around it, and code review catches the rest.
 
 ### Other languages
 
-Keep the same three modes, the same JSON format and line counting, and add a counter for each language in scope, following `references/comment-syntax.md`: a scanner for shell, Swift or Rust, `go/parser` called through a small Go program for Go. Skip each machine-read form the inventory recorded for that language. Test the counter on the inventory's own files before writing the baseline: its total must equal the comment lines Step 1 found after Step 6, minus the machine-read ones.
+Keep the same three modes, the same JSON format and line counting. The counter for another language is the scanner Step 1 used and validated (`references/comment-syntax.md` → *Method per language*), or `go/parser` through a small Go program for Go. With approval, it moves into the repo next to the check script, and its approximations join the known gaps. It skips the machine-read forms the inventory recorded for that language. For shell those are the shebang, `# shellcheck …`, `# bats test_tags=…` and `# bats file_tags=…`, plus any comment a test reads. Before writing the baseline, check the counter on the scope: its total must equal the comment lines Step 1 found after Step 6, minus the machine-read ones.
+
+### Baseline from the committed tree
+
+A baseline must count what is committed, not the working tree: an untracked file or a file the user changed before the run would otherwise enter the baseline. It would pass locally and fail on a clean clone or in CI. After the ratchet files are written and committed, if the pre-sync list is empty, generate the baseline in the repo. Otherwise generate it in a detached worktree of `HEAD` inside the audit folder (`git worktree add --detach <audit folder>/base HEAD`; link `node_modules` there for ESLint). Copy the baseline file back, commit it, and remove the worktree.
 
 ## Wiring
 
-Run the check where lint already runs, in this order of preference:
+Run the check where lint already runs, in this order of preference. Before hooking into an existing command, search the tests for anything that runs that command (on a sandbox, outside a git repo, with a fixed file list), and make the hook skip cleanly when it is not inside a git work tree or the baseline file is absent:
 
 1. the existing lint command (`package.json` `lint` script, Makefile `lint` target, `tox -e lint`);
 2. an existing pre-commit configuration (a `local` hook);
@@ -233,7 +246,7 @@ When the repo has none of these, the Gate D plan offers three options and the us
 
 ## Proving it
 
-Run the probes after the ratchet commit, so every probe can be undone with `git checkout -- <file>` (and `git clean` of a probe file this run created). Run each probe and revert it:
+Run the probes after the ratchet commit, so every probe can be undone with `git checkout -- <file>` (and `git clean` of a probe file this run created). Never probe in a file on the pre-sync list. Run each probe and revert it:
 
 1. The check passes on the tree.
 2. Add one comment line inside a file in scope, including directly under an existing comment. The check fails and names the file.

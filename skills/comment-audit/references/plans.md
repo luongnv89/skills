@@ -21,13 +21,13 @@ A gate with no items prints `Gate <X> — <action group>: nothing to do (<reason
 ## Per gate
 
 **Gate 0, prepare.** Three items:
-- `P1 sync`: the commands from *Repo Sync Before Edits*, and whether a stash is needed (the user has uncommitted changes).
+- `P1 sync`: the commands from *Repo Sync Before Edits*, whether a stash is needed (the user has uncommitted changes), and any local commits `pull --rebase` would rewrite (`git log origin/<branch>..HEAD`).
 - `P2 branch`: its name.
-- `P3 checks`: each check command and what it may write (build folders, caches).
+- `P3 checks`: each check command, what it may write (build folders, caches, files outside the repo), and anything it installs or downloads on first run (a test runner it clones, a tool from a registry). Mark each check that cannot run here and why.
 
 Replies: approve all, approve some (for example `approve P2 P3`, so no sync), skip (no sync, no branch, no checks), stop.
 
-**Gate A, ADRs.** One item per ADR: `ADR-<number> <path> "<title>" ← 12 comments (C012, C044, …): <two-line summary>`. Name the format (the repo's existing template, or the default in `references/adr-and-issues.md`) and say whether an index file changes.
+**Gate A, ADRs.** One item per ADR: `ADR-<number> <path> "<title>" ← 12 comments (C012, C044, …): <two-line summary>`. Decision Records already recorded in a repo doc get one item each: `R<n> already recorded at <path>:<line> ← C031`. Name the format (the repo's existing template, or the default in `references/adr-and-issues.md`) and say whether an index file changes. If the user skipped Gate 0's branch, the plan stops here and asks for one: nothing is committed on the default branch.
 
 **Gate B, issues.** One item per hack: `I<n> "<title>" ← C031 (src/sync.py:88), labels: <existing labels or none>`. If the duplicate search found an issue, the item reads `link to #<number> (open|closed): <title>` instead of filing. Name the tracker and repository (`gh`, `owner/repo`), or say the issues become drafts in the audit folder because no tracker can be written to.
 

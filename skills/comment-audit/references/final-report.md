@@ -16,7 +16,7 @@ A gate that waits for the user's answer in a live conversation does not end the 
 
 - `Result:` the status, the scope, the counts per kind (and unsure), and what changed: comments deleted, ADRs written, issues filed or drafted, ratchet added.
 - `Evidence:` each check that ran, with its result: the deletion check, the baseline checks before and after with test counts, each ratchet probe, and the ADR paths and issue numbers. Then the sync line. Cite only checks that ran.
-- `Uncertainty:` approximations (a scanner instead of a tokenizer), languages left out, unsure entries, pre-sync paths, an unverified deletion, the ratchet's known gaps, and the two figures: the estimate if every comment went, and the comment lines deleted this run (blank lines and inline edits apart). With nothing else to say, still give the two figures.
+- `Uncertainty:` approximations (a scanner instead of a tokenizer, or the degraded sort with its agreement rate; label the estimate as resting on them), languages left out, unsure entries, pre-sync paths, an unverified deletion, the ratchet's known gaps, and the two figures: the estimate if every comment went, and the comment lines deleted this run (blank lines and inline edits apart). With nothing else to say, still give the two figures.
 - `Decision:` what waits on the user (unsure kinds, unapproved groups, issue drafts to file, checks to run elsewhere), or "No approval needed". Then the remaining user action, such as reviewing the branch or opening a pull request.
 
 ## PARTIAL example
