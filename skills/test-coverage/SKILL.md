@@ -3,7 +3,7 @@ name: test-coverage
 description: "Generate unit tests for untested branches and edge cases. Use when coverage is low, CI flags gaps, or a release needs hardening. Not for integration/E2E suites, framework migrations, or fixing production bugs."
 license: MIT
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "low"
 ---
@@ -85,6 +85,7 @@ Leave trivial code out of the gap list: getters and setters, plain data classes 
 1. Read `references/unit-test-quality.md`.
 2. Write tests for the Step 2 gaps with the test framework for the detected [Stack](#stack-detect-before-step-1-of-workflow), following that file's rules: deterministic, isolated, fast, one behavior per test, and assertions on behavior rather than implementation.
 3. Check each new test against the file's five self-check questions and its useless-test patterns. Rewrite any test that fails one.
+4. **Existing tests are read-only.** Add new tests beside them, but never edit, rename, skip, mark `xfail`, retry or delete a test that existed before the run, and never put a skip marker, retry decorator or rerun flag on a new test (`@pytest.mark.flaky`, `jest.retryTimes`, Vitest `retry`). The one change allowed to an existing line is extending an import the new tests need. An existing test that looks wrong or flaky goes under `Decision:`, unchanged.
 
 ### 4. Verify Improvement
 
@@ -96,7 +97,7 @@ Leave trivial code out of the gap list: getters and setters, plain data classes 
 3. Break check: for each new test, plant one realistic bug in the source line or branch it targets (flip a comparison, shift a boundary by one, drop a raised error), run that test alone, and confirm it fails. Then restore the file with `git checkout -- <file>` and confirm `git diff --name-only` no longer lists it. Never plant a bug in a file on the pre-sync list, because the checkout would erase the user's changes; list those tests under `Uncertainty:` as not break-checked. A test that still passes against the bug protects nothing: strengthen its assertion once and repeat the check. If it passes again, remove it and list it under `Uncertainty:`.
 4. Run the same coverage command as Step 1.
 5. Compare the new total with the Step 1 baseline. If it is not strictly higher, report PARTIAL and list the Step 2 gaps that are still untested.
-6. If the full suite passed in item 1 and the new test files passed in item 2, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered. Stage each test file this run wrote by explicit path (`git add tests/test_parser.py`); never `git add -A`, `git add .` or `git commit -a`, which would sweep in user work Repo Sync restored. Never stage a path on the pre-sync list. Stage a changed manifest or lockfile (*Coverage tool not installed*) only with its reason in the commit message. Check `git diff --cached --name-only` before committing. Under `Uncertainty:`, list each changed file left unstaged, or every new test file when the commit is skipped (failed suite or regression).
+6. If the full suite passed in item 1 and the new test files passed in item 2, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered. Stage each test file this run wrote by explicit path (`git add tests/test_parser.py`); never `git add -A`, `git add .` or `git commit -a`, which would sweep in user work Repo Sync restored. Never stage a path on the pre-sync list. Stage a changed manifest or lockfile (*Coverage tool not installed*) only with its reason in the commit message. Check `git diff --cached --name-only` before committing. For each staged test file that existed before the run, read `git diff --cached -U0 -- <file>`: every removed line must be an import that the same diff re-adds with more names. Any other removed line means an existing test changed: commit nothing and report `PARTIAL — existing test changed` with that line. Under `Uncertainty:`, list each changed file left unstaged, or every new test file when the commit is skipped (failed suite or regression).
 7. Print the final report. It opens with `Result:` — `COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason` — followed by:
    - `Evidence:` the commands that ran, with before/after totals, pass/fail counts, the item 2 rerun result, and the item 3 break-check count
    - `Uncertainty:` what was not checked (e.g., excluded paths, CI not run, covered lines without output assertions)
@@ -132,6 +133,7 @@ A run passes when **all** of the following are true:
 - [ ] Every new test asserts on a return value, a raised error, or an observable effect. A test that only executes code does not count.
 - [ ] Every committed test failed the Step 4 break check against a planted bug, and every planted bug was reverted. No test targets trivial code alone.
 - [ ] No new test uses the network, the wall clock, unseeded randomness, or `sleep()`, or a real database other than a test-database fixture the existing unit tests already use.
+- [ ] Tests that existed before the run are unchanged apart from added tests and extended imports, and no test carries a skip, `xfail`, retry or rerun marker this run added.
 - [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.), and the new tests pass when run on their own, twice.
 - [ ] A new test that exposed a suspected bug is left out of the commit and reported under `Decision:`. No assertion was loosened to match the code.
 - [ ] All new tests live on a feature branch (e.g., `feat/test-coverage`), never on `main`/`master`.
@@ -184,7 +186,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Test Writing phase checks:** `Tests written`, `Trivial code skipped`, `Self-check passed`, `No network, DB, clock, randomness, or sleep`, `Framework conventions followed`
 
-**Verification phase checks:** `Tests pass`, `New tests pass on their own`, `Break check passed`, `Coverage improved`, `No regressions`
+**Verification phase checks:** `Tests pass`, `New tests pass on their own`, `Break check passed`, `Existing tests unchanged`, `Coverage improved`, `No regressions`
 
 ## Guidelines
 

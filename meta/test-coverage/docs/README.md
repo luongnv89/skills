@@ -16,6 +16,7 @@
 - Adapt to any testing framework (Jest, Vitest, pytest, Go, Rust)
 - Write deterministic, isolated tests: no network, real database, wall clock, unseeded randomness, or `sleep()`, and every test asserts on behavior, not just executed lines
 - Rerun the new tests on their own to catch flaky ones. A test that exposes a suspected bug is reported to you, never weakened to pass
+- Leave your existing tests alone: it never edits, skips, retries or deletes a test that was there before, and never adds a retry or rerun marker to make a test pass
 - Create feature branch automatically before adding tests
 - Final report states the result, the commands that ran, what was not checked, and any action left to you
 

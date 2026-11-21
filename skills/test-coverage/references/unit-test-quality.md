@@ -11,6 +11,7 @@ Read this before Step 3 writes the first test. A unit test has one job: fail onl
 | Fast | Milliseconds per test, so the whole suite runs on every commit | It makes no network or external-service calls and does no waiting; a per-test temp dir is fine. A test that needs more is an integration test, which this skill does not write |
 | Focused | One behavior per test | Its name alone says what broke |
 | Behavior, not implementation | Assert on return values, raised errors, and observable effects: state, output, and calls to a faked boundary | It asserts nothing about private methods, private attributes, or internal call order |
+| Honest | It passes because the code works, never because it was retried, skipped or because an existing test was changed | It carries no skip, `xfail`, retry decorator or rerun flag, and no test that existed before the run was edited to make room for it |
 
 ## Fakes and boundaries
 
@@ -42,6 +43,7 @@ def test_parse_packet_rejects_truncated_header():
 | Shared global or static state | Build a fresh fixture in each test |
 | Test order dependence | Make each test build the state it needs. To expose it, run the file on its own and, where the runner has a built-in shuffle flag (`go test -shuffle=on`, `jest --randomize` on Jest 29.2+, `vitest --sequence.shuffle`), shuffled |
 | Real ports or temp files | Use in-memory fakes, or a per-test temp dir (`tmp_path`, `t.TempDir()`) |
+| A retry, rerun flag or skip marker | Never a fix: it hides the cause and teaches the next run to retry instead of looking for it. Fix the cause with a row above, or remove the new test and list it under `Uncertainty:` |
 
 ## Self-check
 
