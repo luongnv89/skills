@@ -38,7 +38,7 @@ def test_parse_packet_rejects_truncated_header():
 | Cause | Fix |
 |---|---|
 | Reading the current time (`datetime.now()`, `Date.now()`, `time.Now()`), timezones | Inject a clock where the code accepts one; otherwise patch or freeze time as SKILL.md → Edge Cases says |
-| Randomness | Seed it, or inject the generator |
+| Randomness | Use a generator the test creates with a fixed seed (`random.Random(0)`, `np.random.default_rng(0)`), or inject one; never seed the global generator |
 | `sleep()` waiting for async work | Await the event, or advance fake timers or a fake scheduler |
 | Shared global or static state | Build a fresh fixture in each test |
 | Test order dependence | Make each test build the state it needs. To expose it, run the file on its own and, where the runner has a built-in shuffle flag (`go test -shuffle=on`, `jest --randomize` on Jest 29.2+, `vitest --sequence.shuffle`), shuffled |
@@ -51,12 +51,12 @@ Step 4 runs this before the commit and again on `<base>..HEAD` after it. It pass
 
 Read every change against the base, staged and unstaged together, with renames split and no diff drivers: `git diff --no-ext-diff --no-textconv --no-color --no-renames --text -U0 <base>`, plus the new files from `git status --porcelain --untracked-files=all`. Leave paths on the pre-sync list out of the check (they are the user's work, which this run never writes to) and name them under `Uncertainty:`, since the suite ran with them.
 
-**Every new test, fixture and helper**, in any file, restores everything it changes (patch with the framework's tools, which undo the patch afterwards) and leaves shared state as it found it. An unrestored assignment to a module global, another module's attribute, or the environment fails the check. A class body holds only definitions, and no code runs at import or package load beyond imports, constants and definitions: no autouse or session-wide fixture, no Go `func init()` or package-level `var` with a function call.
+**Every new test, fixture and helper**, in any file, restores everything it changes and leaves shared state as it found it. An unrestored assignment to a module global, another module's attribute, or the environment fails the check. Python's `monkeypatch` and `with patch(...)` restore themselves. These do not, so restore them in the same test (`try`/`finally`) or a fixture only the new tests use: `patch(...).start()` needs `stop()`, Jest and Vitest `spyOn` needs `mockRestore()` unless the config already sets `restoreMocks`, fake timers need `useRealTimers()`. Seeding the global random generator counts as changing shared state. A class body holds only definitions, and no code runs at import or package load beyond imports, constants and definitions: no autouse or session-wide fixture, no Go `func init()` or package-level `var` with a function call.
 
 **A pre-existing test file may change only like this:**
 
-- **Added lines** belong to a new test whose name is not defined in the file (or Go package) at the base, together with its body and blank separator lines, or to an import below. A new test may sit at top level or directly inside an existing test container (a test class, a `describe` block, a Rust `#[cfg(test)]` module), never inside an existing test's body. No other added line: no module-level statement, fixture, assignment, build tag, or line inside an existing test.
-- **An import**: an existing one extended from the same module, every original name and alias kept unchanged, at least one name added; or a new import line. Neither may bind a name the file already binds. Either may be wrapped over several lines (a parenthesised Python import, JavaScript braces, a Go import block replacing a single import, a rustfmt `use` tree).
+- **Added lines** belong to a new test whose name is not defined in the file (or Go package) at the base, together with its body and blank separator lines, or to an import below. A new test goes after the existing tests, at top level or at the end of an existing test container (a test class, a `describe` block, a Rust `#[cfg(test)]` module), never inside an existing test's body. No other added line: no module-level statement, fixture, assignment, build tag, or line inside an existing test.
+- **An import**: an existing one extended from the same module, every original name and alias kept unchanged, at least one name added; or a new import line. Neither may bind a name the file already binds or a builtin name, and neither is a star import. Either may be wrapped over several lines (a parenthesised Python import, JavaScript braces, a Go import block replacing a single import, a rustfmt `use` tree).
 - **Removed lines** only from such an import, or the last line re-added unchanged because a final newline was added. Outside Python, a line in that import block may come back with only the whitespace the project's formatter changed (gofmt alignment).
 
 A pre-existing test file that is deleted, renamed or moved fails the check. A new row in an existing table test is an edit of that test: add a new test instead. Keep each file's line endings; rewriting CRLF as LF changes every line.
@@ -78,15 +78,15 @@ If the check fails after the commit, push nothing: report `PARTIAL — existing 
 
 ## Reading a test result
 
-A solo run, a break check and the base check below are judged by the test's own reported result (passed, failed, error), never by the command's exit status. A run in which the test was not collected or did not execute, or whose only failure is a coverage threshold, gives **no result**.
+A solo run, a break check and the base check below are judged by the test's own reported result (passed, failed, error), never by the command's exit status, so a coverage threshold missed by a run of a few tests changes nothing. A run in which the test was not collected or did not execute gives **no result**.
 
 ## Failing pre-existing tests
 
 When a test that passed at baseline fails in Step 4, decide at the base, never on the branch:
 
-1. `git worktree add --detach <dir outside the repo> <base>`, and run that test there alone by its test id with Step 1's command and environment (the same interpreter, virtualenv or installed dependencies; point to them rather than installing anything). Run it up to three times and stop at the first failure.
-2. It fails there → a **pre-existing flake**: put it and its visible cause under `Decision:`; it does not block the commit, and the `Result:` names it. A later failure of the same test in this run keeps this decision.
-3. It passes all three times, or gives no result in any run → **this run broke it**: report `PARTIAL` and name it, even if it passes alone on the branch. A flake that fails one run in three still passes three runs in a row about a third of the time and is blamed here; that errs on the safe side, since nothing is committed.
+1. `git worktree add --detach <dir outside the repo> <base>`, and run that test there alone by its test id with Step 1's command and the same dependency versions: point to the original checkout's interpreter, virtualenv or installed dependencies, or let Step 1's command build them from the lockfile. A command that would fetch other versions gives no result. Run it up to three times and stop at the first failure.
+2. It fails there the same way it failed on the branch (the same assertion or exception) → a **pre-existing flake**: put it and its visible cause under `Decision:`; it does not block the commit, and the `Result:` names it. A later failure of the same test in this run keeps this decision.
+3. It passes all three times, fails another way (a file the scratch checkout lacks, an import error), or gives no result → **this run broke it**: report `PARTIAL` and name it, even if it passes alone on the branch. A flake that fails one run in three still passes three runs in a row about a third of the time and is blamed here; that errs on the safe side, since nothing is committed.
 4. Remove the worktree with `git worktree remove --force` in every outcome, then confirm `git worktree list` no longer shows it.
 
 ## Self-check

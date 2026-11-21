@@ -163,7 +163,7 @@ These are instruction checks. Without reviewer feedback, human understanding of 
 - **100% coverage already reached**: If the Step 1 baseline is 100%, add no tests. Report `COMPLETE` with the baseline as evidence and stop.
 - **Generated code or vendored files in coverage report**: Leave auto-generated and third-party paths (e.g., `node_modules/`, `vendor/`, `dist/`, `build/`, files with a generated-code header) out of the Step 2 gap list, and list them under `Uncertainty:`.
 - **Async / concurrent code paths**: Use the framework's async test utilities (for example `pytest-asyncio` or Jest fake timers). Never use a bare sync wrapper, and never `sleep()` to wait for async work.
-- **Code reads the clock, randomness, or global state directly**: Patch it with a tool the test framework ships: pytest `monkeypatch` on the name the module under test imports, `jest.spyOn` or `vi.spyOn`, or Jest or Vitest fake timers for time. If no such tool reaches it, do not refactor production code to add a seam. Leave that gap untested and list it under `Uncertainty:`.
+- **Code reads the clock, randomness, or global state directly**: Patch it with a tool the test framework ships: pytest `monkeypatch` on the name the module under test imports, `jest.spyOn` or `vi.spyOn`, or Jest or Vitest fake timers for time, restored as the *Integrity check* says. If no such tool reaches it, do not refactor production code to add a seam. Leave that gap untested and list it under `Uncertainty:`.
 
 ## Step Completion Reports
 
