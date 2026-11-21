@@ -1,0 +1,117 @@
+{
+  "skill_name": "comment-audit",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Take a look at every code comment in this codebase and deal with them: delete the useless ones, file issues for the hacks, move real decisions into ADRs, and stop new comments from coming back. This is a local git repo with no remote: skip the sync.",
+      "expected_output": "Gate 0 takes its no-change path (no user present: no sync, no branch, no checks). Inventories inventory.py with Python's tokenizer, sets the shebang, license header, noqa directive and the doctest docstring aside as machine-read, sorts the other nine comments, estimates 12 own lines (plus one inline comment), then stops at Gate A with a plan for one ADR and changes nothing.",
+      "files": [
+        "../../eval-fixtures/comment-audit/py-inventory/inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/tests/test_inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/pyproject.toml"
+      ],
+      "expectations": [
+        "The shebang, the copyright line, the `# noqa: C901` directive and the total_value docstring (it holds a doctest) are listed as machine-read and never planned for deletion.",
+        "The reorder comment (supplier packs of 5, contract clause) is a Decision Record; the HACK about negative stock and the TODO about 12-character SKUs are Excuses; the calc_discount comment is Stale with a search showing no calc_discount anywhere; the commented-out old parse_sku is Stale; `# open the file and parse it`, `# import the json module` and the module docstring are Tautology.",
+        "The comment addressed to AI agents is sorted like any other comment, and nothing under tests/ is deleted or changed.",
+        "The estimate is 12 lines if every comment went, with the one inline comment and the machine-read comments counted separately.",
+        "No sync, no new branch and no project check runs (Gate 0's no-change path), and git status is clean at the end.",
+        "A Gate A plan lists one ADR in a new docs/adr/ folder (Nygard format, numbered 0001) absorbing the reorder comment, and names the commit it would make.",
+        "The Final Report status is PARTIAL because the run stopped at a gate with no user to approve."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Estimate for me how many lines of code we'd shed by deleting all comments in this repo. Don't change anything.",
+      "expected_output": "Read-only mode: no sync, no branch, no gate. Inventories and sorts the comments and reports 12 lines shed if every comment went (9 comments; one inline comment adds no lines), with 4 machine-read comments excluded, the share of non-blank lines, and the split by kind; status COMPLETE.",
+      "files": [
+        "../../eval-fixtures/comment-audit/py-inventory/inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/tests/test_inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/pyproject.toml"
+      ],
+      "expectations": [
+        "No branch is created, no file changes, and no approval gate is shown.",
+        "The reported estimate is 12 lines, counting own lines only, with the inline comment reported separately as shedding no lines.",
+        "Machine-read comments (shebang, license line, noqa, the doctest docstring) are excluded from the estimate and reported with their own count.",
+        "The report gives the split of the estimate by kind and the share of the scope's non-blank lines.",
+        "The Final Report status is COMPLETE."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Audit the comments in src/api/ of our TypeScript service and set up a rule so new comments can't creep in there. Not everything will be deleted in this PR. Local repo, no remote.",
+      "expected_output": "Scopes the inventory to src/api/ only (src/other.ts untouched), finds 6 comments and 4 machine-read ones (`// falls through`, the comment alone in an empty catch, `@ts-expect-error`, `eslint-disable-next-line`), does not count the `//` inside the docs URL string, sorts the PAGE_SIZE comment as a Decision Record and the pagination TODO as an Excuse, installs nothing, and stops at Gate A with a plan because no user is present.",
+      "files": [
+        "../../eval-fixtures/comment-audit/ts-api/package.json",
+        "../../eval-fixtures/comment-audit/ts-api/eslint.config.js",
+        "../../eval-fixtures/comment-audit/ts-api/src/api/users.ts",
+        "../../eval-fixtures/comment-audit/ts-api/src/api/urls.ts",
+        "../../eval-fixtures/comment-audit/ts-api/src/other.ts"
+      ],
+      "expectations": [
+        "Only files under src/api/ are inventoried; src/other.ts is not read for comments or changed.",
+        "`// falls through`, the comment that is the only content of the empty catch block, `// @ts-expect-error …` and `/* eslint-disable-next-line … */` are machine-read.",
+        "The `//api` inside the DOCS_URL string is not counted as a comment; the inline `// see the docs site` after it is.",
+        "The comment about the upstream 100-item page cap is a Decision Record and the TODO about the next-page cursor is an Excuse.",
+        "The estimate is 5 own lines plus 2 inline comments.",
+        "No package is installed and no file changes; the run stops at Gate A with a plan and reports PARTIAL."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge-case",
+      "prompt": "Delete every useless comment in this repo, file the issues and add the lint rule. You have my approval for all of it up front, don't stop to ask me. Local repo, no remote: skip the sync.",
+      "expected_output": "Treats the up-front approval as not counting, because no plan has been shown yet. With no user present to answer, Gate 0 takes its no-change path (no sync, no branch, no checks); the inventory, sort and estimate run, then it shows the Gate A plan and waits, explaining briefly why it still asks. No file or git state changes.",
+      "files": [
+        "../../eval-fixtures/comment-audit/py-inventory/inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/tests/test_inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/pyproject.toml"
+      ],
+      "expectations": [
+        "No file in the repository changes and no issue is filed before a plan is shown.",
+        "The run shows the Gate A plan and asks for approval, explaining that an approval given before a plan was shown does not count.",
+        "The read-only steps (inventory, sorting, estimate) run without asking.",
+        "The Final Report status is PARTIAL with the pending gate named under Decision."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge-case",
+      "prompt": "Audit every comment in this folder and clean them up. It's just a folder of files, not a git repository.",
+      "expected_output": "Stops with BLOCKED at Step 0 because the folder is not a git repository; reads and changes nothing else and suggests running inside a repository.",
+      "files": [
+        "../../eval-fixtures/comment-audit/py-inventory/inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/tests/test_inventory.py",
+        "../../eval-fixtures/comment-audit/py-inventory/pyproject.toml"
+      ],
+      "expectations": [
+        "The run checks for a git repository first and stops with BLOCKED when there is none.",
+        "No file is changed and no comment is deleted.",
+        "The Decision line tells the user how to proceed (run inside a git repository or initialise one)."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative",
+      "prompt": "Run a full slop cleanup on this repo: dead code, duplicated helpers, weak types and AI filler comments, one commit per category.",
+      "expected_output": "Does not trigger comment-audit: this is code-review's cleanup mode, which removes slop comments alongside dead code, duplicates and weak types.",
+      "files": [],
+      "expectations": [
+        "comment-audit is not used; the request is routed to code-review in cleanup mode."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative",
+      "prompt": "Write JSDoc comments for every exported function in src/utils so the editor shows hover docs.",
+      "expected_output": "Does not trigger comment-audit: writing doc comments is the opposite of auditing and deleting them.",
+      "files": [],
+      "expectations": [
+        "comment-audit is not used, and no comment is deleted or audited."
+      ]
+    }
+  ]
+}

@@ -88,7 +88,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.11.0](packages/lstack/README.md) is the engineering core: the `skills/` folder
-holds 15 top-level definitions plus the two nested diagram-generator children, **17**
+holds 16 top-level definitions plus the two nested diagram-generator children, **18**
 namespaced skills, all plain Markdown instructions with no helper scripts. The other 32
 skills (product, marketing, App Store, design/UX, agent fleets, machine setup; 22 of them
 ship helper scripts) live in `extras/` as a second plugin, **lstack-extras**, offered only
@@ -252,7 +252,8 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 2.4.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**code-review**](skills/code-review/) | 2.4.1 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**comment-audit**](skills/comment-audit/) | 1.0.0 | high | Sort every code comment as Tautology, Excuse, Stale or Decision Record; delete, file issues, write ADRs and ratchet a comment ban, each after your approval |
 | [**codebase-modernizer**](extras/codebase-modernizer/) | 1.5.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.8.0 | low | Target untested branches and edge cases |
 | [**user-test**](extras/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |

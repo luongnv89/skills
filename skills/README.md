@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 17 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 18 first-party Agent Skills for everyday
 engineering work: code review, test generation, documentation, diagrams,
 CI pipelines, release shipping, repository cleanup, open-source readiness,
 architecture documents and agent instruction files. Each skill is a plain-text
@@ -61,6 +61,7 @@ working in. That is the only network access many skills make.
 | cleanup-project | your git remote, GitHub API via `gh` | branch names; on confirmation, commits, branches and PR text | after one confirmation: delete remote branches, push main or archive branches, `gh pr create` | git, gh |
 | cli-builder | your git remote; package registries when adding CLI framework dependencies | dependency names | local branch and commits only | git, pip, npm, go, `npx oclif`, project test runner |
 | code-review | your git remote; Context7 MCP (optional) | library doc queries | local commits per cleanup category (cleanup mode); no push | git, knip, madge, ts-prune, vulture, jscpd, pylint and similar linters |
+| comment-audit | GitHub API via `gh`, only for issues you approve; your git remote | issue titles and bodies, which quote the removed comments and their file paths | after you approve each plan: writes ADRs, files issues, deletes comments, adds a lint ratchet, and commits locally; no push | git, gh, the project's linter and test runner |
 | devops-pipeline | your git remote; generated hooks and CI fetch pre-commit hook repos, npm packages, and GitHub Actions when they run | none; the generated CI writes coverage to the job summary on GitHub | writes pre-commit and CI config, installs git hooks; no commit or push | git, pre-commit; generated hooks run prettier, eslint, tsc |
 | diagram-generator | none | none | none | asm; routes to drawio-generator or excalidraw-generator |
 | doc-manager | your git remote; your own health endpoint when the generated check script runs | a GET to your endpoint | creates a feature branch and writes docs; no commit unless asked | git, bash, mmdc (optional) |
