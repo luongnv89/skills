@@ -232,7 +232,7 @@ Keep the same three modes, the same JSON format and line counting. The counter f
 
 ### Baseline from the committed tree
 
-A baseline must count what is committed, not the working tree: an untracked file or a file the user changed before the run would otherwise enter the baseline. It would pass locally and fail on a clean clone or in CI. After the ratchet files are written and committed, if the pre-sync list is empty, generate the baseline in the repo. Otherwise generate it in a detached worktree of `HEAD` inside the audit folder (`git worktree add --detach <audit folder>/base HEAD`; link `node_modules` there for ESLint). Copy the baseline file back and commit it as a second commit (`build(lint): add the comment ratchet baseline`). Keep the worktree until the probes are done, then remove it.
+A baseline must count what is committed, not the working tree: an untracked file or a file the user changed before the run would otherwise enter the baseline. It would pass locally and fail on a clean clone or in CI. After the ratchet files are written and committed, if the pre-sync list is empty, generate the baseline in the repo. Otherwise generate it in a detached worktree of `HEAD` inside the audit folder (`git worktree add --detach <audit folder>/ratchet-base HEAD`; link `node_modules` there for ESLint). Move the baseline file back to the repo and commit it as a second commit (`build(lint): add the comment ratchet baseline`). Keep the worktree until the probes are done, then remove it.
 
 ## Wiring
 
