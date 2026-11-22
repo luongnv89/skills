@@ -59,16 +59,17 @@ export TMPDIR="$V/tmp" XDG_CACHE_HOME="$V/cache" \
   PYTHONPYCACHEPREFIX="$V/cache/pycache" PIPENV_VENV_IN_PROJECT=1 \
   YARN_CACHE_FOLDER="$V/cache/yarn" YARN_ENABLE_GLOBAL_CACHE=false PNPM_HOME="$V/cache/pnpm" \
   GOCACHE="$V/cache/go-build" GOMODCACHE="$V/cache/go-mod" CARGO_HOME="$V/cache/cargo" \
-  GRADLE_USER_HOME="$V/cache/gradle" MAVEN_OPTS="-Dmaven.repo.local=$V/cache/m2" \
+  GRADLE_USER_HOME="$V/cache/gradle" GRADLE_OPTS="${GRADLE_OPTS:+$GRADLE_OPTS }-Dorg.gradle.daemon=false" \
+  MAVEN_USER_HOME="$V/cache/m2" MAVEN_OPTS="${MAVEN_OPTS:+$MAVEN_OPTS }-Dmaven.repo.local=$V/cache/m2" \
   POETRY_CACHE_DIR="$V/cache/pypoetry" POETRY_VIRTUALENVS_IN_PROJECT=true PIPENV_CACHE_DIR="$V/cache/pipenv" \
   BUN_INSTALL_CACHE_DIR="$V/cache/bun" DENO_DIR="$V/cache/deno" \
   COMPOSER_HOME="$V/cache/composer" COMPOSER_CACHE_DIR="$V/cache/composer/cache" \
   PLAYWRIGHT_BROWSERS_PATH="$V/cache/ms-playwright" NEXT_TELEMETRY_DISABLED=1 DO_NOT_TRACK=1
 ```
 
-Keep only the lines for the tools the app uses. A Python install goes into a repo-local `.venv/` (`python3 -m venv .venv`, then `.venv/bin/pip install --no-cache-dir …`); `PIP_REQUIRE_VIRTUALENV` makes a pip call outside it fail instead of writing to user site-packages. A redirected cache starts empty, so the first install downloads more: say so in the plan.
+Keep only the lines for the tools the app uses. A Python install goes into a repo-local `.venv/` (`python3 -m venv .venv`, then `.venv/bin/pip install --no-cache-dir …`); `PIP_REQUIRE_VIRTUALENV` makes a pip call outside it fail instead of writing to user site-packages. A redirected cache starts empty, so the first install downloads more: say so in the plan. `GRADLE_OPTS` and `MAVEN_OPTS` append to any value the user already set; `MAVEN_USER_HOME` keeps the Maven Wrapper (`./mvnw`) download in the repo; with the Gradle daemon off, no Gradle process outlives teardown or carries state between stress-test runs.
 
-A tool or app path that no variable redirects (a config path the code hard-codes under `~`, a system service) is a write outside the repo: the commands that cause it are not run, their rows are `UNVERIFIED`, and the plan names the path. A package manager or build tool this block does not name counts as unredirected, so its commands are not run either.
+A tool or app path that no variable redirects (a config path the code hard-codes under `~`, a system service) is a write outside the repo: the commands that cause it are not run, their rows are `UNVERIFIED`, and the plan names the path. A package manager or build tool that keeps its own cache, store or home directory and is not named in this block counts as unredirected, so its commands are not run either. A task runner that only calls other commands (`make`, `just`, `task`) is judged by the commands it calls.
 
 ## Drivers
 

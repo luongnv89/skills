@@ -23,7 +23,7 @@ Mutating rows (run against the test database from compose.test.yaml:3):
   F6 POST /api/todos creates a todo
 Install (each default No):
   I1 npm ci into node_modules/ (cache in .verify/cache) — needed for R2
-  I2 npm i -D playwright into node_modules/, then npx playwright install chromium into .verify/cache/ms-playwright (PLAYWRIGHT_BROWSERS_PATH) — no browser tool found; without it F3, F5 stay UNVERIFIED
+  I2 npm i --no-save playwright into node_modules/ (package.json and the lockfile unchanged), then npx playwright install chromium into .verify/cache/ms-playwright (PLAYWRIGHT_BROWSERS_PATH) — no browser tool found; without it F3, F5 stay UNVERIFIED
 Pointer:
   P1 AGENTS.md +1 line: "- Before committing, follow `.agents/skills/verify/SKILL.md`"
 Ask: F8 "Export CSV" has no expected result in the repo. What should it produce?
