@@ -1510,11 +1510,11 @@ A retry turns a failing test green by running it again, so the flaky test is nev
 repo_dir=/path/to/checkout   # the audited repository, not the scratch directory
 git -C "$repo_dir" grep -n -I -E \
   -e 'rerunfailures|--reruns|reruns *=|retryTimes|--rerun-fails|rerunFailingTestsCount|test-retry|nick-fields/retry|wretry' \
-  -e '(^|[^A-Za-z_])retr(y|ies) *[:=] *[^0 ]|(^|[^A-Za-z_])retries\( *[1-9]|--retr(y|ies)[= ]+[1-9]' \
+  -e '(^|[^A-Za-z_])retr(y|ies)"? *[:=] *[^0 ]|(^|[^A-Za-z_])retries\( *[1-9]|--retr(y|ies)[= ]+[1-9]' \
   -- ':!*.lock' ':!package-lock.json' ':!pnpm-lock.yaml'
 ```
 
-It catches pytest `--reruns` and `@pytest.mark.flaky(reruns=…)`, `pytest-rerunfailures`, `jest.retryTimes`, Vitest `retry`, Playwright and Cypress `retries` (`process.env.CI ? 2 : 0` included), Mocha `this.retries()`, nextest `retries`, `gotestsum --rerun-fails`, Maven `rerunFailingTestsCount`, the Gradle test-retry plugin and retry actions; a setting of 0 is not a match. Each match is a candidate: read it, and drop it when it retries no test (an HTTP client's `retry: false`). Also read each workflow `run:` step that runs tests for a loop or `||` that runs the command again. Verified with git 2.43 on a scratch repository holding one of each.
+It catches pytest `--reruns` and `@pytest.mark.flaky(reruns=…)`, `pytest-rerunfailures`, `jest.retryTimes`, Vitest `retry`, Playwright, Cypress and Mocha `retries` (`process.env.CI ? 2 : 0` and JSON config included), Mocha `this.retries()`, nextest `retries`, `gotestsum --rerun-fails`, Maven `rerunFailingTestsCount`, the Gradle test-retry plugin and retry actions; a setting of 0 is not a match. Each match is a candidate: read it, and drop it when it retries no test (an HTTP client's `retry: false`). Also read each workflow `run:` step that runs tests for a loop or `||` that runs the command again. Verified with git 2.43 on a scratch repository holding one of each.
 
 Each retry setting is one named finding, `Test retries: <file>:<line>`, giving the setting, the tests it covers, and any test the run logs show passing only on a retry. Its fix is one of two:
 
