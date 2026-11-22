@@ -20,6 +20,7 @@
 - Keep CI fast with free techniques only: caches seeded from the default branch, blobless checkout, superseded-run cancellation, affected-only tests with a default-branch full run, parallel jobs where they are free, everything generated for the repo's visibility, and job timeouts
 - Use the fastest free tools: Oxlint for JS/TS linting, TypeScript 7's `tsc` (benchmark `bun check`, `tsrs`), Vitest `isolate: false` with a per-file reset hook
 - Audit an existing pipeline's speed from real runs: queue wait, setup, and work per job, cache scope, and the slowest job
+- Never generate test retries: existing retry config (pytest `--reruns`, `jest.retryTimes`, Vitest `retry`, Playwright `retries`) is an audit finding fixed by root-causing the flaky test or deleting it with a written reason, and removed only once the user approves that finding
 - Cut Actions minutes: billed minutes per runner OS with a monthly estimate, the step-level critical path, and named findings the user approves one by one, each measured before and after on a branch and kept only when it beats noise, ending in a pull request the user merges
 
 ## When to Use

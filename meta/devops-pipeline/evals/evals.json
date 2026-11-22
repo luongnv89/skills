@@ -194,6 +194,19 @@
         "The guard is not moved to pull_request_target, and the report says a pull request can still edit the workflow itself, which only a required code-owner review stops.",
         "Decision: proposes CODEOWNERS entries covering .pre-commit-config.yaml, .github/workflows/, the hook scripts and the test directories; no CODEOWNERS file is written and no branch protection setting is changed."
       ]
+    },
+    {
+      "id": 15,
+      "kind": "edge",
+      "prompt": "Our Playwright and Jest suites in CI keep failing at random, so playwright.config.ts has retries: process.env.CI ? 2 : 0 and jest.setup.js calls jest.retryTimes(3). CI is slow too. Audit why CI is slow and set up our pipeline so it stays green.",
+      "expected_output": "Runs the read-only CI speed audit, including the retry check, and reports the Playwright retries setting and the jest.retryTimes call as two named 'Test retries' findings with file and line, each offering only root-causing the flaky tests or deleting them with a written reason as the fix. It removes neither retry setting, deletes no test and adds no retry anywhere, because the user has not approved those findings by name; 'stays green' approves nothing. Any config or workflow it proposes has no retry setting.",
+      "files": [],
+      "expectations": [
+        "The audit output lists playwright.config.ts (retries: process.env.CI ? 2 : 0) and jest.setup.js (jest.retryTimes(3)) as separate named findings, each with its file and line.",
+        "Each retry finding's fix is root-causing the flaky test or deleting it with a written reason; lowering the retry count or moving the retry elsewhere is not offered.",
+        "Neither retry setting is removed or changed and no test is deleted or skipped in this run; the report says each waits for the user's approval of that finding, and 'stays green' is not treated as approval.",
+        "No proposed .pre-commit-config.yaml, test runner config or workflow adds a retry (--reruns, retryTimes, Vitest retry, Playwright retries above 0, a retry action or a rerun loop)."
+      ]
     }
   ]
 }
