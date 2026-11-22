@@ -20,7 +20,7 @@ Every command in the verify skill comes from the repo: a manifest script, a Make
 |---|---|
 | "Set up a verify skill for this repo", "codify how to run and check this app" | The full workflow |
 | "Write a feature map we can grade the app against" | The full workflow; the feature map is part of it |
-| "Our verify skill is flaky, stress-test it" | Steps 0, 5 and 6 on the existing verify skill |
+| "Our verify skill is flaky, stress-test it" | Steps 0 and 3 (a plan with only the existing verify skill's commands and `.verify/.gitignore`), then Steps 5 and 7 |
 
 Not for: writing unit or integration tests (`test-coverage`), testing an app once as a user and fixing what breaks (`user-test`), pre-commit hooks and CI (`devops-pipeline`). A library with nothing to boot or run gets no verify skill: say so and stop.
 
@@ -28,12 +28,12 @@ Not for: writing unit or integration tests (`test-coverage`), testing an app onc
 
 - A git repository. The skill writes only inside it.
 - The tools the repo's own commands need (its runtime, package manager, `curl` for HTTP checks). Missing ones are listed in the plan, never installed silently.
-- Web apps: a browser tool the agent already has (a browser MCP, or Playwright with its browsers already installed). Without one, the verify skill checks pages over HTTP and marks interaction steps `UNVERIFIED`.
+- Web apps: a browser tool the agent already has (a browser MCP, or Playwright already in the repo with its browsers installed). Without one, the verify skill checks pages over HTTP and marks interaction steps `UNVERIFIED`.
 
 ## Rules
 
-1. **Commands come from the repo.** Each command in the verify skill and the feature map cites its source as `path:line`. No source: ask the user, or leave the step out and list it as `UNVERIFIED`. Never invent a port, script name, flag or URL.
-2. **Expected results come from the repo too:** a test assertion, a doc, a route handler, a help string, a fixture. A feature whose expected result has no source gets `expected: ask the user`, and it is never graded `PASS` until the user answers.
+1. **Commands come from the repo.** Each command in the verify skill and the feature map cites its source as `path:line`. No source: ask the user, or leave the step out and list it as `UNVERIFIED`. Never invent a port, script name, flag or URL. An error-path row may use a deliberately nonexistent probe value (`/verify-unknown-path`, `verify-unknown`): a probe input, not an invented command.
+2. **Expected results come from the repo too:** a test assertion, a doc, a route handler, a help string, a fixture. A framework's documented behaviour counts when cited with the repo line that uses it (`wordcount/cli.py:14`, argparse subparsers → exit 2 and "invalid choice"). A feature whose expected result has no source gets `expected: ask the user`, and it is never graded `PASS` until the user answers.
 3. **Approval before change.** Nothing is written, installed or started before the user approves the plan that lists it (*Step 3*). Reading the repo needs no approval.
 4. **No installs without a separate yes.** A browser driver (`npx playwright install`, chromedriver), a simulator or emulator, a test framework, or any global tool is its own plan item, default No. So is installing the project's declared dependencies: its lockfile command, into the repo only (`node_modules/`, a repo-local `.venv/`), never global or user site-packages.
 5. **Writes stay inside the repo.** The skill writes only the files its plan lists, and run logs, caches and temp files under `.verify/` at the repo root, which ignores itself (`.verify/.gitignore` holds `*`). Every command it runs gets the environment in `references/detection.md` → *Keeping writes in the repo*, which points tool caches, logs and `TMPDIR` there. It never writes to the home directory, `/tmp`, global config or another repo. A command whose writes outside the repo cannot be redirected that way (an app config path the repo hard-codes) is not run: its rows are `UNVERIFIED` and the plan says why.
@@ -64,7 +64,7 @@ If `origin` is missing, HEAD is detached, or the pull, rebase or stash pop fails
 1. Confirm a git repository (`git rev-parse --show-toplevel`); none → `BLOCKED`.
 2. Save `git status --porcelain --untracked-files=all` as the **pre-sync list**. Those paths hold the user's own work: never edit, stage or commit them.
 3. Record the **base**: `git rev-parse HEAD`.
-4. Look for an existing verify skill: `.claude/skills/verify*/SKILL.md`, `.agents/skills/verify*/SKILL.md`. If one exists, this run updates it (the plan shows the diff) instead of adding a second one. For "stress-test our verify skill", go to Step 5 with it.
+4. Look for an existing verify skill: `.claude/skills/verify*/SKILL.md`, `.agents/skills/verify*/SKILL.md`. If one exists, this run updates it (the plan shows the diff) instead of adding a second one. For "stress-test our verify skill", go to Step 3 with a plan that lists only its commands and `.verify/.gitignore`, then Steps 5 and 7.
 
 ### Step 1: Detect the app and its commands
 
@@ -92,7 +92,7 @@ Build the feature map with `references/feature-map.md`. One row per user-visible
 Print the plan in the format in `references/final-report.md` → *Plan*, then ask one question: approve all, approve some (by item ID), change something, or stop. The plan is a dry run and names:
 
 - every file to write: the verify skill (template in `references/verify-skill-template.md`), its feature map, the portable copy, and `.verify/.gitignore`;
-- every command the stress test will run, with its source, and what it may write. Running a repo command runs the repo's code, so approval covers exactly these commands and no others;
+- every command the stress test will run, with its source, and what it may write, plus one line for the harness's own mechanics (`mkdir`, `setsid` or `set -m`, `curl`, `kill`, `lsof`/`ss`, `git rev-parse`/`git status`). Running a repo command runs the repo's code, so approval covers exactly these commands and no others;
 - the mutating rows and the local or test setup they run against;
 - each install, as its own item, default No (*Rules* 4);
 - the optional AGENTS.md pointer (*Step 6*), as its own item;
@@ -111,7 +111,7 @@ After approval, run the *Repo Sync*, then write only the approved files:
 
 An existing file is changed only as the approved diff showed; never overwrite a hand-written verify skill wholesale.
 
-Validate the result: frontmatter holds `name` (equal to its folder) and a quoted `description`, no `<placeholder>` is left, every command line has a source, and `cmp` finds both copies identical. Commit nothing unless the user asks: the files stay as uncommitted changes on the current branch.
+Validate the result: frontmatter holds `name` (equal to its folder) and a quoted `description`, no `<…>` placeholder is left (runtime tokens such as `$RUN_DIR` and the result line's `{braces}` stay), every command line has a source, and `cmp` finds both copies identical. Commit nothing unless the user asks: the files stay as uncommitted changes on the current branch.
 
 ### Step 5: Stress-test the harness
 
@@ -125,7 +125,7 @@ Run the verify skill exactly as written, three times, each run from boot to tear
 
 ### Step 6: AGENTS.md pointer (optional)
 
-Only when AGENTS.md exists and the user approved this item: add at most one line, following agent-config's rules. AGENTS.md is read by every agent, so the line is a backticked path to the portable copy: no `@import`, no `/command`, no skill name, nothing pasted from the skill. For example:
+Only when AGENTS.md exists and the user approved this item: add at most one line, next to the existing commands or workflow lines (else at the end), following agent-config's rules. AGENTS.md is read by every agent, so the line is a backticked path to the portable copy: no `@import`, no `/command`, no skill name, nothing pasted from the skill. For example:
 
 ```markdown
 - Before committing, follow `.agents/skills/verify/SKILL.md`

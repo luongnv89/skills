@@ -18,6 +18,7 @@ Run (3 times in Step 5):
   R1 npm run build               package.json:8         writes .next/
   R2 npm run dev                 package.json:7         port 3000
   R3 curl -fsS localhost:3000/api/health  src/app/api/health/route.ts:3
+  Harness (covered by this approval): mkdir, setsid or set -m, curl, kill, lsof/ss, git rev-parse/git status
 Mutating rows (run against the test database from compose.test.yaml:3):
   F6 POST /api/todos creates a todo
 Install (each default No):
@@ -52,7 +53,7 @@ After each step, print a compact block: one `√` or `×` line per check, then `
 | 1 Detect | `App classified`, `Install, build, boot sourced` (or `unknown` listed), `Ready signal sourced`, `Drivers listed` |
 | 2 Map | `Boot and main path first`, `Every row has a source`, `Expected results observable`, `Rows needing input listed` |
 | 3 Plan | `Plan shown`, `Approval received` (or no user, with the reason), `Installs separate and default No` |
-| 4 Write | `Sync done or skipped with reason`, `Only approved files written`, `Copies identical`, `No placeholder left`, `Nothing outside the repo` |
+| 4 Write | `Sync done or skipped with reason`, `Only approved files written`, `Copies identical`, `No <…> placeholder left`, `Nothing outside the repo` |
 | 5 Stress test | `3 runs completed`, `Per-step comparison done`, `Flaky steps reported`, `Teardown after every run` |
 | 6 Pointer | `AGENTS.md exists`, `Approved`, `At most one line added` (or skipped, with the reason) |
 | 7 Report | `Files and statuses listed`, `Final Report printed` |
@@ -81,10 +82,10 @@ The four-line block that ends every run, stops included. It follows the Step 7 s
 ### PARTIAL example (no user present)
 
 ```text
-Result: PARTIAL. Detected a CLI (pyproject.toml:9) and drafted .claude/skills/verify/ with 5 features; nothing was written or run because no user is present to approve the plan.
-Evidence: commands sourced: pip install -e . (README.md:14), wordcount --help (src/wordcount/cli.py:8); draft and plan printed above.
-Uncertainty: the stress test has not run; F4 has no expected result in the repo.
-Decision: Approve the plan (W1-W4, R1-R3) to write the files and run the stress test; give F4's expected result.
+Result: PARTIAL. Detected a CLI (pyproject.toml:7-8, [project.scripts]) and drafted .claude/skills/verify/ with 5 features; nothing was written or run because no user is present to approve the plan.
+Evidence: commands sourced: python3 -m wordcount count tests/fixtures/sample.txt (README.md:10), python3 -m wordcount --version (wordcount/cli.py:13); install: none needed (no dependencies declared); draft and plan printed above.
+Uncertainty: the stress test has not run; F5 (unknown command) expects argparse's exit 2 and "invalid choice" (wordcount/cli.py:14), framework behaviour rather than a repo test.
+Decision: Approve the plan (W1-W4, R1-R2) to write the files and run the stress test.
 ```
 
 ### BLOCKED example

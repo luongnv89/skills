@@ -9,7 +9,7 @@ Check every signal; a repo can hold several apps (a monorepo, or a server with i
 | Type | Signals |
 |---|---|
 | **Web app** | A frontend framework or bundler in the manifest (`next`, `vite`, `react-scripts`, `nuxt`, `@sveltejs/kit`, `astro`, `@angular/core`, Rails or Django templates), an `index.html` served by the app, a `dev` or `start` script that serves pages |
-| **API or service** | A server framework (`express`, `fastify`, `hono`, `@nestjs/core`, `flask`, `fastapi`, `django` without templates, `gin`, `echo`, `axum`, `actix-web`, `spring-boot`), an OpenAPI or GraphQL schema, a Dockerfile `EXPOSE`, a compose service with `ports:`, a `Procfile` `web:` line, a worker with a health endpoint |
+| **API or service** | A server framework (`express`, `fastify`, `hono`, `@nestjs/core`, `flask`, `fastapi`, `django` without templates, `gin`, `echo`, `axum`, `actix-web`, `spring-boot`), an OpenAPI or GraphQL schema, a Dockerfile `EXPOSE`, a compose service with `ports:`, a `Procfile` `web:` line, a worker with a health endpoint, a plain server in code (Node `http.createServer` or `node:http`, Python `http.server`, Go `net/http` `ListenAndServe`) |
 | **CLI** | `bin` in `package.json`, `[project.scripts]` or `console_scripts` in Python packaging, `[[bin]]` or `src/main.rs` in Cargo, a Go `main` package with `cobra`, `urfave/cli` or `flag`, a `cmd/` folder |
 | **Mobile or desktop** | `ios/`, `android/`, Xcode or Gradle projects, Flutter, React Native, Electron or Tauri config |
 | **Library** | Only packaging metadata and modules, no entry point, server or `bin` |
@@ -24,9 +24,9 @@ Look in this order and stop at the first source that gives the command. Cite it.
 2. Task runners: `Makefile`, `justfile`, `Taskfile.yml`, `mise.toml`, `.tool-versions` for runtime versions.
 3. Containers: `docker-compose.yml` or `compose.yaml` services, `Dockerfile` `CMD`, `ENTRYPOINT` and `EXPOSE`, `Procfile`, `devcontainer.json` `postCreateCommand`.
 4. CI: the steps in `.github/workflows/*.yml` (or other CI config) that install, build, start or smoke-test the app.
-5. Docs: a fenced command block in `README*`, `CONTRIBUTING*` or `docs/` under a run, start or usage heading.
+5. Docs: a fenced command block in `README*`, `CONTRIBUTING*` or `docs/` under a run, start or usage heading, or a command in `AGENTS.md` or `CLAUDE.md`.
 
-The package manager comes from the lockfile: `package-lock.json` → `npm ci`, `pnpm-lock.yaml` → `pnpm install --frozen-lockfile`, `yarn.lock` → `yarn install --frozen-lockfile` (Yarn 1) or `yarn install --immutable` (Yarn 2+), `bun.lock` or `bun.lockb` → `bun install --frozen-lockfile`, `uv.lock` → `uv sync --frozen`, `poetry.lock` → `poetry install`, `Pipfile.lock` → `pipenv sync`, `Cargo.lock` → `cargo build --locked`, `go.sum` → `go build ./...`. With no lockfile, say so: the install is not reproducible, and it is an assumption in the plan.
+The package manager comes from the lockfile: `package-lock.json` → `npm ci`, `pnpm-lock.yaml` → `pnpm install --frozen-lockfile`, `yarn.lock` → `yarn install --frozen-lockfile` (Yarn 1) or `yarn install --immutable` (Yarn 2+), `bun.lock` or `bun.lockb` → `bun install --frozen-lockfile`, `uv.lock` → `uv sync --frozen`, `poetry.lock` → `poetry install`, `Pipfile.lock` → `pipenv sync`, `Cargo.lock` → `cargo build --locked`, `go.sum` → `go build ./...`. With no lockfile, say so: the install is not reproducible, and it is an assumption in the plan. A manifest that declares no dependencies needs no install ("none needed").
 
 ## What to record per app
 
@@ -42,7 +42,7 @@ The package manager comes from the lockfile: `package-lock.json` → `npm ci`, `
 
 **CLI entry points.** A `[project.scripts]`, `bin` or `[[bin]]` entry is a command only once the package is installed or built. Use, in order: an invocation the repo documents without an install (`python -m <pkg>` with a `__main__.py`, `node bin/cli.js`, `cargo run --`, `go run ./cmd/<name>`), each with its source; else the entry point after the approved install into the repo (a repo-local `.venv/`, `node_modules/.bin/`, `target/`). With neither, the CLI rows are `UNVERIFIED`; never compose an invocation such as `python -c 'from pkg import main'`.
 
-A field with no source is `unknown`. The plan lists each `unknown` and asks the user for it, or proposes an assumption for approval: for a missing ready signal, polling the boot URL or port with a stated timeout. A fixed sleep is never a ready signal.
+A field with no source is `unknown`. The plan lists each `unknown` and asks the user for it, or proposes an assumption for approval: for a missing ready signal, polling the boot URL or port with a stated timeout. Take the timeout from the repo when it has one (a compose `healthcheck`, a CI wait step), else propose one (for example 30 seconds) in the plan as an assumption. A fixed sleep is never a ready signal.
 
 **Port.** Use the port the config names. When it is configurable by an environment variable the code reads (`PORT`), the verify skill may set a free port that way. When the port is fixed and busy, report the conflict; never kill the process holding it.
 

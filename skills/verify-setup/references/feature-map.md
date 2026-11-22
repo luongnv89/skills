@@ -28,7 +28,7 @@ Base: <commit SHA it was derived from> · App type: <web app | API or service | 
   - CLI: the command and arguments, with input files from the repo's fixtures or README examples.
 - **Action:** what the verify skill does there: open, click, type, submit, call, run.
 - **Expected result:** one observable fact the verify skill can check without judgement: an HTTP status, text on the page or in the response, a JSON field and its value, an exit code and an output pattern, a file created. "Works" or "looks right" is not a result.
-- **Mutates:** `no`, or `yes:` and what it changes, with the local or test setup it runs against. A mutating row never runs against a real or shared database or service: with no local or test setup in the repo, it is `UNVERIFIED (no test setup)`.
+- **Mutates:** `no`, or `yes:` and what it changes, with the local or test setup it runs against. A mutating row never runs against a real or shared database or service: with no local or test setup in the repo, it is `UNVERIFIED (no test setup)`. An app whose data lives only in the process the harness starts (an in-memory store the repo documents) counts as a local setup.
 - **Source:** the `path:line` the row comes from: a route, a handler, a help string, a test assertion, a README example. Several sources are separated by commas.
 
 ## Where features come from

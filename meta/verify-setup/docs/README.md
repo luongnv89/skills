@@ -36,6 +36,8 @@ It reads the repo, drafts the verify skill and its feature map, and stops at one
 ```text
 ◆ verify-setup plan for notepad at 3f2a9c1
 App: web app · root: . · verify skill: verify
+Sync (after approval):
+  S1 git pull --rebase origin main
 Write:
   W1 .claude/skills/verify/SKILL.md (new)
   W2 .claude/skills/verify/feature-map.md (new, 6 features)
@@ -44,6 +46,7 @@ Write:
 Run (3 times):
   R1 npm start                         package.json:7   port 4173
   R2 curl -fsS localhost:4173/health   server.js:9
+  Harness (covered by this approval): mkdir, setsid or set -m, curl, kill, lsof/ss, git rev-parse/git status
 Install (each default No):
   I1 npx playwright install chromium — without it F3, F4 stay UNVERIFIED
 Pointer:
@@ -51,11 +54,12 @@ Pointer:
 Reply: approve all · approve <IDs> · change … · stop
 ```
 
-After you approve, the generated verify skill ends every run with one line other tools can read:
+After you approve, the generated verify skill ends every run with one line other tools can read. Here I1 was declined, so the two browser rows stay unverified:
 
 ```text
-VERIFY FAIL commit=3f2a9c1 dirty=no pass=5 fail=1 unverified=0 total=6 seconds=12
-F4 FAIL: /about returned 404
+VERIFY PARTIAL commit=3f2a9c1 dirty=no pass=4 fail=0 unverified=2 total=6 seconds=3
+F3 UNVERIFIED: no driver (Add button needs a browser)
+F4 UNVERIFIED: no driver (/ shortcut needs a browser)
 ```
 
 ## Highlights

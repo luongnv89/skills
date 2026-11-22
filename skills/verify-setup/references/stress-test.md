@@ -6,7 +6,7 @@ The verify skill is the smoke test for every change, so a step that passes on on
 
 1. Run only commands the approved plan listed. A command that is not in it needs a new approval.
 2. Follow the generated verify skill exactly as written, start to finish, three times: run 1, run 2, run 3. Do not edit it between runs. Do not reuse a running app: each run boots its own, and tears it down, even after a failure.
-3. Fresh state per run where the verify skill creates any: a new `.verify/runs/<UTC timestamp>/` folder, and the same seed data. Do not reset anything the verify skill does not reset; a step that depends on state left by the previous run is a finding, not something to hide.
+3. Fresh state per run where the verify skill creates any: a new `$RUN_DIR` folder (set in the verify skill's step 1), and the same seed data. Do not reset anything the verify skill does not reset; a step that depends on state left by the previous run is a finding, not something to hide.
 4. Before each run, check that the app's port is free (`lsof -i :<port>` or `ss -ltn`); a port still held by a process this run started is a teardown failure, and one held by anything else stops the stress test with the conflict reported. Start the app in its own process group (`setsid`, or `set -m` in bash) and tear it down by stopping that whole group, so a child process (the `node` that `npm run` starts) cannot keep the port.
 5. Readiness is one bounded poll of the ready signal (for example `curl -fsS` every second up to the stated timeout). That waits for a signal and is not a retry: a feature step itself runs once, and its first result is the result.
 6. Record per step and per run: the status (`PASS`, `FAIL`, `UNVERIFIED`), the exit code where there is one, the observation compared with the expected result, and the seconds it took. Boot, ready and teardown are steps too.
@@ -23,7 +23,9 @@ The verify skill is the smoke test for every change, so a step that passes on on
 | `FAIL` in all three | **Stable failure** | Report it as a bug or a wrong row; never edit the row to pass |
 | `UNVERIFIED` in all three | **Not run** | Report the reason (missing variable, driver or answer) |
 
-A step that takes more than twice as long in one run as in the others is flagged as **slow variance**, with its three durations.
+`dirty` is expected to be `yes` on every run until the user commits the new files. Compare runs on per-step results, not on `dirty`.
+
+A step that takes more than twice as long in one run as in the others, and over 1 second in its slowest run, is flagged as **slow variance**, with its three durations.
 
 ## Proposing a fix
 
@@ -46,7 +48,7 @@ Report each run's total seconds and the three slowest steps. When one run takes 
 ## Report table
 
 ```text
-Stress test: 3 runs of .claude/skills/verify/SKILL.md at 3f2a9c1 (logs: .verify/runs/20261122T101500Z, …T101544Z, …T101630Z)
+Stress test: 3 runs of .claude/skills/verify/SKILL.md at 3f2a9c1 (logs: .verify/runs/20261122T101500Z-4121, …T101544Z-4388, …T101630Z-4602)
 Step          Run 1        Run 2        Run 3        Verdict
 Boot          PASS 6.1s    PASS 5.8s    PASS 6.0s    stable
 Ready         PASS 1.2s    PASS 1.1s    PASS 9.7s    stable, slow variance
