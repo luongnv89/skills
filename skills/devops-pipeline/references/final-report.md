@@ -2,7 +2,7 @@
 
 Print the final report once per run, after the last Step Completion Report. The step reports score each check; the final report tells the user what changed, what proves it, what is still unknown, and what they must decide.
 
-A **repository write** is any of: writing or merging `.pre-commit-config.yaml`, a workflow file, or `scripts/e2e_test.sh`; creating a `<file>.bak`; running `pre-commit install`; or, in CI minutes optimization, creating its branch, committing a change, writing `.github/CI-BUDGET.md`, or opening its pull request.
+A **repository write** is any of: writing or merging `.pre-commit-config.yaml`, a workflow file, `scripts/e2e_test.sh`, or `scripts/base-hook-gate.py`; creating a `<file>.bak`; running `pre-commit install`; or, in CI minutes optimization, creating its branch, committing a change, writing `.github/CI-BUDGET.md`, or opening its pull request.
 
 ## Four required parts, in this order
 
@@ -14,6 +14,8 @@ A **repository write** is any of: writing or merging `.pre-commit-config.yaml`, 
 3. **`Uncertainty:`** — what is unknown or untested, labeled apart from verified facts. Always state that the GitHub Actions workflow was not run: the bypass guard, matrix, and deploy jobs first run on the next pull request or push. Also list each foreign hook moved to `<hook>.legacy`, each check demoted with its measured time, each failing hook left open, and each tool or stack choice the user did not confirm.
 4. **`Decision:`** — the action that needs the user's approval, or `No approval needed.` Pending approvals include: confirming a merge diff, deleting a `<file>.bak`, deleting a `<hook>.legacy`, and deciding how to fix a failing hook, and, in CI minutes optimization, each named finding awaiting approval and merging the pull request, which the skill never does. Name each other remaining user action on its own line, such as committing the new files and opening a pull request to exercise CI.
 
+   **Proposed CODEOWNERS.** Every run that writes, merges or audits a workflow ends `Decision:` with CODEOWNERS entries for the hook config, the workflows, the hook scripts and the test directories it found, as a proposal the user applies. The base-branch gate cannot stop a pull request that edits the guard's own workflow; only a required code-owner review can. Skip an entry an existing `CODEOWNERS` (`.github/`, the root or `docs/`) already covers, and fill the owner from that file, else `@<owner>`. Never write the file, and never change branch protection: the entries bind only once the branch's protection requires review from code owners, a setting the user turns on.
+
 Map the step report to the status: `Result: PASS` → `COMPLETE`; `PARTIAL` → `PARTIAL`; `FAIL` → `BLOCKED` when no repository write happened, otherwise `PARTIAL`.
 
 ## Example: a complete setup
@@ -22,7 +24,7 @@ Map the step report to the status: `Result: PASS` → `COMPLETE`; `PARTIAL` → 
 Result: COMPLETE — pre-commit hooks and a lean CI workflow added for a Python CLI
 Evidence:
   Stack: Python 3.12, uv, ruff + mypy + pytest; CLI with 4 subcommands (from --help)
-  Wrote: .pre-commit-config.yaml (new), .github/workflows/ci.yml (new), scripts/e2e_test.sh (new)
+  Wrote: .pre-commit-config.yaml (new), .github/workflows/ci.yml (new), scripts/e2e_test.sh (new), scripts/base-hook-gate.py (new)
   pre-commit validate-config: exit 0
   pre-commit run --all-files: exit 0 (ruff-check, ruff-format, mypy, pytest-fast)
   pre-commit run --all-files --hook-stage pre-push: exit 0 (pytest-full, e2e-cli)
@@ -31,7 +33,12 @@ Evidence:
 Uncertainty:
   ci.yml has not run on GitHub; the bypass guard and matrix first run on the next pull request.
 Decision: No approval needed.
-  Remaining action: commit the three files and open a pull request to exercise CI.
+  Remaining action: commit the four files and open a pull request to exercise CI.
+  Proposed CODEOWNERS (not written; binds once branch protection requires code-owner review):
+    /.pre-commit-config.yaml  @<owner>
+    /.github/workflows/       @<owner>
+    /scripts/                 @<owner>
+    /tests/                   @<owner>
 ```
 
 ## Example: a run that stopped before any write
@@ -65,7 +72,7 @@ The check names each Step Completion Report prints, per phase:
 
 **Phase: Pre-commit Configuration** — checks: `Pre-commit setup`, `Commit-stage hooks installed`, `Push-stage hooks installed`, `Modern stage names used`, `E2E script created (if CLI)`
 
-**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `CI limited to the four responsibilities`, `Bypass guard runs both stages`, `Matrix off the per-commit path`, `Speed techniques`, `No paid speedups`
+**Phase: GitHub Actions Setup** — checks: `GitHub Actions config`, `CI limited to the four responsibilities`, `Bypass guard runs both stages`, `Base-branch gate step`, `CODEOWNERS proposed, not written`, `Matrix off the per-commit path`, `Speed techniques`, `No paid speedups`
 
 **Phase: CI Speed Audit** — checks: `Runs analysed`, `Queue/setup/work split`, `Cache scope checked`, `Free fixes only`
 
