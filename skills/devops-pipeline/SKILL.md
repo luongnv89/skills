@@ -117,7 +117,7 @@ If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the 
 
 CI runs exactly four kinds of thing:
 
-1. **Bypass guard** — re-runs both hook stages over the pull request's diff, then, when it changes hook config, a workflow or a hook script, again with the base branch's ([base-branch gate](references/github-actions.md#the-base-branch-judges-hook-changes)).
+1. **Bypass guard** — re-runs both hook stages over the pull request's diff; when it changes hook config, a workflow or a hook script, first with the base branch's ([base-branch gate](references/github-actions.md#the-base-branch-judges-hook-changes)).
 2. **Version matrix** — the only lane needing several runners, doubling as the full-suite backstop. Per merge; nightly only on a private repo with 30 or more default-branch commits a month.
 3. **CI-only scans** — checks that need the hosted runner rather than a laptop.
 4. **Deploy / release** — on merge to the default branch.
@@ -172,7 +172,7 @@ A run passes when **all** of the following are true:
 - [ ] Both hook types are installed: `pre-commit install` **and** `pre-commit install --hook-type pre-push`.
 - [ ] At least one `.github/workflows/*.yml` exists and carries only the four CI responsibilities from step 3.
 - [ ] Apart from `security-setup`'s workflow, CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
-- [ ] The guard ends with the base-branch gate step, job and check names unchanged; the report proposes, never writes, CODEOWNERS for test, CI and hook config.
+- [ ] The guard runs the base-branch gate step before its own run, job and check names unchanged; the report proposes, never writes, CODEOWNERS for test, CI and hook config.
 - [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by the template's default-branch job when it has one (private Minimal has none by design); with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
 - [ ] No paid runner, larger runner, private-repo shard, third-party coverage upload, or cache above 10 GB; parallel guard legs and shards only on public repos.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).

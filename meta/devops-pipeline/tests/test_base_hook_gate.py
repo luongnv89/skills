@@ -153,9 +153,12 @@ class GateOnScratchRepo(unittest.TestCase):
 
     def gate(self, stages="pre-commit pre-push"):
         script = (self.step.replace("${{ github.event.pull_request.base.sha }}", self.base)
-                  .replace("${{ matrix.stages || 'pre-commit pre-push' }}", stages))
+                  .replace("${{ matrix.stages || 'pre-commit pre-push' }}", stages)
+                  .replace("pip install pre-commit\n", ""))  # already installed; no network
         run = subprocess.run(["bash", "-e", "-c", script], cwd=self.repo, env=self.env,
                              capture_output=True, text=True)
+        # The guard's own run comes next and must see the PR's files again.
+        self.assertEqual(self.git("status", "--porcelain"), "")
         return run.returncode, run.stdout + run.stderr
 
     def edited_config(self, old, new):
@@ -226,6 +229,23 @@ class GateOnScratchRepo(unittest.TestCase):
         self.assertNotIn("this PR removes it", out)
         self.assertRegex(out, r"no TODO in src\.+Failed")
 
+    def test_hook_naming_a_directory_still_checks_the_prs_files(self):
+        self.write({".pre-commit-config.yaml": BASE_CONFIG + (
+            "      - id: scan-src\n        name: no SECRET under src\n        language: system\n"
+            "        entry: bash scripts/scan.sh src\n        pass_filenames: false\n        always_run: true\n"),
+            "scripts/scan.sh": 'if grep -rl SECRET "$1"; then exit 1; fi\n',
+            "docs/readme.txt": "docs\n"})
+        self.base = self.commit("base scans src/")
+        self.pull_request({".pre-commit-config.yaml": BASE_CONFIG + (
+            "      - id: scan-src\n        name: no SECRET under src\n        language: system\n"
+            "        entry: bash scripts/scan.sh docs\n        pass_filenames: false\n        always_run: true\n"),
+            "src/app.txt": "ok\n", "src/other.txt": "SECRET\n"})
+        self.assertEqual(self.guard(), 0)  # the PR points the hook at docs/
+        code, out = self.gate("pre-commit")
+        self.assertEqual(code, 1, out)
+        self.assertNotIn("this PR removes it", out)
+        self.assertRegex(out, r"no SECRET under src\.+Failed")
+
     def test_weakened_gate_script_is_not_used(self):
         removed = self.edited_config("      - id: no-todo\n", "      - id: no-todo-renamed\n")
         self.pull_request({**removed, "scripts/base-hook-gate.py": "import sys\nsys.exit(0)\n"})
@@ -268,7 +288,7 @@ class GateOnScratchRepo(unittest.TestCase):
 
 
 class TemplatesKeepTheGuardNames(unittest.TestCase):
-    def test_every_guard_job_ends_with_the_same_gate_step(self):
+    def test_every_guard_job_runs_the_gate_before_its_own_hook_run(self):
         text = reference()
         jobs = guard_jobs(text)
         self.assertGreaterEqual(len(jobs), 7)
@@ -276,8 +296,10 @@ class TemplatesKeepTheGuardNames(unittest.TestCase):
         self.assertEqual(len(templates), len(jobs) - 1)  # the intro excerpt has no step
         for job in templates:
             self.assertIn(GUARD_NAME, job)
-            last_step = job.rstrip().rsplit("\n      - ", 1)[1]
-            self.assertTrue(last_step.startswith(f"name: {STEP_NAME}"), last_step[:80])
+            names = re.findall(r"^      - name: (.*)$", job, re.M)
+            guard_run = [n for n in names if n.startswith("Run ") and "hook stage" in n]
+            self.assertEqual(len(guard_run), 1, names)
+            self.assertEqual(names.index(STEP_NAME) + 1, names.index(guard_run[0]), names)
         self.assertEqual(len(set(gate_steps(text))), 1)
 
     def test_guard_job_id_and_name_are_unchanged(self):

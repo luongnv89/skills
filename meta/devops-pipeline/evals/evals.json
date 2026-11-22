@@ -188,7 +188,7 @@
       "expected_output": "Adds the base-branch gate step at the end of the existing guard job and writes scripts/base-hook-gate.py through the merge procedure, so a pull request that changes hook config, a workflow or a hook script is re-run with the base branch's config and hook scripts and fails on any hook it removed. Keeps the guard's job id, job name and matrix, so the required check name is unchanged. The final report proposes CODEOWNERS entries for test, CI and hook config and states that it wrote no CODEOWNERS file and changed no branch protection.",
       "files": [],
       "expectations": [
-        "The guard job keeps its id and its name 'Verify hooks were not bypassed'; the change adds a step to that job rather than a new job, so no required status check is renamed.",
+        "The guard job keeps its id and its name 'Verify hooks were not bypassed'; the change adds a step to that job, placed before the guard's own hook run, rather than a new job, so no required status check is renamed.",
         "The new step reads scripts/base-hook-gate.py from the base branch (git show \"$base:scripts/base-hook-gate.py\"), falling back to the pull request's copy only when the base lacks it, and passes the leg's stage(s).",
         "The gate runs only when the diff touches .pre-commit-config.yaml, .github/workflows/ or a hook script, fails on a hook id the base runs in a stage that the pull request's config no longer runs there, and re-runs the stages over the pull request diff with the base branch's config and hook scripts.",
         "The guard is not moved to pull_request_target, and the report says a pull request can still edit the workflow itself, which only a required code-owner review stops.",
