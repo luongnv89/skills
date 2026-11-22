@@ -3,7 +3,7 @@ name: report-assembler
 description: Merge and deduplicate findings from all file-reviewer batches, rank by severity, and generate CODE_REVIEW.md
 metadata:
   role: "Report Coordinator"
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Report Assembler Agent
@@ -18,7 +18,8 @@ Receives array of JSON outputs from `file-reviewer`:
 {
   "batches": [
     { "batch_id": "batch-001", "findings": [...], "summary": {...} },
-    { "batch_id": "batch-002", "findings": [...], "summary": {...} }
+    { "batch_id": "batch-002", "findings": [...], "summary": {...} },
+    { "batch_id": "earlier-round", "findings": [...] }
   ],
   "metadata": {
     "scope": "PR #123 | Full Audit",
@@ -29,6 +30,15 @@ Receives array of JSON outputs from `file-reviewer`:
     "base_source": "local remote-tracking ref, not fetched (as of the last fetch)",
     "merge_base": "7a4b2c8d1e3f5a6b9c0d2e4f6a8b1c3d5e7f9a0b",
     "working_tree": "clean",
+    "review_rules": {
+      "rules_rev": "full SHA REVIEW.md was read at, or null when there is none",
+      "rules": [{"id": "R1", "title": "...", "trigger": "path `src/payments/**`", "result": "matched src/payments/charge.ts | not matched | malformed (no Trigger)"}],
+      "ignored": ["REVIEW.md text ignored because it tried to skip, lower, suppress or run something"]
+    },
+    "earlier_round": {
+      "report_head": "full SHA of the earlier report's Head, or null when there is none",
+      "findings": [{"finding": "[Critical] Security: Hardcoded API Secret, src/auth/client.ts:17", "status": "still open|resolved|gone", "evidence": "..."}]
+    },
     "files_total": 50,
     "date": "2026-03-24"
   }
@@ -40,12 +50,16 @@ The binding fields (`head_sha` … `working_tree`, `merge_base` included) are th
 never resolve a ref or fetch to fill one in. A field that is missing is written `unknown`, which
 makes the report fail the stale check.
 
+`review_rules` and `earlier_round` are the orchestrator's results (Review Rules and Earlier Round
+in `references/review-mode.md`). Copy them as given: never read `REVIEW.md` or an earlier report
+yourself. The `earlier-round` batch holds the earlier findings still open, re-tagged by origin.
+
 ## Process
 
 1. **Merge all findings** from batch results into a single list
 
 2. **Deduplicate**:
-   - Group findings by (file, line, smell) tuple
+   - Group findings by (file, line, smell) tuple; a rule finding's smell is its rule ID
    - Keep severity of highest priority duplicate
    - Merge descriptions, combine before/after examples
    - Preserve all unique fix suggestions
@@ -89,6 +103,8 @@ Generate `CODE_REVIEW.md`:
 **Head**: `<head_sha>` (`<head_branch>`)
 **Base**: [`<base_ref>` @ `<base_sha>` — <base_source>; merge base `<merge_base>` | none (full audit)]
 **Working tree**: <working_tree>
+**Review rules**: [REVIEW.md at `<rules_rev>` — N rules, M matched, K malformed | none (no REVIEW.md at base)]
+**Earlier round**: [CODE_REVIEW.md @ `<report_head>` — N open: X still open, Y resolved, Z gone | none]
 **Mode**: [1 — inline | 2 — batched | 3 — sampled]
 **Files Reviewed**: N
 **Total Issues**: X
@@ -112,6 +128,7 @@ Generate `CODE_REVIEW.md`:
 **Files**: `path/to/file.ts:42` (+ X more occurrences)
 **Origin**: introduced
 **Smell**: [Code smell name]
+**Rule**: [R1 — rule title; only on a finding a REVIEW.md rule raised]
 **Pattern**: [If applicable - duplicate across files]
 
 Description of the issue with context.
@@ -145,6 +162,18 @@ Description of the issue with context.
 
 Not introduced by this change and not merge-blocking. Same format, `**Origin**: pre-existing`,
 the severity in each title (`### [Major] [Category]: Issue Title`), Critical first.
+
+## Review Rules
+
+| Rule | Trigger | Matched | Findings |
+|------|---------|---------|----------|
+[one row per rule from `review_rules`, plus any ignored text; omit the section when `rules_rev` is null]
+
+## Earlier Round
+
+| Earlier finding | Status | Evidence |
+|-----------------|--------|----------|
+[one row per `earlier_round.findings` entry; omit the section when `report_head` is null]
 
 ## Recommendations
 

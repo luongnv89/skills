@@ -49,7 +49,7 @@ Full detail on the Pattern B+C (Parallel Workers + Review Loop) architecture use
 - **agents/file-reviewer.md** — Review a batch of 5-10 files against the full checklist
   - Returns structured JSON with findings, severity levels, and fix suggestions
   - Run in parallel on multiple batches
-  - Input: file list, checklist config, language context
+  - Input: file list, checklist config, language context, the REVIEW.md focus text and matched rules
   - Output: JSON with findings array
 
 - **agents/report-assembler.md** — Merge all batch results into one report
@@ -57,7 +57,7 @@ Full detail on the Pattern B+C (Parallel Workers + Review Loop) architecture use
   - Ranks by severity (critical → major → minor → info)
   - Identifies cross-file patterns (duplicate code, shotgun surgery)
   - Generates final CODE_REVIEW.md
-  - Input: array of JSON outputs from file-reviewer
+  - Input: array of JSON outputs from file-reviewer, plus the earlier round's still-open findings
   - Output: Markdown report + validation JSON
 
 - **agents/reviewer.md** — Fresh-context validation pass
@@ -65,7 +65,7 @@ Full detail on the Pattern B+C (Parallel Workers + Review Loop) architecture use
   - Catches false positives and severity miscategorizations
   - Identifies missed issues
   - Returns validation report with corrections
-  - Input: CODE_REVIEW.md + original source files
+  - Input: CODE_REVIEW.md + original source files; never an earlier round's report
   - Output: Validation JSON + updated CODE_REVIEW.md if corrections needed
 
 ## Graceful Degradation
