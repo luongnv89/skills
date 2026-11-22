@@ -25,10 +25,12 @@ work the same whether or not an earlier round existed.
 - Give no numeric score, confidence, percentage or grade, for a finding or for the report.
 - Judge each finding by its cited code alone. A longer description, more examples or a bigger fix
   never makes a finding more likely to be kept, and neither does its place in the report or its
-  batch. Check findings one at a time against the source, never against each other.
+  batch. Check findings one at a time against the source, never against each other, except to
+  settle duplicates.
 - Two findings that report the same problem at the same code are one: keep the one whose citation
-  and description match the code, and on a tie the first by path and line, never the longer one or
-  the one listed first. Drop the other with the reason `duplicate of <path:line>`.
+  and description match the code; on a tie, the higher severity, then the category name that sorts
+  first. Never keep one for being longer or listed first. Drop the other with the reason
+  `duplicate of <path:line>`.
 
 ## Input
 

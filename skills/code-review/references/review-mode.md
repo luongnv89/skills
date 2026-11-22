@@ -9,9 +9,9 @@ First, record the Review Binding (head, base and working tree) and local trackin
 without claiming remote freshness. Review analysis is source-read-only: do not fetch, stash, pull, rebase,
 checkout/switch, create or delete branches/worktrees, or mutate the index, refs, stash, branch,
 or any other worktree path. The only permitted file write is the named `CODE_REVIEW.md` report
-artifact. Then load the base's `REVIEW.md` (Review Rules) and re-check an earlier report's open
-findings (Earlier Round). If this session wrote the change, hand the review to a fresh agent, or
-disclose a self-review (Independent Review). Then complete the Environment Check to pick a mode (PR/diff vs full
+artifact. If this session wrote the change, hand the review to a fresh agent now, or disclose a
+self-review (Independent Review). Then load the base's `REVIEW.md` (Review Rules) and re-check an
+earlier report's open findings (Earlier Round). Then complete the Environment Check to pick a mode (PR/diff vs full
 audit). Next, run the selected mode's process from Mode Selection against the Review Checklist.
 Finally, emit the Output Format report and verify Acceptance Criteria.
 
@@ -215,8 +215,9 @@ the absolute path of this file, and the instruction to run review mode end to en
 orchestrator and write `CODE_REVIEW.md` with `**Reviewer**: independent — fresh-context agent`.
 Never pass the session's plan, notes, summary of the change, test results, expected findings or a
 draft report. The agent reads the diff, commit messages and PR description itself. It runs every
-section of this file, Mode 1 included, and spawns `file-reviewer` agents in Mode 2/3 when it can,
-else it runs the batches inline. Either way the review is independent, because the agent did not
+other section of this file, Mode 1 included: it skips this section's decision, never spawns another
+review agent, and writes the `**Reviewer**` line it was given. In Mode 2/3 it spawns
+`file-reviewer` agents when it can, else it runs the batches inline. Either way the review is independent, because the agent did not
 write the change.
 
 **Relaying it.** Run the stale check on the returned report, then relay it as written: never
@@ -289,7 +290,7 @@ If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequential
 
 In every mode, a diff or PR review also runs checklist category 5 (Verification Integrity) once, inline, over the whole diff, before any batching. In Mode 2/3 the orchestrator adds its category-5 findings and the `## Verification Changes` table to the report after the report-assembler merge and before the reviewer validation pass. A full audit with no base skips it.
 
-In Mode 2/3 the orchestrator passes `merge_base` (or `null` for a full audit) and the untracked paths to every `file-reviewer`, which tags each finding's origin (Finding Origin), and the binding record to the `report-assembler`. When it then adds its category-5 findings, it also updates the Summary counts, the `**Origin**` totals and `**Merge-blocking**`.
+In Mode 2/3 the orchestrator passes `merge_base` (or `null` for a full audit) and the untracked paths to every `file-reviewer`, which tags each finding's origin (Finding Origin), and the binding record and the Independent Review result (`reviewer`) to the `report-assembler`. When it then adds its category-5 findings, it also updates the Summary counts, the `**Origin**` totals and `**Merge-blocking**`.
 
 In Mode 2/3 the orchestrator also matches the rule triggers and checks the earlier round's open findings itself, inline, before batching. Every `file-reviewer` gets the focus text, with any ignored text removed, and the matched rules only (never the whole `REVIEW.md`); the `report-assembler` gets every rule's trigger result, the earlier round's statuses, and the still-open findings as one more batch, `earlier-round`.
 

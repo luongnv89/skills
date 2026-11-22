@@ -69,7 +69,7 @@ yourself. The `earlier-round` batch holds the earlier findings still open, re-ta
    - Preserve all unique fix suggestions
    - Never prefer a finding, description or fix for being longer or for coming from an earlier
      batch: batch order and text length never decide what is kept, its severity or its place.
-     Within each section, order findings by path and line
+     Within each severity (under `## Pre-existing Issues` too), order findings by path and line
 
 3. **Split by origin**: each finding keeps the `origin` its file-reviewer gave it (Finding Origin
    in `references/review-mode.md`). Deduplicated findings are `introduced` when any duplicate is.
