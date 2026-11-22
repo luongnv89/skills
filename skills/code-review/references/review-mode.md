@@ -36,9 +36,10 @@ use these names instead of re-deriving them.
 head_sha="$(git rev-parse HEAD)"
 head_branch="$(git rev-parse --abbrev-ref HEAD)"   # prints HEAD when detached
 git status --porcelain=v1 --untracked-files=all -- . ':(exclude)CODE_REVIEW.md'   # empty: clean
-# Diff or PR review only (a full audit has base_ref none and skips these two):
+# Diff or PR review only (a full audit has base_ref none and skips these three):
 base_sha="$(git rev-parse --verify --quiet "${base_ref}^{commit}")"
 base_full="$(git rev-parse --symbolic-full-name "$base_ref")"   # empty for a raw SHA
+merge_base="$(git merge-base "$base_sha" "$head_sha")"           # where the change forked
 ```
 
 | Name | Value |
@@ -47,12 +48,17 @@ base_full="$(git rev-parse --symbolic-full-name "$base_ref")"   # empty for a ra
 | `base_ref` | The ref the diff is compared against, as the user named it (`main`, `origin/main`, a SHA). For a PR, its base branch's local remote-tracking ref `origin/<base branch>`, else the local branch of that name. `none` for a full audit with no base. |
 | `base_sha` | The full SHA `base_ref` resolved to when recorded. |
 | `base_source` | From `base_full`: `refs/remotes/…` is `local remote-tracking ref, not fetched (as of the last fetch)`; `refs/heads/…` is `local branch, not fetched`; `refs/tags/…` is `local tag, not fetched`; any other ref is `local ref <base_full>, not fetched`; empty is `commit`. |
+| `merge_base` | The full SHA of `git merge-base <base_sha> <head_sha>`: the commit the change started from. |
 | `working_tree` | `clean`, or `dirty — N uncommitted paths, not in Head` when `git status` printed N lines. The review's own `CODE_REVIEW.md` is not counted. |
 
-- `<base>` in every command in this file means `$base_sha`, so the diff matches the record even
-  if the ref moves during the review.
+- `<merge_base>` in every command in this file means `$merge_base`, so the diff matches the record
+  even if the ref moves during the review. **The change** is `git diff <merge_base>..HEAD`.
+- Never diff against the base tip (`<base_sha>..HEAD`): once the base has moved past the fork,
+  that diff shows the base's newer commits reversed, as if the change had removed them.
 - In a diff or PR review, a `base_ref` that does not resolve locally stops the review: ask for a
-  base that exists locally. Never fetch one. A full audit records no `base_sha` or `base_source`.
+  base that exists locally. Never fetch one. An empty `merge_base` (unrelated histories, or a
+  shallow clone without the fork point) also stops it: ask for a base that shares history, and
+  never fetch or deepen. A full audit records no `base_sha`, `base_source` or `merge_base`.
 - A local base can lag its remote. The report names `base_source` and never claims the base is the
   remote's current tip.
 - A dirty tree means some reviewed lines are not in `head_sha`. List those paths in the report.
@@ -61,7 +67,7 @@ base_full="$(git rev-parse --symbolic-full-name "$base_ref")"   # empty for a ra
 
 ```markdown
 **Head**: `<head_sha>` (`<head_branch>`)
-**Base**: `<base_ref>` @ `<base_sha>` — <base_source>
+**Base**: `<base_ref>` @ `<base_sha>` — <base_source>; merge base `<merge_base>`
 **Working tree**: <working_tree>
 ```
 
@@ -84,6 +90,30 @@ if [ -n "$report_head" ] && [ "$report_head" = "$(git rev-parse HEAD)" ]; then e
   `HEAD` for a verdict.
 - A base that now resolves to another SHA does not make the report stale, because the Head is what
   was reviewed. Say `base moved` beside its verdict.
+
+## Finding Origin (introduced or pre-existing)
+
+The author of a change answers for the lines the change touched, not for old bugs next to them.
+Every finding carries one origin tag, decided by its cited lines:
+
+- **introduced**: at least one line it cites is in the change. That is a line on the `+` side of a
+  hunk in `git diff -U0 <merge_base> -- <file>`, a line that diff deletes, or any line of an
+  untracked file. This diff compares the merge base with the working tree, so it numbers lines as
+  the reviewed files do and includes uncommitted edits; on a clean tree it equals
+  `git diff -U0 <merge_base>..HEAD`.
+- **pre-existing**: every line it cites is unchanged since `merge_base`. This includes context
+  lines next to a hunk. A pre-existing finding **never blocks a merge**, whatever its severity.
+
+Rules:
+
+- When the change is what makes an unchanged line wrong (a changed signature that breaks an
+  unchanged caller), cite the changed line as well. The finding is then introduced.
+- A removed line has no line number at `HEAD`. Cite it as `path:line (deleted)`, where `line` is
+  the `+b` of its `@@ -a,n +b,0 @@` hunk; a cited deletion position is in the change. So a removed
+  null check that breaks an unchanged line below it is introduced.
+- Category 5 (Verification Integrity) findings come from the diff, so they are always introduced.
+- A full audit has no change: every finding is pre-existing and none blocks a merge.
+- Decide the tag from the diff, never from `git blame` or a guess about who wrote the line.
 
 ## Environment Check
 
@@ -109,10 +139,10 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
 - Process: run the Review Checklist inline over the changed lines; no subagents
 - Git commands:
   ```bash
-  git diff --name-only <base>..HEAD
-  git diff <base>..HEAD
+  git diff --name-only <merge_base>..HEAD
+  git diff <merge_base>..HEAD
   ```
-- Scan focus: only changed lines and their immediate context
+- Scan focus: only changed lines and their immediate context (a finding on a context line is pre-existing)
 - Output: CODE_REVIEW.md in seconds
 
 **Mode 2: Medium Audit (Batched with Subagents)**
@@ -145,6 +175,8 @@ If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequential
 
 In every mode, a diff or PR review also runs checklist category 5 (Verification Integrity) once, inline, over the whole diff, before any batching. In Mode 2/3 the orchestrator adds its category-5 findings and the `## Verification Changes` table to the report after the report-assembler merge and before the reviewer validation pass. A full audit with no base skips it.
 
+In Mode 2/3 the orchestrator passes `merge_base` (or `null` for a full audit) and the untracked paths to every `file-reviewer`, which tags each finding's origin (Finding Origin), and the binding record to the `report-assembler`. When it then adds its category-5 findings, it also updates the Summary counts, the `**Origin**` totals and `**Merge-blocking**`.
+
 ## Review Checklist
 
 Findings are grouped into the five categories below and classified by severity:
@@ -153,10 +185,13 @@ Findings are grouped into the five categories below and classified by severity:
 
 | Level | Description | Action |
 |-------|-------------|--------|
-| **Critical** | Security risks, bugs, data loss potential, weakened verification (category 5) | Must fix before merge |
+| **Critical** | Security risks, bugs, data loss potential, weakened verification (category 5) | Must fix before merge (introduced findings only) |
 | **Major** | Code smells, maintainability blockers | Should fix soon |
 | **Minor** | Style, minor improvements | Nice to have |
 | **Info** | Suggestions, alternatives | Optional |
+
+Severity and origin are separate: a pre-existing finding keeps its severity but never blocks a
+merge (Finding Origin). Only an introduced Critical finding is merge-blocking.
 
 ### 1. Code Smells
 
@@ -238,7 +273,7 @@ Read `references/code-smells.md` when a code smell is identified that requires t
 
 If a change can modify the check that judges it, the check is broken. This category looks for a diff that weakens its own verification.
 
-**When it runs.** Only when the diff touches at least one of these. Check the paths with `git diff --name-only <base>..HEAD`; the Thresholds trigger needs the diff content (`git diff <base>..HEAD`). Otherwise skip it and write `Verification integrity: skipped (no test, test or lint config, CI, hook or threshold change)` under the report's Summary.
+**When it runs.** Only when the diff touches at least one of these. Check the paths with `git diff --name-only <merge_base>..HEAD`; the Thresholds trigger needs the diff content (`git diff <merge_base>..HEAD`). Otherwise skip it and write `Verification integrity: skipped (no test, test or lint config, CI, hook or threshold change)` under the report's Summary.
 
 - **Tests:** files under `test/`, `tests/`, `__tests__/` or `spec/`, or named `test_*`, `*_test.*`, `*.test.*`, `*.spec.*`, `*Test.*`, `*Tests.*`, plus `conftest.py`, fixtures and snapshots
 - **Test or lint config:** `pytest.ini`, `tox.ini`, `.coveragerc`, `jest.config.*`, `vitest.config.*`, `playwright.config.*`, `cypress.config.*`, `.mocharc*`, `karma.conf.*`, `phpunit.xml*`, `.eslintrc*`, `eslint.config.*`, `ruff.toml`, `.ruff.toml`, `.flake8`, `.pylintrc`, `mypy.ini`, `.golangci.*`, `.rubocop.yml`, `.swiftlint.yml`, `tsconfig*.json`; in `pyproject.toml`, `setup.cfg` or `package.json`, only a changed hunk in a test, lint, type-check or coverage section (`[tool.pytest…]`, `[tool.coverage…]`, `[tool.ruff…]`, `[tool.mypy]`, `jest`, `eslintConfig`, a `test` or `lint` script)
@@ -257,7 +292,7 @@ If a change can modify the check that judges it, the check is broken. This categ
 | Lowered threshold | a coverage floor reduced; `--max-warnings` raised; a rule moved from `error` to `warn` or `off`, or added to an ignore list; `# noqa`, `eslint-disable`, `@ts-ignore` or `type: ignore` added; type-check strictness reduced |
 | Removed hook or gate | a pre-commit hook, husky or lefthook hook removed; a CI job or step removed or neutralized (`if: false`, `continue-on-error: true`, `allow_failure: true`, `\|\| true`); `--no-verify`, `SKIP=` or `HUSKY=0` added |
 
-**The change states why** only when the reason is in the change itself: a commit message in `<base>..HEAD`, the PR description, or a comment on or beside the changed line. It must explain this item, for example "the export feature is removed" or "upstream flake, tracked in #123". "Fix tests" or "cleanup" is not a reason. With a stated reason, the item is listed with the reason quoted, at **Info**, so a person can judge it.
+**The change states why** only when the reason is in the change itself: a commit message in `<merge_base>..HEAD`, the PR description, or a comment on or beside the changed line. It must explain this item, for example "the export feature is removed" or "upstream flake, tracked in #123". "Fix tests" or "cleanup" is not a reason. With a stated reason, the item is listed with the reason quoted, at **Info**, so a person can judge it.
 
 **A test deleted together with the code it covered** is listed but not flagged: no severity, no finding. It qualifies when the diff also deletes every function, class or module the test exercised, so `git grep` at `HEAD` finds no definition of it. This keeps cleanup mode's dead-code removals reviewable. A deleted test whose subject still exists at `HEAD` is a Deleted test.
 
@@ -271,7 +306,7 @@ Generate `CODE_REVIEW.md`:
 **Date**: YYYY-MM-DD
 **Scope**: [PR #123 | Full Audit]
 **Head**: `<head_sha>` (`<head_branch>`)
-**Base**: [`<base_ref>` @ `<base_sha>` — <base_source> | none (full audit)]
+**Base**: [`<base_ref>` @ `<base_sha>` — <base_source>; merge base `<merge_base>` | none (full audit)]
 **Working tree**: [clean | dirty — N uncommitted paths, not in Head]
 **Mode**: [1 — inline | 2 — batched | 3 — sampled]
 **Files Reviewed**: N
@@ -285,10 +320,14 @@ Generate `CODE_REVIEW.md`:
 | Minor    | X |
 | Info     | X |
 
+**Origin**: X introduced · Y pre-existing
+**Merge-blocking**: N — introduced Critical findings only; pre-existing findings never block
+
 ## Critical Issues
 
 ### [Category]: Issue Title
 **File**: `path/to/file.ts:42`
+**Origin**: introduced
 **Smell**: [Code smell name]
 
 Description of the issue.
@@ -309,6 +348,19 @@ Description of the issue.
 ## Minor Issues
 ...
 
+## Info
+...
+
+## Pre-existing Issues
+
+Not introduced by this change and not merge-blocking (Finding Origin). Ordered by severity; same
+finding format, with `**Origin**: pre-existing` and the severity in the title.
+
+### [Critical] [Category]: Issue Title
+**File**: `path/to/other.ts:10`
+**Origin**: pre-existing
+...
+
 ## Verification Changes
 
 | File | Signal | Status | Reason stated |
@@ -324,6 +376,13 @@ Description of the issue.
 3. Architecture improvements
 ```
 
+- The Summary keeps its four severity rows; each Count covers both origins. The `**Origin**` and
+  `**Merge-blocking**` lines below the table split them.
+- `## Critical Issues`, `## Major Issues`, `## Minor Issues` and `## Info` hold introduced findings
+  only. Every pre-existing finding goes under `## Pre-existing Issues`, whatever its severity.
+- A full audit has no introduced findings: it omits the four severity sections, writes
+  `**Merge-blocking**: 0 — full audit, no change` and lists every finding under Pre-existing Issues.
+
 ## Expected Output
 
 A `CODE_REVIEW.md` file with findings grouped by severity. Example:
@@ -334,7 +393,7 @@ A `CODE_REVIEW.md` file with findings grouped by severity. Example:
 **Date**: 2024-01-15
 **Scope**: PR #42 — auth module refactor
 **Head**: `9f2c4e1a7b3d5f6e8c0a1b2c3d4e5f6a7b8c9d0e` (`feat/auth-refactor`)
-**Base**: `origin/main` @ `3e1d7c9b5a2f4e6d8c0b1a3f5e7d9c2b4a6f8e0d` — local remote-tracking ref, not fetched (as of the last fetch)
+**Base**: `origin/main` @ `3e1d7c9b5a2f4e6d8c0b1a3f5e7d9c2b4a6f8e0d` — local remote-tracking ref, not fetched (as of the last fetch); merge base `7a4b2c8d1e3f5a6b9c0d2e4f6a8b1c3d5e7f9a0b`
 **Working tree**: clean
 **Mode**: 1 — inline
 **Files Reviewed**: 8
@@ -348,10 +407,14 @@ A `CODE_REVIEW.md` file with findings grouped by severity. Example:
 | Minor    | 5     |
 | Info     | 2     |
 
+**Origin**: 9 introduced · 2 pre-existing
+**Merge-blocking**: 1 — introduced Critical findings only; pre-existing findings never block
+
 ## Critical Issues
 
 ### [Security]: Hardcoded API Secret
 **File**: `src/auth/client.ts:17`
+**Origin**: introduced
 **Smell**: Hardcoded secrets
 
 API key is embedded directly in source code and will be committed to version control.
@@ -367,6 +430,15 @@ const API_KEY = process.env.API_KEY;
 if (!API_KEY) throw new Error("API_KEY env var is required");
 ```
 
+## Pre-existing Issues
+
+### [Major] [Code Smell]: Long Method in `refreshToken`
+**File**: `src/auth/session.ts:88`
+**Origin**: pre-existing
+**Smell**: Long Method
+
+The 64-line method sits beside the changed hunk but this change did not touch it.
+
 ## Recommendations
 
 1. Move all secrets to environment variables immediately
@@ -380,10 +452,11 @@ A run passes when **all** of the following are true:
 
 - [ ] `CODE_REVIEW.md` exists in the repo root with `# Code Review Report` as the first heading.
 - [ ] Report includes a `## Summary` table with rows for Critical, Major, Minor, and Info severities.
+- [ ] Every finding carries `**Origin**: introduced` or `**Origin**: pre-existing`, decided by whether a cited line is in `git diff -U0 <merge_base> -- <file>` or an untracked file (Finding Origin). Pre-existing findings are listed only under `## Pre-existing Issues` and never counted in `**Merge-blocking**`.
 - [ ] Every reported finding cites a `path/to/file.ext:line` reference and a code smell or category label.
 - [ ] Critical findings include both a "Before" and "Suggested Fix" code block when a code change is proposed.
 - [ ] Mode used (Mode 1/2/3) is recorded in the report header along with the file count.
-- [ ] The header names the full `head_sha`, the base as `base_ref` @ full `base_sha` with its `base_source` (or `none (full audit)`), and the working-tree state (Review Binding). No fetch ran.
+- [ ] The header names the full `head_sha`, the base as `base_ref` @ full `base_sha` with its `base_source` and full `merge_base` (or `none (full audit)`), and the working-tree state (Review Binding). No fetch ran.
 - [ ] An existing `CODE_REVIEW.md` that was used or validated passed the stale check first; a stale one was reported as stale and its verdict not counted.
 - [ ] When the diff touches a test, test or lint config, CI workflow, hook config or threshold, the report has a `## Verification Changes` table listing every signal found, each Critical, Info with its quoted reason, or listed with its covered code deleted. Otherwise the report says the check was skipped.
 - [ ] No merge-conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) are silently dropped — they appear as Critical findings if present in the source.
@@ -421,7 +494,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase: Review Execution** — checks: `Code smell detection`, `Security scan`, `Verification integrity` (or `skipped` when no trigger path changed)
 
-**Phase: Report Generation** — checks: `Report generation`, `Severity classification`
+**Phase: Report Generation** — checks: `Report generation`, `Severity classification`, `Origin tagged` (every finding introduced or pre-existing)
 
 **Phase: Validation Pass** — checks: `Head current` (stale check), `Validation pass`, `False positive check`
 

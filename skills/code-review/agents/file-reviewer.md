@@ -3,7 +3,7 @@ name: file-reviewer
 description: Review a batch of 5-10 files against the complete code-review checklist, returning structured JSON findings with severity levels
 metadata:
   role: "Code Quality Analyzer"
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # File Reviewer Agent
@@ -24,7 +24,9 @@ Review a batch of files against the full code-review checklist and return struct
   "context": {
     "language": "typescript|javascript|python|etc",
     "projectType": "web|backend|library|etc"
-  }
+  },
+  "merge_base": "full SHA from the Review Binding, or null for a full audit",
+  "untracked": ["paths of untracked files in the batch, from git status"]
 }
 ```
 
@@ -60,6 +62,12 @@ Review a batch of files against the full code-review checklist and return struct
    - Nesting depth (>3 levels is a smell)
    - Error handling coverage
 
+6. **Tag each finding's origin** by the Finding Origin rules in `references/review-mode.md`.
+   With a `merge_base`, read `git diff -U0 <merge_base> -- <file>` once per file (the working
+   tree, so its line numbers match the file you read): `introduced` when a cited line is in the
+   change or the file is in `untracked`, else `pre-existing`. With `merge_base: null` (a full
+   audit) every finding is `pre-existing`. Never fetch, and never use `git blame`.
+
 ## Output
 
 Return JSON with this structure:
@@ -74,6 +82,7 @@ Return JSON with this structure:
       "file": "path/to/file.ts",
       "line": 42,
       "severity": "critical|major|minor|info",
+      "origin": "introduced|pre-existing",
       "category": "code-smell|pragmatic|security|maintainability",
       "smell": "Long Method",
       "title": "processOrder exceeds 20-line threshold",
