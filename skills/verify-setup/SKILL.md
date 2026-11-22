@@ -51,11 +51,14 @@ stashed=0
 if [ -n "$(git status --porcelain)" ]; then
   git stash push -u -m "verify-setup pre-sync" && stashed=1
 fi
-git fetch origin && git pull --rebase origin "$branch"
-[ "$stashed" -eq 1 ] && git stash pop
+if git fetch origin && git pull --rebase origin "$branch"; then
+  [ "$stashed" -eq 1 ] && git stash pop --index
+else
+  echo "sync failed on $branch (stashed=$stashed)" >&2
+fi
 ```
 
-If `origin` is missing, HEAD is detached, or the pull, rebase or stash pop fails, stop and ask the user. Before stopping, run `git rebase --abort` when a rebase is in progress and `git stash pop` when `stashed=1`. Record `sync: skipped (<reason>)` when the user skips it.
+If `origin` is missing, HEAD is detached, or the pull, rebase or stash pop fails, stop and ask the user. When the fetch or pull failed, before stopping run `git rebase --abort` if a rebase is in progress, then `git stash pop` once if `stashed=1`. Record `sync: skipped (<reason>)` when the user skips it.
 
 ## Workflow
 
