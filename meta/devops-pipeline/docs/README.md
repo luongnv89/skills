@@ -16,6 +16,7 @@
 - Run the unit tests related to the changed files on every commit, full test suite + E2E tests on push
 - Enumerate all CLI commands and generate end-to-end smoke tests (for CLI tools)
 - Keep GitHub Actions lean — a diff-scoped bypass guard, matrix version testing, CI-only scans, and deploys only
+- Judge a pull request that changes the hooks with the base branch's hooks: the guard re-runs the base branch's hook config and hook scripts over the diff and fails on any hook the pull request removed, and the final report proposes (never writes) CODEOWNERS entries for test, CI and hook config
 - Keep CI fast with free techniques only: caches seeded from the default branch, blobless checkout, superseded-run cancellation, affected-only tests with a default-branch full run, parallel jobs where they are free, everything generated for the repo's visibility, and job timeouts
 - Use the fastest free tools: Oxlint for JS/TS linting, TypeScript 7's `tsc` (benchmark `bun check`, `tsrs`), Vitest `isolate: false` with a per-file reset hook
 - Audit an existing pipeline's speed from real runs: queue wait, setup, and work per job, cache scope, and the slowest job

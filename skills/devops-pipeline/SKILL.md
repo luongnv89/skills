@@ -3,7 +3,7 @@ name: devops-pipeline
 description: "Configure pre-commit hooks and lean GitHub Actions for shift-left QA. Use when adding, auditing, speeding up CI/CD or cutting its Actions minutes or cost: max local checks, fast free CI. Skip for Terraform/K8s, deploy pipelines, or non-GitHub CI."
 license: MIT
 metadata:
-  version: 2.6.3
+  version: 2.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "medium"
 ---
@@ -28,21 +28,13 @@ Every check lands in exactly one lane. This table is the single source of truth;
 A check that fits an earlier lane must not be repeated in a later one; the only deliberate overlaps are the bypass guard, the default-branch full run that backstops affected-test selection, and `security-setup`'s full-scan workflow, which that skill owns.
 
 ## Repo Sync Before Edits (mandatory)
-Before creating/updating/deleting files in an existing repository, sync the current branch with remote:
+Before creating/updating/deleting files in an existing repository, sync the current branch with remote, stashing a dirty working tree first:
 
 ```bash
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git fetch origin
-git pull --rebase origin "$branch"
-```
-
-If the working tree is not clean, stash first, sync, then restore:
-
-```bash
-git stash push -u -m "pre-sync"
+git stash push -u -m "pre-sync"   # only if the tree is dirty
 branch="$(git rev-parse --abbrev-ref HEAD)"
 git fetch origin && git pull --rebase origin "$branch"
-git stash pop
+git stash pop                     # only after a stash
 ```
 
 If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, stop and ask the user before continuing.
@@ -64,6 +56,7 @@ This skill writes config into someone else's repository and installs git hooks:
 - **Surface failures, never suppress them.** Do not add a hook id to `SKIP` or lower a coverage threshold to turn a run green or make it faster, nor relax a lint rule or delete or skip a test without the user's approval of that named finding; a blanket "delete the slow tests" or "make it green" approves nothing. Report the failure and let the user decide.
 - **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid or third-party service such as Codecov; coverage goes to the job summary.
 - **Never merge.** Committed changes end in a pull request the user merges; measurement runs are budgeted and approved before any push.
+- **Never write CODEOWNERS or branch protection**; the final report only proposes CODEOWNERS entries.
 - **Stop rather than guess** when the stack is undetected, `pre-commit` is absent, or `origin` is missing — see Step 1 and Edge Cases.
 
 ## Workflow
@@ -124,7 +117,7 @@ If no workflow exists, write `.github/workflows/ci.yml`. If one exists, run the 
 
 CI runs exactly four kinds of thing:
 
-1. **Bypass guard** — re-runs both hook stages over the pull request's diff.
+1. **Bypass guard** — re-runs both hook stages over the pull request's diff; when it changes hook config, a workflow or a hook script, first with the base branch's ([base-branch gate](references/github-actions.md#the-base-branch-judges-hook-changes)).
 2. **Version matrix** — the only lane needing several runners, doubling as the full-suite backstop. Per merge; nightly only on a private repo with 30 or more default-branch commits a month.
 3. **CI-only scans** — checks that need the hosted runner rather than a laptop.
 4. **Deploy / release** — on merge to the default branch.
@@ -164,7 +157,8 @@ After running the skill, the repository contains:
 3. **`scripts/e2e_test.sh`** (CLI projects only) — executable script exercising every CLI command/subcommand.
 4. **`scripts/affected-tests.sh`** (only when the suite exceeds the push budget) — affected-test selection that fails closed.
 5. **`scripts/related-tests.py`** (Python projects) — the commit hook's selection of the unit tests related to the changed files.
-6. **A final report** in the shape of [references/final-report.md](references/final-report.md).
+6. **`scripts/base-hook-gate.py`** — the guard's base-branch gate.
+7. **A final report** in the shape of [references/final-report.md](references/final-report.md).
 
 An audit-only run writes nothing.
 
@@ -178,6 +172,7 @@ A run passes when **all** of the following are true:
 - [ ] Both hook types are installed: `pre-commit install` **and** `pre-commit install --hook-type pre-push`.
 - [ ] At least one `.github/workflows/*.yml` exists and carries only the four CI responsibilities from step 3.
 - [ ] Apart from `security-setup`'s workflow, CI's sole pull request overlap with pre-commit is the bypass guard, and that guard is diff-scoped (`--from-ref`/`--to-ref`) and runs **both** stages.
+- [ ] The guard runs the base-branch gate step before its own run, job and check names unchanged; the report proposes, never writes, CODEOWNERS for test, CI and hook config.
 - [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by the template's default-branch job when it has one (private Minimal has none by design); with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
 - [ ] No paid runner, larger runner, private-repo shard, third-party coverage upload, or cache above 10 GB; parallel guard legs and shards only on public repos.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).

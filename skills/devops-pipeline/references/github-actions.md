@@ -33,6 +33,140 @@ Beyond running both stages, three more details are load-bearing, and dropping an
 
 Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. Running `--all-files` in CI re-checks the entire repository on every push and is the cost blow-up this skill exists to avoid. The one approved exception is `security-setup`'s offline security workflow (`security_check.py --all`), which that skill owns; leave it in place. `filter: blob:none` is a speed detail, not a load-bearing one; see [Blobless checkout](#blobless-checkout).
 
+## The base branch judges hook changes
+
+The guard runs `pre-commit` with the pull request's own `.pre-commit-config.yaml` and hook scripts, so a pull request that deletes a hook, moves it to `manual`, or rewrites its script to `exit 0` passes a guard it has just weakened. Keep the rules that judge a change where the change cannot edit them. Every guard template has a step, just before the guard's own hook run, that runs `scripts/base-hook-gate.py` when the pull request's diff touches the hook config, a workflow (`.github/workflows/`), or a hook script (anything under `scripts/`, or a file that a `repo: local` hook's `entry` or `args` names). The script:
+
+1. Fails, with a `::error::` annotation, on every hook id that the base branch's config runs in the leg's stage and the pull request's config no longer runs there: deleted, renamed, or moved to another stage.
+2. Restores the base branch's config, and the scripts its `repo: local` hooks name, in the runner's checkout (`git restore --source=<base>`). Every other file, `scripts/` included, keeps the pull request's content, so the base branch's hooks check it.
+3. Re-runs the leg's stage(s) over the same pull request diff, so the changed files meet the rules the base branch enforces.
+
+It then puts the pull request's config and scripts back for the guard's own run. A pull request that touches none of those paths skips the step in about a second. One that does runs its stages twice, once per config; only a change to the gate itself pays that.
+
+- **Before any hook the pull request controls.** A hook the pull request adds could otherwise write a fake `python` to `$GITHUB_PATH` or a `SKIP` to `$GITHUB_ENV`, or create a `git replace` ref that redirects the base branch's files, and every later step would inherit it. `GIT_NO_REPLACE_OBJECTS=1` makes the gate's git ignore replace refs.
+- **Same job, same check name.** It is a step inside the `hooks` job, not a new job, so the job name `Verify hooks were not bypassed` and every required status check name stay unchanged; branch protection needs no update.
+- **Read from the base branch.** The step runs the base branch's copy of the script (`git show "$base:scripts/base-hook-gate.py"`), so a pull request's edit to the script does not take effect. Only the pull request that first adds it, which the base branch lacks, runs its own copy.
+- **A deliberate removal fails too.** Dropping or relaxing a hook on purpose is a maintainer's decision: the step fails, and a maintainer merges past it or lands the change by another reviewed route. Later pull requests are judged by the new base config.
+- **`SKIP`.** A hook skipped on the guard step (see [Skipping specific pre-commit hooks in CI](#skipping-specific-pre-commit-hooks-in-ci)) needs the same `SKIP` on this step.
+- **What it cannot stop.** On `pull_request`, GitHub runs the workflow file from the pull request itself, so a pull request can still delete this step or the whole guard. The toolchain install that runs before the step executes the pull request's package scripts (an npm `postinstall`, a build backend), which can change what later steps run. A hook whose logic lives outside a file its `entry` or `args` names, such as `npm test` (the `test` script in `package.json`), `pytest` (its settings in `pyproject.toml` or `conftest.py`), or a `make` or `mvn` target, runs the pull request's copy of that file, and a change to it alone does not trigger the step. Only review stops these, which is why the final report proposes CODEOWNERS entries for test, CI and hook config ([final-report.md](final-report.md)). They bind only once branch protection requires code-owner review, a setting this skill never changes. Never move the guard to `pull_request_target` to run the base branch's workflow: it runs pull request code with a write token and the repository's secrets.
+
+```python
+"""scripts/base-hook-gate.py: judge a change to the hooks with the base branch's hooks.
+
+Usage: python scripts/base-hook-gate.py --base <sha> <stage> [<stage> ...]
+
+Does nothing unless the diff from <base> to HEAD touches .pre-commit-config.yaml,
+a workflow, or a hook script (anything under scripts/, or a file a local hook's
+entry or args names). Then it fails on every hook id the base config runs in a
+given stage that the PR's config no longer runs there, restores the base's config
+and the scripts its local hooks name, re-runs each stage over the PR diff, then
+puts the PR's files back for the guard's own run.
+The CI guard reads this file from the base branch, so a PR cannot edit it either.
+"""
+
+import shlex
+import subprocess
+import sys
+
+import yaml  # installed with pre-commit
+
+sys.stdout.reconfigure(line_buffering=True)  # keep our lines in order with pre-commit's
+
+CONFIG = ".pre-commit-config.yaml"
+LEGACY = {"commit": "pre-commit", "push": "pre-push", "merge-commit": "pre-merge-commit"}
+
+
+def git(*args):
+    return subprocess.run(["git", *args], capture_output=True, text=True)
+
+
+def config_at(rev):
+    shown = git("show", f"{rev}:{CONFIG}")
+    return (yaml.safe_load(shown.stdout) or {}) if shown.returncode == 0 else None
+
+
+def hooks(cfg):
+    for repo in cfg.get("repos") or []:
+        for hook in repo.get("hooks") or []:
+            yield repo.get("repo"), hook
+
+
+def ids_in_stage(cfg, stage):
+    default = cfg.get("default_stages")
+    found = set()
+    for _, hook in hooks(cfg):
+        stages = hook.get("stages") or default
+        if stages is None or stage in {LEGACY.get(s, s) for s in stages}:
+            found.add(hook["id"])
+    return found
+
+
+def named_files(cfg):
+    names = set()
+    for repo, hook in hooks(cfg):
+        if repo == "local":
+            for arg in [*shlex.split(str(hook.get("entry", ""))), *map(str, hook.get("args") or [])]:
+                names.add(arg.removeprefix("./"))
+    return names
+
+
+args = sys.argv[1:]
+if args[:1] != ["--base"] or len(args) < 3:
+    sys.exit("usage: base-hook-gate.py --base <sha> <stage> [<stage> ...]")
+base, stages = args[1], args[2:]
+
+base_cfg = config_at(base)
+if base_cfg is None:
+    print(f"base-hook-gate: {base} has no {CONFIG}; nothing to compare.")
+    sys.exit(0)
+head_cfg = config_at("HEAD") or {}
+
+diff = git("diff", "--name-only", "-z", base, "HEAD")
+if diff.returncode != 0:
+    sys.exit(f"base-hook-gate: git diff failed: {diff.stderr.strip()}")
+scripts = named_files(base_cfg) | named_files(head_cfg)
+gated = [
+    p for p in diff.stdout.split("\0") if p and (
+        p == CONFIG or p.startswith((".github/workflows/", "scripts/")) or p in scripts
+    )
+]
+if not gated:
+    print("base-hook-gate: no hook config, workflow or hook script changed; skipped.")
+    sys.exit(0)
+print("base-hook-gate: the PR changes " + ", ".join(gated))
+
+failed = False
+for stage in stages:
+    for hook_id in sorted(ids_in_stage(base_cfg, stage) - ids_in_stage(head_cfg, stage)):
+        print(f"::error::The base branch runs hook '{hook_id}' on {stage}; this PR removes it.")
+        failed = True
+
+# The base's config and the scripts its local hooks name; every other file keeps
+# the PR's content, so the base hooks still check it. Files only: a directory
+# such as `src` in `mypy src` keeps the PR's content too. A file the base lacks
+# has no base version to restore.
+restore = [p for p in [CONFIG, *sorted(named_files(base_cfg))]
+           if git("cat-file", "-t", f"{base}:{p}").stdout.strip() == "blob"]
+
+
+def checkout(source):
+    if restore and subprocess.call(["git", "restore", f"--source={source}", "--staged", "--worktree", "--", *restore]):
+        sys.exit(f"base-hook-gate: could not restore the hook files from {source}.")
+
+
+checkout(base)
+try:
+    for stage in stages:
+        print(f"base-hook-gate: {stage} stage, base branch's hooks, PR diff")
+        run = ["pre-commit", "run", "--hook-stage", stage, "--from-ref", base, "--to-ref", "HEAD"]
+        failed |= subprocess.call(run) != 0
+finally:
+    checkout("HEAD")  # the guard's own run, next, uses the PR's config
+sys.exit(1 if failed else 0)
+```
+
+Checked with pre-commit 4.7.0 on a scratch repository, with the step run as written: a pull request that changed only source files skipped the gate; one that removed a hook and added code that hook rejects passed the PR's own config and failed the gate on both the removed hook and the base config's run; one that rewrote a hook script to `exit 0` failed on the base branch's script; one that narrowed a hook's `files` and put a violation in another file under `scripts/`, or pointed a hook's `entry` from `src` to `docs` and put a violation in `src/`, failed on the base branch's hook; and one that added a hook with clean code passed.
+
 ## Table of Contents
 
 - [Fast CI at no extra cost](#fast-ci-at-no-extra-cost)
@@ -60,6 +194,7 @@ Every workflow Step 3 writes or merges applies all of these:
 - **Generated for the recorded visibility.** Only the guard's leg split reads visibility at run time: one leg per hook stage on public repos, otherwise one leg, commit stage first. `seed-cache`, macOS legs, and the matrix trigger are written in or left out for Step 1's answer. Coverage goes to `$GITHUB_STEP_SUMMARY` on every repo, never to a third-party service.
 - **Caches seeded from the default branch.** A pull request's caches serve only that pull request. Seed from the default-branch matrix (Minimal: a per-merge `seed-cache` on public repos), cache `~/.cache/pre-commit`, and cache `node_modules` only when measured.
 - **Blobless full history** in the guard: `fetch-depth: 0` plus `filter: blob:none`. Never shallow where history is read.
+- **The base-branch gate step** in the guard job, unchanged and just before the guard's own run ([The base branch judges hook changes](#the-base-branch-judges-hook-changes)), plus `scripts/base-hook-gate.py`.
 - **`concurrency`** on the pull request number (fallback `github.run_id`) with `cancel-in-progress`.
 - **Affected-only on pull requests once the suite is too slow to run whole, full suite on the default branch**. Filters list what may be skipped; skip with job-level `if:`, not workflow `paths:`; selection fails when source changed but no test ran.
 - **Workers matched to cores** (4 public, 2 private), **`timeout-minutes`** on every job (about 3× typical; default 360), and **shards only on public repos**.
@@ -240,6 +375,19 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
+      # A PR must not loosen the rules that judge it. When it changes hook
+      # config, a workflow or a hook script, run the stage(s) with the base
+      # branch's config first, before any hook the PR controls can run
+      # ("The base branch judges hook changes").
+      - name: Re-run the base branch's hooks if the PR changes them
+        run: |
+          export GIT_NO_REPLACE_OBJECTS=1
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          gate="$RUNNER_TEMP/base-hook-gate.py"
+          git show "$base:scripts/base-hook-gate.py" > "$gate" 2>/dev/null || cp scripts/base-hook-gate.py "$gate"
+          python "$gate" --base "$base" ${{ matrix.stages || 'pre-commit pre-push' }}
+
       # The ONLY overlap with pre-commit, and it costs seconds because the run is
       # scoped to the diff. Every stage must run in some leg — `pre-commit run`
       # alone executes commit-stage hooks and silently skips the pre-push suite and E2E.
@@ -402,6 +550,19 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      # A PR must not loosen the rules that judge it. When it changes hook
+      # config, a workflow or a hook script, run the stage(s) with the base
+      # branch's config first, before any hook the PR controls can run
+      # ("The base branch judges hook changes").
+      - name: Re-run the base branch's hooks if the PR changes them
+        run: |
+          export GIT_NO_REPLACE_OBJECTS=1
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          gate="$RUNNER_TEMP/base-hook-gate.py"
+          git show "$base:scripts/base-hook-gate.py" > "$gate" 2>/dev/null || cp scripts/base-hook-gate.py "$gate"
+          python "$gate" --base "$base" ${{ matrix.stages || 'pre-commit pre-push' }}
 
       # The ONLY overlap with pre-commit, and it costs seconds because the run is
       # scoped to the diff (a slow suite's test hook selects affected tests). Every
@@ -576,6 +737,19 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
+      # A PR must not loosen the rules that judge it. When it changes hook
+      # config, a workflow or a hook script, run the stage(s) with the base
+      # branch's config first, before any hook the PR controls can run
+      # ("The base branch judges hook changes").
+      - name: Re-run the base branch's hooks if the PR changes them
+        run: |
+          export GIT_NO_REPLACE_OBJECTS=1
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          gate="$RUNNER_TEMP/base-hook-gate.py"
+          git show "$base:scripts/base-hook-gate.py" > "$gate" 2>/dev/null || cp scripts/base-hook-gate.py "$gate"
+          python "$gate" --base "$base" ${{ matrix.stages || 'pre-commit pre-push' }}
+
       # The ONLY overlap with pre-commit, and it costs seconds because the run is
       # scoped to the diff. Every stage must run in some leg — `pre-commit run`
       # alone executes commit-stage hooks and silently skips the pre-push suite and E2E.
@@ -739,6 +913,19 @@ jobs:
         with:
           python-version: '3.12'
 
+      # A PR must not loosen the rules that judge it. When it changes hook
+      # config, a workflow or a hook script, run the stage(s) with the base
+      # branch's config first, before any hook the PR controls can run
+      # ("The base branch judges hook changes").
+      - name: Re-run the base branch's hooks if the PR changes them
+        run: |
+          export GIT_NO_REPLACE_OBJECTS=1
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          gate="$RUNNER_TEMP/base-hook-gate.py"
+          git show "$base:scripts/base-hook-gate.py" > "$gate" 2>/dev/null || cp scripts/base-hook-gate.py "$gate"
+          python "$gate" --base "$base" ${{ matrix.stages || 'pre-commit pre-push' }}
+
       # The ONLY overlap with pre-commit, and it costs seconds because the run is
       # scoped to the diff. Both invocations are required — `pre-commit run` alone
       # executes commit-stage hooks and silently skips the pre-push suite and E2E.
@@ -831,6 +1018,19 @@ jobs:
         with:
           python-version: '3.12'
 
+      # A PR must not loosen the rules that judge it. When it changes hook
+      # config, a workflow or a hook script, run the stage(s) with the base
+      # branch's config first, before any hook the PR controls can run
+      # ("The base branch judges hook changes").
+      - name: Re-run the base branch's hooks if the PR changes them
+        run: |
+          export GIT_NO_REPLACE_OBJECTS=1
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          gate="$RUNNER_TEMP/base-hook-gate.py"
+          git show "$base:scripts/base-hook-gate.py" > "$gate" 2>/dev/null || cp scripts/base-hook-gate.py "$gate"
+          python "$gate" --base "$base" ${{ matrix.stages || 'pre-commit pre-push' }}
+
       # The ONLY overlap with pre-commit, and it costs seconds because the run is
       # scoped to the diff. Both invocations are required — `pre-commit run` alone
       # executes commit-stage hooks and silently skips the pre-push suite and E2E.
@@ -922,6 +1122,19 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: '3.12'
+
+      # A PR must not loosen the rules that judge it. When it changes hook
+      # config, a workflow or a hook script, run the stage(s) with the base
+      # branch's config first, before any hook the PR controls can run
+      # ("The base branch judges hook changes").
+      - name: Re-run the base branch's hooks if the PR changes them
+        run: |
+          export GIT_NO_REPLACE_OBJECTS=1
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          gate="$RUNNER_TEMP/base-hook-gate.py"
+          git show "$base:scripts/base-hook-gate.py" > "$gate" 2>/dev/null || cp scripts/base-hook-gate.py "$gate"
+          python "$gate" --base "$base" ${{ matrix.stages || 'pre-commit pre-push' }}
 
       # The ONLY overlap with pre-commit, and it costs seconds because the run is
       # scoped to the diff. Both invocations are required — `pre-commit run` alone
@@ -1038,6 +1251,19 @@ jobs:
           python-version: '3.12'
       - if: steps.changes.outputs.backend == 'true'
         run: pip install -e "backend/[dev]"
+
+      # A PR must not loosen the rules that judge it. When it changes hook
+      # config, a workflow or a hook script, run the stage(s) with the base
+      # branch's config first, before any hook the PR controls can run
+      # ("The base branch judges hook changes").
+      - name: Re-run the base branch's hooks if the PR changes them
+        run: |
+          export GIT_NO_REPLACE_OBJECTS=1
+          pip install pre-commit
+          base="${{ github.event.pull_request.base.sha }}"
+          gate="$RUNNER_TEMP/base-hook-gate.py"
+          git show "$base:scripts/base-hook-gate.py" > "$gate" 2>/dev/null || cp scripts/base-hook-gate.py "$gate"
+          python "$gate" --base "$base" ${{ matrix.stages || 'pre-commit pre-push' }}
 
       - name: Run both hook stages over the PR diff
         run: |
@@ -1170,7 +1396,7 @@ run, or move the matrix back to `push` when every merge deploys.
 
 ### Skipping specific pre-commit hooks in CI
 
-Some hooks (like interactive formatters) may not make sense in CI. Skip them with the `SKIP` env var, on the guard job's run step:
+Some hooks (like interactive formatters) may not make sense in CI. Skip them with the `SKIP` env var, on the guard job's run step and on its base-branch gate step:
 
 ```yaml
       - name: Run the hook stage(s) over the PR diff
