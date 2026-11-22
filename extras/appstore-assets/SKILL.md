@@ -8,7 +8,7 @@ dependencies:
   - "github:emilkowalski/skills:skills/emil-design-eng"
   - browse
 metadata:
-  version: 1.4.1
+  version: 1.4.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
