@@ -64,6 +64,7 @@ Full detail on the Pattern B+C (Parallel Workers + Review Loop) architecture use
   - Verifies accuracy of all findings
   - Catches false positives and severity miscategorizations
   - Identifies missed issues
+  - Keeps or drops each finding with a one-line reason, never a score, and never for its length or batch position
   - Returns validation report with corrections
   - Input: CODE_REVIEW.md + original source files; never an earlier round's report
   - Output: Validation JSON + updated CODE_REVIEW.md if corrections needed
@@ -71,6 +72,7 @@ Full detail on the Pattern B+C (Parallel Workers + Review Loop) architecture use
 ## Graceful Degradation
 
 If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequentially, and note in the report that the validation pass was skipped.
+If this session also wrote the change, the report says `self-review, not independent` (Independent Review in `references/review-mode.md`).
 - Log message: "Subagent architecture unavailable; running inline review"
 
 ## Risk Mitigation

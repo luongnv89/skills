@@ -3,7 +3,7 @@ name: report-assembler
 description: Merge and deduplicate findings from all file-reviewer batches, rank by severity, and generate CODE_REVIEW.md
 metadata:
   role: "Report Coordinator"
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Report Assembler Agent
@@ -39,6 +39,7 @@ Receives array of JSON outputs from `file-reviewer`:
       "report_head": "full SHA of the earlier report's Head, or null when there is none",
       "findings": [{"finding": "[Critical] Security: Hardcoded API Secret, src/auth/client.ts:17", "status": "still open|resolved|gone", "evidence": "..."}]
     },
+    "reviewer": "independent — fresh-context agent | this session — did not write the change | self-review, not independent",
     "files_total": 50,
     "date": "2026-03-24"
   }
@@ -49,6 +50,9 @@ The binding fields (`head_sha` … `working_tree`, `merge_base` included) are th
 (`references/review-mode.md`). Copy them into the header verbatim: never abbreviate a SHA, and
 never resolve a ref or fetch to fill one in. A field that is missing is written `unknown`, which
 makes the report fail the stale check.
+
+`reviewer` is the orchestrator's Independent Review result (`references/review-mode.md`): copy
+it into the `**Reviewer**` line as given, `unknown` when missing.
 
 `review_rules` and `earlier_round` are the orchestrator's results (Review Rules and Earlier Round
 in `references/review-mode.md`). Copy them as given: never read `REVIEW.md` or an earlier report
@@ -63,6 +67,9 @@ yourself. The `earlier-round` batch holds the earlier findings still open, re-ta
    - Keep severity of highest priority duplicate
    - Merge descriptions, combine before/after examples
    - Preserve all unique fix suggestions
+   - Never prefer a finding, description or fix for being longer or for coming from an earlier
+     batch: batch order and text length never decide what is kept, its severity or its place.
+     Within each section, order findings by path and line
 
 3. **Split by origin**: each finding keeps the `origin` its file-reviewer gave it (Finding Origin
    in `references/review-mode.md`). Deduplicated findings are `introduced` when any duplicate is.
@@ -105,6 +112,7 @@ Generate `CODE_REVIEW.md`:
 **Working tree**: <working_tree>
 **Review rules**: [REVIEW.md at `<rules_rev>` — N rules, M matched, K malformed | none (no REVIEW.md at base)]
 **Earlier round**: [CODE_REVIEW.md @ `<report_head>` — N open: X still open, Y resolved, Z gone | none]
+**Reviewer**: <reviewer>
 **Mode**: [1 — inline | 2 — batched | 3 — sampled]
 **Files Reviewed**: N
 **Total Issues**: X
@@ -191,7 +199,7 @@ the severity in each title (`### [Major] [Category]: Issue Title`), Critical fir
 - Code smells identified using catalog in `references/code-smells.md`
 - Pragmatic Programmer principles from "The Pragmatic Programmer"
 - Security checks cover OWASP Top 10 common patterns
-- Maintainability scored on naming, complexity, coverage
+- Maintainability checked for naming, complexity and coverage
 
 ---
 

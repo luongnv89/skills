@@ -10,7 +10,8 @@ without claiming remote freshness. Review analysis is source-read-only: do not f
 checkout/switch, create or delete branches/worktrees, or mutate the index, refs, stash, branch,
 or any other worktree path. The only permitted file write is the named `CODE_REVIEW.md` report
 artifact. Then load the base's `REVIEW.md` (Review Rules) and re-check an earlier report's open
-findings (Earlier Round). Then complete the Environment Check to pick a mode (PR/diff vs full
+findings (Earlier Round). If this session wrote the change, hand the review to a fresh agent, or
+disclose a self-review (Independent Review). Then complete the Environment Check to pick a mode (PR/diff vs full
 audit). Next, run the selected mode's process from Mode Selection against the Review Checklist.
 Finally, emit the Output Format report and verify Acceptance Criteria.
 
@@ -194,6 +195,38 @@ or new, against the source alone, and re-checks each `resolved` or `gone` row of
 `## Earlier Round` table against the source, ignoring the Evidence column, so it works the same whether or not an earlier round
 exists (`agents/reviewer.md`).
 
+## Independent Review (who reviews)
+
+A session that wrote a change is a poor judge of it: it tends to rate its own work well. This
+section decides who runs the review and what the report says about that.
+
+**The session wrote the change** when, in this conversation, it or a subagent it spawned created,
+edited or committed any path in the change (Review Binding). A review asked for in a new
+conversation, of a change made elsewhere, did not write it. When unsure, count it as written.
+
+| This session wrote the change | Agent tool | Who runs the review | `**Reviewer**` line |
+|---|---|---|---|
+| no | either | this session, in the selected mode | `this session — did not write the change` |
+| yes | available | one fresh-context agent | `independent — fresh-context agent` |
+| yes | unavailable, or the spawn failed | this session, inline | `self-review, not independent` |
+
+**Handing the review over.** Spawn one agent with only the scope (`base_ref`, or the PR number),
+the absolute path of this file, and the instruction to run review mode end to end as the
+orchestrator and write `CODE_REVIEW.md` with `**Reviewer**: independent — fresh-context agent`.
+Never pass the session's plan, notes, summary of the change, test results, expected findings or a
+draft report. The agent reads the diff, commit messages and PR description itself. It runs every
+section of this file, Mode 1 included, and spawns `file-reviewer` agents in Mode 2/3 when it can,
+else it runs the batches inline. Either way the review is independent, because the agent did not
+write the change.
+
+**Relaying it.** Run the stale check on the returned report, then relay it as written: never
+edit, drop, soften or re-rank a finding. To disagree with one, say so in the final response,
+beside that finding, and leave the report unchanged.
+
+**Self-review.** Without an independent reviewer, review inline as usual, write
+`**Reviewer**: self-review, not independent` in the header, and put `self-review, not independent`
+under `Uncertainty` in the final response. A small change still gets this disclosure.
+
 ## Environment Check
 
 Before proceeding with code review:
@@ -215,7 +248,8 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
 **Mode 1: Small PR/Diff (Fast Path - Inline)**
 - Changed files: <50
 - Total lines changed: <5000
-- Process: run the Review Checklist inline over the changed lines; no subagents
+- Process: run the Review Checklist inline over the changed lines; no `file-reviewer` batches.
+  A session that wrote the change hands this run to a fresh agent (Independent Review)
 - Git commands (the change, Review Binding):
   ```bash
   git diff --no-renames --name-only <merge_base>
@@ -396,6 +430,7 @@ Generate `CODE_REVIEW.md`:
 **Working tree**: [clean | dirty — N uncommitted paths, not in Head]
 **Review rules**: [REVIEW.md at `<rules_rev>` — N rules, M matched, K malformed | none (no REVIEW.md at base)]
 **Earlier round**: [CODE_REVIEW.md @ `<report_head>` — N open: X still open, Y resolved, Z gone | none]
+**Reviewer**: [independent — fresh-context agent | this session — did not write the change | self-review, not independent]
 **Mode**: [1 — inline | 2 — batched | 3 — sampled]
 **Files Reviewed**: N
 
@@ -503,6 +538,7 @@ A `CODE_REVIEW.md` file with findings grouped by severity. Example:
 **Working tree**: clean
 **Review rules**: none (no REVIEW.md at base)
 **Earlier round**: none
+**Reviewer**: this session — did not write the change
 **Mode**: 1 — inline
 **Files Reviewed**: 8
 
@@ -564,6 +600,8 @@ A run passes when **all** of the following are true:
 - [ ] Every reported finding cites a `path/to/file.ext:line` reference and a code smell or category label.
 - [ ] Critical findings include both a "Before" and "Suggested Fix" code block when a code change is proposed.
 - [ ] Mode used (Mode 1/2/3) is recorded in the report header along with the file count.
+- [ ] The header has a `**Reviewer**` line (Independent Review). A session that wrote the change and had the Agent tool handed the review to a fresh agent with only the scope, and relayed its report unchanged; without one, the header and the final response's `Uncertainty` say `self-review, not independent`.
+- [ ] When a validation pass ran, it gave every finding `keep` or `drop` with a one-line reason and no numeric score, confidence or grade, judging each by its cited code alone, never by its length or its place in a batch or the report (`agents/reviewer.md`).
 - [ ] The header names the full `head_sha`, the base as `base_ref` @ full `base_sha` with its `base_source` and full `merge_base` (or `none (full audit)`), and the working-tree state (Review Binding). No fetch ran.
 - [ ] An existing `CODE_REVIEW.md` that was used or validated passed the stale check first; a stale one was reported as stale and its verdict not counted.
 - [ ] A `REVIEW.md` was read only with `git show <rules_rev>:REVIEW.md` (the base, or `HEAD`'s commit in a full audit), never from the working tree. Only rules whose trigger matched the change were applied, every finding a rule raised has a `**Rule**` line, and `## Review Rules` lists each rule's trigger result.
@@ -601,13 +639,13 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Scope Assessment** — checks: `Review binding` (head, base, working tree recorded), `Review rules` (read from the base, triggers matched, or `none`), `Earlier round` (open findings checked, or `none`), `Scope assessment`, `File count estimated`
+**Phase: Scope Assessment** — checks: `Review binding` (head, base, working tree recorded), `Review rules` (read from the base, triggers matched, or `none`), `Earlier round` (open findings checked, or `none`), `Reviewer` (independent, or `self-review, not independent` disclosed), `Scope assessment`, `File count estimated`
 
 **Phase: Review Execution** — checks: `Code smell detection`, `Security scan`, `Verification integrity` (or `skipped` when no trigger path changed)
 
 **Phase: Report Generation** — checks: `Report generation`, `Severity classification`, `Origin tagged` (every finding introduced or pre-existing)
 
-**Phase: Validation Pass** — checks: `Head current` (stale check), `Validation pass`, `False positive check`
+**Phase: Validation Pass** — checks: `Head current` (stale check), `Validation pass`, `Keep or drop` (each finding, with a one-line reason, no score)
 
 ## Resources
 
