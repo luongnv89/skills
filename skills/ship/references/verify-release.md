@@ -8,7 +8,14 @@ In interactive mode, list the checks this file finds (test command, CI push, ver
 
 ## What counts
 
-Right after the release commit, record `release_sha="$(git rev-parse HEAD)"`. A check counts only when it ran on `release_sha` and left the working tree clean. These do not count:
+Right after the release commit, record two values:
+
+```bash
+release_sha="$(git rev-parse HEAD)"
+baseline="$(git status --porcelain)"   # untracked files included
+```
+
+Step 7's commit took every tracked change, so `baseline` can hold only untracked files, such as Step 6 build output that is not gitignored. The checks did not make those files, so they never count against a check (see _After each check_). A check counts only when it ran on `release_sha` and added nothing to the working tree beyond `baseline`. These do not count:
 
 - A green CI run on the parent commit, the previous tag, or a pull request head
 - The Step 6 build, because a build is not a test
@@ -69,16 +76,22 @@ Look for these, in order:
 
 Run each one you find after step 1 or 2. They run in addition to the test command or CI and never replace it: with no test command and no CI, section 4 still applies.
 
-- **Verify skill:** follow its SKILL.md as written, from boot to teardown, and read its last `VERIFY` line. The line counts only when `commit=` is the short `release_sha` and `dirty=no`.
+- **Verify skill:** follow its SKILL.md as written, from boot to teardown, and read its last `VERIFY` line. The line counts only when `commit=` is the short `release_sha` and the tree was clean when the skill started: `dirty=no`, or `dirty=yes` when `baseline` is not empty and the _After each check_ test printed nothing just before the skill ran (the verify skill counts the baseline's untracked files as dirty).
   - `VERIFY PASS`: the check passes.
   - `VERIFY PARTIAL`: the check passes, and each `UNVERIFIED` row goes under `Uncertainty`.
   - `VERIFY FAIL`: stop with `BLOCKED — verify skill failed: F<id> <observation>`.
-  - No `VERIFY` line, a different commit, or `dirty=yes`: stop with `BLOCKED — verify skill gave no verdict for <short sha>`.
+  - No `VERIFY` line, a different commit, or a `dirty=yes` the rule above does not allow: stop with `BLOCKED — verify skill gave no verdict for <short sha>`.
 - **Smoke script:** run `bash scripts/e2e_test.sh` or `python3 scripts/e2e_test.py`. A non-zero exit stops with `BLOCKED — smoke script failed: <path>`.
 
 ## After each check
 
-`git status --porcelain` (untracked files included) must print nothing after the test command and after each later check, so the next check, such as a verify skill, sees a clean tree. Anything it prints stops with `BLOCKED — release checks left files: <list>`.
+After the test command and after each later check, compare the tree with `baseline`, so the next check, such as a verify skill, sees the tree the release commit left:
+
+```bash
+git status --porcelain | grep -vxF -f <(printf '%s\n' "$baseline")   # must print nothing
+```
+
+Any new or changed entry stops with `BLOCKED — release checks left files: <list>`. Entries already in `baseline` never stop the release.
 
 ## 4. Neither tests nor CI
 

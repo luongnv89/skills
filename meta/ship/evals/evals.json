@@ -378,6 +378,66 @@
         "Never states under Evidence or in the step report that the release commit is verified (the step report shows — rather than √).",
         "Does not run scripts/release.sh, in auto mode or as a check."
       ]
+    },
+    {
+      "id": 27,
+      "name": "release-commit-ci-fails-blocks",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v2.0.0, one fix commit since; docs site with no package.json test script, Makefile, Cargo.toml, go.mod, pytest config, verify skill or scripts/e2e_test.*; .github/workflows/check.yml runs on push; gh is authenticated; after the release commit is pushed, the 'check' run on that commit ends with conclusion failure)",
+      "expected_output": "Pushes the branch without the tag so CI can verify the release commit, waits for the runs on release_sha, and stops with 'BLOCKED — CI failed on release commit: check (failure)'. It creates no tag and puts the git revert recovery under Decision, never a reset or force-push.",
+      "files": [],
+      "expectations": [
+        "Finds no local test command, then runs gh auth status before pushing anything.",
+        "Pushes the branch with no tag and lists runs with gh run list --commit for the release commit, not the parent commit.",
+        "Reports 'BLOCKED — CI failed on release commit: check (failure)', naming the workflow and its conclusion.",
+        "Creates no tag and pushes no tag.",
+        "Puts git revert <release_sha> and a push under Decision as the recovery, and never suggests git reset --hard on the pushed commit or a force-push."
+      ]
+    },
+    {
+      "id": 28,
+      "name": "pretest-hook-calls-release-step",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v0.9.0, one feat commit since; package.json has \"test\": \"jest\" and \"pretest\": \"npm version patch --no-git-tag-version\"; no Makefile, .github/workflows, verify skill or scripts/e2e_test.*)",
+      "expected_output": "Reads the pretest hook before running npm test, sees that it calls npm version, and does not run npm test in auto mode. With no other check, it still tags v0.10.0 and reports 'Release commit <sha> not verified: the test command was skipped because it calls a release step' under Uncertainty.",
+      "files": [],
+      "expectations": [
+        "Reads the pretest and posttest hooks of the test script before running it.",
+        "Does not run npm test (or any command that triggers the pretest hook) in auto mode.",
+        "Names the skipped test command and its npm version hook under Uncertainty.",
+        "Writes 'not verified: the test command was skipped because it calls a release step' for the release commit and never calls it verified under Evidence.",
+        "Still creates the v0.10.0 tag."
+      ]
+    },
+    {
+      "id": 29,
+      "name": "verify-skill-stale-commit-blocks",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v3.1.0, one fix commit since; Makefile has a test: target that passes on the release commit; .claude/skills/verify-api/SKILL.md exists; when followed, its last line is 'VERIFY PASS commit=1a2b3c4 dirty=no pass=6 fail=0 unverified=0 total=6 seconds=41', and 1a2b3c4 is the parent of the release commit)",
+      "expected_output": "Runs make test on the release commit (passes), then follows the verify-api skill. Because its VERIFY line names the parent commit instead of the release commit, it stops with 'BLOCKED — verify skill gave no verdict for <short release sha>' and creates no tag.",
+      "files": [],
+      "expectations": [
+        "Runs make test before the verify skill, and runs the verify skill as well rather than instead.",
+        "Does not count the VERIFY PASS line because its commit= is not the release commit.",
+        "Reports 'BLOCKED — verify skill gave no verdict for <short release sha>'.",
+        "Creates no tag and pushes nothing.",
+        "Does not run verify-setup itself as the verify skill."
+      ]
+    },
+    {
+      "id": 30,
+      "name": "verified-release-with-untracked-build-output",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v1.1.0, one feat commit since; pyproject.toml has [tool.pytest.ini_options] and a build step; the Step 6 build leaves an untracked, not gitignored build/ directory; python -m pytest passes on the release commit with 42 tests and changes no file)",
+      "expected_output": "Records release_sha and a baseline git status after the release commit (holding the untracked build/ directory), runs python -m pytest, finds no entry beyond the baseline, tags v1.2.0 and records 'python -m pytest passed on <short sha>' with the test count under Evidence.",
+      "files": [],
+      "expectations": [
+        "Records release_sha and a git status --porcelain baseline right after the release commit, before any check.",
+        "Runs python -m pytest on the release commit before git tag.",
+        "Does not stop with 'BLOCKED — release checks left files' because of the build/ directory that was already in the baseline.",
+        "Records the release commit as verified under Evidence, naming python -m pytest, the short release sha and the 42 tests.",
+        "Creates the v1.2.0 tag only after the check passes."
+      ]
     }
   ]
 }
