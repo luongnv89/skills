@@ -549,6 +549,8 @@ A line in AGENTS.md such as "run lint and typecheck before pushing" is advice. A
 
 ## Fast test runs
 
+**No retries.** Nothing here reruns a failing test: no `--reruns` or `pytest-rerunfailures`, `jest.retryTimes`, Vitest `retry`, Playwright `retries` above 0, or a loop that runs a hook again. A flaky test is root-caused, or deleted with a written reason once the user approves that finding ([Find test retries](github-actions.md#3-find-test-retries)).
+
 ### Related tests on commit
 
 The commit-stage unit hook keeps `pass_filenames` on, so it gets the staged files, and runs only the tests related to them. In the CI guard's `--from-ref`/`--to-ref` run the same hook gets the files changed in the pull request, so its repeat of the unit tests shrinks to the diff, and no hook id goes into `SKIP`. The push stage still runs the whole suite (or `scripts/affected-tests.sh` past the 60-second budget), locally and in the guard: it is the gate, and the commit hook is fast feedback. So the commit hook exits 0 when nothing is related, while `affected-tests.sh` fails closed, because the default-branch run is the only thing behind it.

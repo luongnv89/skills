@@ -3,7 +3,7 @@ name: devops-pipeline
 description: "Configure pre-commit hooks and lean GitHub Actions for shift-left QA. Use when adding, auditing, speeding up CI/CD or cutting its Actions minutes or cost: max local checks, fast free CI. Skip for Terraform/K8s, deploy pipelines, or non-GitHub CI."
 license: MIT
 metadata:
-  version: 2.7.0
+  version: 2.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "medium"
 ---
@@ -54,6 +54,7 @@ This skill writes config into someone else's repository and installs git hooks:
 - **Check for an existing git hook before installing.** `pre-commit install` moves a foreign hook to `<hook>.legacy` and runs it in migration mode. Never pass `-f`/`--overwrite`, which deletes it silently; deleting it needs the user's explicit confirmation.
 - **Never run `git commit --no-verify` or `git push --no-verify` on the user's behalf**, except `security-setup`'s recorded-override commit. A failing hook is a finding to report, not an obstacle to route around.
 - **Surface failures, never suppress them.** Do not add a hook id to `SKIP` or lower a coverage threshold to turn a run green or make it faster, nor relax a lint rule or delete or skip a test without the user's approval of that named finding; a blanket "delete the slow tests" or "make it green" approves nothing. Report the failure and let the user decide.
+- **No test retries.** Generated config never reruns a failing test (pytest `--reruns`, `jest.retryTimes`, Vitest `retry`, Playwright `retries`). Existing retry config is a named audit finding, removed only after that finding's approval.
 - **Never configure anything paid**: no third-party or larger runners, no sharding on a private repo, no Actions cache above the free 10 GB, no paid or third-party service such as Codecov; coverage goes to the job summary.
 - **Never merge.** Committed changes end in a pull request the user merges; measurement runs are budgeted and approved before any push.
 - **Never write CODEOWNERS or branch protection**; the final report only proposes CODEOWNERS entries.
@@ -75,9 +76,9 @@ gh repo view --json visibility --jq .visibility   # PUBLIC or PRIVATE
 Identify:
 - **Stack**: languages, frameworks, build system, and the linters, formatters and type checkers already configured
 - **Visibility**: public (standard runners free, 4 vCPU) or private, `INTERNAL` included (billed per minute, each job rounded up, 2 vCPU). Step 3 generates the workflow for it; if `gh` cannot read it, ask, and assume private meanwhile. For a private repo, count default-branch commits over 30 days: `git rev-list --count --first-parent --since=30.days <default-branch>`.
-- **Is this a CLI tool?** — if yes, enumerate all commands/subcommands (check README, `--help`, `click`/`argparse`/`cobra` source) to build an E2E test suite
+- **Is this a CLI tool?** If yes, list every command and subcommand for the E2E suite
 
-If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the language, build system, existing tooling, existing config files, visibility, and CLI status (with its command list) are recorded.
+If no package manifest matches, ask the user for the language and build system before Step 2. Step 1 is done when the language, build system, existing tooling, existing config files, visibility, and CLI status are recorded.
 
 ### 2. Configure Pre-commit Hooks (maximize local coverage)
 
@@ -122,11 +123,11 @@ CI runs exactly four kinds of thing:
 3. **CI-only scans** — checks that need the hosted runner rather than a laptop.
 4. **Deploy / release** — on merge to the default branch.
 
-**Make it fast, free techniques only**: apply every item of [references/github-actions.md](references/github-actions.md#fast-ci-at-no-extra-cost) → _Generated-workflow checklist_ (visibility, cache seeding, blobless guard checkout, `concurrency`, affected-only tests, workers, timeouts, shards).
+**Make it fast, free techniques only**: apply every item of [references/github-actions.md](references/github-actions.md#fast-ci-at-no-extra-cost) → _Generated-workflow checklist_.
 
 #### CI Speed Audit (existing pipelines)
 
-Run it before changing an existing workflow, or alone when the user asks why CI is slow. It is read-only and runs no hooks; follow [references/github-actions.md](references/github-actions.md#ci-speed-audit). Done when each job's queue/setup/work split comes from real runs, or the report says why none were measured.
+Run it before changing an existing workflow, or alone when the user asks why CI is slow. It is read-only and runs no hooks; follow [references/github-actions.md](references/github-actions.md#ci-speed-audit). Done when each job's queue/setup/work split comes from real runs, or the report says why none were measured, and the retry check ran.
 
 #### CI Minutes Optimization (existing pipelines)
 
@@ -175,6 +176,7 @@ A run passes when **all** of the following are true:
 - [ ] The guard runs the base-branch gate step before its own run, job and check names unchanged; the report proposes, never writes, CODEOWNERS for test, CI and hook config.
 - [ ] Speed: a pull-request-only `concurrency` cancel, `timeout-minutes` on every job, a `fetch-depth: 0` plus `filter: blob:none` guard checkout, and caches saved by the template's default-branch job when it has one (private Minimal has none by design); with affected-only tests, a default-branch full run and a selection that fails on zero tests for changed source.
 - [ ] No paid runner, larger runner, private-repo shard, third-party coverage upload, or cache above 10 GB; parallel guard legs and shards only on public repos.
+- [ ] No generated config retries a failing test; existing retry config is a named audit finding, never removed unapproved.
 - [ ] `pre-commit run --all-files` and `pre-commit run --all-files --hook-stage pre-push` both succeed (or their failures are surfaced explicitly to the user, not auto-suppressed).
 - [ ] For CLI projects, the E2E script is wired to the `pre-push` stage per the language reference files.
 - [ ] The final report passes the four reader checks in [references/final-report.md](references/final-report.md); without user feedback, human understanding stays unconfirmed.
@@ -182,7 +184,6 @@ A run passes when **all** of the following are true:
 ## Edge Cases
 
 - **Pre-commit not installed**: Show the install command and stop; do not install it or write anything.
-- **Existing `.pre-commit-config.yaml`**: Use the Safety Rails merge procedure.
 - **Monorepo with multiple languages**: One config with per-language sections and `files:` filters. Local `language: system` entries must also target the package dir (`npm --prefix frontend`, `pytest backend/tests`): `files:` does not change cwd.
 - **No `origin` remote**: Stop and ask the user whether a local-only setup with no repo sync is acceptable; do not proceed automatically.
 - **Tests take >60 seconds**: Select affected tests on `pre-push` (default-branch full run as backstop) or demote to the next lane; record the measured time in a hook comment.
@@ -226,8 +227,8 @@ Optional and propose-only. After the run's result is delivered, run this check:
 
 ## Resources
 
-- [references/precommit-configs.md](references/precommit-configs.md) — tool choice and hook configs by language, fast tools, fast test runs
-- [references/github-actions.md](references/github-actions.md) — fast workflow templates and the CI speed audit
-- [references/cli-e2e.md](references/cli-e2e.md) — CLI command discovery, the E2E script template, and its `pre-push` hook
-- [references/ci-minutes.md](references/ci-minutes.md) — billed minutes, critical path, measured approved changes, CI budget file
-- [references/final-report.md](references/final-report.md) — final report parts, status rules, examples, reader checks, and step report check names
+- [references/precommit-configs.md](references/precommit-configs.md) — hook configs and fast tools per language
+- [references/github-actions.md](references/github-actions.md) — workflow templates, CI speed audit
+- [references/cli-e2e.md](references/cli-e2e.md) — CLI E2E script and hook
+- [references/ci-minutes.md](references/ci-minutes.md) — billed minutes, measured cuts
+- [references/final-report.md](references/final-report.md) — report shape, step-report checks

@@ -198,6 +198,7 @@ Every workflow Step 3 writes or merges applies all of these:
 - **`concurrency`** on the pull request number (fallback `github.run_id`) with `cancel-in-progress`.
 - **Affected-only on pull requests once the suite is too slow to run whole, full suite on the default branch**. Filters list what may be skipped; skip with job-level `if:`, not workflow `paths:`; selection fails when source changed but no test ran.
 - **Workers matched to cores** (4 public, 2 private), **`timeout-minutes`** on every job (about 3× typical; default 360), and **shards only on public repos**.
+- **No test retries.** No step, runner config or action reruns a failing test (`--reruns`, `retryTimes`, Vitest `retry`, Playwright `retries` above 0, a retry action or shell loop). A flaky test is root-caused or deleted with a written reason: [Find test retries](#3-find-test-retries).
 
 ### Who pays
 
@@ -1501,7 +1502,28 @@ for id in $(gh run list --repo "$repo" --workflow "$workflow" --event pull_reque
 done
 ```
 
-### 3. Read the numbers
+### 3. Find test retries
+
+A retry turns a failing test green by running it again, so the flaky test is never fixed and every rerun is billed. List each retry setting in the audited repository's local checkout; `git grep` only reads tracked files:
+
+```bash
+repo_dir=/path/to/checkout   # the audited repository, not the scratch directory
+git -C "$repo_dir" grep -n -I -E \
+  -e 'rerunfailures|--reruns|reruns *=|retryTimes|--rerun-fails|rerunFailingTestsCount|test-retry|nick-fields/retry|wretry' \
+  -e '(^|[^A-Za-z_])retr(y|ies)"? *[:=] *[^0 ]|(^|[^A-Za-z_])retries\( *[1-9]|--retr(y|ies)[= ]+[1-9]' \
+  -- ':!*.lock' ':!package-lock.json' ':!pnpm-lock.yaml'
+```
+
+It catches pytest `--reruns` and `@pytest.mark.flaky(reruns=…)`, `pytest-rerunfailures`, `jest.retryTimes`, Vitest `retry`, Playwright, Cypress and Mocha `retries` (`process.env.CI ? 2 : 0` and JSON config included), Mocha `this.retries()`, nextest `retries`, `gotestsum --rerun-fails`, Maven `rerunFailingTestsCount`, the Gradle test-retry plugin and retry actions; a setting of 0 is not a match. Each match is a candidate: read it, and drop it when it retries no test (an HTTP client's `retry: false`). Also read each workflow `run:` step that runs tests for a loop or `||` that runs the command again. Verified with git 2.43 on a scratch repository holding one of each.
+
+Each retry setting is one named finding, `Test retries: <file>:<line>`, giving the setting, the tests it covers, and any test the run logs show passing only on a retry. Its fix is one of two:
+
+- **Root cause.** Find why the test fails intermittently (shared state, order, timing, the network, an unseeded random value) and fix that, so it passes without a retry.
+- **Approved deletion.** Delete the test, with a written reason in the commit message that names what still covers its behaviour.
+
+Either way the retry setting goes too, and only after the user approves that finding by name: removing a user's retry config is a change like deleting a test, and a blanket "make CI green" approves nothing. Never lower a retry count as the fix, or move a retry somewhere else. Once the setting is gone, a red run is the flaky test showing itself: report it, never rerun until green.
+
+### 4. Read the numbers
 
 | Signal | Likely cause | Free fix |
 |---|---|---|
@@ -1513,10 +1535,11 @@ done
 | The same step in several jobs | Duplicated work | Run it once; hook checks belong to the guard (`security-setup`'s offline security workflow is an approved exception) |
 | Matrix legs on `pull_request` | Version matrix on the hot path | Default branch only: per merge, or nightly on a busy private repository |
 | No `timeout-minutes` | 360-minute default | About three times the typical duration |
+| A retry setting (step 3) | A flaky test passes on a rerun | Root-cause it, or delete it with a written reason; either only after the user approves that finding |
 
-Measure before cutting. Deleting tests is rarely the fix: the split shows whether the time is in queue, setup, or the slowest job's work, as in the example below. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests. The only exception is a named test-scope finding the user approves, in [ci-minutes.md](ci-minutes.md#4-test-scope).
+Measure before cutting. Deleting tests is rarely the fix: the split shows whether the time is in queue, setup, or the slowest job's work, as in the example below. Never propose a paid runner, a larger runner, sharding on a private repository, a cache limit above 10 GB, or deleting or skipping tests. The only exceptions are a named finding the user approves: test scope, in [ci-minutes.md](ci-minutes.md#4-test-scope), and a flaky test's deletion ([Find test retries](#3-find-test-retries)).
 
-### 4. Report
+### 5. Report
 
 Report one row per finding, each tied to the audit output, then the proposed diff through the Safety Rails merge procedure. Example from a real run against the public `luongnv89/asm` repository (50 runs of `ci.yml`, 2026-11-01):
 
