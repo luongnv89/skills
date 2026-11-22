@@ -3,7 +3,7 @@ name: test-coverage
 description: "Generate unit tests for untested branches and edge cases. Use when coverage is low, CI flags gaps, or a release needs hardening. Not for integration/E2E suites, framework migrations, or fixing production bugs."
 license: MIT
 metadata:
-  version: 1.8.0
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "low"
 ---
@@ -78,13 +78,14 @@ Review the low-coverage code for:
 - Error paths and invalid input, where real bugs often live
 - Boundary values: empty, null, zero, min, max, and off-by-one
 - Normal paths that no existing test covers
+- Properties the code promises: round-trip, invariant, idempotency, or agreement with a naive version
 
 Leave trivial code out of the gap list: getters and setters, plain data classes and DTOs, constants, and one-line calls straight into a library or framework. A test there checks the language or the framework, not this project. Cover such code only through a test of logic that uses it, and list the skipped files under `Uncertainty:`.
 
 ### 3. Write Tests
 
 1. Read `references/unit-test-quality.md`.
-2. Write tests for the Step 2 gaps with the test framework for the detected [Stack](#stack-detect-before-step-1-of-workflow), following that file's rules: deterministic, isolated, fast, one behavior per test, and assertions on behavior rather than implementation.
+2. Write tests for the Step 2 gaps with the test framework for the detected [Stack](#stack-detect-before-step-1-of-workflow), following that file's rules: deterministic, isolated, fast, one behavior per test, and assertions on behavior rather than implementation. If the project already has a property-testing library, cover property gaps with seeded property tests (that file's *Property tests*); never add one.
 3. Check each new test against the file's five self-check questions and its useless-test patterns. Rewrite any test that fails one.
 4. **Pre-existing tests are read-only**, so the run's evidence comes from the same checks that existed before it. Never edit, rename, move, shadow, skip, retry or delete one, never add anything that skips, selects or retries tests, and never write to a path on the pre-sync list. In a pre-existing test file, add only new uniquely named tests and the names an import needs; anything else goes in a new test file. Keep each file's line endings. A pre-existing test that looks wrong or flaky goes under `Decision:`, unchanged. What may change: `references/unit-test-quality.md` → *Integrity check*.
 
@@ -137,6 +138,7 @@ A run passes when **all** of the following are true:
 - [ ] Every new test asserts on a return value, a raised error, or an observable effect. A test that only executes code does not count.
 - [ ] Every committed test failed the Step 4 break check against a planted bug, and every planted bug was reverted. No test targets trivial code alone.
 - [ ] No new test uses the network, the wall clock, unseeded randomness, or `sleep()`, or a real database other than a test-database fixture the existing unit tests already use.
+- [ ] Every property test fixes its seed or derandomizes in the test itself; no property-testing library was added.
 - [ ] Pre-existing tests are unchanged apart from added imports, the *Integrity check* passed before and after the commit, and the run added nothing that skips, selects or retries tests.
 - [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.), apart from a pre-existing test shown flaky at the base and named under `Decision:`, and the new tests pass when run on their own, twice.
 - [ ] A new test that exposed a suspected bug is left out of the commit and reported under `Decision:`. No assertion was loosened to match the code.
@@ -182,13 +184,13 @@ After completing each major step, output a status report in this format:
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context. The "Criteria" line summarizes how many acceptance criteria were met. The "Result" line gives the overall verdict.
+Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context.
 
 **Branch Setup phase checks:** `Feature branch created`, `Base recorded`, `Base coverage measured`
 
 **Analysis phase checks:** `Coverage report parsed`, `Gaps identified`, `Priority ranked`
 
-**Test Writing phase checks:** `Tests written`, `Trivial code skipped`, `Self-check passed`, `No network, DB, clock, randomness, or sleep`, `Framework conventions followed`
+**Test Writing phase checks:** `Tests written`, `Trivial code skipped`, `Self-check passed`, `No network, DB, clock, randomness, or sleep`, `Property tests seeded`, `Framework conventions followed`
 
 **Verification phase checks:** `Tests pass`, `New tests pass on their own`, `Break check passed`, `Existing tests unchanged`, `Coverage improved`, `No regressions`
 

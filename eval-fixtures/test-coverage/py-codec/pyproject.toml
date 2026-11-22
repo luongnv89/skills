@@ -1,0 +1,11 @@
+[project]
+name = "codec"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "hypothesis"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
