@@ -3,7 +3,7 @@ name: code-review
 description: "Review or improve code in four modes: bug/security review (default), performance, clean-code audit, slop cleanup (mode:review|perf|clean|cleanup). Don't use for features, tests (test-coverage) or a full comment audit (comment-audit)."
 license: MIT
 metadata:
-  version: 2.4.1
+  version: 2.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
   effort: "high"
@@ -19,7 +19,7 @@ mode you need — this protects the agent's context budget.
 
 | Mode | Use when the user wants to... | Reads / writes | Output | Workflow |
 |---|---|---|---|---|
-| **review** (default) | find bugs, security holes, quality issues in a diff/PR | read-only | prioritized findings report | `references/review-mode.md` |
+| **review** (default) | find bugs, security holes, quality issues, or weakened tests and gates in a diff/PR | read-only | prioritized findings report | `references/review-mode.md` |
 | **perf** | make code faster — bottlenecks, leaks, algorithmic waste | read-only | performance findings report | `references/perf-mode.md` |
 | **clean** | audit readability/standards vs the bbv Clean Code cheat sheet | read-only | `CLEAN_CODE_AUDIT.md` | `references/clean-mode.md` |
 | **cleanup** | actually refactor out AI slop, dead code, duplication, cruft | **WRITES CODE** | modified source files | `references/cleanup-mode.md` |
