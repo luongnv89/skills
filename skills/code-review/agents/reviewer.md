@@ -3,7 +3,7 @@ name: reviewer
 description: Fresh-context independent validation of CODE_REVIEW.md findings for accuracy and completeness
 metadata:
   role: "Quality Assurance Validator"
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # Reviewer Agent
@@ -17,11 +17,21 @@ Perform independent validation of the CODE_REVIEW.md report without knowledge of
   "code_review_md": "path/to/CODE_REVIEW.md",
   "source_files": ["batch of original source files"],
   "scope": "PR #123 | Full Audit",
+  "head_sha": "full SHA the report says it reviewed (its **Head** line)",
   "validation_mode": "accuracy|completeness|both"
 }
 ```
 
 ## Process
+
+### Phase 0: Stale Check (first, always)
+
+Run the stale check in `references/review-mode.md` (*Review Binding*) against the report. When it
+prints `stale` (the report's **Head** differs from `git rev-parse HEAD`, or there is no full Head
+line), validate nothing: return `validation_result: "stale"` with `report_head`, `current_head`
+and an `overall_assessment` that says the report must be re-run on `HEAD`. A stale report's
+findings describe another commit, so checking them against today's lines would mix two commits.
+Never fetch, check out or reset to reach the reported head.
 
 ### Phase 1: Accuracy Validation (Fresh Eyes)
 
@@ -81,7 +91,9 @@ Return validation report with structure:
 
 ```json
 {
-  "validation_result": "pass|pass_with_notes|fail",
+  "validation_result": "pass|pass_with_notes|fail|stale",
+  "report_head": "full SHA from the report's Head line, or null",
+  "current_head": "full SHA of git rev-parse HEAD",
   "timestamp": "2026-03-24T11:00:00Z",
   "accuracy": {
     "findings_validated": 25,
@@ -123,6 +135,7 @@ Return validation report with structure:
 
 ## Validation Checklist
 
+- [ ] Report Head equals the current `HEAD` (stale check), else `stale` and nothing else validated
 - [ ] Each finding verified against current source code
 - [ ] Severity levels are appropriate
 - [ ] Code examples match the actual code
