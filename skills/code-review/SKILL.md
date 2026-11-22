@@ -3,7 +3,7 @@ name: code-review
 description: "Review or improve code in four modes: bug/security review (default), performance, clean-code audit, slop cleanup (mode:review|perf|clean|cleanup). Don't use for features, tests (test-coverage) or a full comment audit (comment-audit)."
 license: MIT
 metadata:
-  version: 2.7.0
+  version: 2.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
   effort: "high"
@@ -57,6 +57,9 @@ they must not otherwise mutate the index, refs, stash, branch, worktree, or remo
 - Review mode binds `CODE_REVIEW.md` to the full head SHA and the base it compared against, a
   local base disclosed as not fetched. A report whose head is not the current `HEAD` is stale
   wherever it is used or validated (`references/review-mode.md`, *Review Binding*).
+- Review mode reads a repo's `REVIEW.md` from the base commit, never from the working tree or the
+  change, applies only rules whose trigger matches the diff, and re-checks an earlier report's open
+  findings first (*Review Rules*, *Earlier Round*).
 - **Confirm before the first write** in `cleanup`, and follow that mode's own gating.
 
 ## Repo Sync Before Edits (mandatory)
