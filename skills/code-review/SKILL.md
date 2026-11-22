@@ -3,7 +3,7 @@ name: code-review
 description: "Review or improve code in four modes: bug/security review (default), performance, clean-code audit, slop cleanup (mode:review|perf|clean|cleanup). Don't use for features, tests (test-coverage) or a full comment audit (comment-audit)."
 license: MIT
 metadata:
-  version: 2.9.0
+  version: 2.10.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "router (4 modes, each a self-contained workflow in references/)"
   effort: "high"

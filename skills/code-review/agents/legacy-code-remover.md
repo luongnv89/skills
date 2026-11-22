@@ -4,7 +4,7 @@ description: Delete deprecated, fallback, and duplicate-by-migration code paths
 metadata:
   role: "Legacy Path Eliminator"
   wave: "2"
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Legacy Code Remover Subagent
@@ -50,7 +50,7 @@ Deprecated code sometimes stays because someone external still uses it. Before d
    - Remove the `if (oldVersion)` branch and the surrounding conditional.
    - Delete the old implementation file.
    - Delete the adapter/shim.
-   - Delete any associated tests (the legacy tests).
+   - Delete any associated tests (the legacy tests), and list each one under `## Deleted Tests` in the report with the deleted code it covered and the count it removes (each parametrize row or case the runner counts), so the wave's test count drop is explained (`references/cleanup-mode.md`, *Test Count per Wave*).
 4. **Collapse type unions** when one variant represented a legacy shape: if `User = UserV1 | UserV2` and V1 is gone, collapse to just `UserV2` (renamed to `User`).
 5. **Commit per legacy system removed**: `chore(legacy): remove v1 user API path`.
 
@@ -76,6 +76,11 @@ Deprecated code sometimes stays because someone external still uses it. Before d
 | Polyfill | Object.fromEntries polyfill | Node min is 14+, native support |
 | Feature flag | use-new-checkout | at 100% since 2025-03, no rollback planned |
 
+## Deleted Tests
+| Test | Location | Covered deleted code | Count |
+|------|----------|----------------------|-------|
+| test_v1_order_payload | tests/api/test_orders.py:88 | v1 branch, src/api/orders.ts:120 | 3 |
+
 ## Flagged (user decision needed)
 | Target | Why flagged |
 |--------|-------------|
@@ -95,4 +100,4 @@ Deprecated code sometimes stays because someone external still uses it. Before d
 
 ## What to return
 
-A one-paragraph summary: what was removed, what was flagged for user review, whether tests pass.
+A one-paragraph summary: what was removed, what was flagged for user review, how many tests were deleted, whether tests pass.
