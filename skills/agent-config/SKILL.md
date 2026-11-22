@@ -101,12 +101,14 @@ Done when every command you will write was read from a file. If no manifest or C
 
 ## Step 3: Draft
 
-For a **targeted edit**, make the requested change, add the token-efficiency block if it's missing, and change nothing else. A request for general workflow, coding-discipline, or unit-test rules is met by the matching block in `references/optional-blocks.md`. List other prune candidates in the report, but don't apply them. A rule the user asked for goes in as asked. A rule you propose yourself must first pass the evidence bar in `references/knowledge-routing.md` (*A rule the agent proposes*): two cited occurrences, a trigger a diff or command can check, and a disprove check; one that fails is reported as a candidate, never written. A model or agent upgrade, or a file at 150+ lines, makes a re-prune due (*When to re-prune*). For a **full pass**, read `references/agents-md-writing.md` first. It holds the template, the writing rules, and the evidence behind them. Then:
+For a **targeted edit**, make the requested change, add the token-efficiency block if it's missing, and change nothing else. A request for general workflow, coding-discipline, or unit-test rules is met by the matching block in `references/optional-blocks.md`. List other prune candidates in the report, but don't apply them. A model or agent upgrade, or a file at 150+ lines, makes a re-prune due (*When to re-prune*). For a **full pass**, read `references/agents-md-writing.md` first. It holds the template, the writing rules, and the evidence behind them. Then:
 
 1. **Fill the template.** **Commands**, **Constraints** (*Never* and *Ask first*), and **Done when** are required. Project, Layout, Conventions, and Read when needed appear only when they hold a fact the agent cannot infer.
 2. **Prune pass.** Delete every line that fails the deletion test: *"would removing this cause a specific mistake?"* Also delete any overview, directory tree, dependency list, or restatement of the README. Keep opt-in blocks already in the file. Move Claude-only lines to the place Step 1 names.
 3. Add opt-in blocks from `references/optional-blocks.md` (workflow orchestration, coding discipline, unit tests) only when the user asks for them.
 4. **Append the token-efficiency block** (see below) last.
+
+In either kind of run, a rule the user asked for goes in as asked. A rule you propose yourself must first pass the evidence bar in `references/knowledge-routing.md` (*A rule the agent proposes*): two cited occurrences, a trigger a diff or command can check, and a disprove check; one that fails is reported as a candidate, never written.
 
 Done when every remaining line is a command, a pin, a constraint, or a pointer.
 
