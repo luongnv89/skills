@@ -48,7 +48,7 @@ Run (3 times):
   R2 curl -fsS localhost:4173/health   server.js:9
   Harness (covered by this approval): mkdir, setsid or set -m, curl, kill, lsof/ss, git rev-parse/git status
 Install (each default No):
-  I1 npx playwright install chromium — without it F3, F4 stay UNVERIFIED
+  I1 npm i -D playwright into node_modules/, then npx playwright install chromium into .verify/cache/ms-playwright — without it F3, F4 stay UNVERIFIED
 Pointer:
   P1 AGENTS.md +1 line: "- Before committing, follow `.agents/skills/verify/SKILL.md`"
 Reply: approve all · approve <IDs> · change … · stop

@@ -150,8 +150,8 @@ Fill rules and examples: `references/final-report.md`. Expected output of a full
 ```text
 Result: COMPLETE. Wrote .claude/skills/verify/ (SKILL.md, feature-map.md, 9 features) and its copy in .agents/skills/verify/ for the web app; 3 runs agree: 8 PASS, 1 FAIL (F7 export button, all 3 runs).
 Evidence: boot `npm run dev` (package.json:7), ready on GET /health (src/server.ts:41); runs 1-3 took 41s, 39s, 40s; logs in .verify/runs/; sync: pulled main, already up to date.
-Uncertainty: F9 billing page needs STRIPE_KEY (.env.example:4) and stayed UNVERIFIED; F7 fails in all 3 runs: a bug or a wrong expected result, not decided here.
-Decision: Check F7 (feature-map.md) and set STRIPE_KEY to verify F9. Remaining action: review and commit the new files.
+Uncertainty: F7 fails in all 3 runs: a bug or a wrong expected result, not decided here.
+Decision: Check F7 (feature-map.md). Remaining action: review and commit the new files.
 ```
 
 ## Edge Cases

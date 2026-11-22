@@ -51,6 +51,7 @@ A field with no source is `unknown`. The plan lists each `unknown` and asks the 
 Package managers and runtimes write caches, logs and temp files to the home directory by default (`~/.npm/_logs` on every `npm` call, `~/.cache/pip`). From Step 4 on (after approval; creating `.verify/` is itself a write), every command the skill runs, and every command the generated verify skill runs, starts with this environment, using absolute paths under the repo (`$ROOT` is `git rev-parse --show-toplevel`):
 
 ```bash
+ROOT="$(git rev-parse --show-toplevel)"
 V="$ROOT/.verify"; mkdir -p "$V/tmp" "$V/cache" "$V/logs"
 export TMPDIR="$V/tmp" XDG_CACHE_HOME="$V/cache" \
   npm_config_cache="$V/cache/npm" npm_config_logs_dir="$V/logs/npm" npm_config_update_notifier=false \
@@ -58,7 +59,7 @@ export TMPDIR="$V/tmp" XDG_CACHE_HOME="$V/cache" \
   PYTHONPYCACHEPREFIX="$V/cache/pycache" PIPENV_VENV_IN_PROJECT=1 \
   YARN_CACHE_FOLDER="$V/cache/yarn" YARN_ENABLE_GLOBAL_CACHE=false PNPM_HOME="$V/cache/pnpm" \
   GOCACHE="$V/cache/go-build" GOMODCACHE="$V/cache/go-mod" CARGO_HOME="$V/cache/cargo" \
-  NEXT_TELEMETRY_DISABLED=1 DO_NOT_TRACK=1
+  PLAYWRIGHT_BROWSERS_PATH="$V/cache/ms-playwright" NEXT_TELEMETRY_DISABLED=1 DO_NOT_TRACK=1
 ```
 
 Keep only the lines for the tools the app uses. A Python install goes into a repo-local `.venv/` (`python3 -m venv .venv`, then `.venv/bin/pip install --no-cache-dir …`); `PIP_REQUIRE_VIRTUALENV` makes a pip call outside it fail instead of writing to user site-packages. A redirected cache starts empty, so the first install downloads more: say so in the plan.
@@ -69,7 +70,7 @@ A tool or app path that no variable redirects (a config path the code hard-codes
 
 | App | Driver, in order of preference | Without it |
 |---|---|---|
-| Web app | A browser tool the agent already has (a browser MCP such as Chrome DevTools or Playwright MCP); Playwright already in the repo with its browsers installed (`node_modules/playwright/package.json` present and a browser in its cache folder) | `curl` the page: status code and text in the served HTML. Clicks, forms and shortcuts are `UNVERIFIED` |
+| Web app | A browser tool the agent already has (a browser MCP such as Chrome DevTools or Playwright MCP); Playwright already in the repo with its browsers installed (`node_modules/playwright/package.json` present and a browser in `.verify/cache/ms-playwright/`, or in `$PLAYWRIGHT_BROWSERS_PATH` when the repo sets it) | `curl` the page: status code and text in the served HTML. Clicks, forms and shortcuts are `UNVERIFIED` |
 | API or service | `curl` (or the repo's HTTP client in its existing e2e tests) | Nothing needed beyond `curl` |
 | CLI | The built binary or the manifest's entry point | Nothing needed |
 | Mobile or desktop | An installed simulator, emulator or driver the repo's tooling names | Features `UNVERIFIED` |
