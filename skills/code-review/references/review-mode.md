@@ -5,8 +5,8 @@ Review code for quality issues, code smells, and pragmatic programming violation
 
 ## Quick Start
 
-First, record `git rev-parse HEAD`, `git status`, and local tracking observations without
-claiming remote freshness. Review analysis is source-read-only: do not fetch, stash, pull, rebase,
+First, record the Review Binding (head, base and working tree) and local tracking observations
+without claiming remote freshness. Review analysis is source-read-only: do not fetch, stash, pull, rebase,
 checkout/switch, create or delete branches/worktrees, or mutate the index, refs, stash, branch,
 or any other worktree path. The only permitted file write is the named `CODE_REVIEW.md` report
 artifact. Then complete the Environment Check to pick a mode (PR/diff vs full audit). Next, run
@@ -22,6 +22,66 @@ The skill orchestrates parallel reviewer subagents over batched files, then runs
 Review mode never performs repository sync or source mutation during analysis. If a separately
 approved mutation is requested, hand it off to a workflow with its own freshness check and
 sync/safety gates (cleanup mode stops on a dirty tree); this mode does not apply fixes.
+
+## Review Binding (head and base)
+
+A review counts only for the commit it reviewed: a pass on an out-of-date commit means nothing.
+This section is the single home of the review's binding record. Other sections and later steps
+use these names instead of re-deriving them.
+
+**Record it first**, before any other analysis, from local data only. Never run `git fetch`,
+`git pull`, `git remote update` or `gh pr checkout` to get a base:
+
+```bash
+head_sha="$(git rev-parse HEAD)"
+head_branch="$(git rev-parse --abbrev-ref HEAD)"   # prints HEAD when detached
+base_sha="$(git rev-parse --verify --quiet "${base_ref}^{commit}")"
+base_full="$(git rev-parse --symbolic-full-name "$base_ref")"   # empty for a raw SHA
+git status --porcelain=v1 --untracked-files=all    # empty output: clean tree
+```
+
+| Name | Value |
+|------|-------|
+| `head_sha` | The full SHA of `HEAD` (40 hex characters, 64 in a SHA-256 repo). Never abbreviated in the report. |
+| `base_ref` | The ref the diff is compared against, as the user named it (`main`, `origin/main`, a SHA). For a PR, its base branch's local remote-tracking ref `origin/<base branch>`, else the local branch of that name. `none` for a full audit with no base. |
+| `base_sha` | The full SHA `base_ref` resolved to when recorded. |
+| `base_source` | From `base_full`: `refs/remotes/…` is `local remote-tracking ref, not fetched (as of the last fetch)`; `refs/heads/…` is `local branch, not fetched`; empty is `commit`. |
+| `working_tree` | `clean`, or `dirty — N uncommitted paths, not in Head` when `git status` printed N lines. |
+
+- `<base>` in every command in this file means `$base_sha`, so the diff matches the record even
+  if the ref moves during the review.
+- `base_ref` does not resolve locally: stop and ask for a base that exists locally. Never fetch one.
+- A local base can lag its remote. The report names `base_source` and never claims the base is the
+  remote's current tip.
+- A dirty tree means some reviewed lines are not in `head_sha`. List those paths in the report.
+
+**Report header.** `CODE_REVIEW.md` carries these three lines (Output Format):
+
+```markdown
+**Head**: `<head_sha>` (`<head_branch>`)
+**Base**: `<base_ref>` @ `<base_sha>` — <base_source>
+**Working tree**: <working_tree>
+```
+
+A full audit writes `**Base**: none (full audit)`.
+
+**Stale check.** Run it whenever an existing `CODE_REVIEW.md` is used (its verdict or counts
+cited, its findings acted on, the report handed on) and whenever it is validated (the `reviewer`
+agent's first phase):
+
+```bash
+report_head="$(sed -n 's/^\*\*Head\*\*: `\([0-9a-f]\{40,64\}\)`.*/\1/p' CODE_REVIEW.md | head -n 1)"
+if [ -n "$report_head" ] && [ "$report_head" = "$(git rev-parse HEAD)" ]; then echo current; else echo stale; fi
+```
+
+- `current`: the report describes this `HEAD`.
+- `stale`: its Head differs from the current `HEAD`, or it has no full Head line (a report written
+  before this binding existed). Print `⚠ CODE_REVIEW.md is stale: reviewed <report_head, first 12
+  characters, or "unknown"> but HEAD is <HEAD, first 12 characters>`. Never count its verdict or
+  an all-zero summary as a pass for `HEAD`. Its findings are history only; re-run review mode on
+  `HEAD` for a verdict.
+- A base that now resolves to another SHA does not make the report stale, because the Head is what
+  was reviewed. Say `base moved` beside its verdict.
 
 ## Environment Check
 
@@ -208,6 +268,9 @@ Generate `CODE_REVIEW.md`:
 
 **Date**: YYYY-MM-DD
 **Scope**: [PR #123 | Full Audit]
+**Head**: `<head_sha>` (`<head_branch>`)
+**Base**: [`<base_ref>` @ `<base_sha>` — <base_source> | none (full audit)]
+**Working tree**: [clean | dirty — N uncommitted paths, not in Head]
 **Mode**: [1 — inline | 2 — batched | 3 — sampled]
 **Files Reviewed**: N
 
@@ -268,6 +331,10 @@ A `CODE_REVIEW.md` file with findings grouped by severity. Example:
 
 **Date**: 2024-01-15
 **Scope**: PR #42 — auth module refactor
+**Head**: `9f2c4e1a7b3d5f6e8c0a1b2c3d4e5f6a7b8c9d0e` (`feat/auth-refactor`)
+**Base**: `origin/main` @ `3e1d7c9b5a2f4e6d8c0b1a3f5e7d9c2b4a6f8e0d` — local remote-tracking ref, not fetched (as of the last fetch)
+**Working tree**: clean
+**Mode**: 1 — inline
 **Files Reviewed**: 8
 
 ## Summary
@@ -314,6 +381,8 @@ A run passes when **all** of the following are true:
 - [ ] Every reported finding cites a `path/to/file.ext:line` reference and a code smell or category label.
 - [ ] Critical findings include both a "Before" and "Suggested Fix" code block when a code change is proposed.
 - [ ] Mode used (Mode 1/2/3) is recorded in the report header along with the file count.
+- [ ] The header names the full `head_sha`, the base as `base_ref` @ full `base_sha` with its `base_source` (or `none (full audit)`), and the working-tree state (Review Binding). No fetch ran.
+- [ ] An existing `CODE_REVIEW.md` that was used or validated passed the stale check first; a stale one was reported as stale and its verdict not counted.
 - [ ] When the diff touches a test, test or lint config, CI workflow, hook config or threshold, the report has a `## Verification Changes` table listing every signal found, each Critical, Info with its quoted reason, or listed with its covered code deleted. Otherwise the report says the check was skipped.
 - [ ] No merge-conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) are silently dropped — they appear as Critical findings if present in the source.
 
@@ -346,13 +415,13 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 ### Skill-specific checks per phase
 
-**Phase: Scope Assessment** — checks: `Scope assessment`, `File count estimated`
+**Phase: Scope Assessment** — checks: `Review binding` (head, base, working tree recorded), `Scope assessment`, `File count estimated`
 
 **Phase: Review Execution** — checks: `Code smell detection`, `Security scan`, `Verification integrity` (or `skipped` when no trigger path changed)
 
 **Phase: Report Generation** — checks: `Report generation`, `Severity classification`
 
-**Phase: Validation Pass** — checks: `Validation pass`, `False positive check`
+**Phase: Validation Pass** — checks: `Head current` (stale check), `Validation pass`, `False positive check`
 
 ## Resources
 

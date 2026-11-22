@@ -3,7 +3,7 @@ name: report-assembler
 description: Merge and deduplicate findings from all file-reviewer batches, rank by severity, and generate CODE_REVIEW.md
 metadata:
   role: "Report Coordinator"
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Report Assembler Agent
@@ -22,13 +22,22 @@ Receives array of JSON outputs from `file-reviewer`:
   ],
   "metadata": {
     "scope": "PR #123 | Full Audit",
-    "base_ref": "main",
-    "head_ref": "feature-x",
+    "head_sha": "9f2c4e1a7b3d5f6e8c0a1b2c3d4e5f6a7b8c9d0e",
+    "head_branch": "feature-x",
+    "base_ref": "origin/main",
+    "base_sha": "3e1d7c9b5a2f4e6d8c0b1a3f5e7d9c2b4a6f8e0d",
+    "base_source": "local remote-tracking ref, not fetched (as of the last fetch)",
+    "working_tree": "clean",
     "files_total": 50,
     "date": "2026-03-24"
   }
 }
 ```
+
+The binding fields (`head_sha` … `working_tree`) are the orchestrator's Review Binding record
+(`references/review-mode.md`). Copy them into the header verbatim: never abbreviate a SHA, and
+never resolve a ref or fetch to fill one in. A field that is missing is written `unknown`, which
+makes the report fail the stale check.
 
 ## Process
 
@@ -69,6 +78,9 @@ Generate `CODE_REVIEW.md`:
 
 **Date**: YYYY-MM-DD
 **Scope**: [PR #123 | Full Audit]
+**Head**: `<head_sha>` (`<head_branch>`)
+**Base**: [`<base_ref>` @ `<base_sha>` — <base_source> | none (full audit)]
+**Working tree**: <working_tree>
 **Mode**: [1 — inline | 2 — batched | 3 — sampled]
 **Files Reviewed**: N
 **Total Issues**: X
