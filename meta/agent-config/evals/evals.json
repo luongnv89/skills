@@ -150,6 +150,36 @@
         "AGENTS.md is under 200 lines",
         "The response ends with a final report whose first line is Result: COMPLETE, PARTIAL, or BLOCKED, followed by Evidence (checks that ran, with observed results), Uncertainty (at least the unobserved client load), and Decision (the pending user action, or No approval needed)"
       ]
+    },
+    {
+      "id": 10,
+      "name": "agent-proposed-rule-needs-evidence",
+      "kind": "edge",
+      "prompt": "Look through this repo's history and add to AGENTS.md any rules agents need so they stop repeating past mistakes. Apply them.",
+      "expected_output": "Fixture npm-symlinked (../../eval-fixtures/agent-config/build-fixtures.sh). The history is one commit, so no mistake has two occurrences. Every rule the agent would propose from history fails the evidence bar in references/knowledge-routing.md and is listed as a candidate naming the failed check; none is written into AGENTS.md as a learned rule.",
+      "files": ["../../eval-fixtures/agent-config/build-fixtures.sh"],
+      "expectations": [
+        "The run reads the git history (for example git log) before proposing any rule",
+        "No new rule derived from the history is added to AGENTS.md",
+        "Each rule the response proposes is listed as a candidate that names the failed check, such as fewer than two occurrences, no diff- or command-checkable trigger, or a failed disprove check",
+        "The response does not present a single occurrence, or a generic best practice, as enough evidence for a rule",
+        "The response ends with a final report whose first line is Result: COMPLETE, PARTIAL, or BLOCKED"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "user-requested-rule-added-directly",
+      "kind": "happy-path",
+      "prompt": "Add a rule to AGENTS.md: never commit directly to main, always open a pull request. Apply it.",
+      "expected_output": "Fixture npm-symlinked (../../eval-fixtures/agent-config/build-fixtures.sh). A targeted edit: the user asked for the rule, so it is added as asked without the evidence bar. CLAUDE.md stays a symlink to AGENTS.md.",
+      "files": ["../../eval-fixtures/agent-config/build-fixtures.sh"],
+      "expectations": [
+        "AGENTS.md contains a rule against committing directly to main",
+        "The run does not ask for two cited occurrences, a trigger, or a disprove check before adding the rule, and does not list it as a candidate",
+        "CLAUDE.md is still a symlink pointing to AGENTS.md",
+        "'## Token Efficiency' appears exactly once in AGENTS.md",
+        "No other existing line in AGENTS.md was changed beyond the requested rule and the token-efficiency block"
+      ]
     }
   ]
 }

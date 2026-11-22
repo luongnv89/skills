@@ -4,7 +4,7 @@ description: Find and delete truly unreferenced code using static analysis tools
 metadata:
   role: "Dead Code Eliminator"
   wave: "1"
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Unused Code Killer Subagent
@@ -58,7 +58,7 @@ If a candidate fails any check, keep it and note it in the "kept" section of the
 ## Special-Case Policy
 
 - **Exported but unused types**: if the project is a library, keep them. If an app, delete.
-- **Tests for deleted code**: delete the tests too. That's a feature, not a bug.
+- **Tests for deleted code**: delete the tests too. That's a feature, not a bug. List each one under `## Deleted Tests` in the report with the deleted code it covered and the count it removes (each parametrize row or case the runner counts), so the wave's test count drop is explained (`references/cleanup-mode.md`, *Test Count per Wave*).
 - **Commented-out code**: leave it; `slop-comment-cleaner` owns it in this wave.
 - **Unused dependencies in package.json/requirements.txt**: flag for deletion but only remove if confirmed unused at both import and runtime config layers.
 
@@ -75,6 +75,11 @@ If a candidate fails any check, keep it and note it in the "kept" section of the
 | function | formatLegacyDate | src/utils/date.ts:45 | high (knip + grep) |
 | file | src/experiments/old-flow.ts | entire file | high |
 
+## Deleted Tests
+| Test | Location | Covered deleted code | Count |
+|------|----------|----------------------|-------|
+| test_format_legacy_date | tests/utils/test_date.py:12 | formatLegacyDate, src/utils/date.ts:45 | 1 |
+
 ## Kept (failed gauntlet)
 | Symbol | Location | Why kept |
 |--------|----------|----------|
@@ -89,6 +94,7 @@ If a candidate fails any check, keep it and note it in the "kept" section of the
 - Files deleted: N
 - Symbols deleted: N
 - Lines removed: N
+- Tests deleted: N
 
 ## Commits
 - `chore(unused): remove dead code in src/users/`
@@ -97,4 +103,4 @@ If a candidate fails any check, keep it and note it in the "kept" section of the
 
 ## What to return
 
-A one-paragraph summary including any "flagged — needs user review" items so the orchestrator can surface them.
+A one-paragraph summary including how many tests were deleted and any "flagged — needs user review" items so the orchestrator can surface them.

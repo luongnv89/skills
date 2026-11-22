@@ -3,7 +3,7 @@ name: agent-config
 description: "Create, update, or audit AGENTS.md (default) or CLAUDE.md agent instructions: set up, prune, add a rule, or merge CLAUDE.md or .cursorrules into one file Claude Code, Codex, and Cursor all read. Don't use for READMEs, skills, or subagents."
 license: MIT
 metadata:
-  version: 2.3.1
+  version: 2.4.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "medium"
 ---
@@ -101,12 +101,14 @@ Done when every command you will write was read from a file. If no manifest or C
 
 ## Step 3: Draft
 
-For a **targeted edit**, make the requested change, add the token-efficiency block if it's missing, and change nothing else. A request for general workflow, coding-discipline, or unit-test rules is met by the matching block in `references/optional-blocks.md`. List other prune candidates in the report, but don't apply them. For a **full pass**, read `references/agents-md-writing.md` first. It holds the template, the writing rules, and the evidence behind them. Then:
+For a **targeted edit**, make the requested change, add the token-efficiency block if it's missing, and change nothing else. A request for general workflow, coding-discipline, or unit-test rules is met by the matching block in `references/optional-blocks.md`. List other prune candidates in the report, but don't apply them. A model or agent upgrade, or a file at 150+ lines, makes a re-prune due (*When to re-prune*). For a **full pass**, read `references/agents-md-writing.md` first. It holds the template, the writing rules, and the evidence behind them. Then:
 
 1. **Fill the template.** **Commands**, **Constraints** (*Never* and *Ask first*), and **Done when** are required. Project, Layout, Conventions, and Read when needed appear only when they hold a fact the agent cannot infer.
 2. **Prune pass.** Delete every line that fails the deletion test: *"would removing this cause a specific mistake?"* Also delete any overview, directory tree, dependency list, or restatement of the README. Keep opt-in blocks already in the file. Move Claude-only lines to the place Step 1 names.
 3. Add opt-in blocks from `references/optional-blocks.md` (workflow orchestration, coding discipline, unit tests) only when the user asks for them.
 4. **Append the token-efficiency block** (see below) last.
+
+In either kind of run, a rule the user asked for goes in as asked. A rule you propose yourself from a repeated mistake, review, audit or session corrections (not Step 2's commands and boundaries) must first pass the evidence bar in `references/knowledge-routing.md` (*A rule the agent proposes*): two cited occurrences, a trigger a diff or command can check, and a disprove check; one that fails is reported as a candidate, never written.
 
 Done when every remaining line is a command, a pin, a constraint, or a pointer.
 
@@ -129,7 +131,7 @@ Done when every remaining line is a command, a pin, a constraint, or a pointer.
    - `.claude/settings.json` and `.claude/settings.local.json`, for hooks
 2. Walk `references/agents-md-checklist.md`, and report every item as pass, fail, or N/A with a one-line reason. Its loading section catches CLAUDE files that shadow without importing, prose telling Claude to "read AGENTS.md", a `SessionStart` hook that prints `AGENTS.md`, and an `AGENTS.override.md` that Codex reads instead.
 3. Cross-check `references/anti-patterns.md`.
-4. **Route and enforce.** For every failing line, name its home from `references/knowledge-routing.md`. A rule a machine can check gets its gate **and** loses its prose.
+4. **Route and enforce.** For every failing line, name its home from `references/knowledge-routing.md`. A rule a machine can check gets its gate **and** loses its prose, and a rule broken again since it was written is proposed as a hook (*A rule broken again*).
 5. Modify nothing; `git status` must be unchanged. Give the overall verdict (`PASS`, `PARTIAL`, or `FAIL`) as the audit report's `Result:` line. Suggest `/memory` to see what loaded, and `/doctor prompt-audit` (v2.1.283+) for a second pass.
 
 ## Token Efficiency Block (always inject)
@@ -166,6 +168,7 @@ End every run, including one that stops early, with the final report from `refer
 - [ ] The source-of-truth file is under 200 lines and passes sections 1–3 and 5–7 of `references/agents-md-checklist.md`. Wrappers and rules files pass sections 1–3 and 6.
 - [ ] No rule appears in both `AGENTS.md` and a CLAUDE file.
 - [ ] New content has no anti-pattern from `references/anti-patterns.md`.
+- [ ] Every written rule the agent proposed from a repeated mistake, review, audit or session corrections cites two occurrences, a checkable trigger and a disprove check, and was approved; the rest are listed as candidates.
 - [ ] A write run that wrote files ends Step 4 with `Result: PASS`. Audit runs report every checklist item, give each failing line a routing recommendation, leave `git status` unchanged, and give the overall verdict.
 - [ ] Every run ends with the final report, and it passes the reader checks in `references/final-report.md`. Without user feedback, human understanding of the report stays unconfirmed.
 
