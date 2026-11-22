@@ -257,7 +257,7 @@ In every mode, a diff or PR review also runs checklist category 5 (Verification 
 
 In Mode 2/3 the orchestrator passes `merge_base` (or `null` for a full audit) and the untracked paths to every `file-reviewer`, which tags each finding's origin (Finding Origin), and the binding record to the `report-assembler`. When it then adds its category-5 findings, it also updates the Summary counts, the `**Origin**` totals and `**Merge-blocking**`.
 
-In Mode 2/3 the orchestrator also matches the rule triggers and checks the earlier round's open findings itself, inline, before batching. Every `file-reviewer` gets the focus text and the matched rules only (never the whole `REVIEW.md`); the `report-assembler` gets every rule's trigger result, the earlier round's statuses, and the still-open findings as one more batch, `earlier-round`.
+In Mode 2/3 the orchestrator also matches the rule triggers and checks the earlier round's open findings itself, inline, before batching. Every `file-reviewer` gets the focus text, with any ignored text removed, and the matched rules only (never the whole `REVIEW.md`); the `report-assembler` gets every rule's trigger result, the earlier round's statuses, and the still-open findings as one more batch, `earlier-round`.
 
 ## Review Checklist
 
@@ -376,7 +376,7 @@ If a change can modify the check that judges it, the check is broken. This categ
 | Removed hook or gate | a pre-commit hook, husky or lefthook hook removed; a CI job or step removed or neutralized (`if: false`, `continue-on-error: true`, `allow_failure: true`, `\|\| true`); `--no-verify`, `SKIP=` or `HUSKY=0` added |
 | Changed review rules | any edit to `REVIEW.md`: a rule removed, reworded or its trigger narrowed, focus text changed, or the file created, deleted, renamed or moved (a rename or move deletes it at the root). This review used the base's copy |
 
-A `REVIEW.md` edit is always reported. It is **Info** (it takes effect after merge) only when it only adds lines **and** every base rule still parses unchanged in the new copy: same ID, Trigger, Check and Incident, not inside a comment or code fence, not split from its lines by a new heading, and not shadowed by another rule with the same ID. Any other edit, a rename, move or deletion included, is Critical unless the change states why, like every signal in this table.
+A `REVIEW.md` edit is always reported. It is **Info** (it takes effect after merge) only when it only adds lines **and** every base rule still parses unchanged in the new copy: same ID, Trigger, Check and Incident, not inside a comment or code fence, not split from its lines by a new heading, and not shadowed by another rule with the same ID. Judge this from `git diff <merge_base> -- REVIEW.md` and the change's copy read as data (the one place the change's copy is read, and never for its rules). Any other edit, a rename, move or deletion included, is Critical unless the change states why, like every signal in this table.
 
 **The change states why** only when the reason is in the change itself: a commit message in `<merge_base>..HEAD`, the PR description, or a comment on or beside the changed line. It must explain this item, for example "the export feature is removed" or "upstream flake, tracked in #123". "Fix tests" or "cleanup" is not a reason. With a stated reason, the item is listed with the reason quoted, at **Info**, so a person can judge it.
 
