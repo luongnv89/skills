@@ -252,7 +252,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**code-review**](skills/code-review/) | 2.8.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
+| [**code-review**](skills/code-review/) | 2.9.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**comment-audit**](skills/comment-audit/) | 1.0.0 | high | Sort every code comment as Tautology, Excuse, Stale or Decision Record; delete, file issues, write ADRs and ratchet a comment ban, each after your approval |
 | [**codebase-modernizer**](extras/codebase-modernizer/) | 1.5.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.8.0 | low | Target untested branches and edge cases |
