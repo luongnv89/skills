@@ -81,9 +81,11 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
 
 If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequentially, and note in the report that the validation pass was skipped.
 
+In every mode, a diff or PR review also runs checklist category 5 (Verification Integrity) once, inline, over the whole diff, before any batching. A full audit with no base skips it.
+
 ## Review Checklist
 
-Findings are grouped into the four categories below and classified by severity:
+Findings are grouped into the five categories below and classified by severity:
 
 ### Severity Levels
 
@@ -170,6 +172,33 @@ Read `references/code-smells.md` when a code smell is identified that requires t
 - Deep nesting (>3 levels)
 - Missing error handling
 
+### 5. Verification Integrity (diff only)
+
+If a change can modify the check that judges it, the check is broken. This category looks for a diff that weakens its own verification.
+
+**When it runs.** Only when `git diff --name-only <base>..HEAD` lists at least one of these. Otherwise skip it and write `Verification integrity: skipped (no test, test or lint config, CI, hook or threshold change)` under the report's Summary.
+
+- **Tests:** files under `test/`, `tests/`, `__tests__/` or `spec/`, or named `test_*`, `*_test.*`, `*.test.*`, `*.spec.*`, `*Test.*`, `*Tests.*`, plus `conftest.py`, fixtures and snapshots
+- **Test or lint config:** `pytest.ini`, `tox.ini`, `.coveragerc`, `jest.config.*`, `vitest.config.*`, `playwright.config.*`, `cypress.config.*`, `.mocharc*`, `karma.conf.*`, `phpunit.xml*`, `.eslintrc*`, `eslint.config.*`, `ruff.toml`, `.ruff.toml`, `.flake8`, `.pylintrc`, `mypy.ini`, `.golangci.*`, `.rubocop.yml`, `.swiftlint.yml`, `tsconfig*.json`; in `pyproject.toml`, `setup.cfg` or `package.json`, only a changed hunk in a test, lint, type-check or coverage section (`[tool.pytest…]`, `[tool.coverage…]`, `[tool.ruff…]`, `[tool.mypy]`, `jest`, `eslintConfig`, a `test` or `lint` script)
+- **CI workflows:** `.github/workflows/`, `.gitlab-ci.yml`, `.circleci/`, `azure-pipelines.yml`, `Jenkinsfile`, `.buildkite/`
+- **Hook config:** `.pre-commit-config.yaml`, `.husky/`, `lefthook.yml`, `.lefthook.yml`, `.githooks/`, lint-staged config
+- **Thresholds:** a changed line in any file that sets a coverage floor (`fail_under`, `--cov-fail-under`, `coverageThreshold`), a lint limit (`--max-warnings`, `max-complexity`) or a test timeout or retry count
+
+**What it flags.** Each signal below is a **Critical** finding (category `Verification Integrity`) unless the change states why:
+
+| Signal | Examples |
+|--------|----------|
+| Deleted test | a test function, case, file or parametrize row removed |
+| Skipped or narrowed test | `skip`, `skipif`, `xfail`, `it.skip`, `xit`, `describe.skip`, `t.Skip()`, `@Disabled`, `@Ignore`, `#[ignore]`; `.only`, `fit`, `fdescribe` (the rest stop running); a path added to `testPathIgnorePatterns`, `--ignore`, `--deselect` or `-k "not …"` |
+| Weakened or removed assertion | an `assert` or `expect` removed; an exact match swapped for a looser one (`toEqual` → `toBeDefined`, `assertEqual` → `assertIsNotNone`, a wider tolerance); an expected value rewritten to match new output; an assertion error caught and ignored; snapshots regenerated wholesale |
+| Added sleep or retry | `sleep`, `time.sleep`, `setTimeout` or `waitForTimeout` in a test; `@flaky`, `--reruns`, `jest.retryTimes`, `retries:` in test config, a retry loop around a test command; a raised test timeout |
+| Lowered threshold | a coverage floor reduced; `--max-warnings` raised; a rule moved from `error` to `warn` or `off`, or added to an ignore list; `# noqa`, `eslint-disable`, `@ts-ignore` or `type: ignore` added; type-check strictness reduced |
+| Removed hook or gate | a pre-commit hook, husky or lefthook hook removed; a CI job or step removed or neutralized (`if: false`, `continue-on-error: true`, `allow_failure: true`, `\|\| true`); `--no-verify`, `SKIP=` or `HUSKY=0` added |
+
+**The change states why** only when the reason is in the change itself: a commit message in `<base>..HEAD`, the PR description, or a comment on or beside the changed line. It must explain this item, for example "the export feature is removed" or "upstream flake, tracked in #123". "Fix tests" or "cleanup" is not a reason. With a stated reason, the item is listed with the reason quoted, at **Info**, so a person can judge it.
+
+**A test deleted together with the code it covered** is listed but not flagged: no severity, no finding. It qualifies when the diff also deletes every function, class or module the test exercised, so `git grep` at `HEAD` finds no definition of it. This keeps cleanup mode's dead-code removals reviewable. A deleted test whose subject still exists at `HEAD` is a Deleted test.
+
 ## Output Format
 
 Generate `CODE_REVIEW.md`:
@@ -214,6 +243,14 @@ Description of the issue.
 
 ## Minor Issues
 ...
+
+## Verification Changes
+
+| File | Signal | Status | Reason stated |
+|------|--------|--------|---------------|
+| `tests/test_api.py:88` | Skipped or narrowed test | Critical | none |
+| `.github/workflows/ci.yml:31` | Lowered threshold | Info | "coverage tool changed, floor rebased" (commit a1b2c3d) |
+| `tests/test_legacy_export.py` | Deleted test | Listed, covered code deleted | n/a |
 
 ## Recommendations
 
@@ -277,6 +314,7 @@ A run passes when **all** of the following are true:
 - [ ] Every reported finding cites a `path/to/file.ext:line` reference and a code smell or category label.
 - [ ] Critical findings include both a "Before" and "Suggested Fix" code block when a code change is proposed.
 - [ ] Mode used (Mode 1/2/3) is recorded in the report header along with the file count.
+- [ ] When the diff touches a test, test or lint config, CI workflow, hook config or threshold, the report has a `## Verification Changes` table listing every signal found, each Critical, Info with its quoted reason, or listed with its covered code deleted. Otherwise the report says the check was skipped.
 - [ ] No merge-conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) are silently dropped — they appear as Critical findings if present in the source.
 
 ## Edge Cases
@@ -310,7 +348,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 
 **Phase: Scope Assessment** — checks: `Scope assessment`, `File count estimated`
 
-**Phase: Review Execution** — checks: `Code smell detection`, `Security scan`
+**Phase: Review Execution** — checks: `Code smell detection`, `Security scan`, `Verification integrity` (or `skipped` when no trigger path changed)
 
 **Phase: Report Generation** — checks: `Report generation`, `Severity classification`
 
