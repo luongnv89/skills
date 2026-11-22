@@ -81,7 +81,7 @@ Full orchestration diagram, per-agent responsibilities, graceful degradation whe
 
 If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequentially, and note in the report that the validation pass was skipped.
 
-In every mode, a diff or PR review also runs checklist category 5 (Verification Integrity) once, inline, over the whole diff, before any batching. A full audit with no base skips it.
+In every mode, a diff or PR review also runs checklist category 5 (Verification Integrity) once, inline, over the whole diff, before any batching. In Mode 2/3 the orchestrator adds its category-5 findings and the `## Verification Changes` table to the report after the report-assembler merge and before the reviewer validation pass. A full audit with no base skips it.
 
 ## Review Checklist
 
@@ -91,7 +91,7 @@ Findings are grouped into the five categories below and classified by severity:
 
 | Level | Description | Action |
 |-------|-------------|--------|
-| **Critical** | Security risks, bugs, data loss potential | Must fix before merge |
+| **Critical** | Security risks, bugs, data loss potential, weakened verification (category 5) | Must fix before merge |
 | **Major** | Code smells, maintainability blockers | Should fix soon |
 | **Minor** | Style, minor improvements | Nice to have |
 | **Info** | Suggestions, alternatives | Optional |
@@ -176,13 +176,13 @@ Read `references/code-smells.md` when a code smell is identified that requires t
 
 If a change can modify the check that judges it, the check is broken. This category looks for a diff that weakens its own verification.
 
-**When it runs.** Only when `git diff --name-only <base>..HEAD` lists at least one of these. Otherwise skip it and write `Verification integrity: skipped (no test, test or lint config, CI, hook or threshold change)` under the report's Summary.
+**When it runs.** Only when the diff touches at least one of these. Check the paths with `git diff --name-only <base>..HEAD`; the Thresholds trigger needs the diff content (`git diff <base>..HEAD`). Otherwise skip it and write `Verification integrity: skipped (no test, test or lint config, CI, hook or threshold change)` under the report's Summary.
 
 - **Tests:** files under `test/`, `tests/`, `__tests__/` or `spec/`, or named `test_*`, `*_test.*`, `*.test.*`, `*.spec.*`, `*Test.*`, `*Tests.*`, plus `conftest.py`, fixtures and snapshots
 - **Test or lint config:** `pytest.ini`, `tox.ini`, `.coveragerc`, `jest.config.*`, `vitest.config.*`, `playwright.config.*`, `cypress.config.*`, `.mocharc*`, `karma.conf.*`, `phpunit.xml*`, `.eslintrc*`, `eslint.config.*`, `ruff.toml`, `.ruff.toml`, `.flake8`, `.pylintrc`, `mypy.ini`, `.golangci.*`, `.rubocop.yml`, `.swiftlint.yml`, `tsconfig*.json`; in `pyproject.toml`, `setup.cfg` or `package.json`, only a changed hunk in a test, lint, type-check or coverage section (`[tool.pytest…]`, `[tool.coverage…]`, `[tool.ruff…]`, `[tool.mypy]`, `jest`, `eslintConfig`, a `test` or `lint` script)
 - **CI workflows:** `.github/workflows/`, `.gitlab-ci.yml`, `.circleci/`, `azure-pipelines.yml`, `Jenkinsfile`, `.buildkite/`
 - **Hook config:** `.pre-commit-config.yaml`, `.husky/`, `lefthook.yml`, `.lefthook.yml`, `.githooks/`, lint-staged config
-- **Thresholds:** a changed line in any file that sets a coverage floor (`fail_under`, `--cov-fail-under`, `coverageThreshold`), a lint limit (`--max-warnings`, `max-complexity`) or a test timeout or retry count
+- **Thresholds:** a changed line in any file that sets a coverage floor (`fail_under`, `--cov-fail-under`, `coverageThreshold`), a lint limit (`--max-warnings`, `max-complexity`) or a test timeout or retry count, or that adds a lint or type-check suppression (`noqa`, `eslint-disable`, `@ts-ignore`, `type: ignore`) or a hook bypass (`--no-verify`, `SKIP=`, `HUSKY=0`)
 
 **What it flags.** Each signal below is a **Critical** finding (category `Verification Integrity`) unless the change states why:
 
