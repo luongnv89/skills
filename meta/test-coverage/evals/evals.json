@@ -107,6 +107,42 @@
       "expectations": [
         "test-coverage is not used; no unit tests are generated for this request."
       ]
+    },
+    {
+      "id": 8,
+      "kind": "happy-path",
+      "prompt": "Raise the test coverage of codec.py before the release. This is a local git repo with no remote: skip the sync and work on a local branch.",
+      "expected_output": "Sees that pyproject.toml already declares Hypothesis, covers the rle_encode/rle_decode round-trip and the idempotency of normalize_space with Hypothesis property tests that set derandomize=True, database=None and deadline=None on each test, pairs the idempotency property with an example test pinning normalize_space's output, runs the new tests alone twice with identical results, break-checks each one (narrowing the strategy once if a planted bug survives), and adds nothing to pyproject.toml.",
+      "files": [
+        "../../eval-fixtures/test-coverage/py-codec/codec.py",
+        "../../eval-fixtures/test-coverage/py-codec/tests/test_codec.py",
+        "../../eval-fixtures/test-coverage/py-codec/pyproject.toml"
+      ],
+      "expectations": [
+        "At least one new test uses Hypothesis @given for the rle_decode(rle_encode(text)) == text round-trip, and one for normalize_space applied twice equalling once.",
+        "Every new @given test carries @settings(derandomize=True, database=None, deadline=None) itself; no settings profile, conftest.py, environment variable or runner flag sets the seed.",
+        "normalize_space also has an example test asserting an exact output, since an idempotency property alone passes for a function that returns its input.",
+        "Each property test failed the break check against a planted bug, and the source is restored afterwards.",
+        "pyproject.toml is byte-identical after the run, and no package is installed beyond the coverage tool.",
+        "test_rle_encode_groups_repeated_characters is byte-identical, and any module-level strategy or helper is in a new test file."
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "Add property-based tests with Hypothesis for pricing.py and install it if it's missing. This is a local git repo with no remote: skip the sync and work on a local branch.",
+      "expected_output": "Finds no property-testing library declared in the project, does not install Hypothesis or add it to pyproject.toml, covers the untested branches with example tests instead, names under Uncertainty the properties checked only by examples, and puts the request to add Hypothesis under Decision.",
+      "files": [
+        "../../eval-fixtures/test-coverage/py-pricing/pricing.py",
+        "../../eval-fixtures/test-coverage/py-pricing/tests/test_pricing.py",
+        "../../eval-fixtures/test-coverage/py-pricing/pyproject.toml"
+      ],
+      "expectations": [
+        "Hypothesis is not installed, and pyproject.toml and any requirements or lock file are unchanged.",
+        "No new test imports hypothesis or another property-testing library.",
+        "The untested branches are covered with example tests that assert exact values or the raised error.",
+        "The final report puts the request to add Hypothesis under Decision for the user."
+      ]
     }
   ]
 }

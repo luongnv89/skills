@@ -34,12 +34,51 @@ def test_parse_packet_rejects_truncated_header():
         parse_packet(raw)
 ```
 
+## Property tests
+
+A property test states a rule that holds for every input and lets a library generate the inputs, so it reaches cases the writer's own examples miss. Write one only when both hold:
+
+- **The project already has a property-testing library**: a manifest or lockfile declares it and Step 1's command can import it (Go's standard `testing/quick` is always present). Never add, install or upgrade one, or write it into a manifest, lockfile or requirements file, even when asked: the coverage tool stays the only manifest change, and a request for one goes under `Decision:`. Without one, cover the gap with example tests and name under `Uncertainty:` each property checked only by examples.
+- **The code promises the property** in its docstring, types or name:
+
+| Gap | Property | Example |
+|---|---|---|
+| Round-trip | Decoding what was encoded gives the input back | `decode(encode(x)) == x`, `parse(format(d)) == d` |
+| Invariant | A fact true of every output | A sorted result is ordered and holds the same items; a clamped value is in range |
+| Idempotency | Applying twice equals applying once | `normalize(normalize(s)) == normalize(s)` |
+| Naive equivalence | The real code agrees with an obviously correct version | Binary search against a linear scan of the same list |
+
+Write the naive version in the test, simpler than the code and independent of it (a linear scan, a brute-force loop); one that copies the code's logic is *Tautological* (see *Useless-test patterns*). A property that wrong code can also satisfy (a function that returns its input unchanged is idempotent) is paired with an example test that pins the real output.
+
+**Deterministic.** Each property test fixes its seed, or derandomizes, in the test itself, so every run generates the same inputs:
+
+| Library | In each test |
+|---|---|
+| Hypothesis (Python) | `@settings(derandomize=True, database=None, deadline=None)` on the test |
+| fast-check (JS/TS) | `fc.assert(fc.property(...), { seed: 42 })` |
+| `testing/quick` (Go) | `quick.Check(f, &quick.Config{Rand: rand.New(rand.NewSource(1))})` |
+| gopter (Go) | `gopter.NewProperties(gopter.DefaultTestParametersWithSeed(1))` |
+| proptest (Rust) | `#![proptest_config(ProptestConfig { rng_seed: RngSeed::Fixed(1), failure_persistence: None, ..ProptestConfig::default() })]` |
+
+Never set it through shared config: a Hypothesis settings profile, `fc.configureGlobal`, an environment variable such as `PROPTEST_RNG_SEED`, or a runner flag. A library or installed version that takes its seed only from a flag or an environment variable is not used; write example tests. No saved failure database either (`database=None`, `failure_persistence: None`): a replayed failure makes the next run differ. Keep the library's default number of examples or fewer. Files the library generates (`.hypothesis/`) stay untracked and unstaged.
+
+**Placement.** The *Integrity check* applies unchanged. In a pre-existing test file, a property test is a new test whose decorators, strategies and naive version sit in its decorator arguments or body, plus allowed imports; a strategy or helper shared by several tests goes in a new test file.
+
+```python
+@settings(derandomize=True, database=None, deadline=None)
+@given(st.text(alphabet="ab"))
+def test_rle_decode_reverses_encode(text):
+    assert rle_decode(rle_encode(text)) == text
+```
+
+**Verification.** Step 4 treats a property test like any other. It runs alone twice; one that fails in only one run is flaky, and usually not derandomized. It is break-checked: a planted bug it still passes means the generated inputs never reach the bug or the property does not pin that behavior. Strengthen it once, by narrowing the strategy toward the branch (a two-letter alphabet makes long runs likely) or adding the boundary as an explicit case (`@example`), then repeat the check. One that fails all three times shows the library's shrunk counterexample as its failure output, and Step 4 decides which side is wrong as for any test.
+
 ## Sources of flakiness
 
 | Cause | Fix |
 |---|---|
 | Reading the current time (`datetime.now()`, `Date.now()`, `time.Now()`), timezones | Inject a clock where the code accepts one; otherwise patch or freeze time as SKILL.md → Edge Cases says |
-| Randomness | Use a generator the test creates with a fixed seed (`random.Random(0)`, `np.random.default_rng(0)`), or inject one; never seed the global generator |
+| Randomness | Use a generator the test creates with a fixed seed (`random.Random(0)`, `np.random.default_rng(0)`), or inject one; never seed the global generator. A property test seeds as *Property tests* says |
 | `sleep()` waiting for async work | Await the event, or advance fake timers or a fake scheduler |
 | Shared global or static state | Build a fresh fixture in each test |
 | Test order dependence | Make each test build the state it needs. To expose it, run the file on its own and, where the runner has a built-in shuffle flag (`go test -shuffle=on`, `jest --randomize` on Jest 29.2+, `vitest --sequence.shuffle`), shuffled |
