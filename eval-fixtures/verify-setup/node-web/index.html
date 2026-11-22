@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Notepad</title>
+</head>
+<body>
+  <h1>Notepad</h1>
+  <nav><a href="/about">About</a></nav>
+  <form id="note-form">
+    <input name="note" data-testid="note-input" placeholder="Write a note">
+    <button type="submit" data-testid="add-note">Add</button>
+  </form>
+  <ul data-testid="notes"></ul>
+  <p data-testid="count">0 notes</p>
+  <script>
+    const form = document.getElementById("note-form");
+    const list = document.querySelector("[data-testid=notes]");
+    const count = document.querySelector("[data-testid=count]");
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const text = form.note.value.trim();
+      if (!text) return;
+      const item = document.createElement("li");
+      item.textContent = text;
+      list.appendChild(item);
+      form.note.value = "";
+      const n = list.children.length;
+      count.textContent = n === 1 ? "1 note" : `${n} notes`;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "/" && document.activeElement !== form.note) {
+        event.preventDefault();
+        form.note.focus();
+      }
+    });
+  </script>
+</body>
+</html>

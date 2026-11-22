@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 18 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 19 first-party Agent Skills for everyday
 engineering work: code review, test generation, documentation, diagrams,
 CI pipelines, release shipping, repository cleanup, open-source readiness,
 architecture documents and agent instruction files. Each skill is a plain-text
@@ -74,6 +74,7 @@ working in. That is the only network access many skills make.
 | ship | your git remote, GitHub API via `gh`, PyPI (`pypi.org` JSON API, `twine upload`), npm registry | release commits, tags, release notes, built packages, package lookups | **automatic by default**: commit, tag, push, `gh release create`, `twine upload`, `npm publish`; `--no-auto` asks first; never force-pushes. A registry that refuses the upload is skipped and reported | git, gh, curl, python -m build, twine, npm, your project's build |
 | tad-generator | web search/fetch for technology research; your git remote | stack research queries; `tad.md` commits | commit, then push only after you approve | git, mmdc (optional) |
 | test-coverage | npm registry if `npx jest`/`npx vitest` is not installed locally; package registries for coverage tools (pytest-cov, nyc, cargo-tarpaulin); your git remote | package names | creates a feature branch and commits new tests locally; installs missing coverage dev dependencies; no push | your test runner, git |
+| verify-setup | your git remote; the package registries your project's own install command uses, only for an install you approve | none beyond your project's own install | after you approve the plan: writes `.claude/skills/verify/`, `.agents/skills/verify/`, a feature map and `.verify/`, runs your app's own commands three times, optionally adds one line to AGENTS.md; no commit or push | git, curl, your project's runtime and package manager; a browser tool only if already installed or you approve its install |
 
 ## Support
 
