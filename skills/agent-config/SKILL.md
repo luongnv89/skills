@@ -108,7 +108,7 @@ For a **targeted edit**, make the requested change, add the token-efficiency blo
 3. Add opt-in blocks from `references/optional-blocks.md` (workflow orchestration, coding discipline, unit tests) only when the user asks for them.
 4. **Append the token-efficiency block** (see below) last.
 
-In either kind of run, a rule the user asked for goes in as asked. A rule you propose yourself must first pass the evidence bar in `references/knowledge-routing.md` (*A rule the agent proposes*): two cited occurrences, a trigger a diff or command can check, and a disprove check; one that fails is reported as a candidate, never written.
+In either kind of run, a rule the user asked for goes in as asked. A rule you propose yourself from a repeated mistake, review, audit or session corrections (not Step 2's commands and boundaries) must first pass the evidence bar in `references/knowledge-routing.md` (*A rule the agent proposes*): two cited occurrences, a trigger a diff or command can check, and a disprove check; one that fails is reported as a candidate, never written.
 
 Done when every remaining line is a command, a pin, a constraint, or a pointer.
 
@@ -168,7 +168,7 @@ End every run, including one that stops early, with the final report from `refer
 - [ ] The source-of-truth file is under 200 lines and passes sections 1–3 and 5–7 of `references/agents-md-checklist.md`. Wrappers and rules files pass sections 1–3 and 6.
 - [ ] No rule appears in both `AGENTS.md` and a CLAUDE file.
 - [ ] New content has no anti-pattern from `references/anti-patterns.md`.
-- [ ] Every rule the agent proposed itself and wrote cites two occurrences, a checkable trigger and a disprove check, and was approved; the rest are listed as candidates.
+- [ ] Every written rule the agent proposed from a repeated mistake, review, audit or session corrections cites two occurrences, a checkable trigger and a disprove check, and was approved; the rest are listed as candidates.
 - [ ] A write run that wrote files ends Step 4 with `Result: PASS`. Audit runs report every checklist item, give each failing line a routing recommendation, leave `git status` unchanged, and give the overall verdict.
 - [ ] Every run ends with the final report, and it passes the reader checks in `references/final-report.md`. Without user feedback, human understanding of the report stays unconfirmed.
 
