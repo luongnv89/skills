@@ -19,7 +19,7 @@ Release a project end to end: the version in every place it appears, the develop
 ```
 
 - **Auto mode (default)** runs every step without asking. Each point where interactive mode asks has a fixed outcome: continue, skip with `PARTIAL`, or stop with `BLOCKED`.
-- **Interactive mode (`--no-auto`)** asks the user to confirm the version, the file changes, the build, the push, the GitHub release, and each publish. "Ask me before each step" selects it too.
+- **Interactive mode (`--no-auto`)** asks the user to confirm the version, the file changes, the build, the release-commit checks and any push for CI, the push, the GitHub release, and each publish. "Ask me before each step" selects it too.
 - **Version argument**: `X.Y.Z` releases that version; `major|minor|patch` sets the bump.
 
 Read `references/auto-mode.md` before Step 1: outcome table, hard stops, version rules.
@@ -186,7 +186,7 @@ Every run, including one that stops early, ends with: `Result:` (`COMPLETE`, `PA
 ## Acceptance Criteria
 
 - [ ] The Step 1 report and the final report print the mode; in auto mode, every gate outcome matches `references/auto-mode.md` and appears under `Evidence`
-- [ ] In interactive mode, the user confirms the version, the file changes, the build, the push, the GitHub release, and each publish
+- [ ] In interactive mode, the user confirms the version, the file changes, the build, the release-commit checks and any push for CI, the push, the GitHub release, and each publish
 - [ ] A narrower request (notes, bump, docs) never commits, tags, pushes, or publishes
 - [ ] Auto mode releases only from the default branch, and never runs a project's own release script
 - [ ] Every version source reads the new version and the sweep ends with no `missed` hit

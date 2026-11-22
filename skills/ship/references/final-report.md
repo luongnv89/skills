@@ -111,7 +111,7 @@ Evidence:
 Uncertainty:
 - Whether the failure comes from this release's changes or an earlier commit
 
-Decision: Fix the failing test, then drop the unpushed release commit (git reset --hard HEAD~1 discards the release edits, which /ship recreates) and run /ship again.
+Decision: Drop the unpushed release commit (git reset --hard HEAD~1 discards the release edits, which /ship recreates). Then fix the failing test, commit the fix, and run /ship again.
 ```
 
 An auto-mode run that found uncommitted changes:
