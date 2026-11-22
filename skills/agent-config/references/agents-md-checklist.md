@@ -57,7 +57,8 @@ Applies to the source-of-truth file only. Wrappers and rules files are exempt.
 
 - [ ] Reads like a technical brief for a senior engineer's first day, not a wish list.
 - [ ] Every bullet is a command, a pin, a constraint, or a pointer.
-- [ ] Gets updated whenever the agent makes the same mistake twice.
+- [ ] Gets a rule whenever the agent makes the same mistake twice, with the evidence in `knowledge-routing.md` (*A rule the agent proposes*). A rule broken again becomes a hook.
+- [ ] Re-pruned after the last model or agent upgrade, and once the file reaches 150 lines.
 
 ## Sample audit report
 

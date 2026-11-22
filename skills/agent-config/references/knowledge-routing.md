@@ -45,16 +45,32 @@ When no Claude-only lines remain, the wrapper is just the import line. In `.clau
 
 ## Maintaining it as a feedback loop
 
-Add a rule only when one of these is true:
+### A rule the user asks for
 
-- the agent made the **same** mistake twice
-- a review found a fact the agent should have known
-- you typed the same correction in two consecutive sessions
-- a new teammate would need it
+Add it as asked, through the targeted edit. The evidence bar below does not apply: the user's request is the approval. Still check it for duplicates and contradictions, and route it with the table above.
 
-Then:
+### A rule the agent proposes
 
-- Check for duplicates and contradictions before keeping the edit.
-- If a machine can check the rule, add a hook or a test and **delete the prose**.
-- Batch updates: one bad session is noise, but two is a pattern.
-- Re-prune periodically, since instructions lose value as models improve.
+A rule you propose yourself, from a repeated mistake, a review, an audit finding or a session's corrections, is written only when it passes all four checks. One bad session is noise; two is a pattern.
+
+1. **Two occurrences.** Cite at least two separate occurrences of the same miss, each with its location: a PR or commit SHA plus `path:line`, or a session's command and its output. Two occurrences in the same PR or session count once.
+2. **A checkable trigger.** State the trigger as something a diff or a command can show: a path glob, an added or removed line matching a pattern, or a command and the result that means the rule was broken. "Write cleaner code" has no trigger, so it fails.
+3. **A disprove check.** Try to prove the rule wrong before keeping it. Run the trigger against both cited occurrences: it must fire on each. Then run it against recent clean changes, such as the last 10 merged commits on the default branch that are not occurrences (`git log --first-parent -n 10`): it must fire on none. Show the commands and what they returned.
+4. **Human approval.** Show the rule with its evidence, and write it only after the user approves (Step 4, *Show before writing*). An unattended run writes nothing and lists the rule as a candidate.
+
+A rule that fails a check is reported as a **candidate**, never written, naming the check it failed (for example `1 occurrence found`, `no diff-checkable trigger`, `fires on 3 clean commits`).
+
+### A rule broken again
+
+A rule is not a lock. When a cited occurrence happened after the rule was already in the file (`git log -S '<rule text>' -- AGENTS.md` dates it), the prose has failed once. Don't reword it or add emphasis: propose a hook (`PreToolUse` plus permissions for a must-never stop) or a test or CI check that enforces the same trigger, and, once that gate exists, delete the prose.
+
+If a machine can check any rule, add a hook or a test and **delete the prose**.
+
+### When to re-prune
+
+Instructions lose value as models improve, so re-run the prune pass (SKILL.md Step 3, step 2) over the whole file when either of these happens:
+
+- **A model or agent upgrade**: the user reports moving to a new model, or to a new major version of Claude Code, Codex or Cursor.
+- **The file nears its size limit**: it reaches 150 lines (the top of the 40–150 sweet spot; the hard limit is 200), or all instruction files together pass 28 KiB of Codex's 32 KiB.
+
+A targeted edit that finds either trigger still makes only the requested change, and reports `re-prune due` with the reason and its prune candidates.
