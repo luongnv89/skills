@@ -62,7 +62,7 @@ Write the naive version in the test, simpler than the code and independent of it
 
 Never set it through shared config: a Hypothesis settings profile, `fc.configureGlobal`, an environment variable such as `PROPTEST_RNG_SEED`, or a runner flag. A library or installed version that takes its seed only from a flag or an environment variable is not used; write example tests. No saved failure database either (`database=None`, `failure_persistence: None`): a replayed failure makes the next run differ. Keep the library's default number of examples or fewer. Files the library generates (`.hypothesis/`) stay untracked and unstaged.
 
-**Placement.** The *Integrity check* applies unchanged. In a pre-existing test file, a property test is a new test whose decorators, strategies and naive version sit in its decorator arguments or body, plus allowed imports; a strategy or helper shared by several tests goes in a new test file.
+**Placement.** The *Integrity check* applies unchanged. In a pre-existing test file, a property test is a new test whose decorators, strategies and naive version sit in its decorator arguments or body, plus allowed imports; a strategy or helper shared by several tests goes in a new test file, defined as a function so nothing runs at import.
 
 ```python
 @settings(derandomize=True, database=None, deadline=None)

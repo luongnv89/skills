@@ -111,7 +111,7 @@
     {
       "id": 8,
       "kind": "happy-path",
-      "prompt": "Raise the test coverage of codec.py before the release. This is a local git repo with no remote: skip the sync and work on a local branch.",
+      "prompt": "Raise the test coverage of codec.py before the release. The dev extras, Hypothesis included, are installed in this environment. This is a local git repo with no remote: skip the sync and work on a local branch.",
       "expected_output": "Sees that pyproject.toml already declares Hypothesis, covers the rle_encode/rle_decode round-trip and the idempotency of normalize_space with Hypothesis property tests that set derandomize=True, database=None and deadline=None on each test, pairs the idempotency property with an example test pinning normalize_space's output, runs the new tests alone twice with identical results, break-checks each one (narrowing the strategy once if a planted bug survives), and adds nothing to pyproject.toml.",
       "files": [
         "../../eval-fixtures/test-coverage/py-codec/codec.py",
@@ -124,7 +124,8 @@
         "normalize_space also has an example test asserting an exact output, since an idempotency property alone passes for a function that returns its input.",
         "Each property test failed the break check against a planted bug, and the source is restored afterwards.",
         "pyproject.toml is byte-identical after the run, and no package is installed beyond the coverage tool.",
-        "test_rle_encode_groups_repeated_characters is byte-identical, and any module-level strategy or helper is in a new test file."
+        "test_rle_encode_groups_repeated_characters is byte-identical, and any module-level strategy or helper is in a new test file.",
+        "If hypothesis cannot be imported after all, no package is installed: the gaps get example tests and the report names each property checked only by examples under Uncertainty."
       ]
     },
     {
