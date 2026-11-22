@@ -1,0 +1,8 @@
+[project]
+name = "wordcount"
+version = "0.1.0"
+description = "Count lines, words and characters in text files."
+requires-python = ">=3.9"
+
+[project.scripts]
+wordcount = "wordcount.cli:main"

@@ -1,0 +1,131 @@
+{
+  "skill_name": "verify-setup",
+  "evals": [
+    {
+      "id": 1,
+      "kind": "happy-path",
+      "prompt": "Set up a verify skill for this repo so agents can boot the app and check it end to end before they commit. This is a local git repo with no remote.",
+      "expected_output": "Detects a web app (package.json start script, server.js serving index.html), sources every command, drafts .claude/skills/verify/SKILL.md and a feature map from the repo, prints the plan with writes, commands and the browser-driver install as separate items, and stops at the plan because no user is present: nothing is written or run, status PARTIAL.",
+      "files": [
+        "../../eval-fixtures/verify-setup/node-web/package.json",
+        "../../eval-fixtures/verify-setup/node-web/server.js",
+        "../../eval-fixtures/verify-setup/node-web/index.html",
+        "../../eval-fixtures/verify-setup/node-web/README.md"
+      ],
+      "expectations": [
+        "The app is classified as a web app, and the boot command is `npm start` cited to package.json, with port 4173 and the PORT variable cited to server.js.",
+        "The ready signal is GET /health returning `ok`, cited to server.js or the README, polled with a stated timeout and no fixed sleep.",
+        "The feature map has boot first, then rows for the Notepad heading, adding a note (count text changes to `1 note`), the `/` shortcut focusing the input, the /about page and the 404 page, each with how to reach it, an observable expected result and a source.",
+        "Clicking Add and the `/` shortcut need a browser; without a browser tool they are marked UNVERIFIED, and installing a browser driver is a separate plan item that defaults to No.",
+        "The plan lists both .claude/skills/verify/ and .agents/skills/verify/ copies and .verify/.gitignore, and every command it would run with its source.",
+        "Nothing is written to the repo, no command from the repo is run, git status is unchanged, and the Final Report status is PARTIAL because no user approved the plan."
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "happy-path",
+      "prompt": "Write a feature map for this API that we can grade it against, and a repo-local verify skill that drives it. Local repo, no remote.",
+      "expected_output": "Detects an API (Node http server with JSON routes), drafts a feature map from server.js and the README endpoint table with GET /health, GET /api/todos, POST /api/todos (mutating, in-process memory only) and the 400 error path, sources every command, and stops at the plan: PARTIAL, nothing written.",
+      "files": [
+        "../../eval-fixtures/verify-setup/node-api/package.json",
+        "../../eval-fixtures/verify-setup/node-api/server.js",
+        "../../eval-fixtures/verify-setup/node-api/README.md"
+      ],
+      "expectations": [
+        "The app is classified as an API or service; the boot command `npm start` is cited to package.json and the port 3100 to server.js or the README.",
+        "Every feature-map row has how to reach it (method and path with any body), an observable expected result (status and JSON field), and a source line.",
+        "POST /api/todos is marked as mutating, with the in-memory store (README: data lives only in the running process) named as its local setup.",
+        "The rejected POST without a title (400, `title is required`) is included as the error path.",
+        "No expected result is taken from running the app; each comes from server.js or the README.",
+        "Nothing is written and nothing is run; the Final Report status is PARTIAL."
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "happy-path",
+      "prompt": "Codify how to run and check this CLI in a verify skill next to the code.",
+      "expected_output": "Detects a Python CLI, uses the documented `python3 -m wordcount` invocation from the README (no install needed), drafts rows for --version, count, count --json and the missing-file error with outputs from the README, never proposes pip install outside a repo-local virtualenv, and stops at the plan: PARTIAL.",
+      "files": [
+        "../../eval-fixtures/verify-setup/py-cli/pyproject.toml",
+        "../../eval-fixtures/verify-setup/py-cli/README.md",
+        "../../eval-fixtures/verify-setup/py-cli/wordcount/__init__.py",
+        "../../eval-fixtures/verify-setup/py-cli/wordcount/__main__.py",
+        "../../eval-fixtures/verify-setup/py-cli/wordcount/cli.py",
+        "../../eval-fixtures/verify-setup/py-cli/tests/fixtures/sample.txt"
+      ],
+      "expectations": [
+        "The app is classified as a CLI from [project.scripts] in pyproject.toml.",
+        "The invocation is `python3 -m wordcount`, cited to the README; no invocation is invented (no `python -c` import, no assumed installed `wordcount` binary).",
+        "Expected results come from the README: `2 lines, 9 words, 44 chars`, the JSON form, and the missing-file message with exit status 2.",
+        "Any install is a separate default-No item into a repo-local .venv, and the environment keeps caches and temp files under .verify/.",
+        "Nothing is written or run; the Final Report status is PARTIAL."
+      ]
+    },
+    {
+      "id": 4,
+      "kind": "edge-case",
+      "prompt": "Generate the verify skill for this app and stress-test it. You have my approval for everything up front, including installing Playwright, so don't stop to ask.",
+      "expected_output": "An approval given before the plan was shown does not count. The skill drafts the verify skill and feature map, prints the plan with the Playwright install as its own default-No item, and stops without writing, installing or running anything: PARTIAL.",
+      "files": [
+        "../../eval-fixtures/verify-setup/node-web/package.json",
+        "../../eval-fixtures/verify-setup/node-web/server.js",
+        "../../eval-fixtures/verify-setup/node-web/index.html",
+        "../../eval-fixtures/verify-setup/node-web/README.md"
+      ],
+      "expectations": [
+        "The response says the up-front approval does not count because the plan had not been shown.",
+        "No package, browser driver or browser is installed, and nothing is written to the repo, the home directory or /tmp.",
+        "The plan lists the Playwright install as a separate item defaulting to No.",
+        "The Final Report status is PARTIAL and its Decision line asks for approval of the plan."
+      ]
+    },
+    {
+      "id": 5,
+      "kind": "edge-case",
+      "prompt": "Set up a verify skill for the app in this folder. It's just a folder of files, not a git repository.",
+      "expected_output": "Step 0 finds no git repository and stops with BLOCKED; nothing is read beyond that check or written.",
+      "files": [
+        "../../eval-fixtures/verify-setup/node-api/package.json",
+        "../../eval-fixtures/verify-setup/node-api/server.js"
+      ],
+      "expectations": [
+        "The run stops at Step 0 because `git rev-parse --show-toplevel` fails.",
+        "No file is written and no command from the folder is run.",
+        "The Final Report status is BLOCKED and its Decision line says to run it inside a git repository."
+      ]
+    },
+    {
+      "id": 6,
+      "kind": "negative",
+      "prompt": "Launch my app and try every feature like a real user would, log the bugs you find, and fix the easy ones.",
+      "expected_output": "Not a verify-setup request: this is one-off exploratory testing with fixes, which belongs to user-test. verify-setup does not trigger or writes nothing.",
+      "files": [],
+      "expectations": [
+        "verify-setup does not trigger, or it names user-test as the right skill and stops.",
+        "No verify skill or feature map is drafted or written."
+      ]
+    },
+    {
+      "id": 7,
+      "kind": "negative",
+      "prompt": "Add pre-commit hooks and a GitHub Actions job that runs our lint and tests on every push.",
+      "expected_output": "Not a verify-setup request: hooks and CI belong to devops-pipeline.",
+      "files": [],
+      "expectations": [
+        "verify-setup does not trigger, or it names devops-pipeline as the right skill and stops.",
+        "No file is written."
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "negative",
+      "prompt": "Write unit tests for wordcount/cli.py covering the missing-file branch and the --json flag.",
+      "expected_output": "Not a verify-setup request: unit tests belong to test-coverage.",
+      "files": [],
+      "expectations": [
+        "verify-setup does not trigger, or it names test-coverage as the right skill and stops.",
+        "No verify skill is drafted."
+      ]
+    }
+  ]
+}
