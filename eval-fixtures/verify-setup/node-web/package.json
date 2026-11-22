@@ -1,0 +1,12 @@
+{
+  "name": "notepad-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A one-page notepad served by Node's http module. No dependencies.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -88,7 +88,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.11.0](packages/lstack/README.md) is the engineering core: the `skills/` folder
-holds 16 top-level definitions plus the two nested diagram-generator children, **18**
+holds 17 top-level definitions plus the two nested diagram-generator children, **19**
 namespaced skills, all plain Markdown instructions with no helper scripts. The other 32
 skills (product, marketing, App Store, design/UX, agent fleets, machine setup; 22 of them
 ship helper scripts) live in `extras/` as a second plugin, **lstack-extras**, offered only
@@ -257,6 +257,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [**codebase-modernizer**](extras/codebase-modernizer/) | 1.5.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
 | [**test-coverage**](skills/test-coverage/) | 1.9.0 | low | Target untested branches and edge cases |
 | [**user-test**](extras/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
+| [**verify-setup**](skills/verify-setup/) | 1.0.0 | high | Write a repo-local verify skill that boots and drives your web app, API or CLI end to end, with a feature map as its pass/fail rubric; run it three times and report flaky steps |
 | [**dont-make-me-think**](extras/dont-make-me-think/) | 1.7.1 | medium | Usability review using Krug's principles |
 | [**ux-ax-review**](extras/ux-ax-review/) | 1.3.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
@@ -276,7 +277,7 @@ the findings into a phased sprint plan with milestones. It is read-only: depende
 planned tasks with migration steps, never a bulk `npm update`. Reach for it when returning to a
 neglected project or untangling one that has drifted.
 
-Adjacent skills: **test-coverage** (generate tests for untested branches) · **user-test** (run the app and test it as a user) · **dont-make-me-think** (usability/UX review).
+Adjacent skills: **test-coverage** (generate tests for untested branches) · **user-test** (run the app and test it as a user) · **verify-setup** (a repo-local harness agents run before every commit) · **dont-make-me-think** (usability/UX review).
 
 ### Shipping
 
@@ -284,7 +285,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 |---|---|---|---|
 | [**auto-push**](skills/auto-push/) | 1.2.3 | low | Commit message + stage + push with secret and size checks |
 | [**cleanup-project**](skills/cleanup-project/) | 1.1.1 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
-| [**devops-pipeline**](skills/devops-pipeline/) | 2.8.0 | medium | Pre-commit + lean, fast GitHub Actions quality gates, and cutting Actions minutes |
+| [**devops-pipeline**](skills/devops-pipeline/) | 2.8.1 | medium | Pre-commit + lean, fast GitHub Actions quality gates, and cutting Actions minutes |
 | [**github-pages-publish**](extras/github-pages-publish/) | 1.1.1 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
 | [**security-setup**](extras/security-setup/) | 1.6.3 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**ship**](skills/ship/) | 3.1.2 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
