@@ -25,7 +25,8 @@ Review a batch of files against the full code-review checklist and return struct
     "language": "typescript|javascript|python|etc",
     "projectType": "web|backend|library|etc"
   },
-  "merge_base": "full SHA from the Review Binding, or null for a full audit"
+  "merge_base": "full SHA from the Review Binding, or null for a full audit",
+  "untracked": ["paths of untracked files in the batch, from git status"]
 }
 ```
 
@@ -62,9 +63,10 @@ Review a batch of files against the full code-review checklist and return struct
    - Error handling coverage
 
 6. **Tag each finding's origin** by the Finding Origin rules in `references/review-mode.md`.
-   With a `merge_base`, read `git diff -U0 <merge_base>..HEAD -- <file>` once per file:
-   `introduced` when a cited line is in the change, else `pre-existing`. With `merge_base: null`
-   (a full audit) every finding is `pre-existing`. Never fetch, and never use `git blame`.
+   With a `merge_base`, read `git diff -U0 <merge_base> -- <file>` once per file (the working
+   tree, so its line numbers match the file you read): `introduced` when a cited line is in the
+   change or the file is in `untracked`, else `pre-existing`. With `merge_base: null` (a full
+   audit) every finding is `pre-existing`. Never fetch, and never use `git blame`.
 
 ## Output
 

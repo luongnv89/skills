@@ -40,7 +40,8 @@ Never fetch, check out or reset to reach the reported head.
    - Verify the issue actually exists at specified line
    - Confirm the severity is appropriate
    - Check that the code snippet matches current state
-   - Check its origin tag against `git diff -U0 <merge_base>..HEAD` (the report's merge base):
+   - Check its origin tag against `git diff -U0 <merge_base> -- <file>` (the report's merge base,
+     working tree; every line of an untracked file is in the change):
      `introduced` only when a cited line is in the change, else `pre-existing` (Finding Origin in
      `references/review-mode.md`). A pre-existing finding outside `## Pre-existing Issues`, or
      counted in `**Merge-blocking**`, is a correction

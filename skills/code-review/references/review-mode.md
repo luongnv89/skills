@@ -96,9 +96,11 @@ if [ -n "$report_head" ] && [ "$report_head" = "$(git rev-parse HEAD)" ]; then e
 The author of a change answers for the lines the change touched, not for old bugs next to them.
 Every finding carries one origin tag, decided by its cited lines:
 
-- **introduced**: at least one line it cites is in the change. That is a line added or modified in
-  `git diff -U0 <merge_base>..HEAD` (the `+` side of a hunk), a line that diff deletes (a removed
-  test, assertion or gate), or, on a dirty tree, an uncommitted line or a line of an untracked file.
+- **introduced**: at least one line it cites is in the change. That is a line on the `+` side of a
+  hunk in `git diff -U0 <merge_base> -- <file>`, a line that diff deletes, or any line of an
+  untracked file. This diff compares the merge base with the working tree, so it numbers lines as
+  the reviewed files do and includes uncommitted edits; on a clean tree it equals
+  `git diff -U0 <merge_base>..HEAD`.
 - **pre-existing**: every line it cites is unchanged since `merge_base`. This includes context
   lines next to a hunk. A pre-existing finding **never blocks a merge**, whatever its severity.
 
@@ -106,6 +108,9 @@ Rules:
 
 - When the change is what makes an unchanged line wrong (a changed signature that breaks an
   unchanged caller), cite the changed line as well. The finding is then introduced.
+- A removed line has no line number at `HEAD`. Cite it as `path:line (deleted)`, where `line` is
+  the `+b` of its `@@ -a,n +b,0 @@` hunk; a cited deletion position is in the change. So a removed
+  null check that breaks an unchanged line below it is introduced.
 - Category 5 (Verification Integrity) findings come from the diff, so they are always introduced.
 - A full audit has no change: every finding is pre-existing and none blocks a merge.
 - Decide the tag from the diff, never from `git blame` or a guess about who wrote the line.
@@ -170,7 +175,7 @@ If the Agent tool is unavailable, run the Mode 2/3 batches inline and sequential
 
 In every mode, a diff or PR review also runs checklist category 5 (Verification Integrity) once, inline, over the whole diff, before any batching. In Mode 2/3 the orchestrator adds its category-5 findings and the `## Verification Changes` table to the report after the report-assembler merge and before the reviewer validation pass. A full audit with no base skips it.
 
-In Mode 2/3 the orchestrator passes `merge_base` (or `null` for a full audit) to every `file-reviewer`, which tags each finding's origin (Finding Origin), and the binding record to the `report-assembler`.
+In Mode 2/3 the orchestrator passes `merge_base` (or `null` for a full audit) and the untracked paths to every `file-reviewer`, which tags each finding's origin (Finding Origin), and the binding record to the `report-assembler`. When it then adds its category-5 findings, it also updates the Summary counts, the `**Origin**` totals and `**Merge-blocking**`.
 
 ## Review Checklist
 
@@ -447,7 +452,7 @@ A run passes when **all** of the following are true:
 
 - [ ] `CODE_REVIEW.md` exists in the repo root with `# Code Review Report` as the first heading.
 - [ ] Report includes a `## Summary` table with rows for Critical, Major, Minor, and Info severities.
-- [ ] Every finding carries `**Origin**: introduced` or `**Origin**: pre-existing`, decided by whether a cited line is in `git diff <merge_base>..HEAD` (Finding Origin). Pre-existing findings are listed only under `## Pre-existing Issues` and never counted in `**Merge-blocking**`.
+- [ ] Every finding carries `**Origin**: introduced` or `**Origin**: pre-existing`, decided by whether a cited line is in `git diff -U0 <merge_base> -- <file>` or an untracked file (Finding Origin). Pre-existing findings are listed only under `## Pre-existing Issues` and never counted in `**Merge-blocking**`.
 - [ ] Every reported finding cites a `path/to/file.ext:line` reference and a code smell or category label.
 - [ ] Critical findings include both a "Before" and "Suggested Fix" code block when a code change is proposed.
 - [ ] Mode used (Mode 1/2/3) is recorded in the report header along with the file count.
