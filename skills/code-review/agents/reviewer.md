@@ -3,7 +3,7 @@ name: reviewer
 description: Fresh-context independent validation of CODE_REVIEW.md findings for accuracy and completeness
 metadata:
   role: "Quality Assurance Validator"
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Reviewer Agent
@@ -40,12 +40,17 @@ Never fetch, check out or reset to reach the reported head.
    - Verify the issue actually exists at specified line
    - Confirm the severity is appropriate
    - Check that the code snippet matches current state
+   - Check its origin tag against `git diff -U0 <merge_base>..HEAD` (the report's merge base):
+     `introduced` only when a cited line is in the change, else `pre-existing` (Finding Origin in
+     `references/review-mode.md`). A pre-existing finding outside `## Pre-existing Issues`, or
+     counted in `**Merge-blocking**`, is a correction
    - Validate the suggested fix is correct and improves the code
    - Test the fix doesn't introduce new issues
 
 3. **Flag inaccuracies**:
    - False positives (issue description doesn't match code)
    - Wrong severity (critical issue marked as minor)
+   - Wrong origin (an old line tagged introduced, or a changed line tagged pre-existing)
    - Outdated references (code has changed since review)
    - Impractical fixes (suggestion won't compile or breaks behavior)
 
@@ -138,6 +143,7 @@ Return validation report with structure:
 - [ ] Report Head equals the current `HEAD` (stale check), else `stale` and nothing else validated
 - [ ] Each finding verified against current source code
 - [ ] Severity levels are appropriate
+- [ ] Each origin tag matches the diff from the merge base, and no pre-existing finding is merge-blocking
 - [ ] Code examples match the actual code
 - [ ] Suggested fixes are practical and correct
 - [ ] No false positives reported as issues
