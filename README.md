@@ -337,7 +337,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**seo-ai-optimizer**](extras/seo-ai-optimizer/) | 1.7.2 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](extras/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.5.1 | low | Add OSS files and templates |
-| [**agent-config**](skills/agent-config/) | 2.3.1 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
+| [**agent-config**](skills/agent-config/) | 2.4.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
 
 ### App Store
 
