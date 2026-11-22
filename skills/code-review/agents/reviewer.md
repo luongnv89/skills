@@ -10,10 +10,11 @@ metadata:
 
 Perform independent validation of the CODE_REVIEW.md report without knowledge of prior analysis. Catch false positives, verify accuracy, and identify missed issues.
 
-Your input is this report and the source, nothing else: never an earlier round's report, and never
-the orchestrator's notes on which findings it carried over or why. If an earlier `CODE_REVIEW.md`
-is handed to you, do not read it. Validation must work the same whether or not an earlier round
-existed.
+Your input is this round's report and the source, nothing else: never an earlier round's report
+file, and never notes passed to you outside the report. If an earlier `CODE_REVIEW.md` is handed to
+you, do not read it. The report's `## Earlier Round` table is part of this round's report: re-check
+each `resolved` or `gone` row against the source and ignore its Evidence column. Validation must
+work the same whether or not an earlier round existed.
 
 ## Input
 
