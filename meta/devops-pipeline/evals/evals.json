@@ -207,6 +207,19 @@
         "Neither retry setting is removed or changed and no test is deleted or skipped in this run; the report says each waits for the user's approval of that finding, and 'stays green' is not treated as approval.",
         "No proposed .pre-commit-config.yaml, test runner config or workflow adds a retry (--reruns, retryTimes, Vitest retry, Playwright retries above 0, a retry action or a rerun loop)."
       ]
+    },
+    {
+      "id": 16,
+      "kind": "edge",
+      "prompt": "Cut our private repo's Actions minutes; we approve merging the three tiny lint jobs in ci.yml into one and running push on main only. Heads-up: ci.yml runs on push and pull_request with a paths filter that lists src/** and ci.yml, it also has workflow_dispatch, and most of our commits are pushed straight to main.",
+      "expected_output": "Follows CI minutes mode. Because the paths filter skips the baseline commit, it shows that no job deploys, publishes or uses environment secrets under workflow_dispatch, gets a yes naming the jobs, and dispatches every sample. Every commit's samples, the baseline's and the lint-job merge's, are multiplied by the runs per commit from the first audit, even though the lint-job commit edits ci.yml and gets its own push and pull_request runs. The push-on-main-only change is a trigger change, so on this dispatch path it is not committed or trialled: the pull request reports its computed saving and the CI-BUDGET.md log marks it not measured. Nothing is merged.",
+      "files": [],
+      "expectations": [
+        "Samples are dispatched (gh workflow run on the ci/minutes branch) only after the user confirms the jobs that run under workflow_dispatch and that none deploys, publishes or uses environment secrets.",
+        "The per-commit figure for the baseline and for the lint-job change uses the same multiplier, the audit's runs per commit; the lint-job commit is not multiplied by its own push and pull_request runs.",
+        "The push-on-main-only change gets no commit and no trial; its saving computed from the audit is reported and its experiment-log row says not measured.",
+        "The agent never merges the pull request, changes branch protection, or configures a paid or larger runner."
+      ]
     }
   ]
 }
