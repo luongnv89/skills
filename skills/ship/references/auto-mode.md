@@ -18,6 +18,8 @@ Each row is a point where interactive mode asks the user. Auto mode takes the ou
 | Proposed file changes | 3 | Show the consolidated summary; wait for confirmation | Print the summary; continue to the review |
 | Reviewer `NEEDS_FIX` | 4 | Show the issues; fix them with the user | Apply each suggestion, review once more; still `NEEDS_FIX` → `BLOCKED — release review failed` |
 | Build | 6 | Ask before running | Run |
+| Release-commit checks | 7 | List the checks; ask once; declined → tag, `not verified (user declined)` under `Uncertainty` | Run them (`verify-release.md`) |
+| Push the branch for CI (no test command, CI runs on push) | 7 | Ask; declined → `PARTIAL — release commit not verified, not tagged` | Push the branch only, wait for CI on the release commit |
 | Push branch and tag | 7 | Ask; declined → `PARTIAL — tag vX.Y.Z created locally, not pushed` | Push |
 | GitHub release | 8 | Ask; declined → listed under `Decision` | Create |
 | Publish to a registry | 9 | Ask per registry | Follow the decision made in Step 2 (`publishing.md` → _Decide per registry_) |
@@ -35,6 +37,7 @@ Each of these stops the run with `BLOCKED`. Never retry with force and never ove
 - The reviewer still returns `NEEDS_FIX` after one fix round, or reports that the version does not match a breaking change
 - A version source still does not read `NEW_VERSION` after the Step 5 sweep
 - The build fails
+- A check on the release commit fails: the test command, a CI run on that commit, the verify skill, the smoke script, or a check that changed a tracked file. No tag is created (`verify-release.md`)
 - A hook rejects the release commit. Never use `--no-verify`
 - A push is rejected (protected branch, remote moved ahead). Never force-push
 - `git ls-remote` does not show the pushed tag: skip Steps 8-9
@@ -60,6 +63,8 @@ Step 2 applies the first row that matches, after a version argument (which alway
 Under `Evidence` in the final report, list every auto decision with its reason:
 
 - The chosen version and the rule that chose it
+- Each release-commit check: what ran and the commit it ran on, or `not verified` and why
+- Each check skipped because it would run a release, publish or deploy step
 - Each skipped step and why (no credentials, package not published by this project, CI-owned release, no landing page)
 - The reviewer status and each fix applied after `NEEDS_FIX`
 

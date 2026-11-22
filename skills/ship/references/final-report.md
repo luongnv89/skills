@@ -7,10 +7,10 @@ Print this report at the end of every run, including runs that stop early. It co
 1. `Result:` with one status at the start of the line:
    - `COMPLETE` — every step in the request's scope ran.
    - `PARTIAL — <reason>` — a step was skipped: the user declined it in interactive mode, or auto mode skipped it for a stated reason (no remote, no `gh` login, no registry credentials, an npm one-time-password prompt).
-   - `BLOCKED — <reason>` — a check failed or a hard stop fired (`auto-mode.md` → _Hard stops_), such as uncommitted changes in auto mode, a failed build, a rejected push, a tag that `git ls-remote` does not find on origin, or a publish error.
+   - `BLOCKED — <reason>` — a check failed or a hard stop fired (`auto-mode.md` → _Hard stops_), such as uncommitted changes in auto mode, a failed build, a failed check on the release commit (the check is named), a rejected push, a tag that `git ls-remote` does not find on origin, or a publish error.
 2. `Mode:` `auto` or `interactive`.
 3. `Evidence:` only the checks that actually ran, each with its observed result: files changed, the sweep counts, the landing-page items, `git ls-remote` output, the release URL, the registry check. In auto mode, also each auto decision and its reason (`auto-mode.md` → _What auto mode records_).
-4. `Uncertainty:` what was not verified, such as a clean install from the registry, or an edit skipped because its old line no longer matched.
+4. `Uncertainty:` what was not verified, such as a clean install from the registry, a release commit with no test command or CI, or an edit skipped because its old line no longer matched.
 5. `Decision:` the action still waiting on the user, or "No approval needed."
 
 Then print the post-release checklist below.
@@ -30,6 +30,7 @@ Evidence:
 - Changelog: CHANGELOG.md "## Unreleased" promoted to "## v2.4.0 — 2026-10-09"
 - Landing page (site/index.html): version updated, changelog updated, features updated, docs current
 - Reviewer: PASS
+- Release commit 3f2a91c: python -m pytest passed (214 passed); verify skill VERIFY PASS commit=3f2a91c (9/9)
 - Git tag: v2.4.0 (annotated) pushed to origin (confirmed by git ls-remote)
 - GitHub release: https://github.com/owner/repo/releases/tag/v2.4.0
 - Published: PyPI — https://pypi.org/project/mypackage/2.4.0/ (PyPI JSON API returned the version)
@@ -94,6 +95,23 @@ Uncertainty:
 - Why the tag push did not reach origin
 
 Decision: Push the tag (git push origin v2.4.0), then run /ship again: it finds the tag on HEAD and resumes at the GitHub release, then publishing.
+```
+
+A run where the release commit failed its tests stops before the tag:
+
+```
+Result: BLOCKED — release commit failed npm test
+Mode: auto
+
+Evidence:
+- Version bumped: package.json, package-lock.json (1.3.1 → 1.4.0)
+- Release commit: 8c41d0e chore(release): v1.4.0 (local, not pushed)
+- npm test on 8c41d0e: exit 1, 1 failing — "config loader › reads legacy keys": expected 3, received 2
+
+Uncertainty:
+- Whether the failure comes from this release's changes or an earlier commit
+
+Decision: Fix the failing test, then drop the unpushed release commit (git reset --hard HEAD~1 discards the release edits, which /ship recreates) and run /ship again.
 ```
 
 An auto-mode run that found uncommitted changes:

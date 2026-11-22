@@ -74,6 +74,8 @@ Adapt the check names to what the step actually validated. Use `√` for pass, `
 ··································································
   Build:                    √ pass | — no build step
   Release commit:           √ pass (git status --porcelain --untracked-files=no empty)
+  Release commit verified:  √ npm test on 3f2a91c | √ CI green on 3f2a91c | × npm test failed | — not verified: no tests or CI
+  Verify skill / smoke:     √ VERIFY PASS commit=3f2a91c | × VERIFY FAIL F3 | — none
   Tag pushed:               √ pass (git ls-remote shows v1.3.0)
   GitHub release:           √ pass (URL: ...) | — skipped: <reason>
   Package published:        √ pass (npm view returned 1.3.0) | — skipped: <reason>

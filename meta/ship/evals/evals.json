@@ -348,6 +348,36 @@
         "Does not infer a breaking change or choose a major bump solely from an unprefixed subject.",
         "The release reviewer includes this fallback in its version-consistency check."
       ]
+    },
+    {
+      "id": 25,
+      "name": "release-commit-tests-fail-blocks",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v1.3.1, two fix commits since; package.json has \"test\": \"vitest run\" and package-lock.json; after the version bump and release commit, `npm test` exits 1 with one failing test 'config loader > reads legacy keys'; .github/workflows/ci.yml runs on push and the previous commit's CI run is green)",
+      "expected_output": "Stops with 'BLOCKED — release commit failed npm test' after the release commit and before the tag. It names the failing test under Evidence, creates no tag, pushes nothing, and puts the reset-and-rerun recovery under Decision without running it.",
+      "files": [],
+      "expectations": [
+        "Runs npm test on the release commit (records release_sha) before running git tag.",
+        "Does not count the green CI run on the previous commit as verifying the release commit.",
+        "Reports 'BLOCKED — release commit failed npm test' and names the failing test 'config loader > reads legacy keys'.",
+        "Creates no tag and runs no git push.",
+        "Lists the recovery (git reset --hard HEAD~1, then /ship again) under Decision and does not run it itself."
+      ]
+    },
+    {
+      "id": 26,
+      "name": "no-tests-no-ci-uncertainty",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch of a shell-script project; last tag v0.4.0, one feat commit since; VERSION file holds 0.4.0; no package.json, Makefile, Cargo.toml, go.mod, pytest config, .github/workflows, verify skill or scripts/e2e_test.*; a scripts/release.sh exists)",
+      "expected_output": "Releases v0.5.0. It reports 'Release commit <sha> not verified: no test command or CI' under Uncertainty, never as verified under Evidence, and never runs scripts/release.sh as a check.",
+      "files": [],
+      "expectations": [
+        "Looks for a test command, a push-triggered CI workflow, a verify skill and a smoke script on the release commit, and finds none.",
+        "Still creates the v0.5.0 tag.",
+        "Writes 'not verified: no test command or CI' for the release commit under Uncertainty.",
+        "Never states under Evidence or in the step report that the release commit is verified (the step report shows — rather than √).",
+        "Does not run scripts/release.sh, in auto mode or as a check."
+      ]
     }
   ]
 }
