@@ -35,9 +35,10 @@ use these names instead of re-deriving them.
 ```bash
 head_sha="$(git rev-parse HEAD)"
 head_branch="$(git rev-parse --abbrev-ref HEAD)"   # prints HEAD when detached
+git status --porcelain=v1 --untracked-files=all -- . ':(exclude)CODE_REVIEW.md'   # empty: clean
+# Diff or PR review only (a full audit has base_ref none and skips these two):
 base_sha="$(git rev-parse --verify --quiet "${base_ref}^{commit}")"
 base_full="$(git rev-parse --symbolic-full-name "$base_ref")"   # empty for a raw SHA
-git status --porcelain=v1 --untracked-files=all    # empty output: clean tree
 ```
 
 | Name | Value |
@@ -45,12 +46,13 @@ git status --porcelain=v1 --untracked-files=all    # empty output: clean tree
 | `head_sha` | The full SHA of `HEAD` (40 hex characters, 64 in a SHA-256 repo). Never abbreviated in the report. |
 | `base_ref` | The ref the diff is compared against, as the user named it (`main`, `origin/main`, a SHA). For a PR, its base branch's local remote-tracking ref `origin/<base branch>`, else the local branch of that name. `none` for a full audit with no base. |
 | `base_sha` | The full SHA `base_ref` resolved to when recorded. |
-| `base_source` | From `base_full`: `refs/remotes/…` is `local remote-tracking ref, not fetched (as of the last fetch)`; `refs/heads/…` is `local branch, not fetched`; empty is `commit`. |
-| `working_tree` | `clean`, or `dirty — N uncommitted paths, not in Head` when `git status` printed N lines. |
+| `base_source` | From `base_full`: `refs/remotes/…` is `local remote-tracking ref, not fetched (as of the last fetch)`; `refs/heads/…` is `local branch, not fetched`; `refs/tags/…` is `local tag, not fetched`; any other ref is `local ref <base_full>, not fetched`; empty is `commit`. |
+| `working_tree` | `clean`, or `dirty — N uncommitted paths, not in Head` when `git status` printed N lines. The review's own `CODE_REVIEW.md` is not counted. |
 
 - `<base>` in every command in this file means `$base_sha`, so the diff matches the record even
   if the ref moves during the review.
-- `base_ref` does not resolve locally: stop and ask for a base that exists locally. Never fetch one.
+- In a diff or PR review, a `base_ref` that does not resolve locally stops the review: ask for a
+  base that exists locally. Never fetch one. A full audit records no `base_sha` or `base_source`.
 - A local base can lag its remote. The report names `base_source` and never claims the base is the
   remote's current tip.
 - A dirty tree means some reviewed lines are not in `head_sha`. List those paths in the report.
