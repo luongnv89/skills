@@ -213,6 +213,19 @@ class GateOnScratchRepo(unittest.TestCase):
         self.assertNotIn("this PR removes it", out)
         self.assertRegex(out, r"no FORBIDDEN in src\.+Failed")
 
+    def test_narrowed_hook_still_checks_other_scripts(self):
+        self.write(self.edited_config("        entry: TODO\n        files: ^src/\n",
+                                      "        entry: TODO\n        files: ^(src|scripts)/\n"))
+        self.write({"scripts/deploy.sh": "echo ship\n"})
+        self.base = self.commit("base checks scripts/ too")
+        narrowed = {".pre-commit-config.yaml": BASE_CONFIG}  # back to ^src/ only
+        self.pull_request({**narrowed, "scripts/deploy.sh": "# TODO ship it\n"})
+        self.assertEqual(self.guard(), 0)  # the PR's config no longer looks at scripts/
+        code, out = self.gate()
+        self.assertEqual(code, 1, out)
+        self.assertNotIn("this PR removes it", out)
+        self.assertRegex(out, r"no TODO in src\.+Failed")
+
     def test_weakened_gate_script_is_not_used(self):
         removed = self.edited_config("      - id: no-todo\n", "      - id: no-todo-renamed\n")
         self.pull_request({**removed, "scripts/base-hook-gate.py": "import sys\nsys.exit(0)\n"})

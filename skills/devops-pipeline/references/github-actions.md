@@ -38,7 +38,7 @@ Scoping to the diff with `--from-ref`/`--to-ref` is what keeps the guard cheap. 
 The guard runs `pre-commit` with the pull request's own `.pre-commit-config.yaml` and hook scripts, so a pull request that deletes a hook, moves it to `manual`, or rewrites its script to `exit 0` passes a guard it has just weakened. Keep the rules that judge a change where the change cannot edit them. Every guard template ends with a step that runs `scripts/base-hook-gate.py` when the pull request's diff touches the hook config, a workflow (`.github/workflows/`), or a hook script (anything under `scripts/`, or a file that a `repo: local` hook's `entry` or `args` names). The script:
 
 1. Fails, with a `::error::` annotation, on every hook id that the base branch's config runs in the leg's stage and the pull request's config no longer runs there: deleted, renamed, or moved to another stage.
-2. Restores the base branch's config and hook scripts in the runner's checkout (`git restore --source=<base>`).
+2. Restores the base branch's config, and the scripts its `repo: local` hooks name, in the runner's checkout (`git restore --source=<base>`). Every other file, `scripts/` included, keeps the pull request's content, so the base branch's hooks check it.
 3. Re-runs the leg's stage(s) over the same pull request diff, so the changed files meet the rules the base branch enforces.
 
 A pull request that touches none of those paths skips the step in about a second. One that does runs its stages twice, once per config; only a change to the gate itself pays that.
@@ -47,7 +47,7 @@ A pull request that touches none of those paths skips the step in about a second
 - **Read from the base branch.** The step runs the base branch's copy of the script (`git show "$base:scripts/base-hook-gate.py"`), so a pull request cannot weaken the script either. Only the pull request that first adds it, which the base branch lacks, runs its own copy.
 - **A deliberate removal fails too.** Dropping or relaxing a hook on purpose is a maintainer's decision: the step fails, and a maintainer merges past it or lands the change by another reviewed route. Later pull requests are judged by the new base config.
 - **`SKIP`.** A hook skipped on the guard step (see [Skipping specific pre-commit hooks in CI](#skipping-specific-pre-commit-hooks-in-ci)) needs the same `SKIP` on this step.
-- **What it cannot stop.** On `pull_request`, GitHub runs the workflow file from the pull request itself, so a pull request can still delete this step or the whole guard. Only review stops that, which is why the final report proposes CODEOWNERS entries for test, CI and hook config ([final-report.md](final-report.md)). They bind only once branch protection requires code-owner review, a setting this skill never changes. Never move the guard to `pull_request_target` to run the base branch's workflow: it runs pull request code with a write token and the repository's secrets.
+- **What it cannot stop.** On `pull_request`, GitHub runs the workflow file from the pull request itself, so a pull request can still delete this step or the whole guard. A hook whose logic lives outside a file its `entry` or `args` names, such as `npm test` (the `test` script in `package.json`), `pytest` (its settings in `pyproject.toml` or `conftest.py`), or a `make` or `mvn` target, runs the pull request's copy of that file, and a change to it alone does not trigger the step. Only review stops these, which is why the final report proposes CODEOWNERS entries for test, CI and hook config ([final-report.md](final-report.md)). They bind only once branch protection requires code-owner review, a setting this skill never changes. Never move the guard to `pull_request_target` to run the base branch's workflow: it runs pull request code with a write token and the repository's secrets.
 
 ```python
 """scripts/base-hook-gate.py: judge a change to the hooks with the base branch's hooks.
@@ -58,7 +58,7 @@ Does nothing unless the diff from <base> to HEAD touches .pre-commit-config.yaml
 a workflow, or a hook script (anything under scripts/, or a file a local hook's
 entry or args names). Then it fails on every hook id the base config runs in a
 given stage that the PR's config no longer runs there, restores the base's config
-and hook scripts in the working tree, and re-runs each stage over the PR diff.
+and the scripts its local hooks name, and re-runs each stage over the PR diff.
 The CI guard reads this file from the base branch, so a PR cannot edit it either.
 """
 
@@ -139,9 +139,11 @@ for stage in stages:
         print(f"::error::The base branch runs hook '{hook_id}' on {stage}; this PR removes it.")
         failed = True
 
-# The base's config and hook scripts, over the PR's files. Workflows are not
-# pre-commit input, and a file the base lacks has no base version to restore.
-restore = [p for p in gated if not p.startswith(".github/") and git("cat-file", "-e", f"{base}:{p}").returncode == 0]
+# The base's config and the scripts its local hooks name; every other file keeps
+# the PR's content, so the base hooks still check it. A file the base lacks has
+# no base version to restore.
+restore = [p for p in [CONFIG, *sorted(named_files(base_cfg))]
+           if git("cat-file", "-e", f"{base}:{p}").returncode == 0]
 if restore and subprocess.call(["git", "restore", f"--source={base}", "--staged", "--worktree", "--", *restore]):
     sys.exit("base-hook-gate: could not restore the base branch's hook files.")
 for stage in stages:
@@ -151,7 +153,7 @@ for stage in stages:
 sys.exit(1 if failed else 0)
 ```
 
-Checked with pre-commit 4.7.0 on a scratch repository, with the step run as written: a pull request that changed only source files skipped the gate; one that removed a hook and added code that hook rejects passed the PR's own config and failed the gate on both the removed hook and the base config's run; one that rewrote a hook script to `exit 0` failed on the base branch's script; and one that added a hook with clean code passed.
+Checked with pre-commit 4.7.0 on a scratch repository, with the step run as written: a pull request that changed only source files skipped the gate; one that removed a hook and added code that hook rejects passed the PR's own config and failed the gate on both the removed hook and the base config's run; one that rewrote a hook script to `exit 0` failed on the base branch's script; one that narrowed a hook's `files` and put a violation in another file under `scripts/` failed on the base branch's hook; and one that added a hook with clean code passed.
 
 ## Table of Contents
 
