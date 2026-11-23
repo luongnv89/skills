@@ -3,7 +3,8 @@
 // colon); render.py refuses to run while any marker remains, so no template
 // text can reach a PNG. Screens must mirror real app views: cite the source
 // file above each builder, and use realistic, all-ages sample content.
-// Never reuse a kit.js global (CREATIVE, LAYOUT, ui, macui, sym, I …) as a top-level name here: it throws.
+// Never reuse a kit.js top-level name here. Reusing a const (CREATIVE, LAYOUT, ui, macui, sym, I …) throws;
+// a function reusing a kit.js function (renderFrame …) silently replaces it. See references/render-pipeline.md, Troubleshooting.
 window.APP_CONFIG = {
   app: "TODO: App name",
   version: "TODO: 1.0.0",
