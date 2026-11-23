@@ -19,7 +19,7 @@ Each row is a point where interactive mode asks the user. Auto mode takes the ou
 | Reviewer `NEEDS_FIX` | 4 | Show the issues; fix them with the user | Apply each suggestion, review once more; still `NEEDS_FIX` → `BLOCKED — release review failed` |
 | Build | 6 | Ask before running | Run |
 | Release-commit checks | 7 | List the checks; ask once; declined → no tag, `PARTIAL — release commit not verified, not tagged` | Run them (`verify-release.md`) |
-| Push the branch for CI (no test command, CI runs on push) | 7 | Ask; declined → `PARTIAL — release commit not verified, not tagged` | Push the branch only, wait for CI on the release commit |
+| Push the branch for CI (no test command, CI runs on push) | 7 | Ask; declined → `PARTIAL — release commit not verified, not tagged` | Push the branch only, wait for CI on the release commit. Rejected → `BLOCKED — CI push rejected: <reason>` |
 | Push branch and tag | 7 | Ask; declined → `PARTIAL — tag vX.Y.Z created locally, not pushed` | Push |
 | GitHub release | 8 | Ask; declined → listed under `Decision` | Create |
 | Publish to a registry | 9 | Ask per registry | Follow the decision made in Step 2 (`publishing.md` → _Decide per registry_) |
@@ -44,7 +44,7 @@ Each of these stops the run with `BLOCKED`. Never retry with force and never ove
 
 A missing `gh` login or registry credential is not a hard stop: skip that step, report `PARTIAL`, and put the command under `Decision`.
 
-A stop after Step 5 and before the release commit (a failed Step 6 build, a rejected commit hook) leaves the release edits uncommitted in the working tree. List the edited files under `Decision`, with `git restore <files>` to discard them before running `/ship` again. A failed release-commit check (after the release commit, before the tag) follows `verify-release.md` → _5. On failure_. A rejected push or a tag that `git ls-remote` does not find keeps its own recovery (`resume.md`, `final-report.md`), never a reset or revert of the tagged commit.
+A stop after Step 5 and before the release commit (a failed Step 6 build, a rejected commit hook) leaves the release edits uncommitted in the working tree. List the edited files under `Decision`, with `git restore <files>` to discard them before running `/ship` again. A failed release-commit check or a rejected CI push (after the release commit, before the tag) follows `verify-release.md` → _5. On failure_. A rejected push of the tag, or a tag that `git ls-remote` does not find, keeps its own recovery (`resume.md`, `final-report.md`), never a reset or revert of the tagged commit.
 
 ## Version rules
 

@@ -468,6 +468,21 @@
         "Creates no tag and pushes nothing.",
         "Puts git reset --hard HEAD~1 under Decision for the unpushed release commit, and never suggests git revert or a force-push."
       ]
+    },
+    {
+      "id": 33,
+      "name": "release-commit-ci-push-rejected-blocks",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v1.3.0, one fix commit since; no package.json test script, Makefile, Cargo.toml, go.mod, pytest config, verify skill or smoke script; .github/workflows/ci.yml runs on push; gh is authenticated; the branch is protected, so git push origin main for CI is rejected)",
+      "expected_output": "Commits the release, finds no local test command, pushes the branch without the tag for CI, and when the push is rejected stops with 'BLOCKED — CI push rejected: <reason>'. It creates no tag, never force-pushes, and puts git reset --hard HEAD~1 under Decision because the release commit never reached origin, so a rerun writes one changelog entry.",
+      "files": [],
+      "expectations": [
+        "Attempts git push origin main without the tag only after the release commit and gh auth status.",
+        "Reports 'BLOCKED — CI push rejected: <reason>' naming the rejection.",
+        "Creates no v1.3.1 tag and never force-pushes.",
+        "Puts git reset --hard HEAD~1 under Decision for the unpushed release commit, and never suggests git revert, git tag -d or the resume.md recovery.",
+        "Never treats the release commit as verified."
+      ]
     }
   ]
 }

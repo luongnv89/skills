@@ -52,6 +52,8 @@ Use CI only when step 1 found no test command and a workflow in `.github/workflo
 - **Interactive:** ask "Push `<branch>` (no tag) so CI can verify `<short sha>`?". A decline ends as in _Interactive mode: ask once_.
 - **Auto:** run `git push origin <branch>`.
 
+With no `origin` remote, push nothing and continue as in section 4. A rejected push (protected branch, remote moved ahead) stops with `BLOCKED — CI push rejected: <reason>`; never force-push. The release commit is still local and untagged, so recovery is section 5's _Local commit_ reset, not `resume.md`, which assumes a tag.
+
 Then wait for the runs on that exact commit:
 
 ```bash
@@ -98,6 +100,7 @@ Any new or changed entry stops with `BLOCKED — release checks left files: <lis
 The release still tags when nothing verified the commit, and `Uncertainty` says `Release commit <short sha> not verified: <reason>`, with one of these reasons:
 
 - no test command or CI
+- no `origin` remote to push to for CI
 - CI never ran on the commit
 - gh could not read runs
 - the test command was skipped because it calls a release step
@@ -108,5 +111,5 @@ The release still tags when nothing verified the commit, and `Uncertainty` says 
 
 Every failure stops with `BLOCKED` and names the exact check that failed: the command, the workflow, the verify row or the script. No tag is created, and nothing rolls back automatically. Under `Decision`, in this order:
 
-- **Local commit:** drop the unpushed release commit with `git reset --hard HEAD~1`, which discards the release edits that `/ship` recreates. Then fix the failing check, commit the fix (Step 1 needs a clean tree), and run `/ship` again.
+- **Local commit:** drop the unpushed release commit (including one whose CI push was rejected) with `git reset --hard HEAD~1`, which discards the release edits that `/ship` recreates. Then fix the failing check, commit the fix (Step 1 needs a clean tree), and run `/ship` again.
 - **Pushed for CI:** run `git revert <release_sha>` and push, which restores the old version files and changelog, so the next run writes one `## vX.Y.Z` entry, not two. Then fix the failing check, commit the fix, and run `/ship` again. Never force-push or delete the remote commit.
