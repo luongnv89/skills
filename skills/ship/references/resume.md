@@ -25,7 +25,7 @@ Run the required project builds from Step 6 against the tagged source before any
 Then follow `publishing.md`'s package checks for each pending local registry:
 
 - **npm:** run `npm pack --dry-run` after the build. Confirm required publish files, including built entry points named by `package.json`, exist and appear in the packed file list. A successful pack command alone does not prove those files are included.
-- **PyPI:** build the distribution as described there unless this run's build already produced it, then run `uvx twine check` and confirm the distribution's package name and version match `NEW_VERSION`. Do not reuse artifacts merely because they are present.
+- **PyPI:** build the distribution as described there unless this run's build already produced it, then run `uvx twine@latest check` and confirm the distribution's package name and version match `NEW_VERSION`. Do not reuse artifacts merely because they are present.
 
 Missing or invalid artifacts stop with `BLOCKED — package verification failed`. Record the build and package checks under `Evidence`; only then continue to the remaining upload.
 
