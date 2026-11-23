@@ -27,7 +27,7 @@ Two workers in `agents/` return JSON. **source-checker** runs one check and is s
 ## Environment Check
 
 1. Before Step 1, find the web access this session has: an HTTP tool (WebFetch, an MCP fetch tool, or `curl` in a shell) or a web-search tool. Either kind is enough.
-2. Run one test request with each tool you found, for example a fetch of `https://registry.npmjs.org/npm` or one search query.
+2. Run one test request with each tool you found, for example a fetch of `https://data.iana.org/rdap/dns.json` (the domain check reads it anyway) or one search query.
 3. If no tool works, stop and return the `BLOCKED` report from *Output Format* with the error. When only one kind works, run every check and mark each source it cannot reach Unknown.
 
 ## Repo Sync Before Edits (mandatory)
@@ -57,7 +57,7 @@ Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TL
 - Available: the TLD registry's RDAP or WHOIS answers that the domain is not found; cite that lookup as evidence
 - Parked: registered, and its page shows parking or a sale offer
 - Active: In use (flag if same industry)
-- Unknown: no registry RDAP or WHOIS answer, so the result rests on search or a registrar page, or only shows that no active site was found; do not infer availability. A registered domain whose page could not be fetched or shows neither a site nor a parking page is Unknown too
+- Unknown: no registry RDAP or WHOIS answer and no fetched site, so the result rests on search or a registrar page, or only shows that no active site was found; do not infer availability. A registered domain whose page could not be fetched or shows neither a site nor a parking page is Unknown too
 
 ### Step 4: Trademark Check (if Step 1 clear)
 

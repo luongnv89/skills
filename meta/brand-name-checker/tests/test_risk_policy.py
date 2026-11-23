@@ -315,6 +315,7 @@ class WebAccessAndDomainTests(unittest.TestCase):
         self.assertNotIn("confirm the WebSearch and WebFetch tools are available", section)
         self.assertIn("WebFetch, an MCP fetch tool, or `curl` in a shell) or a web-search tool", section)
         self.assertIn("Either kind is enough", section)
+        self.assertNotIn("https://registry.npmjs.org/npm`", section)
 
     def test_blocked_only_when_no_web_access_works(self) -> None:
         section = self.environment_section()
@@ -362,7 +363,7 @@ class WebAccessAndDomainTests(unittest.TestCase):
         section = self.domain_section()
         self.assertIn("but the status stays Unknown", section)
         self.assertIn("nothing short of the registry shows it is Available", section)
-        self.assertIn("- Unknown: no registry RDAP or WHOIS answer, so the result rests on search", SKILL_TEXT)
+        self.assertIn("- Unknown: no registry RDAP or WHOIS answer and no fetched site, so the result rests on search", SKILL_TEXT)
 
     def test_failed_site_fetch_never_makes_a_domain_parked(self) -> None:
         section = self.domain_section()
