@@ -9,7 +9,7 @@
 
 > Design professional, modern logos with automatic project context detection and multiple SVG deliverables.
 
-Version: **1.7.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.8.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
