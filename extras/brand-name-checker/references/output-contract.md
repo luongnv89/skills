@@ -18,7 +18,7 @@ Field rules and worked examples for the compact report in `SKILL.md` → *Output
 
 - **COMPLETE**: every required check is verified, or skipped by the Early-Exit Rule after an exact handle was confirmed.
 - **PARTIAL**: one or more checks are Unknown. The risk is provisional under the unknown policy.
-- **BLOCKED**: no name was provided, or the web tools are unavailable. Return only the `RESULT` line with the reason and the fix (for example, "enable WebSearch and re-run"). Omit every other line.
+- **BLOCKED**: no name was provided, or no web access works (no HTTP or search tool answers a test request). Return only the `RESULT` line with the reason and the fix (for example, "enable a web fetch or search tool, or shell access for curl, and re-run"). Omit every other line.
 
 ## The `next:` clause
 

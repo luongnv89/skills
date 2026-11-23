@@ -8,4 +8,4 @@ Handling rules for unusual inputs and source failures. `SKILL.md` → *Edge Case
 - **Name contains special characters or spaces**: normalize to slug form (for example `my tool` → `my-tool`) before all checks, and report both the original and the normalized forms.
 - **Very short names (1-3 characters)**: flag the elevated trademark collision risk upfront. Abbreviations are almost always claimed across social and trademark databases.
 - **Name already in use by a well-known brand (typosquat risk)**: escalate to High even if every technical check passes.
-- **No web tools available**: return the `BLOCKED` report from `SKILL.md` → *Output Format*. Never fill statuses from memory.
+- **No web access** (no HTTP or search tool answers a test request): return the `BLOCKED` report from `SKILL.md` → *Output Format*. Never fill statuses from memory. When only one kind of tool works, run the checks anyway and mark each source it cannot reach Unknown.

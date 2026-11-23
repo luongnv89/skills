@@ -2,20 +2,22 @@
 
 Per-source queries and status rules for the four checks in `SKILL.md` → *Analysis Protocol*. This file is their single home: `agents/source-checker.md` reads the section for its `check`, and without subagents Steps 1-4 run inline from it.
 
+**Tools.** Any working HTTP tool (WebFetch, an MCP fetch tool, or `curl` in a shell) can fetch the direct endpoints below, and any web-search tool can run the queries. Each source lists its direct endpoint first: use it, and run the search query only when the source has none or its endpoint cannot be reached, and say so in the evidence. Put only the normalized slug of the name (`references/edge-cases.md`) into a URL or a shell command, never the raw input.
+
 Record each result as one of the statuses below, together with the source that produced it (the query or URL) and the time it was checked. A source that cannot be reached is `Unknown`, never clear.
 
 ## Step 1: Social Media Check
 
-Run one WebSearch per platform:
+Check each platform through its direct endpoint when it has one, else through its search query:
 
-| Platform | Query |
-|----------|-------|
-| X/Twitter | `"@[NAME]" site:twitter.com OR site:x.com` |
-| Instagram | `"@[NAME]" site:instagram.com` |
-| GitHub | `"[NAME]" site:github.com/[NAME]` |
-| LinkedIn | `"[NAME]" site:linkedin.com/company/[NAME]` |
-| TikTok | `"@[NAME]" site:tiktok.com` |
-| Discord | `"[NAME]" site:discord.com`, or open `discord.com/invite/[NAME]` |
+| Platform | Direct endpoint | Search query |
+|----------|-----------------|--------------|
+| X/Twitter | none | `"@[NAME]" site:twitter.com OR site:x.com` |
+| Instagram | none | `"@[NAME]" site:instagram.com` |
+| GitHub | `https://api.github.com/users/[NAME]` (users and organizations): 200 is `taken (exact)`, 404 is `available` | `"[NAME]" site:github.com/[NAME]` |
+| LinkedIn | none | `"[NAME]" site:linkedin.com/company/[NAME]` |
+| TikTok | none | `"@[NAME]" site:tiktok.com` |
+| Discord | `https://discord.com/api/v10/invites/[NAME]`: 200 with a server is `taken (exact)`, 404 means the invite name is unused (`available`) | `"[NAME]" site:discord.com` |
 
 Statuses: `available`, `taken (exact)`, `similar (non-exact)`, `unknown`.
 
@@ -29,14 +31,16 @@ If any platform returns `taken (exact)`, apply the Early-Exit Rule: return `NEGA
 
 Package registries are first-come-first-served namespaces. Unlike GitHub, which allows duplicate project names, a registry enforces unique names: once someone claims a name on PyPI or npm, nobody else can publish under it. If the name is taken on a registry the user plans to publish to, the user needs a different name or a naming variant (prefix or suffix).
 
-Use WebFetch for each registry:
+Fetch each registry's endpoint with any HTTP tool:
 
 | Registry | Check URL | Taken if... |
 |----------|-----------|-------------|
 | **npm** | `https://registry.npmjs.org/[NAME]` | Returns JSON with package data (not a 404) |
 | **PyPI** | `https://pypi.org/pypi/[NAME]/json` | Returns JSON with package data (not a 404) |
 | **Homebrew** | `https://formulae.brew.sh/api/formula/[NAME].json` | Returns JSON (not a 404) |
-| **apt** | Search: `"[NAME]" site:packages.debian.org OR site:packages.ubuntu.com` | Package listing found |
+| **apt** | `https://packages.debian.org/search?keywords=[NAME]&searchon=names&exact=1&suite=all&section=all`, and the same query on `packages.ubuntu.com` | The page lists `Exact hits`; `Sorry, your search gave no results` on both is not found |
+
+When the Debian and Ubuntu pages cannot be reached, fall back to the search `"[NAME]" site:packages.debian.org OR site:packages.ubuntu.com` and say so in the evidence.
 
 Report each registry as:
 
@@ -51,7 +55,13 @@ If the name is taken on a target registry, flag it at the top of the registry li
 
 Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD only when `prd.md` or the user names it (`SKILL.md` → *Step 3: Domain Check*).
 
-For each TLD, run `"[NAME].[TLD]" domain registry status`, `"[NAME].[TLD]" domain availability` and `site:[NAME].[TLD]`, and look the domain up in a registrar's availability search (for example GoDaddy or Namecheap). Record the registrar and expiry date when a source shows them. For an active site, record its industry and whether it overlaps the user's product. For a parked or for-sale page, record the sale contact. For an Unknown domain, name a WHOIS or registrar lookup as the way to verify it.
+Ask the TLD's registry first, by RDAP or WHOIS. A search or a registrar's availability page is only a fallback. For each `[NAME].[TLD]`:
+
+1. **RDAP.** Read the TLD's RDAP base URL from the IANA bootstrap file `https://data.iana.org/rdap/dns.json` and fetch `<base>domain/[NAME].[TLD]`. A 404 from that registry server means not found. A 200 means registered: record the registrar and the expiry date from its `events`. When the bootstrap file lists no RDAP server for the TLD, go to WHOIS. Never count a 404 from a redirector such as `rdap.org` for a TLD with no RDAP server: it answers 404 for registered domains too.
+2. **WHOIS.** Ask IANA for the TLD's WHOIS server (`whois -h whois.iana.org [TLD]`, the `whois:` line), then query that server: `whois -h <server> [NAME].[TLD]`. Its not-found reply (for example `Domain not found.` or `No match`) means not found; a record that names a registrar means registered.
+3. **One method failed.** No answer, a host that does not resolve, a timeout, a 403, 429 or 5xx, or an empty reply is a failure, not an answer. Try the other method before giving up on the TLD. A failed WHOIS never ends the check while RDAP is untried, and a failed RDAP never ends it while WHOIS is untried.
+4. **Status.** A registry not-found reply is Available; cite the RDAP URL or the WHOIS command and its reply as the evidence. For a registered domain, fetch `https://[NAME].[TLD]` (or run `site:[NAME].[TLD]`) to tell Active from Parked. For an active site, record its industry and whether it overlaps the user's product. For a parked or for-sale page, record the sale contact. A registered domain with no site is Parked.
+5. **Fallback, still Unknown.** When neither RDAP nor WHOIS answers, run `"[NAME].[TLD]" domain availability` and look the domain up in a registrar's availability search (for example GoDaddy or Namecheap). Record what they show in the evidence, but the status stays Unknown; name the RDAP or WHOIS lookup that would verify it. Only a site that answers at `https://[NAME].[TLD]` can still show the domain is registered (Active or Parked); nothing short of the registry shows it is Available.
 
 The statuses (Available, Parked, Active, Unknown) are defined in `SKILL.md` → *Step 3: Domain Check*. A search that finds no site proves nothing about registration; record it as Unknown.
 

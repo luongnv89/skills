@@ -299,5 +299,76 @@ class SourceCheckerTests(unittest.TestCase):
         self.assertNotIn("is unchanged", SKILL_TEXT)
 
 
+class WebAccessAndDomainTests(unittest.TestCase):
+    """Any working web access runs the skill (#673); domains are asked of the registry first (#671)."""
+
+    @staticmethod
+    def environment_section() -> str:
+        return SKILL_TEXT.split("## Environment Check", 1)[1].split("\n## ", 1)[0]
+
+    @staticmethod
+    def domain_section() -> str:
+        return SOURCE_CHECKS_TEXT.split("## Step 3", 1)[1].split("## Step 4", 1)[0]
+
+    def test_environment_check_accepts_any_web_access(self) -> None:
+        section = self.environment_section()
+        self.assertNotIn("confirm the WebSearch and WebFetch tools are available", section)
+        self.assertIn("WebFetch, an MCP fetch tool, or `curl` in a shell) or a web-search tool", section)
+        self.assertIn("Either kind is enough", section)
+
+    def test_blocked_only_when_no_web_access_works(self) -> None:
+        section = self.environment_section()
+        self.assertIn("If no tool works, stop and return the `BLOCKED` report", section)
+        self.assertIn("When only one kind works, run every check and mark each source it cannot reach Unknown", section)
+        self.assertIn("**BLOCKED** when no name was given or no web access works", SKILL_TEXT)
+        contract = (SKILL_DIR / "references" / "output-contract.md").read_text(encoding="utf-8")
+        self.assertNotIn("enable WebSearch and re-run", contract)
+
+    def test_source_checks_prefer_direct_endpoints(self) -> None:
+        preamble = SOURCE_CHECKS_TEXT.split("## Step 1", 1)[0]
+        self.assertIn("Each source lists its direct endpoint first", preamble)
+        self.assertNotIn("Run one WebSearch per platform", SOURCE_CHECKS_TEXT)
+        self.assertNotIn("Use WebFetch for each registry", SOURCE_CHECKS_TEXT)
+        for endpoint in (
+            "https://api.github.com/users/[NAME]",
+            "https://discord.com/api/v10/invites/[NAME]",
+            "https://packages.debian.org/search?keywords=[NAME]&searchon=names&exact=1",
+        ):
+            with self.subTest(endpoint=endpoint):
+                self.assertIn(endpoint, SOURCE_CHECKS_TEXT)
+        worker = worker_text("source-checker")
+        self.assertNotIn("If WebFetch or a direct database search is unavailable", worker)
+        self.assertIn("Query the\n   direct endpoint first", worker)
+
+    def test_domain_check_asks_the_registry_first(self) -> None:
+        section = self.domain_section()
+        rdap = section.index("https://data.iana.org/rdap/dns.json")
+        whois = section.index("whois -h whois.iana.org [TLD]")
+        search = section.index('"[NAME].[TLD]" domain availability')
+        self.assertLess(rdap, search)
+        self.assertLess(whois, search)
+        self.assertIn("Ask the TLD's registry first, by RDAP or WHOIS", SKILL_TEXT)
+
+    def test_registry_not_found_is_available_with_that_evidence(self) -> None:
+        section = self.domain_section()
+        self.assertIn(
+            "A registry not-found reply is Available; cite the RDAP URL or the WHOIS command and its reply as the evidence",
+            section,
+        )
+        self.assertIn("Never count a 404 from a redirector such as `rdap.org`", section)
+        self.assertIn("- Available: the TLD registry's RDAP or WHOIS answers that the domain is not found", SKILL_TEXT)
+
+    def test_search_only_domain_result_stays_unknown(self) -> None:
+        section = self.domain_section()
+        self.assertIn("but the status stays Unknown", section)
+        self.assertIn("nothing short of the registry shows it is Available", section)
+        self.assertIn("- Unknown: no registry RDAP or WHOIS answer, so the result rests on search", SKILL_TEXT)
+
+    def test_failed_whois_does_not_end_the_domain_check(self) -> None:
+        section = self.domain_section()
+        self.assertIn("A failed WHOIS never ends the check while RDAP is untried", section)
+        self.assertIn("a host that does not resolve", section)
+
+
 if __name__ == "__main__":
     unittest.main()

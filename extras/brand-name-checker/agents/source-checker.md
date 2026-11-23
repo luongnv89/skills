@@ -58,9 +58,12 @@ lookups.
    owner and last publish date, a squatting signal, a domain's registrar,
    expiry or active site's industry, and each trademark's class, owner and
    live or expired state.
-6. If WebFetch or a direct database search is unavailable, run the section's
-   web-search query instead and say so in `evidence`. If no tool works, mark
-   every target `unknown`.
+6. Use whichever web access works: any HTTP tool (WebFetch, an MCP fetch
+   tool, or `curl` in a shell) for the section's direct endpoints, a shell
+   for its `whois` lookups, and any search tool for its queries. Query the
+   direct endpoint first. Run the section's search query only when the source
+   has no endpoint or the endpoint cannot be reached, and say so in
+   `evidence`. If no tool works, mark every target `unknown`.
 
 For `social`, report every platform even when one is `taken (exact)`. The
 parent applies the Early-Exit Rule; this agent does not stop early.

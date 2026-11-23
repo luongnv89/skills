@@ -4,7 +4,7 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -26,9 +26,9 @@ Two workers in `agents/` return JSON. **source-checker** runs one check and is s
 
 ## Environment Check
 
-1. Before Step 1, confirm the WebSearch and WebFetch tools are available.
-2. Run one test query.
-3. If either check fails, stop and return the `BLOCKED` report from *Output Format* with the error.
+1. Before Step 1, find the web access this session has: an HTTP tool (WebFetch, an MCP fetch tool, or `curl` in a shell) or a web-search tool. Either kind is enough.
+2. Run one test request with each tool you found, for example a fetch of `https://registry.npmjs.org/npm` or one search query.
+3. If no tool works, stop and return the `BLOCKED` report from *Output Format* with the error. When only one kind works, run every check and mark each source it cannot reach Unknown.
 
 ## Repo Sync Before Edits (mandatory)
 
@@ -40,11 +40,11 @@ Read the name from `$ARGUMENTS`; if empty, ask the user. If `prd.md` exists, rea
 
 ## Analysis Protocol
 
-Queries, check URLs, and status rules for Steps 1-4: `references/source-checks.md`. Record every result with its source.
+Queries, check URLs, and status rules for Steps 1-4: `references/source-checks.md`. Query a source's direct API or registry endpoint first and fall back to search only when it has none or the endpoint fails. Record every result with its source.
 
 ### Step 1: Social Media Check (First Priority)
 
-Search X/Twitter, Instagram, GitHub, LinkedIn, TikTok, and Discord. If an exact handle is taken (Early-Exit Rule), return `NEGATIVE: Exact social handle taken (@platform)` and skip to Step 6.
+Check X/Twitter, Instagram, GitHub, LinkedIn, TikTok, and Discord. If an exact handle is taken (Early-Exit Rule), return `NEGATIVE: Exact social handle taken (@platform)` and skip to Step 6.
 
 ### Step 2: Package Registry Check (if Step 1 clear)
 
@@ -52,12 +52,12 @@ Check npm, PyPI, Homebrew, and apt as Available, Taken (owner, last publish date
 
 ### Step 3: Domain Check (if Step 1 clear)
 
-Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD only when `prd.md` or the user names it, and add it to the DOMAIN line and the check count:
+Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD only when `prd.md` or the user names it, and add it to the DOMAIN line and the check count. Ask the TLD's registry first, by RDAP or WHOIS (`references/source-checks.md`):
 
-- Available: an authoritative availability result confirms the domain is unregistered
-- Parked: Domain exists but is for-sale/parking
+- Available: the TLD registry's RDAP or WHOIS answers that the domain is not found; cite that lookup as evidence
+- Parked: registered but not in use (a for-sale or parking page, or no site)
 - Active: In use (flag if same industry)
-- Unknown: the source is unavailable or only shows that no active site was found; do not infer availability
+- Unknown: no registry RDAP or WHOIS answer, so the result rests on search or a registrar page, or only shows that no active site was found; do not infer availability
 
 ### Step 4: Trademark Check (if Step 1 clear)
 
@@ -109,7 +109,7 @@ RISK: [Low | Moderate | High] - [highest matching trigger, evidence, and policy 
 RECOMMEND: [Proceed | Modify | Abandon] - [reason and checked or unverified alternatives]; next: [the user's decision and remaining actions]
 ```
 
-`RESULT` status: **COMPLETE** when every check is verified or skipped by the Early-Exit Rule; **PARTIAL** when any check is Unknown; **BLOCKED** when no name was given or the web tools are unavailable (return only the `RESULT` line with the reason and fix). Before writing the report, read `references/output-contract.md` for the field rules and the `next:` clause. If `prd.md` exists, append the blocks from `references/prd-integration.md`.
+`RESULT` status: **COMPLETE** when every check is verified or skipped by the Early-Exit Rule; **PARTIAL** when any check is Unknown; **BLOCKED** when no name was given or no web access works (return only the `RESULT` line with the reason and fix). Before writing the report, read `references/output-contract.md` for the field rules and the `next:` clause. If `prd.md` exists, append the blocks from `references/prd-integration.md`.
 
 ## Step Completion Reports
 
