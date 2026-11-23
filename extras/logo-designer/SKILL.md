@@ -4,7 +4,7 @@ description: "Generate professional SVG logos from project context: 7 brand vari
 license: MIT
 effort: medium
 metadata:
-  version: 1.6.0
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -134,7 +134,7 @@ Output structure:
 └── brand-showcase.html    # Self-contained brand identity page
 ```
 
-Draw the wordmark as outlined `<path>` letterforms, never `<text>`, so no SVG or PNG depends on an installed font.
+Draw the wordmark as outlined `<path>` letterforms, never `<text>`, so no SVG or PNG depends on an installed font. Produce them with `references/wordmark-outlining.md`: a licence check, a static weight file, and one fontTools pass whose paths every wordmark file reuses.
 
 After writing all 7 files, read back mark, full, icon, white, and black variants and verify `d=""` strings are identical (or correctly scaled via `transform`). Fix divergences before continuing.
 
@@ -206,6 +206,7 @@ Decision: No approval needed.
 - [ ] `logo-mark.svg` is created first and its `d=""` path strings are used verbatim in all derived variants
 - [ ] Every SVG has a correct `viewBox` attribute and contains no embedded rasters
 - [ ] No SVG contains `<text>`: the wordmark is outlined paths, so neither the SVGs nor the PNGs need an installed font
+- [ ] The wordmark is outlined from a licence-checked static font file (`references/wordmark-outlining.md`), and `logo-wordmark`, `logo-full`, `logo-white` and `logo-black` hold the same glyph `d` strings
 - [ ] A PNG of each of the 7 variants is rendered from the verified SVGs into `/assets/logo/png/` at the Phase 3b sizes, and each one's measured dimensions appear in `Evidence:`
 - [ ] With no rasterizer found, the run still delivers the SVGs and ends `PARTIAL` with the install command under `Decision:`
 - [ ] Monochrome variants (`logo-white.svg`, `logo-black.svg`) differ from `logo-full.svg` only in color, not geometry

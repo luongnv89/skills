@@ -9,7 +9,7 @@
 
 > Design professional, modern logos with automatic project context detection and multiple SVG deliverables.
 
-Version: **1.6.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.7.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -68,6 +68,7 @@ asm install github:luongnv89/skills:extras/logo-designer
 | `agents/svg-generator.md` | Generate all 7 SVG logo files (full, mark, wordmark, icon, favicon, white, black) |
 | `agents/svg-reviewer.md` | Validate SVG structure, completeness, and compatibility |
 | `references/png-export.md` | Rasterizer detection, per-tool PNG commands, sizes, and the dimension check |
+| `references/wordmark-outlining.md` | Licence check, static weight, fontTools outlining, spacing, weight matching, and one set of glyph paths reused in every wordmark file |
 
 ## Output
 

@@ -16,6 +16,7 @@ You receive these parameters in your prompt:
 - **canonical_paths** (optional): If the caller provides literal SVG `<path d="...">` strings, use them exactly. This is the most common case — the main agent creates logo-mark.svg first and passes you the path data.
 - **wordmark_text**: The exact product name string and formatting for the wordmark (e.g., "mmtDPI", "FastBuild")
 - **wordmark_style**: How to style the wordmark (which parts bold, which colored, etc.)
+- **wordmark_paths** (optional): The literal `<path d="...">` letterforms produced by `references/wordmark-outlining.md`. When provided, paste them unchanged into every wordmark file.
 
 ## Process
 
@@ -147,7 +148,7 @@ For ALL generated SVGs:
 4. **Proper structure**: Use `<g>` groups. Add brief comments for sections.
 5. **Correct naming**: Exactly 7 files with the standard names.
 6. **Default quality bar**: Even if the brief never asks, every file must look professional, production-ready, elegant, and premium: optical balance, consistent stroke weights, clean minimal paths, legible at 16px, refined wordmark kerning. Premium means craft and restraint, not ornament.
-7. **Outlined text**: No `<text>`, `<tspan>` or `@font-face`. Draw each wordmark letter as a `<path>` in the brief's typeface proportions, and reuse the same letter paths in logo-full, logo-white, logo-black and logo-wordmark (scaled via `transform` where sizes differ). The PNG export renders these files, and a rasterizer would substitute an installed font for `<text>`.
+7. **Outlined text**: No `<text>`, `<tspan>` or `@font-face`. Use the `wordmark_paths` you were given; without them, outline the brief's font by `references/wordmark-outlining.md`. Reuse the same letter paths byte for byte in logo-full, logo-white, logo-black and logo-wordmark, changing only the wrapping group's `transform` and fill. The PNG export renders these files, and a rasterizer would substitute an installed font for `<text>`.
 
 ### Step 6: Verify Consistency
 
