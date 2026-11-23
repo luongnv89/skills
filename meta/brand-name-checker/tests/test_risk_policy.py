@@ -293,6 +293,7 @@ class SourceCheckerTests(unittest.TestCase):
             "A bot check, CAPTCHA",
             "list it in the evidence as ignored",
             "counts as identical",
+            "equals a hyphen- or space-separated part of the name (for example `ACME` for `acme-flow`)",
         ):
             with self.subTest(clause=clause):
                 self.assertIn(clause, section)
