@@ -41,15 +41,17 @@ The same applies to the GitHub release in Step 8. If a workflow creates releases
 If Step 6 already produced the files in `dist/`, reuse them. Otherwise build inside the project's virtual environment (`.venv/` or `venv/`) when one exists:
 
 ```bash
-python -m pip install --upgrade build twine
+python -m pip install --upgrade build
 rm -rf dist/ build/ *.egg-info
 python -m build
 ```
 
+Run twine through `uvx twine`, so the latest twine runs instead of whatever version the environment has. An older twine rejects newer package metadata (`'2.5' is not a valid metadata version`). If `uvx` is missing, install it with uv, or use `python -m pip install --upgrade twine` and then plain `twine`.
+
 ### Verify the package
 
 ```bash
-twine check dist/*
+uvx twine check dist/*
 ls -la dist/
 ```
 
@@ -66,7 +68,7 @@ Proceed? Once published, this version cannot be overwritten on PyPI."
 In auto mode, upload when the Step 2 decision for PyPI is "publish":
 
 ```bash
-twine upload --non-interactive dist/*   # fail fast instead of prompting for credentials
+uvx twine upload --non-interactive dist/*   # fail fast instead of prompting for credentials
 ```
 
 Record the URL: `https://pypi.org/project/<package-name>/X.Y.Z/`
