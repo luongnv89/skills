@@ -10,7 +10,7 @@ Field rules and worked examples for the compact report in `SKILL.md` → *Output
 | `SOCIAL`, `REGISTRY`, `DOMAIN`, `TM` | One status per source, using the vocabulary in `references/source-checks.md` and `SKILL.md` → *Step 3*. `Unknown` and `Skipped (not cleared)` are statuses, never blanks. |
 | `EVIDENCE` | For each verified status, the URL or query that produced it and the check time. A status with no evidence is Unknown. |
 | `SKIPPED` | Checks omitted by the Early-Exit Rule, or `none`. |
-| `UNKNOWN` | Each unverified check, why it failed (timeout, 429, outage, missing target intent), and what would verify it. `none` when empty. |
+| `UNKNOWN` | Each unverified check, why it failed (timeout, 429, outage, bot check, unconfirmed search, missing target intent), and what would verify it; for a trademark register, its manual check link from `references/source-checks.md` → *Step 4*. `none` when empty. |
 | `RISK` | Level, highest matching trigger from the Step 5 matrix, the finding behind it, and the policy rationale. |
 | `RECOMMEND` | Verdict, reason, alternatives (checked or labeled unverified), then `next:`. Keep `RISK` and `RECOMMEND` as the last two lines. |
 

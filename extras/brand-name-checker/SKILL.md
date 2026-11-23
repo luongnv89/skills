@@ -4,7 +4,7 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.8.0
+  version: 1.8.1
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -61,7 +61,7 @@ Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TL
 
 ### Step 4: Trademark Check (if Step 1 clear)
 
-Search WIPO, EUIPO, and INPI in Nice Classes 9, 35, 42; record each mark as live or expired.
+Search WIPO, EUIPO, and INPI in Nice Classes 9, 35, 42; record each mark as live or expired. A register's answer counts only when it passes the guards in `references/source-checks.md` → *Step 4*: the page answered, its results name the searched term, and each hit's word element matches the name. Otherwise the register is Unknown, and the `UNKNOWN` line gives its manual check link.
 
 ### Step 5: Risk Assessment
 

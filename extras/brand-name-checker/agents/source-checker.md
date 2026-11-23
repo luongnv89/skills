@@ -70,6 +70,12 @@ lookups.
 For `social`, report every platform even when one is `taken (exact)`. The
 parent applies the Early-Exit Rule; this agent does not stop early.
 
+For `trademark`, apply the three guards in *Step 4: Trademark Check* to every
+register answer. A block or bot page, or a results view that does not name the
+searched term, is `unknown`; a hit whose word element does not match the name
+goes in `evidence` as ignored and is never a conflict. Put the final URL in
+`evidence`, and for each `unknown` register its manual check link.
+
 ## Output
 
 Return only this JSON, with one entry per target in input order:
