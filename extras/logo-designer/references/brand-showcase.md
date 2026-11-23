@@ -12,12 +12,12 @@ The showcase page must:
 
    - **Hero section** — dark background, centered logo mark (inline SVG), product name as heading, "Brand Identity" label, and design concept tagline
    - **Design Concept** — two-column layout: left column shows an annotated version of the mark (with labels on key visual elements explaining what they represent), right column explains the design rationale in prose (why this shape, why these colors, typography reasoning)
-   - **Logo Variants** — grid of cards showing each of the 7 SVG files on appropriate backgrounds:
-     - `logo-full.svg` on light background (full width)
+   - **Logo Variants** — grid of cards showing each of the 7 SVG files on its intended background (`references/svg-deliverables.md` variant table):
+     - `logo-full.svg` on the brand background (full width)
      - `logo-white.svg` on dark background (full width)
-     - `logo-mark.svg` on dark background
+     - `logo-mark.svg` on the brand background
      - `logo-icon.svg` on light background
-     - `logo-wordmark.svg` on light background
+     - `logo-wordmark.svg` on the brand background
      - `favicon.svg` on dark background (shown at 64px with "16×16px" caption)
      - `logo-black.svg` on light background (full width)
      - Each card shows: a label (top-left), the SVG image, and the filename (bottom-right, monospace)

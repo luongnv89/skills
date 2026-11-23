@@ -13,7 +13,7 @@
         "Wrote logo-mark.svg first and derived the 6 sibling variants from its exact path data",
         "Read back the mark, full, icon, white and black variants and verified the d=\"\" strings are identical or correctly scaled via transform",
         "Every SVG has a correct viewBox and contains no embedded rasters; favicon.svg is a simplified 2-layer mark at 16x16",
-        "Rendered PNGs from the verified SVGs into /assets/logo/png/ (logo-icon 512 and 1024, logo-mark 512, logo-full, logo-white and logo-black 1280x288, logo-wordmark 720x160, favicon 16, 32 and 48), and the Evidence: line lists each PNG's measured dimensions",
+        "Rendered PNGs from the verified SVGs into /assets/logo/png/ (logo-icon 512 and 1024, logo-mark 512, logo-full, logo-white and logo-black at 4W x 288 where W is the fitted lockup width, logo-wordmark 720x160, favicon 16, 32 and 48), and the Evidence: line lists each PNG's measured dimensions",
         "No SVG contains <text>; the wordmark is outlined paths",
         "The Final Report opens with a Result: line carrying COMPLETE and the files written",
         "The Final Report has Evidence:, Uncertainty: and Decision: lines; Evidence names the geometry read-back and the svg-reviewer result, and Uncertainty labels each assumption as an assumption",
@@ -110,6 +110,34 @@
       "expectations": [
         "logo-designer did not trigger",
         "No /assets/logo/ directory was created"
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "name": "icon-stroke-and-centering",
+      "prompt": "Design a logo for ledgerline, a bookkeeping CLI. Wordmark in lowercase. The mark should be stroke-based: two thin outlined ledger lines inside a rounded frame.",
+      "expected_output": "logo-icon.svg wraps the canonical stroke-based mark in a centered scale group and keeps its stroke widths, so the 512px icon has the same stroke-to-mark proportions as logo-mark.svg.",
+      "files": [],
+      "expectations": [
+        "logo-icon.svg wraps the mark in a group whose transform is translate(256 - cx*S, 256 - cy*S) scale(S), for example translate(86, 86) scale(5.3125) for a mark centered in its 64x64 canvas, so the mark is centered in the 512x512 tile",
+        "Every stroke-width inside logo-icon.svg's scaled group equals the matching stroke-width in logo-mark.svg; none is divided by the scale factor and none uses vector-effect=\"non-scaling-stroke\"",
+        "The svg-reviewer report does not flag the icon's stroke widths as contradicting the mark-consistency rule"
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "edge",
+      "name": "short-name-lockup-and-backgrounds",
+      "prompt": "Design a logo for sfm, our three-letter file manager CLI. Wordmark in lowercase, default style.",
+      "expected_output": "The lockups fit their width to the short wordmark, every variant names its intended background, and each variant's contrast against that background is checked at 3:1 for the mark and 4.5:1 for wordmark letters.",
+      "files": [],
+      "expectations": [
+        "logo-full.svg's viewBox is 0 0 W 72 with W equal to the wordmark's right edge plus 4 (well under 320 for sfm), so the canvas has no mostly empty band on the right",
+        "logo-white.svg and logo-black.svg use the same W as logo-full.svg, and their PNGs measure 4W x 288",
+        "Each of the 7 files is assigned an intended background: brand background for mark, full and wordmark; its own tile for the icon; both #FAFAFA and #0A0A0A for the favicon; #0A0A0A for logo-white; #FAFAFA for logo-black",
+        "Each variant's contrast against its intended background is checked and reported: at least 3:1 for the mark's silhouette layer and at least 4.5:1 for every wordmark letter, with layer opacity composited first",
+        "The svg-reviewer report includes the contrast table and does not raise an empty-canvas warning for the lockups"
       ]
     }
   ]

@@ -17,6 +17,7 @@ You receive these parameters in your prompt:
 - **wordmark_text**: The exact product name string and formatting for the wordmark (e.g., "mmtDPI", "FastBuild")
 - **wordmark_style**: How to style the wordmark (which parts bold, which colored, etc.)
 - **wordmark_paths** (optional): The literal `<path d="...">` letterforms produced by `references/wordmark-outlining.md`. When provided, paste them unchanged into every wordmark file.
+- **brand_background**: The background logo-mark, logo-full and logo-wordmark are drawn for (`references/svg-deliverables.md`, *Brand background*)
 
 ## Process
 
@@ -78,15 +79,16 @@ Every variant reuses the **exact same `d=""` path strings** from the canonical m
 viewBox="0 0 64 64"
 ```
 
-The source of truth. All paths defined here. If already written, skip.
+The source of truth. All paths defined here, colored for `brand_background`. If already written, skip.
 
 #### 4.2 logo-full.svg (Mark + Wordmark, Horizontal)
 
 ```
-viewBox="0 0 320 72"
+viewBox="0 0 W 72"
 ```
 
 - Mark: Same `<path>` elements from logo-mark.svg, wrapped in `<g transform="translate(4,4)">`
+- Width fitted to content: `W` = the wordmark's right edge + 4, rounded up, so a short name leaves no empty band (`sfm` ending at x = 152 gives `0 0 156 72`)
 - Wordmark: Product name to the right of the mark using the specified formatting and colors, drawn as outlined `<path>` letterforms (no `<text>`)
 
 #### 4.3 logo-wordmark.svg (Text Only)
@@ -104,8 +106,8 @@ viewBox="0 0 512 512"
 ```
 
 - Dark rounded square background: `<rect width="512" height="512" rx="80" fill="..."/>`
-- Mark: Same `<path>` elements wrapped in `<g transform="translate(86, 76) scale(5.3)">`
-- Divide all stroke-width values by the scale factor (5.3) so strokes render at the original visual weight
+- Mark: Same `<path>` elements wrapped in `<g transform="translate(86, 86) scale(5.3125)">`: `S = 340/64`, translate `256 − 32·S` on each axis for a mark centered in its 64x64 canvas (else `256 − cx·S`, `256 − cy·S` from the mark's bounding-box center)
+- Keep every stroke-width value exactly as in logo-mark.svg: `scale(S)` scales strokes with the paths, so the icon keeps the mark's proportions. Never divide stroke widths by `S` and never use `vector-effect="non-scaling-stroke"`
 
 #### 4.5 favicon.svg (16x16 Optimized)
 
@@ -121,7 +123,7 @@ viewBox="0 0 16 16"
 #### 4.6 logo-white.svg (White Version for Dark Backgrounds)
 
 ```
-viewBox="0 0 320 72"
+viewBox="0 0 W 72"   (logo-full's W)
 ```
 
 - **Same layout as logo-full.svg** — identical `<path>` elements, identical transforms
@@ -131,7 +133,7 @@ viewBox="0 0 320 72"
 #### 4.7 logo-black.svg (Black Version for Light Backgrounds)
 
 ```
-viewBox="0 0 320 72"
+viewBox="0 0 W 72"   (logo-full's W)
 ```
 
 - **Same layout as logo-full.svg** — identical `<path>` elements, identical transforms
@@ -169,9 +171,8 @@ Use colors from the brand brief:
 
 Guidelines:
 - Accent colors: Reserved for highlights, borders, lines — never as background fill
-- Dark backgrounds: Use white or light colors
-- Light backgrounds: Use dark colors or primary brand color
-- High contrast: Ensure WCAG AA compliance (4.5:1 minimum for text)
+- Intended backgrounds: logo-mark, logo-full and logo-wordmark on `brand_background`; logo-icon on its own tile; favicon on both `#FAFAFA` and `#0A0A0A` (or its own tile); logo-white on `#0A0A0A`; logo-black on `#FAFAFA`
+- Contrast against that background: 3:1 for the mark's silhouette layer, 4.5:1 for every wordmark letter, opacity composited first (`references/svg-deliverables.md`, *Step 4*). Fix a failing color; never change the background
 
 ## Output
 
@@ -180,6 +181,6 @@ Guidelines:
 ## Tips
 
 - The favicon (16x16) is the hardest — simplify aggressively but keep the same proportional shape
-- Test all colors for accessibility (4.5:1 contrast ratio minimum)
+- Check each variant's contrast against its intended background: 3:1 for the mark, 4.5:1 for wordmark letters
 - The symbol should work as a standalone icon (logo-mark.svg) — it's your strongest branding asset
-- When scaling the mark for logo-icon.svg, remember to divide stroke-widths by the scale factor
+- When scaling the mark for logo-icon.svg, keep its stroke-width values unchanged: the group's `scale(S)` scales them with the paths
