@@ -55,9 +55,9 @@ Check npm, PyPI, Homebrew, and apt as Available, Taken (owner, last publish date
 Check `.com` first, then `.io` and `.app`. Add `.co`, `.eu`, `.fr` or another TLD only when `prd.md` or the user names it, and add it to the DOMAIN line and the check count. Ask the TLD's registry first, by RDAP or WHOIS (`references/source-checks.md`):
 
 - Available: the TLD registry's RDAP or WHOIS answers that the domain is not found; cite that lookup as evidence
-- Parked: registered but not in use (a for-sale or parking page, or no site)
+- Parked: registered, and its page shows parking or a sale offer, or a DNS lookup confirms it has no site (no A or AAAA record)
 - Active: In use (flag if same industry)
-- Unknown: no registry RDAP or WHOIS answer, so the result rests on search or a registrar page, or only shows that no active site was found; do not infer availability
+- Unknown: no registry RDAP or WHOIS answer, so the result rests on search or a registrar page, or only shows that no active site was found; do not infer availability. A registered domain whose site fetch failed is Unknown too
 
 ### Step 4: Trademark Check (if Step 1 clear)
 

@@ -53,7 +53,8 @@ lookups.
 4. Never infer availability. A source that cannot be reached, answers with an
    error the section does not map to a status (a registry 404 is `available`),
    or only shows that no active site was found is `unknown`; do not infer
-   availability.
+   availability. Once a registry has answered for a domain, the section's
+   Active and Parked rules decide its status.
 5. Put the facts behind each status in `evidence`: the query or URL you used,
    plus every fact the section asks you to record, such as a taken package's
    owner and last publish date, a squatting signal, a domain's registrar,

@@ -368,6 +368,8 @@ class WebAccessAndDomainTests(unittest.TestCase):
         section = self.domain_section()
         self.assertIn("leaves Active or Parked undecided: record the domain as Unknown", section)
         self.assertNotIn("A registered domain with no site is Parked.", section)
+        self.assertIn("A registered domain whose site fetch failed is Unknown too", SKILL_TEXT)
+        self.assertIn("or a DNS lookup confirms it has no site (no A or AAAA record)", SKILL_TEXT)
 
     def test_failed_whois_does_not_end_the_domain_check(self) -> None:
         section = self.domain_section()
