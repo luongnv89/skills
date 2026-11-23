@@ -47,13 +47,13 @@ on macOS.
 |--------|-----------|-----------|
 | `logo-icon.svg` | `png/logo-icon-512.png`, `png/logo-icon-1024.png` | 512×512, 1024×1024 |
 | `logo-mark.svg` | `png/logo-mark-512.png` (transparent background) | 512×512 |
-| `logo-full.svg` | `png/logo-full.png` | 4W×288 |
-| `logo-white.svg` | `png/logo-white.png` | 4W×288 |
-| `logo-black.svg` | `png/logo-black.png` | 4W×288 |
+| `logo-full.svg` | `png/logo-full.png` | (4 × lockup width)×288 |
+| `logo-white.svg` | `png/logo-white.png` | (4 × lockup width)×288 |
+| `logo-black.svg` | `png/logo-black.png` | (4 × lockup width)×288 |
 | `logo-wordmark.svg` | `png/logo-wordmark.png` | 720×160 |
 | `favicon.svg` | `png/favicon-16.png`, `png/favicon-32.png`, `png/favicon-48.png` | 16, 32, 48 square |
 
-`W` is the lockup's fitted viewBox width (`0 0 W 72`), so a 156-wide lockup renders at 624×288 and a 320-wide one at 1280×288. Every size is an exact multiple of its viewBox, so always pass both width and height.
+The lockup width is the fitted viewBox width of logo-full (`references/svg-deliverables.md`), so a `0 0 156 72` lockup renders at 624×288 and a `0 0 320 72` one at 1280×288. Every size is an exact multiple of its viewBox, so always pass both width and height. Below, `W`×`H` is always the PNG size from the Size column.
 Run `mkdir -p assets/logo/png` first. One command per row and size, with `W`×`H` from
 the table:
 

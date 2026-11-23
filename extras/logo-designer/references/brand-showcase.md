@@ -10,7 +10,7 @@ The showcase page must:
 2. **Use the project's brand colors** — apply the detected/chosen palette throughout the page (backgrounds, text, accents)
 3. **Follow this section structure:**
 
-   - **Hero section** — dark background, centered logo mark (inline SVG), product name as heading, "Brand Identity" label, and design concept tagline
+   - **Hero section** — the brand background (`references/svg-deliverables.md`), centered logo mark (inline SVG), product name as heading, "Brand Identity" label, and design concept tagline
    - **Design Concept** — two-column layout: left column shows an annotated version of the mark (with labels on key visual elements explaining what they represent), right column explains the design rationale in prose (why this shape, why these colors, typography reasoning)
    - **Logo Variants** — grid of cards showing each of the 7 SVG files on its intended background (`references/svg-deliverables.md` variant table):
      - `logo-full.svg` on the brand background (full width)
