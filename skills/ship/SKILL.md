@@ -3,7 +3,7 @@ name: ship
 description: "Run a release end to end, autonomous by default: version bump everywhere, changelog, docs, landing page, tag, push, GitHub release, PyPI/npm. Use to ship, cut, or tag a release. Don't use for routine commits, pull requests, or marketplace publishing."
 license: MIT
 metadata:
-  version: 3.1.2
+  version: 3.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "max"
 ---
@@ -19,7 +19,7 @@ Release a project end to end: the version in every place it appears, the develop
 ```
 
 - **Auto mode (default)** runs every step without asking. Each point where interactive mode asks has a fixed outcome: continue, skip with `PARTIAL`, or stop with `BLOCKED`.
-- **Interactive mode (`--no-auto`)** asks the user to confirm the version, the file changes, the build, the push, the GitHub release, and each publish. "Ask me before each step" selects it too.
+- **Interactive mode (`--no-auto`)** asks the user to confirm the version, the file changes, the build, the release-commit checks and any push for CI, the push, the GitHub release, and each publish. "Ask me before each step" selects it too.
 - **Version argument**: `X.Y.Z` releases that version; `major|minor|patch` sets the bump.
 
 Read `references/auto-mode.md` before Step 1: outcome table, hard stops, version rules.
@@ -34,7 +34,7 @@ Read `references/auto-mode.md` before Step 1: outcome table, hard stops, version
 4. **Review**: *(subagent)* mandatory in auto mode
 5. **Apply and sweep**: write the changes, prove no stale version remains
 6. **Build**
-7. **Commit, tag, push**
+7. **Commit, verify, tag, push**: tests or CI on the release commit before the tag
 8. **GitHub release**
 9. **Publish** to PyPI and/or npm
 
@@ -122,7 +122,7 @@ Run the same sweep for each drifted `current` value in `version_sources`. Use on
 
 Interactive mode asks first; auto mode runs it. A failed build stops the run: `BLOCKED — build failed`. No build step → skip and say so.
 
-## Step 7: Commit, Tag, Push (inline)
+## Step 7: Commit, Verify, Tag, Push (inline)
 
 Step 1 guaranteed a clean start, so every tracked change belongs to the release, including regenerated lockfiles:
 
@@ -130,11 +130,27 @@ Step 1 guaranteed a clean start, so every tracked change belongs to the release,
 git add -u
 git add <each file Step 5 created, such as a new CHANGELOG.md>
 git commit -m "chore(release): vX.Y.Z"
+release_sha="$(git rev-parse HEAD)"
+```
+
+If a hook rejects the commit, stop: `BLOCKED — commit hook failed`; never use `--no-verify`.
+
+**Verify the release commit before tagging** (`references/verify-release.md`). A check counts only when it ran on `release_sha`; a green run on an older commit does not.
+
+1. Run the project's test command locally. When there is none and CI runs on push, push the branch without the tag and wait for every CI run on `release_sha`.
+2. Run the repo's verify skill or smoke script as well, when there is one; on the CI path, before that push.
+3. A failure stops the release as `BLOCKED`, naming the failing check; `references/verify-release.md` gives the exact line for each check. No tag is created.
+4. With neither tests nor CI, tag anyway and say under `Uncertainty` that the release commit is not verified.
+5. A check never runs a release, publish or deploy script.
+
+Then tag:
+
+```bash
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 git status --porcelain --untracked-files=no   # must print nothing
 ```
 
-If a hook rejects the commit, stop: `BLOCKED — commit hook failed`; never use `--no-verify`. Interactive mode asks "Push `<branch>` and tag `vX.Y.Z` to origin?"; a decline ends with `PARTIAL — tag vX.Y.Z created locally, not pushed`. Auto mode pushes:
+Interactive mode asks "Push `<branch>` and tag `vX.Y.Z` to origin?"; a decline ends with `PARTIAL — tag vX.Y.Z created locally, not pushed`. Auto mode pushes (when the branch already went up for CI, push only the tag):
 
 ```bash
 git push origin <branch> && git push origin vX.Y.Z
@@ -170,10 +186,11 @@ Every run, including one that stops early, ends with: `Result:` (`COMPLETE`, `PA
 ## Acceptance Criteria
 
 - [ ] The Step 1 report and the final report print the mode; in auto mode, every gate outcome matches `references/auto-mode.md` and appears under `Evidence`
-- [ ] In interactive mode, the user confirms the version, the file changes, the build, the push, the GitHub release, and each publish
+- [ ] In interactive mode, the user confirms the version, the file changes, the build, the release-commit checks and any push for CI, the push, the GitHub release, and each publish
 - [ ] A narrower request (notes, bump, docs) never commits, tags, pushes, or publishes
 - [ ] Auto mode releases only from the default branch, and never runs a project's own release script
 - [ ] Every version source reads the new version and the sweep ends with no `missed` hit
+- [ ] The tag is created only after the release commit passes its test command or CI, plus its verify skill or smoke script. A failed check stops as `BLOCKED` and names the check. With no tests or CI, the commit is reported under `Uncertainty`, never as verified
 - [ ] The history file has exactly one entry for the release; an existing `## Unreleased` section is promoted, not duplicated
 - [ ] A landing page's report covers version, end-user changelog, feature list, and documentation, each with a status and evidence
 - [ ] The tag is confirmed on origin by `git ls-remote`; the GitHub release exists when `gh` is available
@@ -205,6 +222,7 @@ Optional and propose-only. After the run's result is delivered, run this check:
 - `references/orchestration.md`: workspace, two-wave spawn inputs, file ownership, apply order
 - `references/step-reports.md`: step report templates
 - `references/publishing.md`: per-registry decision, CI-owned publishing, PyPI / npm commands
+- `references/verify-release.md`: release-commit checks before the tag (tests, CI, verify skill, smoke script)
 - `references/resume.md`: finishing a release that stopped after its tag was created
 - `references/final-report.md`: status rules, examples, reader checks, post-release checklist
 - `agents/`: `version-bumper`, `changelog-generator`, `docs-updater`, `landing-page-updater`, `release-reviewer`

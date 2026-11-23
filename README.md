@@ -288,7 +288,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.8.1 | medium | Pre-commit + lean, fast GitHub Actions quality gates, and cutting Actions minutes |
 | [**github-pages-publish**](extras/github-pages-publish/) | 1.1.1 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
 | [**security-setup**](extras/security-setup/) | 1.6.3 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
-| [**ship**](skills/ship/) | 3.1.2 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
+| [**ship**](skills/ship/) | 3.2.0 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 
 ### Product Planning
 

@@ -19,7 +19,7 @@
 - Promotes an existing `## Unreleased` changelog section instead of duplicating it
 - Two-wave subagents: version and changelog first, then docs and landing page built on their results
 - Independent review of every proposal before any file is written
-- Guardrails instead of prompts: auto mode releases only from the default branch with a clean tree, checks tags and registries before changing any file, reads `BREAKING CHANGE:` footers, and never force-pushes, skips hooks, or rolls back on its own
+- Guardrails instead of prompts: auto mode releases only from the default branch with a clean tree, checks tags and registries before changing any file, tags only a release commit that passed its tests or CI (and the repo's verify skill or smoke script), reads `BREAKING CHANGE:` footers, and never force-pushes, skips hooks, or rolls back on its own
 - Safe auto publishing: only to registries where this project already publishes, never a pre-release or older-line version as `latest`, never a duplicate of a CI-owned publish
 - Hands over to existing release tools (semantic-release, changesets, release-it) and monorepos instead of running them unattended
 - Resumes a stopped release from where it left off
@@ -53,7 +53,7 @@ graph TD
     F --> H["Release Reviewer"]
     K --> H
     H --> S["Apply and sweep"]
-    S --> I["Build, commit, tag, push"]
+    S --> I["Build, commit, verify, tag, push"]
     I --> J["GitHub release and publish"]
     style A fill:#4CAF50,color:#fff
     style J fill:#2196F3,color:#fff
