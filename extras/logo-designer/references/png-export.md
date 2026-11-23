@@ -17,7 +17,7 @@ grep -lE '<(text|tspan)[ >]|@font-face' assets/logo/*.svg
 ```
 
 No output means every SVG is outlined. For each file it lists, redraw the text as
-`<path>` letterforms, or, with Inkscape installed, convert the text in place:
+`<path>` letterforms (`references/wordmark-outlining.md`), or, with Inkscape installed, convert the text in place:
 
 ```bash
 inkscape FILE.svg --export-text-to-path --export-plain-svg --export-filename=FILE.svg
