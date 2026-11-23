@@ -45,8 +45,9 @@ lookups.
    statuses to use. For `domain`, the status definitions are in `../SKILL.md` →
    *Step 3: Domain Check*; read them there.
 2. Check each target independently, in parallel where the tools allow, with
-   the query or URL that section gives. Substitute the name for `[NAME]` and
-   the TLD for `[TLD]`.
+   the query or URL that section gives. Substitute the name's normalized slug
+   for `[NAME]` and the TLD for `[TLD]`, following the section file's
+   *Tools* rule on what may go into a URL or shell command.
 3. Give each target exactly one status from that section's list. Never
    invent a status.
 4. Never infer availability. A source that cannot be reached, answers with an

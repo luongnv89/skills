@@ -49,7 +49,7 @@ SOCIAL: Clear
 REGISTRY: npm (available) | PyPI (available) | Homebrew (available) | apt (available)
 DOMAIN: .com (parked) | .io (available) | .app (available)
 TM: WIPO (clear) | EUIPO (clear) | INPI (clear)
-EVIDENCE: registry.npmjs.org/acme-flow 404; pypi.org/pypi/acme-flow/json 404; branddb.wipo.int no live mark in classes 9/35/42; checked 2026-01-15T10:02Z
+EVIDENCE: registry.npmjs.org/acme-flow 404; pypi.org/pypi/acme-flow/json 404; pubapi.registry.google/rdap/domain/acme-flow.app 404; whois -h whois.nic.io acme-flow.io: Domain not found.; branddb.wipo.int no live mark in classes 9/35/42; checked 2026-01-15T10:02Z
 SKIPPED: none
 UNKNOWN: none
 RISK: Low - no High or Moderate trigger; every check verified; .com parked, not active

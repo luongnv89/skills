@@ -364,6 +364,11 @@ class WebAccessAndDomainTests(unittest.TestCase):
         self.assertIn("nothing short of the registry shows it is Available", section)
         self.assertIn("- Unknown: no registry RDAP or WHOIS answer, so the result rests on search", SKILL_TEXT)
 
+    def test_failed_site_fetch_never_makes_a_domain_parked(self) -> None:
+        section = self.domain_section()
+        self.assertIn("leaves Active or Parked undecided: record the domain as Unknown", section)
+        self.assertNotIn("A registered domain with no site is Parked.", section)
+
     def test_failed_whois_does_not_end_the_domain_check(self) -> None:
         section = self.domain_section()
         self.assertIn("A failed WHOIS never ends the check while RDAP is untried", section)
