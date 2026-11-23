@@ -47,7 +47,7 @@ For `npm test`, use the package manager that the lockfile names (`pnpm test`, `y
 
 ## 2. CI on the release commit (only when there is no test command)
 
-Use CI only when step 1 found no test command and a workflow in `.github/workflows/` runs on `push`. CI reports only on a pushed commit, so the branch goes up first, without the tag. Run `gh auth status` first: if it fails, push nothing and continue as in section 4.
+Use CI only when step 1 found no test command and a workflow in `.github/workflows/` runs on `push`. CI reports only on a pushed commit, so the branch goes up first, without the tag. Run `gh auth status` first: if it fails, push nothing and continue as in section 4. Run section 3's verify skill or smoke script before this push, never after it.
 
 - **Interactive:** ask "Push `<branch>` (no tag) so CI can verify `<short sha>`?". A decline ends as in _Interactive mode: ask once_.
 - **Auto:** run `git push origin <branch>`.
@@ -74,7 +74,7 @@ Look for these, in order:
 - A verify skill, as `/verify-setup` writes it: `verify/SKILL.md` or `verify-*/SKILL.md` under `.claude/skills/` or `.agents/skills/`, excluding `verify-setup` itself. The `.agents/` copy mirrors the `.claude/` one, so run only one of them. With several `verify-<app>` skills, run the one for the package being released, or all of them when the repo releases as one.
 - devops-pipeline's smoke script: `scripts/e2e_test.sh` or `scripts/e2e_test.py`. Skip it if the verify skill already runs it.
 
-Run each one you find after step 1 or 2. They run in addition to the test command or CI and never replace it: with no test command and no CI, section 4 still applies.
+Run each one you find after step 1. On the CI path, run them before the step 2 push, so a failing local check stops the release before the commit is shared and its recovery stays a local reset. They run in addition to the test command or CI and never replace it: with no test command and no CI, section 4 still applies.
 
 - **Verify skill:** follow its SKILL.md as written, from boot to teardown, and read its last `VERIFY` line. The line counts only when `commit=` is the short `release_sha` and the tree was clean when the skill started: `dirty=no`, or `dirty=yes` when `baseline` is not empty and the _After each check_ test printed nothing just before the skill ran (the verify skill counts the baseline's untracked files as dirty).
   - `VERIFY PASS`: the check passes.

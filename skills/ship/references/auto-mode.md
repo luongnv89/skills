@@ -44,7 +44,7 @@ Each of these stops the run with `BLOCKED`. Never retry with force and never ove
 
 A missing `gh` login or registry credential is not a hard stop: skip that step, report `PARTIAL`, and put the command under `Decision`.
 
-A stop after Step 5 and before the release commit (a failed Step 6 build, a rejected commit hook) leaves the release edits uncommitted in the working tree. List the edited files under `Decision`, with `git restore <files>` to discard them before running `/ship` again. A stop after the release commit follows `verify-release.md` → _5. On failure_.
+A stop after Step 5 and before the release commit (a failed Step 6 build, a rejected commit hook) leaves the release edits uncommitted in the working tree. List the edited files under `Decision`, with `git restore <files>` to discard them before running `/ship` again. A failed release-commit check (after the release commit, before the tag) follows `verify-release.md` → _5. On failure_. A rejected push or a tag that `git ls-remote` does not find keeps its own recovery (`resume.md`, `final-report.md`), never a reset or revert of the tagged commit.
 
 ## Version rules
 

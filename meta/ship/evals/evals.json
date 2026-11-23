@@ -438,6 +438,36 @@
         "Records the release commit as verified under Evidence, naming python -m pytest, the short release sha and the 42 tests.",
         "Creates the v1.2.0 tag only after the check passes."
       ]
+    },
+    {
+      "id": 31,
+      "name": "release-commit-ci-green-tags",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v2.0.0, one fix commit since; docs site with no package.json test script, Makefile, Cargo.toml, go.mod, pytest config or verify skill; scripts/e2e_test.sh exists and exits 0 on the release commit without writing files; .github/workflows/check.yml runs on push; gh is authenticated; after the release commit is pushed, the only run on that commit, 'check', ends with conclusion success)",
+      "expected_output": "Runs scripts/e2e_test.sh on the release commit before pushing anything, then pushes the branch without the tag, waits for the runs on release_sha, records 'CI green on <short sha>: check', and only then creates and pushes the v2.0.1 tag.",
+      "files": [],
+      "expectations": [
+        "Finds no local test command and runs gh auth status before pushing anything.",
+        "Runs scripts/e2e_test.sh before the git push for CI, not after it.",
+        "Pushes the branch with no tag and lists runs with gh run list --commit for the release commit, not the parent commit.",
+        "Records 'CI green on <short sha>: check' under Evidence as the release-commit verification.",
+        "Creates the v2.0.1 tag only after CI is green, then pushes the tag and confirms it with git ls-remote."
+      ]
+    },
+    {
+      "id": 32,
+      "name": "release-check-leaves-files-blocks",
+      "kind": "edge",
+      "prompt": "/ship (clean default branch, last tag v0.4.0, one feat commit since; package.json has a test script with no pretest or posttest hook; npm test passes on the release commit but writes an untracked, not gitignored coverage/ directory that was not there after the release commit)",
+      "expected_output": "Records release_sha and a baseline right after the release commit, runs npm test, finds coverage/ beyond the baseline, and stops with 'BLOCKED — release checks left files: coverage/'. It creates no tag, pushes nothing, and puts git reset --hard HEAD~1 under Decision as the recovery.",
+      "files": [],
+      "expectations": [
+        "Records release_sha and a git status --porcelain baseline right after the release commit, before running npm test.",
+        "Runs npm test on the release commit before git tag.",
+        "Reports 'BLOCKED — release checks left files: coverage/' even though npm test passed.",
+        "Creates no tag and pushes nothing.",
+        "Puts git reset --hard HEAD~1 under Decision for the unpushed release commit, and never suggests git revert or a force-push."
+      ]
     }
   ]
 }

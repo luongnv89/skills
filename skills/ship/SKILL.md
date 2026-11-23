@@ -138,7 +138,7 @@ If a hook rejects the commit, stop: `BLOCKED — commit hook failed`; never use 
 **Verify the release commit before tagging** (`references/verify-release.md`). A check counts only when it ran on `release_sha`; a green run on an older commit does not.
 
 1. Run the project's test command locally. When there is none and CI runs on push, push the branch without the tag and wait for every CI run on `release_sha`.
-2. Run the repo's verify skill or smoke script as well, when there is one.
+2. Run the repo's verify skill or smoke script as well, when there is one; on the CI path, before that push.
 3. A failure stops the release as `BLOCKED`, naming the failing check; `references/verify-release.md` gives the exact line for each check. No tag is created.
 4. With neither tests nor CI, tag anyway and say under `Uncertainty` that the release commit is not verified.
 5. A check never runs a release, publish or deploy script.
