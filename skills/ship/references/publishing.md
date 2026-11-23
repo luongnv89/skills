@@ -46,7 +46,7 @@ rm -rf dist/ build/ *.egg-info
 python -m build
 ```
 
-Run twine through `uvx twine@latest`: the `@latest` pin makes uvx resolve the newest twine instead of reusing one installed with `uv tool install`, a cached tool environment, or the environment's own twine. An older twine rejects newer package metadata (`'2.5' is not a valid metadata version`). If `uvx` is missing, install it with uv, or use `python -m pip install --upgrade twine` and then plain `twine`.
+Run twine through `uvx twine@latest`: the `@latest` pin makes uvx resolve the newest twine instead of reusing one installed with `uv tool install`, a cached tool environment, or the environment's own twine. An older twine rejects newer package metadata (`'2.5' is not a valid metadata version`). If `uvx` is not on PATH but `uv` is, run `uv tool run twine@latest` in its place. If neither is installed, do not install uv for the release: upgrade twine in the interpreter that built the package and run it through that interpreter, `python -m pip install --upgrade twine` then `python -m twine check dist/*` and `python -m twine upload --non-interactive dist/*`. A bare `twine` can resolve to an older copy elsewhere on PATH.
 
 ### Verify the package
 
