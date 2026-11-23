@@ -42,10 +42,12 @@ print("variable:", "fvar" in font)
   `LICENSE` beside the file, names the SIL Open Font License or Apache 2.0, and
   `fsType` has neither the `0x0002` bit (restricted licence embedding) nor the
   `0x0200` bit (bitmap embedding only).
-- **Stop and ask** for anything else: a commercial or unknown licence, an empty
-  name ID 13, or either restricted bit. The user either confirms they hold a licence
-  that allows logo use, or picks an OFL family. `fsType` only describes embedding
-  rights, so a clear `fsType` never replaces the licence text.
+- **Stop and ask** when the licence is commercial or unknown, or name ID 13 is
+  empty: the user either confirms they hold a licence that allows logo use, or picks
+  an OFL family. `fsType` only describes embedding rights, so a clear `fsType` never
+  replaces the licence text.
+- **Pick another family** when either restricted bit is set. The outliner refuses
+  such a file.
 
 Record the family, weight, file name and licence. They go in the design rationale
 and the Final Report's `Evidence:` line.
@@ -60,10 +62,11 @@ JetBrains Mono, the `[wght]` file outlines weight 400 even when Bold was chosen.
 - With only a variable file, pin the weight first and outline the instance:
 
   ```bash
-  fonttools varLib.instancer "Family[wght].ttf" wght=700 -o family-700.ttf
+  fonttools varLib.instancer "Family[wght].ttf" wght=700 --static -o family-700.ttf
   ```
 
-  Its contours can overlap, so keep the SVG default `fill-rule` (`nonzero`) and
+  `--static` pins every other axis (`opsz`, `wdth`) to its default; without it a
+  multi-axis file stays variable and the outliner refuses it. Its contours can overlap, so keep the SVG default `fill-rule` (`nonzero`) and
   never set `evenodd` on the letters.
 
 The outliner below refuses a variable font.
@@ -121,7 +124,7 @@ def fmt(n):
 
 cap = getattr(font["OS/2"], "sCapHeight", 0) or bounds(cmap[ord("I")])[3]
 s = CAP / cap
-x, right, paths = 0.0, None, []
+x, right, edge, paths = 0.0, None, 0.0, []
 for ch in TEXT:
     g = cmap[ord(ch)]
     b = bounds(g)
@@ -135,23 +138,23 @@ for ch in TEXT:
     pen = SVGPathPen(gs, ntos=fmt)
     gs[g].draw(TransformPen(pen, (s, 0, 0, -s, x * s, CAP)))  # flip y, baseline at CAP
     paths.append(f'  <path d="{pen.getCommands()}"/>')
-    right = x + b[2]
+    right = edge = x + b[2]
     x += gs[g].width
 
 probe = "I" if TEXT.isupper() else "n"
 y = cap / 2 if probe == "I" else (getattr(font["OS/2"], "sxHeight", 0) or cap) / 2
 w = stem(probe, y)
-print(f"<!-- {font['name'].getDebugName(4)}: cap {fmt(CAP)}, baseline y={fmt(CAP)}, "
-      f"right edge x={fmt(right * s)}, stem {fmt(w * s)} ({w} font units) -->")
+print(f"<!-- {FONT.rsplit('/', 1)[-1]}: cap {fmt(CAP)}, baseline y={fmt(CAP)}, "
+      f"right edge x={fmt(edge * s)}, stem {fmt(w * s)} ({w} font units) -->")
 print("\n".join(paths))
 ```
 
 `python3 -I outline_wordmark.py Family-Bold.ttf sfm` prints one `<path>` per letter,
 in SVG units: x offsets are baked in, y is flipped (font units point up, SVG units
 point down), the baseline sits at `y = CAP` and the first letter's ink starts at
-`x = 0`. The comment line gives the ink's right edge, which is the wordmark width
-wherever `references/svg-deliverables.md` sizes a canvas from it, and the stem width
-used in Step 6. The script places letters by the font's advance widths only, with no
+`x = 0`. The comment line gives the ink's right edge, which is the wordmark's
+width for laying out `logo-wordmark` and the lockups (`references/svg-deliverables.md`),
+and the stem width used in Step 6. The script places letters by the font's advance widths only, with no
 kerning (`GPOS`) or ligatures, so Step 5 checks the spacing.
 
 ## Step 5: Space the letters
