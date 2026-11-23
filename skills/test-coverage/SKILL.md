@@ -3,7 +3,7 @@ name: test-coverage
 description: "Generate unit tests for untested branches and edge cases. Use when coverage is low, CI flags gaps, or a release needs hardening. Not for integration/E2E suites, framework migrations, or fixing production bugs."
 license: MIT
 metadata:
-  version: 1.9.0
+  version: 1.10.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "low"
 ---
@@ -15,20 +15,22 @@ Expand unit test coverage by targeting untested branches and edge cases.
 ## When to Use
 
 - User asks to "increase test coverage", "add more tests", "expand unit tests", or "cover edge cases"
-- A CI pipeline reports low coverage and the user wants it improved
+- CI reports low coverage
 - A code review flags untested error paths or boundary conditions
-- The user wants to identify and fill gaps in an existing test suite before a release
+- An existing suite needs its gaps filled before a release
 
 ## Stack (detect before Step 1 of Workflow)
 
-Detect the project's language from its manifest file and use the matching commands throughout the Workflow below:
+Detect the stack from its manifest and use its commands throughout the Workflow:
 
 | Manifest | Stack | Coverage command | Test framework |
 |---|---|---|---|
 | `package.json` | JavaScript/TypeScript | `npx jest --coverage` or `npx vitest --coverage` | Jest, Vitest, Mocha |
-| `pyproject.toml` | Python | `pytest --cov=. --cov-report=term-missing` | pytest, unittest |
+| `pyproject.toml` | Python | `pytest --cov=<source> --cov-report=term-missing` | pytest, unittest |
 | `go.mod` | Go | `go test -coverprofile=coverage.out ./...` | testing, testify |
 | `Cargo.toml` | Rust | `cargo tarpaulin` or `cargo llvm-cov` | built-in test framework |
+
+Python's `<source>` is the package or module under test (`src`, `pricing`), or bare `--cov` when coverage config sets `source`; `--cov=.` counts test files.
 
 If none of these manifests is found, see [Edge Cases](#edge-cases) — "No test framework detected".
 
@@ -56,11 +58,10 @@ If `origin` is missing, pull is unavailable, or rebase/stash conflicts occur, st
 
 ### 0. Create Feature Branch
 
-Before making any changes:
-1. Run `git rev-parse --abbrev-ref HEAD`. If it prints a branch other than `main` or `master` that was created for this task, go to item 4.
+1. Record `git rev-parse --abbrev-ref HEAD` as the starting branch. If it is a branch other than `main` or `master` that was created for this task, go to item 4.
 2. Run `git branch -a` and note the prefix most existing branches use (e.g., `feat/`, `feature/`, `test/`).
-3. Create and switch to a new branch with that prefix. If no prefix is in use, name it `feat/test-coverage`.
-4. Record `git rev-parse HEAD` as the **base**. A *pre-existing test* is any test in a file tracked at the base.
+3. Create and switch to a new branch with that prefix. If no prefix is in use, name it `feat/test-coverage`. If the run stops `BLOCKED`, this branch has no commits: `git switch <starting branch>`, then `git branch -d <branch>` (never `-D`). Uncommitted changes move with the switch; list them under `Uncertainty:`.
+4. Record `git rev-parse HEAD` as the **base**. A *pre-existing test* is any test in a file tracked at the base, except one an earlier run of this skill committed (`references/unit-test-quality.md` → *Integrity check*).
 
 ### 1. Analyze Coverage
 
@@ -80,7 +81,7 @@ Review the low-coverage code for:
 - Normal paths that no existing test covers
 - Properties the code promises: round-trip, invariant, idempotency, or agreement with a naive version
 
-Leave trivial code out of the gap list: getters and setters, plain data classes and DTOs, constants, and one-line calls straight into a library or framework. A test there checks the language or the framework, not this project. Cover such code only through a test of logic that uses it, and list the skipped files under `Uncertainty:`.
+Leave trivial code out of the gap list: getters and setters, plain data classes and DTOs, constants, and one-line calls into a library or framework. Cover such code only through a test of logic that uses it, and list the skipped files under `Uncertainty:`.
 
 ### 3. Write Tests
 
@@ -91,30 +92,30 @@ Leave trivial code out of the gap list: getters and setters, plain data classes 
 
 ### 4. Verify Improvement
 
-Use Step 1's exact commands throughout, adding only test ids (and Go's `-count=1`) for solo runs, and judge each test by its own reported result (`references/unit-test-quality.md` → *Reading a test result*).
+Use Step 1's exact commands throughout. For solo runs add only test ids (or a command-line flag naming exactly those tests: `-k`, `-run`, a cargo name filter) and Go's `-count=1`. Judge each test by its own reported result (`references/unit-test-quality.md` → *Reading a test result*).
 
-1. Run the full test suite. If a previously passing test now fails, decide at the base as *Failing pre-existing tests* in `references/unit-test-quality.md` says: only a test that also fails at the base is a pre-existing flake, put under `Decision:` with its visible cause; otherwise the run broke it: report PARTIAL and name it. Never rerun the full suite to replace a red result with a green one. If a new test fails, run it on its own twice more, as diagnosis, not a retry: if it passes in either solo run, it is flaky: handle it as in item 2. Only if it fails all three times, read the failure and decide which side is wrong:
+1. Run the full test suite. If a previously passing test now fails, decide at the base as `references/unit-test-quality.md` → *Failing pre-existing tests* says: a pre-existing flake goes under `Decision:`, anything else is PARTIAL. Never rerun the full suite to replace a red result with a green one. If a new test fails, run it on its own twice more, as diagnosis, not a retry: if it passes in either solo run, it is flaky: handle it as in item 2. Only if it fails all three times, read the failure and decide which side is wrong:
    - **The test is wrong** (bad setup, or an expectation the code never promised): fix the test, then rerun.
    - **The code is wrong** (the test checks behavior that the code's docstring, types, or name promise): this is a suspected bug. Remove the test, and any import or fixture this run added for it, then rerun item 1. Do not change production code, and do not loosen the assertion to match the code. Report the bug under `Decision:` with the test's code and failure output. The run can still be `COMPLETE`; name the bug in the `Result:` line. That test becomes the regression test for the fix.
    - **You cannot tell which side is wrong**: treat it as a suspected bug.
 2. Run only the new tests on their own, twice, selecting them by test id or `-k` when they share a file with pre-existing tests (for example `pytest tests/test_parser.py`, `go test ./internal/store -count=1 -run '^TestKey'`, `cargo test key_`). If a new test fails in either run, it depends on test order, shared state, or timing. Fix it once from the flakiness table in `references/unit-test-quality.md` and repeat items 1 and 2. If it still fails, remove it and list it under `Uncertainty:`.
-3. Break check: for each new test, plant one realistic bug in the source line or branch it targets (flip a comparison, shift a boundary by one, drop a raised error), run that test alone, and confirm it fails. Then restore the file with `git checkout -- <file>` and confirm `git diff --name-only` no longer lists it. Never plant a bug in a file on the pre-sync list, because the checkout would erase the user's changes; list those tests under `Uncertainty:` as not break-checked. A test that still passes against the bug protects nothing: strengthen its assertion once and repeat the check. If it passes again, remove it and list it under `Uncertainty:`.
+3. Break check: for each new test, plant one realistic bug in the source line or branch it targets (flip a comparison, shift a boundary by one, drop a raised error), run that test alone, and confirm it fails. Then restore the file with `git checkout -- <file>` and confirm `git diff --name-only` no longer lists it. Never plant a bug in a file on the pre-sync list, because the checkout would erase the user's changes; list those tests under `Uncertainty:` as not break-checked. A test that still passes against the bug gets its assertion strengthened once; repeat the check. If it passes again, remove it and list it under `Uncertainty:`.
 4. Run the same coverage command as Step 1.
 5. Compare the new total with the Step 1 baseline. If it is not strictly higher, report PARTIAL and list the Step 2 gaps that are still untested.
-6. If item 1 found no failure this run caused and the new test files passed in item 2, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered. Stage each test file this run wrote by explicit path (`git add tests/test_parser.py`); never `git add -A`, `git add .` or `git commit -a`, which would sweep in user work Repo Sync restored. Never stage a path on the pre-sync list. Stage a changed manifest or lockfile (*Coverage tool not installed*) only with its reason in the commit message. Check `git diff --cached --name-only` before committing, then run the *Integrity check* from `references/unit-test-quality.md` against the base. A failed check means commit nothing and report `PARTIAL — existing test changed` with the line. After committing, run it again on `<base>..HEAD`, since a commit hook can rewrite files. Under `Uncertainty:`, list each changed file left unstaged, or every new test file when the commit is skipped (failed suite or regression).
+6. If item 1 found no failure this run caused and the new test files passed in item 2, commit the new tests on the feature branch with a message that records the before/after coverage percentages and the files newly covered, ending with the trailer `Test-Coverage-Run: <before>% -> <after>%`. Stage each test file this run wrote by explicit path (`git add tests/test_parser.py`); never `git add -A`, `git add .` or `git commit -a`, which would sweep in user work Repo Sync restored. Never stage a path on the pre-sync list. Stage a changed manifest or lockfile (*Coverage tool not installed*) only with its reason in the commit message. Check `git diff --cached --name-only` before committing, then run the *Integrity check* from `references/unit-test-quality.md` against the base. A failed check means commit nothing and report `PARTIAL — existing test changed` with the line. After committing, run it again on `<base>..HEAD`. Under `Uncertainty:`, list each changed file left unstaged, or every new test file when the commit is skipped (failed suite or regression).
 7. Print the final report. It opens with `Result:` — `COMPLETE`, `PARTIAL — reason`, or `BLOCKED — reason` — followed by:
    - `Evidence:` the commands that ran, with before/after totals, pass/fail counts, the item 2 rerun result, and the item 3 break-check count
    - `Uncertainty:` what was not checked (e.g., excluded paths, CI not run, covered lines without output assertions)
    - `Decision:` the action that needs approval, or `No approval needed`, then any remaining user action (e.g., push the branch, open a PR)
-   - The number of new test cases and the files with the biggest coverage gains
+   - New test count and the files with the biggest coverage gains
 
 ## Expected Output
 
-After a successful run on a Python project, the final verification report shows:
+A successful Python run ends with:
 
 ```
 Result:       COMPLETE — coverage 61% → 84%, all tests pass
-Evidence:     pytest --cov=. --cov-report=term-missing (before): 61% (47/77 statements), 47 passed
+Evidence:     pytest --cov=src --cov-report=term-missing (before): 61% (47/77 statements), 47 passed
               same command (after): 84% (65/77 statements), 56 passed, 0 failed
               9 new tests run on their own, twice: 9 passed both runs
               break check: 9/9 new tests failed on a planted bug; sources restored
@@ -133,14 +134,14 @@ Files improved:
 A run passes when **all** of the following are true:
 
 - [ ] Coverage report exists from a runnable command for the detected stack (e.g., `jest --coverage`, `pytest --cov`, `go test -cover`).
-- [ ] Post-run total coverage is strictly higher than the pre-run baseline — no test additions that fail to move the metric. The exceptions are a 100% baseline and a gap list that holds only trivial code (see Edge Cases).
+- [ ] Post-run total coverage is strictly higher than the pre-run baseline. The exceptions are a 100% baseline and a gap list that holds only trivial code (see Edge Cases).
 - [ ] New tests target previously-untested branches, error paths, or boundary values — not duplicates of existing assertions.
 - [ ] Every new test asserts on a return value, a raised error, or an observable effect. A test that only executes code does not count.
 - [ ] Every committed test failed the Step 4 break check against a planted bug, and every planted bug was reverted. No test targets trivial code alone.
 - [ ] No new test uses the network, the wall clock, unseeded randomness, or `sleep()`, or a real database other than a test-database fixture the existing unit tests already use.
 - [ ] Every property test fixes its seed or derandomizes in the test itself; no property-testing library was added.
 - [ ] Pre-existing tests are unchanged apart from added imports, the *Integrity check* passed before and after the commit, and the run added nothing that skips, selects or retries tests.
-- [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.), apart from a pre-existing test shown flaky at the base and named under `Decision:`, and the new tests pass when run on their own, twice.
+- [ ] The full test suite passes locally before committing (`npm test`, `pytest`, `go test ./...`, etc.), judged per test (`references/unit-test-quality.md` → *Reading a test result*), apart from a pre-existing test shown flaky at the base and named under `Decision:`, and the new tests pass when run on their own, twice.
 - [ ] A new test that exposed a suspected bug is left out of the commit and reported under `Decision:`. No assertion was loosened to match the code.
 - [ ] All new tests live on a feature branch (e.g., `feat/test-coverage`), never on `main`/`master`.
 - [ ] Commit message records the before/after coverage percentages and the files newly covered.
@@ -152,14 +153,14 @@ The final report must also be understandable:
 
 - The first line gives `COMPLETE`, `PARTIAL` or `BLOCKED` and the reason.
 - `Evidence:` (commands run and their observed totals) is separate from `Uncertainty:` (assumptions and unchecked behavior).
-- Each coverage number traces to a command output: the before/after totals and the per-file percentages.
+- Each coverage number, total or per file, traces to a command output.
 - `Decision:` names the approval needed or says `No approval needed`, and names any remaining user action.
 
 These are instruction checks. Without reviewer feedback, human understanding of the report stays unconfirmed; agent inspection cannot confirm it.
 
 ## Edge Cases
 
-- **No test framework detected**: Skill checks `package.json`, `pyproject.toml`, `Cargo.toml`, or `go.mod` for test dependencies; if none found, asks the user which framework to use before writing any tests.
+- **No test framework detected**: Check the Stack manifests for test dependencies; if none is found, ask the user which framework to use before writing tests.
 - **Coverage tool not installed**: If the coverage command fails because the tool is missing, install it as a dev dependency (`pytest-cov`, `nyc`, `cargo tarpaulin`, etc.) and rerun the command once. If it fails again, stop and report `BLOCKED` with the error output.
 - **Existing tests are already failing**: If the Step 1 baseline run reports failing tests, do not write new tests. Run the baseline once more, as diagnosis only, to tell a flaky test from a hard failure. Either way, stop and report `BLOCKED` with the failing tests' names, and put each one's visible cause under `Decision:`. Never add a retry to make the baseline pass.
 - **Only trivial code is uncovered**: If every Step 2 gap is trivial code, add no tests. Report `COMPLETE` with the baseline as evidence and list the skipped files under `Uncertainty:`.
@@ -170,7 +171,7 @@ These are instruction checks. Without reviewer feedback, human understanding of 
 
 ## Step Completion Reports
 
-After completing each major step, output a status report in this format:
+After each major step, print:
 
 ```
 ◆ [Step Name] ([step N of M] — [context])
@@ -184,7 +185,7 @@ After completing each major step, output a status report in this format:
   Result:             PASS | FAIL | PARTIAL
 ```
 
-Adapt the check names to match what the step actually validates. Use `√` for pass, `×` for fail, and `—` to add brief context.
+Adapt the check names to the step. Use `√` for pass, `×` for fail, and `—` to add brief context.
 
 **Branch Setup phase checks:** `Feature branch created`, `Base recorded`, `Base coverage measured`
 

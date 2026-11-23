@@ -34,7 +34,8 @@
         "No @pytest.mark.flaky, pytest-rerunfailures, --reruns, skip or xfail is added anywhere.",
         "test_unit_price_is_fast is not edited, renamed, skipped or deleted.",
         "The report names the flaky test's visible cause (a random sleep plus a wall-clock assertion) under Decision and leaves the fix to the user.",
-        "If the baseline run fails, the result is BLOCKED and names the failing test; no new tests are committed in that case."
+        "If the baseline run fails, the result is BLOCKED and names the failing test; no new tests are committed in that case.",
+        "If the run stops BLOCKED, it ends on the branch it started from and leaves no empty feature branch: the branch it created is deleted with git branch -d, never -D."
       ]
     },
     {

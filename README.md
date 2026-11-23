@@ -255,7 +255,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [**code-review**](skills/code-review/) | 2.10.0 | high | Review or improve code — 4 modes: bugs/security, performance, clean-code audit, slop cleanup |
 | [**comment-audit**](skills/comment-audit/) | 1.0.0 | high | Sort every code comment as Tautology, Excuse, Stale or Decision Record; delete, file issues, write ADRs and ratchet a comment ban, each after your approval |
 | [**codebase-modernizer**](extras/codebase-modernizer/) | 1.5.2 | max | Whole-repo audit + phased, testable plan to modernize a stale or messy codebase |
-| [**test-coverage**](skills/test-coverage/) | 1.9.0 | low | Target untested branches and edge cases |
+| [**test-coverage**](skills/test-coverage/) | 1.10.0 | low | Target untested branches and edge cases |
 | [**user-test**](extras/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
 | [**verify-setup**](skills/verify-setup/) | 1.0.0 | high | Write a repo-local verify skill that boots and drives your web app, API or CLI end to end, with a feature map as its pass/fail rubric; run it three times and report flaky steps |
 | [**dont-make-me-think**](extras/dont-make-me-think/) | 1.7.1 | medium | Usability review using Krug's principles |
