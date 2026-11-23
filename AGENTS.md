@@ -25,7 +25,7 @@ Skill **definitions** live in `skills/<name>/` (the lstack plugin, no code files
 - Ask first: a change that touches more than one skill
 
 ## Conventions
-- Every SKILL.md edit bumps `metadata.version` (patch for wording, minor for a new capability, major for a restructure), and the skill's row in the root `README.md` shows the same version
+- Every SKILL.md edit bumps `metadata.version` (patch for wording, minor for a new capability, major for a restructure), and the skill's row in the root `README.md` shows the same version, as does the `Version:` line of `meta/<name>/docs/README.md` when it has one
 - Quote any frontmatter string containing `:` `#` `-` `<` `>` `|` `,` `&` `?` `!`
 - `name` equals the skill's own directory name, suite children included (`skills/<umbrella>/<child>/`). Each suite SKILL.md validates and versions independently
 - SKILL.md stays under 500 lines and 3000 words; overflow goes to `references/`
