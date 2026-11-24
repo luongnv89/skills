@@ -26,7 +26,8 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Purpose understood:       √ pass (problem and audience identified)
   Tone identified:          √ pass ([aesthetic direction] chosen)
   Differentiation clear:    √ pass | × fail — [what's missing]
-  Style source:             √ explicit brief | √ Default Style Guide
+  Style source:             √ explicit brief | √ rules file ([path]) | √ Default Style Guide
+  Vague words:              √ converted ([word] → [decisions or named reference]) | — none in brief
   Files listed:             √ pass ([N] files) | — not applicable (new project)
   ____________________________
   Result:                   PASS | FAIL | PARTIAL
@@ -38,9 +39,10 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ◆ Implementation (step 2 of 2 — [component/page type])
 ··································································
   Style guide applied:      √ pass | × fail — [deviations noted]
-  Responsive check:         √ pass (375/768/1280 px) | × fail — [width, element] | — untested (no browser)
+  Visual check:             √ pass ([widths], [dark mode], [production build]; no ban-table row, no overflow) | × fail — [width, element or ban row] | — untested ([reason]; CSS inspected)
   Contrast check:           √ pass (lowest [ratio]) | × fail — [pair, ratio, file:line]
-  Quality + usability:      √ pass | × fail — [which item failed]
+  Subtraction pass:         √ [N] decorations removed | √ none to remove
+  Quality + usability:      √ pass (ban table included) | × fail — [which item or ban row failed]
   Build:                    √ pass ([command]) | × fail — [first error line] | — not run (no command)
   ____________________________
   Result:                   PASS | FAIL | PARTIAL
