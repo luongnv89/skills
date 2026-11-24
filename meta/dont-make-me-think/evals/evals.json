@@ -110,6 +110,21 @@
         "Does not produce a Usability Review report or score any of the Ten Lenses",
         "Handles the request as an API design review"
       ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "Do a usability review of ../../eval-fixtures/dont-make-me-think/pricing.html. Few visitors start the free trial from this page.",
+      "expected_output": "A Usability Review report whose clutter and trust findings each name the element and its effect on the user: the .pill that looks clickable but does nothing, the subtitle that restates the Pricing heading, the four badges beside #start-trial, and the lorem ipsum testimonial or unnamed logo row. The hero gradient and the font are not reported, because visual and brand critique is out of scope.",
+      "files": ["../../eval-fixtures/dont-make-me-think/pricing.html"],
+      "expectations": [
+        "Reports #features-pill (.pill) as an Affordances issue: it is styled like a button but has no link or action, and Where names the element",
+        "Reports the '.subtitle' line 'Our pricing plans' as restating the 'Pricing' heading, a Word economy issue whose Fix cuts or rewrites it",
+        "Reports the .badge elements beside #start-trial as competing with the primary action for attention, naming the badges in Where",
+        "Has a trust or goodwill finding that names the element (the lorem ipsum testimonial, the unnamed 'Trusted by' logo boxes, or the © 2019 footer), and no issue's Problem line is only an adjective such as 'unprofessional', 'cluttered' or 'cheap-looking'",
+        "Does not report the hero gradient, the purple palette or the font choice as an issue, and adds no visual-design or brand lens to the Scorecard",
+        "Every issue has Problem, Impact, Fix and Where lines"
+      ]
     }
   ]
 }
