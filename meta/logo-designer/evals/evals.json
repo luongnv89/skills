@@ -5,14 +5,14 @@
       "id": 1,
       "kind": "happy-path",
       "prompt": "Design a logo for this project. The README describes fastbuild, a CLI build tool for developers.",
-      "expected_output": "Project analysis summarized, a style proposed and confirmed, wordmark casing confirmed, then 7 SVGs written to /assets/logo/ with logo-mark.svg first, geometry verified by reading back the variants, a PNG of every variant rendered into /assets/logo/png/, brand-showcase.html generated with PNG download links, and a Final Report.",
+      "expected_output": "Project analysis summarized, the decision sheet proposed and confirmed, wordmark casing confirmed, then 7 SVGs written to /assets/logo/ with logo-mark.svg first, geometry verified by reading back the variants, a PNG of every variant rendered into /assets/logo/png/, brand-showcase.html generated with PNG download links, and a Final Report.",
       "files": [],
       "expectations": [
         "Summarized the detected product identity (name, type, purpose, audience, existing colors) before designing",
-        "Confirmed the style selection and the wordmark casing with the user before generating any text-bearing SVG",
+        "Confirmed the decision sheet (the mark's idea, mark type, construction, stroke, corner radius, layer and colour count, wordmark weight) and the wordmark casing with the user, with no style adjective standing in for a decision, before generating any text-bearing SVG",
         "Wrote logo-mark.svg first and derived the 6 sibling variants from its exact path data",
         "Read back the mark, full, icon, white and black variants and verified the d=\"\" strings are identical or correctly scaled via transform",
-        "Every SVG has a correct viewBox and contains no embedded rasters; favicon.svg is a simplified 2-layer mark at 16x16",
+        "Every SVG has a correct viewBox and contains no embedded rasters; logo-mark.svg uses the fewest layers that carry the idea, and favicon.svg is a simplified version of the mark at 16x16 that keeps only layers still readable at that size",
         "Rendered PNGs from the verified SVGs into /assets/logo/png/ (logo-icon 512 and 1024, logo-mark 512, logo-full, logo-white and logo-black at 4W x 288 where W is the fitted lockup width, logo-wordmark 720x160, favicon 16, 32 and 48), and the Evidence: line lists each PNG's measured dimensions",
         "No SVG contains <text>; the wordmark is outlined paths",
         "The Final Report opens with a Result: line carrying COMPLETE and the files written",
@@ -72,7 +72,7 @@
       "expectations": [
         "Asked for the wordmark casing before generating logo-full.svg or logo-wordmark.svg",
         "Generated no text-bearing SVG before the casing answer",
-        "A text-free asset such as the mark may proceed only if the style confirmation gate was also satisfied"
+        "A text-free asset such as the mark may proceed only if the decision-sheet confirmation gate was also satisfied"
       ]
     },
     {
@@ -138,6 +138,54 @@
         "Each of the 7 files is assigned an intended background: brand background for mark, full and wordmark; its own tile for the icon; both #FAFAFA and #0A0A0A for the favicon; #0A0A0A for logo-white; #FAFAFA for logo-black",
         "Each variant's contrast against its intended background is checked and reported: at least 3:1 for the mark's silhouette layer and at least 4.5:1 for every wordmark letter, with layer opacity composited first",
         "The svg-reviewer report includes the contrast table and does not raise an empty-canvas warning for the lockups"
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "name": "initial-only-mark-needs-an-idea",
+      "prompt": "Design a logo for Quillo, a note-taking app for students. Wordmark in title case, default style.",
+      "expected_output": "The proposed mark draws one idea about note-taking, stated in one sentence. A mark that is only the letter Q is proposed only with an idea tying the letter's construction to the product, and the Phase 3 step report records which case applied.",
+      "files": [],
+      "expectations": [
+        "The Phase 2 proposal states the mark's idea in one sentence that names a shape and the part of the product it shows",
+        "If the proposed mark is only the letter Q (alone or in a rounded square, circle or other tile), the proposal ties the letter's construction to note-taking (for example the Q's tail drawn as a pen nib); otherwise the mark is a symbol drawn from the idea",
+        "No delivered logo-mark.svg is a plain Q in a rounded square with no recorded idea, since the user did not ask for a lettermark",
+        "The Phase 3 step report records the mark's idea and whether the initial-only rule applied (idea tied to the letter, user request, or not applicable)"
+      ]
+    },
+    {
+      "id": 12,
+      "kind": "edge",
+      "name": "design-rules-file-feeds-bans",
+      "prompt": "Design a logo for the project in ../../eval-fixtures/logo-designer/rules-repo.",
+      "expected_output": "The skill finds DESIGN.md, reads its rules into the brand brief's bans with their source lines, follows every rule in all 7 SVGs and the showcase, leaves DESIGN.md unchanged, and offers any new rule line only as an optional proposal after the Final Report's Decision: text.",
+      "files": [
+        "../../eval-fixtures/logo-designer/rules-repo/DESIGN.md",
+        "../../eval-fixtures/logo-designer/rules-repo/README.md"
+      ],
+      "expectations": [
+        "The brand brief's rules_file names DESIGN.md, and its bans array has one entry per rule with a DESIGN.md:<line> source",
+        "The Phase 2 step report names DESIGN.md as the rules file with its ban count, and the proposed decisions already follow it (radius 0, filled shapes, lowercase IBM Plex Sans 600 wordmark), so the casing question is answered by the file",
+        "Every shape in the 7 SVGs has square corners (no rx, ry or rounded path corners in the mark; the app-icon tile follows the radius rule too, or the Final Report names it as an assumption) and no stroke in the mark",
+        "The SVGs use only #1F2937 and #D97706, plus white or black in logo-white.svg and logo-black.svg",
+        "The svg-reviewer report checks every brief ban and cites its DESIGN.md source",
+        "DESIGN.md is not modified; any new rule line appears only as an optional proposal after the Final Report's Decision: text, quoted with the file it would go in"
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "edge",
+      "name": "no-ai-default-effects",
+      "prompt": "Design a logo for Tidewatch, a tide-table app for sailors. Wordmark in title case, default style.",
+      "expected_output": "The 7 SVGs and brand-showcase.html carry no filter, glow, shadow, hover lift, eyebrow label or remote font; the mark's layers separate by geometry, and the Final Report cites the effects check instead of an adjective.",
+      "files": [],
+      "expectations": [
+        "No SVG contains a <filter> element, an fe* primitive (feGaussianBlur, feDropShadow), a filter= attribute, a CSS filter or drop-shadow(), box-shadow or text-shadow",
+        "logo-mark.svg's layers are separated by gaps, overlaps or knockouts, not by opacity steps on stacked copies, and each layer carries a named part of the idea",
+        "brand-showcase.html loads no remote font (no <link> or @import to fonts.googleapis.com or any http(s) font URL) and sets its text in a system font stack",
+        "brand-showcase.html has no box-shadow or text-shadow, no transform or translateY on :hover, and no small uppercase letter-spaced section labels; the hero mark is an <img> with no filter",
+        "The Final Report's Evidence: line cites the effects check of the SVGs and the showcase page and the mark's layer count, and uses no adjective such as elegant or premium as evidence"
       ]
     }
   ]
