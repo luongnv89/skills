@@ -9,14 +9,16 @@
 
 > One run to optimize a website or app design: capture once, audit with every lens, get one prioritized report.
 
-Version: **1.2.1** · Author: Luong NGUYEN · License: MIT
+Version: **1.3.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
 - Captures the page, head tags, screenshots and robots/sitemap/llms.txt **once**; every member reads the same evidence.
 - Runs `dont-make-me-think`, `ux-ax-review`, `website-agent-readiness` and `viral-product-evaluator` with a check-ownership matrix: evidence is captured once, the live scan runs at most once, overlapping checks are skipped where the member supports skip-checks, and remaining overlaps are merged into one row per defect.
-- Merges all findings into one deduplicated `design-optimization.md`, one row per finding, owner cited.
-- Audit by default; fixes only on explicit opt-in, through `frontend-design` or Redesign Mode and their own confirmation gates.
+- Records dark-scheme screenshots (or why they were skipped) and whether the capture is a production, preview or dev build.
+- Merges all findings into one deduplicated `design-optimization.md`, one row per finding, owner cited; usability clutter findings join the matching brand row, and a cut list and rules-file candidates (propose-only) are drawn from member findings.
+- Style adjectives such as "make it look great" are recorded as untestable, with a request for a design-rules file or reference screens.
+- Audit by default; fixes only on explicit opt-in, through `frontend-design` or Redesign Mode and their own confirmation gates. A visual fix gets the evidence screenshots and the finding's ban as its brief, and a member re-checks it before it is reported done.
 - Third-party scans, issue filing and repo writes stay behind each member's gate.
 
 ## When to Use
@@ -51,9 +53,9 @@ graph TD
 
 ## Output
 
-- `evidence/` with `manifest.json` (captured files + check owners)
+- `evidence/` with `manifest.json` (captured files, dark-scheme shots, build kind, untestable style words, check owners)
 - `reports/<member>/` — each member's own report
-- `design-optimization.md` — the single merged, prioritized report
+- `design-optimization.md` — the single merged, prioritized report, with a cut list and rules-file candidates
 - A closing response that opens with `Result: PASS | PARTIAL | BLOCKED`, then Evidence, Uncertainty and the apply offer as the Decision
 
 ## Requirements

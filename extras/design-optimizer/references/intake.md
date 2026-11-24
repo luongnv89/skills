@@ -52,13 +52,35 @@ If `/browse` is installed, load the final URL and save `screenshots/desktop.png`
 `/browse` is missing, record `"screenshots": {"status": "skipped", "reason": "browse not installed"}`
 — fail-soft, never fatal.
 
+**Dark scheme.** When the browser can emulate `prefers-color-scheme: dark` and the product offers a
+dark scheme, also save `screenshots/desktop-dark.png` and `screenshots/mobile-dark.png` at the same
+widths. They take these extra names so members that read `desktop.png` / `mobile.png` keep working.
+Record them under their own key, `files["screenshots-dark"]`; otherwise record
+`{"status": "skipped", "reason": "<why>"}` with one of: `browse not installed`, `browser cannot
+emulate color scheme`, `product offers no dark scheme`, `target has no render`. Never fatal.
+
+## Build provenance
+
+Record what was captured in the top-level `build` object: `kind` is `production`, `preview`,
+`dev` or `unknown`, and `basis` says how it was judged (the user's statement, a host pattern such as
+a `*.vercel.app` preview URL, `localhost` or a dev-server port, "source only, no render"). Never guess
+`production` without a basis; a dev, preview or unknown capture is labelled as such in the merged
+report and never presented as production.
+
+## Request
+
+Record the request's style adjectives ("look great", "modern", "clean", "premium") in the
+top-level `request` object as untestable, with the ask for a design-rules file or reference
+screens (`"style_adjectives": []` when there are none). They are never converted into decisions
+and never forwarded to a member as a brief.
+
 ## Other target types
 
 | Target | Intake |
 |---|---|
-| Repo only | No fetches. Record the repo path and the entry page file(s) in the manifest. |
-| Screenshot only | Copy the images into `screenshots/`; record that HTML and root files are unavailable. |
-| Saved HTML | Copy to `page.html`; extract `head.json`; root files recorded as unavailable. |
+| Repo only | No fetches. Record the repo path and the entry page file(s) in the manifest. `screenshots-dark` skipped (`target has no render`) unless rendered; `build`: `dev` or `unknown`, basis "source only, no render". |
+| Screenshot only | Copy the images into `screenshots/` (dark ones as `*-dark.png` when supplied); record that HTML and root files are unavailable. `build`: `unknown` unless the user said. |
+| Saved HTML | Copy to `page.html`; extract `head.json`; root files recorded as unavailable. `build`: `unknown` unless stated. |
 
 ## manifest.json
 
@@ -72,10 +94,13 @@ If `/browse` is installed, load the final URL and save `screenshots/desktop.png`
     "page.html": {"status": 200},
     "head.json": {"status": "derived"},
     "screenshots": {"status": "ok", "files": ["desktop.png", "mobile.png"]},
+    "screenshots-dark": {"status": "ok", "files": ["desktop-dark.png", "mobile-dark.png"]},
     "robots.txt": {"status": 200},
     "sitemap.xml": {"status": 404, "reason": "not found"},
     "llms.txt": {"status": 404, "reason": "not found"}
   },
+  "build": {"kind": "production", "basis": "public custom domain; user said it is the live site"},
+  "request": {"style_adjectives": ["look great"], "status": "untestable", "ask": "a design-rules file or reference screens"},
   "owners": {}
 }
 ```
