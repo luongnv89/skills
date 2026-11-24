@@ -32,7 +32,8 @@
         "No member re-fetches page.html, robots.txt, sitemap.xml or llms.txt listed in manifest.files.",
         "website-agent-readiness posts to isitagentready.com at most once.",
         "A defect reported by two members appears as one row with the other member under 'Also reported by'.",
-        "Every canonical check ID appears exactly once across Findings, Skipped and Not covered."
+        "Every canonical check ID appears exactly once across Findings, Skipped and Not covered.",
+        "A dont-make-me-think visual-noise finding naming the same element as a ux-ax-review Visual-system item appears on that brand row as 'Also reported by: dont-make-me-think (clarity, lens N)', not as a separate row, and the report has Cut list and Rules-file candidates sections citing member finding IDs."
       ]
     },
     {
@@ -61,7 +62,9 @@
         "Treats the request as audit mode; no UI source file is modified.",
         "Relays any member's closing implementation question (e.g. ux-ax-review's choice of IDs) instead of answering it for the user.",
         "Ends with an offer to apply chosen finding IDs, stated as the Decision of the closing response.",
-        "Describes that each applied finding routes to exactly one of frontend-design or dont-make-me-think Redesign Mode behind that member's confirmation gate."
+        "Describes that each applied finding routes to exactly one of frontend-design or dont-make-me-think Redesign Mode behind that member's confirmation gate.",
+        "Records 'look great' as an untestable style adjective in the one-line scope, in manifest.json request.style_adjectives (status untestable) and in the report's Scope note, with a request for a design-rules file or reference screens.",
+        "Does not convert 'look great' into design decisions and never passes it to frontend-design as a brief; an apply brief would carry only the finding's ban and the evidence screenshots."
       ]
     },
     {
@@ -95,6 +98,20 @@
       "expectations": [
         "No audit, evidence capture or merged report is produced.",
         "The response is a UI build, not a design optimization run."
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "name": "manifest-dark-and-build",
+      "prompt": "Optimize the design of https://my-app-git-feature-x.vercel.app — it's a preview deploy, and the app has a dark mode. Output to /tmp/do-dark.",
+      "expected_output": "Intake writes manifest.json with the light screenshots under files.screenshots, the dark ones under files[\"screenshots-dark\"] (or that entry skipped with a reason when the browser cannot emulate the dark scheme), and build {kind: preview, basis} from the user's statement and the *.vercel.app host; the merged report labels the capture as a preview, never production.",
+      "files": [],
+      "expectations": [
+        "manifest.json keeps files.screenshots as {status: ok, files: [desktop.png, mobile.png]} (or skipped with a reason) and does not rename the light screenshots.",
+        "manifest.json has files[\"screenshots-dark\"] either as {status: ok, files: [desktop-dark.png, mobile-dark.png]} or as {status: skipped, reason} naming why (browse not installed, browser cannot emulate color scheme, product offers no dark scheme, or target has no render); a missing dark capture is never fatal.",
+        "manifest.json has a top-level build object with kind 'preview' and a basis naming the user's statement or the *.vercel.app host pattern.",
+        "The merged design-optimization.md labels the evidence as a preview build and never presents it as production."
       ]
     }
   ]
