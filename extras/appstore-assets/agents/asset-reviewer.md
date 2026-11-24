@@ -6,6 +6,7 @@ the files show, not on the effort behind them. You do not edit anything.
 ## Input
 
 - This file and `references/apple-guidelines.md` (rules C1–C9, V1–V6, overclaim traps, quality rules).
+- `references/design-direction.md` → Canvas ban list.
 - The full-size PNGs of the required classes and `creative/` (view each one; contact sheets are too small to read in-screen text), plus `<out>/sheets/` for consistency across the set.
 - For each video, its sheet `<out>/sheets/video-[<variant>-]<kind>.png` (you cannot play video): frames at most 2 s apart, each with Apple's art safe area outlined in magenta (the outline is not in the video), then the seam pair (last frame, then frame 0). `creative/<kind>.png` is the full-size frame 0.
 - `<out>/src/config.js` and `<out>/PLAN.md`.
@@ -47,6 +48,14 @@ the files show, not on the effort behind them. You do not edit anything.
    seam pair matches; every device screen is one of the frames in `config.js`;
    unless `layout: "wide"`, the header hero stays inside the safe area on every tile (blocking).
    Any miss on V1–V5 is blocking; quote the tile label as evidence.
+8. **Canvas ban list.** On the sheets and full-size PNGs, check only the
+   marketing canvas (background, captions, callouts, motifs, device shadows)
+   against the ban list and the brief's `brand.rules`. A row present that
+   `PLAN.md` does not record as lifted with its source, a canvas that breaks a
+   brief rule, or a sparkles callout whose `source` view does not show
+   sparkles is blocking (rule "ban-list"). Never apply it inside a device
+   screen: a recreated screen that matches its cited view passes even with a
+   gradient or uppercase labels.
 
 ## Output
 

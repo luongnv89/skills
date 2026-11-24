@@ -49,7 +49,8 @@ Pillow (`python3 -m pip install pillow`). `render.py` needs Chrome or Chromium
 
 | Behavior | Reason |
 | --- | --- |
-| Refuses to run while `config.js` contains `TODO:` | Template text must never reach a PNG |
+| Refuses to run while `config.js` contains `TODO:`, and while it paints the template palette: checked by value from the manifest, including a token left out so it falls back to `kit.css`. `brand.confirmed: true` keeps a template value that really is the app's color; `--allow-placeholders` skips both checks (template testing only) | Template text and template colors must never reach a PNG |
+| Fails a callout using the `sparkles` icon without `source` | Sparkles is the generic AI mark; a callout shows it only when a cited app view does |
 | Builds a manifest first (`index.html?manifest=1` via `--dump-dom`), rendering every screen once | A broken builder, an unknown icon name or a missing image fails with its frame id instead of shipping a blank PNG |
 | Checks caption contrast from the brand tokens (3:1 headline, 4.5:1 supporting line, light and dark) | A dark frame with dark text cannot pass |
 | After a full render, deletes outputs no longer in `config.js`: `<frame>.png` in the class folders, and in `creative/` only files `.kit-outputs.json` lists (videos only without `--no-video`) whose size and sha256 still match the record, then a variant folder it lists once that folder is empty or holds only `.DS_Store` (removed with it). A listed file changed since gets `WARN: … changed since the kit wrote it, left in place` and leaves the record; a listed variant folder holding anything else is kept with a WARN. Each write records the file's fingerprint atomically right after it lands (`--only` adds to it), so a failed render never adds a file; a file deleted by hand stays listed until the next full render clears it. With no record (a 1.0.0 set), only root `header`/`search`/`universal.png` go. Hidden files are skipped silently; symlinks and anything else in `creative/` get `WARN: … not produced by the kit, left in place`. A file the config still produces is re-rendered over whatever is there: to keep a hand-made asset, remove that kind from the config first; the kit will then leave it in place | A dropped frame, video or variant cannot ship by accident, and a file the kit did not write or that changed since (an App Preview recording, raw art, a hand-replaced `search.png`, `old/header.png`, an empty folder, a symlinked folder) is never deleted |
@@ -83,13 +84,14 @@ window.APP_CONFIG = {
   app, version, platforms: ["iphone", "ipad", "mac"],      // only what the app ships
   orientation: "portrait",                                  // or "landscape", or { iphone, ipad }
   brand: { brand, brandInk, ink, muted, canvas1, canvas2, glow,
-           darkCanvas1, darkCanvas2, darkInk, darkMuted, darkAccent },   // dark* style frames with dark: true
+           darkCanvas1, darkCanvas2, darkInk, darkMuted, darkAccent, confirmed? },   // dark* style frames with dark: true
+  canvas: "flat",                                           // or "gradient" (canvas2 and glow); no key = gradient
   uiTint: "#3b86f7",                                        // the app's accent inside screens
   css: ".my-card{…}",                                       // optional styles for custom screen HTML
   fonts: { display: { file: "fonts/display.woff2", weight: "200 800" } },
-  frames: [{ id, headline, sub, dark?, callout?: { icon, title, text, platforms? },
+  frames: [{ id, headline, sub, dark?, callout?: { icon, title, text, platforms?, source? /* "path:line", needed for sparkles */ },
              screens: { iphone: () => html, ipad: () => html, mac: () => html } }],
-  creatives: { enabled /* only when requested */, kinds: ["header", "search", "universal"],
+  creatives: { enabled /* only when requested */, kinds: ["header", "search", "universal"], motif?: false /* arcs unless false */,
                headline, sub, searchHeadline, searchSub,
                hero: { platform, frame }, sides: [{ platform, frame }] /* search, universal; header only under "wide" */, layout?: "wide" | "safe" /* default; a variant sets it to undo a base "wide" */,
                video: { kinds: ["header", "search"], duration? /* fitted */, fps: 30, transition: 0.8, searchSize?: "max",
@@ -139,7 +141,7 @@ existing frames. The header shows the hero (plus one side device under
 `layout: "wide"`), search the hero and two. A beat holds, then crossfades (`transition`, default 0.8 s:
 the caption fades out, then the next fades in; each device crossfades its
 screen). The last crossfade returns to beat 0 half a second before the end,
-so the loop seam falls inside beat 0's hold. Devices drift ±8 px and the arcs
+so the loop seam falls inside beat 0's hold. Devices drift ±8 px and the arcs (when `motif` is on)
 breathe 2 % on one sine period over the whole video, so the last frame flows
 into the first.
 
@@ -235,7 +237,7 @@ lists only departures from `apple-specs.md` → Known kit assumptions.
 | `ui.button(label, "filled"\|"tinted"\|"plain")`, `ui.badge(text, fg, bg)` | Buttons and badges |
 | `ui.messages([ui.bubble("user"\|"other", html, meta)])`, `ui.composer(placeholder)` | Chat transcript and input bar |
 | `ui.tabBar([{icon, label}], active)` | Floating tab bar |
-| `ui.card(html)`, `ui.stat(value, label)`, `ui.grid2(cards)` | Cards and stat tiles |
+| `ui.card(html)`, `ui.stat(value, label)`, `ui.grid2(cards)` | Cards and stat tiles; the label shows as written (sentence case), and a view that uppercases it adds `.stat-label{text-transform:uppercase;letter-spacing:.04em}` to `css` |
 | `ui.split(sidebar, detail)`, `ui.sideItem(label, icon, on)` | iPad split view |
 | `ui.capture("captures/x.png")` | A real capture filling the screen (it carries its own status bar) |
 | `macui.window({title, tools, sidebar, content, dark})`, `macui.group`, `macui.item`, `macui.table` | Mac window with traffic lights, sidebar, toolbar, table |
@@ -275,6 +277,11 @@ differ as `<name>.bak-<timestamp>` so a hand edit is never lost. List the backup
 On `landscape fork`, add `orientation: "landscape"` to `config.js`, render with `render.py` itself (not
 the wrapper), and say so in the report.
 
+A `config.js` with no `canvas` key keeps the 1.4 glow-and-gradient canvas and the arcs; add
+`canvas: "flat"` and `creatives.motif: false` for the flat default. On a re-render, callout icons lose
+their tile and stat labels their uppercase (restore it in `css` when the app's view uppercases). `render.py`
+1.5.0 needs the refreshed `kit.js` (its manifest carries the palette).
+
 Update brief: read `src/brief.json`. If it is missing or lacks `orientation`, `limits` or
 `listing_findings`, run Step 1 and save its brief there. If the brief's `orientation` differs from
 `config.js`, report it and re-plan from Step 3 (every screen changes shape).
@@ -290,7 +297,7 @@ ts=$(date +%Y%m%d-%H%M%S); for f in kit.js kit.css index.html; do
 ## Step 5 script behavior
 
 Under load, `render.py` retries Chrome crashes (falling back to `chrome-headless-shell`), and videos
-take turns machine-wide: `waiting for the video lock` is not a hang. It also fails on unknown icons, missing images, caption contrast below 3:1
+take turns machine-wide: `waiting for the video lock` is not a hang. It also fails on the template palette, a sparkles callout without `source`, unknown icons, missing images, caption contrast below 3:1
 (headline) or 4.5:1 (supporting line), and a video beat held shorter than its caption needs;
 it removes the PNGs and videos it wrote that the config dropped (unless changed since), and warns about (but keeps) other files in `creative/`
 (a hand-made file the config still lists is overwritten: see *What render.py does and why* above). Videos render last and are slow (about a

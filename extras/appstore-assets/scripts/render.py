@@ -17,7 +17,9 @@ folders, and in creative/ only the files its ownership record
 (creative/.kit-outputs.json) says it wrote, while their size and sha256 still
 match. Any other file in creative/, or one changed since, is reported and kept.
 Caption color pairs from config.js brand tokens must reach 3:1 (headline) and
-4.5:1 (supporting line) on every canvas stop, or the run fails.
+4.5:1 (supporting line) on every canvas stop drawn, or the run fails. Like a
+TODO: marker, the template's own palette (TEMPLATE_PALETTE) fails the run
+unless brand.confirmed is true or --allow-placeholders is given.
 
 Videos (creatives.video.kinds in config.js) need ffmpeg and ffprobe; a config
 without video never calls them. One Chrome, driven over --remote-debugging-pipe,
@@ -89,6 +91,12 @@ CREATIVES = {
 }
 KIT_OUTPUTS = {f"{k}.png" for k in CREATIVES} | {"header.mp4", "search.mp4"}  # what creative/ can hold
 VARIANT_ID = re.compile(r"[a-z0-9][a-z0-9-]*")  # kit.js checks creatives.variants ids against the same pattern
+# The template's identity colors, refused by value in the manifest palette. Must match
+# assets/template/config.js and the kit.css :root fallbacks.
+TEMPLATE_PALETTE = {
+    "brand": "#3b82f6", "brandInk": "#1d5fd6", "canvas1": "#f4f7fc", "canvas2": "#e6edf8",
+    "glow": "rgba(59,130,246,.13)", "darkCanvas1": "#1f4fc4", "darkCanvas2": "#12306f", "uiTint": "#3b86f7",
+}
 # creative/.kit-outputs.json maps each creative file render.py wrote to its size and
 # sha256, and lists the variant folders it created; a full render deletes nothing
 # else in creative/, and no file whose content changed since.
@@ -468,6 +476,24 @@ def check_placeholders(config: Path) -> None:
              "replace every TODO: value with the app's real content, then re-run.")
 
 
+def check_palette(manifest: dict) -> None:
+    palette = manifest.get("palette")
+    if not isinstance(palette, dict):
+        fail("src/kit.js is older than this render.py (its manifest has no palette).",
+             "copy kit.js, kit.css and index.html from the skill's assets/template/ into src/ (config.js stays), then re-run.")
+    if manifest.get("paletteConfirmed"):
+        return
+
+    def norm(v) -> str:
+        return re.sub(r"\s+", "", str(v)).lower()
+    hits = [f"  {k}: {v}" for k, v in palette.items() if k in TEMPLATE_PALETTE and norm(v) == norm(TEMPLATE_PALETTE[k])]
+    if hits:
+        fail("config.js still paints the template palette (a token left unchanged, or left out so kit.css falls back to it):\n"
+             + "\n".join(hits),
+             "set each listed token to the app's own color from the brief (brand.accent, brand.colors) or the project's "
+             "design-rules file; if a listed value really is the app's color, add confirmed: true to brand.")
+
+
 def contrast(fg: str, bg: str) -> float:
     def lum(c: str) -> float:
         c = c.lstrip("#")
@@ -703,7 +729,7 @@ def main() -> None:
     ap.add_argument("--only", nargs="+", default=[], help="render only these frame ids or creative kinds")
     ap.add_argument("--classes", default=",".join(CLASSES), help="comma-separated device classes to render")
     ap.add_argument("--chrome", help="path to a Chrome or Chromium binary (or set $CHROME)")
-    ap.add_argument("--allow-placeholders", action="store_true", help="render even if config.js has TODO: markers (template testing only)")
+    ap.add_argument("--allow-placeholders", action="store_true", help="render even if config.js has TODO: markers or the template palette (template testing only)")
     a = ap.parse_args()
 
     if a.preflight:
@@ -739,6 +765,8 @@ def main() -> None:
     if any(isinstance(c, str) for c in manifest.get("creatives", [])):
         fail("src/kit.js is older than this render.py (its manifest lists creatives as plain names).",
              "copy kit.js, kit.css and index.html from the skill's assets/template/ into src/ (config.js stays), then re-run.")
+    if not a.allow_placeholders:
+        check_palette(manifest)
     for line in check_contrast(manifest.get("contrast", [])):
         print(f"ok {line.strip()}")
     if not manifest.get("fontOk", True):

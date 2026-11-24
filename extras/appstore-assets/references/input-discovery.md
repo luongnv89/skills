@@ -17,6 +17,7 @@ quoted text for a landing page. A field without evidence is `null`, never a gues
 | `listing_findings[]` | Each sentence of the listing copy (`store/`, `fastlane/metadata/`, `metadata/`) that the code does not support, such as a session length or a count the content does not have | Optional listing check: report it; this skill never edits the listing |
 | `brand.accent` | `Assets.xcassets/AccentColor.colorset/Contents.json`, `Color("…")`/`.tint(…)` in views, brand SVGs (`brand/`, `assets/`, `docs/`) | Convert to `#rrggbb`; an empty colorset means the system blue |
 | `brand.fonts` | Custom fonts in `Info.plist` `UIAppFonts`, `.font(.custom(…))` | System font if none |
+| `brand.rules_file`, `brand.rules` | The first match, from the project directory up to the git root, among `DESIGN.md`, `design-rules.md`, `docs/DESIGN.md`, `docs/design-rules.md`, a `## Design` or `## Design rules` section of `AGENTS.md` or `CLAUDE.md`, then `brand_kit.md` (`docs/`, `.docs/` or root) | Marketing canvas only; never edit it |
 | `screens[]` | SwiftUI `View` structs / UIKit view controllers under `Features/`, `Views/`, `Screens/`, `Scenes/`; Flutter widgets in `lib/`; React Native components | Pick the 5–10 screens that show the core value; record the file and the strings, colors and controls they render, in order |
 | `claims[]` | Listing description bullets, README feature list | Each claim maps to the code that implements it, or is marked unsupported |
 | `sensitive[]` | `*.entitlements`, `Info.plist` keys, extension targets, App Intents | See the sensitive-features table |
@@ -163,6 +164,7 @@ the host's web-fetch tool. For a local `.html` file, read it directly.
 | `name`, `subtitle` | `<title>`, hero heading, App Store badge link text |
 | `description`, `claims[]` | Hero subhead, feature sections; quote the exact text |
 | `brand.accent`, `brand.fonts` | CSS custom properties, button colors, `font-family`, Google Fonts links |
+| `brand.rules_file`, `brand.rules` | Next to the page file, the same lookup as the codebase row (`DESIGN.md` … `brand_kit.md`); marketing canvas only, never edit it |
 | `captures[]` | `<img>` and `<picture>` sources showing app UI, device mockups, inline SVG/HTML mock screens |
 | `platforms` | "Available on iPhone/iPad/Mac" text, App Store badge, device mockups shown |
 

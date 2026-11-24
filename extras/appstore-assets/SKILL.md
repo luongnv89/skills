@@ -8,7 +8,7 @@ dependencies:
   - "github:emilkowalski/skills:skills/emil-design-eng"
   - browse
 metadata:
-  version: 1.4.3
+  version: 1.5.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -173,7 +173,7 @@ FAIL row ends "(not written by the kit)"), never move, rename or delete it yours
 ## Step 6 — Review and polish
 
 1. View every sheet in `<out>/sheets/`, video sheets included. Fix text overlapping a device, clipped strings, blank screens, a caption outside the magenta safe area, and a header crop tile without the app.
-2. Acquire `emil-design-eng` and spawn a polish worker with the slice and task in `references/design-direction.md`. Apply its accepted rows to `config.js` only (`css` and brand tokens), then re-run Step 5.
+2. Run the cutting pass, then acquire `emil-design-eng` and spawn a polish worker with the slice and task in `references/design-direction.md`. Apply its accepted rows to `config.js` only, then re-run Step 5.
 3. Spawn a fresh reviewer, never the builder. Input: `agents/asset-reviewer.md`, `references/apple-guidelines.md`, the full-size PNGs, every sheet, `config.js`, `PLAN.md`, `src/brief.json`, and source access. With no brief, say so: the reviewer checks limits against the source, and its `verify_on_build` items go under Uncertainty.
 4. If the verdict is `NEEDS_FIX`, fix each blocking finding, re-run Step 5, and spawn a new reviewer. Stop after two fix cycles.
 

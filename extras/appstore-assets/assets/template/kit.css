@@ -8,6 +8,7 @@
   --brand: #3b82f6; --brand-ink: #1d5fd6; --ink: #0c1424; --muted: #4a5568;
   --canvas-1: #f4f7fc; --canvas-2: #e6edf8; --glow: rgba(59,130,246,.13);
   --dark-1: #1f4fc4; --dark-2: #12306f; --dark-ink: #ffffff; --dark-muted: #dbe5f7; --dark-accent: #ffd479;
+  --dark-glow: rgba(255,255,255,.10);
   --display: system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
@@ -19,8 +20,12 @@ body { font-family: var(--display); -webkit-font-smoothing: antialiased; }
 /* Dark (brand) frames swap the canvas AND the caption colors together, so a
    dark frame can never put dark text on a dark ground. */
 .stage.dark { --ink: var(--dark-ink); --muted: var(--dark-muted); --brand-ink: var(--dark-accent);
-  background: radial-gradient(70% 45% at 50% 62%, rgba(255,255,255,.10), transparent 70%),
+  background: radial-gradient(70% 45% at 50% 62%, var(--dark-glow), transparent 70%),
               linear-gradient(180deg, var(--dark-1) 0%, var(--dark-2) 100%); }
+/* canvas: "flat" in config.js (the template's setting): one solid color, no glow.
+   The gradient rules above stay for configs with no canvas key or canvas: "gradient". */
+.stage.flat { background: var(--canvas-1); }
+.stage.dark.flat { background: var(--dark-1); }
 .arcs { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .cap { position: absolute; left: 0; right: 0; text-align: center; z-index: 4; }
 .cap h1 { margin: 0; font-family: var(--display); font-weight: 780; line-height: 1.02; letter-spacing: -0.026em; color: var(--ink); text-wrap: balance; }
@@ -39,9 +44,9 @@ body { font-family: var(--display); -webkit-font-smoothing: antialiased; }
 .callout { position: absolute; z-index: 6; display: flex; gap: 14px; align-items: center;
   padding: 16px 18px; border-radius: 22px; background: #fff; border: 1px solid rgba(12,20,36,.06);
   box-shadow: 0 24px 50px -18px rgba(20,48,110,.4), 0 6px 14px -6px rgba(20,48,110,.2); }
-.callout .ci { flex: none; width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--brand) 75%, #fff), var(--brand)); color: #fff; }
-.callout .ci svg { width: 26px; height: 26px; }
+/* The icon draws in the brand color with no tile; --brand, not --brand-ink, which dark frames remap. */
+.callout .ci { flex: none; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--brand); }
+.callout .ci .sym { width: 26px; height: 26px; }
 .callout b { display: block; font-size: 17px; font-weight: 720; color: #0c1424; letter-spacing: -0.01em; }
 .callout span.t { display: block; font-size: 14px; line-height: 1.3; color: #4a5568; font-weight: 500; margin-top: 2px; }
 
@@ -134,7 +139,9 @@ body { font-family: var(--display); -webkit-font-smoothing: antialiased; }
 .tab.on { color: var(--blue); }
 .card { background: var(--fill); border-radius: 22px; margin: 0 16px; padding: 16px 18px; }
 .stat { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.stat-label { font-size: 13px; color: var(--sec); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+/* Labels show as written, not uppercased; a recreated view that uppercases its labels restores it in
+   config.js css (.stat-label{text-transform:uppercase;letter-spacing:.04em}), since this is in-screen UI. */
+.stat-label { font-size: 13px; color: var(--sec); font-weight: 600; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 16px; }
 .grid2 .card { margin: 0; }
 .capture { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
