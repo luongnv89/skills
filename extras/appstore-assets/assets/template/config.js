@@ -1,8 +1,10 @@
 // Per-app content for the asset set. Rewrite every value for the target app.
 // Every example string below carries a placeholder marker (TODO followed by a
 // colon); render.py refuses to run while any marker remains, so no template
-// text can reach a PNG. Screens must mirror real app views: cite the source
-// file above each builder, and use realistic, all-ages sample content.
+// text can reach a PNG. It also refuses the template palette in brand and
+// uiTint (by value), so set them from the app. Screens must mirror real app
+// views: cite the source file above each builder, and use realistic, all-ages
+// sample content.
 // Never reuse a kit.js top-level name here. Reusing a const (CREATIVE, LAYOUT, ui, macui, sym, I …) throws;
 // a function reusing a kit.js function (renderFrame …) silently replaces it. See references/render-pipeline.md, Troubleshooting.
 window.APP_CONFIG = {
@@ -15,14 +17,22 @@ window.APP_CONFIG = {
   // Landscape renders the rotated sizes (2868 × 1320 …); build screens with ui.screen(…, { platform }).
   orientation: "portrait",
 
-  // Marketing canvas tokens. render.py checks every caption pair: headline
-  // colors need 3:1 and the supporting line 4.5:1 on both canvas stops.
-  // The dark* tokens style frames marked dark: true (brand-colored frames).
+  // Marketing canvas tokens. These values are the template palette, which
+  // render.py refuses: replace each with the app's palette. render.py checks
+  // every caption pair: headline colors need 3:1 and the supporting line 4.5:1
+  // on each canvas stop drawn. The dark* tokens style frames marked dark: true
+  // (brand-colored frames). canvas2, glow and darkCanvas2 matter only with
+  // canvas: "gradient". confirmed: true keeps a value that really is the app's color.
   brand: {
     brand: "#3b82f6", brandInk: "#1d5fd6", ink: "#0c1424", muted: "#4a5568",
     canvas1: "#f4f7fc", canvas2: "#e6edf8", glow: "rgba(59,130,246,.13)",
     darkCanvas1: "#1f4fc4", darkCanvas2: "#12306f", darkInk: "#ffffff", darkMuted: "#dbe5f7", darkAccent: "#ffd479",
   },
+  // "flat" draws canvas1 (darkCanvas1 on dark frames) as one solid color; "gradient"
+  // draws canvas1 → canvas2 plus the glow token, only when the brand, a design-rules
+  // file or the user asks for it (references/design-direction.md). A config with no
+  // canvas key keeps the gradient (sets made before 1.5.0).
+  canvas: "flat",
   // Accent used inside the recreated app UI (the app's tint, sampled from code or captures).
   uiTint: "#3b86f7",
   // Optional styles for custom screen HTML and polish overrides; injected after kit.css.
@@ -65,7 +75,8 @@ window.APP_CONFIG = {
       dark: true,  // a brand-colored frame; remove for a light one
       headline: "TODO: Second benefit.<br><em>Accent.</em>",
       sub: "TODO: Supporting sentence.",
-      // Optional floating card for one fact the screen cannot show.
+      // Optional floating card for one fact the screen cannot show. A callout with
+      // icon "sparkles" also needs source: "path:line" naming the app view that shows it.
       callout: { icon: "lock", title: "TODO: Short fact", text: "TODO: One supporting line.", platforms: ["iphone"] },
       screens: {
         // Source: TODO: captures/feature.png, a clean simulator capture
@@ -80,6 +91,7 @@ window.APP_CONFIG = {
   creatives: {
     enabled: false,
     kinds: ["header", "search", "universal"],  // keep only the placements the user asked for
+    motif: false,  // arcs behind the devices; true only when the direction asks for a motif
     headline: "TODO: One clear idea. <em>Accent.</em>",
     sub: "TODO: One supporting line.",
     searchHeadline: "TODO: State the obvious.<br><em>Accent.</em>",

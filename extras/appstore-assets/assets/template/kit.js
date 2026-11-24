@@ -188,6 +188,8 @@ const LAYOUT_LANDSCAPE = {
 const layout = (platform) => (landscape(platform) ? LAYOUT_LANDSCAPE : LAYOUT)[platform];
 
 function callout(c, top, width, stageW) {
+  // Sparkles reads as the generic AI mark; a callout shows it only when the app does.
+  if (c.icon === "sparkles" && !c.source) KIT_ERRORS.push(`callout icon "sparkles" needs source: "path:line" naming the app view that shows it, or another icon`);
   return `<div class="callout" style="top:${top}px;width:${width}px;left:${(stageW - width) / 2}px"><span class="ci">${sym(c.icon)}</span><div><b>${c.title}</b><span class="t">${c.text}</span></div></div>`;
 }
 
@@ -196,7 +198,7 @@ function renderFrame(cfg, frame, platform, stageH) {
   const size = deviceSize(platform, L.scale);
   const screen = frame.screens[platform]();
   const showCallout = frame.callout && (!frame.callout.platforms || frame.callout.platforms.includes(platform));
-  return `<section class="stage${frame.dark ? " dark" : ""}" style="width:${W}px;height:${stageH}px">
+  return `<section class="stage${frame.dark ? " dark" : ""}${cfg.canvas === "flat" ? " flat" : ""}" style="width:${W}px;height:${stageH}px">
     <div class="cap" style="top:${L.capTop}px;padding:0 ${Math.round(W * 0.06)}px">
       <h1 data-fit="frame ${frame.id} (${platform})" style="font-size:${L.h1}px">${frame.headline}</h1>
       ${frame.sub ? `<p style="font-size:${L.sub}px;margin-top:${L.subGap}px;max-width:${L.subMax}px">${frame.sub}</p>` : ""}
@@ -370,8 +372,8 @@ function renderSafeCreative(cfg, kind, cr) {
         <h1 data-fit="${kind} beat ${i}" style="font-size:${C.h1}px">${b.headline}</h1>${b.sub ? `<p style="font-size:${C.sub}px;margin-top:14px">${b.sub}</p>` : ""}</div></div>`;
   });
   const cx = C.w / 2, cy = C.safe.y + C.safe.h / 2, r0 = C.safe.w * 0.62;
-  return `<section class="stage" data-creative="${kind}" style="width:${C.w}px;height:${C.h}px;--glow:${cfg.brand.glow}">
-    <div class="cv-arcs">${arcs(cx, cy, [r0, r0 + 90, r0 + 190], C.w, C.h, cfg.brand.brand)}</div>${beats.join("")}</section>`;
+  return `<section class="stage${cfg.canvas === "flat" ? " flat" : ""}" data-creative="${kind}" style="width:${C.w}px;height:${C.h}px">
+    ${cr.motif !== false ? `<div class="cv-arcs">${arcs(cx, cy, [r0, r0 + 90, r0 + 190], C.w, C.h, cfg.brand.brand)}</div>` : ""}${beats.join("")}</section>`;
 }
 
 function renderCreative(cfg, kind, variant) {
@@ -389,8 +391,8 @@ function renderCreative(cfg, kind, variant) {
   const cy = C.devTop + hero.sz.h / 2, r0 = C.dx + 330 * C.side;
   const headline = (kind === "search" && cr.searchHeadline) || cr.headline;
   const sub = kind === "search" ? (cr.searchSub ?? "") : (cr.sub ?? "");
-  return `<section class="stage" style="width:${C.w}px;height:${C.h}px;--glow:${cfg.brand.glow}">
-    ${arcs(C.w / 2, cy, [r0, r0 + 90 * C.side, r0 + 190 * C.side], C.w, C.h, cfg.brand.brand)}
+  return `<section class="stage${cfg.canvas === "flat" ? " flat" : ""}" style="width:${C.w}px;height:${C.h}px">
+    ${cr.motif !== false ? arcs(C.w / 2, cy, [r0, r0 + 90 * C.side, r0 + 190 * C.side], C.w, C.h, cfg.brand.brand) : ""}
     <div class="cap" style="top:${C.capTop}px"><h1 data-fit="${kind}" style="font-size:${C.h1}px">${headline}</h1>${sub ? `<p style="font-size:${C.sub}px;margin-top:14px">${sub}</p>` : ""}</div>
     ${sides.join("")}${hero.html}
   </section>`;
@@ -402,6 +404,8 @@ function applyBrand(cfg) {
   const map = { brand: "--brand", brandInk: "--brand-ink", ink: "--ink", muted: "--muted", canvas1: "--canvas-1", canvas2: "--canvas-2", glow: "--glow",
     darkCanvas1: "--dark-1", darkCanvas2: "--dark-2", darkInk: "--dark-ink", darkMuted: "--dark-muted", darkAccent: "--dark-accent" };
   for (const [k, v] of Object.entries(map)) if (b[k]) r.setProperty(v, b[k]);
+  // A missing glow means no glow, never the template's.
+  if (!b.glow) for (const v of ["--glow", "--dark-glow"]) r.setProperty(v, "transparent");
   const f = cfg.fonts && cfg.fonts.display;
   if (f) {
     const face = document.createElement("style");
@@ -506,13 +510,21 @@ async function renderFromQuery(cfg) {
       });
     }
     // Caption color pairs render.py checks: headline (large text, 3:1) and
-    // supporting line (4.5:1) on both canvas stops, light and dark.
-    const b = cfg.brand, pairs = [];
-    for (const bg of [b.canvas1, b.canvas2]) pairs.push([b.ink, bg, 3], [b.brandInk, bg, 3], [b.muted, bg, 4.5]);
-    if (cfg.frames.some((f) => f.dark)) for (const bg of [b.darkCanvas1, b.darkCanvas2]) pairs.push([b.darkInk, bg, 3], [b.darkAccent, bg, 3], [b.darkMuted, bg, 4.5]);
+    // supporting line (4.5:1) on each canvas stop drawn (one when flat), light and dark.
+    const b = cfg.brand, pairs = [], flat = cfg.canvas === "flat", anyDark = cfg.frames.some((f) => f.dark);
+    for (const bg of flat ? [b.canvas1] : [b.canvas1, b.canvas2]) pairs.push([b.ink, bg, 3], [b.brandInk, bg, 3], [b.muted, bg, 4.5]);
+    if (anyDark) for (const bg of flat ? [b.darkCanvas1] : [b.darkCanvas1, b.darkCanvas2]) pairs.push([b.darkInk, bg, 3], [b.darkAccent, bg, 3], [b.darkMuted, bg, 4.5]);
+    // The identity tokens this render paints, as the page resolved them, so a token
+    // config.js leaves out reports the kit.css fallback; render.py refuses the template's.
+    const css = getComputedStyle(document.documentElement), tok = (v) => css.getPropertyValue(v).trim();
+    const palette = { brand: tok("--brand"), brandInk: tok("--brand-ink"), canvas1: tok("--canvas-1") };
+    if (!flat) Object.assign(palette, { canvas2: tok("--canvas-2"), glow: tok("--glow") });
+    if (anyDark) Object.assign(palette, { darkCanvas1: tok("--dark-1") }, flat ? {} : { darkCanvas2: tok("--dark-2") });
+    if (cfg.uiTint) palette.uiTint = cfg.uiTint;
     root.textContent = JSON.stringify({
       app: cfg.app, version: cfg.version, platforms: cfg.platforms, orientation: ORIENT, fontOk, errors: [...new Set(errors)],
       contrast: pairs.map(([fg, bg, min]) => ({ fg, bg, min })),
+      canvas: flat ? "flat" : "gradient", palette, paletteConfirmed: cfg.brand?.confirmed === true,
       frames: cfg.frames.map((f) => ({ id: f.id, platforms: cfg.platforms.filter((p) => f.screens[p]) })),
       creatives: stills, video, outside, fit, capOutside,
     });
