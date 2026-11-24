@@ -4,7 +4,7 @@ description: "Generate professional SVG logos from project context: 7 brand vari
 license: MIT
 effort: medium
 metadata:
-  version: 1.8.0
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -29,8 +29,8 @@ This skill uses an **Explorer+Executor (A) + Review Loop (C)** architecture:
 Phase 1: Brand Research
   ↓ (brand-researcher agent)
   ↓
-Phase 2: Interactive Style Selection
-  ↓ Main agent: confirm style selection with user
+Phase 2: Design Decisions
+  ↓ Main agent: confirm the decision sheet with user
   ↓
 Phase 3: Generate All 7 SVGs
   ↓ (svg-generator agent)
@@ -48,7 +48,7 @@ Final Output: 7 SVG files in /assets/logo/ + PNGs in /assets/logo/png/ + brand-s
 2. `agents/svg-generator.md` — Generates all 7 SVG files (mark, wordmark, full, icon, favicon, white, black)
 3. `agents/svg-reviewer.md` — Validates SVG structure (viewBox, no rasters, all files present, correct names)
 
-**Key Insight**: 7 SVG files generated inline is the single biggest context cost. Brand research across multiple project files adds to the burden. The reviewer acts as a quality gate to catch SVG structure issues before files are committed.
+**Key Insight**: the 7 inline SVGs are the biggest context cost. The reviewer catches SVG structure issues before files are committed.
 
 ## Repo Sync Before Edits (mandatory)
 Before creating/updating/deleting files in an existing repository, sync the current branch with remote. If the working tree is not clean, stash first, sync, then restore:
@@ -83,6 +83,7 @@ Automatically analyze the current project to understand brand context:
    - `go.mod` - Module name
 
 2. **Find existing brand assets** - Search for:
+   - A design-rules file (`DESIGN.md` first, `references/design-principles.md`)
    - `/docs/brand_kit.md`, `/.docs/brand_kit.md`, `brand_kit.md`
    - `/docs/prd.md`, `prd.md` - Product requirements with brand info
    - `/assets/logo/`, `/public/logo`, `/static/logo` - Existing logos
@@ -107,13 +108,13 @@ Automatically analyze the current project to understand brand context:
 
 ### Phase 2: Logo Design
 
-Pick a style based on the detected project type (Developer/SaaS/Startup/Enterprise/Consumer), then design a minimalist, geometric mark that reads at every size from 16px favicon to hero banner. Use detected brand colors when present, else apply the Default Style Guide (dark base + neon-green highlights only — never as a background fill). Confirm with the user how the product name should be cased in the wordmark before generating any text-bearing SVG.
+Confirm the decision sheet with the user before any text-bearing SVG, never an adjective: the mark's idea, type, construction, stroke, corner radius, layer and colour count, wordmark weight and casing. An initial-only mark needs an idea tied to the product or the user's explicit request. Use detected brand colors, else the Default Style Guide. Write the confirmed decisions and lifted bans into the brief before Phase 3.
 
-See `references/design-principles.md` for the style table, full visual/color/typography rules, and the Default Style Guide palette with system status colors.
+`references/design-principles.md` holds the sheet, the AI-default bans, the rules-file lookup and the Default Style Guide.
 
-### Default Quality Bar
+### Effects and Layers
 
-All 7 SVGs and `brand-showcase.html` must be professional, production-ready, elegant, and premium, even unasked. The chosen style sets direction; this bar sets the finish (craft and restraint, not ornament): optical balance, consistent strokes, clean minimal paths legible at 16px, refined wordmark kerning, and a polished showcase with no placeholders. Pass this bar to `svg-generator`.
+No SVG or showcase rule uses a filter, glow, shadow, opacity as depth, hover lift, eyebrow label or remote font unless the brief or rules file asks; depth comes from layer geometry, in the fewest layers that carry the idea.
 
 ### Phase 3: Deliverables
 
@@ -127,7 +128,7 @@ Output structure:
 ├── logo-full.svg          # W×72 mark + wordmark (width fitted to the name)
 ├── logo-wordmark.svg      # 180×40 text only
 ├── logo-icon.svg          # 512×512 app icon (centered, padded)
-├── favicon.svg            # 16×16 simplified 2-layer mark
+├── favicon.svg            # 16×16 simplified mark
 ├── logo-white.svg         # W×72 white (for dark backgrounds)
 ├── logo-black.svg         # W×72 black (for light backgrounds)
 ├── png/                   # PNG exports (Phase 3b)
@@ -160,11 +161,11 @@ For a CLI tool called "fastbuild", the skill produces:
 
 ```
 /assets/logo/
-├── logo-mark.svg          — 64×64 abstract "F" mark (canonical geometry)
+├── logo-mark.svg          — 64×64 two-block mark (canonical geometry)
 ├── logo-full.svg          — W×72 mark + "FASTBUILD" wordmark, W fitted to the name
 ├── logo-wordmark.svg      — 180×40 text-only wordmark
-├── logo-icon.svg          — 512×512 mark centered in rounded square
-├── favicon.svg            — 16×16 simplified 2-layer mark
+├── logo-icon.svg          — 512×512 mark centered on the app-icon tile
+├── favicon.svg            — 16×16 simplified mark
 ├── logo-white.svg         — W×72 full logo in white (for dark backgrounds)
 ├── logo-black.svg         — W×72 full logo in black (for light backgrounds)
 ├── png/                   — logo-icon-512/1024, logo-mark-512, logo-full, logo-white,
@@ -176,9 +177,9 @@ Design rationale summary presented to the user:
 ```
 Product: fastbuild
 Type: Developer/CLI Tool
-Symbol: Abstract "F" from stacked horizontal speed bars
+Symbol: base block and a forward-shifted top block (incremental builds move only what changed); 2 layers, filled
 Colors: #0A0A0A base, #00FF41 neon green accent (borders and highlights only)
-Typography: Inter Bold for wordmark
+Typography: Inter 600, outlined, for wordmark
 ```
 
 ## Edge Cases
@@ -188,8 +189,8 @@ Typography: Inter Bold for wordmark
 - **User does not specify wordmark casing**: Ask explicitly before proceeding (see `references/design-principles.md` for the casing rule and examples).
 - **SVG geometry diverges across variants**: Re-run the Phase 3 verification step (read back and diff `d=""` strings) and fix before finishing.
 - **No git repository**: Skip the branch and sync steps; write directly to the current directory and note this in the summary.
-- **favicon.svg complexity**: At 16×16 the full mark is unreadable — always simplify to 2 layers (outer + inner) and drop the middle detail layer; preserve proportional geometry.
-- **User rejects the proposed style**: Iterate on Phase 2 (style selection) until the user approves before generating any SVG files.
+- **favicon.svg complexity**: At 16×16, keep the layers that still read and drop detail under 1px; preserve proportional geometry.
+- **User rejects the proposed decisions**: Iterate on Phase 2 until the user approves before generating any SVG files.
 
 ## Final Report
 
@@ -197,7 +198,7 @@ End every run, stops included, with this compact text block. Status is `COMPLETE
 
 ```text
 Result: COMPLETE. Wrote 7 SVGs, 10 PNGs in png/ and brand-showcase.html to /assets/logo/.
-Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. PNGs (rsvg-convert, measured with file): logo-icon-512 512x512, logo-icon-1024 1024x1024, logo-mark-512 512x512 RGBA, logo-full/white/black 1176x288, logo-wordmark 720x160, favicon-16 16x16, favicon-32 32x32, favicon-48 48x48. Default Quality Bar passed. sync: skipped (not a git repo)
+Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. PNGs (rsvg-convert, measured with file): logo-icon-512 512x512, logo-icon-1024 1024x1024, logo-mark-512 512x512 RGBA, logo-full/white/black 1176x288, logo-wordmark 720x160, favicon-16 16x16, favicon-32 32x32, favicon-48 48x48. Effects check: no filter, shadow or remote font; logo-mark 2 layers, as confirmed. sync: skipped (not a git repo)
 Uncertainty: Assumed a developer-tool audience from the CLI entry point; the user did not say.
 Decision: No approval needed.
 ```
@@ -212,7 +213,7 @@ Decision: No approval needed.
 - [ ] A PNG of each of the 7 variants is rendered from the verified SVGs into `/assets/logo/png/` at the Phase 3b sizes, and each one's measured dimensions appear in `Evidence:`
 - [ ] With no rasterizer found, the run still delivers the SVGs and ends `PARTIAL` with the install command under `Decision:`
 - [ ] Monochrome variants (`logo-white.svg`, `logo-black.svg`) differ from `logo-full.svg` only in color, not geometry
-- [ ] `favicon.svg` is a simplified 2-layer version of the mark at 16×16
+- [ ] `favicon.svg` is a simplified version of the mark at 16×16
 - [ ] `logo-icon.svg` keeps `logo-mark.svg`'s stroke widths inside its `scale(S)` group, and its transform centers the mark in the 512×512 tile
 - [ ] `logo-full.svg`, `logo-white.svg` and `logo-black.svg` share one viewBox width fitted to the wordmark, so a short name leaves no empty canvas
 - [ ] Every variant reaches 3:1 (mark) and 4.5:1 (wordmark letters) against its intended background
@@ -220,7 +221,9 @@ Decision: No approval needed.
 - [ ] Design rationale (symbol meaning, color choices, typography) is documented in the response
 - [ ] Color specification includes hex codes for all palette roles
 - [ ] Wordmark casing is confirmed with the user before any SVG containing text is generated
-- [ ] Every SVG and the showcase page meet the Default Quality Bar (professional, production-ready, elegant, premium) without the user asking
+- [ ] No SVG or showcase rule uses a filter, glow, shadow, hover lift, eyebrow label or remote font unless a lifted ban names it; every brief ban holds
+- [ ] Phase 2 confirms decisions, not adjectives; an initial-only mark has a recorded idea or user request; the mark has the fewest layers that carry the idea
+- [ ] A found design-rules file feeds the brief's bans; new rule lines are only proposed
 - [ ] The Final Report opens with `Result:` and its status, and has `Evidence:`, `Uncertainty:`, and `Decision:` lines. `Evidence:` cites only checks that ran
 - [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear). Without a human reviewer's answer, human understanding is unconfirmed
 
@@ -233,8 +236,6 @@ See `references/step-reports.md` for the full report template, per-phase check l
 ## Notes
 
 - Always show logo previews on both light (#FAFAFA) and dark (#0A0A0A) backgrounds
-- Confirm wordmark casing before generating (see Phase 2 and Edge Cases)
-- If no project context is found, ask the user for: product name, type, and purpose
 - Prefer simplicity — a logo should be recognizable at 16x16 pixels
 - **Consistency is non-negotiable**: every variant must be visually recognizable as the same logo. The mark shape, number of layers, and accent elements must match across all files. The only things that change between variants are: color (monochrome), scale (favicon, icon), and presence of wordmark. If you cannot verify that paths match, the deliverable is incomplete.
 

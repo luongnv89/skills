@@ -9,15 +9,17 @@
 
 > Design professional, modern logos with automatic project context detection and multiple SVG deliverables.
 
-Version: **1.8.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.9.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
-- Analyze project type (CLI, SaaS, Startup, Enterprise, Consumer) for style selection
+- Analyze project type (CLI, SaaS, Startup, Enterprise, Consumer) for the starting design decisions
+- Confirm concrete decisions, not adjectives: the mark's idea, mark type, construction, stroke, corner radius, layer and colour count, wordmark weight and casing
 - Apply design principles: simplicity, scalability, memorability, versatility
 - Generate 7 SVG variants (full, mark, wordmark, icon, favicon, white, black), with the wordmark outlined so nothing depends on an installed font
 - Export a PNG of every variant (icon 512/1024, mark 512, full/white/black 4W×288 with W the fitted lockup width, wordmark 720×160, favicon 16/32/48) with `rsvg-convert`, `magick`, `inkscape` or headless Chrome
-- Default quality bar: every SVG and the showcase page are professional, production-ready, elegant, and premium without being asked
+- No AI-default effects: no filter, glow or shadow in any SVG, depth from layer geometry in the fewest layers that carry the idea, and a showcase page with flat cards, sentence-case headings and no remote font
+- Read a project design-rules or brand file (`DESIGN.md`, `design-rules.md`, `brand_kit.md` and the like) into the brief's bans; new rule lines are only proposed
 - Provide color specs with hex codes and Tailwind config
 
 ## When to Use
@@ -33,7 +35,7 @@ Version: **1.8.0** · Author: Luong NGUYEN · License: MIT
 
 ```mermaid
 graph TD
-    A["Analyze Project Context"] --> B["Select Design Style"]
+    A["Analyze Project Context"] --> B["Confirm Design Decisions"]
     B --> C["Generate SVG Logos"]
     C --> D["Document Design Rationale"]
     style A fill:#4CAF50,color:#fff

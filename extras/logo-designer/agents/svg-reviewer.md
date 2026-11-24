@@ -4,14 +4,14 @@ Validate SVG structure, correctness, and all 7 files are present with proper for
 
 ## Role
 
-Fresh-context validation of generated SVG files. Verify SVG structure is correct (viewBox, no rasters, proper paths), confirm all 7 files exist with correct names, and validate visual quality.
+Fresh-context validation of generated SVG files. Verify SVG structure is correct (viewBox, no rasters, proper paths), confirm all 7 files exist with correct names, and check that no file uses a banned effect or breaks a brief ban.
 
 ## Inputs
 
 You receive these parameters in your prompt:
 
 - **output_dir**: Path to `/assets/logo/` directory where SVGs were written
-- **brand_brief_path**: Path to the brand brief JSON (for reference)
+- **brand_brief_path**: Path to the brand brief JSON: its confirmed `decisions` (layer count and what each layer carries), `bans` and `lifted_bans`
 - **output_path**: Where to save the validation report
 
 ## Process
@@ -115,7 +115,7 @@ Check fill and stroke colors:
 - [ ] Colors are valid hex codes (#RRGGBB format) or named colors
 - [ ] Colors are from the brand palette (from brand brief)
 - [ ] Contrast against the file's intended background (`references/svg-deliverables.md` variant table): logo-mark, logo-full and logo-wordmark on the brand background; logo-icon's mark on its own tile; favicon on both `#FAFAFA` and `#0A0A0A` (or its own tile); logo-white on `#0A0A0A`; logo-black on `#FAFAFA`
-- [ ] The mark's silhouette layer reaches 3:1 and every wordmark letter reaches 4.5:1, with opacity composited over the background first (*Step 4* of that file). Lighter depth layers below 3:1 are not a finding
+- [ ] The mark's silhouette layer reaches 3:1 and every wordmark letter reaches 4.5:1, with opacity composited over the background first (*Step 4* of that file). Other layers below 3:1 are not a finding
 
 Examples:
 ```
@@ -125,6 +125,20 @@ Examples:
 ❌ Invalid: fill="blue" (not from palette)
 ❌ Invalid: fill="#" (malformed hex)
 ```
+
+#### 2.8 No Effects and Brief Bans
+
+Scan every file's markup, including any `<style>` block (`references/design-principles.md`, *AI-default bans*):
+- [ ] No `<filter>` element, no `fe*` primitive (`feGaussianBlur`, `feDropShadow`, `feMorphology` and the rest), no `filter=` attribute, no CSS `filter` or `drop-shadow()` — ❌ FAIL, naming the file and element
+- [ ] No `box-shadow` or `text-shadow`, and no offset darker copy of a layer drawn as a shadow — ❌ FAIL
+- [ ] Layers are separated by geometry (gaps, overlaps, knockouts). Two layers that differ only in opacity are a ⚠️ warning, not a FAIL: a flat tint may be a colour value
+- [ ] Every `brief.bans` entry holds — ❌ FAIL, citing the entry's `source`
+- [ ] A default ban listed in `brief.lifted_bans` is not a finding; note it with its source
+
+#### 2.9 Layer Count
+
+- [ ] logo-mark.svg has the layer count of `brief.decisions.layers`, and each layer carries a part of the idea named there. A layer with no named part is a finding
+- [ ] A mark that is only the product's initial has an idea tied to the letter or the user's explicit request recorded in the brief — else a finding
 
 ### Step 3: File-Specific Validation
 
@@ -198,7 +212,7 @@ For each of these files, extract the `<path d="...">` strings used for the mark:
 
 **Common failure modes to catch:**
 - Different `d=""` strings between files (each file invented its own shape)
-- Missing layers (e.g., logo-icon has 3 layers but logo-white has 2)
+- Missing layers (e.g., logo-icon has more layers than logo-white)
 - Missing accent elements (e.g., lens circle in mark but not in icon)
 - Different SVG element types (e.g., mark uses `<path>` but icon uses `<rect>` + `<polygon>`)
 - Different notch/cut angles or directions between variants
@@ -255,6 +269,9 @@ Write a concise, unfilled validation report to `output_path`. It must contain ob
 | Every path has non-empty, valid `d` data | [ ] | |
 | Wordmark is outlined paths (no `<text>`, `<tspan>` or `@font-face`) spelling the actual product name | [ ] | |
 | Colors follow the brand palette and contrast requirements | [ ] | |
+| No filter, `fe*` primitive, `filter=`, drop-shadow, box-shadow or text-shadow (lifted bans named); layers separated by geometry | [ ] | |
+| Every `brief.bans` entry holds | [ ] | |
+| logo-mark.svg's layer count equals the confirmed decision, and each layer carries a named part of the idea | [ ] | |
 | File size and trailing whitespace are reasonable | [ ] | |
 
 ## Mark Consistency
@@ -309,6 +326,8 @@ Before PASS:
 - [ ] **Mark consistency**: identical `d=""` paths across logo-mark, logo-full, logo-icon, logo-white, logo-black
 - [ ] **Wordmark consistency**: identical outlined letter paths, casing and weight across logo-full, logo-wordmark, logo-white, logo-black
 - [ ] Colors from brand palette
+- [ ] **No effects**: no filter, `fe*` primitive or shadow unless `brief.lifted_bans` names it, and every `brief.bans` entry holds
+- [ ] **Layers**: logo-mark.svg uses the confirmed layer count, each layer carrying a named part of the idea
 - [ ] **Contrast**: each file reaches 3:1 (mark silhouette) and 4.5:1 (wordmark letters) against its intended background
 - [ ] **Lockup width**: logo-full, logo-white and logo-black share one W fitted to the wordmark, with no empty band on the right
 - [ ] **Icon**: stroke widths equal logo-mark's and the transform centers the mark

@@ -4,7 +4,7 @@ Generate all 7 SVG logo files based on the brand brief, ensuring perfect consist
 
 ## Role
 
-Consume the brand brief from the brand-researcher agent and generate 7 professional SVG files. The critical requirement is that **every file uses the exact same mark geometry** — only color, scale, and wordmark presence change between variants.
+Consume the brand brief from the brand-researcher agent and generate 7 SVG files. The critical requirement is that **every file uses the exact same mark geometry** — only color, scale, and wordmark presence change between variants.
 
 ## Inputs
 
@@ -25,22 +25,15 @@ You receive these parameters in your prompt:
 
 Read the brand brief JSON:
 - Product name and wordmark formatting
-- Project type (determines style)
+- Project type (the decision sheet's starting row)
 - Color palette (primary, accent, surface, text, etc.)
 - Typography (font)
-- Visual personality and design principles
+- The confirmed `decisions` and `mark_idea` (written back after Phase 2)
+- `bans` (from the project's design-rules file) and `lifted_bans`: obey every ban, and treat a default ban as lifted only when `lifted_bans` names it
 
-### Step 2: Determine Design Direction
+### Step 2: Apply the Confirmed Decisions
 
-Based on project type, select the appropriate style:
-
-| Project Type | Design Direction | Example |
-|--------------|------------------|---------|
-| **Developer/CLI/Open Source** | Clean, technical, monochrome, minimal | Linear/geometric, single-color, works at small size |
-| **SaaS/Productivity** | Ultra-minimal, Apple-style, geometric | Simple shapes, elegant proportions, symbol-first |
-| **Startup** | Bold, distinctive, high-contrast | Strong geometry, memorable symbol, color-forward |
-| **Enterprise/B2B** | Professional, trustworthy, conservative | Geometric, stable composition, balanced colors |
-| **Consumer/Mobile** | Friendly, vibrant, icon-first | Rounded shapes, vibrant color, approachable |
+Build from `brief.decisions`: mark type, construction, stroke, corner radius, layer count, colours and wordmark weight (the decision sheet in `references/design-principles.md`). Never reinterpret them through a style adjective. If `decisions.confirmed` is not `true`, stop and report that Phase 2 has not confirmed them.
 
 ### Step 3: Establish Canonical Mark
 
@@ -50,8 +43,10 @@ Based on project type, select the appropriate style:
 
 Design requirements:
 - Recognizable at 16px (favicon size)
-- Geometric and clean
-- Relates to core purpose/value prop
+- Draws `brief.mark_idea` with the confirmed construction, stroke and corner radius
+- An initial-only mark only when the brief records an idea tied to the letter or the user's explicit request (`references/design-principles.md`, *Initial-only marks*)
+- The fewest layers that carry the idea, each layer carrying a named part of it
+- Depth from layer geometry only: gaps, overlaps and knockouts, never a filter, shadow, glow or opacity steps
 - Works in both light and dark modes
 - Use `<path>` elements (not `<rect>` + separate `<polygon>` combos) so `d=""` strings can be copy-pasted
 
@@ -59,10 +54,9 @@ After writing logo-mark.svg, extract and record the exact path data:
 
 ```
 MARK PATHS (canonical — used in all variants):
-  Layer 1: d="..."  fill/stroke: ...
-  Layer 2: d="..."  fill/stroke: ...
-  Layer 3: d="..."  fill/stroke: ...
-  Accent:  <circle cx="..." cy="..." r="..." .../>
+  Layer 1 (carries: ...): d="..."  fill/stroke: ...
+  Layer N (carries: ...): d="..."  fill/stroke: ...   (one line per layer, no more than the idea needs)
+  Accent (only if the mark has one): <circle cx="..." cy="..." r="..." .../>
 ```
 
 ### Step 4: Generate All 7 SVG Files
@@ -105,7 +99,7 @@ viewBox="0 0 180 40"
 viewBox="0 0 512 512"
 ```
 
-- Dark rounded square background: `<rect width="512" height="512" rx="80" fill="..."/>`
+- Dark rounded square background (the platform's app-icon tile, not part of the mark): `<rect width="512" height="512" rx="80" fill="..."/>`
 - Mark: Same `<path>` elements wrapped in `<g transform="translate(86, 86) scale(5.3125)">`: `S = 340/64`, translate `256 − 32·S` on each axis for a mark centered in its 64x64 canvas (else `256 − cx·S`, `256 − cy·S` from the mark's bounding-box center)
 - Keep every stroke-width value exactly as in logo-mark.svg: `scale(S)` scales strokes with the paths, so the icon keeps the mark's proportions. Never divide stroke widths by `S` and never use `vector-effect="non-scaling-stroke"`
 
@@ -115,9 +109,9 @@ viewBox="0 0 512 512"
 viewBox="0 0 16 16"
 ```
 
-- Simplified: Keep only 2 of the 3 layers (outer stroke + inner fill)
+- Simplified: keep every layer that still reads at 16px; drop a layer only when its detail falls under 1px there
 - Maintain the same proportional geometry (same angles, corner radius ratios, notch direction)
-- Include any distinctive accent element (dot, circle) scaled down
+- Keep the mark's accent element (dot, circle), scaled down, when it has one
 - Thicker strokes for visibility at tiny size
 
 #### 4.6 logo-white.svg (White Version for Dark Backgrounds)
@@ -127,7 +121,7 @@ viewBox="0 0 W 72"   (logo-full's W)
 ```
 
 - **Same layout as logo-full.svg** — identical `<path>` elements, identical transforms
-- All fills/strokes changed to `#FFFFFF` with varying opacity for layer depth
+- All fills/strokes changed to `#FFFFFF`; the layers stay apart through the mark's gaps and knockouts, not opacity
 - Wordmark in white
 
 #### 4.7 logo-black.svg (Black Version for Light Backgrounds)
@@ -137,7 +131,7 @@ viewBox="0 0 W 72"   (logo-full's W)
 ```
 
 - **Same layout as logo-full.svg** — identical `<path>` elements, identical transforms
-- All fills/strokes changed to `#000000` or `#1A1A1A` with varying opacity
+- All fills/strokes changed to `#000000` or `#1A1A1A`; the layers stay apart through the mark's gaps and knockouts, not opacity
 - Wordmark in dark
 
 ### Step 5: SVG Quality Requirements
@@ -149,7 +143,7 @@ For ALL generated SVGs:
 3. **Optimized paths**: Use `<path>` elements. Round coordinates to 2 decimals max.
 4. **Proper structure**: Use `<g>` groups. Add brief comments for sections.
 5. **Correct naming**: Exactly 7 files with the standard names.
-6. **Default quality bar**: Even if the brief never asks, every file must look professional, production-ready, elegant, and premium: optical balance, consistent stroke weights, clean minimal paths, legible at 16px, refined wordmark kerning. Premium means craft and restraint, not ornament.
+6. **No effects, every ban**: No `<filter>`, `fe*` primitive, `filter=` attribute, CSS `filter` or `drop-shadow()`, `box-shadow` or `text-shadow`, and no opacity steps used as depth, unless `brief.lifted_bans` names that ban. Obey every `brief.bans` entry. Check the craft, not an adjective: the mark is optically centered, layers that share a role share one stroke width, coordinates sit on the canvas grid, and the mark reads at 16px.
 7. **Outlined text**: No `<text>`, `<tspan>` or `@font-face`. Use the `wordmark_paths` you were given; without them, outline the brief's font by `references/wordmark-outlining.md`. Reuse the same letter paths byte for byte in logo-full, logo-white, logo-black and logo-wordmark, changing only the wrapping group's `transform` and fill. The PNG export renders these files, and a rasterizer would substitute an installed font for `<text>`.
 
 ### Step 6: Verify Consistency
