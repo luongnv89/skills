@@ -415,5 +415,103 @@ class WebAccessAndDomainTests(unittest.TestCase):
         self.assertIn("a host that does not resolve", section)
 
 
+REFERENCES_DIR = SKILL_DIR / "references"
+CONTRACT_TEXT = (REFERENCES_DIR / "output-contract.md").read_text(encoding="utf-8")
+CLEAR_WORDS = re.compile(r"\b(available|Available|clear|Clear|Low|Proceed|COMPLETE)\b")
+
+
+def fenced_blocks(text: str) -> list[str]:
+    return re.findall(r"```text\n(.*?)\n```", text, re.DOTALL)
+
+
+def several_names_example() -> list[str]:
+    section = CONTRACT_TEXT.split("### Worked example: two names", 1)[1]
+    return fenced_blocks(section)[0].splitlines()
+
+
+class SeveralNamesTests(unittest.TestCase):
+    """Several names per run, one report each, and a quick-screen that never clears (#674)."""
+
+    def test_input_accepts_several_names_without_splitting_one(self) -> None:
+        self.assertIn("Commas, semicolons or newlines separate names", SKILL_TEXT)
+        self.assertIn("Check at most 5 names in full", SKILL_TEXT)
+        self.assertIn("never leave one out silently", SKILL_TEXT)
+        self.assertIn("The Early-Exit Rule ends only that name's checks", SKILL_TEXT)
+        edge = (REFERENCES_DIR / "edge-cases.md").read_text(encoding="utf-8")
+        for clause in (
+            "`Salt and Pepper` is one name",
+            "`Acme, Inc.` is one name",
+            "A name passed by another skill is one name, never split",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, edge)
+
+    def test_single_name_template_keeps_its_lines(self) -> None:
+        section = SKILL_TEXT.split("## Output Format", 1)[1]
+        template = re.search(r"```\n(RESULT:.*?)\n```", section, re.DOTALL).group(1)
+        prefixes = [line.split(":", 1)[0] for line in template.splitlines()]
+        self.assertEqual(
+            prefixes,
+            ["RESULT", "SOCIAL", "REGISTRY", "DOMAIN", "TM", "EVIDENCE", "SKIPPED", "UNKNOWN", "RISK", "RECOMMEND"],
+        )
+        for block in fenced_blocks(CONTRACT_TEXT.split("## Several names", 1)[0]):
+            with self.subTest(block=block.splitlines()[0]):
+                self.assertTrue(block.startswith("RESULT: "))
+                self.assertNotIn("CANDIDATES", block)
+                self.assertNotIn("QUICK-SCREEN", block)
+
+    def test_each_report_block_starts_with_result_and_ends_with_risk_then_recommend(self) -> None:
+        lines = several_names_example()
+        self.assertTrue(lines[0].startswith("CANDIDATES: "))
+        blocks, current = [], None
+        for line in lines:
+            if line.startswith("--- "):
+                current = []
+                blocks.append(current)
+            elif current is not None:
+                current.append(line)
+        self.assertEqual(len(blocks), 2)
+        for block in blocks:
+            with self.subTest(first=block[0]):
+                self.assertTrue(block[0].startswith("RESULT: "))
+                self.assertTrue(block[-2].startswith("RISK: "))
+                self.assertTrue(block[-1].startswith("RECOMMEND: "))
+
+    def test_quick_screen_rows_are_never_cleared(self) -> None:
+        lines = several_names_example()
+        caption = next(line for line in lines if line.startswith("QUICK-SCREEN: "))
+        self.assertIn("partial", caption)
+        self.assertIn("unverified", caption)
+        rows = [line for line in lines if line.startswith("| ")][1:]
+        self.assertTrue(rows)
+        for row in rows:
+            with self.subTest(row=row):
+                self.assertIsNone(CLEAR_WORDS.search(row))
+                self.assertTrue(row.endswith("| unverified - not cleared |"))
+
+    def test_quick_screen_rules_live_in_the_contract(self) -> None:
+        section = CONTRACT_TEXT.split("## Quick-screen table", 1)[1].split("### Worked example", 1)[0]
+        for clause in (
+            "the slug rule in `references/edge-cases.md` before any fetch",
+            "so it is not fetched",
+            "it never spawns source-checker for them",
+            "it is never written as available",
+            "plus each extra TLD named",
+            "reads `unverified - not cleared`, whatever the endpoint cells say",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, section)
+        cell_words = re.findall(r"is `([a-z ]+)`", section)
+        self.assertEqual(set(cell_words), {"taken", "not found", "registered", "unknown"})
+        self.assertIn("First line of each report", CONTRACT_TEXT)
+        self.assertIn("first line of each report states the `RESULT` status", SKILL_TEXT)
+
+    def test_prd_quick_risk_never_copies_endpoint_cells(self) -> None:
+        prd = (REFERENCES_DIR / "prd-integration.md").read_text(encoding="utf-8")
+        self.assertIn("| Name | Rationale | Quick Risk |", prd)
+        self.assertIn("reads exactly `unverified - not cleared (see QUICK-SCREEN)`", prd)
+        self.assertIn("never copy the table's endpoint cells into it", prd)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -19,3 +19,7 @@ Rate the name against the PRD on three points. Quote the PRD line each rating re
 | Name3 | Why it fits | Availability |
 
 The `Quick Risk` column states only what was checked. An alternative that did not go through the Step 1-4 source checks is labeled **unverified**, never "available".
+
+When a quick-screen ran (`references/output-contract.md` → *Quick-screen table*), a screened alternative's `Quick Risk` cell reads exactly `unverified - not cleared (see QUICK-SCREEN)`; never copy the table's endpoint cells into it.
+
+In a run with several names, append these blocks once, after the last report: the Name Fit Assessment rates each fully checked name in its own sub-list, and the Alternative Suggestions table is shared.

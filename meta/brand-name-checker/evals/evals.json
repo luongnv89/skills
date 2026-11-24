@@ -103,6 +103,21 @@
         "Does not run the social, registry, domain and trademark availability checks",
         "Treats the request as a trademark filing task, not a name conflict check"
       ]
+    },
+    {
+      "id": 9,
+      "kind": "happy-path",
+      "prompt": "/brand-name-checker sfm, Hosthale",
+      "expected_output": "A CANDIDATES line naming sfm and hosthale, a QUICK-SCREEN table of the suggested alternatives captioned partial and unverified, then one complete compact report per name in input order, each after a '--- <name> (i of 2) ---' divider, starting with RESULT and ending with RISK then RECOMMEND.",
+      "files": [],
+      "expectations": [
+        "Both sfm and Hosthale get their own complete compact report with SOCIAL, REGISTRY, DOMAIN, TM, EVIDENCE, SKIPPED and UNKNOWN lines",
+        "Each report block starts with 'RESULT:' and ends with a RISK line followed by a RECOMMEND line",
+        "An Early-Exit on one name does not skip the other name's checks",
+        "The QUICK-SCREEN caption says the screen is partial and unverified and lists the checks it did not run",
+        "Every quick-screen row ends 'unverified - not cleared' and no row uses available, clear, Low or Proceed",
+        "No quick-screened alternative is recommended for adoption without a full check"
+      ]
     }
   ]
 }

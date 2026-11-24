@@ -4,7 +4,7 @@ description: "Check product and brand names for conflicts across trademarks, dom
 license: MIT
 effort: max
 metadata:
-  version: 1.8.1
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -37,6 +37,14 @@ This skill writes no files by default. Before creating, updating, or deleting fi
 ## Input
 
 Read the name from `$ARGUMENTS`; if empty, ask the user. If `prd.md` exists, read it for industry, target registries, and target domains.
+
+### Several names
+
+Commas, semicolons or newlines separate names. Spaces and the words `and`, `or` and `vs` never do, and a company suffix after a comma stays with its name (`references/edge-cases.md`). A name that another skill passes, such as the product name `product-planner` reads from `prd.md`, is one name. When the user compares candidates in conversation, write them as that list. Check at most 5 names in full, in input order, and name any extra ones as not checked; never leave one out silently. Names with the same slug are checked once.
+
+- The Environment Check and a `BLOCKED` result cover the whole run. Steps 1-6 run once per name, with the source-checkers and the synthesizer spawned per name. The Early-Exit Rule ends only that name's checks.
+- Quick-screen: after the last report, screen the alternatives named on the reports' `RECOMMEND` lines yourself, with five direct fetches per alternative (GitHub, npm, PyPI, Homebrew, `.com` RDAP), never through source-checker. It runs in every run with several names, and in a one-name run only when the user asks for alternatives to be screened. A quick-screen is partial: every alternative it lists stays **unverified** and is never cleared; adopting one takes a full run on that name.
+- Layout, cell words, caps and the slug rule: `references/output-contract.md` → *Several names* and *Quick-screen table*.
 
 ## Analysis Protocol
 
@@ -111,6 +119,8 @@ RECOMMEND: [Proceed | Modify | Abandon] - [reason and checked or unverified alte
 
 `RESULT` status: **COMPLETE** when every check is verified or skipped by the Early-Exit Rule; **PARTIAL** when any check is Unknown; **BLOCKED** when no name was given or no web access works (return only the `RESULT` line with the reason and fix). Before writing the report, read `references/output-contract.md` for the field rules and the `next:` clause. If `prd.md` exists, append the blocks from `references/prd-integration.md`.
 
+A run with several names, or with a requested quick-screen, uses the layout in `references/output-contract.md` → *Several names*: a `CANDIDATES` line, the `QUICK-SCREEN` table, then one report per name in the format above, each starting with `RESULT` and ending with `RISK` and `RECOMMEND`.
+
 ## Step Completion Reports
 
 After each major step, emit a status report. The general template and per-step examples (Social, Registry, Domain, Trademark, Risk, Recommendation) live in `references/step-reports.md`. Adapt check names to what the step validates; use `√` for pass and `×` for fail.
@@ -123,7 +133,8 @@ After each major step, emit a status report. The general template and per-step e
 - Trademark search completed against WIPO, EUIPO, and INPI (unless the Early-Exit Rule fired)
 - Risk level assigned (Low / Moderate / High) with the highest matching trigger as rationale
 - Final recommendation delivered (Proceed / Modify / Abandon) with named alternatives if needed
-- Understanding: the first line states the `RESULT` status; verified statuses cite a source on `EVIDENCE` while unverified ones sit on `UNKNOWN`; `RISK` names its trigger; `RECOMMEND` ends with `next:`. Unanswered human review leaves understanding unconfirmed (`references/output-contract.md`)
+- With several names: each checked name gets its own complete report, and every quick-screened alternative reads `unverified - not cleared`
+- Understanding: the first line of each report states the `RESULT` status; verified statuses cite a source on `EVIDENCE` while unverified ones sit on `UNKNOWN`; `RISK` names its trigger; `RECOMMEND` ends with `next:`. Unanswered human review leaves understanding unconfirmed (`references/output-contract.md`)
 
 ## Expected Output
 
@@ -154,6 +165,7 @@ Rate limits, source outages, special characters, very short names, and typosquat
   3. **Social handles** — secure handles on key platforms.
 - **Modify**: Recommend a variant addressing confirmed conflicts and list any pending verification. Alternatives not checked are **unverified**, never available by assertion.
 - **Abandon**: Recommend the best alternative from suggestions; mark unchecked alternatives **unverified** and do not claim that any option is clear.
+- **Quick-screened alternatives**: never recommend adopting one on its quick-screen alone; the `next:` clause names a full check on it as the step before adoption.
 
 ## Self-Improve
 
