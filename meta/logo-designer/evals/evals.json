@@ -170,7 +170,7 @@
         "Every shape in the 7 SVGs has square corners (no rx, ry or rounded path corners in the mark; the app-icon tile follows the radius rule too, or the Final Report names it as an assumption) and no stroke in the mark",
         "The SVGs use only #1F2937 and #D97706, plus white or black in logo-white.svg and logo-black.svg",
         "The svg-reviewer report checks every brief ban and cites its DESIGN.md source",
-        "The box-shadow rule on DESIGN.md:6 is in lifted_bans, not bans, with that source; the showcase check keeps the cards' box-shadow while the SVGs still have no filter or shadow",
+        "The box-shadow rule on DESIGN.md:10 is in lifted_bans, not bans, with that source; the showcase check may keep the cards' box-shadow while the SVGs still have no filter or shadow",
         "DESIGN.md is not modified; any new rule line appears only as an optional proposal after the Final Report's Decision: text, quoted with the file it would go in"
       ]
     },
