@@ -29,7 +29,7 @@ second A/B variant) after the deliverable exists does not change a `COMPLETE`.
 
 ```text
 Result: PARTIAL. Delivered full PAS landing copy for AcmeDesk, built as HTML in landing-page/; 2 of 6 CTAs still fail the CTA Button Rules.
-Evidence: Framework PAS applied via references/section-templates.md; hero headline 8 words; CTA Button Rules check: "Learn more" (pricing section) and "Submit" (FAQ) state no outcome; companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; page: built (landing-page/: index.html, privacy.html, changelog.html); page checks passed.
+Evidence: Framework PAS applied via references/section-templates.md; hero headline 8 words; CTA Button Rules check: "Learn more" (pricing section) and "Submit" (FAQ) state no outcome; companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; page: built (landing-page/: index.html, privacy.html, changelog.html); page checks passed; visual check at 375 and 1280 px showed no ban-table row.
 Uncertainty: The brief names no outcome for the pricing link, so a replacement CTA is a guess; not confirmed with the user.
 Decision: Approve "Compare AcmeDesk plans" and "Ask us a question" as the two CTAs, or name your own.
 ```
