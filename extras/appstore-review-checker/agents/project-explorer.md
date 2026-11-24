@@ -10,7 +10,7 @@ Read all project configuration files and source code to build a structured app-p
 
 ## Workspace Artifacts
 
-- **Input**: The user's iOS/macOS app project directory (passed as `<project_path>`)
+- **Input**: The user's iOS/macOS app project directory (passed as `<project_path>`), plus the live-listing answer from the main conversation: approved or declined, the App Store Connect app ID, the platform, and the version if the user named one (Step 1f)
 - **Output**: `<project_path>/app-profile.json` — structured JSON with all findings
 - **Working files**: Read-only access to project configuration and source code
 
@@ -87,7 +87,7 @@ Record each locale in `metadata.locales` and set `metadata.source` to `fastlane/
 
 ### Step 1f: Live App Store Connect Listing (optional)
 
-Repo metadata can be stale because store copy is often edited in App Store Connect. If `asc` is on the PATH, offer to read the pending version's listing read-only, following `references/live-metadata.md`. On approval, fill `metadata.locales` from it and set `metadata.source` to `App Store Connect (asc, pending version)`, or to both sources when you compare them. Without `asc`, or when the user declines, skip this step.
+Repo metadata can be stale because store copy is often edited in App Store Connect. You cannot ask the user: the main conversation offers the live read before spawning you (`references/live-metadata.md` → _When to offer_). Run this step only when your prompt says the user approved it and gives the app ID and platform (and possibly the version); then read the pending version's listing read-only with the commands in `references/live-metadata.md`, fill `metadata.locales` from it, and set `metadata.source` to `App Store Connect (asc, pending version)`, or to both sources when you compare them. When no approval was passed in, skip this step. In single-conversation mode, the conversation asks the user directly before this step.
 
 ## Phase 2: Scan Source Code for Usage Patterns
 
