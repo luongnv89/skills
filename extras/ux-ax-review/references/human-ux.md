@@ -49,7 +49,7 @@ Classify each item. Name the element and the rule, never "looks AI-generated":
 | Situation | Finding |
 |---|---|
 | Breaks a rule in supplied guidelines | `observed` under `brand`, citing the E record of the rule's file:line and the E record of the breach |
-| Supplied guidelines ask for the element | No finding |
+| Supplied guidelines or the user's brief ask for the element | No finding |
 | No rule covers it and no harm is shown | `hypothesis`, confidence `low`, severity `low`; it never makes `brand` `issues` |
 | It causes real harm: contrast below the WCAG minimum, clipped or overlapping text, content hidden by an effect | `observed` under the harmed aspect (`accessibility`, `responsive`) with `related_aspects: ["brand"]`; harm read from source stays source-scoped until rendered |
 
