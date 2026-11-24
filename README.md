@@ -259,7 +259,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [**user-test**](extras/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
 | [**verify-setup**](skills/verify-setup/) | 1.0.0 | high | Write a repo-local verify skill that boots and drives your web app, API or CLI end to end, with a feature map as its pass/fail rubric; run it three times and report flaky steps |
 | [**dont-make-me-think**](extras/dont-make-me-think/) | 1.8.0 | medium | Usability review using Krug's principles |
-| [**ux-ax-review**](extras/ux-ax-review/) | 1.3.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
+| [**ux-ax-review**](extras/ux-ax-review/) | 1.4.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
