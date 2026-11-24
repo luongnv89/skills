@@ -49,7 +49,7 @@ A mark that is only the product's initial (one letter, alone or in a rounded squ
 
 ### Fewest layers
 
-The canonical mark uses the fewest layers that carry the idea. One layer is the default; each further layer names the part of the idea it carries, and a layer that carries none is removed. The favicon keeps every layer that still reads at 16px and drops a layer only when its detail falls under 1px there.
+The canonical mark uses the fewest layers that carry the idea. One layer is the default; each further layer names the part of the idea it carries, and a layer that carries none is removed. A named part must also show: before any variant is derived, a layer or accent whose removal changes neither the 64 px nor the 16 px render is cut (`references/render-inspect.md`, *Gate 1*). The favicon keeps every layer that still reads at 16px with at least 1 unit of clearance, and drops the rest, accent included (*Gate 2*).
 
 ## AI-default bans
 
@@ -60,6 +60,7 @@ Unless the user's explicit brief or the design-rules file asks for one:
 | `<filter>`, any `fe*` primitive (`feGaussianBlur`, `feDropShadow`), a `filter=` attribute, CSS `filter` or `drop-shadow()` | SVGs, showcase | Glow and blur smear at 16px and render differently in each rasterizer |
 | `box-shadow`, `text-shadow`, or a shadow drawn as an offset darker copy | SVGs, showcase | Depth comes from layer geometry |
 | Opacity steps used as depth (fading back layers) | SVGs | Same reason; the layers must separate by shape |
+| A gradient: `<linearGradient>`, `<radialGradient>`, CSS `linear-gradient()` or `radial-gradient()` | SVGs, showcase | Flat color reproduces in one-color variants and at 16px; a gradient bands or vanishes |
 | Hover lift: `transform` or `translateY` on `:hover` | Showcase | A reference page has nothing to lift |
 | Eyebrow labels: small, uppercase, letter-spaced section labels | Showcase | Section headings in sentence case carry the structure |
 | A remote font: a `<link>` or `@import` to `fonts.googleapis.com` or any http(s) font URL | Showcase, SVGs | The page must open offline; the wordmark is outlined paths |

@@ -46,8 +46,10 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ```
 ◆ Deliverables (step 3 of 4 — [project name])
 ··································································
+  Gate 1 mark inspected:      √ pass (16/32/64/512 px viewed; cut: [layers] | none) | × fail — [finding]
   7 variants generated:       √ pass | × fail — [missing files]
   Files written:              √ pass (/assets/logo/ populated)
+  Gate 2 favicon inspected:   √ pass (16/32/48 px on #FAFAFA and #0A0A0A; min gap [n] unit; tile: yes | no) | × fail — [finding]
   PNGs rendered:              √ pass ([rasterizer], N PNGs, sizes measured) | × fail — no rasterizer, [install hint]
   ____________________________
   Result:                     PASS | FAIL | PARTIAL
@@ -60,6 +62,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Rationale documented:       √ pass | × fail — [missing sections]
   Colors specified:           √ pass ([N] hex codes documented)
   Showcase created:           √ pass (brand-showcase.html written)
+  Gate 3 output inspected:    √ pass (N PNGs viewed; showcase at 1440 and 390 px; no ban hit) | × fail — [finding or gate not run]
   ____________________________
   Result:                     PASS | FAIL | PARTIAL
 ```
