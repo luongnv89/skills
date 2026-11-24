@@ -101,7 +101,7 @@ with a recorded gap, `FAIL` when a check is blocked and the run cannot continue.
   Build decided:           √ pass (page: built (landing-page/: index.html, privacy.html, ...)) | — page: skipped — <reason>
   frontend-design:         √ pass (acquired; direction stated in one line) | × fail — page: not built — <reason>; copy only
   Page checks:             √ pass (sections, CTAs, markers carried; nothing added; links resolve)
-  Design checks:           √ pass (contrast, quality, build) | — responsive untested (no browser)
+  Design checks:           √ pass (contrast, quality, build; visual check at [widths], [dark mode]) | — visual check untested ([reason]; CSS inspected)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```

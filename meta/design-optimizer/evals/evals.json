@@ -32,7 +32,8 @@
         "No member re-fetches page.html, robots.txt, sitemap.xml or llms.txt listed in manifest.files.",
         "website-agent-readiness posts to isitagentready.com at most once.",
         "A defect reported by two members appears as one row with the other member under 'Also reported by'.",
-        "Every canonical check ID appears exactly once across Findings, Skipped and Not covered."
+        "Every canonical check ID appears exactly once across Findings, Skipped and Not covered.",
+        "A dont-make-me-think issue whose title or Where line names the same element as a ux-ax-review Visual-system item and whose title or Problem line contains that item's effect word appears on that brand row as 'Also reported by: dont-make-me-think (\"<issue title>\"; Where: ...)', not as a separate row, with no invented lens number or #N; the report has Cut list and Rules-file candidates sections citing ux-ax-review F/T IDs and the dont-make-me-think issue title."
       ]
     },
     {
@@ -61,7 +62,9 @@
         "Treats the request as audit mode; no UI source file is modified.",
         "Relays any member's closing implementation question (e.g. ux-ax-review's choice of IDs) instead of answering it for the user.",
         "Ends with an offer to apply chosen finding IDs, stated as the Decision of the closing response.",
-        "Describes that each applied finding routes to exactly one of frontend-design or dont-make-me-think Redesign Mode behind that member's confirmation gate."
+        "Describes that each applied finding routes to exactly one of frontend-design or dont-make-me-think Redesign Mode behind that member's confirmation gate.",
+        "Records 'look great' as an untestable style adjective in the one-line scope, in manifest.json request.style_adjectives (status untestable) and in the report's Scope note, with a request for a design-rules file or reference screens.",
+        "Does not convert 'look great' into design decisions and never passes it to frontend-design as a brief; an apply brief would carry only the finding's ban and the evidence screenshots."
       ]
     },
     {
@@ -95,6 +98,49 @@
       "expectations": [
         "No audit, evidence capture or merged report is produced.",
         "The response is a UI build, not a design optimization run."
+      ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "name": "manifest-dark-and-build",
+      "prompt": "Optimize the design of https://my-app-git-feature-x.vercel.app — it's a preview deploy, and the app has a dark mode. Output to /tmp/do-dark.",
+      "expected_output": "Intake writes manifest.json with the light screenshots under files.screenshots, the dark ones under files[\"screenshots-dark\"] (or that entry skipped with a reason when the browser cannot emulate the dark scheme), and build {kind: preview, basis} from the user's statement and the *.vercel.app host; the merged report labels the capture as a preview, never production.",
+      "files": [],
+      "expectations": [
+        "manifest.json keeps files.screenshots as {status: ok, files: [desktop.png, mobile.png]} (or skipped with a reason) and does not rename the light screenshots.",
+        "manifest.json has files[\"screenshots-dark\"] either as {status: ok, files: [desktop-dark.png, mobile-dark.png]} or as {status: skipped, reason} naming why (browse not installed, browser cannot emulate color scheme, product offers no dark scheme, or target has no render); a missing dark capture is never fatal.",
+        "manifest.json has a top-level build object with kind 'preview' and a basis naming the user's statement or the *.vercel.app host pattern.",
+        "The merged design-optimization.md labels the evidence as a preview build and never presents it as production."
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "name": "apply-ban-brief-recheck",
+      "prompt": "Here's the design-optimization.md from the last run on https://example.com (D-03: brand, \"New\" badge beside the hero CTA, ux-ax-review F3, dark screenshots captured, build production). Apply D-03 and make it look modern.",
+      "expected_output": "Routes D-03 to frontend-design with a brief holding only the finding's ban, the evidence screenshot paths (light and dark) and the build line; 'modern' is recorded as untestable and never relayed. frontend-design's own approval, diff-and-confirm gate and checks still run, and the fix is reported done only after a COMPLETE frontend-design visual check covering the affected views and dark mode, or a scoped ux-ax-review re-run whose brand coverage is tested and no longer names the badge; otherwise 'applied, not verified: <reason>'.",
+      "files": [],
+      "expectations": [
+        "The frontend-design brief carries only the D-03 ban (remove the \"New\" badge beside the hero CTA; do not add a substitute effect), the finding ID and member reason quoted as data, the evidence screenshot paths including desktop-dark.png and mobile-dark.png, and the manifest's build line.",
+        "'modern' is not relayed to frontend-design in any form; it is recorded as an untestable style adjective with a request for a design-rules file or reference screens.",
+        "frontend-design's own direction approval, diff-and-confirm gate, Repo Sync and verification checks still run; design-optimizer does not edit UI files or judge the result itself.",
+        "The fix is reported done only when frontend-design's Final Report has Result: COMPLETE and its Evidence line lists the visual check for the affected views and dark mode, or when a ux-ax-review re-run scoped to brand (skip-checks of the other eleven aspects, fresh capture and output-dir of its own) has brand coverage tested (not not-tested) and no finding naming the badge.",
+        "A frontend-design PARTIAL or 'Visual check untested' result with no passing re-run is reported as 'applied, not verified: <reason>', never done, in the Apply step report and the closing Decision line."
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "edge",
+      "name": "same-element-different-defect",
+      "prompt": "Run a full design optimization on https://example.com. dont-make-me-think and ux-ax-review both flag the hero CTA: ux-ax-review has a Competing-effects item for a \"New\" badge beside it, dont-make-me-think says its label \"Learn more\" doesn't say what happens.",
+      "expected_output": "The ux-ax-review badge item becomes the brand row. The dont-make-me-think CTA-label issue names the same element but not the badge, so it keeps its own clarity row (optionally noting related: the brand row), routes to dont-make-me-think Redesign Mode, and is not cited on the brand row or the Cut list.",
+      "files": [],
+      "expectations": [
+        "The hero CTA badge appears as a brand row owned by ux-ax-review.",
+        "The dont-make-me-think \"Learn more\" CTA-label issue keeps its own clarity row with fix route Redesign Mode; it is not listed under 'Also reported by' on the brand row.",
+        "The Cut list cites only the ux-ax-review badge item; the CTA itself and the clarity issue are not on the Cut list.",
+        "The merge rests on quoted element and effect words from the member reports; design-optimizer does not reclassify either finding by its own judgment."
       ]
     }
   ]

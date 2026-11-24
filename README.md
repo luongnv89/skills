@@ -259,7 +259,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | [**user-test**](extras/user-test/) | 1.1.0 | high | Launch an app, API or CLI and test every feature as a real user; log bugs, perf and UX issues with evidence; fix and verify simple ones; report with a plan |
 | [**verify-setup**](skills/verify-setup/) | 1.0.0 | high | Write a repo-local verify skill that boots and drives your web app, API or CLI end to end, with a feature map as its pass/fail rubric; run it three times and report flaky steps |
 | [**dont-make-me-think**](extras/dont-make-me-think/) | 1.8.0 | medium | Usability review using Krug's principles |
-| [**ux-ax-review**](extras/ux-ax-review/) | 1.3.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
+| [**ux-ax-review**](extras/ux-ax-review/) | 1.4.0 | high | Evidence-backed human UX + AI/search AX audit and approval-gated improvement plan |
 
 **`code-review` has four modes** — pick by intent or pass `mode:<name>`:
 
@@ -315,10 +315,10 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**frontend-design**](skills/frontend-design/) | 1.5.3 | high | Production UIs with usability-first approach |
-| [**logo-designer**](extras/logo-designer/) | 1.8.0 | medium | 7 SVG logo variants plus PNG exports from project context |
+| [**frontend-design**](skills/frontend-design/) | 1.6.0 | high | Production UIs with usability-first approach |
+| [**logo-designer**](extras/logo-designer/) | 1.9.0 | medium | 7 SVG logo variants plus PNG exports from project context |
 | [**diagram-generator**](skills/diagram-generator/) | 1.5.1 | high | One entry point for diagrams — routes to draw.io XML or Excalidraw JSON |
-| [**design-optimizer**](extras/design-optimizer/) | 1.2.1 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
+| [**design-optimizer**](extras/design-optimizer/) | 1.3.0 | high | One run to optimize a website/app design: usability, UX/AX, virality, agent readiness, opt-in fixes |
 
 **Diagram generator engines** (install the umbrella or a single engine):
 
@@ -333,7 +333,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.2.1 | medium | Generate/update docs to match code, cited to path:line, never invented |
 | [**readme-generator**](skills/readme-generator/) | 1.0.0 | high | Write or rewrite a README onboarding-first: pitch, install, the most common use with its output, then every detail |
-| [**landing-page-generator**](extras/landing-page-generator/) | 2.0.0 | high | Landing pages: marketing copy from a brief or a README (read only), with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
+| [**landing-page-generator**](extras/landing-page-generator/) | 2.1.0 | high | Landing pages: marketing copy from a brief or a README (read only), with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
 | [**search-optimizer**](extras/search-optimizer/) | 1.2.1 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
 | [**seo-ai-optimizer**](extras/seo-ai-optimizer/) | 1.7.2 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](extras/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |

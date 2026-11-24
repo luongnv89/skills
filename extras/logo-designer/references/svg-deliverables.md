@@ -10,14 +10,15 @@ Every logo variant must use the **exact same mark geometry**. The svg-generator 
 
 Generate `logo-mark.svg` first — this is the **single source of truth** for the mark's geometry. Use a `viewBox="0 0 64 64"` base canvas. Design the mark using `<path>` elements so the exact `d=""` attribute strings can be copy-pasted into every other variant.
 
-After creating `logo-mark.svg`, extract and record the exact path data. For example:
+Use the fewest layers that carry the idea, and separate them by geometry (gaps and knockouts, so no two layers overlap without a gap), never by a filter, shadow or opacity steps (`references/design-principles.md`, *Fewest layers* and *AI-default bans*). The depth lives in these paths, so every variant inherits it.
+
+After creating `logo-mark.svg`, extract and record the exact path data, with the part of the idea each layer carries. For example:
 
 ```
 MARK PATHS (canonical — copy these exactly into all other variants):
-  Layer 1: d="M10,6 H44 L56,18 V52 Q56,58 50,58 H16 Q10,58 10,52 Z"
-  Layer 2: d="M14,10 H42 L52,20 V50 Q52,54 48,54 H20 Q14,54 14,50 Z"
-  Layer 3: d="M18,14 H40 L48,22 V48 Q48,50 46,50 H24 Q18,50 18,48 Z"
-  (plus any circles, dots, or accent elements)
+  Layer 1 (carries: the unchanged build): d="M8,30 H48 V56 H8 Z"
+  Layer 2 (carries: the changed part moving forward): d="M16,8 H56 V26 H16 Z"
+  (plus an accent element only if the idea needs one)
 ```
 
 These exact strings must be reused verbatim in every subsequent file.
@@ -41,9 +42,9 @@ Generate the remaining 6 files. If using the svg-generator agent, its prompt **m
 | `logo-full.svg` | `0 0 W 72` (W fitted, below) | Same paths, `translate(4,4)` to fit 72px height | Product name to the right of mark | Brand background |
 | `logo-wordmark.svg` | `0 0 180 40` | None | Product name text only, centered | Brand background |
 | `logo-icon.svg` | `0 0 512 512` | Same paths wrapped in `<g transform="translate(X,Y) scale(S)">`, centered in a rounded square background | None | Its own opaque tile |
-| `favicon.svg` | `0 0 16 16` | Simplified: use 2 of the 3 layers (outer + inner) with scaled-down coordinates, same proportional shape | None | Browser tabs: both `#FAFAFA` and `#0A0A0A`, unless it draws its own tile |
-| `logo-white.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#FFFFFF` with varying opacity | Same as logo-full but white text | Dark, `#0A0A0A` |
-| `logo-black.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#000000`/`#1A1A1A` with varying opacity | Same as logo-full but dark text | Light, `#FAFAFA` |
+| `favicon.svg` | `0 0 16 16` | Simplified: the layers that still read at 16px, with scaled-down coordinates, same proportional shape | None | Browser tabs: both `#FAFAFA` and `#0A0A0A`, unless it draws its own tile |
+| `logo-white.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#FFFFFF` | Same as logo-full but white text | Dark, `#0A0A0A` |
+| `logo-black.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#000000`/`#1A1A1A` | Same as logo-full but dark text | Light, `#FAFAFA` |
 
 **Brand background** is the one background the brand-colored files (mark, full, wordmark) are drawn for, fixed before generation: `#0A0A0A` under the Default Style Guide (its dark base); with detected or user-given brand colors, the brand kit's page background, else `#FAFAFA`. The three files share colors, so they share this background.
 
@@ -59,7 +60,7 @@ Generate the remaining 6 files. If using the svg-generator agent, its prompt **m
 - Example: `translate(86, 86) scale(5.3125)`
 - Keep every `stroke-width` exactly as in logo-mark.svg. The group's `scale(S)` scales strokes with the paths, so the icon keeps the mark's stroke-to-size proportions. Never divide stroke widths by `S` (that leaves hairlines at 512px), and never add `vector-effect="non-scaling-stroke"`
 
-**For favicon.svg**, redraw the shape at 16x16 but maintain the same proportional geometry (same angles, same corner radius ratios). Simplify by dropping the middle layer — keep only outer (stroke) and inner (fill). Include any distinctive accent element (dot, circle) scaled down.
+**For favicon.svg**, redraw the shape at 16x16 but maintain the same proportional geometry (same angles, same corner radius ratios). Keep every layer that still reads at 16px, and drop a layer only when its detail falls under 1px there. Keep the mark's accent element (dot, circle), scaled down, when it has one.
 
 ## Step 3: Verify consistency
 
@@ -73,7 +74,7 @@ If any file has diverged, fix it before proceeding.
 ## Step 4: Check contrast against each intended background
 
 Measure every variant against its background in the table above and record each ratio:
-- **Graphics, 3:1:** the mark layer that draws the silhouette (the outer outline or main fill). Lighter depth layers and accents may fall below 3:1 while that layer passes.
+- **Graphics, 3:1:** the mark layer that draws the silhouette (the outer outline or main fill). Other layers and accents may fall below 3:1 while that layer passes.
 - **Text, 4.5:1:** every wordmark letter. Outlined letter paths still count as text.
 - **logo-icon.svg:** measure the mark against the tile fill, not the page.
 - **favicon.svg:** measure against both `#FAFAFA` and `#0A0A0A`, or against its tile when it draws one.
@@ -100,6 +101,8 @@ A variant below its ratio gets a darker or lighter palette color before PNG expo
 - Vector-style, crisp edges
 - No embedded rasters
 - No `<text>`, `<tspan>` or `@font-face`: draw the wordmark as outlined `<path>` letterforms (`references/wordmark-outlining.md`), so the SVG and its PNG render the same without an installed font
+- No `<filter>`, `fe*` primitive, `filter=` attribute, CSS `filter` or `drop-shadow()`, `box-shadow` or `text-shadow`: depth comes from layer geometry, unless the brief's `lifted_bans` names the effect
+- Every `brief.bans` entry from the project's design-rules file holds
 - Optimized paths — use `<path>` elements, not `<rect>` + separate `<polygon>` combos
 - viewBox properly set
 - All marks use `<path>` with the canonical `d` strings (scaled via `transform` where needed)

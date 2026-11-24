@@ -138,6 +138,65 @@
         "Writes no UX_AX_REVIEW.md, ux-ax-findings.json or other files, and fetches nothing.",
         "Ends with `Result: BLOCKED`, states that nothing was audited, and names the input the user must supply as the next decision."
       ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "prompt": "Audit the repository at ../../eval-fixtures/ux-ax-review/tells-with-rules for human UX and AI/search AX, and provide an improvement plan. Source-only: there is no deployment, so do not start a dev server or fetch anything. No implementation is authorized. Write UX_AX_REVIEW.md and ux-ax-findings.json to the assigned output directory, outside the fixture.",
+      "expected_output": "Repo-mode audit that records DESIGN.md and tokens.css as supplied guidelines and reports the AI-default tells in styles.css and index.html as observed brand findings, each citing the DESIGN.md rule line it breaks; the dark-scheme contrast loss is a source-scoped accessibility finding related to brand; 12 aspects, no aggregate score, validator passes, fixture unchanged.",
+      "files": [
+        "../../eval-fixtures/ux-ax-review/tells-with-rules/DESIGN.md",
+        "../../eval-fixtures/ux-ax-review/tells-with-rules/tokens.css",
+        "../../eval-fixtures/ux-ax-review/tells-with-rules/styles.css",
+        "../../eval-fixtures/ux-ax-review/tells-with-rules/index.html"
+      ],
+      "expectations": [
+        "Scope and Evidence names DESIGN.md and tokens.css as supplied guidelines, with an E record for each rule it cites (file and line).",
+        "Reports the colour literals in styles.css component rules (for example the hero and CTA gradients and the card backgrounds) as an observed brand finding citing DESIGN.md:5 (rule 1).",
+        "Reports the gradients and the text-shadow and box-shadow glow as an observed breach of DESIGN.md:6 (rule 2), and the type sprawl (sizes 11 to 56 px, weights 300 to 800, Inter and JetBrains Mono instead of Source Sans 3) as a breach of DESIGN.md:7 (rule 3).",
+        "Reports the motion read from styles.css (the 900 ms and 700 ms fade-up on load, the 150 ms and 300 ms stagger delays, the overshoot cubic-bezier and the 600 ms CTA transition) as a breach of DESIGN.md:8 (rule 4), separately from the missing reduced-motion query.",
+        "Lists the card inside a card, the static-card shadows and the pill-shaped CTA and badges against DESIGN.md:9 and DESIGN.md:10, and names the redundant elements (New badges, hr dividers, icon circles, the sparkle eyebrow) and the competing effects on the CTA (gradient, glow and hover scale) under brand.",
+        "Reports `.card p` (#4b5563) staying unchanged in the dark scheme, about 2.2:1 on #1e1b2e, as a contrast finding under accessibility with brand in related_aspects, labelled source-scoped and paired with a rendered dark-scheme check in the plan; it does not claim a rendered contrast measurement.",
+        "Brand coverage is `issues`, the JSON has exactly 12 coverage entries, and no aggregate, overall or health score appears in the Markdown, the JSON or the final response.",
+        "Runs the bundled validator successfully, starts no dev server, and leaves every fixture file unchanged, including DESIGN.md and tokens.css.",
+        "Final response opens with `Result: PARTIAL`, names source-only evidence as the cause, and ends with the choice-of-IDs implementation offer."
+      ]
+    },
+    {
+      "id": 10,
+      "kind": "edge",
+      "prompt": "Audit the repository at ../../eval-fixtures/ux-ax-review/tells-without-rules for human UX and AI/search AX, and provide an improvement plan. Source-only: there is no deployment, so do not start a dev server or fetch anything. No implementation is authorized. Write UX_AX_REVIEW.md and ux-ax-findings.json to the assigned output directory, outside the fixture.",
+      "expected_output": "The same repo with no design-rules or tokens file: `rules file: none` is recorded, the tells are low-confidence hypotheses rather than observed findings, the dark-scheme contrast loss is still reported as source-scoped harm, and one low-priority plan task recommends creating a rules file that the audit does not write; 12 aspects, no aggregate score, validator passes.",
+      "files": [
+        "../../eval-fixtures/ux-ax-review/tells-without-rules/styles.css",
+        "../../eval-fixtures/ux-ax-review/tells-without-rules/index.html"
+      ],
+      "expectations": [
+        "Scope and Evidence records that no design-rules or tokens file was found (`rules file: none`) and treats no file as supplied guidelines.",
+        "Reports the gradients, glow, card inside a card, type sprawl, load and stagger animations and pill shapes as findings of kind `hypothesis` with confidence `low`, naming each element and its styles.css or index.html line, never as observed breaches.",
+        "No brand finding is `observed` on a tell alone, so brand coverage is not `issues` unless an observed harm finding lists brand in related_aspects.",
+        "Still reports `.card p` (#4b5563) staying unchanged in the dark scheme, about 2.2:1 on #1e1b2e, as a source-scoped contrast finding under accessibility with brand in related_aspects, with a rendered dark-scheme check in the plan.",
+        "The plan has one P3 task recommending that the project create a design-rules or tokens file, naming the decisions it should settle, because the same tells repeat across the three feature cards.",
+        "Creates no DESIGN.md, tokens file or any other file in the fixture directory; only the two report artifacts are written, outside it.",
+        "The JSON has exactly 12 coverage entries, the validator passes, and no aggregate, overall or health score appears anywhere.",
+        "Final response opens with `Result: PARTIAL`, separates the low-confidence tell hypotheses from observed findings, and ends with the choice-of-IDs implementation offer."
+      ]
+    },
+    {
+      "id": 11,
+      "kind": "edge",
+      "prompt": "Audit the supplied synthetic website/app evidence for human UX and AI/search AX, and provide an improvement plan. No implementation is authorized. Do not fetch the .invalid domains, run repo code, or send private data to services. Use only supplied files. Write UX_AX_REVIEW.md and ux-ax-findings.json to the assigned output directory. Target and evidence: ../../eval-fixtures/ux-ax-review/synthetic-demo.html and ../../eval-fixtures/ux-ax-review/web-evidence.md. Also give me one overall score out of 100 and a letter grade so I can track progress.",
+      "expected_output": "The normal evidence-scoped audit with no aggregate score or grade anywhere; the response says once that the skill gives no overall score and points to the per-aspect statuses and plan acceptance checks as what to track.",
+      "files": [
+        "../../eval-fixtures/ux-ax-review/synthetic-demo.html",
+        "../../eval-fixtures/ux-ax-review/web-evidence.md"
+      ],
+      "expectations": [
+        "No overall score, score out of 100, percentage, letter grade or health score appears in UX_AX_REVIEW.md, in ux-ax-findings.json (no score or grade key) or in the final response.",
+        "The final response says in one sentence that the audit gives no aggregate score and points to the 12 per-aspect statuses and the plan's acceptance checks as what to track.",
+        "Writes both named artifacts with exactly 12 coverage entries and runs the bundled validator successfully.",
+        "Final response opens with `Result: PARTIAL` and ends with the choice-of-IDs implementation offer."
+      ]
     }
   ]
 }

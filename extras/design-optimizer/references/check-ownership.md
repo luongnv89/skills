@@ -93,3 +93,10 @@ ux-ax-review's `conversion` both flag a vague primary CTA, or the scan and ux-ax
 a missing llms.txt), keep **one** row under the check's owner and cite the other member as
 corroboration. dont-make-me-think and viral-product-evaluator take no skip-checks here, so their
 overlaps are removed at this merge step, not before the audit. Findings outside a member's owned checks are kept only if no owner covers them.
+
+One narrow exception: a dont-make-me-think issue that names the same element as a ux-ax-review
+*Visual-system check* item, and whose title or Problem line contains the effect word that item
+names, is cited on that item's `brand` row (or its `accessibility`/`responsive` row with
+`related_aspects: ["brand"]`), not on a `clarity` row. A different defect on the same element
+(no shared effect word), or no matching ux-ax-review item, stays on `clarity`. See `references/merge-format.md` →
+Dedup rule 5.

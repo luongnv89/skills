@@ -33,7 +33,9 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ```
 ◆ Design (step 2 of 4 — [project name])
 ··································································
-  Style selected:             √ pass ([aesthetic direction])
+  Rules file:                 √ pass ([file], [N] bans) | √ pass (none)
+  Decisions confirmed:        √ pass ([mark type], [construction], [stroke], radius [r], [N] layers, [N] colours)
+  Mark idea:                  √ pass ([one sentence]; initial-only: idea tied to the letter | user request | n/a)
   Typography chosen:          √ pass ([font name and weight])
   SVG valid:                  √ pass | × fail — [validation errors]
   ____________________________
@@ -76,9 +78,9 @@ Existing colors: None detected
 Assets found: None
 
 ## Design Rationale
-- **Symbol**: Abstract "F" formed by stacked horizontal bars suggesting speed and layered builds
-- **Colors**: Default style guide — dark base with Neon Green highlight on the speed bars
-- **Typography**: Inter for clean, modern readability
+- **Symbol**: A base block and a top block shifted forward, for an incremental build that moves only what changed (2 layers, filled, radius 2)
+- **Colors**: Default style guide — dark base with Neon Green on the shifted top block
+- **Typography**: Inter 600, outlined, lowercase as the user confirmed
 
 ## Colors
 Primary: #0A0A0A
