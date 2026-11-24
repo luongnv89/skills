@@ -152,7 +152,7 @@
       "id": 14,
       "kind": "negative-trigger",
       "prompt": "Generate the changelog for our v2.3 release from the git log.",
-      "expected_output": "The skill does not trigger: release notes belong to ship and are named in the negative-trigger clause.",
+      "expected_output": "The skill does not trigger: release notes belong to cut-release and are named in the negative-trigger clause.",
       "files": [],
       "expectations": [
         "landing-page-generator did not trigger",

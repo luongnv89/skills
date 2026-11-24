@@ -32,7 +32,7 @@ helper scripts: `claude plugin install lstack-extras@lstack --scope user`.
 
 - **Some skills act as you.** They run your own `git`, `gh`, `twine` and
   `npm`, signed in however you set them up; no skill reads a sign-in itself.
-  `ship` commits, tags, pushes, creates a GitHub release
+  `cut-release` commits, tags, pushes, creates a GitHub release
   and publishes to PyPI and npm **without asking by default**; pass `--no-auto`
   to confirm each step. `auto-push` stages everything, commits and pushes once
   its sensitive-file and large-file scan passes. Other skills that push, delete
@@ -62,6 +62,7 @@ working in. That is the only network access many skills make.
 | cli-builder | your git remote; package registries when adding CLI framework dependencies | dependency names | local branch and commits only | git, pip, npm, go, `npx oclif`, project test runner |
 | code-review | your git remote; Context7 MCP (optional) | library doc queries | local commits per cleanup category (cleanup mode); no push | git, knip, madge, ts-prune, vulture, jscpd, pylint and similar linters |
 | comment-audit | GitHub API via `gh`, only for issues you approve; your git remote | issue titles and bodies, which quote the removed comments and their file paths | after you approve each plan: writes ADRs, files issues, deletes comments, adds a lint ratchet, and commits locally; no push | git, gh, the project's linter and test runner |
+| cut-release | your git remote, GitHub API via `gh`, PyPI (`pypi.org` JSON API, `twine upload`), npm registry | release commits, tags, release notes, built packages, package lookups | **automatic by default**: commit, tag, push, `gh release create`, `twine upload`, `npm publish`; `--no-auto` asks first; never force-pushes. A registry that refuses the upload is skipped and reported | git, gh, curl, python -m build, twine, npm, your project's build |
 | devops-pipeline | your git remote; generated hooks and CI fetch pre-commit hook repos, npm packages, and GitHub Actions when they run | none; the generated CI writes coverage to the job summary on GitHub | writes pre-commit and CI config, installs git hooks; no commit or push | git, pre-commit; generated hooks run prettier, eslint, tsc |
 | diagram-generator | none | none | none | asm; routes to drawio-generator or excalidraw-generator |
 | doc-manager | your git remote; your own health endpoint when the generated check script runs | a GET to your endpoint | creates a feature branch and writes docs; no commit unless asked | git, bash, mmdc (optional) |
@@ -71,7 +72,6 @@ working in. That is the only network access many skills make.
 | opencode-runner | OpenCode Zen (opencode.ai) and its free-model providers; your git remote | the task prompt, files passed with `--file`, and repository files OpenCode reads. Free models may use this data for training | OpenCode may edit files in the working directory; the skill does not commit | opencode, git |
 | oss-ready | GitHub API via `gh repo view`; your git remote | the repository name (read-only) | creates a local branch; no commit or push | git, gh, python3 |
 | readme-generator | your git remote | none | writes `README.md` and a backup of the old one; no commit unless asked | git |
-| ship | your git remote, GitHub API via `gh`, PyPI (`pypi.org` JSON API, `twine upload`), npm registry | release commits, tags, release notes, built packages, package lookups | **automatic by default**: commit, tag, push, `gh release create`, `twine upload`, `npm publish`; `--no-auto` asks first; never force-pushes. A registry that refuses the upload is skipped and reported | git, gh, curl, python -m build, twine, npm, your project's build |
 | tad-generator | web search/fetch for technology research; your git remote | stack research queries; `tad.md` commits | commit, then push only after you approve | git, mmdc (optional) |
 | test-coverage | npm registry if `npx jest`/`npx vitest` is not installed locally; package registries for coverage tools (pytest-cov, nyc, cargo-tarpaulin); your git remote | package names | creates a feature branch and commits new tests locally; installs missing coverage dev dependencies; no push | your test runner, git |
 | verify-setup | your git remote; the package registries your project's own install command uses, only for an install you approve | none beyond your project's own install | after you approve the plan: writes `.claude/skills/verify/`, `.agents/skills/verify/`, a feature map and `.verify/`, runs your app's own commands three times, optionally adds one line to AGENTS.md; no commit or push | git, curl, your project's runtime and package manager; a browser tool only if already installed or you approve its install |

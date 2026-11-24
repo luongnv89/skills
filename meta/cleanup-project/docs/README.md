@@ -9,7 +9,7 @@
 
 > Get a repo to a clean foundation before the next feature: every uncommitted change decided, ignore files updated, merged branches gone locally and on the remote, and you back on an up-to-date `main`.
 
-Version: **1.1.1** · Author: Luong NGUYEN · License: MIT
+Version: **1.1.2** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -34,7 +34,7 @@ Version: **1.1.1** · Author: Luong NGUYEN · License: MIT
 - Remove dead code or unused imports: use `code-review` (mode:cleanup).
 - Commit and push everything as-is: use `auto-push`.
 - Add LICENSE, CONTRIBUTING, or other open-source files: use `oss-ready`.
-- Bump a version, tag, or publish a release: use `ship`.
+- Bump a version, tag, or publish a release: use `cut-release`.
 - Ask a general git question ("`branch -d` vs `-D`?"): no skill needed.
 
 ## Usage

@@ -111,5 +111,5 @@ The release still tags when nothing verified the commit, and `Uncertainty` says 
 
 Every failure stops with `BLOCKED` and names the exact check that failed: the command, the workflow, the verify row or the script. No tag is created, and nothing rolls back automatically. Under `Decision`, in this order:
 
-- **Local commit:** drop the unpushed release commit (including one whose CI push was rejected) with `git reset --hard HEAD~1`, which discards the release edits that `/ship` recreates. Then fix the failing check, commit the fix (Step 1 needs a clean tree), and run `/ship` again.
-- **Pushed for CI:** run `git revert <release_sha>` and push, which restores the old version files and changelog, so the next run writes one `## vX.Y.Z` entry, not two. Then fix the failing check, commit the fix, and run `/ship` again. Never force-push or delete the remote commit.
+- **Local commit:** drop the unpushed release commit (including one whose CI push was rejected) with `git reset --hard HEAD~1`, which discards the release edits that `/cut-release` recreates. Then fix the failing check, commit the fix (Step 1 needs a clean tree), and run `/cut-release` again.
+- **Pushed for CI:** run `git revert <release_sha>` and push, which restores the old version files and changelog, so the next run writes one `## vX.Y.Z` entry, not two. Then fix the failing check, commit the fix, and run `/cut-release` again. Never force-push or delete the remote commit.

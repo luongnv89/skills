@@ -4,7 +4,7 @@
 Find every place the project states its own version, propose the exact replacement with the new version, and save the results, without modifying any files.
 
 ## Context
-You are a subagent spawned by the ship skill in wave 1, alongside the changelog-generator. The main agent has already chosen the old and new versions. A release that leaves one stale version behind (a lockfile, a badge, a plugin manifest) is the failure this agent exists to prevent, so search by field as well as by value.
+You are a subagent spawned by the cut-release skill in wave 1, alongside the changelog-generator. The main agent has already chosen the old and new versions. A release that leaves one stale version behind (a lockfile, a badge, a plugin manifest) is the failure this agent exists to prevent, so search by field as well as by value.
 
 ## Task
 

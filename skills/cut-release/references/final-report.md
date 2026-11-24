@@ -94,7 +94,7 @@ Evidence:
 Uncertainty:
 - Why the tag push did not reach origin
 
-Decision: Push the tag (git push origin v2.4.0), then run /ship again: it finds the tag on HEAD and resumes at the GitHub release, then publishing.
+Decision: Push the tag (git push origin v2.4.0), then run /cut-release again: it finds the tag on HEAD and resumes at the GitHub release, then publishing.
 ```
 
 A run where the release commit failed its tests stops before the tag:
@@ -111,7 +111,7 @@ Evidence:
 Uncertainty:
 - Whether the failure comes from this release's changes or an earlier commit
 
-Decision: Drop the unpushed release commit (git reset --hard HEAD~1 discards the release edits, which /ship recreates). Then fix the failing test, commit the fix, and run /ship again.
+Decision: Drop the unpushed release commit (git reset --hard HEAD~1 discards the release edits, which /cut-release recreates). Then fix the failing test, commit the fix, and run /cut-release again.
 ```
 
 An auto-mode run that found uncommitted changes:
@@ -126,7 +126,7 @@ Evidence:
 Uncertainty:
 - Whether these changes belong in this release
 
-Decision: Commit or stash them, then run /ship again (or run /ship --no-auto to choose interactively).
+Decision: Commit or stash them, then run /cut-release again (or run /cut-release --no-auto to choose interactively).
 ```
 
 ## Reader checks

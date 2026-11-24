@@ -104,7 +104,7 @@ Write for the people who use the product, newest release first. Group each relea
 **New**, **Improved**, **Fixed**, and **Action needed**, and omit empty groups. Write one
 plain-language sentence per item, benefit first. Leave out commit hashes, PR or issue
 numbers, author handles, conventional-commit prefixes, and file paths. These groups match
-the end-user notes of the `ship` skill, so a later release can be added at the top.
+the end-user notes of the `cut-release` skill, so a later release can be added at the top.
 
 ```
 CHANGELOG

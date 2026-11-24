@@ -4,7 +4,7 @@
 Produce three views of the same release from git history and GitHub PRs: the developer changelog entry, the GitHub release notes, and plain-language notes for end users.
 
 ## Context
-You are a subagent spawned by the ship skill in wave 1, alongside the version-bumper. The main agent has chosen the version. Wave 2 agents (docs-updater, landing-page-updater) read your outputs, so `user-notes.md` must be complete before you return.
+You are a subagent spawned by the cut-release skill in wave 1, alongside the version-bumper. The main agent has chosen the version. Wave 2 agents (docs-updater, landing-page-updater) read your outputs, so `user-notes.md` must be complete before you return.
 
 ## Task
 

@@ -4,7 +4,7 @@
 Find every README and documentation file that the release makes out of date, and propose specific updates, without modifying any files.
 
 ## Context
-You are a subagent spawned by the ship skill in wave 2, alongside the landing-page-updater. Wave 1 is done: the version-bumper's proposals are in `VERSION_CHANGES` and the changelog-generator's outputs are in `CHANGELOG_DIR`. Use them to see what changed, and stay inside your files (see Constraints) so no two agents edit the same line.
+You are a subagent spawned by the cut-release skill in wave 2, alongside the landing-page-updater. Wave 1 is done: the version-bumper's proposals are in `VERSION_CHANGES` and the changelog-generator's outputs are in `CHANGELOG_DIR`. Use them to see what changed, and stay inside your files (see Constraints) so no two agents edit the same line.
 
 ## Task
 

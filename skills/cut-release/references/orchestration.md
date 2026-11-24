@@ -32,7 +32,7 @@ If the Agent tool is not available (for example, on Claude.ai), run each agent f
 ## Workspace
 
 ```bash
-WORKSPACE="$(mktemp -d "${TMPDIR:-/tmp}/ship-XXXXXX")"
+WORKSPACE="$(mktemp -d "${TMPDIR:-/tmp}/cut-release-XXXXXX")"
 mkdir -p "$WORKSPACE"/{version-bumper,changelog-generator,docs-updater,landing-page-updater}
 ```
 
