@@ -67,19 +67,27 @@ The statuses (Available, Parked, Active, Unknown) are defined in `SKILL.md` → 
 
 ## Step 4: Trademark Check
 
-| Database | Direct search | Fallback query |
-|----------|---------------|----------------|
-| WIPO | `https://branddb.wipo.int` | `"[NAME]" site:branddb.wipo.int` |
-| EUIPO | `https://euipo.europa.eu/eSearch` | `"[NAME]" site:euipo.europa.eu` |
-| INPI (France) | `https://www.inpi.fr` (French register) | `"[NAME]" site:inpi.fr` |
+| Database | Direct search | Fallback query | Manual check |
+|----------|---------------|----------------|--------------|
+| WIPO | `https://branddb.wipo.int` | `"[NAME]" site:branddb.wipo.int` | `https://branddb.wipo.int` |
+| EUIPO | `https://euipo.europa.eu/eSearch` | `"[NAME]" site:euipo.europa.eu` | `https://euipo.europa.eu/eSearch` |
+| INPI (France) | `https://data.inpi.fr` (French register) | `"[NAME]" site:inpi.fr` | `https://data.inpi.fr` |
 
 Search each database directly first. When the direct search cannot be used, run the fallback query and say in the evidence that the status rests on a web search, which is weaker evidence than the register itself.
+
+Register search pages often block automated lookups, and some are single-page apps whose fetched HTML can still hold an earlier search. A register's answer counts only when it passes all three guards below. Record in the evidence the final URL when the tool shows it, and the text that passed guard 2.
+
+1. **The page answered.** A bot check, CAPTCHA, login wall, block page (for example `Request Rejected`), error page, or app shell with no results in it is no answer: the register is `unknown`.
+2. **The search ran for this name.** The results view itself must name the searched term, the name or its slug: for example `N results for [NAME]`, or the register's no-results message naming it. A URL or a search box that carries the name is not enough on its own, because a single-page app can show the name there while it still lists an earlier search's hits. Without that confirmation the register is `unknown`, whatever hits the page lists.
+3. **Each hit matches the name.** Compare each hit's word element (the text of the mark) with both the name and its slug. It matches when it equals or contains either one, or differs from one only by case, spacing, hyphens, accents or one character. It also matches when it equals a hyphen- or space-separated part of the name (for example `ACME` for `acme-flow`). Leave a hit that does not match out of the status and list it in the evidence as ignored. Once guard 2 holds, a register whose every hit is ignored is `clear`.
+
+A fallback web search can find a mark but never clears one. A result on the register's own site that shows a matching word element in those classes supports `similar` or `conflicts_found`; a search with no such result leaves the register `unknown`.
 
 Limit the conflict review to Nice Classes 9, 35, and 42 (software and technology). For each mark found, record whether it is live or expired, its class, and its owner, so `SKILL.md` Step 5 can tell an active conflict from an expired one.
 
 Statuses: `clear`, `similar`, `conflicts_found`, `unknown`.
 
-- `clear`: the database answered and shows no identical or similar mark in those classes. Marks found only in other classes go in the evidence and leave the status `clear`.
-- `similar`: no identical mark, but a close variant is on file in those classes.
-- `conflicts_found`: a mark identical to the name is on file in those classes, live or expired; the evidence says which.
-- `unknown`: the database could not be queried, or the result was inconclusive.
+- `clear`: the database answered, the search passed the guards above, and it shows no identical or similar mark in those classes. Marks found only in other classes go in the evidence and leave the status `clear`.
+- `similar`: no identical mark, but a close variant is on file in those classes: a word element that contains the name or its slug, differs from one by one character, or equals a hyphen- or space-separated part of the name.
+- `conflicts_found`: a mark identical to the name is on file in those classes, live or expired; the evidence says which. A word element that differs from the name or its slug only by case, spacing, hyphens or accents counts as identical.
+- `unknown`: the database could not be queried, blocked the lookup, failed a guard above, or the result was inconclusive. Put the reason and the register's manual check link from the table above in the evidence; the report's `UNKNOWN` line repeats both.

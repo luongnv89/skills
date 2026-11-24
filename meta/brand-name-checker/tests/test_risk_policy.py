@@ -283,6 +283,42 @@ class SourceCheckerTests(unittest.TestCase):
         self.assertIn("live or expired, its class, and its owner", section)
         self.assertNotIn("risk", section.lower())
 
+    def test_trademark_answer_counts_only_after_the_guards(self) -> None:
+        section = SOURCE_CHECKS_TEXT.split("## Step 4", 1)[1]
+        for clause in (
+            "A URL or a search box that carries the name is not enough on its own",
+            "Without that confirmation the register is `unknown`, whatever hits the page lists",
+            "Once guard 2 holds, a register whose every hit is ignored is `clear`",
+            "a search with no such result leaves the register `unknown`",
+            "A bot check, CAPTCHA",
+            "list it in the evidence as ignored",
+            "counts as identical",
+            "equals a hyphen- or space-separated part of the name (for example `ACME` for `acme-flow`)",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, section)
+        self.assertIn("passes the guards in `references/source-checks.md` → *Step 4*", SKILL_TEXT)
+        self.assertIn(
+            "apply the three guards in *Step 4: Trademark Check*",
+            " ".join(worker_text("source-checker").split()),
+        )
+
+    def test_unverified_registers_get_manual_check_links(self) -> None:
+        section = SOURCE_CHECKS_TEXT.split("## Step 4", 1)[1]
+        self.assertIn("| Manual check |", section.splitlines()[2])
+        rows = {line.split(" | ", 1)[0]: line for line in section.splitlines() if line.startswith("| ")}
+        for register, link in (
+            ("| WIPO", "https://branddb.wipo.int"),
+            ("| EUIPO", "https://euipo.europa.eu/eSearch"),
+            ("| INPI (France)", "https://data.inpi.fr"),
+        ):
+            with self.subTest(register=register):
+                self.assertTrue(rows[register].endswith(f" | `{link}` |"))
+        unknown = next(line for line in section.splitlines() if line.startswith("- `unknown`: "))
+        self.assertIn("manual check link", unknown)
+        contract = (SKILL_DIR / "references" / "output-contract.md").read_text(encoding="utf-8")
+        self.assertIn("its manual check link from `references/source-checks.md` → *Step 4*", contract)
+
     def test_output_contract_counts_extra_tlds(self) -> None:
         text = (SKILL_DIR / "references" / "output-contract.md").read_text(encoding="utf-8")
         self.assertIn("There are 16 checks by default", text)
