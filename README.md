@@ -67,7 +67,7 @@ This catalog release ships lstack and lstack-extras 0.11.0, and lstack grows to 
 
 **Earlier upgrade guidance (from 3.0.0):**
 
-- Install [**ship**](meta/ship/docs/README.md): `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill ship`, then replace `/release-manager` invocations with `/ship`.
+- Install [**ship**](meta/cut-release/docs/README.md): `npx skills@1.7.0 add https://github.com/luongnv89/skills --skill ship`, then replace `/release-manager` invocations with `/ship`. The skill has since been renamed `cut-release` (#694): install it with `--skill cut-release` and run `/cut-release`.
 - Review and remove the obsolete installed `release-manager` copy yourself; reinstalling does not remove it automatically, and both names can compete for triggers.
 - `/ship [X.Y.Z|major|minor|patch]` runs autonomously by default. Use `/ship --no-auto` to keep step-by-step confirmations.
 
