@@ -9,7 +9,7 @@
 
 > Generate upload-ready App Store screenshots and creative assets (header and search images and looping videos) for iPhone, iPad and Mac from an app's codebase or landing page, following Apple's asset best practices.
 
-Version: **1.4.3** · Author: Luong NGUYEN · License: MIT
+Version: **1.5.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -18,6 +18,7 @@ Version: **1.4.3** · Author: Luong NGUYEN · License: MIT
 - Recreates screens from the real SwiftUI/UIKit views, or frames clean simulator captures, so nothing shown is invented (Guideline 2.3)
 - Plans the story with Apple's guidance: core promise in the first three frames, short captions that add to the screen
 - Uses `frontend-design` for the marketing canvas and `emil-design-eng` for a polish pass, then a fresh reviewer checks every frame
+- Flat canvas by default, with a canvas ban list (glow, gradient, tiled or sparkles callout icons, eyebrows) checked on the sheets, a cutting pass before polish, and the project's design-rules file applied to the canvas; recreated screens stay as the app shows them, and `render.py` refuses the template palette
 - Verifies sizes, the RGB/no-alpha rule, per-class counts and caption contrast with a bundled checker
 - Turns the header and search creatives into looping, muted videos (header 3840 × 1646, search 3744 × 2496 at 30 fps or 3600 × 2400 at 60 fps, 5–30 s): captions carry the message without sound, every frame is reproducible, the last frame flows into the first, and the key text stays inside Apple's art safe area
 - Checks each video with ffprobe (size, constant 30/60 fps, duration, H.264 yuv420p, audio) and writes a video sheet so a reviewer can check every caption and the loop seam without playing it
