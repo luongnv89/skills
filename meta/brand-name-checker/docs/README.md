@@ -65,7 +65,10 @@ asm install github:luongnv89/skills:extras/brand-name-checker
 
 ```
 /brand-name-checker <name>
+/brand-name-checker <name1>, <name2>
 ```
+
+Several names get one full report each, plus a quick-screen table for the suggested alternatives. The table is partial and unverified: it never clears a name.
 
 ## Resources
 

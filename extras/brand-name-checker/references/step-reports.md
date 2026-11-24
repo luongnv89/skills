@@ -16,6 +16,8 @@ After completing each major step, output a status report in this format. Use `�
   Result:             PASS | FAIL | PARTIAL
 ```
 
+With several names, the context names the candidate and its position, for example `◆ Social Media Check (step 1 of 6 — sfm, name 1 of 2)`. The quick-screen has no step report; its table is the record.
+
 ## Social Media Check (step 1 of 6)
 
 ```
