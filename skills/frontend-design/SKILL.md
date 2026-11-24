@@ -3,7 +3,7 @@ name: frontend-design
 description: "Build production-grade frontend interfaces with distinctive aesthetics and working code. Use for UI components, pages, or frontend features. Don't use for backend/API work or usability-only audits."
 license: MIT
 metadata:
-  version: 1.5.3
+  version: 1.6.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "high"
 ---
@@ -24,12 +24,12 @@ Trigger this skill when the user asks to:
 
 1. Record the **explicit brief**: any style preference, color palette, brand kit, or style direction the user gives. If there is none, the Default Style Guide applies.
 2. If the request does not state the purpose and the target audience, ask for them before writing code.
-3. If the work extends an existing codebase, read its framework, CSS variables, and component patterns before proposing anything.
+3. Read and follow the project's design-rules file, if any (*Design-rules file* in `references/system-defaults.md`). If the work extends an existing codebase, also read its framework, tokens, and component patterns before proposing anything.
 4. Propose an aesthetic direction (*Design Thinking*). In an existing codebase, also list the files you will create or modify. Emit the Design Thinking step report.
 5. Wait for the user to approve the direction before writing code. If the user asks for changes, propose again. If the user says "just build it", state the direction in one line and continue. If the user ends the run without approving, end with a `BLOCKED` Final Report.
-6. Read `references/aesthetics-guide.md` and the Quick rules in `references/usability-guide.md`. Run *Repo Sync Before Edits*. Then implement the code. Add a short comment at each non-obvious design decision (font pairing, palette mapping, motion timing).
+6. Read `references/aesthetics-guide.md`, `references/system-defaults.md` and the Quick rules in `references/usability-guide.md`. Run *Repo Sync Before Edits*. Then implement the code, adding a short comment at each non-obvious design decision (font pairing, token mapping, motion timing). Finish with the subtraction pass: remove every decoration that neither the brief nor the approved direction names.
 7. Run the verification checks:
-   - **Responsive:** if a browser tool is available, render at 375, 768, and 1280 px and check for horizontal overflow. Otherwise, inspect the breakpoints in the CSS and record responsive rendering as untested.
+   - **Visual:** follow *Visual check* in `references/system-defaults.md`: screenshots at phone and desktop width (dark mode and the production build when they apply), each inspected against the ban table, plus an overflow check. With no browser tool, inspect the CSS and record the visual check as untested.
    - **Contrast:** compute the contrast ratio of each text and background color pair. Each must be at least 4.5:1, or 3:1 for text at 24 px or larger (18.66 px or larger when bold).
    - **Quality and usability:** walk the Default Quality Bar checklist and the six usability Quick rules.
    - **Build:** if the project has a build, lint, or test command, run it and record the exit result. Otherwise record `build: not run (no command)`.
@@ -53,9 +53,10 @@ This skill commits nothing.
 ## Design Thinking
 
 Before coding, identify the active style source and commit to a clear aesthetic direction:
-- **Brief precedence**: With an explicit brief, follow it. Without one, the Default Style Guide below is binding: keep its four core colors (with the text-only status-color exception) and its elegant, clear, clean, professional language; make the result distinctive through composition, typography, spacing, depth, and motion rather than extra core colors.
+- **Brief precedence**: With an explicit brief, follow it; a project design-rules file comes next. Without either, the Default Style Guide below is binding: keep its four core colors (with the text-only status-color exception) and its decisions; make the result distinctive through composition, typography, and spacing rather than extra colors or effects.
+- **Vague words**: Turn each vague style word ("clean", "modern", "premium") into concrete decisions or a named reference (`references/system-defaults.md`).
 - **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: With an explicit brief, honor its direction. Without one, choose from directions such as brutally minimal, maximalist, retro-futuristic, organic/natural, luxury/refined, playful, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, or industrial/utilitarian, and only when the direction stays compatible with the Default Style Guide.
+- **Tone**: With an explicit brief, honor its direction. Without one, choose from directions such as brutally minimal, maximalist, retro-futuristic, organic/natural, luxury/refined, playful, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, or industrial/utilitarian, and only when the direction stays compatible with the Default Style Guide; then bold or maximalist intensity comes from composition, type scale, and density, not from ban-table elements.
 - **Constraints**: Technical requirements (framework, performance, accessibility).
 - **Differentiation**: Name the one thing someone will remember about this interface.
 
@@ -65,29 +66,31 @@ Bold maximalism and refined minimalism both work when they fit the active style 
 
 When the user gives no explicit brief, apply this style guide:
 
-1. **Color Palette (Strictly Limited):** Use only four core colors — Black (`#000000`), White (`#FFFFFF`), Gray (`#6B7280`), and Bright Green (`#22C55E`).
-2. **Aesthetic:** Maintain an elegant, clear, clean, and professional design language.
-3. **Visual Depth:** Incorporate visual depth using elements like cards, lines, borders, and subtle shadows.
-4. **Bright Green Usage Constraint:** The Bright Green color is strictly reserved for highlights (text, borders, or lines); it must *never* be used as a background color.
-5. **System Status Colors:** Danger (`#EF4444`), Warning (`#F59E0B`), and Info (`#3B82F6`) may only be applied to text elements, not backgrounds or primary UI components.
+1. **Color Palette (Strictly Limited):** Use only four core colors — Black (`#000000`), White (`#FFFFFF`), Gray (`#6B7280`), and Bright Green (`#22C55E`) — declared once as semantic tokens; components use only the tokens.
+2. **Aesthetic:** Flat neutral surfaces, black text, one display and one body font, at most two weights, sentence case, one spacing scale, and no decoration the direction does not name. The ban table under *Avoid* in `references/aesthetics-guide.md` applies.
+3. **Visual Depth:** Separate regions with spacing, lines, and 1 px borders. Shadows go only on floating elements (menus, popovers, dialogs, toasts); never put a card inside a card.
+4. **Bright Green Usage Constraint:** Bright Green marks only active or selected states (text, border, underline, or line); it must *never* be a background or decoration. On white it needs a non-color cue too. The primary button is black with white text.
+5. **Motion:** Only on state changes, under 300 ms, exits faster than entries, no bounce, `prefers-reduced-motion` honoured; nothing animates on load or scroll.
+6. **System Status Colors:** Danger (`#EF4444`), Warning (`#F59E0B`), and Info (`#3B82F6`) may only be applied to text elements, not backgrounds or primary UI components.
 
-An explicit brief overrides only the palette and aesthetic defaults. It never overrides the accessibility requirements or the text-only rule for system status colors.
+An explicit brief overrides the palette, aesthetic, depth, and motion defaults, and lifts any ban-table row it asks for: a gradient hero gets its gradient. It never overrides the accessibility requirements, `prefers-reduced-motion`, or the text-only rule for system status colors.
 
 ## Default Quality Bar
 
-Every final design must be professional, production-ready, elegant, and premium, even unasked and regardless of aesthetic direction. The brief sets the style; this bar sets the finish. Premium comes from craft and execution, not from the clichés listed under *Avoid* in `references/aesthetics-guide.md`. Check before delivery:
+Every final design must be production-ready, even unasked and regardless of aesthetic direction. The brief sets the style; this bar sets the finish, which comes from craft, not from the ban table under *Avoid* in `references/aesthetics-guide.md`. Check before delivery:
 - Consistent spacing rhythm and type scale; pixel-aligned edges
-- Intentional palette; coherent radii, borders, and shadows
+- Colors only from the declared tokens; one radius set; shadows only on floating elements
 - Every interactive state: hover, focus, active, disabled, plus loading/empty/error where relevant
 - No placeholder, lorem ipsum, TODO, or broken asset; nothing looks like a draft
-- None of the defaults listed under *Avoid*, unless the explicit brief asked for one
+- Every ban-table row under *Avoid* checked: none present unless the explicit brief or rules file asked for it
 
 ## Usability and Aesthetics References
 
 - **Usability:** apply the six Quick rules in `references/usability-guide.md` to every design.
-- **Aesthetics:** `references/aesthetics-guide.md` holds the typography, color, motion, composition, and background guidance and the *Avoid* list.
+- **Aesthetics:** `references/aesthetics-guide.md` holds the craft guidance and the ban table under *Avoid*.
+- **System defaults:** `references/system-defaults.md` holds the rules-file protocol, tokens, motion, vague-word map, subtraction pass, and visual check.
 
-Read both in step 6, not earlier, to keep the context window small during the brief and approval steps.
+Read them in step 6, not earlier, to keep the context window small; only the rules-file and vague-word sections and the *Avoid* table load at steps 3–4.
 
 ## Expected Output
 
@@ -96,8 +99,8 @@ Production-ready frontend code delivered as one or more files. Example for a lan
 - **`index.html`** — fully self-contained HTML with embedded CSS and JS (or separate files if a framework is used)
 - Implemented features: hero section, CTA button, responsive navigation, and a features grid
 - Typography: a display/body font pairing chosen for this brief, none of the fonts listed under *Avoid*
-- Color palette: strictly four colors per the Default Style Guide, or the explicit brief's palette
-- Interactions: CSS-only hover and focus states on buttons; motion that fits the chosen direction
+- Color palette: four colors declared as tokens per the Default Style Guide, or the explicit brief's palette
+- Interactions: CSS-only hover and focus states; transitions under 300 ms, faster exits, a `prefers-reduced-motion` fallback
 - WCAG AA contrast on all text elements
 - Mobile-responsive layout checked at 375px, 768px, and 1280px
 
@@ -107,8 +110,8 @@ End every run, stops included, with this compact text block. Status is `COMPLETE
 
 ```text
 Result: COMPLETE. Wrote index.html (landing page: hero, CTA, nav, features grid).
-Evidence: Contrast lowest 4.8:1 (Gray on White). Quality Bar and usability Quick rules passed. build: not run (no command). sync: skipped (not a git repo)
-Uncertainty: Responsive rendering untested: no browser available; breakpoints at 375/768/1280 px inspected in CSS. Assumed a developer audience; the brief did not say.
+Evidence: Contrast lowest 4.8:1 (Gray on White). Quality Bar (ban table included) and usability Quick rules passed. build: not run (no command). sync: skipped (not a git repo)
+Uncertainty: Visual check untested: no browser available; CSS inspected against the ban table and at 375/768/1280 px. Assumed a developer audience; the brief did not say.
 Decision: No approval needed. Replace the placeholder logo with your own asset.
 ```
 
@@ -118,9 +121,10 @@ A run passes when **all** of the following are true:
 
 - [ ] The user approved the aesthetic direction, or said "just build it", before any code was written.
 - [ ] Delivered code runs without errors in the target framework (HTML/CSS/JS, React, Vue, etc.); the build command passed when one exists.
-- [ ] Layout has no horizontal overflow at 375px, 768px, and 1280px, or the Final Report records responsive rendering as untested.
+- [ ] Screenshots at phone and desktop width (plus dark mode and the production build when they apply) show no horizontal overflow and no ban-table row the brief did not ask for, or the Final Report records the visual check as untested.
+- [ ] A project design-rules file, when present, was followed; a new rule line was only proposed, never written without the user's explicit reply.
 - [ ] Accessibility basics covered: semantic HTML, every text pair at WCAG AA contrast, keyboard focus states, and `alt`/`aria-label` where applicable.
-- [ ] Without an explicit brief, only the Default Style Guide colors are used, and Bright Green is never a background.
+- [ ] Without an explicit brief, only the Default Style Guide colors are used, through tokens, and Bright Green marks only active or selected states.
 - [ ] Every Default Quality Bar item and every usability Quick rule passes, or the Final Report lists the failure.
 - [ ] The Final Report opens with `Result:` and its status, and has `Evidence:`, `Uncertainty:`, and `Decision:` lines. `Evidence:` cites only checks that ran.
 - [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear). Without a human reviewer's answer, human understanding is unconfirmed.
