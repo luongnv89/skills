@@ -12,7 +12,7 @@ Read the *Avoid* section at Instructions step 4 and the rest before step 6 (impl
 
 ## Explicit brief or maximalist direction
 
-When the user's explicit brief asks for a bold or maximalist look, or names an element, these techniques are available: gradient meshes, noise and grain textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, a choreographed page-load sequence, and scroll-triggered effects. Use the ones the brief names or its direction clearly calls for; each one lifts its ban-table row, so the Quality Bar passes it. Accessibility, contrast, the text-only status-color rule and `prefers-reduced-motion` still apply.
+When the user's explicit brief asks for a bold or maximalist look, or names an element, these techniques are available: gradient meshes, noise and grain textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, a choreographed page-load sequence, and scroll-triggered effects. Use only the ones the brief names or asks for; each one lifts its ban-table row, so the Quality Bar passes it. Accessibility, contrast, the text-only status-color rule and `prefers-reduced-motion` still apply.
 
 Without an explicit brief, a bold or maximalist direction stays available, and its intensity comes from composition, type scale, density and black-and-white blocking within the palette, not from ban-table elements.
 

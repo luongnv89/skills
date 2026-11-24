@@ -22,7 +22,7 @@ Trigger this skill when the user asks to:
 
 ## Instructions
 
-1. Record the **explicit brief**: any style preference, color palette, brand kit, or style direction the user gives. If there is none, the Default Style Guide applies.
+1. Record the **explicit brief**: any style preference, color palette, brand kit, or style direction the user gives. If there is none, the design-rules file (step 3) and then the Default Style Guide apply.
 2. If the request does not state the purpose and the target audience, ask for them before writing code.
 3. Read and follow the project's design-rules file, if any (*Design-rules file* in `references/system-defaults.md`). If the work extends an existing codebase, also read its framework, tokens, and component patterns before proposing anything.
 4. Propose an aesthetic direction (*Design Thinking*). In an existing codebase, also list the files you will create or modify. Emit the Design Thinking step report.
@@ -64,12 +64,12 @@ Bold maximalism and refined minimalism both work when they fit the active style 
 
 ## Default Style Guide
 
-When the user gives no explicit brief, apply this style guide:
+When the user gives no explicit brief, apply this style guide wherever a project design-rules file sets no rule of its own:
 
 1. **Color Palette (Strictly Limited):** Use only four core colors — Black (`#000000`), White (`#FFFFFF`), Gray (`#6B7280`), and Bright Green (`#22C55E`) — declared once as semantic tokens; components use only the tokens.
 2. **Aesthetic:** Flat neutral surfaces, black text, one display and one body font, at most two weights, sentence case, one spacing scale, and no decoration the direction does not name. The ban table under *Avoid* in `references/aesthetics-guide.md` applies.
 3. **Visual Depth:** Separate regions with spacing, lines, and 1 px borders. Shadows go only on floating elements (menus, popovers, dialogs, toasts); never put a card inside a card.
-4. **Bright Green Usage Constraint:** Bright Green marks only active or selected states (text, border, underline, or line); it must *never* be a background or decoration. On white it needs a non-color cue too. The primary button is black with white text.
+4. **Bright Green Usage Constraint:** Bright Green marks only active or selected states; it must *never* be a background or decoration. On white it is only a non-text border, underline, line, or marker beside a black or weight-600 cue, never text color; green text goes only on black. The primary button is black with white text.
 5. **Motion:** Only on state changes, under 300 ms, exits faster than entries, no bounce, `prefers-reduced-motion` honoured; nothing animates on load or scroll.
 6. **System Status Colors:** Danger (`#EF4444`), Warning (`#F59E0B`), and Info (`#3B82F6`) may only be applied to text elements, not backgrounds or primary UI components.
 
@@ -121,10 +121,10 @@ A run passes when **all** of the following are true:
 
 - [ ] The user approved the aesthetic direction, or said "just build it", before any code was written.
 - [ ] Delivered code runs without errors in the target framework (HTML/CSS/JS, React, Vue, etc.); the build command passed when one exists.
-- [ ] Screenshots at phone and desktop width (plus dark mode and the production build when they apply) show no horizontal overflow and no ban-table row the brief did not ask for, or the Final Report records the visual check as untested.
+- [ ] Screenshots at phone and desktop width (plus dark mode and the production build when they apply) show no horizontal overflow and no ban-table row the brief or rules file did not ask for, or the Final Report records the visual check as untested.
 - [ ] A project design-rules file, when present, was followed; a new rule line was only proposed, never written without the user's explicit reply.
 - [ ] Accessibility basics covered: semantic HTML, every text pair at WCAG AA contrast, keyboard focus states, and `alt`/`aria-label` where applicable.
-- [ ] Without an explicit brief, only the Default Style Guide colors are used, through tokens, and Bright Green marks only active or selected states.
+- [ ] Without an explicit brief or a design-rules palette, only the Default Style Guide colors are used, through tokens, and Bright Green marks only active or selected states.
 - [ ] Every Default Quality Bar item and every usability Quick rule passes, or the Final Report lists the failure.
 - [ ] The Final Report opens with `Result:` and its status, and has `Evidence:`, `Uncertainty:`, and `Decision:` lines. `Evidence:` cites only checks that ran.
 - [ ] The Final Report passes the four reader checks in `references/final-report.md` (result findable, facts and assumptions separated, claims traceable, next decision clear). Without a human reviewer's answer, human understanding is unconfirmed.

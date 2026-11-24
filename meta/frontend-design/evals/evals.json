@@ -121,7 +121,7 @@
         "The page has no gradient of any color, no glow, no grain or noise texture, no staggered section reveal, no scroll-triggered entrance and no bounce or overshoot easing",
         "Every transition or animation lasts under 300 ms, each exit is shorter than its entry, and a prefers-reduced-motion media query removes or reduces the movement",
         "Colors are declared once as CSS custom properties limited to #000000, #FFFFFF, #6B7280 and #22C55E (plus status colors on text only), and component rules use only those properties, with no raw hex value outside the declaration",
-        "Page and container backgrounds are white or black, and #22C55E appears only on an active, selected or checked state (the chosen plan, a checked box, a focused field), never as a fill or decoration",
+        "Page and container backgrounds are white or black, and #22C55E appears only on an active, selected or checked state (the chosen plan, a checked control's border or mark), never as a fill, text on white or decoration",
         "Headings, buttons and labels use sentence case, and the CSS uses at most two font weights",
         "Shadows appear only on floating elements, and no card sits inside another card",
         "The Implementation step report has a Visual check line (screenshots at phone and desktop width against the ban table, or untested with a reason) and a Subtraction pass line"
