@@ -145,13 +145,13 @@
       "kind": "edge",
       "name": "initial-only-mark-needs-an-idea",
       "prompt": "Design a logo for Quillo, a note-taking app for students. Wordmark in title case, default style.",
-      "expected_output": "The proposed mark draws one idea about note-taking, stated in one sentence. A mark that is only the letter Q is proposed only with an idea tying the letter's construction to the product, and the Phase 3 step report records which case applied.",
+      "expected_output": "The proposed mark draws one idea about note-taking, stated in one sentence. A mark that is only the letter Q is proposed only with an idea tying the letter's construction to the product, and the Phase 2 step report records which case applied.",
       "files": [],
       "expectations": [
         "The Phase 2 proposal states the mark's idea in one sentence that names a shape and the part of the product it shows",
         "If the proposed mark is only the letter Q (alone or in a rounded square, circle or other tile), the proposal ties the letter's construction to note-taking (for example the Q's tail drawn as a pen nib); otherwise the mark is a symbol drawn from the idea",
         "No delivered logo-mark.svg is a plain Q in a rounded square with no recorded idea, since the user did not ask for a lettermark",
-        "The Phase 3 step report records the mark's idea and whether the initial-only rule applied (idea tied to the letter, user request, or not applicable)"
+        "The Phase 2 step report records the mark's idea and whether the initial-only rule applied (idea tied to the letter, user request, or not applicable)"
       ]
     },
     {
@@ -182,7 +182,7 @@
       "files": [],
       "expectations": [
         "No SVG contains a <filter> element, an fe* primitive (feGaussianBlur, feDropShadow), a filter= attribute, a CSS filter or drop-shadow(), box-shadow or text-shadow",
-        "logo-mark.svg's layers are separated by gaps, overlaps or knockouts, not by opacity steps on stacked copies, and each layer carries a named part of the idea",
+        "logo-mark.svg's layers are separated by gaps or knockouts (no overlap without a gap), not by opacity steps on stacked copies, and each layer carries a named part of the idea",
         "brand-showcase.html loads no remote font (no <link> or @import to fonts.googleapis.com or any http(s) font URL) and sets its text in a system font stack",
         "brand-showcase.html has no box-shadow or text-shadow, no transform or translateY on :hover, and no small uppercase letter-spaced section labels; the hero mark is an <img> with no filter",
         "The Final Report's Evidence: line cites the effects check of the SVGs and the showcase page and the mark's layer count, and uses no adjective such as elegant or premium as evidence"

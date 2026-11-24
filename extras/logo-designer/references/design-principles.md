@@ -41,11 +41,11 @@ Starting values by project type, which the user confirms or changes:
 - One idea: the mark draws something about what the product does or who it serves, stated in one sentence on the decision sheet
 - Works at all sizes (16px favicon to hero banner)
 - Flat design, no fill gradients
-- Depth comes from layer geometry only: gaps, overlaps, knockouts and negative space separate the layers. The canonical mark holds that geometry, so the monochrome variants keep their depth with a colour change alone. A lighter tint of one colour may be a colour value, never a depth effect
+- Depth comes from layer geometry only: gaps, knockouts and negative space separate the layers; two layers never touch or overlap without a gap, since a one-colour variant would merge them. The canonical mark holds that geometry, so the monochrome variants keep their depth with a colour change alone. A lighter tint of one colour may be a colour value, never a depth effect
 
 ### Initial-only marks
 
-A mark that is only the product's initial (one letter, alone or in a rounded square, circle or other tile) needs one of two things: an idea that links the letter's construction to the product (the Q's tail drawn as a pen nib for a note-taking app), or the user's explicit request for a lettermark. With neither, propose a symbol drawn from the idea instead. The Phase 3 step report records which applies. The app icon's rounded tile in `logo-icon.svg` is a platform container, not part of the mark.
+A mark that is only the product's initial (one letter, alone or in a rounded square, circle or other tile) needs one of two things: an idea that links the letter's construction to the product (the Q's tail drawn as a pen nib for a note-taking app), or the user's explicit request for a lettermark. With neither, propose a symbol drawn from the idea instead. The Phase 2 step report records which applies. The app icon's rounded tile in `logo-icon.svg` is a platform container, not part of the mark.
 
 ### Fewest layers
 

@@ -131,7 +131,7 @@ Examples:
 Scan every file's markup, including any `<style>` block (`references/design-principles.md`, *AI-default bans*):
 - [ ] No `<filter>` element, no `fe*` primitive (`feGaussianBlur`, `feDropShadow`, `feMorphology` and the rest), no `filter=` attribute, no CSS `filter` or `drop-shadow()` — ❌ FAIL, naming the file and element
 - [ ] No `box-shadow` or `text-shadow`, and no offset darker copy of a layer drawn as a shadow — ❌ FAIL
-- [ ] Layers are separated by geometry (gaps, overlaps, knockouts). Two layers that differ only in opacity are a ⚠️ warning, not a FAIL: a flat tint may be a colour value
+- [ ] Layers are separated by geometry (gaps, knockouts). Two layers that overlap or touch with no gap are a ⚠️ warning: they merge into one shape in `logo-white.svg` and `logo-black.svg`. Two layers that differ only in opacity are a ⚠️ warning, not a FAIL: a flat tint may be a colour value
 - [ ] Every `brief.bans` entry holds — ❌ FAIL, citing the entry's `source`
 - [ ] A default ban listed in `brief.lifted_bans` is not a finding; note it with its source
 

@@ -10,7 +10,7 @@ Every logo variant must use the **exact same mark geometry**. The svg-generator 
 
 Generate `logo-mark.svg` first — this is the **single source of truth** for the mark's geometry. Use a `viewBox="0 0 64 64"` base canvas. Design the mark using `<path>` elements so the exact `d=""` attribute strings can be copy-pasted into every other variant.
 
-Use the fewest layers that carry the idea, and separate them by geometry (gaps, overlaps, knockouts), never by a filter, shadow or opacity steps (`references/design-principles.md`, *Fewest layers* and *AI-default bans*). The depth lives in these paths, so every variant inherits it.
+Use the fewest layers that carry the idea, and separate them by geometry (gaps and knockouts, so no two layers overlap without a gap), never by a filter, shadow or opacity steps (`references/design-principles.md`, *Fewest layers* and *AI-default bans*). The depth lives in these paths, so every variant inherits it.
 
 After creating `logo-mark.svg`, extract and record the exact path data, with the part of the idea each layer carries. For example:
 

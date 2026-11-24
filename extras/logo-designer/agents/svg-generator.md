@@ -46,7 +46,7 @@ Design requirements:
 - Draws `brief.mark_idea` with the confirmed construction, stroke and corner radius
 - An initial-only mark only when the brief records an idea tied to the letter or the user's explicit request (`references/design-principles.md`, *Initial-only marks*)
 - The fewest layers that carry the idea, each layer carrying a named part of it
-- Depth from layer geometry only: gaps, overlaps and knockouts, never a filter, shadow, glow or opacity steps
+- Depth from layer geometry only: gaps and knockouts (no two layers overlap or touch without a gap), never a filter, shadow, glow or opacity steps
 - Works in both light and dark modes
 - Use `<path>` elements (not `<rect>` + separate `<polygon>` combos) so `d=""` strings can be copy-pasted
 
