@@ -515,12 +515,15 @@ async function renderFromQuery(cfg) {
     for (const bg of flat ? [b.canvas1] : [b.canvas1, b.canvas2]) pairs.push([b.ink, bg, 3], [b.brandInk, bg, 3], [b.muted, bg, 4.5]);
     if (anyDark) for (const bg of flat ? [b.darkCanvas1] : [b.darkCanvas1, b.darkCanvas2]) pairs.push([b.darkInk, bg, 3], [b.darkAccent, bg, 3], [b.darkMuted, bg, 4.5]);
     // The identity tokens this render paints, as the page resolved them, so a token
-    // config.js leaves out reports the kit.css fallback; render.py refuses the template's.
+    // config.js leaves out (uiTint included) reports the kit.css fallback; render.py refuses the template's.
     const css = getComputedStyle(document.documentElement), tok = (v) => css.getPropertyValue(v).trim();
     const palette = { brand: tok("--brand"), brandInk: tok("--brand-ink"), canvas1: tok("--canvas-1") };
     if (!flat) Object.assign(palette, { canvas2: tok("--canvas-2"), glow: tok("--glow") });
     if (anyDark) Object.assign(palette, { darkCanvas1: tok("--dark-1") }, flat ? {} : { darkCanvas2: tok("--dark-2") });
-    if (cfg.uiTint) palette.uiTint = cfg.uiTint;
+    // The in-screen tint as a screen resolves it, so a missing uiTint reports kit.css's.
+    const screenEl = root.querySelector(".screen");
+    const tint = cfg.uiTint || (screenEl ? getComputedStyle(screenEl).getPropertyValue("--blue").trim() : "");
+    if (tint) palette.uiTint = tint;
     root.textContent = JSON.stringify({
       app: cfg.app, version: cfg.version, platforms: cfg.platforms, orientation: ORIENT, fontOk, errors: [...new Set(errors)],
       contrast: pairs.map(([fg, bg, min]) => ({ fg, bg, min })),
