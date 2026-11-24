@@ -1,0 +1,20 @@
+:root {
+  --color-surface: #ffffff;
+  --color-text: #111111;
+  --color-muted: #555555;
+  --color-border: #dddddd;
+  --color-accent: #1d4ed8;
+  --radius: 6px;
+  --duration-enter: 200ms;
+  --duration-exit: 120ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #111111;
+    --color-text: #f5f5f5;
+    --color-muted: #b0b0b0;
+    --color-border: #333333;
+    --color-accent: #93c5fd;
+  }
+}

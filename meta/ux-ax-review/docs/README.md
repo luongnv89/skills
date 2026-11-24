@@ -9,13 +9,14 @@
 
 > Audit websites and apps for humans and AI/search, then turn supported findings into an approval-gated improvement plan.
 
-Version: **1.3.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.4.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
 - Six human aspects: clarity, brand, responsive, accessibility, performance, conversion.
 - Six AI/search aspects: robots/sitemap, structured data, Markdown, llms.txt, crawler access, copy/share/open-in-AI.
 - Live URL, repository, supplied evidence and native-app modes; untested is not passed.
+- Brand includes a visual-system check for AI-default tells, read against a project design-rules or tokens file when one exists.
 - Focused parallel reviewers for substantial audits, inline fallback; no other skills required.
 - Report-only first: fixes, commits, publishing and access-policy changes need separate approval.
 
@@ -82,7 +83,7 @@ or sent to third-party AI services as an “improvement.”
 | Path | Description |
 |---|---|
 | `references/evidence-rules.md` | Aspect ids, coverage statuses and how evidence records are written |
-| `references/human-ux.md` | Checklist for the six human UX aspects |
+| `references/human-ux.md` | Checklist for the six human UX aspects, including the brand visual-system check |
 | `references/ai-search-ax.md` | Checklist for the six AI/search AX aspects |
 | `references/web-evidence.md` | Live-web and repository evidence limits, and the checkout snapshot |
 | `references/native-app.md` | How human and AX checks apply to native-only apps |
@@ -94,8 +95,8 @@ or sent to third-party AI services as an “improvement.”
 | `agents/ax-reviewer.md` | Bounded AI/search reviewer contract |
 | `scripts/validate_report.py` | Stdlib-only report coverage/reference validator |
 | `tests/` | Executable validator regression tests and their TDD notes |
-| `evals/evals.json` | Behavior evals: 3 happy-path, 3 edge, 2 negative-trigger |
-| `eval-fixtures/ux-ax-review/` (repo root) | Synthetic web, repo, native, blocked and orchestrated-run fixtures |
+| `evals/evals.json` | Behavior evals: 3 happy-path, 6 edge, 2 negative-trigger |
+| `eval-fixtures/ux-ax-review/` (repo root) | Synthetic web, repo, native, blocked, orchestrated-run and tells-with/without-rules fixtures |
 
 ## Verification
 

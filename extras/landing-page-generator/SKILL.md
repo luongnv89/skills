@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 2.0.0
+  version: 2.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -158,7 +158,7 @@ substitute a generic Hero/Problem/Solution layout when another framework applies
 - Subheadlines: 1–2 sentences that expand the headline without repeating it
 - Body copy: active voice, benefit-led; address pain points with concrete scenarios where the template calls for them
 - Features: 3–5 items described as outcomes, not feature lists
-- How It Works: 3–4 simple steps; icon concept + description per step; CTA at the end
+- How It Works: 3–4 simple steps, a short description each; CTA at the end
 - Social proof: quote + name + role + company, or `[proof needed]` when proof is unavailable
 - Pricing (if applicable): feature comparison, recommended plan callout, guarantee copy or `[proof needed]`
 - FAQ: 5–7 common objections with clear, confident answers
@@ -178,11 +178,11 @@ Apply `references/section-templates.md` → *Copywriting Best Practices*.
 
 ### CTA Button Rules
 
-- Start with an action verb
+- Start with an action verb; sentence case
 - Be specific about the outcome
-- First person when appropriate ("Start My Free Trial")
-- Genuine urgency ("Get Instant Access")
-- Never generic ("Submit", "Click Here")
+- First person when appropriate ("Start my free trial")
+- Genuine urgency ("Get instant access")
+- Never generic ("Submit", "Click here")
 
 ### Step 6: Generate Companion Pages
 
@@ -236,7 +236,7 @@ End every run, stops included, with this compact text block. Status is `COMPLETE
 ```text
 Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA), A/B test ideas, and Privacy Policy, Terms of Use, and Changelog pages, built as HTML in landing-page/; Docs skipped (hosted app, no setup outside the app).
 Evidence: Framework PAS named and applied via references/section-templates.md; hero headline 8 words; every CTA starts with an action verb; pages: Privacy Policy, Terms of Use, Changelog delivered, Docs skipped (hosted app); companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; [proof needed] markers: 2 on the landing page, 18 on the companion pages; anti-slop check passed; page: built (landing-page/: index.html, privacy.html, terms.html, changelog.html) by frontend-design; page checks Pages built, Sections carried, CTAs carried, Markers carried (24/24), Nothing added, Notes excluded, Links resolve, Design checks passed; sync: skipped (new folder).
-Uncertainty: Assumed a setup-time objection belongs in the FAQ; the brief gives no contrarian take, so the hero leaves it out; no data practices, legal entity, or release date were supplied, so those facts are markers; responsive rendering untested (no browser), breakpoints inspected in CSS.
+Uncertainty: Assumed a setup-time objection belongs in the FAQ; the brief gives no contrarian take, so the hero leaves it out; no data practices, legal entity, or release date were supplied, so those facts are markers; Visual check untested: no browser available; CSS inspected.
 Decision: No approval needed. Before publishing: replace the [proof needed] markers with real facts, and have a lawyer review the Privacy Policy and Terms of Use.
 ```
 

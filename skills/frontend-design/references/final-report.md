@@ -16,7 +16,7 @@ The report is a compact text block of four lines. Do not replace it with a long 
 
 ```text
 Result: PARTIAL. Wrote src/components/PricingTable.vue; 1 of 4 checks still fails.
-Evidence: Contrast check: Gray #6B7280 on Black #000000 for the plan footnote is 4.3:1, below 4.5:1 (PricingTable.vue:88). Responsive check passed at 375, 768 and 1280 px in the browser. npm run build passed. Quality Bar and usability Quick rules passed.
+Evidence: Contrast check: Gray #6B7280 on Black #000000 for the plan footnote is 4.3:1, below 4.5:1 (PricingTable.vue:88). Visual check passed: screenshots at 375 and 1280 px show no ban-table row, and 375, 768 and 1280 px have no overflow. npm run build passed. Quality Bar and usability Quick rules passed.
 Uncertainty: Assumed the footnote must stay gray to match the existing design system; the brief did not say.
 Decision: Choose a fix: lighten the footnote to White, or enlarge it to 24 px so the 3:1 large-text threshold applies.
 ```
@@ -27,7 +27,7 @@ Decision: Choose a fix: lighten the footnote to White, or enlarge it to 24 px so
 
 ```text
 Result: BLOCKED. No code written: the aesthetic direction was not approved.
-Evidence: Proposed "editorial, monochrome with green rule lines" for the landing page. The user did not answer.
+Evidence: Proposed "editorial, monochrome, green only on the selected plan" for the landing page. The user did not answer.
 Uncertainty: No code was written, so no check ran.
 Decision: Approve the proposed direction, ask for a different one, or say "just build it".
 ```
@@ -44,9 +44,9 @@ Decision: Resolve the conflict on main or tell me to continue without syncing.
 ## Fill rules
 
 - `Result:` comes first. The first word after `Result:` is the status. Name each file written, or say `No code written`.
-- `Evidence:` names each verification check that ran and its observed result: the widths rendered, the lowest contrast ratio found, and the build, lint, or test command with its exit result. Cite a `file:line` for each failure. Cite only checks that ran.
-- `Uncertainty:` lists each check that could not run (for example `Responsive rendering untested: no browser available`), a `sync: failed (...)` or `sync: skipped (...)` record, and each assumption made where the brief was silent. Label assumptions as assumptions.
-- `Decision:` names the one action the user must take, or says `No approval needed.` Name a remaining user action (for example, adding real images) in the same line after `No approval needed.`
+- `Evidence:` names each verification check that ran and its observed result: the widths and modes screenshotted (dark mode, production build) and the ban-table result, the lowest contrast ratio found, and the build, lint, or test command with its exit result. Cite a `file:line` for each failure. Cite only checks that ran.
+- `Uncertainty:` lists each check that could not run (for example `Visual check untested: no browser available`), a `sync: failed (...)` or `sync: skipped (...)` record, and each assumption made where the brief was silent. Label assumptions as assumptions.
+- `Decision:` names the one action the user must take, or says `No approval needed.` Name a remaining user action (for example, adding real images) in the same line after `No approval needed.` A proposed design-rules line (`references/system-defaults.md`) goes last on this line, marked optional and quoted with its file; it is never written without the user's reply.
 
 ## Reader checks
 

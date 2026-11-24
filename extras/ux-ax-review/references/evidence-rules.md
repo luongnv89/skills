@@ -20,6 +20,8 @@ scope limitations. No numerical aggregate or arbitrary health score.
 
 - Actual interaction/measurement: method, surface/state, timestamp when captured, device,
   viewport and tool settings when relevant; raw result/source, not just an agent summary.
+- Dev-server, local or preview-deployment render: name the environment in the record. It
+  shows that build only; never present it as production or use it to pass a deployed check.
 - Rendered screenshot: reference and viewport if known. It does not prove keyboard semantics,
   screen-reader behavior, performance, backend policy, mobile reflow beyond that viewport.
 - DOM or saved HTML: source location/selector, relevant snippet. It does not prove rendered
