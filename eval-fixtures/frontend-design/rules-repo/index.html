@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tally: invoices for small studios</title>
+  <style>
+    :root {
+      --color-surface: #FFFFFF;
+      --color-text: #000000;
+      --color-muted: #6B7280;
+      --color-border: #6B7280;
+      --color-accent: #22C55E;
+      --radius: 2px;
+      --font-heading: "Fraunces", Georgia, serif;
+      --font-body: "Source Serif 4", Georgia, serif;
+    }
+    body { margin: 0; background: var(--color-surface); color: var(--color-text); font-family: var(--font-body); font-weight: 400; line-height: 1.6; }
+    h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; }
+    main { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+    section { border-top: 1px solid var(--color-border); padding: 96px 0; }
+    .button { display: inline-block; padding: 12px 20px; border-radius: var(--radius); text-decoration: none; }
+    .button--primary { background: var(--color-text); color: var(--color-surface); }
+    .button--secondary { border: 1px solid var(--color-text); color: var(--color-text); }
+    .muted { color: var(--color-muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>Send an invoice in under a minute</h1>
+      <p class="muted">Tally turns a finished project into a paid invoice for studios of one to ten people.</p>
+      <a class="button button--primary" href="#start">Start free trial</a>
+      <a class="button button--secondary" href="#tour">See how it works</a>
+    </section>
+    <section id="tour">
+      <h2>How it works</h2>
+      <p>Pick the project, check the hours, press send. Tally reminds the client when the invoice is due.</p>
+    </section>
+  </main>
+</body>
+</html>
