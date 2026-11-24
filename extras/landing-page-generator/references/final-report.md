@@ -29,9 +29,9 @@ second A/B variant) after the deliverable exists does not change a `COMPLETE`.
 
 ```text
 Result: PARTIAL. Delivered full PAS landing copy for AcmeDesk, built as HTML in landing-page/; 2 of 6 CTAs still fail the CTA Button Rules.
-Evidence: Framework PAS applied via references/section-templates.md; hero headline 8 words; CTA Button Rules check: "Learn more" (pricing section) and "Submit" (FAQ) state no outcome; companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; page: built (landing-page/: index.html, privacy.html, changelog.html); page checks passed.
+Evidence: Framework PAS applied via references/section-templates.md; hero headline 8 words; CTA Button Rules check: "Learn more" (pricing section) and "Submit" (FAQ) state no outcome; companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; page: built (landing-page/: index.html, privacy.html, changelog.html); page checks passed; visual check at 375 and 1280 px showed no ban-table row.
 Uncertainty: The brief names no outcome for the pricing link, so a replacement CTA is a guess; not confirmed with the user.
-Decision: Approve "Compare AcmeDesk Plans" and "Ask Us a Question" as the two CTAs, or name your own.
+Decision: Approve "Compare AcmeDesk plans" and "Ask us a question" as the two CTAs, or name your own.
 ```
 
 ## PARTIAL example — page not built
@@ -64,10 +64,10 @@ Decision: Provide the product name, target audience, problem solved, and primary
   `Result:` names them) and each companion check by its name in `references/companion-pages.md`
   with its result ("companion checks passed" alone is not enough), the `page:` entry (built
   with its folder and files, skipped, or not built, each with its reason) and each page check
-  with its result, and the `sync:` record (`sync: skipped (...)` or `sync: failed (...)`; a
+  with its result, the visual check's widths and modes as `frontend-design` returned them, and the `sync:` record (`sync: skipped (...)` or `sync: failed (...)`; a
   sync that stopped the page build is a `page: not built` reason). Cite only checks that ran.
-- `Uncertainty:` lists each check that could not run (for example responsive rendering
-  without a browser) and each assumption made where the user was silent. Label assumptions as assumptions.
+- `Uncertainty:` lists each check that could not run (for example `Visual check untested: no browser
+  available`) and each assumption made where the user was silent. Label assumptions as assumptions.
 - `Decision:` names the one action the user must take, or says `No approval needed.`
   Name a remaining user action (for example, replacing `[proof needed]` markers with
   real metrics) in the same line after `No approval needed.` When a Privacy Policy or
