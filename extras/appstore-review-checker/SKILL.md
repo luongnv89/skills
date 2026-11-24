@@ -4,7 +4,7 @@ description: "Audit iOS/macOS apps against App Store Review Guidelines before su
 license: MIT
 effort: high
 metadata:
-  version: 1.7.1
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -24,7 +24,7 @@ Before running this skill, confirm:
 - **Tools available** — `Read`, `Glob`, `Grep` for static analysis. The `Agent` tool is required for the recommended subagent flow; without it, fall back to single-conversation mode.
 - **Write target confirmed** — The audit writes `APPSTORE_AUDIT.md` to the project root. Confirm with the user before overwriting an existing report.
 - **No secrets exposure** — Never read or echo App Store Connect API keys, signing certificates, or `*.p8`/`*.p12` files.
-- **Scope confirmation** — Static analysis only. Do not execute code, install dependencies, or run `xcodebuild`.
+- **Scope confirmation** — Static analysis only, plus an opt-in read-only `asc` read. Do not execute code, install dependencies, or run `xcodebuild`.
 
 ## Environment Check
 
@@ -62,7 +62,7 @@ this step; the report then writes to the working directory the user names.
 The audit always runs through four phases. Full detail is in `references/audit-workflow.md`.
 
 ### Phase 1: Understand the App
-Read project config (pbxproj, Info.plist, entitlements, Podfile/Package.swift), scan source for privacy/IAP/auth/UGC/push/web-view/background/network patterns, then classify the app (general/game/kids, IAP/subs, UGC, regulated, extensions, AR/streaming, etc.) so you know which guideline sections apply.
+Read project config (pbxproj, Info.plist, entitlements, Podfile/Package.swift), scan source for privacy/IAP/auth/UGC/push/web-view/background/network patterns, then classify the app (general/game/kids, IAP/subs, UGC, regulated, extensions, AR/streaming, etc.) so you know which guideline sections apply. Read every locale's store metadata, or the live listing via `asc` (`references/live-metadata.md`).
 
 ### Phase 2: Run the Audit
 Load `references/guidelines.md`. For each guideline, assign one of **PASS / FAIL / WARNING / N/A**. Start with the "Top 20 Rejection Triggers" at the bottom of that file. Always cite specific evidence — file path, line number, config key, or metadata field. Never use vague language like "might have issues."
@@ -116,7 +116,7 @@ Its four lines are `Result:` (run status `COMPLETE`, `PARTIAL` or `BLOCKED`, plu
 
 ## Edge Cases
 
-See `references/edge-cases.md` for: no source code available, metadata-only audit, existing rejection notice, a live app already approved, Kids Category app, StoreKit-without-IAP, multiple targets, macOS/Catalyst, a request to hide a feature from App Review, unknown storefronts for external purchase links.
+See `references/edge-cases.md` for no-source and metadata-only audits, rejection notices, live apps, Kids Category, StoreKit without IAP, multiple targets, Catalyst, hidden features, and unknown storefronts.
 
 ## Common Red Flags
 

@@ -1,0 +1,5 @@
+Quota Meter shows how much of your AI coding plan is left, right in the macOS menu bar.
+
+Works with Claude, Codex and Grok accounts you already have. Sign in with each service, and Quota Meter shows your session and weekly limits, when each one resets, and whether your pace will run out before then.
+
+Quota Meter is not affiliated with Anthropic, OpenAI or xAI.

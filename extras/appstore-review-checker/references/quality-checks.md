@@ -94,7 +94,8 @@ FAIL only where the evidence shows a claim is false; a claim that can't be check
 
 ### Metadata Red Flags
 - Keywords containing "free", "best", "#1", "top", "sale"
-- Competitor names in keywords or description
+- Another developer's brand or product name in the name or subtitle of any locale (4.1-c), or in the keywords (2.3.7-keywords); supported services named in the description as compatibility wording are at most a WARNING
+- Competitor names used comparatively anywhere ("better than X", 5.2.1)
 - "Android", "Google Play" mentioned anywhere in metadata
 - "For Kids" used outside Kids Category
 - Screenshots that are just marketing graphics without real app UI
@@ -111,4 +112,4 @@ FAIL only where the evidence shows a claim is false; a claim that can't be check
 - An OTA update SDK (expo-updates, CodePush, Shorebird, Capgo, Hot Updater) that could change features after approval (2.5.2, 2.5.19; WARNING: pushes stay interpreted JS or assets that don't change the primary purpose, per DPLA 3.3.1(B))
 - Promotional or marketing content in a Live Activity (4.5.3; HIG › Live Activities), or marketing pushes with no in-app consent (`marketing_consent`) or opt-out (`marketing_opt_out`) (4.5.4)
 - Interstitial ads so frequent they interrupt core use, such as after every tap or every few seconds (practitioner advice; 2.5.18 doesn't set a frequency, so WARNING only)
-- An icon or name resembling a large company's brand (Google, Meta, OpenAI) (4.1-c, 5.2.1)
+- An icon, name, or subtitle using or resembling another company's brand (Google, Meta, OpenAI) (4.1-c, 5.2.1)

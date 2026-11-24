@@ -1,0 +1,1 @@
+New: weekly limits for Claude and Codex, and reset countdowns in the menu bar.

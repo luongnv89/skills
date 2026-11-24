@@ -1,0 +1,1 @@
+New: Claude Fable resets, this week's usage by product, credits and spend limit, and a two-column Live view. Also Grok, Codex, Cursor and Devin limits.
