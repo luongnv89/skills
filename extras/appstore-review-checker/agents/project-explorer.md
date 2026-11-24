@@ -10,7 +10,7 @@ Read all project configuration files and source code to build a structured app-p
 
 ## Workspace Artifacts
 
-- **Input**: The user's iOS/macOS app project directory (passed as `<project_path>`)
+- **Input**: The user's iOS/macOS app project directory (passed as `<project_path>`), plus the live-listing answer from the main conversation: approved or declined, the App Store Connect app ID, the platform, and the version if the user named one (Step 1f)
 - **Output**: `<project_path>/app-profile.json` — structured JSON with all findings
 - **Working files**: Read-only access to project configuration and source code
 
@@ -77,14 +77,17 @@ Locate `*.entitlements` file (usually associated with main target):
 
 ### Step 1e: Read Fastlane Metadata (if present)
 
-If `fastlane/metadata/` exists:
-- `en-US/description.txt` — App description text
-- `en-US/keywords.txt` — Keywords
-- `en-US/privacy_url.txt` — Privacy policy URL
-- `en-US/marketing_url.txt` — Marketing URL
-- `en-US/support_url.txt` — Support URL
-- `en-US/name.txt` — App name
-- Screenshots listed in `en-US/screenshots/` directory
+If `fastlane/metadata/` exists, read **every locale directory** (`en-US/`, `de-DE/`, `ja/`, …), not only `en-US`:
+- `name.txt`, `subtitle.txt`, `keywords.txt` — identity fields, checked for third-party brands under 4.1-c and 2.3.7-keywords
+- `description.txt`, `promotional_text.txt`, `release_notes.txt` (What's New)
+- `privacy_url.txt`, `marketing_url.txt`, `support_url.txt`
+- Screenshots listed in each locale's `screenshots/` directory
+
+Record each locale in `metadata.locales` and set `metadata.source` to `fastlane/metadata`.
+
+### Step 1f: Live App Store Connect Listing (optional)
+
+Repo metadata can be stale because store copy is often edited in App Store Connect. You cannot ask the user: the main conversation offers the live read before spawning you (`references/live-metadata.md` → _When to offer_). Run this step only when your prompt says the user approved it and gives the app ID and platform (and possibly the version); then read the pending version's listing read-only with the commands in `references/live-metadata.md`, fill `metadata.locales` from it, and set `metadata.source` to `App Store Connect (asc, pending version)`, or to both sources when you compare them. When no approval was passed in, skip this step. In single-conversation mode, the conversation asks the user directly before this step.
 
 ## Phase 2: Scan Source Code for Usage Patterns
 
@@ -575,6 +578,17 @@ Create a JSON file with this structure:
   },
 
   "metadata": {
+    "source": "fastlane/metadata | App Store Connect (asc, pending version) | user-provided text | none",
+    "locales": [
+      {
+        "locale": "en-US",
+        "name": "string or null",
+        "subtitle": "string or null",
+        "keywords": "string or null",
+        "promotional_text": "string or null",
+        "whats_new": "string or null"
+      }
+    ],
     "description_text": "string — truncated app description from Fastlane or metadata",
     "privacy_policy_url": "string or null",
     "support_url": "string or null",
@@ -625,7 +639,7 @@ Before writing app-profile.json, verify:
 - [ ] Entitlements file parsed (if exists)
 - [ ] Dependencies catalog complete (Podfile, Package.swift, Cartfile)
 - [ ] Source code scanned for usage patterns
-- [ ] Fastlane metadata read (if exists)
+- [ ] Fastlane metadata read for every locale (if exists), and `metadata.source` set
 - [ ] app-profile.json written to workspace with all required fields
 - [ ] Suspicious patterns documented in findings section
 - [ ] No guidelines applied — purely factual inventory

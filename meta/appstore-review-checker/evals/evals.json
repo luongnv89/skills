@@ -53,12 +53,12 @@
       "id": 4,
       "kind": "edge",
       "prompt": "I don't have the code handy. Here's my App Store listing: title 'Best Free Budget App', subtitle 'Better than Mint', description mentions it 'also works great on Android'. Can you check it against App Store guidelines?",
-      "expected_output": "A metadata-only audit: code-level checks are marked N/A (no source), metadata violations under 2.3.7, 5.2.1 and 2.3.10 are FAILs with the quoted text as evidence, and the Final Report states the narrowed scope.",
+      "expected_output": "A metadata-only audit: code-level checks are marked N/A (no source), metadata violations under 2.3.7, 4.1-c, 5.2.1 and 2.3.10 are FAILs with the quoted text as evidence, and the Final Report states the narrowed scope.",
       "files": [],
       "expectations": [
         "Runs a metadata-only audit instead of stopping for missing source code",
         "Marks code-level guideline checks as N/A (no source) and lists them for manual verification",
-        "Flags 'Best' and 'Free' under 2.3.7-keywords, the competitor name 'Mint' under 5.2.1, and the Android mention under 2.3.10",
+        "Flags 'Best' and 'Free' under 2.3.7-keywords, the competitor name 'Mint' in the subtitle under 4.1-c (with 5.2.1 for the comparative 'Better than'), and the Android mention under 2.3.10",
         "Quotes the exact metadata text as evidence for each FAIL",
         "The verdict is LIKELY REJECT because the FAILs are on Top 20 triggers",
         "The Final Report's Uncertainty line says the code, entitlements and runtime behavior were not audited"
@@ -187,6 +187,41 @@
         "Because 3.1.2-scam is a Top 20 trigger, the verdict is LIKELY REJECT",
         "Does not edit PaywallView.swift or any other file before the user approves specific FAIL IDs",
         "The Final Report's Decision line names the FAIL IDs awaiting fix approval or says 'No approval needed.'"
+      ]
+    },
+    {
+      "id": 14,
+      "kind": "edge",
+      "prompt": "Metadata-only check before I resubmit my macOS app. No source code, just the listing in ./subtitle-and-keyword-brands/fastlane/metadata (three locales). Will App Review accept it?",
+      "expected_output": "Fixture subtitle-and-keyword-brands (../../eval-fixtures/appstore-review-checker/subtitle-and-keyword-brands/). A metadata-only audit that reads all three locales, fails 4.1-c for the third-party brands in each subtitle, fails 2.3.7-keywords for Grok and Cursor in the ja keywords, does not fail the promotional text for naming services, names the metadata source, and gives LIKELY REJECT.",
+      "files": [
+        "../../eval-fixtures/appstore-review-checker/subtitle-and-keyword-brands/"
+      ],
+      "expectations": [
+        "Reads the en-US, de-DE and ja locales, not only en-US",
+        "Marks 4.1-c FAIL for each of the three subtitles (en-US 'Claude, Codex & Grok Limits', de-DE 'Limits für Claude, Codex, Grok', ja 'Claude・Codexの使用制限を常に確認'), quoting each one",
+        "Cites the subtitle brands under 4.1-c first; 2.3.7-fields or 5.2.1 appear only as secondary references",
+        "Marks 2.3.7-keywords FAIL for 'Grok' and 'Cursor' in the ja keywords",
+        "Does not mark 4.1-c, 2.3.7-keywords or 5.2.1 FAIL for the services named in the en-US promotional text",
+        "The fix moves the service names out of the subtitle and keywords into the description",
+        "The report header has a Metadata source line naming fastlane/metadata",
+        "The verdict is LIKELY REJECT"
+      ]
+    },
+    {
+      "id": 15,
+      "kind": "edge",
+      "prompt": "Can you audit the App Store listing in ./clean-description-brands/fastlane/metadata? There's no code here, only the metadata. My app works with Claude, Codex and Grok, and the description says so.",
+      "expected_output": "Fixture clean-description-brands (../../eval-fixtures/appstore-review-checker/clean-description-brands/). A metadata-only audit that finds no third-party brand in the name, subtitle or keywords, treats 'Works with Claude, Codex and Grok' in the description and promotional text as acceptable compatibility wording (PASS or at most WARNING), and does not fail 4.1-c, 2.3.7-keywords or 5.2.1 for it.",
+      "files": [
+        "../../eval-fixtures/appstore-review-checker/clean-description-brands/"
+      ],
+      "expectations": [
+        "Marks 4.1-c PASS for the name and subtitle",
+        "Marks 2.3.7-keywords PASS for the brands (the keywords hold no third-party brand)",
+        "Treats the services named in the description and promotional text as compatibility wording: PASS or at most a WARNING, never a FAIL under 4.1-c, 2.3.7-keywords or 5.2.1",
+        "The report header has a Metadata source line naming fastlane/metadata",
+        "Marks code-level guideline checks as N/A (no source)"
       ]
     }
   ]

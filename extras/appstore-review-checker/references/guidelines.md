@@ -111,8 +111,8 @@ This reference contains every checkable guideline organized by section. For each
 | 2.3.5 | Most appropriate category selected | Verify primary and secondary categories match functionality |
 | 2.3.6 | Age-rating questions answered honestly so parental controls work | Verify answers match content, including the social-media questions App Store Connect requires since September 2026 (a feed that redistributes, amplifies, or lets users interact with UGC); media needing local content ratings or warnings complies in each storefront |
 | 2.3.7-name | Unique app name, 30 characters max | Verify the character count and no confusing similarity to existing apps |
-| 2.3.7-keywords | No trademarked terms, popular app names, pricing information, or irrelevant phrases packed into keywords or other metadata | Check for competitor or popular app names, "free"/"best"/"#1"/sale wording, and unrelated terms |
-| 2.3.7-fields | Each metadata field holds only what fits it; subtitles follow standard metadata rules | Verify names, subtitles, screenshots, and previews carry no prices, terms, or text not specific to that field; subtitles have no inappropriate content, references to other apps, or unverifiable claims |
+| 2.3.7-keywords | No trademarked terms, popular app names, pricing information, or irrelevant phrases packed into keywords or other metadata | Check the keywords of every locale for other developers' brands, competitor or popular app names, "free"/"best"/"#1"/sale wording, and unrelated terms; each brand in the keywords is a FAIL. Supported services named in the description, promo text or What's New follow *Third-party brands in metadata* below |
+| 2.3.7-fields | Each metadata field holds only what fits it; subtitles follow standard metadata rules | Verify names, subtitles, screenshots, and previews carry no prices, terms, or text not specific to that field; subtitles have no inappropriate content, references to other apps, or unverifiable claims. Another developer's brand in a subtitle is cited under 4.1-c first, with this row as a secondary reference |
 | 2.3.8 | Metadata suits all audiences (4+), even when the app is rated higher | Verify app and IAP icons (including Apple Watch and alternate icons), screenshots, and previews are 4+, and icons look consistent across sizes and variants |
 | 2.3.8-kids | "For Kids" and "For Children" are reserved for the Kids Category | If not Kids Category: verify these phrases appear nowhere in metadata |
 | 2.3.9 | Rights secured for all materials in icons, screenshots, and previews; fictional account data only | Verify no unlicensed stock photos, third-party logos, or copyrighted material, and screenshots show fictional account info, not a real person's data |
@@ -224,7 +224,14 @@ This reference contains every checkable guideline organized by section. For each
 |----|-----------|---------------|
 | 4.1-a | Don't copy popular apps or make minor changes to another app's name or UI | Check UI, functionality, and concept originality |
 | 4.1-b | No impersonation of other apps or services | Verify the app's identity doesn't mislead; impersonation breaches the Developer Code of Conduct |
-| 4.1-c | No other developer's icon, brand, or product name in your app's icon or name without that developer's approval | Check the icon and name for other developers' brands or product names |
+| 4.1-c | No other developer's icon, brand, or product name in your app's icon, name, or subtitle without that developer's approval; App Review gives the rest of the app's identity metadata the same scrutiny | Check the icon, and the name and subtitle of **every locale**, for other developers' brands or product names, including the services the app works with; each one is a FAIL. Apply *Third-party brands in metadata* below |
+
+**Third-party brands in metadata.** A brand is another developer's app, service, model, or product name (for example ChatGPT, Gemini, Slack, Notion), even when the app integrates with it. Check every locale, not only the primary one.
+
+- **Identity fields** (icon, name, subtitle, keywords): no third-party brands. A brand in the icon, name, or subtitle is a **4.1-c FAIL**, one per field and locale; a brand in the keywords is a **2.3.7-keywords FAIL**. App Review rejects these even when the description names the same services: in November 2026 it rejected a subtitle that listed three AI services under 4.1(c) and did not cite the description and promo text that named them too. Fix: describe what the app does in generic words ("AI usage limits at a glance") and move the service names to the description.
+- **Descriptive fields** (description, promotional text, What's New): naming supported services as compatibility wording ("works with ChatGPT and Gemini") is acceptable. It is never a 4.1-c, 2.3.7-keywords, or 5.2.1 FAIL; at most a **WARNING** when the brand dominates the text or could read as an endorsement.
+- **Still FAIL anywhere:** comparative or disparaging use ("Better than Mint", 5.2.1), wording that implies affiliation or endorsement (4.1-b, 5.2.1), and other mobile platforms (2.3.10).
+- `asc validate --strict` does not check third-party brands; a clean run is no evidence for 4.1-c.
 
 ### 4.2 Minimum Functionality
 
@@ -341,7 +348,7 @@ This reference contains every checkable guideline organized by section. For each
 
 | ID | Guideline | What to Check |
 |----|-----------|---------------|
-| 5.2.1 | No unauthorized third-party IP and no misleading or copycat names or metadata; submitted by the rights owner | Verify content is original or licensed and the submitter owns or licensed the IP |
+| 5.2.1 | No unauthorized third-party IP and no misleading or copycat names or metadata; submitted by the rights owner | Verify content is original or licensed and the submitter owns or licensed the IP; a brand in the name or subtitle is cited under 4.1-c first, and compatibility wording in the description is not a 5.2.1 FAIL (*Third-party brands in metadata*) |
 | 5.2.2 | Using or monetizing third-party services requires permission under their terms | If integrating third-party content or services: verify terms-of-use permission (authorization on request) |
 | 5.2.3 | No illegal file sharing; no saving, converting, or downloading media from third-party sources without authorization | Verify no downloading from Apple Music, YouTube, SoundCloud, Vimeo, or similar without explicit authorization |
 | 5.2.4-a | No suggestion that Apple is a source or endorser | Verify no "Apple recommended" or "Featured by Apple" claims |
@@ -403,5 +410,5 @@ These are the guidelines most commonly causing rejection — audit these first:
 16. **3.1.2-disclosure, 3.1.2-scam** (or 5.6 and 2.3.1-a findings the Paywalls rule raises for a non-subscription paywall) — Unclear subscription terms or a misleading paywall, whatever it sells (guaranteed outcomes, false social proof, fake countdowns or discounts, a hidden price)
 17. **2.3.10** — References to other platforms in metadata
 18. **5.2.1** — Unauthorized third-party IP usage
-19. **4.1-a, 4.1-b, 4.1-c** — Copycat, impersonation, or another developer's brand
+19. **4.1-a, 4.1-b, 4.1-c** — Copycat, impersonation, or another developer's brand in the icon, name, or subtitle
 20. **2.5.1** — Private API usage

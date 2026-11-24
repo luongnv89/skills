@@ -201,6 +201,15 @@ If `third_party_ai.providers` is non-empty and user data is sent:
 - **WARNING**: A disclosure exists but its timing or wording can't be confirmed
 - **N/A**: No third-party AI, or only non-personal data is sent
 
+#### Third-Party Brands in Metadata (Guidelines 4.1-c, 2.3.7-keywords, 5.2.1)
+
+For **every locale** in `metadata.locales`, apply *Third-party brands in metadata* in `references/guidelines.md`:
+- **FAIL** (4.1-c): another developer's brand or product name in the name or subtitle; one finding per field and locale, quoting the text. Cite 2.3.7-fields as a secondary reference, never instead of 4.1-c
+- **FAIL** (2.3.7-keywords): a brand in the keywords, naming each brand and its locale
+- **PASS** or at most **WARNING**: supported services named in the description, promotional text, or What's New as compatibility wording; never a 4.1-c, 2.3.7-keywords, or 5.2.1 FAIL
+- **WARNING** (4.1-c): a locale's name or subtitle could not be read, so it was not checked; name the locale
+- Put `metadata.source` in the evidence of every metadata verdict
+
 #### Hidden Features (Guideline 2.5.19)
 
 For each `feature_flags` entry: **WARNING** when the gated feature is user-facing, unless the review notes say it is enabled and reachable for review (features must be accessible for review under 2.3.1-a); **FAIL** when the evidence shows the flag hides functionality from App Review, such as a feature or business model meant to switch on only after approval.
@@ -308,6 +317,7 @@ Compile all verdicts into a JSON file with this structure:
     "app_name": "string — from app-profile",
     "bundle_identifier": "string — from app-profile",
     "audit_date": "2026-03-24",
+    "metadata_source": "string — metadata.source from app-profile",
     "total_guidelines_checked": number,
     "guidelines_applicable": number,
     "summary": {

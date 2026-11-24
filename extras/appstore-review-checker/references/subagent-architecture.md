@@ -6,6 +6,8 @@ When the Agent tool is available, this skill uses a 4-phase, multi-agent archite
 
 **Purpose:** Read all project files and build a structured app-profile.json inventory.
 
+**Before spawning (main conversation):** a subagent cannot ask the user, so the main conversation handles the live-listing offer itself. If `command -v asc` succeeds, ask the question in `references/live-metadata.md` → _When to offer_, then pass the answer (approved or declined), the app ID, the platform (`IOS` or `MAC_OS`), and the version being submitted (if the user named one) in the explorer's prompt. Without `asc`, pass "no live listing".
+
 This agent:
 - Scans Xcode project configuration (pbxproj, targets, frameworks)
 - Reads Info.plist, entitlements, dependency files (Podfile, Package.swift)

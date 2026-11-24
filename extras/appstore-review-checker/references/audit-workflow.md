@@ -9,7 +9,8 @@ Before checking guidelines, build a mental model of the app. Read these files (i
 - `Info.plist` (or `*-Info.plist`) — permissions, background modes, URL schemes
 - `*.entitlements` — capabilities like HealthKit, HomeKit, Apple Pay, Push
 - `Podfile`, `Package.swift`, `Cartfile` — third-party dependencies
-- `AppStoreConnect` metadata or `fastlane/metadata` — if present, read app description, keywords, screenshots
+- `AppStoreConnect` metadata or `fastlane/metadata` — if present, read the name, subtitle, keywords, description, promotional text, What's New, and screenshots of every locale
+- The live App Store Connect listing — when `asc` is installed and the user opts in (`references/live-metadata.md`)
 
 **Code patterns to look for:**
 - Privacy-sensitive APIs: location, contacts, photos, camera, microphone, health, tracking
@@ -27,7 +28,8 @@ Before checking guidelines, build a mental model of the app. Read these files (i
 - External purchase links and how they are gated by storefront
 
 **Metadata (if available):**
-- App Store description, keywords, title, subtitle
+- App Store description, keywords, title, subtitle, promotional text, What's New — for every locale
+- Which source the listing came from (repo files, live App Store Connect, or pasted text)
 - Screenshots and preview videos
 - Privacy policy URL
 - Age rating configuration
@@ -70,6 +72,7 @@ Structure the output as a clear, actionable report.
 **Date:** [today]
 **Platform:** [iOS / macOS / tvOS / visionOS]
 **App Type:** [classification from Phase 1]
+**Metadata source:** [fastlane/metadata, App Store Connect (asc, pending version X), user-provided text, or none]
 
 ## Verdict: [LIKELY PASS / AT RISK / LIKELY REJECT]
 

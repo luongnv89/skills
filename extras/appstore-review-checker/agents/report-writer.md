@@ -18,7 +18,7 @@ Transform the structured audit-results.json into a human-readable, actionable ma
 
 Read the audit-results.json and extract:
 
-1. **Metadata**: app name, bundle identifier, audit date
+1. **Metadata**: app name, bundle identifier, audit date, metadata source
 2. **Summary counts**: pass, fail, warning, n/a
 3. **Critical failures**: All verdicts with FAIL
 4. **Warnings**: All verdicts with WARNING
@@ -46,6 +46,7 @@ Use this exact markdown template:
 **Date:** [audit_date]
 **Platform:** [extracted from app-profile or inferred from profiles]
 **App Type:** [app_classification.category from profile]
+**Metadata source:** [audit_metadata.metadata_source]
 
 ## Verdict: [LIKELY PASS / AT RISK / LIKELY REJECT]
 
