@@ -23,7 +23,8 @@
         "A reviewer separate from the builder checked the frames against references/apple-guidelines.md, or the report says the review ran inline because no Agent tool was available",
         "The final report opens with a Result: line carrying COMPLETE or PARTIAL and the output folder",
         "The report has Evidence:, Uncertainty: and Decision: lines; Evidence cites the check_assets.py summary, Uncertainty names the recreated screens to verify on a build, and Decision names the upload or commit approval",
-        "The report states that nothing was committed or uploaded"
+        "The report states that nothing was committed or uploaded",
+        "config.js sets canvas: \"gradient\" because the user asked for the editorial light direction, and PLAN.md records the gradient as a lifted canvas ban with the user's request as its source"
       ]
     },
     {
@@ -213,6 +214,45 @@
         "Each step's completion report ends with a 'Step N:' line; the only line starting with 'Result:' is the first line of the final report",
         "The report's Uncertainty: line does not re-list the kit's video or safe-area assumptions; it names only departures from Known kit assumptions, if any",
         "The final report states nothing was committed, pushed or uploaded"
+      ]
+    },
+    {
+      "id": 13,
+      "kind": "happy-path",
+      "name": "trailmark-flat-default",
+      "prompt": "Make iPhone App Store screenshots for Trailmark 2.1. The Xcode project is in ../../eval-fixtures/appstore-assets/trailmark (copy it into your working folder first and work on the copy). Four frames, one callout, no creatives. Pick whatever looks good, don't ask.",
+      "expected_output": "Without asking, the run renders four iPhone frames on a flat canvas in the app's green palette, with no glow, gradient or arcs, one callout whose icon has no tile and is not sparkles, and recreated stat tiles that keep the uppercase labels Views.swift renders. PLAN.md records a cutting pass, render.py passes without --allow-placeholders, and the reviewer runs the canvas ban list check.",
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark"
+      ],
+      "expectations": [
+        "config.js sets canvas: \"flat\", and creatives is absent, disabled or sets motif: false",
+        "No sheet shows a glow or gradient behind the captions or devices",
+        "The callout's icon has no filled or gradient tile behind it, and its icon is not sparkles",
+        "The brand tokens in config.js are the app's green (#2F9E6B or the AccentColor colorset's value, and shades of it), not the template blue, and render.py was run without --allow-placeholders and exited 0",
+        "Any recreated stat tile keeps the uppercase labels Views.swift renders (label.uppercased()), through a config.js css rule that restores the uppercase, because the canvas ban list never applies inside the device screen",
+        "PLAN.md records a cutting pass: each cut made, or 'Cuts: none' with a reason",
+        "The reviewer's output or the report shows the canvas ban list check ran on the sheets"
+      ]
+    },
+    {
+      "id": 14,
+      "kind": "edge",
+      "name": "trailmark-design-rules-file",
+      "prompt": "Make the iPhone App Store screenshots for Trailmark 2.1. Copy ../../eval-fixtures/appstore-assets/trailmark into your working folder, then copy ../../eval-fixtures/appstore-assets/trailmark-rules/DESIGN.md into the copy's root, and work on the copy. iPhone only, just build it.",
+      "expected_output": "The brief records DESIGN.md as brand.rules_file with each rule cited by line, and the marketing canvas follows it: a flat #F4F1EA background, #1F6E4B accent words, no shadows on devices or callouts, no callout cards and no uppercase captions. The recreated stat tiles still show the uppercase labels Views.swift renders, DESIGN.md is unchanged, and any new rule is only proposed.",
+      "files": [
+        "../../eval-fixtures/appstore-assets/trailmark",
+        "../../eval-fixtures/appstore-assets/trailmark-rules/DESIGN.md"
+      ],
+      "expectations": [
+        "The brief's brand.rules_file names DESIGN.md, and brand.rules cites DESIGN.md:<line> for each rule it records",
+        "The canvas follows the rules: a flat background in #F4F1EA (canvas: \"flat\", canvas1 #f4f1ea), headline accent words in #1F6E4B, and no gradient or glow on any sheet",
+        "Devices and callouts carry no drop shadow (a config.js css rule removes it), and no frame has a floating callout card",
+        "Captions are in sentence case, with no uppercase or letter-spaced text on the canvas",
+        "The recreated stat tiles still show the uppercase labels Views.swift renders, although DESIGN.md bans uppercase, because its rules apply to the marketing canvas only",
+        "DESIGN.md in the working copy is unchanged after the run",
+        "Any new design rule the run suggests is only proposed in the report, not written to a file"
       ]
     }
   ]
