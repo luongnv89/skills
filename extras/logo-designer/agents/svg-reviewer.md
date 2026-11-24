@@ -6,6 +6,8 @@ Validate SVG structure, correctness, and all 7 files are present with proper for
 
 Fresh-context validation of generated SVG files. Verify SVG structure is correct (viewBox, no rasters, proper paths), confirm all 7 files exist with correct names, and check that no file uses a banned effect or breaks a brief ban.
 
+This review reads markup only. It cannot see pixels, so it never passes a visual check on its own judgment: how the mark and favicon look at size is checked by the main agent's render gates (`references/render-inspect.md`, Gates 1 and 2, before this review) and the shipped PNGs and showcase by Gate 3 (after it).
+
 ## Inputs
 
 You receive these parameters in your prompt:
@@ -41,7 +43,7 @@ For EACH SVG file, validate:
 - Read the file content
 - Verify all tags are properly closed (`<svg>...</svg>`, not `<svg/>` on its own)
 - Verify no malformed attributes
-- Validate in an XML parser mentally (no unescaped special characters)
+- Parse it with an XML parser when one is available (`python3 -c 'import sys, xml.dom.minidom as m; m.parse(sys.argv[1])' FILE.svg`); otherwise check by reading that no special character is unescaped
 
 #### 2.2 viewBox Attribute
 
@@ -131,13 +133,14 @@ Examples:
 Scan every file's markup, including any `<style>` block (`references/design-principles.md`, *AI-default bans*):
 - [ ] No `<filter>` element, no `fe*` primitive (`feGaussianBlur`, `feDropShadow`, `feMorphology` and the rest), no `filter=` attribute, no CSS `filter` or `drop-shadow()` — ❌ FAIL, naming the file and element
 - [ ] No `box-shadow` or `text-shadow`, and no offset darker copy of a layer drawn as a shadow — ❌ FAIL
+- [ ] No `<linearGradient>`, `<radialGradient>` or `url(#…)` gradient fill — ❌ FAIL, naming the file
 - [ ] Layers are separated by geometry (gaps, knockouts). Two layers that overlap or touch with no gap are a ⚠️ warning: they merge into one shape in `logo-white.svg` and `logo-black.svg`. Two layers that differ only in opacity are a ⚠️ warning, not a FAIL: a flat tint may be a colour value
 - [ ] Every `brief.bans` entry holds — ❌ FAIL, citing the entry's `source`
 - [ ] A default ban listed in `brief.lifted_bans` is not a finding; note it with its source
 
 #### 2.9 Layer Count
 
-- [ ] logo-mark.svg has the layer count of `brief.decisions.layers`, and each layer carries a part of the idea named there. A layer with no named part is a finding
+- [ ] logo-mark.svg has the layer count of `brief.decisions.layers`, and each layer carries a part of the idea named there. A layer with no named part is a finding. Gate 1 may have cut layers before this review: it removes them from `decisions.layers` and lists them in `decisions.cut_layers`, so a cut layer is not a finding
 - [ ] A mark that is only the product's initial has an idea tied to the letter or the user's explicit request recorded in the brief — else a finding
 
 ### Step 3: File-Specific Validation
@@ -175,18 +178,20 @@ Scan every file's markup, including any `<style>` block (`references/design-prin
 - [ ] Symbol is bold and recognizable at 16px
 - [ ] High contrast colors
 - [ ] No small text elements (text is unreadable at 16x16)
+- [ ] Separation: between any two elements the clearance, edge to edge with half of each stroke width counted, is at least 1 unit with both edges on whole units, or at least 2 units off the grid. A smaller gap is a FAIL, naming the two elements and the measured gap
+- [ ] Tile: a full-canvas tile is present only when no palette color reaches 3:1 against both `#FAFAFA` and `#0A0A0A`; with a tile, the mark reaches 3:1 against it. A tile drawn when a palette color passes both, or a tile-less favicon whose ink fails either tab color, is a finding
 
 #### logo-white.svg
 - [ ] Same dimensions as logo-full.svg
 - [ ] Uses white color (#FFFFFF) for symbol and text
 - [ ] Has transparent background
-- [ ] Intended for dark backgrounds (verify visually)
+- [ ] Intended for dark backgrounds: contrast measured against `#0A0A0A` (2.7). How it looks is Gate 3's check, not this review's
 
 #### logo-black.svg
 - [ ] Same dimensions as logo-full.svg
 - [ ] Uses black/dark color (#000000 or brand primary) for symbol and text
 - [ ] Has transparent background
-- [ ] Intended for light backgrounds (verify visually)
+- [ ] Intended for light backgrounds: contrast measured against `#FAFAFA` (2.7). How it looks is Gate 3's check, not this review's
 
 ### Step 4: Cross-File Mark Consistency
 
@@ -269,9 +274,10 @@ Write a concise, unfilled validation report to `output_path`. It must contain ob
 | Every path has non-empty, valid `d` data | [ ] | |
 | Wordmark is outlined paths (no `<text>`, `<tspan>` or `@font-face`) spelling the actual product name | [ ] | |
 | Colors follow the brand palette and contrast requirements | [ ] | |
-| No filter, `fe*` primitive, `filter=`, drop-shadow, box-shadow or text-shadow (lifted bans named); layers separated by geometry | [ ] | |
+| No filter, `fe*` primitive, `filter=`, drop-shadow, box-shadow, text-shadow or gradient (lifted bans named); layers separated by geometry | [ ] | |
 | Every `brief.bans` entry holds | [ ] | |
-| logo-mark.svg's layer count equals the confirmed decision, and each layer carries a named part of the idea | [ ] | |
+| logo-mark.svg's layer count equals the confirmed decision after any Gate 1 cut, and each layer carries a named part of the idea | [ ] | |
+| favicon.svg: every gap at least 1 whole unit (or 2 off the grid); tile only when no palette color passes both tab colors | [ ] | |
 | File size and trailing whitespace are reasonable | [ ] | |
 
 ## Mark Consistency
@@ -326,14 +332,14 @@ Before PASS:
 - [ ] **Mark consistency**: identical `d=""` paths across logo-mark, logo-full, logo-icon, logo-white, logo-black
 - [ ] **Wordmark consistency**: identical outlined letter paths, casing and weight across logo-full, logo-wordmark, logo-white, logo-black
 - [ ] Colors from brand palette
-- [ ] **No effects**: no filter, `fe*` primitive or shadow unless `brief.lifted_bans` names it, and every `brief.bans` entry holds
+- [ ] **No effects**: no filter, `fe*` primitive, shadow or gradient unless `brief.lifted_bans` names it, and every `brief.bans` entry holds
 - [ ] **Layers**: logo-mark.svg uses the confirmed layer count, each layer carrying a named part of the idea
 - [ ] **Contrast**: each file reaches 3:1 (mark silhouette) and 4.5:1 (wordmark letters) against its intended background
 - [ ] **Lockup width**: logo-full, logo-white and logo-black share one W fitted to the wordmark, with no empty band on the right
 - [ ] **Icon**: stroke widths equal logo-mark's and the transform centers the mark
 - [ ] Product name is correct (not placeholder)
 - [ ] Text is readable and properly positioned
-- [ ] Favicon is simplified for 16x16
+- [ ] Favicon is simplified for 16x16, keeps every gap at least 1 whole unit, and has a tile only when it needs one
 
 ## Tips
 

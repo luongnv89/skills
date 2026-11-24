@@ -39,7 +39,7 @@ Build from `brief.decisions`: mark type, construction, stroke, corner radius, la
 
 **If `canonical_paths` were provided in your prompt**: Use them exactly. Skip to Step 4.
 
-**If no canonical paths were provided**: Design the symbol mark and write `logo-mark.svg` first as the single source of truth.
+**If no canonical paths were provided**: Design the symbol mark and write `logo-mark.svg` first as the single source of truth. Then stop and return its path data without writing any other variant: the main agent renders and inspects the mark (`references/render-inspect.md`, *Gate 1*) and calls you again with `canonical_paths`.
 
 Design requirements:
 - Recognizable at 16px (favicon size)
@@ -109,10 +109,12 @@ viewBox="0 0 512 512"
 viewBox="0 0 16 16"
 ```
 
-- Simplified: keep every layer that still reads at 16px; drop a layer only when its detail falls under 1px there
+- Simplified: keep every layer that still reads at 16px; drop a layer when its detail falls under 1px there
 - Maintain the same proportional geometry (same angles, corner radius ratios, notch direction)
-- Keep the mark's accent element (dot, circle), scaled down, when it has one
-- Thicker strokes for visibility at tiny size
+- Thicken strokes for visibility only while every gap between two elements stays at least 1 unit, edge to edge with half of each stroke width counted, with both edges on whole units (or at least 2 units off the grid). When a thicker stroke and the gap cannot both fit, drop the smaller element
+- Keep the mark's accent element (dot, circle), scaled down, only when it keeps that clearance; otherwise drop it
+- Recolor first; when no palette color reaches 3:1 against both `#FAFAFA` and `#0A0A0A`, draw a full-canvas rounded-square tile behind the mark in a palette color it reaches 3:1 against
+- The main agent then renders and inspects the favicon (`references/render-inspect.md`, *Gate 2*)
 
 #### 4.6 logo-white.svg (White Version for Dark Backgrounds)
 
@@ -143,7 +145,7 @@ For ALL generated SVGs:
 3. **Optimized paths**: Use `<path>` elements. Round coordinates to 2 decimals max.
 4. **Proper structure**: Use `<g>` groups. Add brief comments for sections.
 5. **Correct naming**: Exactly 7 files with the standard names.
-6. **No effects, every ban**: No `<filter>`, `fe*` primitive, `filter=` attribute, CSS `filter` or `drop-shadow()`, `box-shadow` or `text-shadow`, and no opacity steps used as depth, unless `brief.lifted_bans` names that ban. Obey every `brief.bans` entry. Check the craft, not an adjective: the mark is optically centered, layers that share a role share one stroke width, coordinates sit on the canvas grid, and the mark reads at 16px.
+6. **No effects, every ban**: No `<filter>`, `fe*` primitive, `filter=` attribute, CSS `filter` or `drop-shadow()`, `box-shadow` or `text-shadow`, no `<linearGradient>` or `<radialGradient>`, and no opacity steps used as depth, unless `brief.lifted_bans` names that ban. Obey every `brief.bans` entry. Check the craft, not an adjective: the mark is optically centered, layers that share a role share one stroke width, coordinates sit on the canvas grid, and the mark reads at 16px.
 7. **Outlined text**: No `<text>`, `<tspan>` or `@font-face`. Use the `wordmark_paths` you were given; without them, outline the brief's font by `references/wordmark-outlining.md`. Reuse the same letter paths byte for byte in logo-full, logo-white, logo-black and logo-wordmark, changing only the wrapping group's `transform` and fill. The PNG export renders these files, and a rasterizer would substitute an installed font for `<text>`.
 
 ### Step 6: Verify Consistency
@@ -165,8 +167,8 @@ Use colors from the brand brief:
 
 Guidelines:
 - Accent colors: Reserved for highlights, borders, lines — never as background fill
-- Intended backgrounds: logo-mark, logo-full and logo-wordmark on `brand_background`; logo-icon on its own tile; favicon on both `#FAFAFA` and `#0A0A0A` (or its own tile); logo-white on `#0A0A0A`; logo-black on `#FAFAFA`
-- Contrast against that background: 3:1 for the mark's silhouette layer, 4.5:1 for every wordmark letter, opacity composited first (`references/svg-deliverables.md`, *Step 4*). Fix a failing color; never change the background
+- Intended backgrounds: logo-mark, logo-full and logo-wordmark on `brand_background`; logo-icon on its own tile; favicon on both `#FAFAFA` and `#0A0A0A` (or its own tile, when no palette color passes on both); logo-white on `#0A0A0A`; logo-black on `#FAFAFA`
+- Contrast against that background: 3:1 for the mark's silhouette layer, 4.5:1 for every wordmark letter, opacity composited first (`references/svg-deliverables.md`, *Step 4*). Fix a failing color; never change the background. The favicon's own tile is the one exception (4.5 above)
 
 ## Output
 
@@ -174,7 +176,7 @@ Guidelines:
 
 ## Tips
 
-- The favicon (16x16) is the hardest — simplify aggressively but keep the same proportional shape
+- The favicon (16x16) is the hardest — simplify aggressively but keep the same proportional shape, and keep every gap at least 1 whole unit after thickening
 - Check each variant's contrast against its intended background: 3:1 for the mark, 4.5:1 for wordmark letters
 - The symbol should work as a standalone icon (logo-mark.svg) — it's your strongest branding asset
 - When scaling the mark for logo-icon.svg, keep its stroke-width values unchanged: the group's `scale(S)` scales them with the paths

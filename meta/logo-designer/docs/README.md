@@ -9,7 +9,7 @@
 
 > Design professional, modern logos with automatic project context detection and multiple SVG deliverables.
 
-Version: **1.9.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.10.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -18,7 +18,8 @@ Version: **1.9.0** · Author: Luong NGUYEN · License: MIT
 - Apply design principles: simplicity, scalability, memorability, versatility
 - Generate 7 SVG variants (full, mark, wordmark, icon, favicon, white, black), with the wordmark outlined so nothing depends on an installed font
 - Export a PNG of every variant (icon 512/1024, mark 512, full/white/black 4W×288 with W the fitted lockup width, wordmark 720×160, favicon 16/32/48) with `rsvg-convert`, `magick`, `inkscape` or headless Chrome
-- No AI-default effects: no filter, glow or shadow in any SVG, depth from layer geometry in the fewest layers that carry the idea, and a showcase page with flat cards, sentence-case headings and no remote font
+- Render and inspect before shipping: the canonical mark at 16/32/64/512 px before any variant is derived (layers that change neither the 64 nor the 16 px render are cut), the favicon at 16/32/48 px on light and dark tab colors with 1-unit gaps and its own tile when it needs one, and every PNG plus the showcase at 1440 and 390 px against the ban list before `COMPLETE`
+- No AI-default effects: no filter, glow, shadow or gradient in any SVG, depth from layer geometry in the fewest layers that carry the idea, and a showcase page with flat cards, sentence-case headings and no remote font
 - Read a project design-rules or brand file (`DESIGN.md`, `design-rules.md`, `brand_kit.md` and the like) into the brief's bans; new rule lines are only proposed
 - Provide color specs with hex codes and Tailwind config
 
