@@ -16,12 +16,13 @@ Who asks depends on the mode. In single-conversation mode, the conversation runs
 
 - Prefix every call with `ASC_READ_ONLY=1`. Only the four read commands below; never create, update, or submit anything.
 - Never read, print, or pass API key files (`*.p8`), key IDs, or issuer IDs. `asc` uses the auth it already holds.
+- If the account has several `asc` profiles, pass the global `--profile <name>` flag with the profile the user named; never pick a profile on your own, ask which one.
 - If a call fails (not authenticated, unknown app ID), say so in one line, fall back to the repo metadata or pasted text, and continue. Never retry with other credentials.
 - `asc validate --strict` is no substitute: it does not check third-party brands.
 
 ## Commands
 
-1. `ASC_READ_ONLY=1 asc apps info list --app <app-id>` — while a version is pending, two app infos exist; pick the one whose state is not `READY_FOR_SALE`.
+1. `ASC_READ_ONLY=1 asc apps info list --app <app-id>` — while a version is pending, two app infos exist; pick the one whose `appStoreState` is not `READY_FOR_SALE`. Ignore the `state` attribute: it reads `READY_FOR_DISTRIBUTION` on the live info too.
 2. `ASC_READ_ONLY=1 asc apps info view --app <app-id> --info-id <info-id> --include appInfoLocalizations` — name and subtitle per locale. Pass `--info-id`: without it the call errors when two app infos exist.
 3. `ASC_READ_ONLY=1 asc versions list --app <app-id> --platform <IOS|MAC_OS>` — pick the version being prepared for submission; if more than one is not live, ask which (single-conversation mode). The Project Explorer cannot ask: it takes the version named in its prompt, else the newest one that is not live, and names that version in `metadata.source`.
 4. `ASC_READ_ONLY=1 asc localizations list --version <version-id>` — keywords, description, promotionalText, and whatsNew per locale.
