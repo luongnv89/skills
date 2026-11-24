@@ -240,7 +240,7 @@ Create a comprehensive, structured brand brief:
 
 JSON file at the specified output path. This will be consumed by the SVG generator agent.
 
-`decisions` and `mark_idea` are proposals until Phase 2: the main agent writes the confirmed values back (setting `"confirmed": true`), and adds each ban the user's explicit brief lifts to `lifted_bans` as `{"ban": "glow", "source": "user brief"}`, before Phase 3. `bans` entries use the shape in `references/design-principles.md` (*Design-rules file*).
+`decisions` and `mark_idea` are proposals until Phase 2: the main agent writes the confirmed values back (setting `"confirmed": true`), and adds each ban the user's explicit brief lifts to `lifted_bans` as `{"ban": "glow", "source": "user brief"}`, before Phase 3. In Phase 3, Gate 1 (`references/render-inspect.md`) may only remove layers: it drops each cut layer from `decisions.layers` and records it in `decisions.cut_layers` as `{"layer": "...", "reason": "..."}`. `bans` entries use the shape in `references/design-principles.md` (*Design-rules file*).
 
 ## Error Handling
 

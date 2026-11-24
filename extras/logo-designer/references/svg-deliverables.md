@@ -23,6 +23,10 @@ MARK PATHS (canonical — copy these exactly into all other variants):
 
 These exact strings must be reused verbatim in every subsequent file.
 
+## Step 1b: Render and inspect the canonical mark (Gate 1)
+
+Before Step 2, render `logo-mark.svg` at 16, 32, 64 and 512 px on the brand background and look at each render (`references/render-inspect.md`, *Gate 1*). Cut every layer or accent whose removal changes neither the 64 nor the 16 px render, update `brief.decisions.layers`, and redraw a mark that fails. Step 2 starts only from a mark that passed, with its paths re-extracted.
+
 ## Step 2: Derive all variants from the canonical paths
 
 Generate the remaining 6 files. If using the svg-generator agent, its prompt **must include the literal `d=""` path strings** from Step 1. Do not describe the shape in words — paste the actual path data.
@@ -42,7 +46,7 @@ Generate the remaining 6 files. If using the svg-generator agent, its prompt **m
 | `logo-full.svg` | `0 0 W 72` (W fitted, below) | Same paths, `translate(4,4)` to fit 72px height | Product name to the right of mark | Brand background |
 | `logo-wordmark.svg` | `0 0 180 40` | None | Product name text only, centered | Brand background |
 | `logo-icon.svg` | `0 0 512 512` | Same paths wrapped in `<g transform="translate(X,Y) scale(S)">`, centered in a rounded square background | None | Its own opaque tile |
-| `favicon.svg` | `0 0 16 16` | Simplified: the layers that still read at 16px, with scaled-down coordinates, same proportional shape | None | Browser tabs: both `#FAFAFA` and `#0A0A0A`, unless it draws its own tile |
+| `favicon.svg` | `0 0 16 16` | Simplified: the layers that still read at 16px, with scaled-down coordinates, same proportional shape | None | Browser tabs: both `#FAFAFA` and `#0A0A0A`; its own tile when no palette color reaches 3:1 on both |
 | `logo-white.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#FFFFFF` | Same as logo-full but white text | Dark, `#0A0A0A` |
 | `logo-black.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#000000`/`#1A1A1A` | Same as logo-full but dark text | Light, `#FAFAFA` |
 
@@ -60,7 +64,10 @@ Generate the remaining 6 files. If using the svg-generator agent, its prompt **m
 - Example: `translate(86, 86) scale(5.3125)`
 - Keep every `stroke-width` exactly as in logo-mark.svg. The group's `scale(S)` scales strokes with the paths, so the icon keeps the mark's stroke-to-size proportions. Never divide stroke widths by `S` (that leaves hairlines at 512px), and never add `vector-effect="non-scaling-stroke"`
 
-**For favicon.svg**, redraw the shape at 16x16 but maintain the same proportional geometry (same angles, same corner radius ratios). Keep every layer that still reads at 16px, and drop a layer only when its detail falls under 1px there. Keep the mark's accent element (dot, circle), scaled down, when it has one.
+**For favicon.svg**, redraw the shape at 16x16 but maintain the same proportional geometry (same angles, same corner radius ratios). Keep every layer that still reads at 16px, and drop a layer when its detail falls under 1px there. Then apply the *Gate 2* rules in `references/render-inspect.md`:
+- **Separation:** between any two elements, the clearance edge to edge, counting half of each stroke width, is at least 1 unit (1 px at 16 px) with both edges on whole units, or at least 2 units when they cannot sit on whole units. Thicker strokes never take a gap below this; when both cannot fit, drop the smaller element.
+- **Accent:** keep the mark's accent (dot, circle), scaled down, only when it reads as its own element with that clearance in the 16 px render; otherwise drop it.
+- **Tile:** recolor first. When no palette color reaches 3:1 against both `#FAFAFA` and `#0A0A0A`, draw a full-canvas rounded-square tile in a palette color the mark reaches 3:1 against. Under the Default Style Guide this is always the case.
 
 ## Step 3: Verify consistency
 
@@ -81,7 +88,7 @@ Measure every variant against its background in the table above and record each 
 - **Opacity:** composite first, `c = a·fg + (1 − a)·bg` per channel, then measure.
 - **Ratio:** `(L1 + 0.05) / (L2 + 0.05)`, L1 the lighter luminance. `L = 0.2126 R + 0.7152 G + 0.0722 B` on linearized channels: `v = c/255`, then `v/12.92` when `v ≤ 0.04045`, else `((v + 0.055)/1.055)^2.4`.
 
-A variant below its ratio gets a darker or lighter palette color before PNG export. Never change its intended background to make it pass.
+A variant below its ratio gets a darker or lighter palette color before PNG export. Never change its intended background to make it pass. The favicon's own tile (Step 2, *For favicon.svg*) is the one exception: it is drawn only when no palette color passes on both tab colors, and it never changes the tab colors.
 
 ```
 /assets/logo/
@@ -102,6 +109,7 @@ A variant below its ratio gets a darker or lighter palette color before PNG expo
 - No embedded rasters
 - No `<text>`, `<tspan>` or `@font-face`: draw the wordmark as outlined `<path>` letterforms (`references/wordmark-outlining.md`), so the SVG and its PNG render the same without an installed font
 - No `<filter>`, `fe*` primitive, `filter=` attribute, CSS `filter` or `drop-shadow()`, `box-shadow` or `text-shadow`: depth comes from layer geometry, unless the brief's `lifted_bans` names the effect
+- No `<linearGradient>`, `<radialGradient>` or gradient fill: flat colors only, unless `lifted_bans` names gradients
 - Every `brief.bans` entry from the project's design-rules file holds
 - Optimized paths — use `<path>` elements, not `<rect>` + separate `<polygon>` combos
 - viewBox properly set

@@ -27,7 +27,7 @@ Re-run the Phase 3 read-back on any file you changed, then run the `grep` again.
 
 ## Step 2: Detect a rasterizer
 
-Use the first tool found, in this order:
+Run this once, at the start of Phase 3: the render gates (`references/render-inspect.md`) use the same tool before any variant exists, and Phase 3b reuses the result. Use the first tool found, in this order:
 
 ```bash
 command -v rsvg-convert || command -v magick || command -v inkscape
@@ -37,7 +37,7 @@ If none is found, look for a Chrome or Chromium binary: `google-chrome`, `chromi
 `chromium-browser` on `PATH`, or `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
 on macOS.
 
-**No rasterizer found:** skip Steps 3 and 4, keep the SVGs and the showcase, and end with a
+**No rasterizer found:** Gates 1 and 2 check geometry only (`references/render-inspect.md`, *When a gate cannot run*). Skip Steps 3 and 4, keep the SVGs and the showcase, and end with a
 `PARTIAL` Final Report whose `Decision:` names the install command:
 `brew install librsvg` (macOS) or `sudo apt install librsvg2-bin` (Debian/Ubuntu).
 
@@ -91,3 +91,6 @@ Each line must read `PNG image data, W x H` with the table's size, and
 assets/logo/png/*.png` or, on macOS, `sips -g pixelWidth -g pixelHeight` give the same
 numbers. Re-render any PNG with the wrong size. Cite the measured sizes in the Final
 Report's `Evidence:` line (`references/final-report.md`).
+
+A measured size proves only the dimensions. Then open every PNG and look at it
+(`references/render-inspect.md`, *Gate 3*).
