@@ -114,7 +114,8 @@ Example check:
 Check fill and stroke colors:
 - [ ] Colors are valid hex codes (#RRGGBB format) or named colors
 - [ ] Colors are from the brand palette (from brand brief)
-- [ ] High contrast with background (4.5:1 minimum for text)
+- [ ] Contrast against the file's intended background (`references/svg-deliverables.md` variant table): logo-mark, logo-full and logo-wordmark on the brand background; logo-icon's mark on its own tile; favicon on both `#FAFAFA` and `#0A0A0A` (or its own tile); logo-white on `#0A0A0A`; logo-black on `#FAFAFA`
+- [ ] The mark's silhouette layer reaches 3:1 and every wordmark letter reaches 4.5:1, with opacity composited over the background first (*Step 4* of that file). Lighter depth layers below 3:1 are not a finding
 
 Examples:
 ```
@@ -128,7 +129,7 @@ Examples:
 ### Step 3: File-Specific Validation
 
 #### logo-full.svg
-- [ ] viewBox width >= 200 (landscape, has room for mark + text)
+- [ ] viewBox is `0 0 W 72` with W fitted to the content: the wordmark's right edge + 4, rounded up (±2). A wider canvas leaving an empty band on the right is a finding; a W other than 320 is not
 - [ ] Contains both symbol and text (wordmark)
 - [ ] Symbol is on left, text is on right
 - [ ] Text (product name) is readable without zooming
@@ -151,6 +152,8 @@ Examples:
 - [ ] Safe area: symbol doesn't touch edges (padding of at least 5-10%)
 - [ ] Has background (recommended: subtle color or rounded rect with stroke)
 - [ ] Uses rounded corners appropriate for iOS/Android
+- [ ] The mark group's transform centers it: `translate(256 − cx·S, 256 − cy·S)` within 1px, (cx, cy) the mark's bounding-box center in the 64x64 canvas
+- [ ] Every `stroke-width` inside the scaled group equals logo-mark.svg's value: the spec keeps strokes verbatim so `scale(S)` preserves the proportions. A stroke divided by S, or `vector-effect="non-scaling-stroke"`, is a mark-consistency FAIL
 
 #### favicon.svg
 - [ ] viewBox is very small (16x16)
@@ -234,12 +237,12 @@ Write a concise, unfilled validation report to `output_path`. It must contain ob
 | File | Expected viewBox | Status | Evidence |
 |------|------------------|--------|----------|
 | `logo-mark.svg` | `0 0 64 64` | [ ] | |
-| `logo-full.svg` | `0 0 320 72` | [ ] | |
+| `logo-full.svg` | `0 0 W 72` (W fitted) | [ ] | |
 | `logo-wordmark.svg` | `0 0 180 40` | [ ] | |
 | `logo-icon.svg` | `0 0 512 512` | [ ] | |
 | `favicon.svg` | `0 0 16 16` | [ ] | |
-| `logo-white.svg` | `0 0 320 72` | [ ] | |
-| `logo-black.svg` | `0 0 320 72` | [ ] | |
+| `logo-white.svg` | `0 0 W 72` (logo-full's W) | [ ] | |
+| `logo-black.svg` | `0 0 W 72` (logo-full's W) | [ ] | |
 
 ## Structure
 
@@ -261,6 +264,19 @@ Write a concise, unfilled validation report to `output_path`. It must contain ob
 | Canonical paths and accent elements were extracted from `logo-mark.svg` | [ ] | |
 | `logo-full.svg`, `logo-icon.svg`, `logo-white.svg`, and `logo-black.svg` use matching geometry and layers | [ ] | |
 | Monochrome variants differ only in color | [ ] | |
+| `logo-icon.svg` keeps logo-mark's stroke widths and its transform centers the mark | [ ] | |
+
+## Contrast
+
+| File | Intended background | Mark silhouette (≥ 3:1) | Wordmark letters (≥ 4.5:1) |
+|------|---------------------|-------------------------|----------------------------|
+| `logo-mark.svg` | brand background [hex] | [ratio] | — |
+| `logo-full.svg` | brand background [hex] | [ratio] | [ratio] |
+| `logo-wordmark.svg` | brand background [hex] | — | [ratio] |
+| `logo-icon.svg` | its tile [hex] | [ratio] | — |
+| `favicon.svg` | `#FAFAFA` and `#0A0A0A` (or its tile) | [ratio / ratio] | — |
+| `logo-white.svg` | `#0A0A0A` | [ratio] | [ratio] |
+| `logo-black.svg` | `#FAFAFA` | [ratio] | [ratio] |
 
 ## Wordmark Consistency
 
@@ -293,6 +309,9 @@ Before PASS:
 - [ ] **Mark consistency**: identical `d=""` paths across logo-mark, logo-full, logo-icon, logo-white, logo-black
 - [ ] **Wordmark consistency**: identical outlined letter paths, casing and weight across logo-full, logo-wordmark, logo-white, logo-black
 - [ ] Colors from brand palette
+- [ ] **Contrast**: each file reaches 3:1 (mark silhouette) and 4.5:1 (wordmark letters) against its intended background
+- [ ] **Lockup width**: logo-full, logo-white and logo-black share one W fitted to the wordmark, with no empty band on the right
+- [ ] **Icon**: stroke widths equal logo-mark's and the transform centers the mark
 - [ ] Product name is correct (not placeholder)
 - [ ] Text is readable and properly positioned
 - [ ] Favicon is simplified for 16x16

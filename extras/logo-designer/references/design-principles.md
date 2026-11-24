@@ -23,7 +23,7 @@ Use this reference during Phase 2 (Logo Design).
 
 - Use detected brand colors if available, OR user-provided palette
 - If neither exists, apply the **Default Style Guide** below
-- High contrast, WCAG AA compliant (4.5:1 minimum)
+- High contrast, WCAG AA compliant: 4.5:1 for wordmark text and 3:1 for the mark, each against the variant's intended background (`references/svg-deliverables.md`)
 - Always provide light, dark, and transparent versions
 
 ## Default Style Guide (used when user provides no style preference)

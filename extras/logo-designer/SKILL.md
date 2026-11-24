@@ -4,7 +4,7 @@ description: "Generate professional SVG logos from project context: 7 brand vari
 license: MIT
 effort: medium
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -124,17 +124,19 @@ Output structure:
 ```
 /assets/logo/
 ├── logo-mark.svg          # Canonical 64×64 mark (source of truth)
-├── logo-full.svg          # 320×72 mark + wordmark
+├── logo-full.svg          # W×72 mark + wordmark (width fitted to the name)
 ├── logo-wordmark.svg      # 180×40 text only
 ├── logo-icon.svg          # 512×512 app icon (centered, padded)
 ├── favicon.svg            # 16×16 simplified 2-layer mark
-├── logo-white.svg         # 320×72 white (for dark backgrounds)
-├── logo-black.svg         # 320×72 black (for light backgrounds)
+├── logo-white.svg         # W×72 white (for dark backgrounds)
+├── logo-black.svg         # W×72 black (for light backgrounds)
 ├── png/                   # PNG exports (Phase 3b)
 └── brand-showcase.html    # Self-contained brand identity page
 ```
 
 Draw the wordmark as outlined `<path>` letterforms, never `<text>`, so no SVG or PNG depends on an installed font. Produce them with `references/wordmark-outlining.md`: a licence check, a static weight file, and one fontTools pass whose paths every wordmark file reuses.
+
+Each variant has one intended background (the variant table in `references/svg-deliverables.md`). Against it, the mark's silhouette layer must reach 3:1 and every wordmark letter 4.5:1; fix a failing color, never the background.
 
 After writing all 7 files, read back mark, full, icon, white, and black variants and verify `d=""` strings are identical (or correctly scaled via `transform`). Fix divergences before continuing.
 
@@ -142,7 +144,7 @@ See `references/svg-deliverables.md` for full variant specifications, scale calc
 
 ### Phase 3b: PNG Export
 
-Once the geometry read-back and `svg-reviewer` pass, render a PNG of every variant from those final SVGs into `/assets/logo/png/`: `logo-icon` at 512 and 1024, `logo-mark` at 512 with a transparent background, `logo-full`, `logo-white` and `logo-black` at 1280×288, `logo-wordmark` at 720×160, and `favicon` at 16, 32 and 48. Use the first rasterizer found: `rsvg-convert`, `magick`, `inkscape`, then headless Chrome. Measure each PNG's dimensions afterwards. No rasterizer: keep the SVGs, skip the PNGs, and end `PARTIAL` with the install command under `Decision:`.
+Once the geometry read-back and `svg-reviewer` pass, render a PNG of every variant from those final SVGs into `/assets/logo/png/`: `logo-icon` at 512 and 1024, `logo-mark` at 512 with a transparent background, `logo-full`, `logo-white` and `logo-black` at 4W×288 (four times the fitted viewBox), `logo-wordmark` at 720×160, and `favicon` at 16, 32 and 48. Use the first rasterizer found: `rsvg-convert`, `magick`, `inkscape`, then headless Chrome. Measure each PNG's dimensions afterwards. No rasterizer: keep the SVGs, skip the PNGs, and end `PARTIAL` with the install command under `Decision:`.
 
 See `references/png-export.md` for the font check, detection, per-tool commands, the optional `favicon.ico`, and the dimension check.
 
@@ -159,12 +161,12 @@ For a CLI tool called "fastbuild", the skill produces:
 ```
 /assets/logo/
 ├── logo-mark.svg          — 64×64 abstract "F" mark (canonical geometry)
-├── logo-full.svg          — 320×72 mark + "FASTBUILD" wordmark
+├── logo-full.svg          — W×72 mark + "FASTBUILD" wordmark, W fitted to the name
 ├── logo-wordmark.svg      — 180×40 text-only wordmark
 ├── logo-icon.svg          — 512×512 mark centered in rounded square
 ├── favicon.svg            — 16×16 simplified 2-layer mark
-├── logo-white.svg         — 320×72 full logo in white (for dark backgrounds)
-├── logo-black.svg         — 320×72 full logo in black (for light backgrounds)
+├── logo-white.svg         — W×72 full logo in white (for dark backgrounds)
+├── logo-black.svg         — W×72 full logo in black (for light backgrounds)
 ├── png/                   — logo-icon-512/1024, logo-mark-512, logo-full, logo-white,
 │                            logo-black, logo-wordmark, favicon-16/32/48 (.png)
 └── brand-showcase.html    — self-contained brand identity presentation page
@@ -195,7 +197,7 @@ End every run, stops included, with this compact text block. Status is `COMPLETE
 
 ```text
 Result: COMPLETE. Wrote 7 SVGs, 10 PNGs in png/ and brand-showcase.html to /assets/logo/.
-Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. PNGs (rsvg-convert, measured with file): logo-icon-512 512x512, logo-icon-1024 1024x1024, logo-mark-512 512x512 RGBA, logo-full/white/black 1280x288, logo-wordmark 720x160, favicon-16 16x16, favicon-32 32x32, favicon-48 48x48. Default Quality Bar passed. sync: skipped (not a git repo)
+Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. PNGs (rsvg-convert, measured with file): logo-icon-512 512x512, logo-icon-1024 1024x1024, logo-mark-512 512x512 RGBA, logo-full/white/black 1176x288, logo-wordmark 720x160, favicon-16 16x16, favicon-32 32x32, favicon-48 48x48. Default Quality Bar passed. sync: skipped (not a git repo)
 Uncertainty: Assumed a developer-tool audience from the CLI entry point; the user did not say.
 Decision: No approval needed.
 ```
@@ -211,6 +213,9 @@ Decision: No approval needed.
 - [ ] With no rasterizer found, the run still delivers the SVGs and ends `PARTIAL` with the install command under `Decision:`
 - [ ] Monochrome variants (`logo-white.svg`, `logo-black.svg`) differ from `logo-full.svg` only in color, not geometry
 - [ ] `favicon.svg` is a simplified 2-layer version of the mark at 16×16
+- [ ] `logo-icon.svg` keeps `logo-mark.svg`'s stroke widths inside its `scale(S)` group, and its transform centers the mark in the 512×512 tile
+- [ ] `logo-full.svg`, `logo-white.svg` and `logo-black.svg` share one viewBox width fitted to the wordmark, so a short name leaves no empty canvas
+- [ ] Every variant reaches 3:1 (mark) and 4.5:1 (wordmark letters) against its intended background
 - [ ] `brand-showcase.html` is written, opens correctly in a browser, and links each rendered PNG next to its SVG
 - [ ] Design rationale (symbol meaning, color choices, typography) is documented in the response
 - [ ] Color specification includes hex codes for all palette roles

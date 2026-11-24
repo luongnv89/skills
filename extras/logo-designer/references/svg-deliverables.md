@@ -31,23 +31,33 @@ Generate the remaining 6 files. If using the svg-generator agent, its prompt **m
 2. The exact fill/stroke/opacity values for each layer
 3. The exact wordmark text and formatting (casing, font, weight, colors), plus the literal `<path>` letterforms from `references/wordmark-outlining.md`
 4. The target viewBox and any transform/scale needed
+5. The brand background (below), as `brand_background`
 
 **Variant specifications:**
 
-| File | viewBox | Mark treatment | Wordmark |
-|------|---------|----------------|----------|
-| `logo-full.svg` | `0 0 320 72` | Same paths, `translate(4,4)` to fit 72px height | Product name to the right of mark |
-| `logo-wordmark.svg` | `0 0 180 40` | None | Product name text only |
-| `logo-icon.svg` | `0 0 512 512` | Same paths wrapped in `<g transform="translate(X,Y) scale(S)">` to fit centered in a rounded square background | None |
-| `favicon.svg` | `0 0 16 16` | Simplified: use 2 of the 3 layers (outer + inner) with scaled-down coordinates, same proportional shape | None |
-| `logo-white.svg` | `0 0 320 72` | Same paths as logo-full, all fills/strokes changed to `#FFFFFF` with varying opacity | Same as logo-full but white text |
-| `logo-black.svg` | `0 0 320 72` | Same paths as logo-full, all fills/strokes changed to `#000000`/`#1A1A1A` with varying opacity | Same as logo-full but dark text |
+| File | viewBox | Mark treatment | Wordmark | Intended background |
+|------|---------|----------------|----------|---------------------|
+| `logo-mark.svg` | `0 0 64 64` | The canonical paths (Step 1) | None | Brand background |
+| `logo-full.svg` | `0 0 W 72` (W fitted, below) | Same paths, `translate(4,4)` to fit 72px height | Product name to the right of mark | Brand background |
+| `logo-wordmark.svg` | `0 0 180 40` | None | Product name text only, centered | Brand background |
+| `logo-icon.svg` | `0 0 512 512` | Same paths wrapped in `<g transform="translate(X,Y) scale(S)">`, centered in a rounded square background | None | Its own opaque tile |
+| `favicon.svg` | `0 0 16 16` | Simplified: use 2 of the 3 layers (outer + inner) with scaled-down coordinates, same proportional shape | None | Browser tabs: both `#FAFAFA` and `#0A0A0A`, unless it draws its own tile |
+| `logo-white.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#FFFFFF` with varying opacity | Same as logo-full but white text | Dark, `#0A0A0A` |
+| `logo-black.svg` | `0 0 W 72` (same W as logo-full) | Same paths as logo-full, all fills/strokes changed to `#000000`/`#1A1A1A` with varying opacity | Same as logo-full but dark text | Light, `#FAFAFA` |
 
-**For logo-icon.svg**, compute the scale factor from the base 64x64 mark:
-- Target mark area: ~340x340 centered in 512
-- Scale: `340/64 ≈ 5.3`
-- Translate to center: `translate(86, 76) scale(5.3)`
-- Divide stroke-width values by the scale factor so strokes render at the same visual weight
+**Brand background** is the one background the brand-colored files (mark, full, wordmark) are drawn for, fixed before generation: `#0A0A0A` under the Default Style Guide (its dark base); with detected or user-given brand colors, the brand kit's page background, else `#FAFAFA`. The three files share colors, so they share this background.
+
+**For logo-full.svg, logo-white.svg and logo-black.svg**, fit the canvas width to the content so a short name leaves no empty band:
+- Keep the 72px height and the mark at `translate(4,4)`, then place the wordmark
+- `W` = the wordmark's right edge + 4 (the mark's left inset), rounded up to a whole number
+- logo-white and logo-black reuse logo-full's `W`
+- Example: `sfm` ending at x = 152 gives `viewBox="0 0 156 72"`. A long name may go past 320
+
+**For logo-icon.svg**, scale and center the 64x64 mark in the 512 tile:
+- Target mark size ~340px: `S = 340/64 = 5.3125`
+- Center: `translate(256 − cx·S, 256 − cy·S)`, where (cx, cy) is the center of the mark's bounding box in the 64x64 canvas: (32, 32) for a centered mark
+- Example: `translate(86, 86) scale(5.3125)`
+- Keep every `stroke-width` exactly as in logo-mark.svg. The group's `scale(S)` scales strokes with the paths, so the icon keeps the mark's stroke-to-size proportions. Never divide stroke widths by `S` (that leaves hairlines at 512px), and never add `vector-effect="non-scaling-stroke"`
 
 **For favicon.svg**, redraw the shape at 16x16 but maintain the same proportional geometry (same angles, same corner radius ratios). Simplify by dropping the middle layer — keep only outer (stroke) and inner (fill). Include any distinctive accent element (dot, circle) scaled down.
 
@@ -59,6 +69,18 @@ After all files are written, read back logo-mark.svg, logo-full.svg, logo-icon.s
 - Monochrome variants differ ONLY in color, not in geometry
 
 If any file has diverged, fix it before proceeding.
+
+## Step 4: Check contrast against each intended background
+
+Measure every variant against its background in the table above and record each ratio:
+- **Graphics, 3:1:** the mark layer that draws the silhouette (the outer outline or main fill). Lighter depth layers and accents may fall below 3:1 while that layer passes.
+- **Text, 4.5:1:** every wordmark letter. Outlined letter paths still count as text.
+- **logo-icon.svg:** measure the mark against the tile fill, not the page.
+- **favicon.svg:** measure against both `#FAFAFA` and `#0A0A0A`, or against its tile when it draws one.
+- **Opacity:** composite first, `c = a·fg + (1 − a)·bg` per channel, then measure.
+- **Ratio:** `(L1 + 0.05) / (L2 + 0.05)`, L1 the lighter luminance. `L = 0.2126 R + 0.7152 G + 0.0722 B` on linearized channels: `v = c/255`, then `v/12.92` when `v ≤ 0.04045`, else `((v + 0.055)/1.055)^2.4`.
+
+A variant below its ratio gets a darker or lighter palette color before PNG export. Never change its intended background to make it pass.
 
 ```
 /assets/logo/

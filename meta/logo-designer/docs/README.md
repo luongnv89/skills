@@ -9,14 +9,14 @@
 
 > Design professional, modern logos with automatic project context detection and multiple SVG deliverables.
 
-Version: **1.7.0** · Author: Luong NGUYEN · License: MIT
+Version: **1.8.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
 - Analyze project type (CLI, SaaS, Startup, Enterprise, Consumer) for style selection
 - Apply design principles: simplicity, scalability, memorability, versatility
 - Generate 7 SVG variants (full, mark, wordmark, icon, favicon, white, black), with the wordmark outlined so nothing depends on an installed font
-- Export a PNG of every variant (icon 512/1024, mark 512, full/white/black 1280×288, wordmark 720×160, favicon 16/32/48) with `rsvg-convert`, `magick`, `inkscape` or headless Chrome
+- Export a PNG of every variant (icon 512/1024, mark 512, full/white/black 4W×288 with W the fitted lockup width, wordmark 720×160, favicon 16/32/48) with `rsvg-convert`, `magick`, `inkscape` or headless Chrome
 - Default quality bar: every SVG and the showcase page are professional, production-ready, elegant, and premium without being asked
 - Provide color specs with hex codes and Tailwind config
 
