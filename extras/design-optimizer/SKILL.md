@@ -11,7 +11,7 @@ dependencies:
   - frontend-design
   - browse
 metadata:
-  version: 1.2.1
+  version: 1.3.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (intake once → member audits with skip-checks → merged report → gated apply)"
 ---
@@ -119,12 +119,14 @@ also run their own Repo Sync; never skip theirs because this one ran.
 
 Resolve the target type (live URL / repo / screenshots / saved HTML), audience and primary goal,
 output dir, and mode. Run the Dependency Preflight. Confirm scope in one line before intake.
+Style adjectives ("look great", "modern") only select audit mode: record them as untestable, ask
+for a design-rules file or reference screens, and never convert or forward them.
 
 ### Phase 2 — Intake once
 
 Follow `references/intake.md`: capture `page.html`, `head.json`, `screenshots/` (via `/browse` if
 available), `robots.txt`, `sitemap.xml`, `llms.txt` into `<output>/evidence/`, and write
-`manifest.json` with a **provisional** `owners` map. Repo-only and screenshot-only targets skip
+`manifest.json` with a **provisional** `owners` map, dark-scheme shots (or why not) and `build`. Repo-only and screenshot-only targets skip
 the fetches and record why in `manifest.files`. No member re-fetches what the manifest holds.
 
 ### Phase 3 — Audit
@@ -156,7 +158,8 @@ verbatim; never answer it on the user's behalf.
 
 Build `<output>/design-optimization.md` from `references/merge-format.md`: one row per
 finding, owner cited, cross-member duplicates merged into the owner's row (others cited as
-corroboration), prioritized P0–P3, plus "Skipped (owned elsewhere)" and "Not covered" sections.
+corroboration; visual-noise findings merge onto the brand row), prioritized P0–P3, plus Cut list,
+Rules-file candidates, "Skipped (owned elsewhere)" and "Not covered" sections.
 Every canonical check ID appears exactly once.
 
 ### Phase 5 — Apply (explicit opt-in only)
@@ -166,7 +169,8 @@ Stop after the merge and offer apply as a choice of finding IDs. Only on an expl
 - Route each chosen finding to **one** member, never both: `clarity` fixes →
   `dont-make-me-think` Redesign Mode (surgical); visual, brand, responsive or new-UI work →
   `frontend-design`.
-- `frontend-design` applies its own Default Quality Bar — defer to it; do not restate or relax it.
+- `frontend-design` gets a ban-only brief with the evidence screenshots, and a member re-checks
+  the result before it is reported done (`references/apply.md`).
 - Each member runs its own dry-run diff and confirmation gate and its own Repo Sync.
 - Do not apply AX/SEO-file fixes here — name `seo-ai-optimizer` as the next step instead.
 
