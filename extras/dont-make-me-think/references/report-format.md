@@ -127,6 +127,7 @@ Bullet list — protect these during redesign:
 - **One line per finding.** Problem, impact, fix — each one line max.
 - **Be specific.** "Move price next to download button" not "improve transparency."
 - **Include selectors/locations.** An AI agent reading this should know exactly where to look.
+- **Name the element, not the look.** "Three badges beside **Buy** compete with it" not "cluttered"; "Lorem ipsum in the testimonials" not "looks unprofessional". Report an element only for what it does to the user's task; a color, font or style choice with no usability effect is visual or brand critique and stays out (`SKILL.md` → *When to Use*).
 - **Diagrams over descriptions.** If you can show it in a mermaid chart or flowchart, do that instead of writing about it.
 - **Severity is visual.** 🔴🟡🟢 — no walls of text explaining severity levels.
 - **Scores are honest.** A 10/10 means flawless. Most things are 5-8. Don't grade inflate.

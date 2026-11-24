@@ -36,6 +36,7 @@ The fundamental principle: every page or screen should be self-evident. When a u
 - Non-standard link/button styling that leaves users unsure what's clickable
 - Layout that doesn't communicate structure or priority
 - Instructions that need to be read to understand the interface (if you need instructions, the design has failed)
+- Decoration styled like a control that does nothing: a pill, chip, arrow or card with a hover shadow and no link or action. Users click it, nothing happens, and they start doubting the real controls (lens 8, Affordances)
 
 ---
 
@@ -71,7 +72,7 @@ Since users scan, the visual hierarchy is everything. It tells users what's impo
 - Keep paragraphs short (nobody reads long blocks online)
 - Use bulleted lists whenever you have a list of items
 - Highlight key terms so scanners can find them
-- Eliminate visual noise — busy backgrounds, too many colors, gratuitous decoration
+- Eliminate visual noise — busy backgrounds, too many colors, decoration that carries no information. A finding names the element and what it does to the scan, never an adjective like "cluttered": badges ("New", "Popular", "Save 20%") on or beside the primary action compete with it for the first glance (lens 3, Visual hierarchy)
 
 ---
 
@@ -82,6 +83,8 @@ Krug's Third Law of Usability: Get rid of half the words on each page, then get 
 **Two types of words to kill:**
 1. **Happy talk** — Introductory text that says nothing useful. "Welcome to our award-winning platform where we strive to deliver the best possible experience..." Nobody reads this. Kill it.
 2. **Instructions** — If the design requires instructions, the design is broken. But if you must include them, make them ruthlessly brief.
+
+**Also cut restated headings.** A subtitle that repeats its heading in other words ("Pricing" over "Our pricing plans") makes the user read the same point twice before the content starts (lens 4, Word economy). Cut it, or make it say something the heading does not.
 
 **Why fewer words is more:**
 - Reduces noise on the page, making useful content more visible
@@ -191,7 +194,7 @@ Every user arrives with a reservoir of goodwill. Good experiences fill it; bad e
 - Asking for unnecessary information
 - Fake "friendly" polish over a frustrating experience
 - Cluttering the interface with ads and cross-promotions
-- An unprofessional look that undermines trust
+- Elements that make the site look abandoned or untrustworthy. Name the element, never the look ("looks unprofessional" is not a finding): placeholder or lorem ipsum text, a broken image or dead link, testimonials or a "Trusted by" logo row with no names, a copyright year or "latest" date years old, a countdown or "only 2 left" claim that resets on reload
 
 **Things that fill goodwill:**
 - Tell users what they want to know up front — be transparent
