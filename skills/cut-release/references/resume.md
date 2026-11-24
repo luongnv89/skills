@@ -7,7 +7,7 @@ Step 1 sends a full release here when HEAD carries a release tag and the request
 ```bash
 TAG="$(git describe --exact-match --tags HEAD)"
 NEW_VERSION="${TAG#v}"
-WORKSPACE="$(mktemp -d "${TMPDIR:-/tmp}/ship-XXXXXX")"
+WORKSPACE="$(mktemp -d "${TMPDIR:-/tmp}/cut-release-XXXXXX")"
 ```
 
 Rebuild the release notes from the history file (`CHANGELOG.md`, `CHANGES.*`, `HISTORY.*`, or `NEWS.*`): copy the section whose heading names `NEW_VERSION`, from that heading through the line before the next `## ` heading, into `$WORKSPACE/release-notes.md`. If no section names the version, create the GitHub release with `--generate-notes` instead, and say so under `Uncertainty`.
@@ -49,4 +49,4 @@ git pull --rebase origin <branch>
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 ```
 
-Then `/ship` again resumes from the push.
+Then `/cut-release` again resumes from the push.

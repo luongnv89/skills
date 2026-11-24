@@ -1,11 +1,11 @@
 {
-  "skill_name": "ship",
+  "skill_name": "cut-release",
   "evals": [
     {
       "id": 1,
       "name": "auto-full-release",
       "kind": "happy-path",
-      "prompt": "/ship",
+      "prompt": "/cut-release",
       "expected_output": "Runs the whole release in auto mode without asking: minor bump from feat commits, version updated in every source including package-lock.json, sweep with no missed hit, reviewer PASS, tag pushed and confirmed, GitHub release created, npm publish for an already-published package, and a final report that lists each auto decision.",
       "files": [],
       "expectations": [
@@ -26,7 +26,7 @@
       "id": 2,
       "name": "interactive-mode",
       "kind": "happy-path",
-      "prompt": "/ship --no-auto",
+      "prompt": "/cut-release --no-auto",
       "expected_output": "Runs the same release but stops for confirmation before the version, the consolidated file changes, the build, the push, the GitHub release, and the publish.",
       "files": [],
       "expectations": [
@@ -41,14 +41,14 @@
       "id": 3,
       "name": "auto-dirty-tree-blocks",
       "kind": "edge",
-      "prompt": "/ship (the working tree has a modified src/app.ts and an untracked notes.txt)",
+      "prompt": "/cut-release (the working tree has a modified src/app.ts and an untracked notes.txt)",
       "expected_output": "Stops in Step 1 with Result: BLOCKED — uncommitted changes, lists both files, and changes nothing: no stash, commit, discard, version bump, or tag.",
       "files": [],
       "expectations": [
         "Stops before Step 2 and reports Result: BLOCKED — uncommitted changes.",
         "Lists src/app.ts and notes.txt under Evidence.",
         "Does not stash, commit, restore, or delete any file.",
-        "Decision tells the user to commit or stash the changes and re-run, or to use /ship --no-auto."
+        "Decision tells the user to commit or stash the changes and re-run, or to use /cut-release --no-auto."
       ]
     },
     {
@@ -69,7 +69,7 @@
       "id": 5,
       "name": "landing-page-four-items",
       "kind": "edge",
-      "prompt": "/ship (the repo has site/index.html with a v1.4.2 version pill, a footer that still says v1.4.0, a What's new section, a features grid, and an install section; the release adds a PDF export feature)",
+      "prompt": "/cut-release (the repo has site/index.html with a v1.4.2 version pill, a footer that still says v1.4.0, a What's new section, a features grid, and an install section; the release adds a PDF export feature)",
       "expected_output": "The landing-page-updater reports version, end-user changelog, feature list, and documentation, each with a status and path:line; it fixes both the pill and the stale footer version, rewrites What's new in plain language, adds a PDF export feature card, and adds no new section.",
       "files": [],
       "expectations": [
@@ -85,7 +85,7 @@
       "id": 6,
       "name": "unreleased-and-drift",
       "kind": "edge",
-      "prompt": "/ship (CHANGELOG.md has a ## Unreleased section with three entries; package.json says 2.3.0 but src/version.ts still says 2.2.9)",
+      "prompt": "/cut-release (CHANGELOG.md has a ## Unreleased section with three entries; package.json says 2.3.0 but src/version.ts still says 2.2.9)",
       "expected_output": "Promotes the Unreleased section to the release heading and adds a fresh empty Unreleased heading, so the release appears once; reports src/version.ts as a drifted version source and updates it to the new version.",
       "files": [],
       "expectations": [
@@ -99,7 +99,7 @@
       "id": 7,
       "name": "zero-major-breaking",
       "kind": "edge",
-      "prompt": "/ship (the last tag is v0.9.3 and one commit since then is feat!: drop the legacy config format)",
+      "prompt": "/cut-release (the last tag is v0.9.3 and one commit since then is feat!: drop the legacy config format)",
       "expected_output": "Releases v0.10.0, not v1.0.0, because auto mode never crosses to 1.0.0 without an explicit version argument; records the rule under Evidence and the breaking change as an Action needed item in the end-user notes.",
       "files": [],
       "expectations": [
@@ -113,10 +113,10 @@
       "name": "negative-open-pr",
       "kind": "negative-trigger",
       "prompt": "Open a pull request for my feature branch so the team can review it.",
-      "expected_output": "Does not run ship; opening a PR is not a release.",
+      "expected_output": "Does not run cut-release; opening a PR is not a release.",
       "files": [],
       "expectations": [
-        "Does not start the ship workflow.",
+        "Does not start the cut-release workflow.",
         "Does not bump a version, create a tag, or publish anything."
       ]
     },
@@ -125,10 +125,10 @@
       "name": "negative-routine-commit",
       "kind": "negative-trigger",
       "prompt": "Commit my changes with a good message and push them.",
-      "expected_output": "Does not run ship; a routine commit and push is not a release.",
+      "expected_output": "Does not run cut-release; a routine commit and push is not a release.",
       "files": [],
       "expectations": [
-        "Does not start the ship workflow.",
+        "Does not start the cut-release workflow.",
         "Does not create a tag or a GitHub release."
       ]
     },
@@ -150,7 +150,7 @@
       "id": 11,
       "name": "breaking-footer-major",
       "kind": "edge",
-      "prompt": "/ship (the last tag is v2.3.0; one commit since then is 'feat: new config loader' whose body has the footer 'BREAKING CHANGE: config.yml is renamed to app.yml')",
+      "prompt": "/cut-release (the last tag is v2.3.0; one commit since then is 'feat: new config loader' whose body has the footer 'BREAKING CHANGE: config.yml is renamed to app.yml')",
       "expected_output": "Detects the BREAKING CHANGE footer in the commit body and releases v3.0.0, with an Action needed item in the end-user notes and upgrade steps in the changelog.",
       "files": [],
       "expectations": [
@@ -163,20 +163,20 @@
       "id": 12,
       "name": "release-tool-auto",
       "kind": "edge",
-      "prompt": "/ship (package.json has \"scripts\": {\"release\": \"release-it\"})",
+      "prompt": "/cut-release (package.json has \"scripts\": {\"release\": \"release-it\"})",
       "expected_output": "Detects release-it and stops with Result: BLOCKED — release owned by release-it, without running npm run release, and gives the command under Decision.",
       "files": [],
       "expectations": [
         "Does not run npm run release or release-it.",
         "Reports Result: BLOCKED — release owned by release-it.",
-        "Decision gives the project's release command (npm run release) or suggests /ship --no-auto."
+        "Decision gives the project's release command (npm run release) or suggests /cut-release --no-auto."
       ]
     },
     {
       "id": 13,
       "name": "tagged-head-different-version",
       "kind": "edge",
-      "prompt": "/ship 1.2.4 (clean default branch; HEAD and the package version are v1.2.3 / 1.2.3; v1.2.3 is fully released, with no later commits; 1.2.4 has no tag or registry publication)",
+      "prompt": "/cut-release 1.2.4 (clean default branch; HEAD and the package version are v1.2.3 / 1.2.3; v1.2.3 is fully released, with no later commits; 1.2.4 has no tag or registry publication)",
       "expected_output": "Treats 1.2.4 as a new release: syncs, selects the explicit version, prepares and reviews the changes, builds, and releases 1.2.4. Does not resume or report 1.2.3 as the requested release.",
       "files": [],
       "expectations": [
@@ -190,7 +190,7 @@
       "id": 14,
       "name": "tagged-head-explicit-bump",
       "kind": "edge",
-      "prompt": "/ship patch (clean default branch; HEAD has the fully released v1.2.3 tag, package.json says 1.2.3, and there are no later commits; v1.2.4 is unused)",
+      "prompt": "/cut-release patch (clean default branch; HEAD has the fully released v1.2.3 tag, package.json says 1.2.3, and there are no later commits; v1.2.4 is unused)",
       "expected_output": "Follows normal sync and version selection, computes 1.2.4 from the explicit patch argument, and prepares a new release rather than resuming 1.2.3.",
       "files": [],
       "expectations": [
@@ -204,7 +204,7 @@
       "id": 15,
       "name": "tagged-head-same-version-resume",
       "kind": "edge",
-      "prompt": "/ship 1.2.3 (clean default branch; HEAD has v1.2.3, which is already pushed and has a GitHub release; npm already has this project's 1.2.3; no local build artifacts exist)",
+      "prompt": "/cut-release 1.2.3 (clean default branch; HEAD has v1.2.3, which is already pushed and has a GitHub release; npm already has this project's 1.2.3; no local build artifacts exist)",
       "expected_output": "Resumes the requested 1.2.3 release, verifies its existing tag, GitHub release, and npm publication, and reports them done without bumping, rebuilding, or uploading again.",
       "files": [],
       "expectations": [
@@ -218,7 +218,7 @@
       "id": 16,
       "name": "resume-npm-fresh-clone-build",
       "kind": "edge",
-      "prompt": "/ship (fresh clone on a clean default branch at tagged HEAD v1.2.3; tag and GitHub release are already on origin; package.json has main=dist/index.js, files=[dist], and a build script that creates dist/index.js; dist/ is ignored and absent; npm belongs to this repository but has only 1.2.2; credentials work and no CI publishes)",
+      "prompt": "/cut-release (fresh clone on a clean default branch at tagged HEAD v1.2.3; tag and GitHub release are already on origin; package.json has main=dist/index.js, files=[dist], and a build script that creates dist/index.js; dist/ is ignored and absent; npm belongs to this repository but has only 1.2.2; credentials work and no CI publishes)",
       "expected_output": "Resumes 1.2.3, runs the required build to regenerate dist/index.js, verifies it is included in npm pack --dry-run, and only then publishes and verifies npm 1.2.3.",
       "files": [],
       "expectations": [
@@ -233,7 +233,7 @@
       "id": 17,
       "name": "resume-npm-build-failure",
       "kind": "edge",
-      "prompt": "/ship (fresh clone on a clean default branch at tagged HEAD v1.2.3; tag and GitHub release are already pushed; npm 1.2.3 is still unpublished and the local upload is authorized; package.json requires dist/index.js, dist/ is absent, and npm run build fails)",
+      "prompt": "/cut-release (fresh clone on a clean default branch at tagged HEAD v1.2.3; tag and GitHub release are already pushed; npm 1.2.3 is still unpublished and the local upload is authorized; package.json requires dist/index.js, dist/ is absent, and npm run build fails)",
       "expected_output": "Runs the required resume build, stops with Result: BLOCKED — build failed, and performs no package upload. Reports the failed build and the unfinished npm publication while preserving the existing release.",
       "files": [],
       "expectations": [
@@ -248,7 +248,7 @@
       "id": 18,
       "name": "poetry-only-pypi-metadata",
       "kind": "edge",
-      "prompt": "/ship 1.2.4 (clean default branch; pyproject.toml has [tool.poetry] name=existing-project and version=1.2.3, no [project] table, and [build-system] uses poetry-core; PyPI's existing-project belongs to this repository and has only 1.2.3; credentials work, no CI publishes, and 1.2.4 has no tag)",
+      "prompt": "/cut-release 1.2.4 (clean default branch; pyproject.toml has [tool.poetry] name=existing-project and version=1.2.3, no [project] table, and [build-system] uses poetry-core; PyPI's existing-project belongs to this repository and has only 1.2.3; credentials work, no CI publishes, and 1.2.4 has no tag)",
       "expected_output": "Recognizes the Poetry package as a PyPI publishing target, checks ownership and target-version availability before edits, updates [tool.poetry] version, builds and validates the distribution, and publishes 1.2.4.",
       "files": [],
       "expectations": [
@@ -263,7 +263,7 @@
       "id": 19,
       "name": "ci-publisher-existing-target-blocks",
       "kind": "edge",
-      "prompt": "/ship 1.2.4 (clean default branch with commits after v1.2.3; v1.2.4 does not exist locally or on origin; npm package belongs to this repository and already has 1.2.4; a tag-triggered GitHub workflow runs npm publish)",
+      "prompt": "/cut-release 1.2.4 (clean default branch with commits after v1.2.3; v1.2.4 does not exist locally or on origin; npm package belongs to this repository and already has 1.2.4; a tag-triggered GitHub workflow runs npm publish)",
       "expected_output": "Selects CI as the publisher but still checks npm's target version before edits, then stops with Result: BLOCKED — 1.2.4 already on npm without creating or pushing a release tag.",
       "files": [],
       "expectations": [
@@ -278,7 +278,7 @@
       "id": 20,
       "name": "ci-publisher-no-local-credentials",
       "kind": "edge",
-      "prompt": "/ship 1.2.4 (clean default branch with commits after v1.2.3; npm package belongs to this repository, is public, and has only 1.2.3; 1.2.4 has no tag or registry publication; a tag-triggered GitHub workflow has publishing credentials and succeeds, but this machine is not logged into npm)",
+      "prompt": "/cut-release 1.2.4 (clean default branch with commits after v1.2.3; npm package belongs to this repository, is public, and has only 1.2.3; 1.2.4 has no tag or registry publication; a tag-triggered GitHub workflow has publishing credentials and succeeds, but this machine is not logged into npm)",
       "expected_output": "Checks registry eligibility and target-version availability, selects the CI publisher, and runs the release without requiring local npm credentials. After pushing the tag, verifies the workflow and npm 1.2.4 instead of uploading locally.",
       "files": [],
       "expectations": [
@@ -293,7 +293,7 @@
       "id": 21,
       "name": "first-ci-publication-needs-registry-request",
       "kind": "edge",
-      "prompt": "/ship (clean default branch with commits after v1.2.3; package.json names a public npm package that has never been published; a tag-triggered GitHub workflow has credentials and runs npm publish; the request does not name npm)",
+      "prompt": "/cut-release (clean default branch with commits after v1.2.3; package.json names a public npm package that has never been published; a tag-triggered GitHub workflow has credentials and runs npm publish; the request does not name npm)",
       "expected_output": "Rejects the first npm publication without an explicit registry request and stops with Result: BLOCKED — CI publication not authorized before any release edits or publishing trigger event.",
       "files": [],
       "expectations": [
@@ -308,7 +308,7 @@
       "id": 22,
       "name": "first-ci-publication-explicit-registry",
       "kind": "edge",
-      "prompt": "Publish this release to npm with /ship 1.2.4 (clean default branch with commits after v1.2.3; package.json names a public package not on npm; a tag-triggered GitHub workflow has credentials and runs npm publish; 1.2.4 has no tag and this machine is not logged into npm)",
+      "prompt": "Publish this release to npm with /cut-release 1.2.4 (clean default branch with commits after v1.2.3; package.json names a public package not on npm; a tag-triggered GitHub workflow has credentials and runs npm publish; 1.2.4 has no tag and this machine is not logged into npm)",
       "expected_output": "Accepts the explicit npm request for the first publication, checks the remaining registry and release gates, then releases 1.2.4 and verifies its CI publication without requiring local npm credentials or uploading twice.",
       "files": [],
       "expectations": [
@@ -323,7 +323,7 @@
       "id": 23,
       "name": "unprefixed-breaking-footer-priority",
       "kind": "edge",
-      "prompt": "/ship (clean default branch; last tag and package version are v2.3.0 / 2.3.0; the only new commit has subject 'Remove old config' and footer 'BREAKING CHANGE: config.yml is renamed to app.yml'; there are no conventional-commit subject prefixes)",
+      "prompt": "/cut-release (clean default branch; last tag and package version are v2.3.0 / 2.3.0; the only new commit has subject 'Remove old config' and footer 'BREAKING CHANGE: config.yml is renamed to app.yml'; there are no conventional-commit subject prefixes)",
       "expected_output": "Detects the breaking footer and chooses 3.0.0 before considering the no-prefix minor fallback. The release reviewer validates the breaking bump, and the notes explain the config migration.",
       "files": [],
       "expectations": [
@@ -338,7 +338,7 @@
       "id": 24,
       "name": "nonbreaking-no-prefix-fallback",
       "kind": "edge",
-      "prompt": "/ship (clean default branch; last tag and package version are v2.3.0 / 2.3.0; the only new commit has subject 'Improve config diagnostics' and a body with no breaking-change marker; there are no conventional-commit prefixes)",
+      "prompt": "/cut-release (clean default branch; last tag and package version are v2.3.0 / 2.3.0; the only new commit has subject 'Improve config diagnostics' and a body with no breaking-change marker; there are no conventional-commit prefixes)",
       "expected_output": "Preserves the no-prefix fallback: chooses 2.4.0 and reports 'no conventional commits, defaulted to minor' under Uncertainty, while the release reviewer checks the proposed bump against the nonbreaking metadata.",
       "files": [],
       "expectations": [
@@ -353,7 +353,7 @@
       "id": 25,
       "name": "release-commit-tests-fail-blocks",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v1.3.1, two fix commits since; package.json has \"test\": \"vitest run\" and package-lock.json; after the version bump and release commit, `npm test` exits 1 with one failing test 'config loader > reads legacy keys'; .github/workflows/ci.yml runs on push and the previous commit's CI run is green)",
+      "prompt": "/cut-release (clean default branch, last tag v1.3.1, two fix commits since; package.json has \"test\": \"vitest run\" and package-lock.json; after the version bump and release commit, `npm test` exits 1 with one failing test 'config loader > reads legacy keys'; .github/workflows/ci.yml runs on push and the previous commit's CI run is green)",
       "expected_output": "Stops with 'BLOCKED — release commit failed npm test' after the release commit and before the tag. It names the failing test under Evidence, creates no tag, pushes nothing, and puts the reset-and-rerun recovery under Decision without running it.",
       "files": [],
       "expectations": [
@@ -361,14 +361,14 @@
         "Does not count the green CI run on the previous commit as verifying the release commit.",
         "Reports 'BLOCKED — release commit failed npm test' and names the failing test 'config loader > reads legacy keys'.",
         "Creates no tag and runs no git push.",
-        "Lists the recovery under Decision in this order (git reset --hard HEAD~1 first, then fix the test, commit the fix, and run /ship again) and does not run it itself."
+        "Lists the recovery under Decision in this order (git reset --hard HEAD~1 first, then fix the test, commit the fix, and run /cut-release again) and does not run it itself."
       ]
     },
     {
       "id": 26,
       "name": "no-tests-no-ci-uncertainty",
       "kind": "edge",
-      "prompt": "/ship (clean default branch of a shell-script project; last tag v0.4.0, one feat commit since; VERSION file holds 0.4.0; no package.json, Makefile, Cargo.toml, go.mod, pytest config, .github/workflows, verify skill or scripts/e2e_test.*; a scripts/release.sh exists)",
+      "prompt": "/cut-release (clean default branch of a shell-script project; last tag v0.4.0, one feat commit since; VERSION file holds 0.4.0; no package.json, Makefile, Cargo.toml, go.mod, pytest config, .github/workflows, verify skill or scripts/e2e_test.*; a scripts/release.sh exists)",
       "expected_output": "Releases v0.5.0. It reports 'Release commit <sha> not verified: no test command or CI' under Uncertainty, never as verified under Evidence, and never runs scripts/release.sh as a check.",
       "files": [],
       "expectations": [
@@ -383,7 +383,7 @@
       "id": 27,
       "name": "release-commit-ci-fails-blocks",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v2.0.0, one fix commit since; docs site with no package.json test script, Makefile, Cargo.toml, go.mod, pytest config, verify skill or scripts/e2e_test.*; .github/workflows/check.yml runs on push; gh is authenticated; after the release commit is pushed, the 'check' run on that commit ends with conclusion failure)",
+      "prompt": "/cut-release (clean default branch, last tag v2.0.0, one fix commit since; docs site with no package.json test script, Makefile, Cargo.toml, go.mod, pytest config, verify skill or scripts/e2e_test.*; .github/workflows/check.yml runs on push; gh is authenticated; after the release commit is pushed, the 'check' run on that commit ends with conclusion failure)",
       "expected_output": "Pushes the branch without the tag so CI can verify the release commit, waits for the runs on release_sha, and stops with 'BLOCKED — CI failed on release commit: check (failure)'. It creates no tag and puts the git revert recovery under Decision, never a reset or force-push.",
       "files": [],
       "expectations": [
@@ -398,7 +398,7 @@
       "id": 28,
       "name": "pretest-hook-calls-release-step",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v0.9.0, one feat commit since; package.json has \"test\": \"jest\" and \"pretest\": \"npm version patch --no-git-tag-version\"; no Makefile, .github/workflows, verify skill or scripts/e2e_test.*)",
+      "prompt": "/cut-release (clean default branch, last tag v0.9.0, one feat commit since; package.json has \"test\": \"jest\" and \"pretest\": \"npm version patch --no-git-tag-version\"; no Makefile, .github/workflows, verify skill or scripts/e2e_test.*)",
       "expected_output": "Reads the pretest hook before running npm test, sees that it calls npm version, and does not run npm test in auto mode. With no other check, it still tags v0.10.0 and reports 'Release commit <sha> not verified: the test command was skipped because it calls a release step' under Uncertainty.",
       "files": [],
       "expectations": [
@@ -413,7 +413,7 @@
       "id": 29,
       "name": "verify-skill-stale-commit-blocks",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v3.1.0, one fix commit since; Makefile has a test: target that passes on the release commit; .claude/skills/verify-api/SKILL.md exists; when followed, its last line is 'VERIFY PASS commit=1a2b3c4 dirty=no pass=6 fail=0 unverified=0 total=6 seconds=41', and 1a2b3c4 is the parent of the release commit)",
+      "prompt": "/cut-release (clean default branch, last tag v3.1.0, one fix commit since; Makefile has a test: target that passes on the release commit; .claude/skills/verify-api/SKILL.md exists; when followed, its last line is 'VERIFY PASS commit=1a2b3c4 dirty=no pass=6 fail=0 unverified=0 total=6 seconds=41', and 1a2b3c4 is the parent of the release commit)",
       "expected_output": "Runs make test on the release commit (passes), then follows the verify-api skill. Because its VERIFY line names the parent commit instead of the release commit, it stops with 'BLOCKED — verify skill gave no verdict for <short release sha>' and creates no tag.",
       "files": [],
       "expectations": [
@@ -428,7 +428,7 @@
       "id": 30,
       "name": "verified-release-with-untracked-build-output",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v1.1.0, one feat commit since; pyproject.toml has [tool.pytest.ini_options] and a build step; the Step 6 build leaves an untracked, not gitignored build/ directory; python -m pytest passes on the release commit with 42 tests and changes no file)",
+      "prompt": "/cut-release (clean default branch, last tag v1.1.0, one feat commit since; pyproject.toml has [tool.pytest.ini_options] and a build step; the Step 6 build leaves an untracked, not gitignored build/ directory; python -m pytest passes on the release commit with 42 tests and changes no file)",
       "expected_output": "Records release_sha and a baseline git status after the release commit (holding the untracked build/ directory), runs python -m pytest, finds no entry beyond the baseline, tags v1.2.0 and records 'python -m pytest passed on <short sha>' with the test count under Evidence.",
       "files": [],
       "expectations": [
@@ -443,7 +443,7 @@
       "id": 31,
       "name": "release-commit-ci-green-tags",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v2.0.0, one fix commit since; docs site with no package.json test script, Makefile, Cargo.toml, go.mod, pytest config or verify skill; scripts/e2e_test.sh exists and exits 0 on the release commit without writing files; .github/workflows/check.yml runs on push; gh is authenticated; after the release commit is pushed, the only run on that commit, 'check', ends with conclusion success)",
+      "prompt": "/cut-release (clean default branch, last tag v2.0.0, one fix commit since; docs site with no package.json test script, Makefile, Cargo.toml, go.mod, pytest config or verify skill; scripts/e2e_test.sh exists and exits 0 on the release commit without writing files; .github/workflows/check.yml runs on push; gh is authenticated; after the release commit is pushed, the only run on that commit, 'check', ends with conclusion success)",
       "expected_output": "Runs scripts/e2e_test.sh on the release commit before pushing anything, then pushes the branch without the tag, waits for the runs on release_sha, records 'CI green on <short sha>: check', and only then creates and pushes the v2.0.1 tag.",
       "files": [],
       "expectations": [
@@ -458,7 +458,7 @@
       "id": 32,
       "name": "release-check-leaves-files-blocks",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v0.4.0, one feat commit since; package.json has a test script with no pretest or posttest hook; npm test passes on the release commit but writes an untracked, not gitignored coverage/ directory that was not there after the release commit)",
+      "prompt": "/cut-release (clean default branch, last tag v0.4.0, one feat commit since; package.json has a test script with no pretest or posttest hook; npm test passes on the release commit but writes an untracked, not gitignored coverage/ directory that was not there after the release commit)",
       "expected_output": "Records release_sha and a baseline right after the release commit, runs npm test, finds coverage/ beyond the baseline, and stops with 'BLOCKED — release checks left files: coverage/'. It creates no tag, pushes nothing, and puts git reset --hard HEAD~1 under Decision as the recovery.",
       "files": [],
       "expectations": [
@@ -473,7 +473,7 @@
       "id": 33,
       "name": "release-commit-ci-push-rejected-blocks",
       "kind": "edge",
-      "prompt": "/ship (clean default branch, last tag v1.3.0, one fix commit since; no package.json test script, Makefile, Cargo.toml, go.mod, pytest config, verify skill or smoke script; .github/workflows/ci.yml runs on push; gh is authenticated; the branch is protected, so git push origin main for CI is rejected)",
+      "prompt": "/cut-release (clean default branch, last tag v1.3.0, one fix commit since; no package.json test script, Makefile, Cargo.toml, go.mod, pytest config, verify skill or smoke script; .github/workflows/ci.yml runs on push; gh is authenticated; the branch is protected, so git push origin main for CI is rejected)",
       "expected_output": "Commits the release, finds no local test command, pushes the branch without the tag for CI, and when the push is rejected stops with 'BLOCKED — CI push rejected: <reason>'. It creates no tag, never force-pushes, and puts git reset --hard HEAD~1 under Decision because the release commit never reached origin, so a rerun writes one changelog entry.",
       "files": [],
       "expectations": [

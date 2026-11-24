@@ -5,13 +5,13 @@
   If you're an AI agent, read the SKILL.md file instead for skill instructions.
 -->
 
-# Ship
+# Cut Release
 
-> Release a project end to end, autonomous by default: bump the version everywhere, write the changelog and end-user release notes, refresh the README, docs, and landing page, then tag, push, create the GitHub release, and publish to PyPI/npm. Formerly `release-manager`.
+> Release a project end to end, autonomous by default: bump the version everywhere, write the changelog and end-user release notes, refresh the README, docs, and landing page, then tag, push, create the GitHub release, and publish to PyPI/npm. Formerly `ship` (renamed because Claude Code now has a built-in `/ship`) and, before that, `release-manager`.
 
 ## Highlights
 
-- **Auto mode by default**: `/ship` runs every step without asking. Each gate has a fixed outcome (continue, skip with `PARTIAL`, or stop with `BLOCKED`), and every decision is listed in the final report
+- **Auto mode by default**: `/cut-release` runs every step without asking. Each gate has a fixed outcome (continue, skip with `PARTIAL`, or stop with `BLOCKED`), and every decision is listed in the final report
 - **`--no-auto`** restores step-by-step confirmation for the version, file changes, build, push, GitHub release, and publish
 - **Version bumped in every place**: version sources are found by field (manifests, lockfiles, plugin manifests, app versions, constants), even when they drifted, then a sweep proves no stale version remains
 - **End-user release notes** in plain language, separate from the developer changelog
@@ -29,9 +29,9 @@
 
 | Say this... | Skill will... |
 |---|---|
-| "/ship" | Run the full release end to end in auto mode |
-| "/ship 2.0.0" or "/ship minor" | Release that exact version, or apply that bump |
-| "/ship --no-auto" or "Ship it, but ask me before each step" | Run the full release with confirmations |
+| "/cut-release" | Run the full release end to end in auto mode |
+| "/cut-release 2.0.0" or "/cut-release minor" | Release that exact version, or apply that bump |
+| "/cut-release --no-auto" or "Ship it, but ask me before each step" | Run the full release with confirmations |
 | "Cut a release" / "Tag and publish v1.4" | Run the full release |
 | "What changed since the last release?" | Summarize commits and draft notes; change no files |
 | "Bump the version" | Update every version place and the docs; leave the changes uncommitted |
@@ -66,21 +66,21 @@ graph TD
 Install via [npx (Vercel)](https://www.npmjs.com/package/skills):
 
 ```bash
-npx skills@1.7.0 add https://github.com/luongnv89/skills --skill ship
+npx skills@1.7.0 add https://github.com/luongnv89/skills --skill cut-release
 ```
 
 Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
 
 ```bash
-asm install github:luongnv89/skills:skills/ship
+asm install github:luongnv89/skills:skills/cut-release
 ```
 
-Upgrading from `release-manager`: install `ship`, then remove the old installed `release-manager` copy so both names do not compete for the same requests.
+Upgrading from `ship` or `release-manager`: install `cut-release`, then remove the old installed `ship` or `release-manager` copy so the names do not compete for the same requests. `/ship` now runs Claude Code's built-in skill, not this one.
 
 ## Usage
 
 ```
-/ship [X.Y.Z | major | minor | patch] [--auto | --no-auto]
+/cut-release [X.Y.Z | major | minor | patch] [--auto | --no-auto]
 ```
 
 ## Resources

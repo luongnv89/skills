@@ -32,7 +32,7 @@ helper scripts: `claude plugin install lstack-extras@lstack --scope user`.
 
 - **Some skills act as you.** They run your own `git`, `gh`, `twine` and
   `npm`, signed in however you set them up; no skill reads a sign-in itself.
-  `ship` commits, tags, pushes, creates a GitHub release
+  `cut-release` commits, tags, pushes, creates a GitHub release
   and publishes to PyPI and npm **without asking by default**; pass `--no-auto`
   to confirm each step. `auto-push` stages everything, commits and pushes once
   its sensitive-file and large-file scan passes. Other skills that push, delete

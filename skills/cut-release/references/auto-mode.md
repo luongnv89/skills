@@ -44,7 +44,7 @@ Each of these stops the run with `BLOCKED`. Never retry with force and never ove
 
 A missing `gh` login or registry credential is not a hard stop: skip that step, report `PARTIAL`, and put the command under `Decision`.
 
-A stop after Step 5 and before the release commit (a failed Step 6 build, a rejected commit hook) leaves the release edits uncommitted in the working tree. List the edited files under `Decision`, with `git restore <files>` to discard them before running `/ship` again. A failed release-commit check or a rejected CI push (after the release commit, before the tag) follows `verify-release.md` → _5. On failure_. A rejected push of the tag, or a tag that `git ls-remote` does not find, keeps its own recovery (`resume.md`, `final-report.md`), never a reset or revert of the tagged commit.
+A stop after Step 5 and before the release commit (a failed Step 6 build, a rejected commit hook) leaves the release edits uncommitted in the working tree. List the edited files under `Decision`, with `git restore <files>` to discard them before running `/cut-release` again. A failed release-commit check or a rejected CI push (after the release commit, before the tag) follows `verify-release.md` → _5. On failure_. A rejected push of the tag, or a tag that `git ls-remote` does not find, keeps its own recovery (`resume.md`, `final-report.md`), never a reset or revert of the tagged commit.
 
 ## Version rules
 
@@ -54,7 +54,7 @@ Step 2 applies the first row that matches, after a version argument (which alway
 |---|---|---|
 | No previous tag | Release the primary version file's value as-is; no version file → `0.1.0` | Propose the same; ask |
 | The primary version file is ahead of `OLD_VERSION` and that version has no tag | Release the file's value as-is | Propose the same; ask |
-| `OLD_VERSION` is a pre-release (`2.0.0-rc.1`, PEP 440 `2.0.0rc1`) | Stop: `BLOCKED — pre-release needs an explicit version`; `Decision`: `/ship 2.0.0` or `/ship 2.0.0-rc.2` | Ask for the version |
+| `OLD_VERSION` is a pre-release (`2.0.0-rc.1`, PEP 440 `2.0.0rc1`) | Stop: `BLOCKED — pre-release needs an explicit version`; `Decision`: `/cut-release 2.0.0` or `/cut-release 2.0.0-rc.2` | Ask for the version |
 | No conventional-commit prefixes and no breaking subject or footer detected | MINOR; write "no conventional commits, defaulted to minor" under `Uncertainty` | Show the commits; ask |
 | Breaking change while `OLD_VERSION` is `0.y.z` | MINOR (`0.(y+1).0`). `1.0.0` only from an explicit version argument | Recommend MINOR; ask |
 

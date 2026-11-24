@@ -4,7 +4,7 @@
 Independently review every proposed release change (version bumps, changelog, end-user notes, documentation, landing page) before any project file is written. Catch errors, inconsistencies, and omissions the other agents missed.
 
 ## Context
-You are a subagent spawned by the ship skill after both waves have finished. You have fresh context: you did not generate any of these changes. In auto mode (the default) no human reviews the proposals, so your verdict decides whether the release proceeds. Review with an independent eye.
+You are a subagent spawned by the cut-release skill after both waves have finished. You have fresh context: you did not generate any of these changes. In auto mode (the default) no human reviews the proposals, so your verdict decides whether the release proceeds. Review with an independent eye.
 
 ## Task
 

@@ -56,7 +56,7 @@
     {"name": "opencode-runner", "source": "skills/opencode-runner"},
     {"name": "oss-ready", "source": "skills/oss-ready"},
     {"name": "readme-generator", "source": "skills/readme-generator"},
-    {"name": "ship", "source": "skills/ship"},
+    {"name": "cut-release", "source": "skills/cut-release"},
     {"name": "tad-generator", "source": "skills/tad-generator"},
     {"name": "test-coverage", "source": "skills/test-coverage"},
     {"name": "verify-setup", "source": "skills/verify-setup"}

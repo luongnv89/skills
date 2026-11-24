@@ -230,7 +230,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Task | Skills, in order |
 |---|---|
 | Prepare an app store submission | aso-marketing → appstore-assets → appstore-review-checker |
-| Harden and ship a repo | security-setup → devops-pipeline → ship (auto-push and cleanup-project for day-to-day work) |
+| Harden and ship a repo | security-setup → devops-pipeline → cut-release (auto-push and cleanup-project for day-to-day work) |
 | Open-source a project | oss-ready → readme-generator → doc-manager → landing-page-generator → github-pages-publish |
 | Brand and launch | brand-name-checker → logo-designer → landing-page-generator → github-pages-publish → product-launch |
 | Run an agent fleet | herdr-agent (Herdr TUI) *or* hc-agent (Herdr desktop app) *or* rex-agent *or* tmux-agent-comms (alternative backends) · issue-work-loop (Herdr TUI or desktop app) · opencode-runner · agent-profile |
@@ -284,11 +284,11 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**auto-push**](skills/auto-push/) | 1.2.3 | low | Commit message + stage + push with secret and size checks |
-| [**cleanup-project**](skills/cleanup-project/) | 1.1.1 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
+| [**cleanup-project**](skills/cleanup-project/) | 1.1.2 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.8.1 | medium | Pre-commit + lean, fast GitHub Actions quality gates, and cutting Actions minutes |
-| [**github-pages-publish**](extras/github-pages-publish/) | 1.1.1 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
+| [**github-pages-publish**](extras/github-pages-publish/) | 1.1.2 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
 | [**security-setup**](extras/security-setup/) | 1.6.3 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
-| [**ship**](skills/ship/) | 3.2.2 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
+| [**cut-release**](skills/cut-release/) | 4.0.0 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 
 ### Product Planning
 

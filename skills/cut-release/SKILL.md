@@ -1,21 +1,21 @@
 ---
-name: ship
+name: cut-release
 description: "Run a release end to end, autonomous by default: version bump everywhere, changelog, docs, landing page, tag, push, GitHub release, PyPI/npm. Use to ship, cut, or tag a release. Don't use for routine commits, pull requests, or marketplace publishing."
 license: MIT
 metadata:
-  version: 3.2.2
+  version: 4.0.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "max"
 ---
 
-# Ship
+# Cut Release
 
 Release a project end to end: the version in every place it appears, the developer changelog and end-user notes, the README, docs, and landing page, then build, tag, push, GitHub release, and PyPI/npm publish.
 
 ## Usage
 
 ```
-/ship [X.Y.Z | major | minor | patch] [--auto | --no-auto]
+/cut-release [X.Y.Z | major | minor | patch] [--auto | --no-auto]
 ```
 
 - **Auto mode (default)** runs every step without asking. Each point where interactive mode asks has a fixed outcome: continue, skip with `PARTIAL`, or stop with `BLOCKED`.
@@ -24,7 +24,7 @@ Release a project end to end: the version in every place it appears, the develop
 
 Read `references/auto-mode.md` before Step 1: outcome table, hard stops, version rules.
 
-**Scope.** A mode removes confirmations; it never widens the request. Only `/ship` or an explicit request to ship, cut, tag, or publish a release runs Steps 6-9. "What changed?" or "draft release notes" runs Step 2 and the changelog-generator only, and changes no file. "Bump the version" or "update the docs/landing page for the release" runs Steps 1-5 and leaves the changes uncommitted.
+**Scope.** A mode removes confirmations; it never widens the request. Only `/cut-release` or an explicit request to ship, cut, tag, or publish a release runs Steps 6-9. "What changed?" or "draft release notes" runs Step 2 and the changelog-generator only, and changes no file. "Bump the version" or "update the docs/landing page for the release" runs Steps 1-5 and leaves the changes uncommitted.
 
 ## Steps
 

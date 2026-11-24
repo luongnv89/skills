@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 1.1.1
+  version: 1.1.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -40,7 +40,7 @@ that names it, to save the agent's context budget.
 
 Use when someone wants a website, page, or set of HTML files published or updated on
 GitHub Pages, in the current repo or another one. Not for CI test or lint pipelines
-(`devops-pipeline`), release tagging (`ship`), designing a page without publishing it
+(`devops-pipeline`), release tagging (`cut-release`), designing a page without publishing it
 (`frontend-design`), building a framework or site-generator project (publish its built
 output instead), custom-domain DNS setup, or hosting outside GitHub Pages.
 

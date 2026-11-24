@@ -9,7 +9,7 @@
 
 > Publish or update a static website on GitHub Pages via GitHub Actions, in this repo or any other, and get back a URL that was checked live.
 
-Version: **1.1.1** · Author: Luong NGUYEN · License: MIT
+Version: **1.1.2** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -30,7 +30,7 @@ Version: **1.1.1** · Author: Luong NGUYEN · License: MIT
 | "Update the website in octo/tea-club with this folder" | Replace the old pages, log deletions, redeploy, verify the new content is live |
 | "Dry run: what would you do to publish this to my blog repo?" | Plan everything and show the changes; create and push nothing |
 
-Not for CI test pipelines (`devops-pipeline`), release tagging (`ship`), page design without publishing (`frontend-design`), or hosting outside GitHub Pages.
+Not for CI test pipelines (`devops-pipeline`), release tagging (`cut-release`), page design without publishing (`frontend-design`), or hosting outside GitHub Pages.
 
 ## How It Works
 
