@@ -40,9 +40,11 @@ The showcase page must:
 
 5. **Reference SVGs via relative `src` paths** (e.g., `<img src="logo-full.svg">`), not inline SVG, the hero mark included.
 
-6. **Check the written page against the bans** before opening it: search the HTML for `box-shadow`, `text-shadow`, `filter`, `drop-shadow`, a `:hover` rule with `transform`, `text-transform: uppercase`, `letter-spacing`, a `<link` or `@import` to an `http` URL, and each `brief.bans` rule. Remove every hit that no `brief.lifted_bans` entry covers, then cite the result on the Final Report's `Evidence:` line.
+6. **Check the written page against the bans** before opening it: search the HTML for `box-shadow`, `text-shadow`, `filter`, `drop-shadow`, `linear-gradient`, `radial-gradient`, a `:hover` rule with `transform`, `text-transform: uppercase`, `letter-spacing`, a `<link` or `@import` to an `http` URL, and each `brief.bans` rule. Remove every hit that no `brief.lifted_bans` entry covers, then cite the result on the Final Report's `Evidence:` line.
 
 7. **Open the file in the browser** after generating: `open /path/to/brand-showcase.html` (macOS) or equivalent.
+
+8. **Screenshot it and look (Gate 3).** A grep finds banned CSS, not a glow baked into an SVG, a clipped grid or a broken image. Take the 1440 px and 390 px screenshots in `references/render-inspect.md` (*Gate 3*), view both, and check them against its ban list before the Final Report says `COMPLETE`.
 
 ## Phase 4 Documentation Outputs
 

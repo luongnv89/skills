@@ -16,8 +16,8 @@ Apply the first row that matches:
 
 | Status | When |
 |--------|------|
-| `COMPLETE` | All 7 SVGs, every Phase 3b PNG at its measured size, and `brand-showcase.html` are written, and the Phase 3 geometry verification passed (the `d=""` strings match across variants, or are correctly scaled via `transform`). |
-| `PARTIAL` | Files were written and at least one holds: a variant is missing, the geometry verification still fails after re-running it, the showcase page was not written, an SVG contains an embedded raster, `<text>` or an effect the bans forbid, no rasterizer was found, or a PNG is missing or has the wrong size. |
+| `COMPLETE` | All 7 SVGs, every Phase 3b PNG at its measured size, and `brand-showcase.html` are written, the Phase 3 geometry verification passed (the `d=""` strings match across variants, or are correctly scaled via `transform`), and render Gates 1–3 ran and passed with no open finding (`references/render-inspect.md`). |
+| `PARTIAL` | Files were written and at least one holds: a variant is missing, the geometry verification still fails after re-running it, the showcase page was not written, an SVG contains an embedded raster, `<text>` or an effect the bans forbid, no rasterizer was found, a PNG is missing or has the wrong size, or a render gate could not run or still has an open finding (`references/render-inspect.md`, *When a gate cannot run*). |
 | `BLOCKED` | No files were written: the user gave no product context after one request, the decision-sheet or wordmark-casing confirmation went unanswered and the user ended the run, or Repo Sync stopped on a conflict. |
 
 A question that awaits the user's answer (product context, decision-sheet approval,
@@ -71,7 +71,8 @@ Decision: Resolve the conflict on the branch or tell me to continue without sync
   used and each PNG's measured dimensions (from `file` or `magick identify`, never copied
   from the size table), the effects-and-bans check of the SVGs (svg-reviewer) and of
   `brand-showcase.html` (the page check in `references/brand-showcase.md`), the
-  canonical mark's layer count against the confirmed decision, and the `sync:` record (`sync: skipped (...)` or `sync: failed
+  canonical mark's layer count against the confirmed decision, each render gate that ran
+  (sizes, backgrounds, the findings it fixed and any layer it cut), and the `sync:` record (`sync: skipped (...)` or `sync: failed
   (...)`; a failed sync that stopped the run is the `BLOCKED` reason). Cite a file name
   for each failure. Cite only checks that ran, never an adjective ("elegant",
   "premium") as evidence.
@@ -101,7 +102,7 @@ Use these when reviewing a run's Final Report, in addition to the correctness it
 |-------|-----------|
 | Result is findable | The first line states the status and the files written (or `No files written`) without opening `/assets/logo/`. |
 | Facts and assumptions are separated | Verified claims name a check that ran; untested checks and assumptions are on the `Uncertainty:` line. |
-| Claims are traceable | Each failed check cites the file it failed in; `COMPLETE` appears only when every file is written and the geometry verification passed. |
+| Claims are traceable | Each failed check cites the file it failed in; `COMPLETE` appears only when every file is written, the geometry verification passed and Gates 1–3 passed. |
 | Next decision is clear | The `Decision:` line names the pending choice or says `No approval needed.` |
 
 A heading's presence alone does not pass a check. Ask a human reviewer the same four
