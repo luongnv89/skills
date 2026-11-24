@@ -27,7 +27,7 @@ Trigger this skill when the user asks to:
 3. Read and follow the project's design-rules file, if any (*Design-rules file* in `references/system-defaults.md`). If the work extends an existing codebase, also read its framework, tokens, and component patterns before proposing anything.
 4. Propose an aesthetic direction (*Design Thinking*). In an existing codebase, also list the files you will create or modify. Emit the Design Thinking step report.
 5. Wait for the user to approve the direction before writing code. If the user asks for changes, propose again. If the user says "just build it", state the direction in one line and continue. If the user ends the run without approving, end with a `BLOCKED` Final Report.
-6. Read `references/aesthetics-guide.md`, `references/system-defaults.md` and the Quick rules in `references/usability-guide.md`. Run *Repo Sync Before Edits*. Then implement the code, adding a short comment at each non-obvious design decision (font pairing, token mapping, motion timing). Finish with the subtraction pass: remove every decoration that neither the brief nor the approved direction names.
+6. Read `references/aesthetics-guide.md`, `references/system-defaults.md` and the Quick rules in `references/usability-guide.md`. Run *Repo Sync Before Edits*. Then implement the code, adding a short comment at each non-obvious design decision (font pairing, token mapping, motion timing). Finish with the subtraction pass: remove every decoration that neither the brief, the rules file, nor the approved direction names.
 7. Run the verification checks:
    - **Visual:** follow *Visual check* in `references/system-defaults.md`: screenshots at phone and desktop width (dark mode and the production build when they apply), each inspected against the ban table, plus an overflow check. With no browser tool, inspect the CSS and record the visual check as untested.
    - **Contrast:** compute the contrast ratio of each text and background color pair. Each must be at least 4.5:1, or 3:1 for text at 24 px or larger (18.66 px or larger when bold).
@@ -79,7 +79,7 @@ An explicit brief overrides the palette, aesthetic, depth, and motion defaults, 
 
 Every final design must be production-ready, even unasked and regardless of aesthetic direction. The brief sets the style; this bar sets the finish, which comes from craft, not from the ban table under *Avoid* in `references/aesthetics-guide.md`. Check before delivery:
 - Consistent spacing rhythm and type scale; pixel-aligned edges
-- Colors only from the declared tokens; one radius set; shadows only on floating elements
+- Colors only from the declared tokens; one radius set; shadows only on floating elements unless the brief or rules file asks for more
 - Every interactive state: hover, focus, active, disabled, plus loading/empty/error where relevant
 - No placeholder, lorem ipsum, TODO, or broken asset; nothing looks like a draft
 - Every ban-table row under *Avoid* checked: none present unless the explicit brief or rules file asked for it

@@ -4,7 +4,7 @@ The concrete values behind the Default Style Guide in `SKILL.md`. Read the *Desi
 
 ## Design-rules file
 
-At step 3, look in the directory the code is written to, then each parent directory up to the git root, and stop at the first match among: `DESIGN.md`, `design-rules.md`, `docs/DESIGN.md`, `docs/design-rules.md`, then a `## Design` or `## Design rules` section in `AGENTS.md` or `CLAUDE.md`.
+At step 3, look in the directory the code is written to, then each parent directory up to the git root (only the target directory outside a git repo), and stop at the first match among: `DESIGN.md`, `design-rules.md`, `docs/DESIGN.md`, `docs/design-rules.md`, then a `## Design` or `## Design rules` section in `AGENTS.md` or `CLAUDE.md`.
 
 - **Found:** read it, follow every rule in it, and name it on the Design Thinking report's `Style source` line. Its rules beat the Default Style Guide and the ban table; the user's explicit brief for this run beats the file. When the brief contradicts a rule, the brief wins and the Design Thinking report names the overridden rule; only an interactive run that is not pre-authorized also asks at step 4 whether the rule should win instead ("just build it", or a calling skill, asks nothing).
 - **Not found:** record `rules file: none` and use the defaults.
@@ -30,7 +30,7 @@ Declare colors once, as CSS custom properties or in the framework's theme file, 
 - **Neutral surfaces:** backgrounds use `--color-surface`, or `--color-text` for an inverted section. No tinted surfaces.
 - **Accent for state only:** the current navigation item, the selected tab, chip, row or plan, a checked control. Never a fill, never text on white, and never decoration (no green headings, rules or icons for flavor).
 - **Contrast:** green on white is about 2.3:1, below both the 4.5:1 text and the 3:1 non-text minimum, so on white green is never text color: it goes only on a non-text border, underline, line or marker placed beside a non-color cue that carries the state (weight 600, or a 2 px black underline or border). Green text is allowed only on black (about 9.2:1). Gray is about 4.8:1 on white but about 4.3:1 on black: on black, use it only for text of 24 px or larger.
-- **Buttons:** primary is a black fill with white text on white surfaces (the inverse on black); secondary is a 1 px border with no fill. A button looks clickable through fill, border, and hover and focus states, not through a shadow.
+- **Buttons:** primary is a black fill with white text on white surfaces (the inverse on black); secondary is a 1 px border with no fill. A button looks clickable through fill, border, and hover and focus states, not through a shadow. Focus rings are a 2 px `--color-text` outline with a 2 px offset (`--color-surface` on black), never the accent.
 - **Existing codebase:** map onto its tokens instead of adding a second set.
 
 ## Motion
@@ -72,7 +72,7 @@ A named reference must be something the user can look at, such as "Swiss editori
 
 ## Subtraction pass
 
-At step 6, after the code is written and before step 7, list every element that is not content, a control or a state cue: icons beside headings, dividers, badges, background shapes, decorative borders, extra animation. Remove each one that the approved direction or the brief does not name; keep anything a brief item names. Record the number removed in the Implementation step report.
+At step 6, after the code is written and before step 7, list every element that is not content, a control or a state cue: icons beside headings, dividers, badges, background shapes, decorative borders, extra animation. Remove each one that the brief, the rules file or the approved direction does not name; keep anything they name. Record the number removed in the Implementation step report.
 
 ## Visual check
 
@@ -81,6 +81,6 @@ At step 7, with a browser tool (Playwright, a headless browser or a browser MCP)
 1. Take full-page screenshots at 375 px (phone) and 1280 px (desktop), and check 375, 768 and 1280 px for horizontal overflow.
 2. When the design ships a dark mode, repeat the screenshots with `prefers-color-scheme: dark` emulated or the theme toggle on.
 3. When the project has a build command, screenshot the production build (build, then serve the output), not the dev server.
-4. Look at each screenshot against every ban-table row and the active style source (explicit brief, design-rules file, else the Default Style Guide): a banned element the brief or rules file did not ask for, accent used outside a state, a nested card, a shadow on a static element, overflow. Fix what you find, then re-run the check.
+4. Look at each screenshot against every ban-table row and the active style source (explicit brief, design-rules file, else the Default Style Guide): a banned element the brief or rules file did not ask for (a nested card or a shadow on a static element included), accent used outside a state, overflow. Fix what you find, then re-run the check.
 
 Record the widths and modes checked on the Final Report's `Evidence:` line. With no browser tool, or a build that cannot be served, inspect the CSS against the ban table instead and write `Visual check untested: <reason>` on the `Uncertainty:` line.
