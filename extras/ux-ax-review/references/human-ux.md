@@ -14,10 +14,50 @@ complete the primary task; record task, sample and success criteria, not a ficti
 ## Brand
 
 Compare tone, logo, typography, color, illustration and trust signals across sampled
-surfaces and any supplied guidelines. Without guidelines label strategic fit as a
+surfaces and any supplied guidelines, including a design-rules or tokens file recorded in
+repo mode. Without guidelines label strategic fit as a
 hypothesis, not a breach. Source design tokens can show consistency but not rendered
 appearance. Suggest a coherent system rather than a gratuitous trend-driven redesign.
 Validation: approved brand tokens/copy rules and visual review of named states.
+
+### Visual-system check
+
+Part of `brand`, never a 13th aspect. Inspect the sampled surfaces and the style sources
+in the bundle (stylesheets, tokens or theme files, animation config) for:
+
+- **AI-default tells**: gradients on backgrounds, text, buttons or tiles; colored glow
+  (`box-shadow`/`text-shadow` halos); grain or noise overlays; decorative shadows on static
+  cards; cards inside cards; icon-in-tinted-circle feature grids; sparkle or emoji icons;
+  eyebrow labels above headings; numbered "01 / 02" section labels; Title Case UI text;
+  overused fonts (Inter, Roboto, Arial, system stacks, Space Grotesk); cream or off-white
+  page backgrounds; italic accent words in headlines; pill-shaped buttons. These are one
+  practitioner's defaults, not platform rules.
+- **Colour literals outside token files**: hex, `rgb()`, `hsl()` or named colours in
+  component rules when the project declares tokens. Cite file:line per distinct value.
+- **Type-scale sprawl**: the distinct font sizes, weights and families in use, listed
+  against the declared scale.
+- **Motion timing read from source**: durations, delays, easing curves and what animates
+  on load or scroll, with file:line. Reduced motion stays an accessibility check.
+- **Redundant elements**: anything that is not content, a control or a state cue, such as
+  icons beside headings, dividers, badges, background shapes, decorative borders, or a
+  subtitle restating its heading. Name each one.
+- **Competing effects**: two or more emphasis effects on one element or region (gradient
+  plus glow plus shadow, several accent colours, badges beside the primary action).
+
+Classify each item. Name the element and the rule, never "looks AI-generated":
+
+| Situation | Finding |
+|---|---|
+| Breaks a rule in supplied guidelines | `observed` under `brand`, citing the E record of the rule's file:line and the E record of the breach |
+| Supplied guidelines ask for the element | No finding |
+| No rule covers it and no harm is shown | `hypothesis`, confidence `low`, severity `low`; it never makes `brand` `issues` |
+| It causes real harm: contrast below the WCAG minimum, clipped or overlapping text, content hidden by an effect | `observed` under the harmed aspect (`accessibility`, `responsive`) with `related_aspects: ["brand"]`; harm read from source stays source-scoped until rendered |
+
+**Colour schemes.** When the product offers a dark scheme (a `prefers-color-scheme` query,
+a `color-scheme` declaration, a theme toggle) or forced-colours styles (`forced-colors:
+active`), check each offered scheme: tokens defined for it, literals that bypass it, and
+contrast in a render with that scheme emulated. No render leaves that subcheck
+not-tested. A scheme the product does not offer is not a finding.
 
 ## Responsive
 

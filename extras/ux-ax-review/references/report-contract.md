@@ -7,7 +7,8 @@ be scoped to evidence; structural validation does not validate their truth.
 
 1. `Executive Summary`: outcome PASS/PARTIAL (rule: `final-report.md`), main strengths and
    top three priorities.
-2. `Scope and Evidence`: mode, audience/goal, sample, exclusions, tool limits, E records.
+2. `Scope and Evidence`: mode, audience/goal, sample, exclusions, tool limits, supplied
+   guidelines (repo mode: the rules/tokens file paths, or `rules file: none`), E records.
 3. `Human UX`: all six human coverage entries with status/rationale and relevant E/F ids.
 4. `AI/Search AX`: all six AX entries, applicability/policy and optional-format caveats.
 5. `Prioritized Findings`: F ids, type, severity/confidence, evidence and recommendations.
@@ -107,6 +108,14 @@ P2 medium/supported discoverability improvement; P3 low/optional polish. Finding
 missing optional Markdown/llms/AI buttons default to low hypotheses/opportunities unless
 explicit requirements establish harm. Do not treat an intentional policy restriction as
 a defect. Task grouping may share ids across aspects, but never duplicate one defect.
+
+Visual-system tells (`human-ux.md` → *Visual-system check*): a tell that breaks a supplied
+rule is observed and cites the rule's E record; a tell judged only against practitioner
+defaults stays a low hypothesis (P3, phase 3). When repo mode found no rules or tokens file
+and the same tell repeats (on 2+ sampled surfaces or in 3+ places), add one P3 phase-3 task
+recommending that the project create one, naming the decisions it should settle (palette
+tokens, type scale, motion durations, which tells the brand wants). The audit never writes
+that file.
 
 Phases: 0 unblock/measure; 1 human/accessibility/performance fundamentals; 2 public
 content/discovery; 3 polish/experiments. Order tasks by phase then priority then id, except
