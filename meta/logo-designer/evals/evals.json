@@ -165,11 +165,12 @@
         "../../eval-fixtures/logo-designer/rules-repo/README.md"
       ],
       "expectations": [
-        "The brand brief's rules_file names DESIGN.md, and its bans array has one entry per rule with a DESIGN.md:<line> source",
+        "The brand brief's rules_file names DESIGN.md, and its bans array has one entry per rule on lines 5-9 with a DESIGN.md:<line> source",
         "The Phase 2 step report names DESIGN.md as the rules file with its ban count, and the proposed decisions already follow it (radius 0, filled shapes, lowercase IBM Plex Sans 600 wordmark), so the casing question is answered by the file",
         "Every shape in the 7 SVGs has square corners (no rx, ry or rounded path corners in the mark; the app-icon tile follows the radius rule too, or the Final Report names it as an assumption) and no stroke in the mark",
         "The SVGs use only #1F2937 and #D97706, plus white or black in logo-white.svg and logo-black.svg",
         "The svg-reviewer report checks every brief ban and cites its DESIGN.md source",
+        "The box-shadow rule on DESIGN.md:6 is in lifted_bans, not bans, with that source; the showcase check keeps the cards' box-shadow while the SVGs still have no filter or shadow",
         "DESIGN.md is not modified; any new rule line appears only as an optional proposal after the Final Report's Decision: text, quoted with the file it would go in"
       ]
     },

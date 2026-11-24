@@ -36,11 +36,11 @@ The showcase page must:
    - Monospace font for filenames and code blocks
    - `max-width: 1100px` container
    - One spacing scale, an aligned grid, no placeholder text or broken images
-   - Every `brief.bans` entry holds; a default ban is lifted only when the user's brief or the design-rules file asks for the effect (`references/design-principles.md`, *AI-default bans*)
+   - Every `brief.bans` entry holds; a default ban is lifted only when `brief.lifted_bans` names it (`references/design-principles.md`, *AI-default bans*)
 
 5. **Reference SVGs via relative `src` paths** (e.g., `<img src="logo-full.svg">`), not inline SVG, the hero mark included.
 
-6. **Check the written page against the bans** before opening it: search the HTML for `box-shadow`, `text-shadow`, `filter`, `drop-shadow`, a `:hover` rule with `transform`, `text-transform: uppercase`, `letter-spacing`, a `<link` or `@import` to an `http` URL, and each `brief.bans` rule. Remove every hit that no lifted ban covers, then cite the result on the Final Report's `Evidence:` line.
+6. **Check the written page against the bans** before opening it: search the HTML for `box-shadow`, `text-shadow`, `filter`, `drop-shadow`, a `:hover` rule with `transform`, `text-transform: uppercase`, `letter-spacing`, a `<link` or `@import` to an `http` URL, and each `brief.bans` rule. Remove every hit that no `brief.lifted_bans` entry covers, then cite the result on the Final Report's `Evidence:` line.
 
 7. **Open the file in the browser** after generating: `open /path/to/brand-showcase.html` (macOS) or equivalent.
 
