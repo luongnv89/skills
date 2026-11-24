@@ -21,4 +21,4 @@
 | Captured build is `dev`, `preview` or `unknown` | Record `build.kind` and `build.basis`; the report's Build line labels it and never presents it as production. |
 | Request has only style adjectives ("make it look great", "modern") | Audit mode; record them in `request.style_adjectives` and the Scope note as untestable, ask for a design-rules file or reference screens; never convert or forward them. |
 | Noise finding with no matching ux-ax-review item | Keeps its own `clarity` row; no brand row is invented; nothing goes on the Cut list without a member finding. |
-| frontend-design reports `Visual check untested` and the ux-ax-review re-check cannot run | Report the fix as `applied, not verified: <reason>`, never done (`references/apply.md`). |
+| frontend-design ends `PARTIAL` or reports `Visual check untested`, and the ux-ax-review re-check cannot run or leaves the row's aspect `not-tested` | Report the fix as `applied, not verified: <reason>`, never done (`references/apply.md`). |
