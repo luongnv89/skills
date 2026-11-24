@@ -45,22 +45,27 @@ lookups.
    statuses to use. For `domain`, the status definitions are in `../SKILL.md` →
    *Step 3: Domain Check*; read them there.
 2. Check each target independently, in parallel where the tools allow, with
-   the query or URL that section gives. Substitute the name for `[NAME]` and
-   the TLD for `[TLD]`.
+   the query or URL that section gives. Substitute the name's normalized slug
+   for `[NAME]` and the TLD for `[TLD]`, following the section file's
+   *Tools* rule on what may go into a URL or shell command.
 3. Give each target exactly one status from that section's list. Never
    invent a status.
 4. Never infer availability. A source that cannot be reached, answers with an
    error the section does not map to a status (a registry 404 is `available`),
    or only shows that no active site was found is `unknown`; do not infer
-   availability.
+   availability. Once a registry has shown a domain is registered, the
+   section's Active and Parked rules decide its status.
 5. Put the facts behind each status in `evidence`: the query or URL you used,
    plus every fact the section asks you to record, such as a taken package's
    owner and last publish date, a squatting signal, a domain's registrar,
    expiry or active site's industry, and each trademark's class, owner and
    live or expired state.
-6. If WebFetch or a direct database search is unavailable, run the section's
-   web-search query instead and say so in `evidence`. If no tool works, mark
-   every target `unknown`.
+6. Use whichever web access works: any HTTP tool (WebFetch, an MCP fetch
+   tool, or `curl` in a shell) for the section's direct endpoints, a shell
+   for its `whois` lookups, and any search tool for its queries. Query the
+   direct endpoint first. Run the section's search query only when the source
+   has no endpoint or the endpoint cannot be reached, and say so in
+   `evidence`. If no tool works, mark every target `unknown`.
 
 For `social`, report every platform even when one is `taken (exact)`. The
 parent applies the Early-Exit Rule; this agent does not stop early.

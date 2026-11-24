@@ -18,7 +18,7 @@ Field rules and worked examples for the compact report in `SKILL.md` → *Output
 
 - **COMPLETE**: every required check is verified, or skipped by the Early-Exit Rule after an exact handle was confirmed.
 - **PARTIAL**: one or more checks are Unknown. The risk is provisional under the unknown policy.
-- **BLOCKED**: no name was provided, or the web tools are unavailable. Return only the `RESULT` line with the reason and the fix (for example, "enable WebSearch and re-run"). Omit every other line.
+- **BLOCKED**: no name was provided, or no web access works (no HTTP or search tool answers a test request). Return only the `RESULT` line with the reason and the fix (for example, "enable a web fetch or search tool, or shell access for curl, and re-run"). Omit every other line.
 
 ## The `next:` clause
 
@@ -49,7 +49,7 @@ SOCIAL: Clear
 REGISTRY: npm (available) | PyPI (available) | Homebrew (available) | apt (available)
 DOMAIN: .com (parked) | .io (available) | .app (available)
 TM: WIPO (clear) | EUIPO (clear) | INPI (clear)
-EVIDENCE: registry.npmjs.org/acme-flow 404; pypi.org/pypi/acme-flow/json 404; branddb.wipo.int no live mark in classes 9/35/42; checked 2026-01-15T10:02Z
+EVIDENCE: registry.npmjs.org/acme-flow 404; pypi.org/pypi/acme-flow/json 404; rdap.verisign.com/com/v1/domain/acme-flow.com 200 and acme-flow.com shows a for-sale page; pubapi.registry.google/rdap/domain/acme-flow.app 404; whois -h whois.nic.io acme-flow.io: Domain not found.; branddb.wipo.int no live mark in classes 9/35/42; checked 2026-01-15T10:02Z
 SKIPPED: none
 UNKNOWN: none
 RISK: Low - no High or Moderate trigger; every check verified; .com parked, not active
@@ -66,7 +66,7 @@ SOCIAL: Clear
 REGISTRY: npm (available) | PyPI (available) | Homebrew (available) | apt (available)
 DOMAIN: .com (available) | .io (available) | .app (available)
 TM: WIPO (clear) | EUIPO (Unknown) | INPI (clear)
-EVIDENCE: registry.npmjs.org/brightloom 404; whois brightloom.com unregistered; checked 2026-01-15T10:20Z
+EVIDENCE: registry.npmjs.org/brightloom 404; rdap.verisign.com/com/v1/domain/brightloom.com 404; whois -h whois.nic.io brightloom.io: Domain not found.; pubapi.registry.google/rdap/domain/brightloom.app 404; checked 2026-01-15T10:20Z
 SKIPPED: none
 UNKNOWN: EUIPO - search timed out twice; verify at euipo.europa.eu/eSearch for classes 9/35/42
 RISK: Moderate - provisional; unknown EUIPO check and no known High finding (unknown policy)
