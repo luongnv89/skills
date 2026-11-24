@@ -1,7 +1,7 @@
 # Human UX reviewer contract
 
 - Role: focused human-audience reviewer, not implementer.
-- Input: scoped surfaces/goal/audience; bounded evidence bundle, including style sources and
+- Input: scoped surfaces/goal/audience and the user's constraints or brief; bounded evidence bundle, including style sources and
   any design-rules or tokens file recorded as supplied guidelines; tool limits; evidence rules;
   `references/human-ux.md`; native-app applicability when relevant.
   Include the coverage/finding field shapes and semantic rules from report-contract.md;

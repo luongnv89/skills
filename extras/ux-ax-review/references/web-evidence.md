@@ -8,6 +8,10 @@ browser is unavailable (e.g. Lightpanda/DOM-only), request screenshots for visua
 mark brand/reflow/contrast subchecks not-tested. Saved screenshots are still a partial
 sample. Never equate DOM extraction with rendered/interactive verification.
 
+When the product offers a dark or forced-colours scheme (`human-ux.md` → *Visual-system
+check*) and a graphical browser is available, capture one render per offered scheme with
+that scheme emulated, label it with the scheme and environment, and add it to the bundle.
+
 Bound collection to the scoped surfaces plus robots.txt, referenced sitemap, llms.txt and
 supplied/documented public machine-readable routes. Prefer fetching known routes; inspect
 one representative sitemap subset rather than crawling the whole site. Do not run load

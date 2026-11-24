@@ -110,8 +110,9 @@ explicit requirements establish harm. Do not treat an intentional policy restric
 a defect. Task grouping may share ids across aspects, but never duplicate one defect.
 
 Visual-system tells (`human-ux.md` → *Visual-system check*): a tell that breaks a supplied
-rule is observed and cites the rule's E record; a tell judged only against practitioner
-defaults stays a low hypothesis (P3, phase 3). When repo mode found no rules or tokens file
+rule is observed and cites the rule's E record; a tell the brief or guidelines ask for is
+no finding; a tell judged only against practitioner defaults stays a low hypothesis (P3,
+phase 3). When repo mode found no rules or tokens file
 and the same tell repeats (on 2+ sampled surfaces or in 3+ places), add one P3 phase-3 task
 recommending that the project create one, naming the decisions it should settle (palette
 tokens, type scale, motion durations, which tells the brand wants). The audit never writes
