@@ -37,8 +37,8 @@ Decision: Approve dropping the detail layer in favicon.svg, or pick a different 
 
 ```text
 Result: PARTIAL. Wrote 7 SVGs and brand-showcase.html to /assets/logo/; no PNGs, because no rasterizer is installed.
-Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. Rasterizer detection: rsvg-convert, magick, inkscape and Chrome not found.
-Uncertainty: PNG rendering did not run, so no PNG dimensions were measured.
+Evidence: Read back mark, full, icon, white and black variants: d="" strings identical. svg-reviewer: all viewBox attributes correct, no embedded rasters, no <text>. Rasterizer detection: rsvg-convert, magick, inkscape and Chrome not found. Gates 1 and 2, geometry only: favicon gaps at least 1 whole unit, contrast by formula, no layer cut.
+Uncertainty: PNG rendering did not run, so no PNG dimensions were measured. The Gate 1 and 2 renders and the Gate 3 PNG and showcase checks did not run, so nobody looked at the mark at size.
 Decision: Install a rasterizer (brew install librsvg on macOS, sudo apt install librsvg2-bin on Debian/Ubuntu), then re-run Phase 3b.
 ```
 

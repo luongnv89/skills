@@ -18,7 +18,8 @@ tool (Read on the PNG). Name each finding by file, size and background.
 ## Setup (start of Phase 3)
 
 Detect the rasterizer once, by `references/png-export.md` *Step 2*, and reuse it in
-Phase 3b. Previews go to a temporary directory, never into `/assets/logo/` or `png/`,
+Phase 3b. Also look for a Chrome or Chromium binary whichever rasterizer won, by the
+same list in *Step 2*, and set `CHROME` to it: Gate 3's screenshots need it. Previews go to a temporary directory, never into `/assets/logo/` or `png/`,
 which hold only deliverables:
 
 ```bash
@@ -30,9 +31,16 @@ Render an SVG at `S`×`S` px on background `BG`:
 | Tool | Command |
 |------|---------|
 | `rsvg-convert` | `rsvg-convert -w S -h S -b 'BG' IN.svg -o OUT.png` |
-| `magick` | `magick -background 'BG' -density D IN.svg -resize 'SxS!' -flatten OUT.png` (`D` = 72 × S ÷ viewBox width, rounded up) |
+| `magick` | `magick -background 'BG' -density D IN.svg -resize 'SxS!' -flatten OUT.png` (`D` = 96 × S ÷ viewBox width, rounded up) |
 | `inkscape` | `inkscape IN.svg --export-type=png --export-filename=OUT.png -w S -h S --export-background='BG' --export-background-opacity=1` |
-| Chrome | The `references/png-export.md` command with `--default-background-color=` set to `BG` as 8 hex digits (`FAFAFAFF`, `0A0A0AFF`). If a run writes no file, run it once more |
+| Chrome | The `references/png-export.md` command with `--default-background-color=` set to `BG` as 8 hex digits (`FAFAFAFF`, `0A0A0AFF`). An SVG file opened directly fills a window as small as 16 px (an HTML page does not; see Gate 3). If a run writes no file, run it once more |
+
+**Gaps need a pixel-exact renderer.** In a test, `rsvg-convert` and Chrome drew a
+1-unit gap on whole units as one clean background column. `magick` without a librsvg
+delegate (`magick -list format` shows `MSVG`) uses its own renderer, which filled that
+same gap. When `magick` is the only tool, judge every gap by the geometry
+check in Gate 2 and put `gaps judged by geometry, magick render not pixel-exact` on
+the Final Report's `Uncertainty:` line.
 
 **Enlarge the small renders before looking.** A 16 px PNG shown as is gets smoothed
 by the viewer, and a closed gap looks open. With `magick`, scale it with nearest
@@ -107,8 +115,7 @@ fix edits `favicon.svg` only, so no other variant changes.
 ## Gate 3: shipped files, before COMPLETE
 
 Run it after the Phase 3b dimension check and after `brand-showcase.html` is
-written. `$CHROME` is the Chrome or Chromium binary from `references/png-export.md`
-*Step 2*.
+written. `$CHROME` is the Chrome or Chromium binary found in *Setup*.
 
 1. **Every PNG.** Open each file in `png/`. It must show the same shape as its SVG,
    with no substituted font and nothing clipped. A white or transparent PNG is hard
