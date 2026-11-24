@@ -498,6 +498,8 @@ class SeveralNamesTests(unittest.TestCase):
             "it is never written as available",
             "plus each extra TLD named",
             "reads `unverified - not cleared`, whatever the endpoint cells say",
+            "past the 8-row cap on the line right below the table as `not screened (over the 8-row cap)`",
+            "is never marked `(quick-screened, unverified)`",
         ):
             with self.subTest(clause=clause):
                 self.assertIn(clause, section)

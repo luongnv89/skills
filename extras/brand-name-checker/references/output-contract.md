@@ -93,14 +93,14 @@ RECOMMEND: Abandon - nimbus-dev, nimbusly (both unverified); next: pick a candid
 This layout applies when more than one name was checked, or when the user asked for a quick-screen on one name (`SKILL.md` → *Several names*). Any other run returns the single report alone.
 
 1. `CANDIDATES:` the names in input order, each with its slug when the slug differs, then any name over the 5-name cap as `not checked (over the 5-name cap)`.
-2. The `QUICK-SCREEN:` caption and table (*Quick-screen table* below), or `QUICK-SCREEN: none - no alternatives suggested`.
+2. The `QUICK-SCREEN:` caption and table (*Quick-screen table* below), then on the line right below the table any alternative over the 8-row cap as `not screened (over the 8-row cap)`; or `QUICK-SCREEN: none - no alternatives suggested`.
 3. For each checked name, in input order, a divider line `--- <name> (i of N) ---` and then that name's compact report. `RESULT` is the first line of each report and counts that name's own checks; `RISK` and `RECOMMEND` are its last two lines.
 
 The table comes before the reports, so every report keeps `RISK` and `RECOMMEND` last and the whole output still ends with the last name's `RISK` and `RECOMMEND` lines. A `BLOCKED` run (no name, or no web access) returns only its one `RESULT` line: no `CANDIDATES` line, no table, no dividers. When `prd.md` exists, its blocks are appended once, after the last report (`references/prd-integration.md`).
 
 ## Quick-screen table
 
-**Input.** The alternatives named on the reports' `RECOMMEND` lines (the synthesizer's `variants_if_modify` and `alternatives_if_abandon` when it ran), de-duplicated by slug, leaving out any name checked in full, at most 8 in the order suggested.
+**Input.** The alternatives named on the reports' `RECOMMEND` lines (the synthesizer's `variants_if_modify` and `alternatives_if_abandon` when it ran), de-duplicated by slug, leaving out any name checked in full, at most 8 in the order suggested. Name each alternative past the 8-row cap on the line right below the table as `not screened (over the 8-row cap)`; never leave one out silently. Such an alternative keeps the plain `unverified` label on its `RECOMMEND` line and is never marked `(quick-screened, unverified)`.
 
 **Slug rule.** Normalize each alternative with the slug rule in `references/edge-cases.md` before any fetch, and put only that slug into a URL or a shell command, as `references/source-checks.md` requires for every lookup. An alternative containing `@` or `/`, such as an npm scope `@org/name`, names something other than its slug, so it is not fetched: every endpoint cell in its row is `unknown`.
 
