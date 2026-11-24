@@ -230,6 +230,22 @@
         "landing-page-generator did not trigger, or stopped and said it never edits README.md",
         "README.md was not edited by this skill, and no landing copy, COMPANION PAGES block or landing-page/ folder was produced"
       ]
+    },
+    {
+      "id": 20,
+      "kind": "happy-path",
+      "name": "page-build-no-icon-steps-sentence-case",
+      "prompt": "Write and build the landing page for Tidyshelf, a pantry app for home cooks that scans grocery receipts and warns before food expires. Audience: busy parents. Primary CTA: start tracking free. We have no brand guide and no user numbers yet.",
+      "expected_output": "Copy whose How-it-works steps are actions in words with no icon slot, and whose headlines, section headings and CTA texts are in sentence case, since the brief names no title-case brand. landing-page/ is built by frontend-design with no icon per step or feature and no decoration the copy does not call for, carrying each CTA text verbatim. The Final Report carries frontend-design's visual check: the widths and modes screenshotted on Evidence:, or Visual check untested: <reason> on Uncertainty:.",
+      "files": [],
+      "expectations": [
+        "No How-it-works step in the copy carries an [Icon concept] or other icon slot; each step is a short action in words",
+        "The hero headline, section headings and every CTA text are in sentence case (for example 'Start tracking free', not 'Start Tracking Free'); only proper nouns such as Tidyshelf keep a capital mid-phrase",
+        "The brief given to frontend-design asks for no icon per step and allows no decoration the copy does not call for: no stock imagery, decorative illustration, background shapes or badges",
+        "landing-page/index.html shows the How-it-works steps without an icon, svg, img or emoji per step, and shows no image the copy does not name",
+        "Each CTA on landing-page/index.html is a link or button whose text matches the copy's sentence-case CTA text verbatim",
+        "The Final Report's Evidence: line names the visual check's widths and modes screenshotted, or its Uncertainty: line reads 'Visual check untested: <reason>'; an untested visual check alone does not make the status PARTIAL"
+      ]
     }
   ]
 }

@@ -63,9 +63,9 @@ Why it beats alternatives: [Specific differentiator]
 HOW IT WORKS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 1: [Icon concept] — [Simple action]
-Step 2: [Icon concept] — [Simple action]
-Step 3: [Icon concept] — [Simple action]
+Step 1: [Simple action]
+Step 2: [Simple action]
+Step 3: [Simple action]
 
 CTA: "[Action-oriented text]"
 
@@ -160,9 +160,9 @@ Outcome statement: [Life or workflow after adopting the product]
 HOW IT WORKS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 1: [Icon concept] — [Simple action]
-Step 2: [Icon concept] — [Simple action]
-Step 3: [Icon concept] — [Simple action]
+Step 1: [Simple action]
+Step 2: [Simple action]
+Step 3: [Simple action]
 
 CTA: "[Action-oriented text]"
 
@@ -249,9 +249,9 @@ Authority proof: [Credentials, results, or experience that earns trust]
 PLAN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 1: [Icon concept] — [Simple action the customer takes]
-Step 2: [Icon concept] — [Simple action the customer takes]
-Step 3: [Icon concept] — [Simple action the customer takes]
+Step 1: [Simple action the customer takes]
+Step 2: [Simple action the customer takes]
+Step 3: [Simple action the customer takes]
 
 Plan summary: [One sentence — "Do X, then Y, then Z to get the outcome"]
 
@@ -332,6 +332,8 @@ Step 5 (SKILL.md → *Workflow*):
 - Short, scannable sentences
 - "You" language (customer-focused)
 - Multiple CTAs throughout the page
+- Sentence case for headlines, subheadlines, section headings, and CTA text ("Start my free trial", not "Start My Free Trial"); product names and other proper nouns keep their capitals. Use title case only when the brand's own materials or the brief use it, and then use it throughout. Companion page names (Privacy Policy, Terms of Use) are document titles and keep their case.
+- No visual slots: a How-it-works step is an action in words, with no icon concept. Name an image only when the brief supplies it (a screenshot, a demo), so the page build adds no decoration (`references/page-build.md` → *Nothing added*).
 
 **Hero rules** (practitioner advice; see `references/anti-slop-rules.md` → *The test*). They shape the content of the template's existing hero fields (headline, subheadline, trust bar) and never add or reorder a section:
 
@@ -360,9 +362,9 @@ Product/Service: AcmeDesk
 Framework: PAS
 
 HERO SECTION
-Headline: Answer Every Customer Without Hiring Support
+Headline: Answer every customer without hiring support
 Subheadline: Solo founders answer every support email themselves, on top of building the product. AcmeDesk gives you a shared inbox with AI draft replies, set up in 10 minutes.
-CTA Button: "Start My Free Trial"
+CTA Button: "Start my free trial"
 Trust Bar: [proof needed — add user count or response-time metric, and a screenshot of the shared inbox]
 ...
 OPTIMIZATION NOTES
