@@ -15,5 +15,7 @@ Glossary for the scan → triage → plan → issues pipeline. Kept out of `SKIL
   or applied** — fetching and implementing them is out of scope.
 - **scan-faithful** — every word of the plan traces to the scan response. Never open the
   target site's source, never guess at its stack, never add a task the scan did not fail.
+  The only exceptions are the renderer's own static header notes (see `plan-format.md`),
+  which change no task.
 - **approval gate** — a full stop. The run ends its turn and waits for the user.
 
