@@ -310,7 +310,7 @@ paste-ready article that the founder must review · Confidence: medium
 - **Do:** write how it was built and why, not an ad, and tag it with relevant tags.
 - **Owned first:** publish the article on the founder's own site first; the Hashnode copy
   sets its canonical URL to that original (confirmed for imports; the editor field is
-  unverified) (`launch-kit.md`, *Own channels*).
+  unverified) (`launch-kit.md`, *Long-form article (owned first)*).
 - **Sources:** hashnode.com/pricing, /changelog and /code-of-conduct.
 
 ## github — GitHub

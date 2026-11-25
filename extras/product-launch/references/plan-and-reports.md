@@ -215,9 +215,9 @@ exactly one mode.
    | L-day                | product-hunt goes live at 12:01 AM PT. x and linkedin posts, and the email-list send, follow once it is live. |
    | L+1                  | hacker-news (Show HN), on its own day so the founder can stay in the thread.                   |
    | L+2 to L+6           | Reddit, one subreddit a day, on each subreddit's allowed day. Community-tier posts (indie-hackers, geeknews, hashnode). Daily boards on their booked dates. |
-   | L+7                  | Recap on x and indie-hackers. The founder writes it from real numbers after launch; the kit gives only an outline. First founder-run signal check, by hand (`launch-story.md` §7). |
+   | L+7                  | Recap on x and indie-hackers. The founder writes it from real numbers after launch; the kit gives only an outline. First founder-run signal check, by hand: branded search in the founder's own Search Console, the Generative AI performance report, and which tools AI assistants name for the category (`launch-story.md` §7). |
    | L+3 to L+30          | Directory drip, 2–3 listings a week.                                                           |
-   | L+30                 | Second founder-run signal check, then one legitimate action per AI-cited page (`launch-story.md` §7). |
+   | L+30                 | Second founder-run signal check, then one action per AI-cited page: the founder's own review profile, a factual note the founder writes to the author with no payment, the Reddit rules, or a better page on the founder's site (`launch-story.md` §7). |
 5. **Without product-hunt:** if product-hunt is not in Core, L-day is the hacker-news day,
    or the main board's day.
 6. **Times:** write every launch time in its platform's timezone (PT, PST/PDT or UTC) and

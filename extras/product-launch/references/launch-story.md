@@ -43,17 +43,20 @@ page and talks. It has five elements:
   off, and write `copy.story.*` fields only for elements a Profile row sources.
 - **Founder interview (optional)** *(practitioner)*: the founder answers the copy-bank
   story prompts in a recorded 20–30 minute session and gives you the transcript, in the
-  request or as a file path. You read it in Step 4 and pass the answers you use to the
-  writers; the explorer reads it only when it comes with the request (`product-profile.md`,
-  source 1).
+  request or as a file path. You read it in Step 4; the answers you use reach the writers
+  only as sourced rows in `launch-plan.md` (`## Launch story`, Product Profile). The
+  explorer reads it only when it comes with the request (`product-profile.md`, source 1).
   - A quoted answer is a founder input in the founder's own words. Its source is
     `user: "<quote>" (interview transcript)`, the form `product-profile.md` already
     accepts, for a story element or a fact. Quote only what the founder said; never fill
     a gap from it by inference.
-  - Own-voice long form (a LinkedIn article, a build article, a post on the founder's
+  - Own-voice long form (a build article, a LinkedIn article, a post on the founder's
     own site) is drafted from the quoted answers. The founder edits it before it goes
-    out, it is published first on the founder's own site, and every copy links home
-    (`launch-kit.md`, *Own channels*).
+    out, and it is published first on the founder's own site: copies on Hashnode, dev.to
+    or Medium set their canonical URL to that original, and a LinkedIn article links to
+    it (`launch-kit.md`, *Long-form article (owned first)*). When the request mentions
+    an article or a cross-post, the plan's `## Assumptions and unknowns` states this
+    rule.
   - Founder-voice rules still apply. A platform whose rules ban generated or AI-edited
     text (hacker-news, r/programming, awesome lists, a subreddit that bans LLM-written
     posts) never gets text drafted from the transcript: its brief may point to which
@@ -167,7 +170,8 @@ no figures, and the skill never runs any step itself.
 
 1. **Branded search:** in the founder's own Search Console (Performance → Search
    results), filter Query to those containing the product name, and compare impressions
-   and clicks for the 28 days before L-day with the days since L-day (28 days at L+30).
+   and clicks for the days since L-day (7 at L+7, 28 at L+30) with the same number of
+   days just before L-day.
    Record each figure with its date range. No Search Console for the site: "not
    available: verify the site in Search Console".
 2. **Generative AI performance report:** where Search Console shows it for the site,
@@ -196,11 +200,11 @@ Each page step 3 found cited for the category gets one action, by its kind:
 | Cited page | Action |
 | --- | --- |
 | Review site (G2, Capterra, TrustRadius) | The founder's own profile there, under that site's review rules (`platforms-directories.md`): reviews come from real users, never conditional on a positive one. |
-| Listicle or article | A short factual note the founder writes to its author: what the product does, for whom and how it differs, from Profile facts, disclosing any material connection (§5). The kit lists the facts and never drafts the note. No payment, product or perk for inclusion; a paid placement is advertising, labelled sponsored and disclosed (the paid amplification track). |
+| Listicle or article | A short factual note the founder writes to its author: what the product does, for whom and how it differs, from Profile facts, disclosing any material connection (§5). The kit lists the facts and never drafts the note. No payment, product or perk for inclusion: paying for a place in the list is never an action here, and ads stay in the paid amplification track (§4, §5). |
 | Reddit or forum thread | The Reddit rules (`platforms-core.md` reddit, the `reddit.md` Participation plan): help in the thread where its rules allow, and disclose whenever the product comes up. Never post to get the product named. |
 | A page that answers the question better than the founder's site | A better page on the founder's own site: hand it to `/seo-ai-optimizer`. |
 
 Never seed, write, buy or trade reviews or mentions, and never ask friends to post them.
 Google's guide: "However, seeking inauthentic "mentions" across the web isn't as helpful as
-it might seem." (developers.google.com/search/docs/fundamentals/ai-optimization-guide)
+it might seem." (https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)
 Refuse such a request, quote this rule, and offer the action in the table instead.
