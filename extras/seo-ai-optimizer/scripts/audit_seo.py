@@ -14,8 +14,50 @@ import sys
 import os
 import re
 import json
+import urllib.parse
+import urllib.robotparser
 from pathlib import Path
 from html.parser import HTMLParser
+
+
+# Crawlers whose robots.txt access is reported, with what blocking each one affects.
+ROBOTS_CRAWLERS = {
+    "GPTBot": "OpenAI's crawler for model training",
+    "ClaudeBot": "Anthropic's crawler for model training",
+    "OAI-SearchBot": "OpenAI's crawler for ChatGPT search answers",
+    "Claude-SearchBot": "Anthropic's crawler for Claude search results",
+    "PerplexityBot": "Perplexity's crawler for its search results",
+    "Googlebot": "Google's crawler for Google Search and all its features",
+}
+ROBOTS_KEY_PATHS = ("/blog/", "/docs/", "/about/")
+
+# Text inside these elements is not shown to a reader of the raw HTML.
+HIDDEN_TEXT_TAGS = {"script", "style", "template", "noscript"}
+APP_MOUNT_IDS = {"root", "app", "__next", "__nuxt", "svelte"}
+APP_SHELL_MAX_WORDS = 50
+
+FRAMEWORK_CONFIG_FILES = {
+    "next.config.js": "Next.js",
+    "next.config.mjs": "Next.js",
+    "next.config.ts": "Next.js",
+    "nuxt.config.js": "Nuxt",
+    "nuxt.config.ts": "Nuxt",
+    "astro.config.mjs": "Astro",
+    "astro.config.ts": "Astro",
+    "svelte.config.js": "SvelteKit",
+    "gatsby-config.js": "Gatsby",
+    "gatsby-config.ts": "Gatsby",
+    "hugo.toml": "Hugo",
+    "hugo.yaml": "Hugo",
+    "config.toml": "Hugo",  # common Hugo config
+    "angular.json": "Angular",
+    "remix.config.js": "Remix",
+    "vite.config.js": "Vite",
+    "vite.config.ts": "Vite",
+    "webpack.config.js": "Webpack",
+    "_config.yml": "Jekyll",
+}
+SERVER_RENDERING_DEPS = {"next", "nuxt", "astro", "@sveltejs/kit", "gatsby", "@react-router/dev", "vike", "vite-plugin-ssr"}
 
 
 class SEOAuditParser(HTMLParser):
@@ -39,6 +81,8 @@ class SEOAuditParser(HTMLParser):
         self.json_ld = []
         self.lang = None
         self.has_inline_critical_css = False
+        self.visible_words = 0
+        self.has_app_mount = False
 
         self._in_title = False
         self._title_text = ""
@@ -53,9 +97,20 @@ class SEOAuditParser(HTMLParser):
         self._a_rel = ""
         self._a_text = ""
         self._in_style = False
+        self._in_head = False
+        self._hidden_depth = 0
 
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
+
+        if tag == "head":
+            self._in_head = True
+        elif tag == "body":
+            self._in_head = False
+        if tag in HIDDEN_TEXT_TAGS:
+            self._hidden_depth += 1
+        if attrs_dict.get("id") in APP_MOUNT_IDS:
+            self.has_app_mount = True
 
         if tag == "html":
             self.lang = attrs_dict.get("lang")
@@ -131,6 +186,11 @@ class SEOAuditParser(HTMLParser):
             self._in_style = True
 
     def handle_endtag(self, tag):
+        if tag == "head":
+            self._in_head = False
+        if tag in HIDDEN_TEXT_TAGS and self._hidden_depth:
+            self._hidden_depth -= 1
+
         if tag == "title":
             self._in_title = False
             self.title = self._title_text.strip()
@@ -160,6 +220,9 @@ class SEOAuditParser(HTMLParser):
             self.has_inline_critical_css = True
 
     def handle_data(self, data):
+        if not (self._in_head or self._in_title or self._hidden_depth):
+            self.visible_words += len(data.split())
+
         if self._in_title:
             self._title_text += data
         elif self._in_heading:
@@ -219,6 +282,16 @@ def audit_file(filepath):
     # Lang attribute
     if not parser.lang:
         issues.append({"severity": "warning", "category": "technical-seo", "message": "Missing lang attribute on <html> tag"})
+
+    # Meta robots noindex
+    if parser.meta_robots:
+        robots_tokens = {token.strip().lower() for token in parser.meta_robots.split(",")}
+        if robots_tokens & {"noindex", "none"}:
+            issues.append({
+                "severity": "warning",
+                "category": "technical-seo",
+                "message": f"Meta robots is '{parser.meta_robots}', so search engines will not index this page. Is this intentional?"
+            })
 
     # --- Content SEO ---
 
@@ -309,6 +382,149 @@ def audit_file(filepath):
     return issues, info
 
 
+def robots_rule_group(crawler, robots_lines):
+    """Name the robots.txt group that governs a crawler: its own group, else `*`."""
+    name = crawler.lower()
+    for line in robots_lines:
+        field, _, value = line.partition(":")
+        if field.strip().lower() != "user-agent":
+            continue
+        token = value.split("#", 1)[0].strip()
+        if token and token != "*" and token.lower() in name:
+            return f"User-agent: {token}"
+    return "User-agent: *"
+
+
+def check_robots(robots_file):
+    """Report each listed crawler that robots.txt blocks from the site or a key path."""
+    try:
+        # utf-8-sig drops a byte-order mark, which robotparser would read as part of the first line.
+        robots_text = robots_file.read_text(encoding="utf-8-sig", errors="replace")
+    except OSError as e:
+        print(
+            f"Error: cannot read robots.txt at {robots_file}: {e}. "
+            "Make it a readable text file, then re-run the audit.",
+            file=sys.stderr,
+        )
+        return [{
+            "severity": "error",
+            "category": "ai-bot",
+            "message": f"Cannot read robots.txt at {robots_file}: {e}",
+        }]
+
+    robots_lines = robots_text.splitlines()
+    rules = urllib.robotparser.RobotFileParser()
+    rules.parse(robots_lines)
+
+    findings = []
+    for crawler, role in ROBOTS_CRAWLERS.items():
+        group = robots_rule_group(crawler, robots_lines)
+        if not rules.can_fetch(crawler, "/"):
+            findings.append({
+                "severity": "critical" if crawler == "Googlebot" else "warning",
+                "category": "ai-bot",
+                "crawler": crawler,
+                "source_group": group,
+                "message": f"robots.txt blocks {crawler} ({role}) from the whole site through `{group}`. Is this block intentional?",
+            })
+            continue
+        blocked_paths = [path for path in ROBOTS_KEY_PATHS if not rules.can_fetch(crawler, path)]
+        if blocked_paths:
+            findings.append({
+                "severity": "info",
+                "category": "ai-bot",
+                "crawler": crawler,
+                "source_group": group,
+                "message": (
+                    f"robots.txt blocks {crawler} from {', '.join(blocked_paths)} through `{group}`. Is this intentional? "
+                    "Wildcard rules and overlapping Allow rules are matched differently before Python 3.13, so read the rule to confirm."
+                ),
+            })
+
+    if not findings:
+        findings.append({
+            "severity": "info",
+            "category": "ai-bot",
+            "message": f"robots.txt allows {', '.join(ROBOTS_CRAWLERS)} to crawl the site",
+        })
+    return findings
+
+
+def raw_html_check(page_file, manifest_file):
+    """Count what a crawler that does not run JavaScript sees in the saved raw HTML."""
+    findings = []
+    site_host = None
+    try:
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+        site_host = urllib.parse.urlsplit(manifest.get("final_url") or manifest.get("url") or "").netloc.lower()
+    except (OSError, ValueError, AttributeError, TypeError) as e:
+        print(
+            f"Error: cannot read the page URL from {manifest_file}: {e}. "
+            "Counting only relative links as internal; fix manifest.json to count absolute same-site links too.",
+            file=sys.stderr,
+        )
+        findings.append({
+            "severity": "error",
+            "category": "raw-html",
+            "message": f"Cannot read manifest.json ({e}); internal_links counts relative links only",
+        })
+
+    parser = SEOAuditParser()
+    parser.feed(page_file.read_text(encoding="utf-8", errors="replace"))
+
+    internal_links = 0
+    for link in parser.links:
+        href = link["href"].strip()
+        if not href or href.startswith("#"):
+            continue
+        parts = urllib.parse.urlsplit(href)
+        if parts.scheme in ("", "http", "https") and (not parts.netloc or parts.netloc.lower() == site_host):
+            internal_links += 1
+
+    stats = {
+        "raw_text_words": parser.visible_words,
+        "h1_count": sum(1 for level, _ in parser.headings if level == 1),
+        "internal_links": internal_links,
+    }
+    if parser.has_app_mount and parser.scripts and parser.visible_words < APP_SHELL_MAX_WORDS:
+        findings.append({
+            "severity": "warning",
+            "category": "raw-html",
+            "message": (
+                f"page.html is a JavaScript app shell ({parser.visible_words} visible words, an app mount element and script bundles): "
+                "the page may look empty to crawlers that do not run JavaScript (practitioner: GPTBot and similar)"
+            ),
+        })
+    return stats, findings
+
+
+def has_server_rendering(project_root):
+    """True when package.json names a server-rendering or static-generation framework.
+
+    Called only when detect_framework returned Vite or React, which already rules out
+    the Next, Nuxt, Astro, SvelteKit, Gatsby and Remix config files.
+    """
+    pkg_json = project_root / "package.json"
+    if not pkg_json.exists():
+        return False
+    try:
+        pkg = json.loads(pkg_json.read_text())
+        all_deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+    except (json.JSONDecodeError, KeyError):
+        return False
+    return any(
+        dep in SERVER_RENDERING_DEPS or dep.startswith("@remix-run/") or (dep.startswith("@tanstack/") and dep.endswith("start"))
+        for dep in all_deps
+    )
+
+
+def print_report(report):
+    """Add project-level findings to the summary totals and print the report."""
+    for check in report["project_checks"]:
+        report["summary"][check["severity"]] = report["summary"].get(check["severity"], 0) + 1
+    print(json.dumps(report, indent=2))
+
+
 def audit_project(project_root, max_files=50):
     """Audit an entire project directory."""
     project_root = Path(project_root).resolve()
@@ -340,7 +556,7 @@ def audit_project(project_root, max_files=50):
             "category": "structure",
             "message": "No HTML/template files found. This skill is designed for web frontends."
         })
-        print(json.dumps(report, indent=2))
+        print_report(report)
         return report
 
     # Sample if too many files
@@ -394,21 +610,15 @@ def audit_project(project_root, max_files=50):
             "message": "No robots.txt found"
         })
     else:
-        robots_content = robots_file.read_text(encoding="utf-8", errors="replace").lower()
-        ai_bots = ["gptbot", "claudebot", "perplexitybot", "google-extended", "ccbot", "bytespider"]
-        mentioned = [bot for bot in ai_bots if bot in robots_content]
-        if not mentioned:
-            report["project_checks"].append({
-                "severity": "warning",
-                "category": "ai-bot",
-                "message": "robots.txt has no AI bot directives (GPTBot, ClaudeBot, etc.)"
-            })
-        else:
-            report["project_checks"].append({
-                "severity": "info",
-                "category": "ai-bot",
-                "message": f"robots.txt mentions AI bots: {', '.join(mentioned)}"
-            })
+        report["project_checks"].extend(check_robots(robots_file))
+
+    # Raw HTML as fetched without JavaScript (live-evidence mode: a search-optimizer evidence dir)
+    manifest_file = project_root / "manifest.json"
+    page_file = project_root / "page.html"
+    live_evidence = manifest_file.is_file() and page_file.is_file()
+    if live_evidence:
+        report["raw_html"], raw_findings = raw_html_check(page_file, manifest_file)
+        report["project_checks"].extend(raw_findings)
 
     # sitemap.xml
     sitemap_candidates = [
@@ -448,7 +658,7 @@ def audit_project(project_root, max_files=50):
         report["project_checks"].append({
             "severity": "info",
             "category": "ai-bot",
-            "message": "No llms.txt found. Consider adding one to help AI systems understand your site."
+            "message": "No llms.txt found (optional; used by some AI tools, not by Google Search)."
         })
 
     # ai-plugin.json
@@ -473,35 +683,20 @@ def audit_project(project_root, max_files=50):
             "category": "framework",
             "message": f"Detected framework: {framework}"
         })
+    if not live_evidence and framework in ("Vite", "React") and not has_server_rendering(project_root):
+        report["project_checks"].append({
+            "severity": "info",
+            "category": "raw-html",
+            "message": f"Client-only SPA ({framework}, no server rendering or static generation found): raw HTML is likely empty for crawlers that do not run JavaScript"
+        })
 
-    print(json.dumps(report, indent=2))
+    print_report(report)
     return report
 
 
 def detect_framework(project_root):
     """Detect the web framework used in the project."""
-    indicators = {
-        "next.config.js": "Next.js",
-        "next.config.mjs": "Next.js",
-        "next.config.ts": "Next.js",
-        "nuxt.config.js": "Nuxt",
-        "nuxt.config.ts": "Nuxt",
-        "astro.config.mjs": "Astro",
-        "astro.config.ts": "Astro",
-        "svelte.config.js": "SvelteKit",
-        "gatsby-config.js": "Gatsby",
-        "gatsby-config.ts": "Gatsby",
-        "hugo.toml": "Hugo",
-        "hugo.yaml": "Hugo",
-        "config.toml": "Hugo",  # common Hugo config
-        "angular.json": "Angular",
-        "remix.config.js": "Remix",
-        "vite.config.js": "Vite",
-        "vite.config.ts": "Vite",
-        "webpack.config.js": "Webpack",
-        "_config.yml": "Jekyll",
-    }
-    for filename, framework in indicators.items():
+    for filename, framework in FRAMEWORK_CONFIG_FILES.items():
         if (project_root / filename).exists():
             return framework
 
