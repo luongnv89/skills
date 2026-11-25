@@ -30,6 +30,14 @@ Record each failed gate in the fit table.
 | Launched a while ago | `stage` is launched with a date more than 4 weeks ago                      | betalist                                                                                        |
 | Promotion product  | `category_flags` is yes                                                      | r/SaaS                                                                                          |
 | Not taking launches | the index status                                                            | crazy-about-ai, 500-tools. tiny-startups is planned as paid only.                               |
+| Link scheme        | the index marks it `link scheme`: every path sells a link or requires a reciprocal link, badge or engagement trade; or it is a bulk-submission service, a low-quality directory, or a directory that gates listings on domain rating | toolify, twelve-tools, rank-anything, ai-directories, startup-fame, confetti-saas. A kept platform whose live check finds only a badge or engagement path joins them. |
+
+The link-scheme gate follows Google's link-spam policy, which names "Buying or selling
+links", "Excessive link exchanges", "Using automated programs or services to create
+links" and "Low-quality directory or bookmark site links"
+(developers.google.com/search/docs/essentials/spam-policies). Listings bring discovery,
+referral visits and credibility, and their links are mostly nofollow: found and trusted,
+not ranked. A link, its attribute or a domain rating is never a reason to pick a path.
 
 | Requirement gate | Passes when                                                                  | Platforms                                              |
 | ---------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -82,8 +90,8 @@ never Step 3's live check, which always reports Reddit as unreachable.
 | ------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Audience fit  | 0–4    | Compare the platform's `Fits` with the profile's `audience` and `ideal_customer`. 4: the platform names that audience. 3: the audience is a large share (developers and tech early adopters on product-hunt or hacker-news). 2: general makers and early adopters (most launch boards). 1: weak overlap. 0: none. |
 | Reach         | 0–3    | The `Reach` column: A=3, B=2, C=1. For own channels, 2 when `channels` lists one, else 1.                                                                    |
-| Cost          | 0–2    | 2: free with no conditions. 1: free with a badge, backlink or engagement task, or paid at ≤$40 and within budget. 0: paid only above $40, or outside budget. |
-| Timing        | 0–1    | 1: it can go live between L-day and L+30, by its free wait or by a paid option within budget (§5). 0: it cannot.                                             |
+| Cost          | 0–2    | 2: free with no conditions (a queue counts). 1: paid at ≤$40 and within budget. 0: paid only above $40, or outside budget. A badge, reciprocal-link or engagement-gate path is never scored as free: score the queue or the paid path. |
+| Timing        | 0–1    | 1: it can go live between L-day and L+30, by its unconditional free wait or by a paid option within budget (§5). 0: it cannot.                               |
 
 Write all four components into the fit table, so the user can audit any score. Break
 ties by higher audience fit, then lower cost, then catalog order.
@@ -98,9 +106,9 @@ Take the rows top to bottom. The first row that matches a platform sets its tier
 | Launch week     | kind "launch board", score ≥6                                                             | 8    |
 | Community       | kind community, content or code host (not Core), score ≥5                                 | 4    |
 | Directory drip  | kind directory, review site or AI directory, score ≥5                                     | 10   |
-| Profiles        | crunchbase when the product has a company; wellfound when its gate passes                 | none |
+| Profiles        | crunchbase when the product has a company; wellfound when its gate passes. Owned profiles (GitHub profile and README homepage, crunchbase, the Product Hunt maker profile, the founder's LinkedIn) carry the same one-line description and one link home. Never create an account, profile or extension only for its link. | none |
 | Own channels    | x and linkedin always; email-list when its gate passes                                    | none |
-| Skip            | everything else, with a reason: a failed gate, "score N below the tier threshold", or "over cap: lower score than <id>" | none |
+| Skip            | everything else, with a reason: a failed gate (link scheme included), "only a reciprocal or engagement path within budget" (no unconditional free path, queue or in-budget paid path), "score N below the tier threshold", or "over cap: lower score than <id>" | none |
 
 The user can move any skipped platform back in at the approval gate.
 
@@ -108,7 +116,16 @@ The user can move any skipped platform back in at the approval gate.
 
 `File`: core = `platforms-core.md`, boards = `platforms-launch-boards.md`, dirs =
 `platforms-directories.md`. `Link`: badge-dofollow means dofollow only while their badge
-is live. Mode `voice` means founder-voice. `Conf`: H, M or L.
+is live. The Link column is catalog data for the live check: never a reason to pick a path,
+and never what money buys. Plans and Budget lines describe a paid tier by its placement and
+audience, as advertising: the link must be nofollow or sponsored. A badge is a reciprocal
+link, never the default path. An `engagement gate` (votes, comments or points on other
+launches) is used only for launches the founder tried and would recommend; a vote given
+only to unlock a slot is a traded vote, so the plan takes the gate-free path or skips the
+slot. Mode `voice` means founder-voice; reddit's `paste*` posts are drafts the founder
+rewrites and posts personally, with no ready comment reply, and links follow each
+subreddit's rule (when unsure, none in comments; the site goes in the Reddit profile).
+`Conf`: H, M or L.
 
 | id                  | Platform               | File   | Kind          | Fits                                    | Free path                               | Paid from        | Free wait            | Cadence                    | Link              | Reach | Mode   | Conf |
 | ------------------- | ---------------------- | ------ | ------------- | --------------------------------------- | --------------------------------------- | ---------------- | -------------------- | -------------------------- | ----------------- | ----- | ------ | ---- |
@@ -125,14 +142,14 @@ is live. Mode `voice` means founder-voice. `Conf`: H, M or L.
 | email-list          | Email list (own)       | core   | own channel   | your waitlist or newsletter             | yes                                     | none             | none                 | L-day                      | n/a               | own   | paste  | n/a  |
 | what-launched-today | What Launched Today    | boards | launch board  | any tech product                        | yes                                     | €27              | ~3 months            | daily 00:00 UTC            | dofollow          | C     | paste  | H    |
 | betalist            | BetaList               | boards | launch board  | pre-launch or just-launched startups    | no (refunded if rejected)               | after sign-in    | by plan              | editorial                  | dofollow (paid)   | B     | paste  | M    |
-| uneed               | Uneed                  | boards | launch board  | SaaS, dev, AI, apps, extensions         | yes (score ≥10 to stay)                 | $14.99           | ≥30 days             | daily 12:00 AM PST         | dofollow if score ≥20 | B | paste  | H    |
+| uneed               | Uneed                  | boards | launch board  | SaaS, dev, AI, apps, extensions         | yes (score ≥10 to stay)                 | $14.99           | ≥30 days             | daily 12:00 AM PST         | dofollow (score-gated) | B | paste  | H    |
 | peerlist            | Peerlist Launchpad     | boards | launch board  | coding/design projects, digital products | yes (verified profile)                 | none             | none (weekly)        | weekly, Monday             | top 5 only        | B     | paste  | M    |
 | devhunt             | DevHunt                | boards | launch board  | developer tools only                    | listing only                            | $19              | n/a                  | weekly Tue 00:00 UTC       | dofollow (paid)   | B     | paste  | H    |
 | launching-next      | Launching Next         | boards | launch board  | startups, side projects                 | yes (editorial)                         | $99              | unstated             | editorial                  | mixed             | C     | paste  | M    |
 | microlaunch         | Microlaunch            | boards | launch board  | startups, software                      | queue (unpublished)                     | $39              | unpublished          | monthly                    | dofollow          | C     | paste  | M    |
-| betterlaunch        | BetterLaunch           | boards | launch board  | live software                           | yes                                     | $9 (skip)        | ≥45 days (−14 by voting 3) | weekly Mon 00:00 UTC | badge-dofollow    | C     | paste  | H    |
-| foundrlist          | FoundrList             | boards | launch board  | products you own                        | badge, or 3 upvotes + 1 comment         | $29              | ~4 weeks             | weekly Mon 12:01 AM PT     | dofollow (paid)   | C     | paste  | H    |
-| peerpush            | PeerPush               | boards | launch board  | web, mobile, API, CLI, MCP              | queue, or 400 points                    | $39              | unpublished          | continuous                 | dofollow          | C     | paste  | H    |
+| betterlaunch        | BetterLaunch           | boards | launch board  | live software                           | yes                                     | $9 (skip)        | ≥45 days (sooner via engagement gate) | weekly Mon 00:00 UTC | badge-dofollow | C | paste  | H    |
+| foundrlist          | FoundrList             | boards | launch board  | products you own                        | badge, or engagement gate               | $29              | ~4 weeks             | weekly Mon 12:01 AM PT     | dofollow (paid)   | C     | paste  | H    |
+| peerpush            | PeerPush               | boards | launch board  | web, mobile, API, CLI, MCP              | queue, or points (engagement gate)      | $39              | unpublished          | continuous                 | dofollow          | C     | paste  | H    |
 | startupbase         | StartupBase            | boards | launch board  | products with a working site            | badge (4–5 weeks) or none (10+ weeks)   | $39              | 4–10+ weeks          | daily 12:00 AM PDT         | dofollow (paid)   | C     | paste  | H    |
 | aura-plus-plus      | Aura++                 | boards | launch board  | real working software                   | yes (5 slots a day)                     | $29              | review 24–48 h       | daily 08:00 UTC            | top 3 + badge     | C     | paste  | H    |
 | shipybara           | Shipybara              | boards | launch board  | tech products                           | yes (18 slots a week)                   | $50              | slot capacity        | weekly Mon 00:00 UTC       | top 3 or badge    | C     | paste  | M    |
@@ -151,19 +168,19 @@ is live. Mode `voice` means founder-voice. `Conf`: H, M or L.
 | trustradius         | TrustRadius            | dirs   | review site   | B2B tech, mid-market and enterprise     | claim profile                           | demo only        | unpublished          | review-driven              | unknown           | B     | paste  | M    |
 | sourceforge         | SourceForge            | dirs   | code host     | OSS hosting; business listing           | yes (OSS)                               | by budget        | immediate (OSS)      | evergreen                  | unknown           | C     | paste  | M    |
 | sideprojectors      | SideProjectors         | dirs   | directory     | side projects (showcase or sale)        | yes                                     | priority fee     | 24 h–5 days          | evergreen                  | unknown           | C     | paste  | M    |
-| startup-fame        | Startup Fame           | dirs   | directory     | startups with an English site, DR >0    | badge                                   | $19/mo           | several days         | evergreen                  | dofollow          | C     | paste  | H    |
+| startup-fame        | Startup Fame           | dirs   | directory     | startups with an English site, DR >0    | badge                                   | $19/mo           | several days         | evergreen                  | link scheme       | C     | paste  | H    |
 | crunchbase          | Crunchbase             | dirs   | profile       | any company (credibility)               | yes                                     | none             | none                 | static                     | unknown           | B     | paste  | M    |
 | wellfound           | Wellfound              | dirs   | profile       | hiring only                             | yes (job posts)                         | $200/ad          | n/a                  | n/a                        | unknown           | C     | paste  | M    |
-| twelve-tools        | Twelve Tools           | dirs   | directory     | any web tool                            | backlink                                | $36              | ≤72 h review         | 12 a day                   | dofollow          | C     | paste  | H    |
+| twelve-tools        | Twelve Tools           | dirs   | directory     | any web tool                            | reciprocal link                         | $36              | ≤72 h review         | 12 a day                   | link scheme       | C     | paste  | H    |
 | 500-tools           | 500 Tools              | dirs   | directory     | sold out                                | no                                      | $1→$5/mo         | n/a                  | n/a                        | unknown           | C     | n/a    | M    |
-| confetti-saas       | Confetti SaaS          | dirs   | directory     | products with a confetti moment         | badge (DR >0)                           | Fast Track       | unstated             | evergreen                  | dofollow          | C     | paste  | M    |
-| rank-anything       | Rank Anything          | dirs   | directory     | user tier lists                         | yes                                     | none             | instant (unverified) | evergreen                  | dofollow (archived) | C   | paste  | L    |
+| confetti-saas       | Confetti SaaS          | dirs   | directory     | products with a confetti moment         | badge (DR >0)                           | Fast Track       | unstated             | evergreen                  | link scheme       | C     | paste  | M    |
+| rank-anything       | Rank Anything          | dirs   | directory     | user tier lists                         | yes                                     | none             | instant (unverified) | evergreen                  | link scheme       | C     | paste  | L    |
 | theresanaiforthat   | There's An AI For That | dirs   | AI directory  | AI tools, MCPs, GPTs                    | no (monthly X thread)                   | $49              | 1–2 days             | permanent listing          | unknown           | A     | paste  | H    |
 | futurepedia         | Futurepedia            | dirs   | AI directory  | AI tools                                | no                                      | $497             | 2 business days      | editorial                  | unknown           | B     | paste  | L    |
-| toolify             | Toolify                | dirs   | AI directory  | AI tools (multilingual)                 | no                                      | $99              | ≤48 h                | permanent listing          | dofollow          | B     | paste  | M    |
+| toolify             | Toolify                | dirs   | AI directory  | AI tools (multilingual)                 | no                                      | $99              | ≤48 h                | permanent listing          | link scheme       | B     | paste  | M    |
 | future-tools        | Future Tools           | dirs   | AI directory  | public AI tools (>75% rejected)         | yes                                     | ads on request   | ≥1 week, no SLA      | editorial                  | unknown           | B     | paste  | H    |
-| ai-directories      | AI Directories         | dirs   | AI directory  | AI tools; submission service            | backlink                                | $49              | ≤72 h                | evergreen                  | dofollow          | C     | paste  | H    |
-| launch-llama        | Launch Llama tools     | dirs   | AI directory  | AI tools, dev tools, SaaS               | badge + 5 upvotes + rating              | $39              | ~4 weeks             | upvotes; newsletter Tue    | badge-dofollow    | C     | paste  | H    |
+| ai-directories      | AI Directories         | dirs   | AI directory  | AI tools; submission service            | reciprocal link                         | $49              | ≤72 h                | evergreen                  | link scheme       | C     | paste  | H    |
+| launch-llama        | Launch Llama tools     | dirs   | AI directory  | AI tools, dev tools, SaaS               | badge + engagement gate                 | $39              | ~4 weeks             | upvotes; newsletter Tue    | badge-dofollow    | C     | paste  | H    |
 | crazy-about-ai      | Crazy About AI         | dirs   | none          | parked domain, always skip              | no                                      | none             | n/a                  | n/a                        | n/a               | n/a   | n/a    | H    |
 
 `paste*` exceptions: r/programming and awesome-list pull requests are founder-voice. Each
@@ -178,9 +195,11 @@ exactly one mode.
    campaign track can move it later: apply the L-day rule in `launch-story.md` §4.
 2. **Account setup:** today, for every account with an age, karma or verification gate:
    product-hunt (7 days), geeknews (7 days), peerlist (verified profile and a 100%
-   project), and each chosen subreddit's karma gate. Reddit participation starts the same
-   day and repeats weekly until the last Reddit post day. The founder sends mod mail this
-   week to each chosen subreddit that §1 marks for it.
+   project), and each chosen subreddit's karma gate. Karma and age gates are thresholds
+   the account meets by taking part, never targets. Reddit participation starts the same
+   day and repeats weekly, between and after the posts: the timeline lists it to L+30, and
+   the plan says to keep going. The founder sends mod mail this week to each chosen
+   subreddit that §1 marks for it.
 3. **Queue submissions:** submit each free-queue platform today. Its expected go-live is
    today plus its free wait.
    - A weekly board goes on the Monday of launch week when its free wait allows. Otherwise
@@ -248,13 +267,13 @@ Story owner: <role, never a name; or none (track off)>
 <every track in launch-story.md §4; all off unless the user turned one on>
 
 ## Budget
-Free path total: $0. Paid options proposed: <each option, its price and what it buys>. Total if all are accepted: $<N>.
+Free path total: $0. Paid options proposed: <each option, its price, and its placement and audience, labelled "advertising: the link must be nofollow or sponsored"; never a link or domain rating>. Total if all are accepted: $<N>.
 
 ## Materials Step 5 will write
 <the file list: README.md, copy-bank.md, assets.md, and platforms/<id>.md for each platform>
 
 ## Actions that need a second yes
-<only what applies: "gh repo edit (metadata)" when the repo is public on GitHub; "ph-mcp: Product Hunt draft, readiness check, then submit after you approve its preview" when product-hunt is in the plan and its MCP passed product-hunt-mcp.md §1 (otherwise one line: "Product Hunt MCP not connected; install steps in the guide"); "/logo-designer: no square logo found"; "/landing-page-generator: no landing page"; "/seo-ai-optimizer: og tags missing"; or "None">
+<only what applies: "gh repo edit (metadata)" when the repo is public on GitHub; "ph-mcp: Product Hunt draft, readiness check, then submit after you approve its preview" when product-hunt is in the plan and its MCP passed product-hunt-mcp.md §1 (otherwise one line: "Product Hunt MCP not connected; install steps in the guide"); "/logo-designer: no square logo found"; "/landing-page-generator: no landing page"; "/seo-ai-optimizer: og tags missing" (or "robots.txt blocks search or AI crawlers"); or "None">
 
 ## Assumptions and unknowns
 <each assumption, inferred value, and unknown profile field that affected a decision>

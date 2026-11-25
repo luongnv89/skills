@@ -4,9 +4,14 @@ Read only by the Step 3 live-check workers and the Step 5 writers that own these
 platforms. Facts come from each platform's own pages, read on 2026-10-22, unless the line
 says otherwise. Every entry here is paste-ready.
 
-These are slow, evergreen listings. They are not launch-day traffic: they bring search
-visibility, backlinks and credibility over weeks, so the plan schedules them as a
-**directory drip** after L-day.
+These are slow, evergreen listings. They are not launch-day traffic: they bring
+discovery, referral visits and credibility over weeks, and their links are mostly
+nofollow (found and trusted, not ranked), so the plan schedules them as a **directory
+drip** after L-day. A link, its attribute or a domain rating is never a reason to list,
+and never what a paid tier buys: describe a paid tier by its placement and audience, as
+advertising whose link must be nofollow or sponsored. A badge path is a reciprocal link,
+never the default. Each listing restates copy-bank facts in its own words rather than
+pasting one paragraph everywhere.
 
 Contents: alternativeto · saashub · g2 · capterra · getapp · trustradius · sourceforge ·
 sideprojectors · startup-fame · crunchbase · wellfound · twelve-tools · 500-tools ·
@@ -111,7 +116,9 @@ archived copies of Capterra's own pages)
 
 There is no separate submission: the Capterra/G2 profile covers GetApp. Plan it as part
 of `capterra` and never as its own task. Same rules, plus "Do ensure the product or
-service description is unique (not copied from another site)". Confidence: medium.
+service description is unique (not copied from another site)". The capterra profile
+therefore uses its own description (`copy.description-review`), never Crunchbase's.
+Confidence: medium.
 
 ## trustradius — TrustRadius (HG Customer Voice)
 
@@ -180,6 +187,9 @@ Submit: https://startupfa.me/login ("Submit your startup") · Confidence: high
   instantly.
 - **Fields:** a URL, from which its AI fills the profile.
 - **Link:** dofollow.
+- **Link scheme:** skipped by default (`plan-and-reports.md` §1). The user can move it back at the gate: the free path is a reciprocal badge, and the site admits listings by domain rating.
+  If moved back, offer only Highlight, as advertising whose link must be nofollow or
+  sponsored.
 - **Sources:** startupfa.me/pricing, /about and /guides/homepage-badge.
 
 ## crunchbase — Crunchbase
@@ -198,6 +208,11 @@ person · Confidence: medium
   - Short and long description in the third person, with no "best" and no "new". Start
     the long description with a one-sentence summary.
   - Headquarters; 3–5 industries; founders; closed funding rounds with a press link.
+  - Fill every field from sourced Profile facts; leave a field empty rather than guess.
+- **Owned-profile consistency:** the short description is the same one-line description
+  and link home that the GitHub profile and README homepage, the Product Hunt maker
+  profile and the founder's LinkedIn carry. Never create an account or profile only for
+  its link.
 - **Sources:** support.crunchbase.com articles "How do I create a Crunchbase profile",
   "Edit a Profile" and "best practices".
 
@@ -226,6 +241,7 @@ Submit: https://twelve.tools/submit · Confidence: high
   - Pro: $36 one-time ($25.20 with its listed code), with 3 dofollow links, featured,
     and no backlink needed.
 - **Cadence:** 12 hand-picked tools a day.
+- **Link scheme:** skipped by default (`plan-and-reports.md` §1). The user can move it back at the gate: the free path requires a reciprocal link, and Pro is sold by its dofollow links.
 - **Sources:** twelve.tools/pricing, /badge and /submit-your-tool.
 
 ## 500-tools — 500 Tools
@@ -243,6 +259,9 @@ Submit: https://confettisaas.com/submit · Confidence: medium
   - Free: needs the dofollow badge, and a domain rating above 0.
   - Fast Track: price unpublished.
   - Sponsorship: $50 or $70.
+- **Link scheme:** skipped by default (`plan-and-reports.md` §1). The user can move it back at the gate: the free path is a reciprocal badge that also requires a domain rating above
+  0. If moved back, offer only Sponsorship, as advertising whose link must be nofollow or
+  sponsored.
 - **Fields:** URL, name, tagline, description, confetti use, category, pricing model
   (Free, Freemium or Paid), images.
 - **Sources:** confettisaas.com, /pricing and /llms.txt.
@@ -256,6 +275,7 @@ Wayback copies up to 2026-07)
   lists. It is not a launch board. Expect low referral quality: the lists include local
   SEO spam.
 - **Cost:** free (unverified).
+- **Link scheme:** skipped by default (`plan-and-reports.md` §1). The user can move it back at the gate, as a low-quality directory.
 - **Sources:** rankanything.online (Wayback), and its terms (2026-01-24).
 
 ## theresanaiforthat — There's An AI For That
@@ -297,8 +317,9 @@ Submit: https://www.toolify.ai/submit · Confidence: medium (403 to fetchers; te
 confirmed by two third-party checks on 2026-10-16 and 2026-10-18)
 
 - **Fits:** AI tools, in multilingual listings.
-- **Cost:** $99 one-time, listed within 48 h, promising "no less than 6 quality dofollow
-  links". There is no free option.
+- **Cost:** $99 one-time, listed within 48 h, sold by the dofollow links it promises.
+  There is no free option.
+- **Link scheme:** skipped by default (`plan-and-reports.md` §1). The user can move it back at the gate: its only path sells links.
 - **Fields:** name, URL, and either "Generated by Toolify" or "Do it myself". The
   do-it-yourself copy is English only and machine-translated, so write short, literal
   English.
@@ -333,8 +354,9 @@ Submit: https://aidirectori.es/submit-ai-tool · Confidence: high
   320+ directories you can submit to yourself.
 - **Catalog cost:** free with a backlink (listed within 72 h, dofollow), or $49 one-time
   with no backlink.
-- **Do:** treat the paid submission service as optional. Launch Llama, Shipybara,
-  ScrollLaunch and Nick Launches sell the same $99/$149/$199 tiers.
+- **Link scheme:** skipped by default (`plan-and-reports.md` §1). The user can move it back at the gate: it is a bulk-submission service, and its catalog's free path requires a
+  reciprocal link. Never propose a bulk-submission service, including the same
+  $99/$149/$199 tiers that Launch Llama, Shipybara, ScrollLaunch and Nick Launches sell.
 - **Sources:** aidirectori.es, /submit-ai-tool and /pricing.
 
 ## launch-llama — Launch Llama tools
@@ -344,9 +366,12 @@ Submit: https://tools.launchllama.co/submit (needs a founder account) · Confide
 - **Fits:** AI tools, dev tools, indie startups and SaaS. Despite the branding, it is not
   AI-only.
 - **Cost:**
-  - Free: review in about 4 weeks. You must upvote 5 tools, leave one rating with
-    written feedback (each line ≥20 characters), and embed the badge.
-  - Instant Launch: $39 (skips the wait, the upvote step and the badge step; dofollow).
+  - Free: review in about 4 weeks, behind an engagement gate (upvote 5 tools and leave
+    one rating with written feedback, each line ≥20 characters) and the badge, a
+    reciprocal link. Vote and rate only tools the founder tried and would recommend; a
+    vote given only to unlock the slot is a traded vote, so otherwise skip this path.
+  - Instant Launch: $39 (skips the wait, the engagement gate and the badge), advertising
+    whose link must be nofollow or sponsored.
   - Featured: $99/month.
 - **Link:**
   - A free link is dofollow while the badge is found, or once the listing has 50

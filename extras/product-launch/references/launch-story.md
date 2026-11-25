@@ -114,9 +114,12 @@ Source: US FTC, "Disclosures 101 for Social Media Influencers"
   "friend of the founder".
   Vague wording fails: "sp", "spon", "collab", or "thanks" on its own.
 - A platform's disclosure tool alone is not enough. Use it as well as the in-post line.
-- Writers put the disclosure line into each such draft, from `copy.disclosure`. When the
-  kit asks others to post (`copy.invite`, `copy.outreach`, a co-launch partner pitch), it
-  asks them to put that line in their own post.
+- Writers put the disclosure line, from `copy.disclosure`, into each draft they write:
+  only the founder's own posts and paid posts. Never write a post for someone else (a
+  friend, partner, employee or investor) to publish as their own. When the kit asks
+  others to post (`copy.invite`, `copy.outreach`, a co-launch partner pitch), it gives
+  them the facts, the link and the disclosure line, asks them to write the post
+  themselves and to put that line in it.
 - **Never propose** fake or sock-puppet accounts, bots, engagement pods (groups that
   trade likes, replies or votes), or undisclosed paid posts. Refuse such a request,
   quote this rule, and offer the disclosed alternative (the friends track).

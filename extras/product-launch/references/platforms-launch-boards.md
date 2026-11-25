@@ -2,7 +2,7 @@
 
 Read only by the Step 3 live-check workers and the Step 5 writers that own these
 platforms. Facts come from each platform's own pages, read on 2026-10-22, unless the line
-says otherwise. Traffic, DR and subscriber numbers are the platforms' own claims. Every
+says otherwise. Traffic and subscriber numbers are the platforms' own claims. Every
 board here is paste-ready.
 
 Contents: what-launched-today · betalist · uneed · peerlist · devhunt · launching-next ·
@@ -16,6 +16,16 @@ to your listing page, which exists only after you submit, so the founder adds it
 creating the listing and keeps it live. Removing the badge can delist the product or
 turn the link back to nofollow.
 
+**Reciprocal links and engagement gates.** A badge that links back is a reciprocal link:
+never the default path. Prefer the free path with no conditions or the queue, and offer a
+paid tier as advertising whose link must be nofollow or sponsored, described by its placement and audience. A link, dofollow or a domain
+rating is never the reason for a path. An engagement gate (upvote, comment on or rate
+other launches, or earn points, to unlock a slot or skip the wait) is used only for
+launches the founder actually tried and would recommend. A vote given only to unlock a
+slot is a traded vote (`launch-story.md` §5): take the gate-free path, or skip the slot.
+A board whose only paths are a badge or an engagement gate goes to Skip as a link scheme
+(`plan-and-reports.md` §1).
+
 ## what-launched-today — What Launched Today
 
 Submit: https://whatlaunched.today/dashboard/submit (needs an account) · Confidence: high
@@ -23,10 +33,10 @@ Submit: https://whatlaunched.today/dashboard/submit (needs an account) · Confid
 - **Fits:** any tech product, existing ones included. Not spam, misleading or
   inappropriate content.
 - **Cost:**
-  - Free: lifetime dofollow link, standard queue.
+  - Free: standard queue.
   - Premium Launch: 27 € (≈$29). Launches at once, skips the queue, and stays on the
     homepage for several days.
-  - Featured Spot: from 36 € for 2 weeks. Sidebar, newsletter and DR70+ link.
+  - Featured Spot: from 36 € for 2 weeks. Sidebar and newsletter.
 - **Free wait:** about 3 months. There are 5 free slots a day, and the nearest 5 days are
   paid-only.
 - **Cadence:** daily, rolling over at 00:00 UTC, with weekly and monthly leaderboards
@@ -82,10 +92,10 @@ Submit: https://uneed.best/submit-a-tool (no account needed to start) · Confide
 - **Fields:** a name and URL first. Uneed scrapes the page to prefill the rest.
 - **Red lines:** votes from account batches or a single IP are removed, and repeat
   offenders are banned.
-- **Link:** dofollow (DR 75 domain) with the score conditions above. Paid launches keep
-  it for life.
-- **Do:** launch Tuesday to Thursday (Uneed's own guide), and line up supporters to
-  reach a score of 20.
+- **Link:** dofollow with the score conditions above. Paid launches keep it for life.
+- **Do:** launch Tuesday to Thursday (Uneed's own guide), and share the launch with people
+  who want the product, never asking for votes (rule 6). The score is theirs to give;
+  never line up supporters to reach it.
 - **Sources:** uneed.best/pricing, /how-it-works, /launch-guide and /faqs.
 
 ## peerlist — Peerlist Launchpad
@@ -122,7 +132,7 @@ Submit: https://devhunt.org/login, then /account/tools/new · Confidence: high
   monitoring, DevOps, databases, auth, AI agents and MCP servers.
 - **Cost:**
   - Free listing: a permanent page with a nofollow link.
-  - Launch: $19. Pick the week, get a newsletter spot and a dofollow link.
+  - Launch: $19. Pick the week and get a newsletter spot, as advertising whose link must be nofollow or sponsored.
   - Boost: $49, which wins ties.
   - Super boost: $99, 3 per week.
 - **Cadence:** weekly, from Tuesday 00:00 UTC to Monday 23:59 UTC. Most votes at the end
@@ -160,7 +170,7 @@ Confidence: medium (low for the free tier)
 
 - **Fits:** startups and software, in Business and Consumer boards.
 - **Cost:**
-  - Launch Pro: $39 (pick your date, DR64+ dofollow).
+  - Launch Pro: $39 (pick your date).
   - Launch Plus: $79.
   - Free queue: wait not published (third-party source).
 - **Cadence:** monthly cohorts, with 30 days of visibility. Onboarding runs from the 1st
@@ -179,10 +189,12 @@ Submit: https://www.betterlaunch.co/submit (needs sign-in) · Confidence: high
 
 - **Fits:** live software products. Not-live sites, link schemes and spam are declined.
 - **Cost:**
-  - Free: a Monday at least 45 days out, or 14 days sooner after you vote for 3 launches.
-    Seven days in the feed. The link is nofollow, or dofollow with the badge.
+  - Free: a Monday at least 45 days out. An engagement gate (vote for 3 launches) brings
+    it 14 days sooner: vote only for launches the founder tried and would recommend,
+    otherwise keep the 45-day date. Seven days in the feed. The link is nofollow, or
+    dofollow with the badge (a reciprocal link).
   - Skip the queue: $9.
-  - Starter: $19 (7 days pinned, permanent dofollow).
+  - Starter: $19 (7 days pinned).
   - Pro: $49.
 - **Cadence:** weekly batches on Monday at 00:00 UTC.
 - **Fields:** paste a URL and the site drafts the name, tagline, description and
@@ -195,10 +207,12 @@ Submit: https://www.betterlaunch.co/submit (needs sign-in) · Confidence: high
 Submit: https://foundrlist.com/agent ("Launch a Product") · Confidence: high
 
 - **Fits:** a product you own or are authorized to represent.
-- **Free qualifier:** add the FoundrList badge, or upvote 3 launches and comment on 1.
+- **Free qualifier:** the FoundrList badge (a reciprocal link), or an engagement gate
+  (upvote 3 launches and comment on 1), only on launches the founder tried and would
+  recommend. With neither, offer Standard as advertising whose link must be nofollow or sponsored, or skip the board.
 - **Cost:**
   - Free: about 4 weeks out, a week on the board, nofollow link.
-  - Standard: $29 (live today, 7 days at the top, dofollow DR 73).
+  - Standard: $29 (live today, 7 days at the top).
   - Featured: $49 for 14 days.
 - **Cadence:** weekly. A new board opens every Monday at 12:01 AM PT. Paid launches show
   first, then the rest by upvotes and recency.
@@ -220,12 +234,14 @@ Submit: https://peerpush.com/submit (peerpush.net redirects there) · Confidence
   - Standard: $39 (live at once).
   - With promotion: $89 or $229.
   - 400 PeerPush points launch a product for free. Points come from engaging with other
-    products, with a daily cap; points decay.
+    products, with a daily cap; points decay. This is an engagement gate: engage only
+    with products the founder actually uses, never for points; otherwise take the queue.
 - **Cadence:** continuous. Day, Week and Month awards are set at midnight UTC.
 - **Fields:** a URL, from which it drafts the listing. The API requires the name,
   tagline, description, URL, logo URL and contact email.
 - **Ranking:** engagement, points, ratings, click-through, freshness, plus a "Verified"
-  boost when your site links back to your PeerPush page.
+  boost when your site links back to your PeerPush page (a reciprocal link, never the
+  default).
 - **Link:** dofollow (observed).
 - **Sources:** peerpush.com, /pricing, /faq and /rules.
 
@@ -240,7 +256,7 @@ high
 - **Cost:**
   - Free with the badge: about 4–5 weeks.
   - Free without the badge: 10+ weeks, one launch in the queue at a time.
-  - Launch: $39, tomorrow or any date within 30 days, dofollow.
+  - Launch: $39, tomorrow or any date within 30 days.
   - Outrank: from $15, a sidebar slot.
 - **Cadence:** daily at 12:00 AM PDT, ranked by upvotes and comments. Weekly and monthly
   winners get badges.
@@ -256,7 +272,7 @@ Submit: https://auraplusplus.com/projects/submit · Confidence: high
 - **Fits:** real, working software and digital products.
 - **Cost:**
   - Free: 5 slots a day, schedulable up to 365 days ahead.
-  - Premium: $29 (skips the queue, dofollow DR 73, launch blog post).
+  - Premium: $29 (skips the queue, launch blog post).
   - Premium Plus: $69.
 - **Timing:** review takes 24–48 h. Launches go live daily at 8:00 AM UTC, ranked by
   upvotes and comments. A relaunch needs a 30-day cooldown on the free tier.
@@ -279,7 +295,7 @@ Confidence: medium
 - **Cost:**
   - Free: 18 slots a week, bookable up to 180 days ahead. Dofollow with a top-3 finish
     or the badge.
-  - Premium: $50 (10 slots a week, guaranteed dofollow).
+  - Premium: $50 (10 slots a week).
 - **Cadence:** weekly, launching Mondays at 00:00 UTC.
 - **Fields:** behind sign-in. They likely mirror Aura++'s (unverified).
 - **Note:** the terms let Shipybara rewrite your description for SEO.
@@ -294,7 +310,8 @@ conflicts across its own pages)
 - **Excluded:** waitlist pages; free-subdomain hosts (github.io, netlify.app and similar);
   sites without HTTPS.
 - **Cost:**
-  - Free: badge required, 15 slots a week.
+  - Free: badge required (a reciprocal link, never the default), 15 slots a week. Offer
+    Quick Pass as advertising whose link must be nofollow or sponsored; if the live check finds no paid path, skip the board.
   - Quick Pass: $19.99 (skips the queue, live within 24 h).
   - Premium: $39.99.
 - **Free wait:** its pricing page showed "~336-day review queue", while its FAQ says "a
@@ -334,7 +351,7 @@ high
 - **Fits:** SaaS, apps, AI and other software.
 - **Cost:**
   - Free: 25 slots per ISO week.
-  - Premium: $39 (always dofollow, placed above standard listings).
+  - Premium: $39 (placed above standard listings).
 - **Cadence:** weekly, by ISO week (Monday to Sunday), ranked by upvotes.
 - **Fields:** behind login. Listings show name, tagline, description, up to 3
   categories and website.
@@ -371,7 +388,7 @@ Confidence: high
 - **Fits:** startups and products, in one category from a fixed list.
 - **Cost:**
   - Free: about 4–5 weeks. On 2026-10-22 the next free Monday was 2026-11-23.
-  - Premium: $39 (next Monday, dofollow).
+  - Premium: $39 (next Monday).
 - **Cadence:** weekly, launching Mondays, ranked by upvotes. The top 3 get badges.
 - **Fields:**
   - name 1–30; tagline 1–60.
@@ -397,7 +414,7 @@ account) · Confidence: medium
 - **Fits:** indie and early-stage startups.
 - **Setup:** a revenue step is mandatory: connect Stripe, self-report a figure, or pick
   pre-revenue. Submitting subscribes the email to the newsletter.
-- **Cost:** £69 for an instant listing with a dofollow link; other upgrades from £99.
+- **Cost:** £69 for an instant listing; other upgrades from £99.
   "All sales are final."
 - **Cadence:** a weekly Monday-to-Sunday leaderboard by upvotes. Sponsors rank above.
 - **Fields:**
@@ -415,7 +432,9 @@ Submit: https://nicklaunches.com/submit/ (needs an account) · Confidence: mediu
 - **Fits:** indie AI, SaaS, dev, marketing and productivity tools.
 - **Excluded:** duplicate launches, unavailable sites, misleading claims.
 - **Cost:**
-  - Free: the earliest week with room. The badge must stay visible to remain listed.
+  - Free: the earliest week with room. The badge must stay visible to remain listed (a
+    reciprocal link, never the default). Offer a paid tier as advertising whose link must be nofollow or sponsored; if the live check
+    finds none, skip the board.
   - Paid (from its own 2026-08-09 post): $19, $39, $99 or $199 one-time. Pro and up
     are featured.
 - **Cadence:** weekly, Monday to Sunday. The free section is ranked by upvotes alone,
