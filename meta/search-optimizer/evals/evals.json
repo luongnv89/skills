@@ -97,6 +97,36 @@
         "No search-optimizer workflow runs.",
         "The response does not produce an SEO or ASO audit."
       ]
+    },
+    {
+      "id": 8,
+      "kind": "edge",
+      "name": "search-console-export-supplied",
+      "prompt": "Optimize https://example.com and its repo in ./site for Google and AI search. My Search Console Performance export is in ./gsc-export. Skip the third-party agent-readiness scan.",
+      "expected_output": "Records the export path once under search_data in manifest.json, owns search-performance with seo-ai-optimizer, leaves ai-citations not covered (no log), passes the export to seo-ai-optimizer as a plain request line after the orchestrated-run block, and lets a ranking row reach P1 only when it cites the measured search-performance rows.",
+      "files": [],
+      "expectations": [
+        "Does not ask again for the Search Console export, since the request names it, and records search_data.search_console as that path with ai_citation_log null.",
+        "The owners map gives search-performance to seo-ai-optimizer and ai-citations 'not-covered: no AI-citation log supplied'.",
+        "Passes the export to seo-ai-optimizer as a 'Search Console data: <path>' line after the orchestrated-run block, and neither check appears in skip-checks.",
+        "Any P1 row about ranking cites a search-performance row from the export; recommendations route to seo-ai-optimizer's Step 5 plan, never a Step 6 diff.",
+        "Lists ai-citations under Not covered with the log to supply."
+      ]
+    },
+    {
+      "id": 9,
+      "kind": "edge",
+      "name": "no-search-data-proxy-capped",
+      "prompt": "Run a full search optimization of https://app.example.com. It has no llms.txt and I think that is why ChatGPT never cites us. I don't have any Search Console data.",
+      "expected_output": "Asks the optional search-data question at most once, records search_data with nulls and raw_js_shell from the raw page, lists search-performance and ai-citations under Not covered with the reasons, and caps the missing-llms.txt row at P3 instead of a P1 AI-citation loss.",
+      "files": [],
+      "expectations": [
+        "Asks for a Search Console export or AI-citation log at most once in the run, and records both as null in manifest.json search_data.",
+        "Records raw_js_shell in manifest.json (true, false, or null with the status as the reason).",
+        "Lists search-performance ('no Search Console export supplied') and ai-citations ('no AI-citation log supplied') under Not covered, each exactly once.",
+        "Ranks the missing llms.txt row no higher than P3 and does not present it as measured loss of AI citation.",
+        "Does not query Google, an AI Overview or ChatGPT by script to measure citations."
+      ]
     }
   ]
 }
