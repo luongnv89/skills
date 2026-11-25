@@ -21,7 +21,7 @@
         "The existing ruff hook in .pre-commit-config.yaml is unchanged and appears exactly once; new hooks (for example bandit and gitleaks) are appended, and .github/workflows/ci.yml is unchanged.",
         "The new CI workflow declares `permissions: contents: read`, a `timeout-minutes` on each job, pinned action refs, and runs gitleaks as a CLI with `--redact` (not gitleaks-action).",
         "Any secret baseline holds only fingerprints or hashes, and every secret match in the output and Final Report is shown as REDACTED, never as a value.",
-        "The exact gitleaks command configured in the hook and the exact one configured in CI are re-run on the baselined repo and each exits 0.",
+        "The exact gitleaks command configured in CI and the hook's matching tree scan (`gitleaks dir --redact .` with the same .gitleaksignore) are re-run on the baselined repo and each exits 0; the staged-diff hook command is not counted as proof.",
         "Warm-up (for example `pre-commit install-hooks`) is reported as setup time, separately from the per-commit time measured with `pre-commit run --files <sample>` against the 10 s budget.",
         "`git write-tree` and `git status --porcelain` are captured before the timing run and are identical after it; no `git add` is run for timing.",
         "The run ends with Result, Evidence, Uncertainty and Decision lines, and nothing is committed."
@@ -31,7 +31,7 @@
       "id": 2,
       "name": "js-husky",
       "kind": "happy-path",
-      "prompt": "What static analysis should this Node project run, and where? It already uses husky. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.)",
+      "prompt": "What static analysis should this Node project run, and where? It already uses husky. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.) (Eval runner: do not reply; this is an unattended run.)",
       "expected_output": "Analyses the repo, finds husky (.husky/pre-commit runs `npm run lint`) and ESLint already configured, and prints a plan that appends to .husky/pre-commit rather than replacing it, adds no second JS linter, puts secret scanning in the hook and dependency scanning in CI on a weekly schedule, then stops with nothing written.",
       "files": [
         "../../eval-fixtures/code-analysis-setup/js-husky/package.json",
@@ -51,7 +51,7 @@
       "id": 3,
       "name": "swift-app",
       "kind": "happy-path",
-      "prompt": "Plan a free lint and security analysis setup for this Swift package. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.)",
+      "prompt": "Plan a free lint and security analysis setup for this Swift package. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.) (Eval runner: do not reply; this is an unattended run.)",
       "expected_output": "Detects Swift (Package.swift, Sources/Tally/main.swift) with no hook manager, plans SwiftLint on staged files in a pre-commit hook and the full SwiftLint run plus secret and dependency scans in CI, lists CodeQL and Bearer as left out with reasons, and stops at the plan.",
       "files": [
         "../../eval-fixtures/code-analysis-setup/swift-app/Package.swift",
@@ -69,7 +69,7 @@
       "id": 4,
       "name": "multi-repo",
       "kind": "happy-path",
-      "prompt": "Plan one static-analysis setup across three projects: the Python repo, the Node repo and the Swift folder. (Eval runner: copy python-precommit and js-husky each to its own scratch folder and run `git init` then `git add -A && git commit -m fixture` in each; copy swift-app to a third scratch folder outside any git repo and do not run `git init` there. Pass all three paths to the skill.)",
+      "prompt": "Plan one static-analysis setup across three projects: the Python repo, the Node repo and the Swift folder. (Eval runner: copy python-precommit and js-husky each to its own scratch folder and run `git init` then `git add -A && git commit -m fixture` in each; copy swift-app to a third scratch folder outside any git repo and do not run `git init` there. Pass all three paths to the skill.) (Eval runner: do not reply; this is an unattended run.)",
       "expected_output": "Resolves the git toplevel of each input, produces a single plan with one block per project, states that hooks and history metrics are left out for the Swift folder because it is not a git repo, and stops at the gate with nothing written.",
       "files": [
         "../../eval-fixtures/code-analysis-setup/python-precommit/pyproject.toml",
@@ -139,19 +139,19 @@
         "../../eval-fixtures/code-analysis-setup/lefthook-go/main.go"
       ],
       "expectations": [
-        "The existing `gofmt` command in lefthook.yml is unchanged; new commands are added under `pre-commit: commands:` with their own names and `{staged_files}`.",
+        "The existing `gofmt` command in lefthook.yml is unchanged; new commands are added under `pre-commit: commands:` with their own names; file-list tools pass `{staged_files}`, and a staged-diff secret scanner (gitleaks) runs without a file list.",
         "pre-commit is not installed as a second hook manager, and `lefthook install` is run only if lefthook's hook is not already installed.",
         "Package-based Go tools (go vet, golangci-lint, gosec, govulncheck) are placed in CI, not in the hook, with the reason given.",
-        "Timing runs each underlying tool command on an explicit list of clean tracked files in check mode, never through `lefthook run` with staging, lint-staged or `git add`.",
+        "Timing runs each underlying file-list tool command on an explicit list of clean tracked files in check mode, never through `lefthook run` with staging, lint-staged or `git add`; a staged-diff scanner (gitleaks) is reported as `not measured (staged-diff scanner)`.",
         "`git write-tree` and `git status --porcelain` are identical before and after the timing run, or the run prints `timing: skipped (<reason>)`.",
-        "The configured gitleaks hook and CI commands (if gitleaks is installed) exit 0 on the baselined repo, and no secret value appears in any output."
+        "The configured gitleaks CI command and the hook's matching tree scan (`gitleaks dir --redact .`), if gitleaks is installed, exit 0 on the baselined repo, and no secret value appears in any output."
       ]
     },
     {
       "id": 8,
       "name": "existing-ci-scanner",
       "kind": "edge-case",
-      "prompt": "This repo needs proper static analysis. Plan what to add. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.)",
+      "prompt": "This repo needs proper static analysis. Plan what to add. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.) (Eval runner: do not reply; this is an unattended run.)",
       "expected_output": "Detects security-setup's footprint (security-check hook, scripts/security_check.py, security/security-tools.json listing gitleaks and semgrep, .github/workflows/security.yml) and plans no second gitleaks or semgrep entry, saying they are covered by security-setup; it adds only what is not covered, such as a Python linter and a dependency scanner, and stops at the plan.",
       "files": [
         "../../eval-fixtures/code-analysis-setup/ci-scanner/pyproject.toml",

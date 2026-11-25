@@ -1,6 +1,6 @@
 # Project analysis (Step 1)
 
-Everything here is read-only: `git` read commands, file reads and directory listings. Never run a project script, install, fetch, stash or hook in this step. Record each fact with the file or command it came from.
+Everything here is read-only: `git` read commands, file reads and directory listings. Never run a project script, install, fetch, stash, hook or scanner in this step; finding counts come after approval (Step 4). Record each fact with the file or command it came from.
 
 ## 1. Locate the repository
 

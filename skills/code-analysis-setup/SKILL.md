@@ -85,7 +85,7 @@ Use `references/tool-catalog.md` and `references/merge-and-baseline.md`:
 
 1. Per project, pick tools by language and category (lint, SAST, secrets, deps). Drop every tool already configured, and say what covers it.
 2. Place each tool: **hook** (staged files, cached, fast) or **CI** (full scan on pull requests and the default branch) or **scheduled** (dependency advisories change without commits). Estimate hook time per commit from the typical files per commit and the catalog's cost class, against the budget.
-3. Plan baselines for existing findings, and list any likely real secret as a finding to rotate.
+3. Plan the baseline mechanism per tool. No scanner runs before approval, so finding counts and secrets to rotate come from Step 4.
 4. List what is left out on purpose, with the reason (paid, not open source, too slow for the hook, duplicate, language share too small).
 5. Write the verification run: the warm-up command, the timing command, and the sample of files it will use.
 6. Write the sync line per repo (*Repo Sync*).
@@ -96,7 +96,7 @@ The plan is a dry-run preview: it lists every file, hook entry, CI job, install 
 
 - A question or change request is not an approval: answer or revise, then ask again.
 - **Rejected** ("stop", "no"): write nothing. HEAD, the index, the working tree and `git stash list` stay unchanged, and no fetch or pull runs. Report `BLOCKED`.
-- **No user to answer** (a subagent, an unattended run): print the plan, write and run nothing, report `PARTIAL`.
+- **No user to answer** (a subagent, an unattended run): print the plan, then the `PARTIAL` Final Report in place of waiting; write and run nothing.
 
 ### Step 4: Install and merge (after approval)
 
@@ -105,7 +105,7 @@ Per repository, in plan order:
 1. Run the *Repo Sync*.
 2. Write each approved config file. Merge hook entries into the existing hook manager and CI jobs into the repo's workflows by the rules in `references/merge-and-baseline.md`: append, dedup, keep existing order and settings.
 3. Install only the approved tools and hook managers, by the commands the plan showed.
-4. Generate baselines as `references/merge-and-baseline.md` → *Baselines* says: secrets as fingerprints or hashes, never values. Temporary reports go outside the repo and are deleted.
+4. Generate baselines as `references/merge-and-baseline.md` → *Baselines* says: secrets as fingerprints or hashes, never values. The user confirms each finding (redacted); a likely real secret is reported to rotate. Temporary reports go outside the repo and are deleted.
 5. Changes stay uncommitted on the current branch unless the user asks for a commit.
 
 ### Step 5: Verify and time
@@ -115,9 +115,9 @@ Follow `references/merge-and-baseline.md` → *Timing*:
 1. **Warm-up:** build tool environments and caches first (for example `pre-commit install-hooks`). Report this as setup time, not hook time.
 2. **Snapshot:** save `git write-tree` and `git status --porcelain`.
 3. **Sample:** tracked files not in the pre-sync dirty list and not written in Step 4, sized to the typical files per commit. An empty sample prints `timing: skipped (no clean tracked files)`.
-4. **Time the per-commit run** on that explicit file list, tools in check mode (`pre-commit run --files <sample>`, or each tool's own command). Never time through lint-staged or another staging wrapper, and never `git add`.
+4. **Time the per-commit run** on that explicit file list, tools in check mode (`pre-commit run --files <sample>`, or each tool's own command). Never time through lint-staged or another staging wrapper, and never `git add`. A staged-diff scanner (the gitleaks hook) is reported as `not measured (staged-diff scanner)`.
 5. **Compare** the snapshot. If the tree or status changed, restore it (`git read-tree <saved tree>`, `git checkout -- <sample>`) and report it. When the invariant cannot be guaranteed, print `timing: skipped (<reason>)` instead of timing.
-6. **Acceptance check:** re-run the exact configured hook and CI secret-scan commands (and every other baselined tool) on the baselined repo; each must exit 0. A file merely existing is not proof.
+6. **Acceptance check:** re-run the exact configured CI secret-scan command, the hook's matching tree scan (`gitleaks dir --redact .`; the staged-diff hook command passes trivially with nothing staged), and every other baselined tool on the baselined repo; each must exit 0. A file merely existing is not proof.
 
 ## Final Report
 
@@ -131,8 +131,8 @@ Expected output of a full run:
 
 ```text
 Result: COMPLETE. 2 repos: api (ruff, bandit, gitleaks merged into .pre-commit-config.yaml; semgrep + osv-scanner in .github/workflows/code-analysis.yml) and web (eslint via .husky/pre-commit; osv-scanner weekly).
-Evidence: setup 41 s (warm-up); hook 2.3 s on 4 files (budget 10 s); gitleaks hook and CI commands exit 0 with .gitleaksignore (3 fingerprints, values REDACTED); write-tree and status unchanged; sync: api pulled main, web skipped (no origin).
-Uncertainty: semgrep CI time not measured locally; 1 bandit finding baselined in tests/ needs review.
+Evidence: setup 41 s (warm-up); hook 2.3 s on 4 files (budget 10 s); gitleaks CI command and hook-side tree scan exit 0 with .gitleaksignore (3 fingerprints, values REDACTED); write-tree and status unchanged; sync: api pulled main, web skipped (no origin).
+Uncertainty: semgrep CI time not measured locally; gitleaks hook not measured (staged-diff scanner); 1 bandit finding baselined in tests/ needs review.
 Decision: Review and commit the changes in both repos; rotate nothing (no real secret found).
 ```
 
@@ -153,7 +153,7 @@ More examples and the step report format: `references/plan-template.md`.
 - Every tool is free and open source, or labelled (Bearer) and off by default.
 - Existing hooks and CI jobs are unchanged, and no tool runs twice (security-setup's tools included).
 - No baseline, report or timing output contains a secret value.
-- The configured hook and CI secret-scan commands exit 0 on the baselined repo.
+- The configured CI secret-scan command and the hook's matching tree scan exit 0 on the baselined repo.
 - The timing run left `git write-tree` and `git status --porcelain` unchanged, or reports why it was skipped or restored.
 - The run closes with the Final Report.
 

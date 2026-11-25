@@ -12,7 +12,7 @@ Placement: **hook** = pre-commit on staged files; **CI** = pull requests and the
 | JS / TS | ESLint (`eslint --cache`) | MIT | yes | yes, `.eslintcache` | medium | hook + CI |
 | JS / TS | Biome (`biome check`) | MIT or Apache-2.0 | yes | n/a (fast without one) | fast | hook + CI, instead of ESLint only when the repo has no ESLint |
 | Go | `go vet` | BSD-3-Clause | package-based | Go build cache | medium | CI |
-| Go | golangci-lint | GPL-3.0 | package-based; `--new-from-rev` limits output to new issues | yes | medium to slow | CI; hook only with a fast-linter subset |
+| Go | golangci-lint | GPL-3.0 | package-based; `--new-from-rev` limits output to new issues (CI needs the base ref: `fetch-depth: 0`) | yes | medium to slow | CI; hook only with a fast-linter subset |
 | Swift | SwiftLint (`swiftlint lint --quiet <paths>`) | MIT | yes | yes, `--cache-path` | fast | hook + CI |
 | Rust | Clippy (`cargo clippy`) | MIT or Apache-2.0 | crate-based | cargo target dir | slow | CI |
 | Ruby | RuboCop | MIT | yes | yes | medium | hook + CI |
@@ -27,7 +27,7 @@ Prefer the linter a project already has. Never add a second linter for the same 
 
 | Scope | Tool | Licence | File list | Cost | Place | Notes |
 |---|---|---|---|---|---|---|
-| Many languages | Semgrep Community Edition (`semgrep scan`) | engine LGPL-2.1 | yes | slow | CI | Registry rules (`--config p/...`) are fetched from semgrep.dev and are published under the Semgrep Rules License, which is not OSI open source (check its current terms); say so in the plan, or use a local rules file. Pass `--metrics=off`: with registry configs, metrics are sent by default. On pull requests, `--baseline-commit <base sha>` reports only new findings. No login needed |
+| Many languages | Semgrep Community Edition (`semgrep scan`) | engine LGPL-2.1 | yes | slow | CI | Registry rules (`--config p/...`) are fetched from semgrep.dev and are published under the Semgrep Rules License, which is not OSI open source (check its current terms); say so in the plan, or use a local rules file. Pass `--metrics=off`: with registry configs, metrics are sent by default. On pull requests, `--baseline-commit <base sha>` reports only new findings; the checkout then needs `fetch-depth: 0` or a fetch of the base ref. No login needed |
 | Python | Bandit | Apache-2.0 | yes | fast | hook + CI | `-b <baseline.json>` compares against a baseline report |
 | Go | gosec | Apache-2.0 | package-based | medium | CI | |
 | Many languages | CodeQL | GitHub CodeQL terms, not open source | n/a | slow | CI | **Public GitHub repos only.** Private repos need a paid GitHub Advanced Security licence: never plan it there |
@@ -77,4 +77,4 @@ Name each in the plan's *Left out* list when it would otherwise apply:
 | Secrets | staged diff | full history or tree | no |
 | Dependencies | no | yes | weekly |
 
-Every CI job the plan adds has `permissions: contents: read`, actions pinned the way the repo pins them, `timeout-minutes` on each job, a `concurrency` group on pull-request workflows, locked or pinned tool installs, and no path filter on a workflow whose check is required.
+Every CI job the plan adds has `permissions: contents: read`, actions pinned the way the repo pins them, `timeout-minutes` on each job, a `concurrency` group on pull-request workflows, `fetch-depth: 0` (or a base-ref fetch) for any job that diffs against history or a base ref, locked or pinned tool installs, and no path filter on a workflow whose check is required.
