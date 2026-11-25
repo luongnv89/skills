@@ -327,9 +327,10 @@ repos:
         types: [rust]
         pass_filenames: false
 
+      # Without git's repository variables: see "cargo audit and the index" below.
       - id: cargo-audit
         name: cargo audit
-        entry: cargo audit
+        entry: bash -c 'unset $(git rev-parse --local-env-vars); exec cargo audit'
         language: system
         pass_filenames: false
 
@@ -358,6 +359,10 @@ repos:
       #   pass_filenames: false
       #   stages: [pre-push]
 ```
+
+**`cargo audit` and the index.** `git commit` gives its hooks `GIT_INDEX_FILE`, the path of the repository's index. `cargo audit` updates the RustSec advisory database (`~/.cargo/advisory-db`) with git, and with that variable set its checkout writes the advisory database's index to that path. The repository's index then lists the advisory database's files, whose blobs it does not have, and `git status` and `git reset` stop with `fatal: unable to read <sha>`. The dry run cannot show this: `pre-commit run` outside a commit sets no `GIT_INDEX_FILE`. So the hook's entry unsets every repository variable first (`git rev-parse --local-env-vars` lists them); give the same prefix to any other hook that runs git in another repository. An index already overwritten is rebuilt from the last commit with `git read-tree HEAD`, which leaves the working tree and its uncommitted changes alone; staged changes must be staged again.
+
+Checked with cargo-audit 0.23.0, git 2.56.1 and pre-commit 4.7.0: `GIT_INDEX_FILE=<path> cargo audit` wrote a 164 KB index to `<path>`; a `git commit` that ran the plain `cargo audit` hook left the index with the advisory database's 1,587 entries, and a commit of `Cargo.lock` through the entry above left the repository's own 124.
 
 ## Java
 
