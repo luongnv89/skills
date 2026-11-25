@@ -12,9 +12,11 @@ url="https://example.com/"            # the user's target, validated as http(s)
 ev="$out/evidence"; mkdir -p "$ev/agent-readiness"
 fetch() { curl -sSL --proto '=https,http' --max-time 20 --max-filesize 5000000 \
   -A "search-optimizer-intake" -o "$2" -w '%{http_code} %{url_effective}\n' "$1"; }
-fetch "$url" "$ev/page.html"            # record status + final redirected URL
-# Visible words of the raw page (no JavaScript run), counted as seo-ai-optimizer's audit counts them
-raw_text_words="$(python3 -I - "$ev/page.html" <<'PY'
+read -r page_status page_final <<<"$(fetch "$url" "$ev/page.html")"; echo "$page_status $page_final"   # record status + final redirected URL
+# Visible words of the raw page (no JavaScript run), counted as seo-ai-optimizer's audit counts them.
+# Only for a 2xx page.html on disk; otherwise record raw_text_words: null with the status as the reason.
+raw_text_words=null
+case "$page_status" in 2??) [ -s "$ev/page.html" ] && raw_text_words="$(python3 -I - "$ev/page.html" <<'PY'
 import sys
 from html.parser import HTMLParser
 class W(HTMLParser):
@@ -28,7 +30,7 @@ class W(HTMLParser):
     def handle_data(s, x): s.words += 0 if s.depth else len(x.split())
 w = W(); w.feed(open(sys.argv[1], encoding="utf-8", errors="replace").read()); print(w.words)
 PY
-)"                                       # write it to manifest.json as raw_text_words
+)";; esac                                # write it to manifest.json as raw_text_words
 origin="$(python3 -I -c 'import sys,urllib.parse as u;p=u.urlsplit(sys.argv[1]);print(f"{p.scheme}://{p.netloc}")' "$url")"
 for f in robots.txt sitemap.xml llms.txt; do fetch "$origin/$f" "$ev/$f"; done
 ```
