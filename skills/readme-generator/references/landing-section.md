@@ -33,10 +33,10 @@ Other methods: [Homebrew, Docker, from source](#installation-options)
 
 <Expected output: a code block of at most 8 lines, or one sentence describing the result. The landing section stays within 30 non-blank lines.>
 
-[Usage](#usage) · [Configuration](#configuration) · [Changelog](CHANGELOG.md)
+[Website](<product website URL>) · [Usage](#usage) · [Configuration](#configuration) · [Changelog](CHANGELOG.md)
 ~~~
 
-Write the "Other methods" line only when other install methods exist. Write the next-links line only with targets that exist. Use `## Install` (or `## Get started` for a hosted app) and `## Quick start`, or their equivalents in the README's language. Those are the landing headings that Step 4 accepts. A project installed from a link (app, hosted app, marketplace extension) has the link under the install heading instead of a code block.
+Write the "Other methods" line only when other install methods exist. Write the next-links line only with targets that exist. Put `Website` first on it when a project file names the product website: the manifest's `homepage` (package.json, Cargo.toml, gemspec), `project_urls` or `[project.urls]` (Python), or a website link in the existing README. Copy that URL as written. Never invent or guess one, never use the repository URL as the website, and add no claim about search ranking or SEO. A hosted app already links its site under `## Get started`. Use `## Install` (or `## Get started` for a hosted app) and `## Quick start`, or their equivalents in the README's language. Those are the landing headings that Step 4 accepts. A project installed from a link (app, hosted app, marketplace extension) has the link under the install heading instead of a code block.
 
 ## Variant per project type
 

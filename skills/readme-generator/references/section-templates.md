@@ -10,7 +10,7 @@ Everything after the landing section. Use this order, and skip a section that ha
 | 4 | `## Configuration` | Config files, environment variables, defaults | Config readers in source, `.env.example`, docs |
 | 5 | `## Installation options` | Other install methods, requirements, upgrade, uninstall | The sources of the install command |
 | 6 | `## Comparison` | A table against named alternatives, with real data only | README, docs, benchmarks in the repo |
-| 7 | `## FAQ` | 3 to 5 questions that docs or issues actually raise, each answered in 1 or 2 sentences | README, docs |
+| 7 | `## FAQ` | 3 to 5 questions that the docs raise, or that issue or support questions the user supplies raise, each answered in 1 or 2 sentences. Skip the section when neither source gives a question | README, docs, issue or support questions the user supplies |
 | 8 | `## Contributing` or `## Development` | Dev setup and test commands, and a link to `CONTRIBUTING.md` when it exists | Manifest scripts, `CONTRIBUTING.md` |
 | 9 | `## License` | The license name, linked to `LICENSE` | `LICENSE` |
 | 10 | Preserved content | Original material that fits no section above, each part in its own `<details>` block | The backup |
