@@ -35,6 +35,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
   Meta tags checked:        √ pass (N files scanned)
   Structured data validated: √ pass (JSON-LD present/valid)
   AI bot access verified:   √ pass (robots.txt per crawler + meta robots noindex checked)
+  Search data read:         √ pass (search-performance, ai-citations) | — not covered (export named)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
