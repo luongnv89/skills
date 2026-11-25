@@ -4,7 +4,7 @@ description: "Optimize App Store and Google Play listings via a 7-phase, plan-ap
 license: MIT
 effort: max
 metadata:
-  version: 1.7.0
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -172,6 +172,7 @@ This skill complements `seo-ai-optimizer`. See `references/edge-cases.md` (Cross
 - **Compliance gate is non-negotiable.** Never present a non-compliant plan to the user; never execute without explicit approval.
 - **Trademark caution:** Competitor brand names from Phase 1 analysis must never appear in proposed metadata.
 - **Rank data from allowed sources only.** Never script store or Google searches; see `references/aso_best_practices.md` → Measurement and Iteration.
+- **AI-cited pages by hand only.** The user asks the assistants; never script assistant queries, buy or fake reviews, or seed inauthentic mentions (`references/aso_best_practices.md` → Outside the store).
 - **Prices are the user's to set.** Localized Pricing is a recommendation in the plan; approval never covers it. Never write a price to any file or run a pricing command.
 
 ## Self-Improve

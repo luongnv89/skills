@@ -38,6 +38,8 @@ If available, gather:
 - Download/install numbers and trends (and paid conversions, if the app sells anything)
 - Ratings and review sentiment
 - Conversion rate (impressions → installs)
+- Brand status: known or unknown, with its evidence, source and date (`references/aso_best_practices.md` → Brand position). It is the baseline for the tracked brand query
+- Optional, by hand: the review sites and lists AI assistants cite for the category, from answers the user gathered (`references/aso_best_practices.md` → Outside the store)
 
 ### 1.5 Analysis Report Template
 
@@ -66,6 +68,14 @@ If available, gather:
 ### Keyword Rank Baseline
 | Keyword | Store | Current Rank (or unranked / unknown) | Source and date |
 |---------|-------|--------------------------------------|-----------------|
+
+### Brand Search Baseline
+- [brand name]: known / unknown — [evidence, source and date]
+
+### AI-Cited Pages (optional, by hand)
+| Cited page (review site or list) | Cited by (assistant, date the user asked) | App listed? | Suggested pitch |
+|----------------------------------|-------------------------------------------|-------------|-----------------|
+- With no answers from the user: `not checked (no answers from the user)`
 
 ### Key Findings
 1. [Finding 1 — most impactful. If product signals are weak (rating below 4.0, or recent reviews repeatedly reporting a broken core function), say so: ASO will not fix it]
@@ -148,9 +158,10 @@ Include only when the app sells something and the user names target markets with
 
 ### Measurement Plan
 - Keywords to track: [primary and secondary, with the Phase 1 baseline rank]
+- Brand query: [brand name], re-checked after each release or launch from an allowed source, with source and date (`aso_best_practices.md` → Measurement and Iteration → Track the brand name)
 - Cadence: [e.g., weekly for a measurement window of at least 6 weeks]
 - Outcome metrics: impressions → product page views → downloads → paid conversions
-- Change order: [cycle 1 = the indexed metadata set (title, subtitle, keywords) for the locales this plan covers; then one lever per cycle: screenshots, new localizations, pricing]
+- Change order: [cycle 1 = the indexed metadata set (title, subtitle, keywords) for the locales this plan covers; then one lever per cycle: screenshots, new localizations, pricing; once brand search appears, a brand-first title is the next cycle's lever]
 
 ### Timeline & Priorities
 | Priority | Action | Impact | Effort | Timeline |

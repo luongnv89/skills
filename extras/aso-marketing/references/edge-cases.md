@@ -97,4 +97,5 @@ Works well combined with:
 - **`asc-metadata-sync`** — Sync local metadata with App Store Connect
 - **`asc-whats-new-writer`** — Generate engaging release notes
 - **`asc-shots-pipeline`** — Automated screenshot capture
-- **`seo-ai-optimizer`** — Align ASO and SEO keyword strategies
+- **`seo-ai-optimizer`** — Align ASO and SEO keyword strategies; the app website's side of the pages AI answers cite
+- **`product-launch`** — Directories and outreach to the review sites and lists AI answers cite (`aso_best_practices.md` → Outside the store)

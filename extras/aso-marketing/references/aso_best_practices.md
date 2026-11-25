@@ -2,7 +2,7 @@
 
 Comprehensive reference for App Store Optimization techniques across Apple App Store and Google Play Store. This document covers keyword strategy, metadata optimization, conversion optimization, localization, pricing, and ongoing measurement.
 
-Sections marked *(practitioner)* draw on Darius Pop's X Article "The Ultimate Guide to ASO" (x.com/tyd3n_/status/2117694233301725635, November 3, 2026). They are one indie developer's advice, not Apple or Google rules: present them as starting points, never as guarantees.
+Sections marked *(practitioner)* draw on Darius Pop's X Article "The Ultimate Guide to ASO" (x.com/tyd3n_/status/2117694233301725635, November 3, 2026). They are one indie developer's advice, not Apple or Google rules: present them as starting points, never as guarantees. *Outside the store* is the exception: it names its own source.
 
 ## Table of Contents
 
@@ -17,9 +17,10 @@ Sections marked *(practitioner)* draw on Darius Pop's X Article "The Ultimate Gu
 9. [A/B Testing](#ab-testing)
 10. [Localized Pricing](#localized-pricing-practitioner)
 11. [Measurement and Iteration](#measurement-and-iteration-practitioner)
-12. [Store Policy Compliance](#store-policy-compliance)
-13. [Common Mistakes](#common-mistakes)
-14. [Character Limits Quick Reference](#character-limits-quick-reference)
+12. [Outside the store](#outside-the-store-practitioner)
+13. [Store Policy Compliance](#store-policy-compliance)
+14. [Common Mistakes](#common-mistakes)
+15. [Character Limits Quick Reference](#character-limits-quick-reference)
 
 ---
 
@@ -90,7 +91,7 @@ Apple's search combines words across title, subtitle, and keywords. This means:
 | Unknown: new app, or no evidence users search the brand name | Keyword first | `Habit Tracker: MyApp` |
 | Known: users already search the brand (as they do for Duolingo) | Brand first | `MyApp: Habit Tracker` |
 
-Treat the brand as **known** only with evidence: the brand name appears in the store's search autocomplete, Apple Search Ads shows search popularity for the brand name, or the user says people search for it. Otherwise it is unknown. Keyword-first does not guarantee a better rank. It tells someone scrolling search results what the app does before they know the name. When the brand status is unclear, default to keyword-first and state the assumption in the plan.
+Treat the brand as **known** only with evidence: the brand name appears in the store's search autocomplete, Apple Search Ads shows search popularity for the brand name, Play Console's search-term report shows searches for it (confirm the report's current name in Play Console), or the user says people search for it. Otherwise it is unknown. Re-check this evidence after each release or launch (Measurement and Iteration → *Track the brand name*). Keyword-first does not guarantee a better rank. It tells someone scrolling search results what the app does before they know the name. When the brand status is unclear, default to keyword-first and state the assumption in the plan.
 
 ### Subtitle (30 chars)
 - Include your secondary keyword and a benefit
@@ -298,7 +299,7 @@ Rank markets by: (1) market size for your category, (2) competition level, (3) l
 6. **Update frequency** — Google favors actively maintained apps
 7. **Backlinks and web presence** — deep linking and SEO overlap
 
-**2026 Trend:** Google is moving toward theme-based keyword understanding and video-rich listings. AI-driven discovery blurs the line between ASO and SEO.
+**2026 Trend:** Google is moving toward theme-based keyword understanding and video-rich listings. AI-driven discovery blurs the line between ASO and SEO: to see which pages AI answers cite for the app's category, see Outside the store.
 
 ---
 
@@ -349,11 +350,26 @@ ASO compounds over weeks. Nobody wakes up to a million downloads the day after a
 - **Baseline before changes.** Record the current rank for each target keyword in Phase 1 (`unranked` or `unknown` when there is no data). When every baseline is `unknown`, the Final Report's Decision asks the user to record ranks in each target storefront before uploading the new metadata.
 - **Track the trend.** Re-check the same keywords on a fixed cadence (for example weekly). A move from #47 to #28 to #16 is a signal. It doesn't prove the metadata caused it: seasonality, updates and competitors also move ranks.
 - **Rank data from allowed sources only.** A rank or popularity reading comes from an ASO tool the user subscribes to, Apple Search Ads search popularity, App Store Connect or Play Console analytics, or the user's own manual search in the store. Record each reading with its source and date. Never script store searches or Google searches to check ranks; for Google Search, Google's spam policies (*Machine-generated traffic*) say: "This includes scraping results for rank-checking purposes or other types of automated access to Google Search conducted without express permission." The iTunes Search API is a documented Apple API, but its result order is not the store's search rank: label any position read from it as an approximation. With no allowed source, the rank is `unknown`.
+- **Track the brand name.** The Measurement Plan tracks the app's brand name as a query, re-checked after each release or launch, from the evidence the Brand position rule accepts (the store autocomplete checked by hand, never by script). Record each reading with its source and date. Once brand search appears, propose a brand-first title (`MyApp: Habit Tracker`) as the next cycle's single lever. *(Practitioner: from the source named in Outside the store.)*
 - **Measure outcomes, not just ranks.** Track impressions → product page views → downloads → paid conversions. Better ranks with flat downloads mean the listing is not converting.
-- **One lever per cycle**, so a change can be attributed. A cycle is one store submission: cycle 1 ships the indexed metadata set (title, subtitle, keywords) for the locales the approved plan covers; later cycles change one lever each (screenshots, then new localizations, then pricing). On iOS the name, subtitle and keywords change only with a new app version submission; promotional text changes without one.
+- **One lever per cycle**, so a change can be attributed. A cycle is one store submission: cycle 1 ships the indexed metadata set (title, subtitle, keywords) for the locales the approved plan covers; later cycles change one lever each (screenshots, then new localizations, then pricing; once brand search appears, a brand-first title takes the next cycle). On iOS the name, subtitle and keywords change only with a new app version submission; promotional text changes without one.
 - **Measurement window:** at least 6 weeks per cycle. A re-run inside the window reviews the data and keeps the metadata unless the user asks for a change.
 - **When ranks stall:** the keywords may be too competitive, the search intent may be wrong, or there may be better, unexplored terms. Revisit the keyword tables before rewriting copy.
 - **ASO cannot save a product nobody wants.** When Phase 1 finds weak product signals (a rating below 4.0, or recent reviews repeatedly reporting a broken core function), say so in the Analysis Report instead of promising ASO gains.
+
+---
+
+## Outside the store *(practitioner)*
+
+Optional and recommendation only. This section draws on Oleksii Sidorov's X carousel "48 SEO & GEO tricks from a YC founder" (x.com/acecreamu/status/2125234701912985928, November 24, 2026): advice from one founder who sells an AI-visibility tracker. Google's rules override this advice.
+
+AI assistants answer "which app should I use for this?" from review sites and best-of lists. Those pages sit outside the store, so the skill only helps the user find them and pitch their editors honestly:
+
+1. **The user asks, by hand.** The user asks one or more AI assistants which apps they recommend for the app's category and which pages they cite, then shares the answers with the assistant's name and the date. The skill never sends a query to an assistant: no scripted, automated or bulk queries.
+2. **The report lists the cited pages.** The Analysis Report's *AI-Cited Pages* table lists each review site or list, the assistant that cited it, and whether the app appears there. With no answers from the user, record `not checked`.
+3. **Suggest genuine pitches.** For a cited page that covers the category but not the app, suggest a short, accurate pitch to its editor: what the app does and who it is for. The pitch discloses any material connection (it is the user's own app, a free copy or subscription, an affiliate link). The editor decides whether to cover it, and the user sends the pitch; the skill contacts nobody.
+4. **Never** pay for reviews or placement, write or request fake reviews, or seed inauthentic mentions. Google's guide to generative AI search says: "However, seeking inauthentic "mentions" across the web isn't as helpful as it might seem." (developers.google.com/search/docs/fundamentals/ai-optimization-guide, *Seeking inauthentic "mentions"*)
+5. **Hand off.** Recommend `seo-ai-optimizer` for the app's own website and `product-launch` for directories and outreach.
 
 ---
 
