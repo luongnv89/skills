@@ -30,8 +30,8 @@ python ../scripts/audit_seo.py <project_root>
 This produces fresh audit results covering:
 - Meta tags (titles, descriptions, canonical, etc.)
 - Structured data (JSON-LD validity, schema coverage)
-- Robots.txt and AI bot directives
-- Sitemap.xml and llms.txt existence
+- robots.txt blocks per crawler (GPTBot, ClaudeBot, OAI-SearchBot, Claude-SearchBot, PerplexityBot, Googlebot) and meta robots noindex
+- Sitemap.xml existence (llms.txt existence is reported, but it is optional and never scored)
 - Heading structure and alt text
 - Technical metrics (render blocking, lazy loading, etc.)
 
@@ -59,9 +59,9 @@ Compare the results systematically:
    - OpenGraph and Twitter card coverage: before vs. after
 
 3. **Project-Level Files**
-   - robots.txt: missing → exists? correct AI bot directives?
+   - robots.txt: missing → exists? each block of a checked crawler confirmed intentional by the user?
    - sitemap.xml: missing → exists? correct format?
-   - llms.txt: missing → exists? correct format?
+   - llms.txt (optional, non-scoring): present only if the user chose it? correct format?
    - ai-plugin.json: missing → exists? valid?
 
 4. **Heading Structure**
@@ -94,8 +94,8 @@ Create a comprehensive before/after comparison:
     "seo_health_before": "critical|poor|fair|good|excellent",
     "seo_health_after": "critical|poor|fair|good|excellent",
     "seo_health_improvement": "string — positive|negative|neutral with percentage",
-    "ai_bot_readiness_before": "not_set_up|needs_work|ready",
-    "ai_bot_readiness_after": "not_set_up|needs_work|ready",
+    "ai_bot_readiness_before": "not_set_up|needs_work|ready — from per-crawler robots.txt blocks (each intentional?) and meta robots noindex; llms.txt never counts",
+    "ai_bot_readiness_after": "not_set_up|needs_work|ready — same basis",
     "total_issues_before": number,
     "total_issues_after": number,
     "issues_resolved": number,
@@ -191,12 +191,12 @@ Create a comprehensive before/after comparison:
           "file": "robots.txt",
           "before": {
             "exists": boolean,
-            "has_ai_bot_directives": boolean,
+            "blocked_crawlers": [{"crawler": "string", "source_group": "string", "intentional": "yes|no|unknown"}],
             "allows_seo_crawlers": boolean
           },
           "after": {
             "exists": boolean,
-            "has_ai_bot_directives": boolean,
+            "blocked_crawlers": [{"crawler": "string", "source_group": "string", "intentional": "yes|no|unknown"}],
             "allows_seo_crawlers": boolean
           },
           "status": "created|updated|unchanged|removed",
@@ -221,6 +221,7 @@ Create a comprehensive before/after comparison:
         },
         {
           "file": "llms.txt",
+          "optional": "true — offered, user's choice; never counts toward readiness or the verdict",
           "before": {
             "exists": boolean,
             "format": "valid|invalid|missing"
@@ -323,7 +324,7 @@ Create a comprehensive before/after comparison:
   "issues_resolved": [
     {
       "issue": "string — description of issue fixed",
-      "category": "meta_tags|structured_data|robots_txt|sitemap|llms_txt|heading|images|technical",
+      "category": "meta_tags|structured_data|robots_txt|sitemap|llms_txt|heading|images|technical — llms_txt is optional and non-scoring",
       "severity_before": "critical|warning|info",
       "pages_affected_before": number,
       "pages_affected_after": number,
@@ -413,13 +414,13 @@ Use these methods to validate specific areas:
 
 ### robots.txt Validation
 
-1. Use Google Search Console's robots.txt tester (if user has access)
+1. Ask the user to open the robots.txt report in Search Console (https://support.google.com/webmasters/answer/6062598): it shows the robots.txt files Google found, when they were last crawled, and any warnings or errors
 2. Use online robots.txt validator: robots-txt.com, seobility.net, etc.
-3. Manual check: Verify syntax, AI bot directives, sitemap reference
+3. Manual check: Verify syntax, each crawler's block (confirmed intentional), sitemap reference
 
 ### JSON-LD Validation
 
-1. Use Google's Structured Data Testing Tool: https://developers.google.com/search/docs/advanced/structured-data
+1. Use Google's Rich Results Test: https://search.google.com/test/rich-results
 2. Use schema.org validator: https://validator.schema.org
 3. Verify common issues:
    - Missing required fields
@@ -463,6 +464,8 @@ Create a human-readable comparison:
 **Before:** SEO Health = FAIR | AI Bot Readiness = NEEDS_WORK
 **After:** SEO Health = GOOD | AI Bot Readiness = READY
 
+AI Bot Readiness comes from the per-crawler robots.txt result and meta robots noindex; llms.txt never counts.
+
 **Result:** ✓ SUCCESSFUL IMPROVEMENT
 
 **Summary:**
@@ -486,7 +489,7 @@ Create a human-readable comparison:
 ### Project-Level Files
 
 ✓ **robots.txt**: Created successfully
-- AI bot directives: Present (GPTBot, ClaudeBot allowed)
+- Crawler access: GPTBot blocked (user confirmed intentional); ClaudeBot, OAI-SearchBot, Claude-SearchBot, PerplexityBot, Googlebot allowed
 - Sitemap reference: Present
 - Validation: VALID
 
@@ -495,10 +498,9 @@ Create a human-readable comparison:
 - Pages included: 50
 - Validation: VALID
 
-✓ **llms.txt**: Created successfully
+○ **llms.txt**: Created because the user chose it (optional, not scored)
 - Format: Valid
 - Sections: 3 (Overview, Key Pages, Blog)
-- Validation: VALID
 
 ✓ **ai-plugin.json**: Created successfully
 - Schema: Valid
@@ -511,8 +513,8 @@ Create a human-readable comparison:
 2. ✓ Missing canonical URLs (35 pages fixed)
 3. ✓ No OpenGraph tags (35 pages fixed)
 4. ✓ Missing robots.txt (created)
-5. ✓ No AI bot directives (added)
-6. ✓ Missing llms.txt (created)
+5. ✓ AI-bot rules the user chose written to the new robots.txt
+6. ✓ Unintended noindex on /pricing (removed)
 7. ✓ Missing structured data (15 pages added)
 8. ✓ Heading hierarchy on 5 pages (fixed)
 
@@ -575,7 +577,8 @@ Create a human-readable comparison:
 4. [ ] Add remaining alt text (20 min)
 5. [ ] Revalidate with Validator Agent
 6. [ ] Submit sitemap to Google Search Console
-7. [ ] Monitor performance metrics over next 30 days
+7. [ ] In Search Console, the user requests indexing through URL Inspection for each new or changed key page
+8. [ ] Weekly, the user rechecks the Search Console performance report (including the Generative AI performance report) for the edited pages — never by scripted Google queries
 
 ---
 
@@ -583,7 +586,7 @@ Create a human-readable comparison:
 
 - **Immediately:** Fix critical issues (broken images, orphaned pages)
 - **This week:** Complete remaining alt text and JSON-LD fixes
-- **Next week:** Monitor ranking improvements and crawl budget usage
+- **Next week:** Recheck the Search Console performance report for the edited pages, and the robots.txt report for fetch errors
 - **Monthly:** Rerun audit to track progress
 
 ```
@@ -611,9 +614,10 @@ Before producing output:
 2. **Document validation tools used**: Specify which validator was used for robots.txt, JSON-LD, etc.
 3. **Be honest about remaining issues**: If something wasn't fixed, say so clearly
 4. **Explain regressions**: If something got worse, explain the likely cause
-5. **Validate thoroughly**: Use external tools where possible (schema.org validator, robots.txt tester)
+5. **Validate thoroughly**: Use external tools where possible (Rich Results Test, schema.org validator, Search Console robots.txt report)
 6. **Provide next steps**: Clear recommendations for what still needs work
 7. **Track improvements**: Use percentages and counts to show progress visually
+8. **Never measure with scripted Google queries**: Google's spam policies count "scraping results for rank-checking purposes" as machine-generated traffic (https://developers.google.com/search/docs/essentials/spam-policies). Use the Search Console reports above.
 
 ## Output Expectations
 

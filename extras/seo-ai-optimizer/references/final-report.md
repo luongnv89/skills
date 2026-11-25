@@ -32,7 +32,7 @@ report and plan are presented and the user declines implementation; name the dec
 ## COMPLETE example
 
 ```text
-Result: COMPLETE. Audited 14 Next.js pages; fixed 3 critical and 5 warning issues; added llms.txt and Organization JSON-LD.
+Result: COMPLETE. Audited 14 Next.js pages; fixed 3 critical and 5 warning issues; added Organization JSON-LD and the optional llms.txt the user chose.
 Evidence: audit_seo.py before 3 critical / 9 warning, after 0 / 4; diffs shown and confirmed for 6 files; Step 8 score 3/5, agent-ready-plan.md written.
 Uncertainty: Search Console indexing is untested; the live scan may predate the deploy of these fixes.
 Decision: No approval needed. Commit and deploy the changes, then re-run Step 8.

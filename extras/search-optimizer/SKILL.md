@@ -9,7 +9,7 @@ dependencies:
   - viral-product-evaluator
   - aso-marketing
 metadata:
-  version: 1.2.1
+  version: 1.2.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   architecture: "orchestrator (detect target → web and/or store branch → member audits with skip-checks → merged report)"
 ---

@@ -1,10 +1,10 @@
 ---
 name: seo-ai-optimizer
-description: "Audit and optimize websites for technical SEO, content SEO, and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, llms.txt, and GPTBot/ClaudeBot directives. Don't use for App Store ASO, paid search, or blog writing."
+description: "Audit and optimize websites for technical SEO, content SEO and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, optional llms.txt and GPTBot/ClaudeBot directives. Don't use for App Store ASO, paid search, or blog writing."
 license: MIT
 effort: high
 metadata:
-  version: 1.7.2
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -114,11 +114,11 @@ For the full manual review checklist, see `references/workflow-detail.md`.
 
 ## Step 3: Research Latest Best Practices
 
-Use web search to check for updates (SEO best practices, AI bot directives, llms.txt spec, algorithm updates). Compare findings with embedded knowledge in `references/`.
+Use web search to check for updates (SEO best practices, AI bot directives, llms.txt, algorithm updates). Compare findings with embedded knowledge in `references/`.
 
 ## Step 4: Report
 
-Present the audit report grouping findings by severity (Critical, Warning, Info) and project-level findings (robots.txt, sitemap, llms.txt, JSON-LD). With `output-dir`, also write it to `<output-dir>/seo-audit-report.md`.
+Present the audit report grouping findings by severity (Critical, Warning, Info) and project-level findings (robots.txt, sitemap, JSON-LD, optional llms.txt). With `output-dir`, also write it to `<output-dir>/seo-audit-report.md`.
 
 ## Step 5: Plan
 
@@ -217,8 +217,8 @@ Cases).
 
 After a full run, the agent should produce:
 1. **Audit Report:** A structured markdown report grouping findings by severity.
-2. **Implementation:** Modified or new files (robots.txt, llms.txt, sitemap.xml, JSON-LD) with confirmed changes.
-3. **Validation Report:** A post-fix verification showing critical issues reduced to 0.
+2. **Implementation:** Confirmed edits or new files: robots.txt, sitemap.xml, JSON-LD, optional llms.txt.
+3. **Validation Report:** Post-fix audit: 0 criticals except crawler blocks confirmed intentional.
 4. **Agent-Readiness Handoff:** The live-site score and `agent-ready-plan.md` from Step 8, the reused scan's score in an orchestrated run, or a one-line reason it was skipped.
 5. **Final Report:** The four-line closing block.
 

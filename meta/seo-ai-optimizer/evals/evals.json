@@ -32,7 +32,7 @@
         "Grouped findings by severity (Critical / Warning / Info) and cited a file path for each",
         "Asked for plan approval and modified no file before the user approved",
         "Showed a diff and asked for confirmation before writing each file",
-        "robots.txt allows GPTBot and ClaudeBot (or the report justifies a block), and llms.txt is created or justified",
+        "Any robots.txt block of GPTBot or ClaudeBot (or another checked crawler) is reported per crawler and confirmed intentional with the user; llms.txt is offered as optional and is not required for acceptance",
         "Re-ran audit_seo.py after the fixes and reported the before and after critical counts",
         "Step 8 records an agent-readiness score or names the unmet condition that made it skip",
         "The Final Report opens with a Result: line whose first word is the status (COMPLETE, PARTIAL or BLOCKED)",

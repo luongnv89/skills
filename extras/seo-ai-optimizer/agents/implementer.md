@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Apply approved changes to the website codebase per category (meta tags, robots.txt, llms.txt, JSON-LD, sitemap). This agent takes the prioritized list of user-approved fixes and implements them across the project.
+Apply approved changes to the website codebase per category (meta tags, robots.txt, llms.txt when the user chose it, JSON-LD, sitemap). This agent takes the prioritized list of user-approved fixes and implements them across the project.
 
 ## Critical Instruction
 
@@ -75,12 +75,12 @@ Map approved improvements to implementation categories:
 - Create robots.txt if missing
 - Add/update User-agent directives
 - Add Allow/Disallow rules for key content
-- Add AI bot directives (GPTBot, ClaudeBot, Googlebot)
+- Add the AI-bot groups of the option the user chose (Option A, Option B or their own rules in `references/ai-bot-guide.md`); never pick one for them
 - Add Sitemap reference
 
 **Location:** Typically at `<project_root>/public/robots.txt` or `<project_root>/robots.txt`
 
-**Common directives:**
+**Common directives** (an Option B example; write the option the user chose):
 ```
 User-agent: *
 Allow: /
@@ -96,10 +96,12 @@ Allow: /
 Sitemap: https://example.com/sitemap.xml
 ```
 
-### Category 3: llms.txt
+### Category 3: llms.txt (only when the user chose it)
+
+llms.txt is optional, for AI tools that read it; Google Search does not use it (see "What llms.txt does not do" in `references/ai-bot-guide.md`). Skip this category unless the approved plan lists it.
 
 **What to fix:**
-- Create llms.txt if missing
+- Create llms.txt if missing and the user chose it
 - Add site header (H1 name)
 - Add site description (blockquote)
 - Organize content by section (H2)
@@ -456,8 +458,8 @@ After implementing changes:
 2. **Build test**: If framework-based, run build to ensure no errors
 3. **Manual review**: Check modified files for correctness
 4. **Link validation**: Ensure canonical URLs are correct, og:image paths exist
-5. **Robots.txt validation**: Use robots.txt tester tool (note for user)
-6. **JSON-LD validation**: Use schema.org validator (note for user)
+5. **Robots.txt validation**: Search Console robots.txt report (note for user)
+6. **JSON-LD validation**: Rich Results Test and schema.org validator (note for user)
 
 Document any issues or warnings that came up.
 
@@ -478,7 +480,7 @@ Create a summary of all changes:
 
 ### robots.txt
 - [x] Created robots.txt at: public/robots.txt
-- [x] Added AI bot directives (GPTBot, ClaudeBot)
+- [x] Applied the AI-bot option the user chose (Option A / Option B / own rules)
 - [x] Added sitemap reference
 
 ### Structured Data (JSON-LD)
@@ -486,7 +488,7 @@ Create a summary of all changes:
 - [x] Added Article schema on: blog posts
 - [x] Validated with schema.org validator
 
-### llms.txt
+### llms.txt (only if the user chose it)
 - [x] Created at: public/llms.txt
 - [x] Added site header and sections
 
@@ -500,7 +502,7 @@ Create a summary of all changes:
 |---|---|
 | pages/index.js | Added NextSeo with homepage metadata |
 | public/robots.txt | Created with AI bot directives |
-| public/llms.txt | Created with site structure |
+| public/llms.txt | Created with site structure (only when the user chose llms.txt) |
 | public/.well-known/ai-plugin.json | Created (or updated; only when the approved plan names it) |
 | pages/blog/[slug].js | Added Article schema |
 
@@ -508,9 +510,10 @@ Create a summary of all changes:
 
 1. Run build: `npm run build` or `yarn build`
 2. Test locally: `npm run dev` or `yarn dev`
-3. Validate robots.txt with Google Search Console
-4. Validate JSON-LD with https://validator.schema.org
+3. Validate robots.txt with Google Search Console (robots.txt report)
+4. Validate JSON-LD with the Rich Results Test (https://search.google.com/test/rich-results) and https://validator.schema.org
 5. Submit to Validator Agent for full audit
+6. After deploy, the user requests indexing through URL Inspection in Search Console for each new or changed key page, then rechecks the Search Console performance report for those pages weekly (never by scripted Google queries)
 ```
 
 ## Important Notes

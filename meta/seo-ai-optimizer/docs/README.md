@@ -26,7 +26,7 @@
 | "Optimize for SEO" | Run full audit and apply fixes |
 | "Audit SEO" | Scan for issues without modifying |
 | "Add structured data" | Implement schema.org markup |
-| "Optimize for AI bots" | Add llms.txt and AI-friendly metadata |
+| "Optimize for AI bots" | Check robots.txt per crawler (blocks confirmed intentional); offer llms.txt as optional |
 | "Check the live site too" | Hand off to `/website-agent-readiness` (Step 8) |
 
 ## How It Works
@@ -71,7 +71,7 @@ asm install github:luongnv89/skills:extras/seo-ai-optimizer
 |---|---|
 | `agents/auditor.md` | Scan codebase and generate comprehensive SEO & AI bot audit report |
 | `agents/researcher.md` | Identify framework-specific best practices and improvement opportunities |
-| `agents/implementer.md` | Apply SEO fixes (meta tags, robots.txt, llms.txt, structured data, sitemaps) |
+| `agents/implementer.md` | Apply SEO fixes (meta tags, robots.txt, JSON-LD, sitemaps, optional llms.txt) |
 | `agents/validator.md` | Validate fixes and confirm improvements in generated report |
 | `references/` | Framework-specific configs and SEO checklists |
 | `references/final-report.md` | Final Report status rules, examples, fill rules and reader checks |
@@ -87,7 +87,7 @@ Step 8 invokes [`website-agent-readiness`](../../../extras/website-agent-readine
 
 - SEO & AI Bot Audit Report with Critical/Warning/Info findings
 - Prioritized improvement plan with implementation checklist
-- Applied fixes: meta tags, robots.txt, llms.txt, structured data, sitemaps
+- Applied fixes: meta tags, robots.txt, JSON-LD, sitemaps, optional llms.txt
 - Validation results confirming improvements
 - Live-site agent-readiness score and `agent-ready-plan.md` (Step 8), or a stated reason it was skipped
 - A closing Final Report with the run status, the checks that ran, open uncertainty and the next decision
