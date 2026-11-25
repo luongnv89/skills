@@ -162,7 +162,9 @@ Generate a comprehensive analysis report:
 
 | Cited page (review site or list) | Cited by (assistant, date the user asked) | App listed? | Suggested pitch |
 |----------------------------------|-------------------------------------------|-------------|-----------------|
-| [page] | [assistant, ISO date] | [yes/no] | [genuine pitch to the editor, material connection disclosed; or `not checked`] |
+| [page] | [assistant, ISO date] | [yes/no] | [genuine pitch to the editor, material connection disclosed] |
+
+With no answers from the user: `not checked (no answers from the user)`.
 
 ### Key Findings
 

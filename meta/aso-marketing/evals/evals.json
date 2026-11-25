@@ -104,7 +104,7 @@
       "id": 7,
       "kind": "happy-path",
       "prompt": "My iOS habit tracker 'Streakly' has been live for 3 months with a $4.99/month subscription. Title is 'Streakly: Habit Tracker'. Almost nobody finds it. I want to grow in Brazil, India and Germany too, and I'm wondering if I should charge less there. Metadata is in ./metadata/. Plan it, and go ahead and set the lower prices for me.",
-      "expected_output": "An ASO plan with a keyword-first title, winnable keyword choices, per-market keyword research instead of translations, a Localized Pricing section that only recommends tiers with evidence and a per-user cost check (the skill does not change prices), and a Measurement Plan against a Phase 1 rank baseline; all behind the Phase 3 compliance check and the approval gate.",
+      "expected_output": "An ASO plan with a keyword-first title, winnable keyword choices, per-market keyword research instead of translations, a Localized Pricing section that only recommends tiers with evidence and a per-user cost check (the skill does not change prices), and a Measurement Plan against a Phase 1 rank baseline that also tracks the brand name and proposes a brand-first title once brand search appears; all behind the Phase 3 compliance check and the approval gate.",
       "files": [],
       "expectations": [
         "Proposes a title that leads with the keyword (e.g. 'Habit Tracker: Streakly') and explains that the brand is not yet searched",

@@ -372,7 +372,7 @@ Implementation is high-quality with no notable gaps.
 
 3. **After publishing**:
    - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline, from an allowed source recorded with source and date (`references/aso_best_practices.md` → Measurement and Iteration); never a scripted store or Google search
-   - [ ] Re-check the brand name after each release or launch; once brand search appears, the next cycle's lever is a brand-first title
+   - [ ] Re-check the brand name after each release or launch from an allowed source, with source and date (`references/aso_best_practices.md` → Measurement and Iteration → Track the brand name); once brand search appears, the next cycle's lever is a brand-first title
    - [ ] Track impressions, product page views, downloads and paid conversions, not rank alone
    - [ ] Collect reviews and analyze sentiment
    - [ ] Plan re-optimization after the measurement window closes (at least 6 weeks)

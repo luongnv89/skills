@@ -75,6 +75,7 @@ If available, gather:
 ### AI-Cited Pages (optional, by hand)
 | Cited page (review site or list) | Cited by (assistant, date the user asked) | App listed? | Suggested pitch |
 |----------------------------------|-------------------------------------------|-------------|-----------------|
+- With no answers from the user: `not checked (no answers from the user)`
 
 ### Key Findings
 1. [Finding 1 — most impactful. If product signals are weak (rating below 4.0, or recent reviews repeatedly reporting a broken core function), say so: ASO will not fix it]
