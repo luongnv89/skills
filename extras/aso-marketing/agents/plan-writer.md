@@ -100,7 +100,7 @@ Include only when the app sells something and the user names target markets with
 
 ### Step 6c: Measurement Plan
 
-List the keywords to track with their Phase 1 baseline ranks (`unranked`/`unknown` allowed), the re-check cadence, the outcome metrics (impressions → product page views → downloads → paid conversions), and the order in which to change one lever per cycle.
+List the keywords to track with their Phase 1 baseline ranks (`unranked`/`unknown` allowed), the re-check cadence, the outcome metrics (impressions → product page views → downloads → paid conversions), and the order in which to change one lever per cycle. Track the app's brand name as a query too, re-checked after each release or launch from an allowed source; once brand search appears, propose a brand-first title as the next cycle's single lever (`aso_best_practices.md` → Measurement and Iteration → Track the brand name).
 
 ### Step 7: Create the ASO Plan Document
 
@@ -306,9 +306,10 @@ Start your first guided sleep session tonight and wake up rested.
 | Keyword | Store | Baseline Rank (Phase 1) | Cadence |
 |---------|-------|-------------------------|---------|
 | sleep meditation | iOS | unranked | weekly, 6-8 weeks |
+| ZenMind (brand) | iOS | no brand search yet (user's autocomplete check, [ISO date]) | after each release or launch |
 
 - Outcome metrics: impressions → product page views → downloads → paid conversions
-- Change order: cycle 1 ships the indexed metadata set (title, subtitle, keywords) for the locales the approved plan covers; then one lever per cycle: screenshots, new localizations, pricing
+- Change order: cycle 1 ships the indexed metadata set (title, subtitle, keywords) for the locales the approved plan covers; then one lever per cycle: screenshots, new localizations, pricing; once brand search appears, a brand-first title takes the next cycle
 
 ---
 

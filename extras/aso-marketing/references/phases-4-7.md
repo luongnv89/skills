@@ -139,15 +139,17 @@ Cross-reference against `references/aso_best_practices.md`:
 ### Measurement Plan
 | Keyword | Store | Baseline Rank (Phase 1) | Re-check Cadence |
 - Rank source: each reading from an allowed source, recorded with source and date (`references/aso_best_practices.md` → Measurement and Iteration)
+- Brand query: [brand name], re-checked after each release or launch (`references/aso_best_practices.md` → Measurement and Iteration → Track the brand name)
 - Outcome metrics: impressions → product page views → downloads → paid conversions
-- Next lever to change: [one, after this cycle's results]
+- Next lever to change: [one, after this cycle's results; a brand-first title once brand search appears]
 
 ### Next Steps
 1. Upload metadata to the store(s). On iOS, the name, subtitle and keywords go live only with a new app version submission
-2. Re-check the tracked keywords on the stated cadence against the Phase 1 baseline; judge by downloads and paid conversions, not rank alone
+2. Re-check the tracked keywords on the stated cadence against the Phase 1 baseline; judge by downloads and paid conversions, not rank alone. Re-check the brand name after each release or launch
 3. A/B test screenshots and descriptions, one lever per cycle
 4. Apply any recommended localized-pricing test yourself in App Store Connect / Play Console (the skill does not change prices)
 5. Re-run this skill after the measurement window closes (at least 6 weeks)
+6. Optional, by hand: ask AI assistants which apps they recommend for the category and which pages they cite, then pitch those editors honestly, disclosing any material connection; never paid or fake reviews (`references/aso_best_practices.md` → Outside the store). For the website side use `seo-ai-optimizer`; for directories and outreach, `product-launch`
 
 ### Files Modified
 - [list all files created or modified with paths]

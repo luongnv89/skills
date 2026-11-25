@@ -247,6 +247,7 @@ Document what was created/modified:
 
 3. **After publishing**:
    - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline, from an allowed source recorded with source and date (`references/aso_best_practices.md` → Measurement and Iteration)
+   - [ ] Re-check the brand name after each release or launch; once brand search appears, the next cycle's lever is a brand-first title
    - [ ] Track impressions, product page views, downloads and paid conversions
    - [ ] Collect user feedback from reviews
 
