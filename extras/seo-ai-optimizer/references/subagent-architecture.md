@@ -7,7 +7,7 @@ When the Agent tool is available, this skill uses a 4-phase, multi-agent archite
 
 This agent:
 - Scans website files for technical SEO issues (meta tags, headings, canonical URLs, structured data)
-- Checks project-level files (robots.txt, sitemap.xml, llms.txt, ai-plugin.json)
+- Checks project-level files (robots.txt per crawler, sitemap.xml, optional llms.txt, ai-plugin.json)
 - Performs manual review of content quality, internal linking, and framework configuration
 - Creates seo-audit.json: a complete machine-readable inventory of all SEO issues with severity levels
 
@@ -25,7 +25,7 @@ This agent:
 **Output artifact:** `<output-dir>/seo-research-findings.json` when the orchestrator passed `output-dir`, else `<project_root>/seo-research-findings.json`
 
 ## Phase 3: Implementer Agent
-**Purpose:** Apply user-approved changes per category (meta tags, robots.txt, llms.txt, structured data, sitemaps)
+**Purpose:** Apply user-approved changes per category (meta tags, robots.txt, llms.txt only if the user chose it, structured data, sitemaps)
 
 This agent:
 - Receives user-approved list of improvements to apply

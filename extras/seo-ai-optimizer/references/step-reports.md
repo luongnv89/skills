@@ -34,7 +34,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ··································································
   Meta tags checked:        √ pass (N files scanned)
   Structured data validated: √ pass (JSON-LD present/valid)
-  AI bot access verified:   √ pass (robots.txt + llms.txt checked)
+  AI bot access verified:   √ pass (robots.txt per crawler + meta robots noindex checked)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -55,7 +55,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ◆ Report (step 4 of 8 — findings presentation)
 ··································································
   Issues categorized:       √ pass (critical/warning/info grouped)
-  Project-level findings:   √ pass (robots.txt, sitemap, llms.txt, JSON-LD)
+  Project-level findings:   √ pass (robots.txt per crawler, sitemap, JSON-LD; llms.txt optional)
   Report presented:         √ pass
   ____________________________
   Result:             PASS | FAIL | PARTIAL
@@ -90,7 +90,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ··································································
   SEO score improved:       √ pass (critical issues: N → 0)
   No regressions:           √ pass
-  AI crawl accessible:      √ pass (llms.txt + GPTBot/ClaudeBot allowed)
+  AI crawl accessible:      √ pass (every robots.txt block intentional + no unintended noindex)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```

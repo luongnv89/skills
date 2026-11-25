@@ -67,13 +67,13 @@ Extract:
 ### Search 3: AI Bot Crawling and Accessibility
 
 ```
-Query: "llms.txt specification latest update"
+Query: "which AI tools read llms.txt {current_year}"
 Or: "GPTBot ClaudeBot robots.txt directives {current_year}"
 Or: "AI-plugin.json standard ChatGPT plugin configuration"
 ```
 
 Extract:
-- Current llms.txt format and requirements
+- Which AI tools read llms.txt (Google Search does not) and its current format
 - Which AI crawlers to allow/block
 - ai-plugin.json latest schema
 - robots.txt directives for AI systems
@@ -216,7 +216,7 @@ Compile all research into a structured JSON:
 
     "ai_bot_accessibility": {
       "research_summary": "string",
-      "llms_txt_current_spec": "string — short description of format",
+      "llms_txt_current_spec": "string — short description of format, and which AI tools read it (not Google Search)",
       "ai_bot_list": [
         {
           "bot_name": "GPTBot|ClaudeBot|Googlebot|Bingbot|etc.",
@@ -314,7 +314,8 @@ Compile all research into a structured JSON:
       "topic": "string — where research conflicts with audit/embedded knowledge",
       "audit_finding": "string",
       "research_finding": "string",
-      "resolution": "string — which is more current/reliable"
+      "source": "primary|practitioner — primary = Google's AI-search guide, its spam policies or an operator's own crawler docs",
+      "resolution": "string — which is more current/reliable; a primary source wins over a practitioner claim"
     }
   ],
 
@@ -347,6 +348,7 @@ Before producing output:
 - [ ] Search dates recorded (should be recent — within the current or previous calendar year)
 - [ ] Findings synthesized, not just copied from sources
 - [ ] Conflicts between research and audit identified
+- [ ] Researched tactics that contradict the primary sources (llms.txt for Google, chunking, AI-only rewrites, fan-out pages, buying or seeding mentions) are in `conflict_analysis`, labelled `practitioner` and resolved in favour of the primary source
 - [ ] Framework-specific guidance included
 - [ ] Recommendations tied to audit findings
 - [ ] All sources cited with URLs
@@ -357,12 +359,13 @@ Before producing output:
 
 1. **Use recent sources**: Prefer articles/docs from `current_year`, fallback to `previous_year` if `current_year` sources are unavailable
 2. **Multiple sources**: If a finding appears in 2+ independent sources, it's more reliable
-3. **Official sources first**: Prefer Google Search Central, OpenGraph official docs, schema.org, frameworks' official docs
+3. **Official sources first**: Prefer Google Search Central, OpenGraph official docs, schema.org, frameworks' official docs. Two primary sources are pinned for every run: Google's *Optimizing your website for generative AI features on Google Search* (https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) and Google's spam policies (https://developers.google.com/search/docs/essentials/spam-policies)
 4. **Date findings**: Record when research was performed and when sources were published
-5. **AI bot landscape**: This is rapidly evolving. Note that llms.txt and ai-plugin.json specs are nascent
+5. **AI bot landscape**: This is rapidly evolving. Google Search does not use llms.txt ("Google Search itself doesn't use them", per the AI-search guide); the ai-plugin.json spec is nascent
 6. **Framework versions**: Research the latest versions of framework-specific SEO packages
 7. **Performance metrics**: Google's metrics change. Record the current thresholds from official sources
 8. **Conflicts matter**: If research contradicts embedded knowledge, flag it clearly
+9. **Primary sources beat GEO tactics**: A researched tactic that contradicts a pinned primary source goes to `conflict_analysis` with `source: practitioner`, resolved in favour of the primary source. The AI-search guide's *Mythbusting* section covers llms.txt and AI text files for Google, chunking, rewriting content just for AI systems, and seeking inauthentic mentions; the spam policies cover link spam (buying links), scaled content abuse (many pages generated to manipulate rankings, such as fan-out pages) and machine-generated traffic (scripted rank checks)
 
 ## Output Expectations
 

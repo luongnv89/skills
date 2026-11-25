@@ -18,11 +18,11 @@ say, and so does a missing repo when `evidence-dir` is absent.
 | Step | Live-evidence-only behavior |
 |---|---|
 | Repo Sync | Skipped: there is no repo, and nothing is written. |
-| 1 Detect | Run `python scripts/audit_seo.py <evidence-dir>`. The script audits `page.html` and the root `robots.txt`, `sitemap.xml` and `llms.txt` that intake captured. Report the framework as "generic HTML (live evidence)". |
+| 1 Detect | Run `python scripts/audit_seo.py <evidence-dir>`. The script audits `page.html` and the root `robots.txt`, `sitemap.xml` and `llms.txt` that intake captured. Because the directory holds `manifest.json` and `page.html`, it also reports `raw_html` (visible words, H1 count, internal links of the raw page) and warns once when `page.html` is a JavaScript app shell that may look empty to crawlers that do not run JavaScript. Report the framework as "generic HTML (live evidence)". |
 | 2 Audit | Read `manifest.json` before the script output. A file recorded as `blocked` or unavailable is "not tested", never "missing". Drop every script finding for that file: its body may be an error page. Review `head.json` by hand only when `page.html` is absent. `skip-checks` still applies. |
 | 3 Research | Unchanged. |
 | 4 Report | Head the report `live evidence only — no source repo`, and write it to `<output-dir>/seo-audit-report.md`. |
-| 5 Plan | List every fix with status `needs source repo` and the file it would change (`robots.txt`, `llms.txt`, head tags, JSON-LD). Ask for no approval, since nothing will be applied. |
+| 5 Plan | List every fix with status `needs source repo` and the file it would change (`robots.txt`, head tags, JSON-LD; `llms.txt` only as an optional offer). Ask for no approval, since nothing will be applied. |
 | 6-7 Implement, Validate | Skipped. Never edit the evidence copies. |
 | 8 Agent-readiness | Unchanged: reuse `scan.json`, or skip via `skip-checks`. |
 

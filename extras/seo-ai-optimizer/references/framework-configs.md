@@ -43,7 +43,7 @@ module.exports = {
 - `public/robots.txt` or generated via next-sitemap
 - `app/sitemap.ts` for dynamic sitemap
 - `app/robots.ts` for dynamic robots.txt
-- `public/llms.txt` for AI bot accessibility
+- `public/llms.txt` only if the user chose it (optional; Google Search does not use it)
 
 ## Nuxt
 
@@ -111,7 +111,7 @@ export default defineConfig({
 ```
 
 ### Static files
-Place `robots.txt`, `llms.txt` in `public/` directory.
+Place `robots.txt` (and `llms.txt`, if the user chose it) in `public/` directory.
 
 ## Hugo
 
@@ -141,7 +141,7 @@ title = "Site Name"
 ```
 
 ### Static files
-Place `robots.txt`, `llms.txt`, `sitemap.xml` in `static/` directory.
+Place `robots.txt`, `sitemap.xml` (and `llms.txt`, if the user chose it) in `static/` directory.
 
 ## SvelteKit
 
@@ -200,7 +200,7 @@ All tags go directly in `<head>`:
 </head>
 ```
 
-Place `robots.txt`, `sitemap.xml`, `llms.txt` in root directory.
+Place `robots.txt`, `sitemap.xml` (and `llms.txt`, if the user chose it) in root directory.
 
 ## Common Packages
 

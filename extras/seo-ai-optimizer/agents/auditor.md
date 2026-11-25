@@ -29,7 +29,7 @@ The script automatically:
 - Scans for HTML/template files (excluding node_modules, build dirs, .git)
 - Samples representative files for large codebases (50 files by default, increase with `--max-files N`)
 - Checks for per-file issues: meta tags, headings, alt text, structured data, canonical URLs, etc.
-- Checks for project-level issues: robots.txt, sitemap.xml, llms.txt, ai-plugin.json
+- Checks for project-level issues: robots.txt (per crawler), sitemap.xml, optional llms.txt, ai-plugin.json
 
 **Important:** If the script reports "No HTML/template files found," stop and inform the user: this skill is designed for web frontends with HTML output.
 
@@ -58,6 +58,7 @@ After running the script, manually review items that require human judgment:
    - Does content show expertise/experience/authoritativeness/trustworthiness?
    - Are there author bios, publication dates, update timestamps?
    - Are sources cited or linked?
+   - Does an About page say in plain words who the company is, what it does and for whom, and does it match the Organization JSON-LD? (Rewording it is a recommendation to the user, never an implementer edit.)
    - Record: assessment of content quality and trust signals
 
 5. **Framework-Specific Configuration**
@@ -66,9 +67,8 @@ After running the script, manually review items that require human judgment:
    - Record: any misconfigurations
 
 6. **AI Bot Accessibility**
-   - Are llms.txt, ai-plugin.json, and robots.txt directives in place?
-   - Do they allow major AI crawlers (GPTBot, ClaudeBot, Googlebot)?
-   - Record: compliance with AI bot scanning requirements
+   - Which of GPTBot, ClaudeBot, OAI-SearchBot, Claude-SearchBot, PerplexityBot and Googlebot does robots.txt block from the site, and through which group (its own or `User-agent: *`)? Does any page carry a noindex meta robots value?
+   - Record: each block as intentional, accidental or unknown (ask the user; never assume). A Googlebot block is critical. llms.txt is optional and does not count here.
 
 Document findings as manual_review section in the output JSON.
 
@@ -127,7 +127,7 @@ Create a JSON file with this structure:
     "robots_txt": {
       "exists": boolean,
       "path": "string or null",
-      "has_ai_bot_directives": boolean,
+      "blocked_crawlers": [{"crawler": "string", "source_group": "User-agent: <name>|User-agent: *", "severity": "critical|warning"}],
       "allows_seo_crawlers": boolean,
       "has_sitemap_reference": boolean,
       "issues": ["string — any problems found"]
@@ -139,6 +139,7 @@ Create a JSON file with this structure:
       "issues": ["string"]
     },
     "llms_txt": {
+      "optional": "true — offered, user's choice; never counts toward ai_bot_readiness",
       "exists": boolean,
       "path": "string or null",
       "format": "valid|invalid|missing",
@@ -228,11 +229,9 @@ Create a JSON file with this structure:
       "properly_configured": boolean,
       "issues": ["string"]
     },
-    "ai_bot_accessibility": {
-      "major_crawlers_allowed": ["string"],
-      "crawlers_blocked": ["string"],
-      "compliance_level": "full|partial|none"
-    }
+    "ai_bot_accessibility": [
+      {"crawler": "string", "blocked": boolean, "source_group": "string", "intentional": "intentional|accidental|unknown"}
+    ]
   },
 
   "summary": {
@@ -241,7 +240,7 @@ Create a JSON file with this structure:
     "warning_count": number,
     "info_count": number,
     "seo_health": "critical|poor|fair|good|excellent",
-    "ai_bot_readiness": "ready|needs_work|not_set_up",
+    "ai_bot_readiness": "ready|needs_work|not_set_up — from per-crawler robots.txt blocks and noindex; llms.txt excluded",
     "key_priorities": [
       "string — top 3-5 issues to fix first"
     ]
@@ -255,7 +254,7 @@ As you build the audit, if you encounter anything unexpected:
 
 - **Misconfigurations**: Framework set up but SEO packages not configured
 - **Missing critical files**: No robots.txt or sitemap
-- **Suspicious patterns**: llms.txt exists but blocks AI crawlers
+- **Suspicious patterns**: robots.txt blocks a crawler the site's owner seems to want (for example Googlebot through `User-agent: *`), or a key page carries noindex
 - **Content issues**: Very short or thin content on key pages
 - **Technical problems**: Canonical URLs pointing to wrong pages
 
@@ -277,7 +276,7 @@ Before writing seo-audit.json, verify:
 - [ ] Audit script ran successfully or error documented
 - [ ] Framework detected or reason for detection failure noted
 - [ ] Per-file issues categorized (critical, warnings, info)
-- [ ] Project-level files checked (robots.txt, sitemap.xml, llms.txt, ai-plugin.json)
+- [ ] Project-level files checked (robots.txt per crawler, sitemap.xml, optional llms.txt, ai-plugin.json)
 - [ ] Manual review checklist completed
 - [ ] Summary with priority list generated
 - [ ] seo-audit.json written to workspace with all required fields

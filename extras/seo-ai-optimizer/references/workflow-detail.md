@@ -12,6 +12,7 @@ After running the automated audit script, manually review these items:
 4. **Content depth** -- Sufficient E-E-A-T signals? Author bios? Source citations?
 5. **Framework-specific config** -- Are SEO packages properly configured?
 6. **Mobile readiness** -- Viewport configured? Touch targets adequate? No horizontal scrolling?
+7. **About page** -- Does an About page say in plain words who the company is, what it does and for whom, and does it match the Organization JSON-LD? Rewording the copy is a recommendation to the user, not an implementer edit.
 
 Consult `references/technical-seo.md` for the full checklist.
 
@@ -37,8 +38,10 @@ Use this template when presenting the prioritized improvement plan to the user:
 ### New Files to Create
 - [ ] robots.txt with AI bot directives
 - [ ] sitemap.xml (or install generation package)
-- [ ] llms.txt
 - [ ] JSON-LD structured data
+
+### Offered, User's Choice
+- [ ] llms.txt (optional, for AI tools that read it; Google Search does not use it)
 ```
 
 ## Step 6: Implementation Details
@@ -57,11 +60,12 @@ For every file modification, follow this safety protocol:
 
 ### robots.txt with AI Bot Directives
 - Consult `references/ai-bot-guide.md` for the full list of AI crawlers.
-- Ask user preference: allow all AI bots, allow search only, or block all.
+- Ask the user to choose Option A (allow AI search, block training), Option B (allow everything) or their own rules from `references/ai-bot-guide.md`; no option is the default.
 - Include sitemap reference: `Sitemap: https://example.com/sitemap.xml`.
 - **Merge logic:** Do NOT overwrite existing `Allow`/`Disallow` rules. Append new directives to the end or merge intelligently.
 
-### llms.txt Generation
+### llms.txt Generation (only when the user opts in)
+- Offer it as optional: some AI tools read it, Google Search does not (see "What llms.txt does not do" in `references/ai-bot-guide.md`). Skip this section unless the user chose it.
 - Create based on site structure and content.
 - Follow format in `references/ai-bot-guide.md`.
 - Include H1 with site name, blockquote summary, H2 sections with key page links.
@@ -160,17 +164,17 @@ After a full run on a Next.js project, the audit report looks like:
 2. [pages/blog/[slug].tsx:14] Duplicate H1 — 2 H1 tags found
 
 ### Warnings (should fix)
-1. [public/robots.txt] GPTBot not listed — AI crawlers get no explicit directive
+1. [public/robots.txt] robots.txt blocks GPTBot from the whole site through `User-agent: GPTBot`. Is this block intentional?
 
 ### Project-Level Findings
-- robots.txt: present, missing AI bot directives
+- robots.txt: present; GPTBot blocked (intentional? ask the user), other checked crawlers allowed
 - sitemap.xml: absent — install next-sitemap
-- llms.txt: absent — AI-friendly summary missing
+- llms.txt: absent (optional; used by some AI tools, not by Google Search)
 - Structured data: partial (homepage only)
 - AI bot directives: not configured
 ```
 
-After implementation, validation shows: `critical issues: 2 → 0`, `llms.txt created`, `sitemap.xml generated`.
+After implementation, validation shows: `critical issues: 2 → 0`, `GPTBot block confirmed intentional`, `sitemap.xml generated`.
 
 ### Acceptance Criteria
 - [ ] Audit report identifies the framework detected or explicitly states "generic HTML".
@@ -178,7 +182,7 @@ After implementation, validation shows: `critical issues: 2 → 0`, `llms.txt cr
 - [ ] User explicitly approved the improvement plan before any file was modified.
 - [ ] Safety Protocol (Diff & Confirm) was followed for all file modifications.
 - [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0.
-- [ ] `llms.txt`, `robots.txt`, and `sitemap.xml` are present (or explicitly justified).
+- [ ] `robots.txt` and `sitemap.xml` are present (or explicitly justified); each robots.txt block of a checked crawler is confirmed intentional by the user. `llms.txt` is offered, user's choice, and never required.
 - [ ] Step 8 either records the live-site agent-readiness score and `agent-ready-plan.md`, records the reused orchestrator scan's score without re-scanning, or names the precondition that made it skip.
 - [ ] Live-evidence-only orchestrated run (no repo): the approval, Diff & Confirm, validation and file-presence items above are marked `n/a — needs source repo`; every fix is listed as `needs source repo`, and files the manifest records as blocked are reported as "not tested".
 

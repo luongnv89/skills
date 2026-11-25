@@ -2,7 +2,13 @@
 
 ## llms.txt
 
-A Markdown file at `/llms.txt` that helps AI systems understand your site. Proposed by Jeremy Howard (Answer.AI), adopted by Anthropic, Cloudflare, Stripe, and documentation platforms.
+A Markdown file at `/llms.txt` that some AI tools read to understand a site. Proposed by Jeremy Howard (Answer.AI), adopted by Anthropic, Cloudflare, Stripe, and documentation platforms. It is optional: offer it for those AI tools, and create it only when the user chooses it.
+
+### What llms.txt does not do
+
+Google Search does not use llms.txt: "You don't need to create new machine readable files, AI text files, markup, or Markdown to appear in Google Search (including its generative AI capabilities), as Google Search itself doesn't use them." ([Google Search Central, *Optimizing your website for generative AI features on Google Search*](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide))
+
+The same guide adds that creating one "will neither harm nor help your site's visibility or rankings in Google Search", and that chunking content or rewriting it just for AI systems is not needed. So llms.txt never counts toward crawl accessibility, the audit score or acceptance.
 
 ### Format
 
@@ -61,7 +67,23 @@ Single Markdown file with all documentation content concatenated. Placed at `/ll
 - `Perplexity-User` (Perplexity)
 - `MistralAI-User` (Mistral)
 
-### Recommended: Allow AI Search, Block Training
+### Which crawler controls which surface
+
+Each token is independent: blocking one leaves the others as they are.
+
+| robots.txt token | What a block affects (quoted from the operator's page) |
+|---|---|
+| `Googlebot` | Google Search: rules for it "affect Google Search (including Discover and all Google Search features)" ([Google crawlers](https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers)). AI Overviews and AI Mode show only pages that are "indexed and eligible to be shown in Google Search with a snippet" ([Google AI guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)). |
+| `Google-Extended` | Training of Google's foundation models and grounding in Google products "aside from Search". It "doesn't impact a site's inclusion in Google Search nor is it used as a ranking signal"; grounding in AI Overviews and AI Mode is managed with the Search generative AI control in Search Console ([Google-Extended](https://developers.google.com/crawling/docs/google-extended)). |
+| `GPTBot` | OpenAI model training: disallowing it "indicates a site's content should not be used in training generative AI foundation models" ([OpenAI crawlers](https://developers.openai.com/api/docs/bots)). |
+| `OAI-SearchBot` | ChatGPT search: opted-out sites "will not be shown in ChatGPT search answers, though can still appear as navigational links" ([OpenAI crawlers](https://developers.openai.com/api/docs/bots)). |
+| `ClaudeBot` | Anthropic model training: a block "signals that the site's future materials should be excluded from our AI model training datasets" ([Anthropic crawlers](https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler)). |
+| `Claude-SearchBot` | Claude search: a block "may reduce your site's visibility and accuracy in user search results" ([Anthropic crawlers](https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler)). |
+| `PerplexityBot` | Perplexity search results; it "is not used to crawl content for AI foundation models" ([Perplexity crawlers](https://docs.perplexity.ai/docs/resources/perplexity-crawlers)). |
+
+Blocking Google-Extended does not remove a site from Google Search or AI Overviews. Blocking Googlebot stops Google crawling the site for Search, AI Overviews included.
+
+### Option A: Allow AI Search, Block Training
 
 ```
 # Block AI training crawlers
@@ -104,7 +126,7 @@ User-agent: Claude-User
 Allow: /
 ```
 
-### Alternative: Allow Everything (maximize AI visibility)
+### Option B: Allow Everything
 
 ```
 # Allow all AI bots for maximum visibility
@@ -130,7 +152,7 @@ User-agent: Claude-User
 Allow: /
 ```
 
-Ask user which approach they prefer before implementing.
+Neither option is the default. Show both with the table above and let the user choose, or write their own rules, before implementing.
 
 ## ai-plugin.json (Deprecated but Referenced)
 
@@ -171,10 +193,12 @@ Every page should have at minimum:
   "name": "Your Company",
   "url": "https://example.com",
   "logo": "https://example.com/logo.png",
-  "sameAs": ["https://twitter.com/you", "https://linkedin.com/company/you"]
+  "sameAs": ["https://github.com/your-org", "https://www.crunchbase.com/organization/your-org", "https://www.linkedin.com/company/your-org"]
 }
 </script>
 ```
+
+List in `sameAs` only profiles the founder or company really owns and keeps up (for example GitHub, Crunchbase, LinkedIn). Never create profiles or directory listings only to get a link: Google's spam policies define link spam as "creating links to or from a site primarily for the purpose of manipulating search rankings" ([Google spam policies](https://developers.google.com/search/docs/essentials/spam-policies)).
 
 **Article/BlogPosting (content pages):**
 ```html

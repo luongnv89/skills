@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO, and AI
 license: MIT
 effort: high
 metadata:
-  version: 1.7.2
+  version: 1.8.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -114,11 +114,11 @@ For the full manual review checklist, see `references/workflow-detail.md`.
 
 ## Step 3: Research Latest Best Practices
 
-Use web search to check for updates (SEO best practices, AI bot directives, llms.txt spec, algorithm updates). Compare findings with embedded knowledge in `references/`.
+Use web search to check for updates (SEO best practices, AI bot directives, llms.txt, algorithm updates). Compare findings with embedded knowledge in `references/`.
 
 ## Step 4: Report
 
-Present the audit report grouping findings by severity (Critical, Warning, Info) and project-level findings (robots.txt, sitemap, llms.txt, JSON-LD). With `output-dir`, also write it to `<output-dir>/seo-audit-report.md`.
+Present the audit report grouping findings by severity (Critical, Warning, Info) and project-level findings (robots.txt, sitemap, JSON-LD, optional llms.txt). With `output-dir`, also write it to `<output-dir>/seo-audit-report.md`.
 
 ## Step 5: Plan
 
