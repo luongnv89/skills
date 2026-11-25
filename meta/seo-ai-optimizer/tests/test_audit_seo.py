@@ -16,6 +16,7 @@ import io
 import json
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -183,6 +184,36 @@ class RobotsTests(AuditFixture):
         self.assertEqual(blocks["Googlebot"]["severity"], "critical")
         self.assertIn("every page except the homepage", blocks["Googlebot"]["message"])
         self.assertIn("intentional", blocks["Googlebot"]["message"])
+
+    def test_homepage_only_disallow_is_a_homepage_block(self):
+        self.write("robots.txt", "User-agent: *\nDisallow: /$\n")
+        blocks = self.robots_blocks(self.audit())
+        self.assertEqual(sorted(blocks), sorted(CRAWLERS))
+        self.assertEqual(blocks["Googlebot"]["severity"], "critical")
+        self.assertIn("from the homepage", blocks["Googlebot"]["message"])
+
+    def test_about_only_disallow_stays_a_key_path_info(self):
+        self.write("robots.txt", "User-agent: *\nDisallow: /about/\n")
+        report = self.audit()
+        self.assertEqual(self.robots_blocks(report), {})
+        googlebot = [c for c in report["project_checks"] if c.get("crawler") == "Googlebot"]
+        self.assertEqual([c["severity"] for c in googlebot], ["info"])
+        self.assertIn("/about/", googlebot[0]["message"])
+
+    def test_long_star_run_is_fast_and_keeps_the_verdict(self):
+        self.write("robots.txt", "User-agent: *\nDisallow: /" + "*" * 30 + "X\nDisallow: /*" + "*" * 30 + "\n")
+        start = time.monotonic()
+        blocks = self.robots_blocks(self.audit())
+        self.assertLess(time.monotonic() - start, 2)
+        self.assertEqual(sorted(blocks), sorted(CRAWLERS))
+        self.assertIn("from the whole site", blocks["Googlebot"]["message"])
+
+    def test_rules_past_500_kib_are_ignored_and_reported(self):
+        self.write("robots.txt", "User-agent: *\n" + "# padding\n" * 60000 + "Disallow: /\n")
+        report = self.audit()
+        self.assertEqual(self.robots_blocks(report), {})
+        self.assertTrue(any("over 500 KiB" in m for m in self.messages(report, "ai-bot")))
+        self.assertIn("500 KiB", self.stderr)
 
     def test_allow_wins_a_tie_with_disallow(self):
         self.write("robots.txt", "User-agent: *\nDisallow: /\nAllow: /\n\nUser-agent: PerplexityBot\nDisallow: /docs/\nAllow: /docs/\n")

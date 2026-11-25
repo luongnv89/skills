@@ -31,6 +31,8 @@ ROBOTS_CRAWLERS = {
 ROBOTS_KEY_PATHS = ("/blog/", "/docs/", "/about/")
 # A page other than the homepage, with a prefix no real rule is likely to target.
 ROBOTS_DEEP_PROBE = "/zz-seo-audit-probe/page"
+# Google reads the first 500 KiB of robots.txt and ignores the rest.
+ROBOTS_MAX_BYTES = 500 * 1024
 
 # Text inside these elements is not shown to a reader of the raw HTML.
 HIDDEN_TEXT_TAGS = {"script", "style", "template", "noscript"}
@@ -383,8 +385,19 @@ def audit_file(filepath):
     return issues, info
 
 
+def robots_rule(is_allow, pattern):
+    """Compile one rule once as (is_allow, pattern length, regex or None for an empty pattern).
+
+    Runs of `*` collapse to one, so a rule such as `/*****X` cannot backtrack exponentially.
+    """
+    anchored = pattern.endswith("$")
+    body = re.sub(r"\*+", "*", pattern[:-1] if anchored else pattern)
+    regex = ".*".join(re.escape(part) for part in body.split("*")) + (r"\Z" if anchored else "")
+    return is_allow, len(pattern), re.compile(regex) if pattern else None
+
+
 def robots_groups(robots_text):
-    """Split robots.txt into RFC 9309 groups of (user-agent values, [(is_allow, pattern)]).
+    """Split robots.txt into RFC 9309 groups of (user-agent values, [compiled rule]).
 
     Consecutive User-agent lines share a group and a User-agent line after a rule starts
     a new one. Blank lines, comments and other fields (Sitemap, Crawl-delay) are skipped.
@@ -400,7 +413,7 @@ def robots_groups(robots_text):
                 groups.append(([], []))
             groups[-1][0].append(value)
         elif field in ("allow", "disallow") and groups:
-            groups[-1][1].append((field == "allow", value))
+            groups[-1][1].append(robots_rule(field == "allow", value))
     return groups
 
 
@@ -425,23 +438,19 @@ def robots_rules_for(crawler, groups):
 def robots_allows(rules, path):
     """Longest matching pattern wins, with `*` and a trailing `$`; on a tie Allow wins."""
     best_length, allowed = -1, True
-    for is_allow, pattern in rules:
-        if not pattern:
+    for is_allow, length, regex in rules:
+        if regex is None or not regex.match(path):
             continue
-        anchored = pattern.endswith("$")
-        regex = ".*".join(re.escape(part) for part in (pattern[:-1] if anchored else pattern).split("*"))
-        if not re.match(regex + (r"\Z" if anchored else ""), path):
-            continue
-        if len(pattern) > best_length or (len(pattern) == best_length and is_allow):
-            best_length, allowed = len(pattern), is_allow
+        if length > best_length or (length == best_length and is_allow):
+            best_length, allowed = length, is_allow
     return allowed
 
 
 def check_robots(robots_file):
     """Report each listed crawler that robots.txt blocks from the site or a key path."""
     try:
-        # utf-8-sig drops a byte-order mark, which would otherwise be read as part of the first field.
-        robots_text = robots_file.read_text(encoding="utf-8-sig", errors="replace")
+        with robots_file.open("rb") as handle:
+            robots_bytes = handle.read(ROBOTS_MAX_BYTES + 1)
     except OSError as e:
         print(
             f"Error: cannot read robots.txt at {robots_file}: {e}. "
@@ -454,9 +463,18 @@ def check_robots(robots_file):
             "message": f"Cannot read robots.txt at {robots_file}: {e}",
         }]
 
-    groups = robots_groups(robots_text)
-
     findings = []
+    if len(robots_bytes) > ROBOTS_MAX_BYTES:
+        robots_bytes = robots_bytes[:ROBOTS_MAX_BYTES]
+        print(f"Note: {robots_file} is over 500 KiB; only the first 500 KiB was read, as Google does.", file=sys.stderr)
+        findings.append({
+            "severity": "warning",
+            "category": "ai-bot",
+            "message": f"robots.txt at {robots_file} is over 500 KiB. Google ignores rules past 500 KiB, so the audit did too.",
+        })
+    # utf-8-sig drops a byte-order mark, which would otherwise be read as part of the first field.
+    groups = robots_groups(robots_bytes.decode("utf-8-sig", errors="replace"))
+
     for crawler, role in ROBOTS_CRAWLERS.items():
         group, rules = robots_rules_for(crawler, groups)
         home_blocked = not robots_allows(rules, "/")
@@ -482,7 +500,7 @@ def check_robots(robots_file):
                 "message": f"robots.txt blocks {crawler} from {', '.join(blocked_paths)} through `{group}`. Is this intentional?",
             })
 
-    if not findings:
+    if not any(finding.get("crawler") for finding in findings):
         findings.append({
             "severity": "info",
             "category": "ai-bot",
