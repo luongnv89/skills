@@ -84,7 +84,7 @@ Ask or infer 3-5 direct competitors:
 - For each primary keyword, note what the top results show (title pattern, first-screenshot message) as evidence of what searchers want
 - Identify their strong points (high rating, featured status, etc.)
 - Identify gaps (category terms they don't target that the user's app could)
-- Read only what the store shows publicly. Never copy competitors' captions or names, and never propose a competitor's brand or a lookalike of it as a keyword
+- Read only what the store shows publicly. Take the top results only from the user's own manual store search or an ASO tool the user subscribes to, recorded with source and date; never a scripted store or Google search. With neither, record `not checked` and ask the user. Never copy competitors' captions or names, and never propose a competitor's brand or a lookalike of it as a keyword
 
 IMPORTANT: Competitive analysis is for STRATEGY only. Do NOT carry competitor names into the proposed metadata.
 

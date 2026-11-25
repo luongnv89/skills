@@ -126,7 +126,7 @@ Both Platforms Description:
 Verify all claims in the description are verifiable:
 
 - [ ] "500+ guided meditations" — does the app actually have 500+? If so, OK.
-- [ ] "2M+ users" — is this publicly stated somewhere, or just marketing hope? If unverifiable, remove it; "Join millions..." is just as unverifiable
+- [ ] "2M+ users" — ❌ remove: user counts stay out of the copy; "Join millions..." is just as unverifiable
 - [ ] "Award-winning" — does the app have a real award? If not, ❌ remove.
 - [ ] "Voted best app" — if not actually voted/awarded, ❌ remove.
 - [ ] "Reduce anxiety" — is this a medical claim? If so, requires disclaimer or removal.
@@ -231,11 +231,11 @@ Generate a comprehensive compliance report:
 | Claim | Field | Verifiable? | Evidence | Status |
 |-------|-------|-----------|----------|--------|
 | "500+ guided meditations" | Description | Yes | App data / store listing | ✅ OK |
-| "2M+ users" | Description | ? | Marketing claim only | ⚠️ Remove unless a public source supports it |
-| "Reduce anxiety" | Description | Qualitative | User reports / testimonials | ✅ OK (not medical claim) |
+| "2M+ users" | Description | ? | Marketing claim only | ❌ Remove (user counts stay out of the copy) |
+| "Reduce anxiety" | Description | Qualitative | Lifestyle wording; no figure or medical claim | ✅ OK (not medical claim) |
 
 **Recommendations**:
-- ⚠️ Remove "2M+ users" unless the user can point to a public source (unverifiable claim)
+- ❌ Remove "2M+ users" (user counts stay out of the copy)
 - ✅ Keep "Reduce anxiety" (lifestyle claim, not medical)
 
 **Overall Content Accuracy Status**: ✅ PASS (with recommended changes)

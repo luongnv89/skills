@@ -283,7 +283,7 @@ The ASO implementation has been reviewed against:
 ✅ **PASS** — Keywords are well-chosen and strategically placed
 - Primary keyword "meditation" in Name ✅
 - Secondary keyword "sleep" in Subtitle ✅
-- Long-tail keywords in Description ✅
+- Long-tail terms covered in the keywords field (the iOS description is not indexed) ✅
 - Keywords field at 90% utilization ✅ (meets 90%+ target)
 
 ### Description Quality
