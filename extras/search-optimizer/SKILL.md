@@ -127,7 +127,8 @@ response. Members still run their own Repo Sync; never skip theirs because this 
 ### Phase 1 — Scope & preflight
 
 Detect the branch, resolve the output dir, run the Dependency Preflight, and confirm scope in one
-line.
+line. On the web branch, ask the optional search-data question (`references/intake.md` → *Search
+data*) in that same message, unless the request already names the data.
 
 ### Phase 2 — Intake once (web branch)
 
