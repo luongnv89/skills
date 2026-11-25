@@ -88,8 +88,8 @@ PRICING (if applicable)
 FAQ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Q: [Common objection]
-A: [Clear, confident answer]
+Q: [A customer question the user supplied, close to word for word, or an assumed objection]
+A: [First sentence answers the question directly; then the detail]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FINAL CTA
@@ -185,8 +185,8 @@ PRICING (if applicable)
 FAQ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Q: [Common objection]
-A: [Clear, confident answer]
+Q: [A customer question the user supplied, close to word for word, or an assumed objection]
+A: [First sentence answers the question directly; then the detail]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACTION
@@ -274,8 +274,8 @@ PRICING (if applicable)
 FAQ
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Q: [Common objection]
-A: [Clear, confident answer]
+Q: [A customer question the user supplied, close to word for word, or an assumed objection]
+A: [First sentence answers the question directly; then the detail]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CALL TO ACTION
@@ -344,6 +344,14 @@ Step 5 (SKILL.md → *Workflow*):
 - One big number from the brief, with its source, or `[proof needed]`.
 - Slots: problem = subheadline sentence 1; contrarian take = subheadline sentence 2, or omitted; big number = trust bar, or `[proof needed]`; proof of work = trust bar, next to the number (the demo, command or screenshot the brief names). When the brief gives neither, the trust bar holds one `[proof needed]` marker that names both gaps. The subheadline stays 1-2 sentences.
 - When `launch-kit/copy-bank.md` exists, reuse its launch story (`copy.story.hero` is the story's protagonist, the customer, not the page headline; `.villain`, `.contrarian`) and its facts instead of writing a new one.
+
+**FAQ rules** (every framework):
+
+- Take the questions from the real customer questions the user supplies: a Search Console query export, support tickets, sales-call notes. Keep each close to the customer's own words; fix only spelling and grammar. Remove personal data: names, email addresses, company or order details, anything that identifies a person.
+- Use only what the user pastes or attaches. Never read Search Console, a support tool, or a CRM yourself.
+- One entry per question, not per wording: merge queries that ask the same thing into one entry, and pick the 5–7 asked most often or that block a purchase. Never write one FAQ entry, or one page, per query variation. Google's spam policies (*Scaled content abuse*): "Scaled content abuse is when many pages are generated for the primary purpose of manipulating search rankings".
+- Each answer's first sentence answers the question directly (yes, no, the number, or the one fact asked for); the detail follows. An unsupported fact in an answer is a `[proof needed]` marker.
+- Without supplied questions, write assumed objections, and list them as assumptions on the Final Report's `Uncertainty:` line.
 
 ## Expected Output Example
 

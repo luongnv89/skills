@@ -246,6 +246,23 @@
         "Each CTA on landing-page/index.html is a link or button whose text matches the copy's sentence-case CTA text verbatim",
         "The Final Report's Evidence: line names the visual check's widths and modes screenshotted, or its Uncertainty: line reads 'Visual check untested: <reason>'; an untested visual check alone does not make the status PARTIAL"
       ]
+    },
+    {
+      "id": 21,
+      "kind": "happy-path",
+      "name": "faq-from-customer-questions-and-about-page",
+      "prompt": "Write and build the landing page for Ledgerline, a bookkeeping app for freelance designers, made by Ledgerline Labs in Lyon. Audience: freelance designers. Primary CTA: start a free trial. Also add an About page. Here is our Search Console query export and two support tickets for the FAQ: 'ledgerline vat', 'does ledgerline handle vat', 'ledgerline vat france', 'can i export to my accountant', 'ledgerline price'; ticket from Marie Dupont (marie@studio-dupont.fr): 'Can I import my old invoices from a spreadsheet?'; ticket: 'is there a mobile app'.",
+      "expected_output": "The FAQ takes its questions from the supplied queries and tickets, close to their wording, merging the three VAT queries into one entry and naming no customer. Each answer opens with the direct answer, unsupported facts as [proof needed] markers. An About page says who makes Ledgerline (Ledgerline Labs, Lyon), what it does and who it is for, with gap markers and no invented team, bio or photo, and is built as about.html. The Final Report's Decision line asks the user to link the new page from their site navigation and README on the day it goes live; nothing is written outside landing-page/.",
+      "files": [],
+      "expectations": [
+        "Each FAQ question comes from the supplied queries or tickets, close to their wording; no FAQ question is an invented objection",
+        "The three VAT queries become one FAQ entry, not three; there is no FAQ entry or page per query variation",
+        "No FAQ entry or other copy names Marie Dupont, her email address, or her studio",
+        "Each FAQ answer's first sentence answers its question directly, and a fact the brief does not supply (VAT support, export formats, a mobile app, the price) is a [proof needed] marker, not a claim",
+        "An About copy block says who makes the product (Ledgerline Labs, Lyon), what it does, and who it is for; it names no team member, bio, job title, photo, founding year or headcount, and each missing fact is a gap marker",
+        "landing-page/about.html is built and every page's footer links it after the other companion pages",
+        "The Final Report's Decision: line asks the user to link the new page from their site navigation and README on the day it goes live, and no file outside landing-page/ is created or changed, README.md included"
+      ]
     }
   ]
 }
