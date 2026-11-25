@@ -4,7 +4,7 @@
   "version": "0.11.0",
   "description": "Platform-neutral distribution of the maintained first-party Agent Skills catalog.",
   "claude": {
-    "description": "19 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
+    "description": "20 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
     "author": {
       "name": "Luong NGUYEN"
     },
@@ -24,7 +24,7 @@
     "marketplace_name": "lstack"
   },
   "codex": {
-    "description": "19 first-party engineering skills for Codex: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
+    "description": "20 first-party engineering skills for Codex: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
     "author": {
       "name": "Luong NGUYEN"
     },
@@ -45,6 +45,7 @@
     {"name": "auto-push", "source": "skills/auto-push"},
     {"name": "cleanup-project", "source": "skills/cleanup-project"},
     {"name": "cli-builder", "source": "skills/cli-builder"},
+    {"name": "code-analysis-setup", "source": "skills/code-analysis-setup"},
     {"name": "code-review", "source": "skills/code-review"},
     {"name": "comment-audit", "source": "skills/comment-audit"},
     {"name": "devops-pipeline", "source": "skills/devops-pipeline"},

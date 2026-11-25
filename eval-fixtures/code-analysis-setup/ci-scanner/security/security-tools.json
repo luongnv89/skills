@@ -1,0 +1,19 @@
+{
+  "fail_on": ["CRITICAL", "HIGH"],
+  "checks": [
+    {
+      "name": "gitleaks",
+      "category": "secrets",
+      "required": true,
+      "triggers": { "always": true },
+      "command": ["gitleaks", "detect", "--source", ".", "--redact", "--report-format", "json", "--report-path", "{output}"]
+    },
+    {
+      "name": "semgrep",
+      "category": "static",
+      "required": true,
+      "triggers": { "paths": ["**/*.py"] },
+      "command": ["semgrep", "--config", "security/semgrep-rules.yml", "--json", "--error", "."]
+    }
+  ]
+}

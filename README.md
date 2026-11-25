@@ -88,7 +88,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the full release history.
 ### lstack: direct Claude Code plugin
 
 [lstack 0.11.0](packages/lstack/README.md) is the engineering core: the `skills/` folder
-holds 17 top-level definitions plus the two nested diagram-generator children, **19**
+holds 18 top-level definitions plus the two nested diagram-generator children, **20**
 namespaced skills, all plain Markdown instructions with no helper scripts. The other 32
 skills (product, marketing, App Store, design/UX, agent fleets, machine setup; 22 of them
 ship helper scripts) live in `extras/` as a second plugin, **lstack-extras**, offered only
@@ -240,7 +240,7 @@ These other task areas don't have a task skill. Each skill in them stands alone,
 | Category | What it covers |
 |---|---|
 | [Code Quality](#code-quality) | Reviews, cleanup, testing, optimization, usability |
-| [Shipping](#shipping) | Auto push, repo cleanup, pipelines, releases, GitHub Pages publishing, security hardening |
+| [Shipping](#shipping) | Auto push, repo cleanup, static analysis, pipelines, releases, GitHub Pages publishing, security hardening |
 | [Product Planning](#product-planning) | Validation, PRDs, architecture, tasks, naming, launch planning |
 | [Career Research](#career-research) | Tailored job discovery with employer/product due diligence |
 | [Frontend & Design](#frontend--design) | UIs, logos, diagrams, design optimization |
@@ -285,9 +285,10 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 |---|---|---|---|
 | [**auto-push**](skills/auto-push/) | 1.2.3 | low | Commit message + stage + push with secret and size checks |
 | [**cleanup-project**](skills/cleanup-project/) | 1.1.2 | high | Review uncommitted changes, update ignore files, delete merged branches locally and on origin, end on clean main |
+| [**code-analysis-setup**](skills/code-analysis-setup/) | 1.0.0 | high | Plan a free static-analysis layer (lint, SAST, secrets, deps) across one or more repos, then merge it into existing hooks and CI after approval, with baselines and a timed hook |
 | [**devops-pipeline**](skills/devops-pipeline/) | 2.8.1 | medium | Pre-commit + lean, fast GitHub Actions quality gates, and cutting Actions minutes |
 | [**github-pages-publish**](extras/github-pages-publish/) | 1.1.2 | high | Publish or update a static site on GitHub Pages via GitHub Actions in any repo; URL returned only after a live check |
-| [**security-setup**](extras/security-setup/) | 1.6.3 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
+| [**security-setup**](extras/security-setup/) | 1.6.4 | high | Local pre-commit secret scans, dep checks, static analysis, gated CI |
 | [**cut-release**](skills/cut-release/) | 4.0.0 | max | Autonomous release: version bumped everywhere, changelog, docs and landing page, tag, GitHub release, publish |
 
 ### Product Planning

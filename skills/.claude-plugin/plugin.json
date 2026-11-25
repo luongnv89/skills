@@ -2,7 +2,7 @@
   "author": {
     "name": "Luong NGUYEN"
   },
-  "description": "19 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
+  "description": "20 first-party engineering skills for Claude Code: code review, tests, docs, diagrams, CI, releases and repo hygiene. Markdown instructions only.",
   "homepage": "https://luongnv.com/skills/",
   "icon": "./.claude-plugin/icon.png",
   "keywords": [
