@@ -130,7 +130,7 @@
         "Drafts no reviews, testimonials or ratings attributed to anyone, and explains that paid or fake reviews and inauthentic mentions are not allowed",
         "Offers the by-hand alternative: the user asks the assistants which apps they recommend for sleep sounds and which pages they cite, and shares the answers with the assistant and date",
         "Lists the cited review sites and lists in an AI-Cited Pages table, or records them as not checked when the user has not shared answers",
-        "Any suggested pitch to a site's editor is accurate and discloses the material connection (the user's own app, and any free copy, affiliate link or payment)",
+        "Any suggested pitch to a site's editor is accurate and discloses the material connection (the user's own app, and any free copy or affiliate link)",
         "Recommends seo-ai-optimizer for the app's website and product-launch for directories and outreach"
       ]
     }
