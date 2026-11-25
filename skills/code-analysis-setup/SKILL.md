@@ -54,7 +54,9 @@ else
   branch="$(git -C "$repo" rev-parse --abbrev-ref HEAD)"
   stashed=0
   if [ -n "$(git -C "$repo" status --porcelain)" ]; then
-    git -C "$repo" stash push -u -m "code-analysis-setup pre-sync" && stashed=1
+    before="$(git -C "$repo" rev-parse -q --verify refs/stash)"
+    git -C "$repo" stash push -u -m "code-analysis-setup pre-sync" &&
+      [ "$(git -C "$repo" rev-parse -q --verify refs/stash)" != "$before" ] && stashed=1
   fi
   if git -C "$repo" fetch origin && git -C "$repo" pull --rebase origin "$branch"; then
     [ "$stashed" -eq 1 ] && git -C "$repo" stash pop --index
@@ -64,7 +66,7 @@ else
 fi
 ```
 
-A repo without `origin` records `sync: skipped (no origin)`, as the plan stated, and continues. For a repo with `origin`: a detached HEAD, or a failed fetch, pull, rebase or stash pop, stops that repo's install and asks the user. Before stopping, run `git rebase --abort` if a rebase is in progress, then `git stash pop` once if `stashed=1`.
+A repo without `origin` records `sync: skipped (no origin)`, as the plan stated, and continues. For a repo with `origin`: a detached HEAD, or a failed fetch, pull, rebase or stash pop, stops that repo's install and asks the user. Before stopping, run `git rebase --abort` if a rebase is in progress, then `git stash pop` once if `stashed=1`. `stashed=1` only when `refs/stash` changed, so a dirty submodule (nothing stashed) never pops an older stash of the user's.
 
 ## Workflow
 
@@ -76,7 +78,7 @@ For each input, follow `references/project-analysis.md`:
    - The input is the toplevel: analyse it.
    - The input is a subfolder: the plan flags it. Hook config and hook installs belong to the toplevel, so they are planned there only as items the user approves explicitly; otherwise the subfolder gets config and CI only.
    - Not inside any git repo: hooks and history metrics (commit frequency, files per commit) are dropped from the plan, which states that they were left out and why.
-2. Save `git status --porcelain --untracked-files=all` as the **pre-sync dirty list**. Those paths are the user's work: never edit, stage or time them.
+2. Save `git status --porcelain --untracked-files=all` as the **pre-sync dirty list**. Those paths are the user's work: never stage or time them, and never edit them except by an item approved by ID (*Step 2*).
 3. Detect languages and their share, frameworks, package managers, the hook manager, CI workflows, analyzers already configured (including security-setup's footprint), the test runner, repo size, commit frequency, typical files per commit, and monorepo signals.
 
 ### Step 2: Build the plan
@@ -89,6 +91,7 @@ Use `references/tool-catalog.md` and `references/merge-and-baseline.md`:
 4. List what is left out on purpose, with the reason (paid, not open source, too slow for the hook, duplicate, language share too small).
 5. Write the verification run: the warm-up command, the timing command, and the sample of files it will use.
 6. Write the sync line per repo (*Repo Sync*).
+7. An item whose target file is in the dirty list is marked `dirty`: only approval of its ID covers it, not `approve all`. Otherwise it is left out and reported.
 
 ### Step 3: Present the plan and STOP
 
@@ -103,7 +106,7 @@ The plan is a dry-run preview: it lists every file, hook entry, CI job, install 
 Per repository, in plan order:
 
 1. Run the *Repo Sync*.
-2. Write each approved config file. Merge hook entries into the existing hook manager and CI jobs into the repo's workflows by the rules in `references/merge-and-baseline.md`: append, dedup, keep existing order and settings.
+2. Write each approved config file; an unapproved `dirty` item stays unwritten and is reported. Merge hook entries into the existing hook manager and CI jobs into the repo's workflows by the rules in `references/merge-and-baseline.md`: append, dedup, keep existing order and settings.
 3. Install only the approved tools and hook managers, by the commands the plan showed.
 4. Generate baselines as `references/merge-and-baseline.md` → *Baselines* says: secrets as fingerprints or hashes, never values. The user confirms each finding (redacted); a likely real secret is reported to rotate. Temporary reports go outside the repo and are deleted. A baseline that quotes source is written there first and copied in only after its secret scan and the user's yes.
 5. Changes stay uncommitted on the current branch unless the user asks for a commit.

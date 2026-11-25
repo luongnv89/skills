@@ -58,6 +58,7 @@ Nothing has been written. Reply: approve all · approve <IDs> · change … · s
 Rules for the plan:
 
 - Every tool shows its licence when it is not plainly OSI open source.
+- An item that writes or appends to a file in the pre-sync dirty list is marked `dirty (uncommitted changes)`. `approve all` skips it; only `approve <ID>` covers it. A skipped `dirty` item is reported in the Step 4 report and the Final Report.
 - Every skipped tool says what already covers it (hook id, workflow, or `covered by security-setup (security/security-tools.json)`).
 - The sync line per repo is exact: the commands, or `skipped (no origin)`, or `skipped (not a git repo)`.
 - A subfolder input lists hook items under *Toplevel* as `T` items. A folder outside git says `hooks: left out (not a git repo)` and `history: left out (not a git repo)`.

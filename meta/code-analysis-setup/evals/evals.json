@@ -58,7 +58,7 @@
         "../../eval-fixtures/code-analysis-setup/swift-app/Sources/Tally/main.swift"
       ],
       "expectations": [
-        "SwiftLint is planned in the pre-commit hook on staged files and again in CI, with its MIT licence; pre-commit is proposed as the hook manager because none exists.",
+        "SwiftLint is planned in the pre-commit hook on staged files and again in CI; pre-commit is proposed as the hook manager because none exists.",
         "CodeQL is not planned for a repo that is not known to be public; it is listed under Left out with the paid GitHub Advanced Security reason.",
         "Bearer is not enabled; if mentioned it is labelled Elastic License 2.0, not open source, off by default.",
         "The plan gives an expected hook time per commit against the budget and lists the verification command and sample.",
