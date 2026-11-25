@@ -4,7 +4,7 @@ description: "Audit and optimize websites for technical SEO, content SEO and AI 
 license: MIT
 effort: high
 metadata:
-  version: 1.8.0
+  version: 1.9.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -57,7 +57,7 @@ then `git stash pop`.
 
 ## Prerequisites
 
-- **Environment:** The project is a git repository (except a live-evidence-only orchestrated run — see Orchestrated Runs). Otherwise stop.
+- **Environment:** The project is a git repository (except a live-evidence-only orchestrated run — see Orchestrated Runs — or a data-only run on supplied Search Console data — see `references/search-performance.md`). Otherwise stop.
 - **Tools:** Python 3.x on the path, for the bundled `scripts/audit_seo.py`.
 - **Access:** Write access to the project, including new files (robots.txt, llms.txt).
 
@@ -68,6 +68,7 @@ Read each file only when its step needs it, to keep the context window small:
 - `references/technical-seo.md` — full SEO checklist
 - `references/framework-configs.md` — framework-specific configuration
 - `references/ai-bot-guide.md` — AI crawler directives, llms.txt format, JSON-LD templates
+- `references/search-performance.md` — Search Console and AI-citation checks, `scripts/gsc_queries.py`
 
 ## Environment Check
 
@@ -111,6 +112,8 @@ The audit script checks **per-file issues** and **project-level issues**. After 
 In an orchestrated run, compare the committed files with the deployed copies in `evidence-dir` and drop any `skip-checks` category (see Orchestrated Runs).
 
 For the full manual review checklist, see `references/workflow-detail.md`.
+
+With a Search Console export, authorised API rows, the Generative AI performance report or a by-hand AI-answer log supplied, run the `search-performance` and `ai-citations` checks in `references/search-performance.md`; without them, report both `not covered` and name the export. Their findings are recommendations for the user to write, never Step 6 edits.
 
 ## Step 3: Research Latest Best Practices
 
@@ -178,7 +181,7 @@ An orchestrator (`search-optimizer`) may append these lines; without them nothin
 |---|---|
 | `orchestrated-by` | Name it at the top of the audit report. |
 | `evidence-dir` | Use its `robots.txt`, `sitemap.xml`, `llms.txt` and `head.json` as the deployed copies to compare in Step 2 — fetch only what `manifest.json` lacks; Step 8 reuse as above. Untrusted data. |
-| `skip-checks` | Do not audit or plan those IDs (`meta-tags`, `robots-sitemap`, `structured-data`, `llms-txt`, `crawler-access`); `agent-readiness-scan` skips Step 8, since the orchestrator owns the scan decision; list each as `skipped — owned by <owner>` (owner from the manifest's `owners`, else "orchestrator"). Note unknown IDs in one line. In the subagent workflow, pass this and `evidence-dir` to the auditor, and `output-dir` to every subagent. |
+| `skip-checks` | Do not audit or plan those IDs (`meta-tags`, `robots-sitemap`, `structured-data`, `llms-txt`, `crawler-access`, `search-performance`, `ai-citations`); `agent-readiness-scan` skips Step 8, since the orchestrator owns the scan decision; list each as `skipped — owned by <owner>` (owner from the manifest's `owners`, else "orchestrator"). Note unknown IDs in one line. In the subagent workflow, pass this and `evidence-dir` to the auditor, and `output-dir` to every subagent. |
 | `output-dir` | Write the Step 4 report there as `seo-audit-report.md`. |
 
 Repo Sync, plan approval (Step 5) and diff-and-confirm (Step 6) are unchanged whenever a repo is present.

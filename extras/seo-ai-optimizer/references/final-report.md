@@ -19,9 +19,9 @@ Apply the first row that matches:
 
 | Status | When |
 |--------|------|
-| `BLOCKED` | No audit report was produced: the project is not a git repo and the run is not live-evidence-only; `audit_seo.py` reported "No HTML/template files found"; `audit_seo.py` could not run (no Python 3); or Repo Sync stopped on a missing `origin`, a failed pull, or a conflict before the audit report was written. |
+| `BLOCKED` | No audit report was produced: the project is not a git repo and the run is neither live-evidence-only nor data-only (`references/search-performance.md`); `audit_seo.py` reported "No HTML/template files found"; `audit_seo.py` could not run (no Python 3); or Repo Sync stopped on a missing `origin`, a failed pull, or a conflict before the audit report was written. |
 | `PARTIAL` | The audit report exists and at least one Acceptance Criteria item is unchecked: the user approved only part of the plan or ended the run before approving; a critical issue remains after Step 7; a Diff & Confirm was refused for a file in the approved plan; Repo Sync stopped after the audit report was written, so no fix was applied; or Step 8 returned `FAIL`. |
-| `COMPLETE` | Every applicable Acceptance Criteria item in `references/workflow-detail.md` is checked. Step 8 `SKIPPED` with its unmet condition named, and Step 8 `REUSED`, both count as checked. A live-evidence-only run is `COMPLETE` when its report is written and every item in `references/live-evidence-only.md` (*Done when*) holds. |
+| `COMPLETE` | Every applicable Acceptance Criteria item in `references/workflow-detail.md` is checked. Step 8 `SKIPPED` with its unmet condition named, and Step 8 `REUSED`, both count as checked. A live-evidence-only run is `COMPLETE` when its report is written and every item in `references/live-evidence-only.md` (*Done when*) holds; a data-only run, when every item in `references/search-performance.md` (*Done when*) holds. |
 
 A plan awaiting the user's approval (Step 5) or a diff awaiting confirmation (Step 6) does
 not end the run. If the user ends the run there, the status is `PARTIAL`, because the audit
@@ -68,7 +68,8 @@ Decision: Run the skill from the site's git repository, or pass the captured liv
   `SKIPPED` with its unmet condition). Cite only checks that ran.
 - `Uncertainty:` lists each check that could not run (for example, Step 8 skipped, Step 3
   web search unavailable, files the manifest records as blocked) and each assumption made.
-  Label assumptions as assumptions. A validator re-run proves the static audit result only;
+  Name each check reported `not covered` (`search-performance`, `ai-citations`) and the export it
+  needs. Label assumptions as assumptions. A validator re-run proves the static audit result only;
   it does not prove search-engine indexing or ranking.
 - `Decision:` names the one approval the user must give, or says `No approval needed.`
   Name a remaining user action (commit and deploy the fixes, supply a live URL for Step 8,

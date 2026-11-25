@@ -336,7 +336,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**readme-generator**](skills/readme-generator/) | 1.1.0 | high | Write or rewrite a README onboarding-first: pitch, install, the most common use with its output, then every detail |
 | [**landing-page-generator**](extras/landing-page-generator/) | 2.2.0 | high | Landing pages: marketing copy from a brief or a README (read only), with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
 | [**search-optimizer**](extras/search-optimizer/) | 1.2.2 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
-| [**seo-ai-optimizer**](extras/seo-ai-optimizer/) | 1.8.0 | high | Technical SEO + AI-bot directives |
+| [**seo-ai-optimizer**](extras/seo-ai-optimizer/) | 1.9.0 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](extras/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.5.1 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 2.4.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
