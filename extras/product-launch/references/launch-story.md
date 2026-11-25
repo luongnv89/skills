@@ -54,14 +54,16 @@ page and talks. It has five elements:
     own site) is drafted from the quoted answers. The founder edits it before it goes
     out, and it is published first on the founder's own site: copies on Hashnode, dev.to
     or Medium set their canonical URL to that original, and a LinkedIn article links to
-    it (`launch-kit.md`, *Long-form article (owned first)*). When the request mentions
-    an article or a cross-post, the plan's `## Assumptions and unknowns` states this
-    rule.
+    it (`launch-kit.md`, *Long-form article (owned first)*).
   - Founder-voice rules still apply. A platform whose rules ban generated or AI-edited
     text (hacker-news, r/programming, awesome lists, a subreddit that bans LLM-written
     posts) never gets text drafted from the transcript: its brief may point to which
     answers to draw on, and the founder writes the words.
   - Contacts and the transcript itself stay out of the kit (§6).
+- **Cross-posts:** with or without a transcript, when the request mentions a long-form
+  article or a cross-post, the plan's `## Assumptions and unknowns` states the
+  owned-first rule: the original goes on the founder's own site and every copy sets its
+  canonical URL to it, or links to it.
 
 ## 2. The copy test
 

@@ -188,13 +188,13 @@ Generative AI performance report where shown, and which tools AI assistants name
 
 **Long-form article (owned first):** a launch or build article (the hashnode guide's
 article, or a LinkedIn article or blog post the founder writes outside the kit) is
-published first on the founder's own site. Its guide says so in `## Setup` and `## Launch day`: copies on Hashnode,
-dev.to or Medium set their canonical URL to that original (`platforms-core.md`, hashnode
-and *Own channels*), and a LinkedIn article links to it; `linkedin.md` still holds only
-the post. With no site of their own, the
-founder publishes it in one place only, and the guide lists a site under "Founder inputs
-needed". When an interview transcript was supplied, the draft is built from its quoted
-answers and the founder edits it before publishing (`launch-story.md` §1).
+published first on the founder's own site. Its guide says so in `## Setup` and `## Launch
+day`: copies on Hashnode, dev.to or Medium set their canonical URL to that original
+(`platforms-core.md`, hashnode and *Own channels*), and a LinkedIn article links to it;
+`linkedin.md` still holds only the post. With no site of their own, the founder publishes
+it in one place only, and the guide lists a site under "Founder inputs needed". When an
+interview transcript was supplied, the draft is built from its quoted answers and the
+founder edits it before publishing (`launch-story.md` §1).
 
 ## Founder-voice brief
 
