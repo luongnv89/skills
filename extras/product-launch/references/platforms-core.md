@@ -116,8 +116,12 @@ Submit: https://news.ycombinator.com/submit (the title starts `Show HN: `) · Mo
 
 ## reddit — Reddit
 
-Submit: https://www.reddit.com/r/<subreddit>/submit · Mode: paste-ready, except a
+Submit: https://www.reddit.com/r/<subreddit>/submit · Mode: paste-ready drafts, except a
 subreddit that bans LLM-written posts is founder-voice · Confidence: medium
+
+Every post body is a draft: the guide tells the founder to rewrite it in their own words
+and post it personally. Nothing is posted unreviewed. Reddit's spam policy names
+generative AI tools that facilitate spam.
 
 - **Fits:** depends on the subreddit (see the table). Reddit blocks automated reading, so
   the table comes from dated Wayback captures of each subreddit's own rules, sidebar and
@@ -128,10 +132,17 @@ subreddit that bans LLM-written posts is founder-voice · Confidence: medium
   per-subreddit: r/LocalLLaMA needs 10 karma to comment and 5 subreddit karma to post,
   and r/MacApps needs 10 local karma before you promote in comments. Many subreddits
   also run hidden AutoModerator thresholds (unverified).
-  - **Participate first:** from account setup to the last Reddit post day, the founder spends time each week
-    in the chosen subreddits answering questions and sharing what they learned, with no
-    product name or link. Help people who will never be customers too. Showing up weekly
-    beats posting often.
+  - **Karma and age are thresholds, never targets.** Reddit's spam policy names
+    "repeatedly posting … for the purpose of rapidly gaining karma". Never repost or
+    post for karma; the account meets a gate by taking part.
+  - **Participate first, and keep going:** from account setup, between the posts and
+    after the last one, the founder spends time each week in the chosen subreddits
+    answering questions and sharing what they learned, with no product name or link.
+    Help people who will never be customers too. Showing up weekly beats posting often.
+  - **Threads that already rank:** the founder searches `site:reddit.com <problem>` by
+    hand in their own browser and lists the threads that come up in the Participation
+    plan as places to help, disclosing that they are the maker whenever the product
+    comes up. The skill itself never fetches Reddit or Google.
   - **Mod mail:** for a chosen subreddit whose promotion is confined to a stickied thread
     or megathread, or whose rules are unverified (the plan lists which), the founder writes
     to its moderators before posting: what they build,
@@ -156,11 +167,14 @@ subreddit that bans LLM-written posts is founder-voice · Confidence: medium
   - Lead with the problem the subreddit discusses and what you learned solving it. The
     product comes after the useful part, never as the opening line or a bare link.
   - Let people ask. When a commenter or a DM asks what you use or whether you built a
-    tool, answer then, and say you are the maker.
+    tool, answer then in your own words, and say you are the maker first.
+  - Links: follow each subreddit's link rule. When unsure, keep links out of comments
+    and put the site in your Reddit profile.
   - Disclose that you are the maker whenever the product is named.
   - Lead with substance in the body, and put any blog link at the end.
   - Keep self-promotion a small share of the account's activity.
-- **Post ideas (practitioner advice):** sort each subreddit by Top → This month and note
+- **Post ideas (practitioner advice):** sort each subreddit by Top → This month and Top →
+  All time, and note
   which formats work there; most other posts are how-tos built from real events in the
   company, such as a hiring round that went wrong. They need the founder's own story.
 - **Sources:** redditinc.com/policies/reddit-rules, the Reddit Help "Spam" article

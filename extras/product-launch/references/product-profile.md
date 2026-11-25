@@ -33,6 +33,17 @@ blockers and lists the assets that already exist.
    - If both fail and there is no local candidate, return
      `BLOCKED: landing page unreachable (<error>)` and stop. Never rebuild a page from
      memory or from search results.
+   - Download `<origin>/robots.txt` with `curl -sL -A "Mozilla/5.0" "<origin>/robots.txt"
+     -o "$tmp/robots.txt"` and list its groups with
+     `grep -n -i -E '^[[:space:]]*(user-agent|allow|disallow)[[:space:]]*:' "$tmp/robots.txt"`.
+     Read each group whole: its `User-agent:` lines and every `Allow:` and `Disallow:` under
+     them; never decide on a `Disallow:` line alone. A bare `Disallow: /` or `Disallow: /*`
+     (not `/admin` or another path) is a whole-site block unless an `Allow:` in the same
+     group reopens the site (for example `Allow: /`). A whole-site block for `*`, Googlebot, Bingbot, OAI-SearchBot,
+     Claude-SearchBot or PerplexityBot fails the raw-HTML blocker. A block of training-only
+     crawlers (GPTBot, ClaudeBot, Google-Extended) passes: report it, with a question for
+     the founder on whether it is intentional. No robots.txt (404) passes. With only a local page, this
+     part is `unknown`.
 3. **Local landing page:** read the file.
    - For a framework source (`.tsx`, `.jsx`, `.vue`, `.svelte`, `.astro`), read its
      metadata instead of raw HTML: Next.js `metadata` / `openGraph` / `twitter`
@@ -104,9 +115,9 @@ plan as "fix before launch", with the platforms it affects.
 | The product is usable now, with no waitlist or invite gate          | hacker-news, uneed, saashub, future-tools, saascity, pitchwall and capterra reject it; product-hunt won't feature it |
 | A try-it path exists without a sign-up or an email                  | HN and GeekNews readers expect one; HN: "without barriers such as signups or emails"                 |
 | Own domain over HTTPS                                               | free subdomains fail betalist, saashub, saascity and r/InternetIsBeautiful; saascity requires HTTPS  |
-| No `noindex` on the landing page                                    | directories and backlinks are worthless on a noindexed page                                          |
+| No `noindex` on the landing page                                    | search engines drop a noindexed page, so listings can't lead searchers to it                         |
 | `og:title`, `og:description`, `og:image` and `twitter:card` present | link previews on X, LinkedIn, Reddit and Slack depend on them                                        |
-| Page content present in the raw HTML (not JS-only)                  | the prefill scrapers (uneed, betterlaunch, peerpush) and saascity's readiness check need it          |
+| Page content present in the raw HTML (not JS-only), and robots.txt does not block search or AI crawlers by accident (step 2) | the prefill scrapers (uneed, betterlaunch, peerpush) and saascity's readiness check need it; a crawler block hides the product from search and AI answers. A fail goes into Fix before launch, routed to /seo-ai-optimizer |
 | Privacy policy and terms linked                                     | r/MacApps' Transparency path and paid products need them; review sites check trust                   |
 | Every link on the page works                                        | a dead CTA wastes launch-day traffic                                                                  |
 
