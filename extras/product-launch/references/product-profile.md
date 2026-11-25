@@ -35,9 +35,11 @@ blockers and lists the assets that already exist.
      memory or from search results.
    - Download `<origin>/robots.txt` with `curl -sL -A "Mozilla/5.0" "<origin>/robots.txt"
      -o "$tmp/robots.txt"` and list its groups with
-     `grep -n -i -E '^[[:space:]]*(user-agent|disallow)[[:space:]]*:' "$tmp/robots.txt"`.
-     Read each `Disallow:` under the `User-agent:` lines above it. A bare `Disallow: /`
-     (not `/admin` or another path) for `*`, Googlebot, Bingbot, OAI-SearchBot,
+     `grep -n -i -E '^[[:space:]]*(user-agent|allow|disallow)[[:space:]]*:' "$tmp/robots.txt"`.
+     Read each group whole: its `User-agent:` lines and every `Allow:` and `Disallow:` under
+     them; never decide on a `Disallow:` line alone. A bare `Disallow: /` or `Disallow: /*`
+     (not `/admin` or another path) is a whole-site block unless an `Allow:` in the same
+     group reopens the site (for example `Allow: /`). A whole-site block for `*`, Googlebot, Bingbot, OAI-SearchBot,
      Claude-SearchBot or PerplexityBot fails the raw-HTML blocker. A block of training-only
      crawlers (GPTBot, ClaudeBot, Google-Extended) passes: report it, with a question for
      the founder on whether it is intentional. No robots.txt (404) passes. With only a local page, this

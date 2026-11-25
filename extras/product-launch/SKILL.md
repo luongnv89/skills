@@ -31,7 +31,7 @@ the exact preview.
 - **approval gate:** the stop at the end of Step 4. Before the user approves, the only file
   the skill writes is `launch-kit/launch-plan.md`.
 - **launch kit:** the `launch-kit/` folder that Step 5 writes.
-- **paste-ready / founder-voice:** a paste-ready value is final text the founder pastes.
+- **paste-ready / founder-voice:** a paste-ready value is final text the founder pastes; Reddit drafts are rewritten first.
   Founder-voice platforms (Hacker News, r/programming, awesome-list PRs) ban AI-written
   text, so their guides hold facts and structure, never wording.
 - **live check:** Step 3 re-reads each shortlisted platform's own pages, because prices
