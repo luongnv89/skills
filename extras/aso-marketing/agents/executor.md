@@ -246,7 +246,7 @@ Document what was created/modified:
    - [ ] Check that all localized versions display correctly
 
 3. **After publishing**:
-   - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline
+   - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline, from an allowed source recorded with source and date (`references/aso_best_practices.md` → Measurement and Iteration)
    - [ ] Track impressions, product page views, downloads and paid conversions
    - [ ] Collect user feedback from reviews
 

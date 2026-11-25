@@ -58,13 +58,13 @@ For iOS:
 - **Name**: Aim for 20-30 chars. Choose the brand position from the Brand position table in `aso_best_practices.md`: keyword first while users don't search the brand ("Sleep Meditation: ZenMind"), brand first once they do. Record the choice and its evidence in the plan; when unsure, default to keyword first and say so
 - **Subtitle**: 20-30 chars. Include secondary keyword or value prop that drives conversion. Example: "Fall Asleep & Ease Stress"
 - **Keywords field**: 90-100 chars. Comma-separated, no spaces, no duplicates of name/subtitle. Example: "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep"
-- **Description**: 4000 chars max. Hook users in first 2-3 sentences with value prop, then use bullet points for features, naturally integrate keywords throughout
+- **Description**: 4000 chars max. Hook users in first 2-3 sentences with value prop, then use bullet points for features. It is not indexed for search: write it for conversion, with no keyword-count target
 - **What's New**: Highlight latest features, bug fixes, keyword-relevant improvements
 
 For Android:
 - **Title**: Max 30 chars. Include primary keyword if space allows. Example: "Sleep Meditation: ZenMind"
 - **Short Description**: Max 80 chars. Lead with value prop and fit a key benefit. Example: "Guided sleep meditation, bedtime stories and breathing for stress relief"
-- **Full Description**: Max 4000 chars. Open with hook, use bullets for key features, naturally integrate keywords 3-5 times across the description
+- **Full Description**: Max 4000 chars. Open with hook, use bullets for key features, use target terms where they read naturally, never more than 5 times across all fields (`aso_best_practices.md` → Description-Specific Rules (Google Play))
 
 ### Step 4: Visual Asset Recommendations
 
@@ -168,7 +168,7 @@ Structure the plan as markdown:
 | **Name (30 chars max)** | [current] | "Sleep Meditation: ZenMind" (25) | Brand position: keyword first, brand last; ZenMind is new and nobody searches the brand yet |
 | **Subtitle (30 chars max)** | [current] | "Fall Asleep & Ease Stress" (25) | Value-prop focused; conversion-oriented; drives installs from listing view |
 | **Keywords (100 chars max)** | [current] | "guided,mindfulness,relaxation,breathing,anxiety,relief,bedtime,story,sounds,rest,unwind,night,deep" (98 chars) | Covers primary + secondary keywords; no duplicates with name/subtitle; comma-separated, no spaces; maximum character utilization |
-| **Description (4000 chars max)** | [current] | [Proposed multi-paragraph version] | Leads with hook (benefit before features); uses bullets for scannability; naturally integrates keywords 5-8 times; ends with CTA |
+| **Description (4000 chars max)** | [current] | [Proposed multi-paragraph version] | Leads with hook (benefit before features); uses bullets for scannability; written for conversion, no keyword-count target (not indexed); ends with CTA |
 | **What's New (4000 chars max)** | [current] | "Latest update: Added 50 new guided sleep meditations, improved offline listening..." | Feature-rich, keyword-natural |
 
 #### Detailed Proposed Description
@@ -201,7 +201,7 @@ Start your first guided sleep session tonight and wake up rested.
 | Field | Current | Proposed | Rationale |
 |-------|---------|----------|-----------|
 | **Title (30 chars max)** | [current] | "Sleep Meditation: ZenMind" | Matches iOS for consistency; keyword-forward |
-| **Short Description (80 chars max)** | [current] | "Guided sleep meditation, bedtime stories and breathing for stress relief" | Value prop + feature mention; naturally integrates keywords; 72/80 chars |
+| **Short Description (80 chars max)** | [current] | "Guided sleep meditation, bedtime stories and breathing for stress relief" | Value prop + feature mention; keywords where they read naturally; 72/80 chars |
 | **Full Description (4000 chars max)** | [current] | [Proposed version] | Opens with hook; emphasizes sleep and stress relief early; keyword integration natural (not forced) |
 
 ---
@@ -221,9 +221,9 @@ Start your first guided sleep session tonight and wake up rested.
 **Recommended Order & Messaging**:
 1. **Screenshot 1**: Lead with strongest benefit — "Sleep Better Tonight" (hook user before they swipe)
 2. **Screenshot 2**: Feature showcase — "500+ Guided Meditations" + keyword-rich caption
-3. **Screenshot 3**: Conversion driver — "Reduce Stress & Anxiety" with user testimonial or stat
+3. **Screenshot 3**: Conversion driver — "Reduce Stress & Anxiety" with a breathing-session demo
 4. **Screenshot 4**: Feature depth — "Breathing Exercises for Anxiety Relief" with demo
-5. **Screenshot 5**: Social proof — the real rating and review count, only once they are public and verifiable
+5. **Screenshot 5**: Proof — a named award or press mention the user can source; with none, another core feature (never a rating or user count: the store shows those)
 
 **Caption Guidelines for iOS**:
 - Include primary/secondary keywords naturally
@@ -233,7 +233,7 @@ Start your first guided sleep session tonight and wake up rested.
 ### Preview Video
 
 **Recommendation**: [Create / Skip]
-- If creating: Show meditation in progress (first 3 seconds), then app UI overview, then testimonial
+- If creating: Show meditation in progress (first 3 seconds), then app UI overview, then the core benefit
 - If skipping: Reason (strong screenshots are sufficient, or budget constraints)
 
 ---
@@ -282,9 +282,10 @@ Start your first guided sleep session tonight and wake up rested.
    - Address specific complaints (crash reports, feature requests)
    - Highlight fixes in release notes
 
-3. **Social Proof**:
-   - Quote top reviews in App Store screenshots (if allowed)
-   - Mention user count and rating in descriptions
+3. **Social Proof** (verifiable only):
+   - A named award or press mention the user can source may appear in the description or a screenshot
+   - Quote a review only with the reviewer's permission and attribution, where the store allows it
+   - Never put the rating or user count in the copy: the store shows them
 
 ---
 

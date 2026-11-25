@@ -37,7 +37,7 @@ Once the user approves, implement the changes systematically. Work through the p
 
 **Google Play keywords:**
 - Keywords go naturally into title, short description, and full description
-- Repeat important keywords 3-5 times across fields (natural usage)
+- Use important keywords where they read naturally, never more than 5 times across all fields (`references/aso_best_practices.md` → Description-Specific Rules)
 - Long description should cover related concepts and use cases
 - Prioritize readability — Google detects stuffing
 
@@ -46,8 +46,8 @@ Once the user approves, implement the changes systematically. Work through the p
 - First 1-3 lines are critical (visible before "Read More")
 - Lead with strongest value proposition and clear CTA
 - Use bullet points or short paragraphs for scannability
-- Naturally integrate target keywords
-- Include social proof if available
+- iOS: written for conversion, with no keyword-count target (the description is not indexed). Google Play: target terms where they read naturally, within the cap above
+- Social proof only when verifiable and sourced (a named award or press mention); never a rating or user count in the copy
 
 ### 4.4 Localization Execution
 
@@ -138,6 +138,7 @@ Cross-reference against `references/aso_best_practices.md`:
 
 ### Measurement Plan
 | Keyword | Store | Baseline Rank (Phase 1) | Re-check Cadence |
+- Rank source: each reading from an allowed source, recorded with source and date (`references/aso_best_practices.md` → Measurement and Iteration)
 - Outcome metrics: impressions → product page views → downloads → paid conversions
 - Next lever to change: [one, after this cycle's results]
 

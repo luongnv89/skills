@@ -24,16 +24,17 @@ If the `asc-aso-audit` skill is available, recommend running it first for iOS me
 ### 1.3 Competitive Landscape
 
 Ask the user to identify 3-5 direct competitors. For each:
-- Note their app name, subtitle/short description, and apparent keyword strategy
-- Identify what makes them rank well
-- Look for gaps — keywords they miss
+- Note their app name, subtitle/short description, and the category terms they target
+- For each primary keyword, note what the top results show (title pattern, first-screenshot message) as evidence of what searchers want
+- Look for gaps — category terms they miss
+- Read only what the store shows publicly. Take the top results only from the user's own manual store search or an ASO tool the user subscribes to, recorded with source and date; never a scripted store or Google search. With neither, record `not checked` and ask the user. Never copy a competitor's captions or name, and never target a competitor's brand or a lookalike of it
 
 **Trademark warning:** Competitive analysis is for strategic insight only. Never carry competitor brand names into proposed metadata.
 
 ### 1.4 Current Performance Baseline
 
 If available, gather:
-- Current rank for each candidate keyword. Record `unranked` or `unknown` where there is no data; Phase 7 measures against this baseline
+- Current rank for each candidate keyword. Record `unranked` or `unknown` where there is no data; Phase 7 measures against this baseline. Take each rank from an allowed source and record its source and date; never script store or Google searches (`references/aso_best_practices.md` → Measurement and Iteration)
 - Download/install numbers and trends (and paid conversions, if the app sells anything)
 - Ratings and review sentiment
 - Conversion rate (impressions → installs)
@@ -57,6 +58,10 @@ If available, gather:
 ### Competitive Landscape
 | Competitor | Platform | Keywords in Title | Rating | Apparent Strategy |
 |-----------|----------|-------------------|--------|-------------------|
+
+### Top Results per Primary Keyword
+| Keyword | Store | Title Pattern | First-Screenshot Message | Source and date |
+|---------|-------|---------------|--------------------------|-----------------|
 
 ### Keyword Rank Baseline
 | Keyword | Store | Current Rank (or unranked / unknown) | Source and date |

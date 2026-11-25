@@ -42,7 +42,7 @@ If iOS (App Store) metadata exists:
 - For each field, record:
   - Current value
   - Character count vs. limit
-  - Keyword density (how many keywords appear)
+  - Keywords present (iOS indexes the name, subtitle and keywords field; the description is read for conversion, with no keyword-count target)
   - Quality assessment
 
 If Android (Google Play) metadata exists:
@@ -51,7 +51,7 @@ If Android (Google Play) metadata exists:
   - `short_description.txt` (max 80 chars)
   - `full_description.txt` (max 4,000 chars)
   - Changelogs
-- For each field, record the same metadata as iOS
+- For each field, record the same metadata as iOS, and count each target keyword across all fields (flag any above 5, the cap in `aso_best_practices.md` → Description-Specific Rules (Google Play))
 
 ### Step 3: Categorize App
 
@@ -71,18 +71,20 @@ Search for:
 
 If the app is already live:
 - Note the current rating (if available)
-- Note the install count or ranking (if available from public info)
+- Note the install count if the store shows it publicly
 - Check for existing reviews (sentiment)
-- Record the current rank for each candidate keyword as the Keyword Rank Baseline (`unranked` or `unknown` where there is no data; a pre-launch app is `unranked` throughout). Phase 7 measures against it
+- Record the current rank for each candidate keyword as the Keyword Rank Baseline (`unranked` or `unknown` where there is no data; a pre-launch app is `unranked` throughout). Phase 7 measures against it. Take each rank from an allowed source and record its source and date; never script store or Google searches (`references/aso_best_practices.md` → Measurement and Iteration)
 - If weak ratings or retention point at the product itself, say so in Key Findings: ASO will not fix it
 
 ### Step 6: Gather Competitive Landscape
 
 Ask or infer 3-5 direct competitors:
 - Note their app names
-- Capture their apparent keyword strategy (keywords in title, subtitle)
+- Capture the category terms they target (in title, subtitle)
+- For each primary keyword, note what the top results show (title pattern, first-screenshot message) as evidence of what searchers want
 - Identify their strong points (high rating, featured status, etc.)
-- Identify gaps (keywords they don't target that the user's app could)
+- Identify gaps (category terms they don't target that the user's app could)
+- Read only what the store shows publicly. Take the top results only from the user's own manual store search or an ASO tool the user subscribes to, recorded with source and date; never a scripted store or Google search. With neither, record `not checked` and ask the user. Never copy competitors' captions or names, and never propose a competitor's brand or a lookalike of it as a keyword
 
 IMPORTANT: Competitive analysis is for STRATEGY only. Do NOT carry competitor names into the proposed metadata.
 
@@ -144,6 +146,12 @@ Generate a comprehensive analysis report:
 | [App 2] | iOS | [keywords] | 4.5★ | Focus on [...] | Missing [keyword] |
 | [App 3] | Android | [keywords] | 4.0★ | Focus on [...] | Missing [keyword] |
 
+#### Top Results per Primary Keyword
+
+| Keyword | Store | Title Pattern | First-Screenshot Message | Source and date |
+|---------|-------|---------------|--------------------------|-----------------|
+| [keyword] | iOS | [e.g. keyword first, brand last] | [e.g. benefit headline] | [manual store search, ISO date] |
+
 ### Key Findings
 
 1. **[Finding 1 — most impactful]**: [Description and why it matters]
@@ -162,7 +170,7 @@ Generate a comprehensive analysis report:
 - Current subtitle uses 28/30 characters but has no keywords — opportunity to integrate target keyword
 - Android title is generic ("My App") — strong opportunity to add differentiating keyword
 - Competitor "XYZ App" dominates with keyword [ABC] in title and subtitle — we could target this if not too competitive
-- iOS description is keyword-sparse — can naturally integrate 5+ target keywords
+- iOS description buries the value proposition below the first 3 lines — rewrite the opening for conversion (the description is not indexed, so it has no keyword target)
 - No localization strategy identified — opportunity for international expansion
 
 ### Opportunities
@@ -179,7 +187,7 @@ Generate a comprehensive analysis report:
 
 #### Example Opportunities:
 - Integrate primary keyword [ABC] into iOS subtitle → improve visibility for [ABC] searches
-- Expand Android description to 2000+ chars, naturally repeating 3-5 target keywords → improve ranking for long-tail searches
+- Expand Android description to 2000+ chars, using target terms where they read naturally (never more than 5 times across all fields) → improve ranking for long-tail searches
 - Implement localization for Japanese market → tap untapped market segment
 - Create subtitle focusing on conversion (value proposition) not just keywords → improve install rate from listing page views
 

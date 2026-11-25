@@ -79,7 +79,7 @@ Scan all proposed metadata for:
    - Platform trademarks: Apple, Google, iOS, Android (usually OK in description, bad in title/subtitle)
    - Celebrity names: only use if explicitly authorized
    - Brand names: only if the developer owns the brand
-   - Example: ❌ "Apple-approved meditation" → ✅ "Award-winning meditation app"
+   - Example: ❌ "Apple-approved meditation" → ✅ "Guided meditation for sleep and focus" (describes the app; claims no endorsement or award)
 
 3. **Misleading trademark use**:
    - "Featured by Apple" — unless actually featured (violates App Store guideline 2.3.7)
@@ -126,7 +126,7 @@ Both Platforms Description:
 Verify all claims in the description are verifiable:
 
 - [ ] "500+ guided meditations" — does the app actually have 500+? If so, OK.
-- [ ] "2M+ users" — is this publicly stated somewhere, or just marketing hope? If unverifiable, remove it; "Join millions..." is just as unverifiable
+- [ ] "2M+ users" — ❌ remove: user counts stay out of the copy; "Join millions..." is just as unverifiable
 - [ ] "Award-winning" — does the app have a real award? If not, ❌ remove.
 - [ ] "Voted best app" — if not actually voted/awarded, ❌ remove.
 - [ ] "Reduce anxiety" — is this a medical claim? If so, requires disclaimer or removal.
@@ -134,9 +134,9 @@ Verify all claims in the description are verifiable:
 
 Example corrections:
 - ❌ "Scientifically proven to reduce anxiety" (medical claim without evidence)
-- ✅ "Many users report better sleep and reduced stress" (qualitative, not medical)
+- ✅ "Guided sessions for sleep and stress relief" (describes a feature; claims no outcome)
 - ❌ "4.8★ rating from 100k+ reviews" (claim rating, let the store show this)
-- ✅ "Loved by users worldwide" (qualitative, doesn't claim false numbers)
+- ❌ "Loved by users worldwide" (just as unverifiable; remove it and let the store show the rating)
 
 ### Step 6: Cross-Field Duplication Check (iOS only)
 
@@ -231,11 +231,11 @@ Generate a comprehensive compliance report:
 | Claim | Field | Verifiable? | Evidence | Status |
 |-------|-------|-----------|----------|--------|
 | "500+ guided meditations" | Description | Yes | App data / store listing | ✅ OK |
-| "2M+ users" | Description | ? | Marketing claim only | ⚠️ Remove unless a public source supports it |
-| "Reduce anxiety" | Description | Qualitative | User reports / testimonials | ✅ OK (not medical claim) |
+| "2M+ users" | Description | ? | Marketing claim only | ❌ Remove (user counts stay out of the copy) |
+| "Reduce anxiety" | Description | Qualitative | Lifestyle wording; no figure or medical claim | ✅ OK (not medical claim) |
 
 **Recommendations**:
-- ⚠️ Remove "2M+ users" unless the user can point to a public source (unverifiable claim)
+- ❌ Remove "2M+ users" (user counts stay out of the copy)
 - ✅ Keep "Reduce anxiety" (lifestyle claim, not medical)
 
 **Overall Content Accuracy Status**: ✅ PASS (with recommended changes)
