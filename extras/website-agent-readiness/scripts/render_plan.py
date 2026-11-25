@@ -23,7 +23,7 @@ AI_TEXT_CHECKS = ("llmsTxt", "llmsFullTxt", "markdownNegotiation")
 # Renderer-owned header note for plans that carry those tasks. Static text: no
 # scanner string reaches it. Source: Google Search Central's generative AI guide.
 AI_TEXT_NOTE = (
-    "**Note:** tasks {tasks} publish llms.txt, llms-full.txt or Markdown "
+    "**Note:** {tasks} llms.txt, llms-full.txt or Markdown "
     "versions of pages. They serve AI agents and other tools that read those "
     "files. Google Search does not use llms.txt: \"You don't need to create new "
     "machine readable files, AI text files, markup, or Markdown to appear in "
@@ -103,7 +103,9 @@ def main() -> int:
     ai_text = [ids[task["check"]] for ph in t["phases"] for task in ph["tasks"]
                if task["check"] in AI_TEXT_CHECKS]
     if ai_text:
-        L.append(AI_TEXT_NOTE.format(tasks=", ".join(ai_text)))
+        who = (f"task {ai_text[0]} publishes" if len(ai_text) == 1
+               else f"tasks {', '.join(ai_text)} publish")
+        L.append(AI_TEXT_NOTE.format(tasks=who))
     L.append("")
     L.append("Each task closes exactly one failing check. The scanner is the only "
              "source: descriptions are its own fix prompts, and every task is "

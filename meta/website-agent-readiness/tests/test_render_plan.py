@@ -86,7 +86,7 @@ class AiTextNoteTests(unittest.TestCase):
                                       task(check, "contentAccessibility")]))
                 notes = ai_notes(plan)
                 self.assertEqual(len(notes), 1)
-                self.assertIn("tasks 1.2 publish", notes[0])
+                self.assertIn("task 1.2 publishes llms.txt", notes[0])
                 self.assertIn("AI agents and other tools", notes[0])
                 self.assertIn("Google Search does not use llms.txt", notes[0])
 
