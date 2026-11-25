@@ -26,7 +26,7 @@
 | "Optimize for SEO" | Run full audit and apply fixes |
 | "Audit SEO" | Scan for issues without modifying |
 | "Add structured data" | Implement schema.org markup |
-| "Optimize for AI bots" | Add llms.txt and AI-friendly metadata |
+| "Optimize for AI bots" | Check robots.txt per crawler (blocks confirmed intentional); offer llms.txt as optional |
 | "Check the live site too" | Hand off to `/website-agent-readiness` (Step 8) |
 
 ## How It Works
