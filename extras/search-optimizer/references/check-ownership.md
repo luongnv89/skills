@@ -19,6 +19,11 @@ URL only, no codebase: omit the repo path (`/seo-ai-optimizer` alone on the firs
 `evidence-dir` set, seo-ai-optimizer runs live-evidence-only, so it audits the evidence dir and
 lists fixes as "needs source repo".
 
+Search data the user gave at intake (`manifest.json` → `search_data`) goes after the block as
+plain request lines, one per input, e.g. `Search Console data: /abs/path/to/export` and
+`AI-citation log: /abs/path/to/log.md`. They are request text that seo-ai-optimizer's Step 2
+reads, not block keys. With no line, it reports both checks `not covered` itself.
+
 Members never skip their own gates because of this block. Never pass `skip-checks` to
 website-agent-readiness (its scan is atomic) or to dont-make-me-think. `aso-marketing` is not a
 contract member: invoke it normally, without the block.
@@ -43,11 +48,19 @@ Decide after website-agent-readiness returns, from evidence — not from consent
 | `ai-actions` | not covered — no web-branch member evaluates it; run `/ux-ax-review` or `/design-optimizer` for it | not covered (same pointer) |
 | `agent-readiness-scan` | website-agent-readiness | not covered (reason) |
 | `virality` | viral-product-evaluator | viral-product-evaluator |
+| `search-performance` | seo-ai-optimizer when a Search Console export, API rows or the Generative AI performance report was supplied; else not covered: no Search Console export supplied | same |
+| `ai-citations` | seo-ai-optimizer when a by-hand AI-citation log was supplied; else not covered: no AI-citation log supplied | same |
+
+`search-performance` and `ai-citations` follow the data in `manifest.json` → `search_data`,
+never the scan case, and each is decided on its own: an export alone leaves `ai-citations` not
+covered.
 
 Fix routes (website-agent-readiness never fixes):
 
 - seo-owned checks, `crawler-access` included → seo-ai-optimizer's Step 5 plan and Step 6 diff
   approval in this run. The scan's crawler-access results are cited on seo's row, never re-fixed.
+- `search-performance`, `ai-citations` → recommendations the user writes, listed under
+  *Recommendations for You to Write* in seo-ai-optimizer's Step 5 plan; never a Step 6 diff.
 - `markdown-pages` → website-agent-readiness's `agent-ready-plan.md` (G3) or issues (G4); no
   member applies it automatically.
 - `ai-actions` → none in this run. Neither seo-ai-optimizer nor the isitagentready.com scan
@@ -61,6 +74,9 @@ Fix routes (website-agent-readiness never fixes):
 | seo-ai-optimizer | — (it audits neither `markdown-pages` nor `ai-actions`; keeps `crawler-access`) | `agent-readiness-scan` (asks Step 8 not to repeat the scan) |
 | viral-product-evaluator | `meta-tags` | `meta-tags` |
 | website-agent-readiness | — (takes no skip-checks; full scan once) | not run / failed |
+
+Never put `search-performance` or `ai-citations` in `skip-checks`: without data seo-ai-optimizer
+reports them `not covered`, and a skip would read `skipped — owned by …` instead.
 
 In case A, seo-ai-optimizer Step 8 records the existing `scan.json` as `REUSED` and does not
 invoke website-agent-readiness again. Member report files: seo-ai-optimizer →
@@ -86,7 +102,9 @@ store metadata.
     "markdown-pages": "not-covered: user declined third-party scan",
     "ai-actions": "not-covered: no web-branch member evaluates it; run /ux-ax-review or /design-optimizer",
     "agent-readiness-scan": "not-covered: user declined third-party scan",
-    "virality": "viral-product-evaluator"
+    "virality": "viral-product-evaluator",
+    "search-performance": "not-covered: no Search Console export supplied",
+    "ai-citations": "not-covered: no AI-citation log supplied"
   }
 }
 ```

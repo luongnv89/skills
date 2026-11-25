@@ -22,7 +22,8 @@ Members: seo-ai-optimizer √ · website-agent-readiness √ (3/5, scanned once)
 | ID | Pri | Check | Finding | Evidence | Owner | Also reported by | Fix route |
 |---|---|---|---|---|---|---|---|
 | S-01 | P0 | robots-sitemap | robots.txt disallows / for all agents | evidence/robots.txt line 2 | seo-ai-optimizer | website-agent-readiness scan | seo-ai-optimizer Step 6 (diff approval) |
-| S-02 | P1 | markdown-pages | No Markdown alternate for docs pages | scan.json check markdown | website-agent-readiness | — | agent-ready-plan.md (G3) / issues (G4) |
+| S-02 | P1 | search-performance | /pricing averages position 9.4 for "pricing for small teams" (3,100 impressions, 0.4% CTR) | Search Console export, seo-audit-report.md Search performance | seo-ai-optimizer | — | seo-ai-optimizer Step 5 plan (Recommendations for You to Write) |
+| S-03 | P3 | markdown-pages | No Markdown alternate for docs pages (a crawl proxy, no measured loss) | scan.json check markdown | website-agent-readiness | — | agent-ready-plan.md (G3) / issues (G4) |
 
 ## Store findings
 
@@ -39,6 +40,7 @@ Members: seo-ai-optimizer √ · website-agent-readiness √ (3/5, scanned once)
 | Check | Reason |
 |---|---|
 | ai-actions | No web-branch member evaluates it; run /ux-ax-review or /design-optimizer |
+| ai-citations | No AI-citation log supplied; fill in the log template in seo-ai-optimizer's references/search-performance.md |
 
 ## Member reports
 - reports/seo-ai-optimizer/
@@ -71,9 +73,16 @@ and the run's `Result:` line (SKILL.md → *Final response*) is never PASS in th
 | Pri | Meaning |
 |---|---|
 | P0 | Blocks indexing, crawling, or store discoverability for a key audience |
-| P1 | Clear, evidenced loss of ranking, citation by AI search, or store conversion |
+| P1 | Clear, evidenced loss of ranking or citation by AI search (measured, see below), or of store conversion |
 | P2 | Real but bounded improvement |
 | P3 | Polish or speculative; evidence partial |
+
+**Ranking and AI-citation claims need measured evidence.** A row is P1 for lost ranking or AI
+citation only when it cites a `search-performance` or `ai-citations` row (the user's Search
+Console data or citation log). A crawl proxy such as a missing llms.txt, a missing Markdown
+alternate or an agent-readiness score measures neither, so a row resting on one caps at P3;
+Google Search does not use llms.txt (quoted in seo-ai-optimizer's `references/ai-bot-guide.md`).
+The cap never lowers a P0 that blocks crawling or indexing, or a store-conversion row.
 
 ## Dedup rules
 
