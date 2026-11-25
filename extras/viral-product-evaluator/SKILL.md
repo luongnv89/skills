@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - browse
 metadata:
-  version: 1.8.3
+  version: 1.8.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
