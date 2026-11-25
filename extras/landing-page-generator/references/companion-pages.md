@@ -1,13 +1,13 @@
 # Companion Pages
 
 The pages a full landing page links to from its footer: Privacy Policy, Terms of Use,
-Changelog, and Docs. `SKILL.md` → *Companion Pages* decides which pages apply. This file
+Changelog, Docs, and the opt-in About page. `SKILL.md` → *Companion Pages* decides which pages apply. This file
 holds the sources, the delivery rules, one template per page, and the companion checks.
 Read only the sections for the pages that apply, to save context budget.
 
 Contents: [Sources and gap markers](#sources-and-gap-markers) · [Delivery](#delivery) ·
 [Privacy Policy](#privacy-policy) · [Terms of Use](#terms-of-use) ·
-[Changelog](#changelog) · [Docs](#docs) · [Companion checks](#companion-checks)
+[Changelog](#changelog) · [Docs](#docs) · [About](#about) · [Companion checks](#companion-checks)
 
 ## Sources and gap markers
 
@@ -25,6 +25,7 @@ states it.
 | Terms of Use | Legal entity, plans and billing, trial and cancellation terms, refunds, acceptable use, governing law, contact | Existing terms, pricing in the README or site |
 | Changelog | Versions, release dates, user-visible changes | The history file, git tags and their dates, the manifest version |
 | Docs | Requirements, install commands, configuration keys, commands and flags, documented failures | README install and usage sections, `docs/`, manifest `bin`/`scripts`/`engines`, argument definitions and config readers in source, `.env.example` |
+| About | Who makes the product (person, team, or company), what it does, who it is for, contact | README, manifest `author`/`maintainers`, the LICENSE copyright holder, existing about text |
 
 Privacy evidence, when the brief is a project README:
 
@@ -44,7 +45,7 @@ When at least one page is delivered, open the companion pages with this block. W
 
 ```
 COMPANION PAGES
-Footer links: [each delivered page, in this order: Privacy Policy · Terms of Use · Changelog · Docs]
+Footer links: [each delivered page, in this order: Privacy Policy · Terms of Use · Changelog · Docs · About]
 Skipped: [page] — [reason from the Companion Pages table]
 ```
 
@@ -146,6 +147,26 @@ Uninstall: [command or steps]
 - Take each flag and configuration key from the brief, or, when the brief is a project README, from the argument definitions and config readers in source. A flag the source defines but the README omits belongs on the page.
 - Write Troubleshooting entries only for failures the project documents or the user supplies.
 
+## About
+
+Opt-in: built when the user asks for it or the brief names who makes the product
+(`SKILL.md` → *Companion Pages*). In plain words, say who makes the product, what it
+does, and who it is for. Take each fact from a source and write a gap marker for each one
+missing. Never invent a team member, bio, job title, photo or headshot, founding story,
+headcount, location, investor, or customer. When the sources name no person, write about
+the maker as the sources name it (a company or a project), not about people.
+
+```
+ABOUT
+Product/Service: [Name]
+
+Who makes it: [the person, team, or company, as a source names it]
+What it does: [one or two sentences]
+Who it is for: [the audience from Step 1]
+Why it exists: [the reason a source states; omit when none does]
+Contact: [contact channel]
+```
+
 ## Companion checks
 
 Run these checks on every page the run delivers. Fix each failure before delivery. A failure
@@ -153,11 +174,12 @@ that cannot be fixed makes the run `PARTIAL` (`references/final-report.md`).
 
 | Check | Pass when |
 |---|---|
-| Pages decided | Each of the four pages is recorded as delivered or skipped with its reason |
+| Pages decided | Each page in the *Companion Pages* table is recorded as delivered or skipped with its reason (About: `skipped — not requested` unless it applies) |
 | Facts traced | Each data practice, legal term, version, date, command, flag, and setting traces to the brief, the user's answers, or a project file; every other fact is a gap marker |
 | No compliance claims | No page claims regulatory compliance, a security guarantee, or a no-sale promise the user did not supply |
 | Footer links | The COMPANION PAGES block lists every delivered page. A companion page delivered alone: the run names the footer link it needs |
 | Changelog style | Newest release first; each release has a version and a date or a gap marker; no hashes, PR or issue numbers, or author handles |
 | Docs commands | Each command comes from a source |
+| About facts | Who makes it, what it does, and who it is for each trace to a source or a gap marker; the page names no person, bio, title, photo, headcount, or story a source lacks |
 | Nothing overwritten | No existing project file was modified, `README.md` included |
 | Anti-slop | The page passes `references/anti-slop-rules.md` |

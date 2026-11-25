@@ -32,7 +32,8 @@ Pages to build, each only when the run delivered it:
 | Terms of Use | `terms.html` | 2 |
 | Changelog | `changelog.html` | 3 |
 | Docs | `docs.html` | 4 |
-| A page the user added by name | `<kebab-case-name>.html` | After Docs |
+| About | `about.html` | 5 |
+| A page the user added by name | `<kebab-case-name>.html` | After About |
 
 ## Output folder
 
@@ -95,7 +96,7 @@ python3 -c 'import html,re,sys; t=open(sys.argv[1],encoding="utf-8").read(); t=r
 | Check | Pass when |
 |---|---|
 | Pages built | `test -e` passes for each file the *Build decision* listed |
-| Sections carried | Each copy line, without its slot label, is found in the page text (`grep -F`); framework section names and *Notes excluded* lines are exempt |
+| Sections carried | Each copy line, without its slot label, is found in the page text (`grep -F`); framework section names and *Notes excluded* lines are exempt. The extraction drops `<script>`, so text a script injects fails: page text must be in the HTML, because AI crawlers and other crawlers that do not run JavaScript read only the HTML |
 | CTAs carried | Each CTA text is found in the page text, as the text of a link or button |
 | Markers carried | The count of `[proof needed` in the page text equals the count in that page's copy plus the CTA and link markers this step added |
 | Nothing added | The page states no claim, number, price, name, quote, or link that its copy lacks |

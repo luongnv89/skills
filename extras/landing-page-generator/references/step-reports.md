@@ -29,6 +29,7 @@ with a recorded gap, `FAIL` when a check is blocked and the run cannot continue.
 ··································································
   Core inputs present:     √ pass (name, audience, problem, CTA) | × fail — asked the user
   Proof points:            √ pass | — [proof needed] markers planned
+  Customer questions:      √ pass (supplied: [source]) | — none supplied; FAQ questions assumed
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -54,6 +55,7 @@ with a recorded gap, `FAIL` when a check is blocked and the run cannot continue.
   Hero rules:              √ pass (proof of work, problem, contrarian take or noted gap, one number or [proof needed])
   Copy test:               √ pass (every marketing line visualizable, falsifiable, only-we-can-say)
   Proof handling:          √ pass ([proof needed] where unsupported)
+  FAQ:                     √ pass (supplied questions near verbatim, no personal data, one entry per question; or assumptions listed; each answer opens with the answer)
   ____________________________
   Result:             PASS | FAIL | PARTIAL
 ```
@@ -84,7 +86,7 @@ with a recorded gap, `FAIL` when a check is blocked and the run cannot continue.
 ### Step 6 — Generate Companion Pages
 
 ```
-◆ Companion Pages (step 6 of 7 — privacy, terms, changelog, docs)
+◆ Companion Pages (step 6 of 7 — privacy, terms, changelog, docs, about)
 ··································································
   Pages decided:           √ pass (delivered: Privacy Policy, Changelog — skipped: Terms, Docs, with reasons) | — all skipped (single section or "landing page only")
   Facts traced:            √ pass (each fact from the brief or a [proof needed] marker)
