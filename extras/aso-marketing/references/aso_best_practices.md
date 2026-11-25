@@ -29,7 +29,7 @@ Sections marked *(practitioner)* draw on Darius Pop's X Article "The Ultimate Gu
 
 1. **Start with your app's core features** — list 10-15 words that describe what your app does
 2. **Expand with synonyms and related terms** — users search in diverse ways
-3. **Include competitor brand-adjacent terms** — keywords their users search for
+3. **Include the category terms competitors' users search** — never a competitor's brand or a lookalike of it (see Trademark and Competitor Restrictions)
 4. **Mix keyword tiers:**
    - **Head terms** (1-2 words, high volume, high competition): e.g., "fitness", "meditation"
    - **Mid-tail** (2-3 words, moderate volume): e.g., "home workout", "sleep sounds"
@@ -46,7 +46,7 @@ Score each keyword on three dimensions:
 
 Target keywords where you score high relevance and volume with manageable difficulty. Avoid high-difficulty keywords unless your app has strong signals (ratings, downloads) to compete.
 
-**Stage-aware targeting *(practitioner)*.** Work in this order: relevance (real search intent for what the app does) → popularity (someone searches it) → difficulty (who already ranks) → opportunity (demand the app can realistically win). A new or small app targets keywords it can win now. It moves to competitive head terms as its ratings and downloads grow. Ranking #1 for a term nobody searches is worth nothing, and a top-volume term owned by apps with millions of downloads is out of reach from day one. Record in the plan why each primary keyword is winnable at the app's current size. Treat a keyword as **winnable** when the median rating count of the current top-10 results is within about 10× of the app's own, or when an ASO tool's difficulty score is in its low or medium band; otherwise mark it watch-only.
+**Stage-aware targeting *(practitioner)*.** Work in this order: relevance (real search intent for what the app does) → popularity (someone searches it) → difficulty (who already ranks) → opportunity (demand the app can realistically win). A new or small app targets keywords it can win now. It moves to competitive head terms as its ratings and downloads grow. Ranking #1 for a term nobody searches is worth nothing, and a top-volume term owned by apps with millions of downloads is out of reach from day one. Record in the plan why each primary keyword is winnable at the app's current size. Treat a keyword as **winnable** when the median rating count of the current top-10 results (read from an allowed source, see Measurement and Iteration) is within about 10× of the app's own, or when an ASO tool's difficulty score is in its low or medium band; otherwise mark it watch-only.
 
 ### Long-Tail Keyword Strategy (2025-2026 Focus)
 
@@ -109,8 +109,8 @@ Treat the brand as **known** only with evidence: the brand name appears in the s
 
 ### Description (4,000 chars)
 - NOT indexed for search on Apple, but critical for conversion. Don't stuff it with keywords: it is written for people deciding whether to download. Google Play differs (see below)
-- Description keyword coverage matters for conversion rate — users who see their search terms reflected are more likely to download
-- Structure: Hook → Features → Social Proof → Call to Action
+- No keyword-count target. Users who see their search terms reflected are more likely to download, so echo them only where they read naturally
+- Structure: Hook → Features → Social Proof → Call to Action. Social proof means verifiable, sourced proof only (a named award or press mention the user can cite); never a rating or user count, which the store already shows
 - First 3 lines visible before "Read More" — make them count
 - Use line breaks and formatting for scannability
 
@@ -141,7 +141,7 @@ Treat the brand as **known** only with evidence: the brand name appears in the s
 
 ### Full Description (4,000 chars)
 - Fully indexed by Google — unlike Apple's description
-- Natural keyword integration throughout (3-5 mentions of key terms)
+- Use target terms where they read naturally, never more than 5 times across all fields (see Description-Specific Rules under Google Play Store — Prohibited Metadata)
 - Cover related concepts, use cases, and synonyms
 - Google's NLP detects keyword stuffing — write for humans first
 - Structure with clear sections for features, benefits, and use cases
@@ -194,7 +194,7 @@ Each stage matters for ASO because stores reward apps that convert well and reta
 - **Captions:** State a benefit first and use keywords where they read naturally. ASO practitioners report that App Store caption text has been indexed by text recognition since June 2025; Apple has not confirmed it
 - **Show real app UI** — not just marketing graphics
 - **Highlight value propositions** — each screenshot should answer "why should I download?"
-- **Optimal count:** 8-10 screenshots covering core features, edge cases, and social proof
+- **Optimal count:** 8-10 screenshots covering core features, edge cases, and verifiable proof (a named award or press mention; never a rating or user count)
 
 **Screenshot captions *(practitioner)*:**
 - **Benefits, not feature labels.** "See How Much Money You've Saved" beats "Advanced Analytics Dashboard": it gives the viewer a reason to care.
@@ -348,6 +348,7 @@ ASO compounds over weeks. Nobody wakes up to a million downloads the day after a
 
 - **Baseline before changes.** Record the current rank for each target keyword in Phase 1 (`unranked` or `unknown` when there is no data). When every baseline is `unknown`, the Final Report's Decision asks the user to record ranks in each target storefront before uploading the new metadata.
 - **Track the trend.** Re-check the same keywords on a fixed cadence (for example weekly). A move from #47 to #28 to #16 is a signal. It doesn't prove the metadata caused it: seasonality, updates and competitors also move ranks.
+- **Rank data from allowed sources only.** A rank or popularity reading comes from an ASO tool the user subscribes to, Apple Search Ads search popularity, App Store Connect or Play Console analytics, or the user's own manual search in the store. Record each reading with its source and date. Never script store searches or Google searches to check ranks; for Google Search, Google's spam policies (*Machine-generated traffic*) say: "This includes scraping results for rank-checking purposes or other types of automated access to Google Search conducted without express permission." The iTunes Search API is a documented Apple API, but its result order is not the store's search rank: label any position read from it as an approximation. With no allowed source, the rank is `unknown`.
 - **Measure outcomes, not just ranks.** Track impressions → product page views → downloads → paid conversions. Better ranks with flat downloads mean the listing is not converting.
 - **One lever per cycle**, so a change can be attributed. A cycle is one store submission: cycle 1 ships the indexed metadata set (title, subtitle, keywords) for the locales the approved plan covers; later cycles change one lever each (screenshots, then new localizations, then pricing). On iOS the name, subtitle and keywords change only with a new app version submission; promotional text changes without one.
 - **Measurement window:** at least 6 weeks per cycle. A re-run inside the window reviews the data and keeps the metadata unless the user asks for a change.

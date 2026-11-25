@@ -79,7 +79,7 @@ Scan all proposed metadata for:
    - Platform trademarks: Apple, Google, iOS, Android (usually OK in description, bad in title/subtitle)
    - Celebrity names: only use if explicitly authorized
    - Brand names: only if the developer owns the brand
-   - Example: ❌ "Apple-approved meditation" → ✅ "Award-winning meditation app"
+   - Example: ❌ "Apple-approved meditation" → ✅ "Guided meditation for sleep and focus" (describes the app; claims no endorsement or award)
 
 3. **Misleading trademark use**:
    - "Featured by Apple" — unless actually featured (violates App Store guideline 2.3.7)
@@ -134,9 +134,9 @@ Verify all claims in the description are verifiable:
 
 Example corrections:
 - ❌ "Scientifically proven to reduce anxiety" (medical claim without evidence)
-- ✅ "Many users report better sleep and reduced stress" (qualitative, not medical)
+- ✅ "Guided sessions for sleep and stress relief" (describes a feature; claims no outcome)
 - ❌ "4.8★ rating from 100k+ reviews" (claim rating, let the store show this)
-- ✅ "Loved by users worldwide" (qualitative, doesn't claim false numbers)
+- ❌ "Loved by users worldwide" (just as unverifiable; remove it and let the store show the rating)
 
 ### Step 6: Cross-Field Duplication Check (iOS only)
 

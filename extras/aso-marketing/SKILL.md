@@ -4,7 +4,7 @@ description: "Optimize App Store and Google Play listings via a 7-phase, plan-ap
 license: MIT
 effort: max
 metadata:
-  version: 1.6.1
+  version: 1.7.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -171,6 +171,7 @@ This skill complements `seo-ai-optimizer`. See `references/edge-cases.md` (Cross
 - **No destructive action without confirmation.** Before `git pull --rebase`, run the dry-run preview in Repo Sync and get the user's confirmation. Before `git stash` or any file deletion, ask the user. Before overwriting an existing metadata file, create a `.bak` backup or confirm the file is tracked in version control. Report every failure or error to the user; do not retry it silently.
 - **Compliance gate is non-negotiable.** Never present a non-compliant plan to the user; never execute without explicit approval.
 - **Trademark caution:** Competitor brand names from Phase 1 analysis must never appear in proposed metadata.
+- **Rank data from allowed sources only.** Never script store or Google searches; see `references/aso_best_practices.md` → Measurement and Iteration.
 - **Prices are the user's to set.** Localized Pricing is a recommendation in the plan; approval never covers it. Never write a price to any file or run a pricing command.
 
 ## Self-Improve

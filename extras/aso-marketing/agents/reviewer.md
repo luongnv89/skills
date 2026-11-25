@@ -45,8 +45,8 @@ Verify all executed metadata against the review checklist:
   - Format: "word1,word2,word3" (no spaces after commas)
   - Verified: [YES/NO]
 
-- [ ] Descriptions read naturally with keywords integrated
-  - Keywords appear 3-5 times naturally (not stuffed)
+- [ ] Descriptions read naturally, with no keyword stuffing
+  - No target keyword appears more than 5 times across all fields (the cap in `aso_best_practices.md` → Description-Specific Rules (Google Play)); the iOS description is checked for conversion, not keyword count
   - Readability score: [check by reading]
   - Example sentences flow naturally: [YES/NO]
 
@@ -126,7 +126,7 @@ Read `references/aso_best_practices.md` and verify:
   - Uses bullets for scannability: [YES/NO]
   - Keywords integrated naturally (not stuffed): [YES/NO]
   - Ends with clear reason to download: [YES/NO]
-  - Social proof (awards, users, rating) included: [YES/NO]
+  - Any proof claim (award, press mention) is verifiable and sourced, and the copy states no rating or user count: [YES/NO]
 
 - [ ] Localization is market-aware, not just translated
   - German: Uses German-specific keywords, not English translations: [YES/NO]
@@ -205,7 +205,7 @@ If issues found during review:
 
 **Minor Issues** (nice to fix):
 - Formatting could be improved
-- Keyword density could be better
+- Keyword placement could read more naturally
 - Visual asset recommendations could be clearer
 
 ### Step 6: Write Review Report
@@ -290,7 +290,7 @@ The ASO implementation has been reviewed against:
 ✅ **PASS** — Description is conversion-optimized
 - Hook: "Meditation and sleep made simple" (benefit-first) ✅
 - Features: Bullet points for scannability ✅
-- Keywords: Integrated naturally 5+ times, no stuffing ✅
+- Keywords: used where they read naturally, none more than 5 times across all fields ✅
 - CTA: "Start your first guided sleep session tonight" (clear reason to download, no unverifiable numbers) ✅
 
 ### Localization
@@ -309,7 +309,7 @@ The ASO implementation has been reviewed against:
 ✅ **PASS** — Strategy documented
 - In-app review prompt: Trigger after first meditation ✅
 - Response strategy: 48-hour responses to negative reviews ✅
-- Social proof: Mention user count and rating ✅
+- Social proof: no rating or user count in the copy; any award or press claim is sourced ✅
 
 ### Ongoing Optimization
 ✅ **PASS** — Plan documented
@@ -370,7 +370,7 @@ Implementation is high-quality with no notable gaps.
    - [ ] Double-check character limits in console UI (sometimes display differs from source)
 
 3. **After publishing**:
-   - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline (rank tracker or manual store search)
+   - [ ] Re-check the tracked keywords on the plan's cadence against the Phase 1 baseline, from an allowed source recorded with source and date (`references/aso_best_practices.md` → Measurement and Iteration); never a scripted store or Google search
    - [ ] Track impressions, product page views, downloads and paid conversions, not rank alone
    - [ ] Collect reviews and analyze sentiment
    - [ ] Plan re-optimization after the measurement window closes (at least 6 weeks)
