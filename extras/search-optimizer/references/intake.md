@@ -13,6 +13,22 @@ ev="$out/evidence"; mkdir -p "$ev/agent-readiness"
 fetch() { curl -sSL --proto '=https,http' --max-time 20 --max-filesize 5000000 \
   -A "search-optimizer-intake" -o "$2" -w '%{http_code} %{url_effective}\n' "$1"; }
 fetch "$url" "$ev/page.html"            # record status + final redirected URL
+# Visible words of the raw page (no JavaScript run), counted as seo-ai-optimizer's audit counts them
+raw_text_words="$(python3 -I - "$ev/page.html" <<'PY'
+import sys
+from html.parser import HTMLParser
+class W(HTMLParser):
+    hidden = {"head", "title", "script", "style", "template", "noscript"}
+    def __init__(s): super().__init__(); s.depth = 0; s.words = 0
+    def handle_starttag(s, tag, a):
+        if tag == "body": s.depth = 0
+        elif tag in s.hidden: s.depth += 1
+    def handle_endtag(s, tag):
+        if tag in s.hidden and s.depth: s.depth -= 1
+    def handle_data(s, x): s.words += 0 if s.depth else len(x.split())
+w = W(); w.feed(open(sys.argv[1], encoding="utf-8", errors="replace").read()); print(w.words)
+PY
+)"                                       # write it to manifest.json as raw_text_words
 origin="$(python3 -I -c 'import sys,urllib.parse as u;p=u.urlsplit(sys.argv[1]);print(f"{p.scheme}://{p.netloc}")' "$url")"
 for f in robots.txt sitemap.xml llms.txt; do fetch "$origin/$f" "$ev/$f"; done
 ```
@@ -61,6 +77,7 @@ PY
   "final_url": "https://example.com/",
   "captured_at": "2026-10-06T09:00:00Z",
   "target_type": "live-url",
+  "raw_text_words": 412,
   "files": {
     "page.html": {"status": 200},
     "head.json": {"status": "derived"},
