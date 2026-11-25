@@ -12,7 +12,7 @@
         "Includes categorized keyword tables (primary/secondary/long-tail) with volume estimates and rationale",
         "Covers all iOS-specific metadata fields with character counts",
         "Includes competitive analysis referencing Nike Training Club but does NOT use 'Nike Training Club' as a proposed keyword or in proposed metadata",
-        "Competitor research uses category terms and notes what the top results show for each primary keyword (title pattern, first-screenshot message); no proposed keyword is Nike's brand or a lookalike of it",
+        "Competitor research uses category terms and, for each primary keyword, either notes what the top results show (title pattern, first-screenshot message) from the user's manual store search or a subscribed ASO tool, or records it as not checked and asks the user; no proposed keyword is Nike's brand or a lookalike of it",
         "Each Phase 1 baseline rank is 'unknown' or a reading from an allowed source (an ASO tool the user subscribes to, Apple Search Ads popularity, App Store Connect analytics, or the user's own manual store search) recorded with its source and date, and the run scripts no store or Google search",
         "Explains cross-field keyword combination strategy",
         "Includes a store policy compliance check that scans for prohibited keywords, trademark violations, and listing policy issues",
