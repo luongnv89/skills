@@ -171,7 +171,6 @@ After a full run on a Next.js project, the audit report looks like:
 - sitemap.xml: absent — install next-sitemap
 - llms.txt: absent (optional; used by some AI tools, not by Google Search)
 - Structured data: partial (homepage only)
-- AI bot directives: not configured
 ```
 
 After implementation, validation shows: `critical issues: 2 → 0`, `GPTBot block confirmed intentional`, `sitemap.xml generated`.

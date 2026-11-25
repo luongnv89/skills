@@ -80,7 +80,7 @@ Map approved improvements to implementation categories:
 
 **Location:** Typically at `<project_root>/public/robots.txt` or `<project_root>/robots.txt`
 
-**Common directives:**
+**Common directives** (an Option B example; write the option the user chose):
 ```
 User-agent: *
 Allow: /

@@ -365,7 +365,7 @@ Before producing output:
 6. **Framework versions**: Research the latest versions of framework-specific SEO packages
 7. **Performance metrics**: Google's metrics change. Record the current thresholds from official sources
 8. **Conflicts matter**: If research contradicts embedded knowledge, flag it clearly
-9. **Primary sources beat GEO tactics**: A researched tactic that contradicts a pinned primary source goes to `conflict_analysis` with `source: practitioner`, resolved in favour of the primary source. The AI-search guide's *Mythbusting* section covers llms.txt and AI text files for Google, chunking, rewriting content just for AI systems, and seeking inauthentic mentions; the spam policies cover link spam (buying links), scaled content abuse (many pages generated to manipulate rankings, such as fan-out pages) and machine-generated traffic (scripted rank checks)
+9. **Primary sources beat GEO tactics**: A researched tactic that contradicts a pinned primary source goes to `conflict_analysis` with `source: practitioner`, resolved in favour of the primary source. The AI-search guide's *Mythbusting* section covers llms.txt and AI text files for Google, chunking, rewriting content just for AI systems, and seeking inauthentic mentions; the spam policies cover link spam (buying links), scaled content abuse (many pages generated to manipulate rankings; fan-out pages fall under it in this skill's reading) and machine-generated traffic (scripted rank checks)
 
 ## Output Expectations
 

@@ -216,6 +216,15 @@ class RawHtmlTests(AuditFixture):
         self.assertEqual(report["raw_html"]["internal_links"], 2)
         self.assertGreaterEqual(report["raw_html"]["raw_text_words"], 120)
 
+    def test_unreadable_manifest_is_reported_and_counts_relative_links_only(self):
+        self.write("manifest.json", "{not json")
+        self.write("page.html", CONTENT_PAGE)
+        report = self.audit()
+        errors = [c for c in report["project_checks"] if c["severity"] == "error" and c["category"] == "raw-html"]
+        self.assertEqual(len(errors), 1)
+        self.assertIn("cannot read the page URL", self.stderr)
+        self.assertEqual(report["raw_html"]["internal_links"], 1)
+
     def test_page_html_without_manifest_gets_no_shell_check(self):
         self.write("page.html", SHELL_PAGE)
         report = self.audit()

@@ -513,7 +513,7 @@ AI Bot Readiness comes from the per-crawler robots.txt result and meta robots no
 2. ✓ Missing canonical URLs (35 pages fixed)
 3. ✓ No OpenGraph tags (35 pages fixed)
 4. ✓ Missing robots.txt (created)
-5. ✓ Googlebot blocked by `User-agent: *` (removed; the user confirmed it was not intentional)
+5. ✓ AI-bot rules the user chose written to the new robots.txt
 6. ✓ Unintended noindex on /pricing (removed)
 7. ✓ Missing structured data (15 pages added)
 8. ✓ Heading hierarchy on 5 pages (fixed)
