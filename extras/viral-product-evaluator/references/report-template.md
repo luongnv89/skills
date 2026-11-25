@@ -61,6 +61,10 @@ Rules for this list:
   #26 weak words + #24 outcome → one "rewrite the hero copy" fix).
 - **Be concrete enough to act on without re-reading the rubric.** Give the actual new headline
   candidate, the actual tier to cut, the actual CTA label to use — not "improve the headline".
+- **Use only facts from product evidence in a Change line.** A number, testimonial or competitor
+  fact may appear only when the codebase, the landing page or the user supplied it. Otherwise
+  write a marked slot for the user to fill, such as `<your measured time>` or `<customer quote>`;
+  never invent one.
 - List the fixes that would move the score; note any remaining low-impact misses in one trailing line.
 
 ## 4. What's already working (brief)
@@ -84,6 +88,6 @@ doesn't undo them while fixing the rest. One line each, no fixes.
 ```
 1. Rewrite the hero to sell the outcome, not the feature — fixes #20, #24, #3, #18
    Now:    "An AI-powered platform for automated code review"
-   Change: "Catch the bug before your user does — review every PR in 30 seconds"
-   Why:    The hero carries the sale; lead with the outcome (less pain) and a concrete number.
+   Change: "Catch the bug before your user does — review every PR in <your measured review time>"
+   Why:    The hero carries the sale; lead with the outcome (less pain) and a concrete number you measured.
 ```
