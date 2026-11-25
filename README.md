@@ -298,7 +298,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**product-planner**](extras/product-planner/) | 1.2.1 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
 | [**idea-validator**](extras/idea-validator/) | 1.11.0 | max | Market, feasibility, competitor checks for ideas |
 | [**viral-product-evaluator**](extras/viral-product-evaluator/) | 1.8.4 | high | Score codebase + landing page vs 32 viral principles |
-| [**product-launch**](extras/product-launch/) | 1.5.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan; submits to Product Hunt through its MCP only after you approve the preview |
+| [**product-launch**](extras/product-launch/) | 1.6.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan; submits to Product Hunt through its MCP only after you approve the preview |
 | [**brand-name-checker**](extras/brand-name-checker/) | 1.9.0 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](extras/prd-generator/) | 1.7.0 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.8.2 | max | Technical architecture document from PRD |

@@ -95,6 +95,9 @@ Two sections have no field markers:
   it, the moment it worked, what they would change). Platform guides point here wherever
   a post needs the founder's own story.
   - Add one prompt for each story element the plan marks `founder input needed`.
+  - When the founder supplied an interview transcript, the prompts stay questions: the
+    answers used carry the `user: "<quote>" (interview transcript)` source in the
+    story fields, and no transcript text is copied here (`launch-story.md` §1, §6).
 - **FAQ:** the 6–8 questions launch commenters will likely ask, each answered only from
   profile facts. A question the profile cannot answer goes to "Founder inputs needed".
 
@@ -175,11 +178,22 @@ holds repo metadata, README notes and release notes, while awesome-list pull req
 in a founder-voice `github-awesome.md`. Every file has exactly one mode.
 
 **Recap posts (L+7):** write an outline only (what to report, and which numbers to look up
-after launch), with no field markers. The numbers do not exist yet.
+after launch), with no field markers. The numbers do not exist yet. The numbers to look up
+include the signal check in `launch-story.md` §7: branded impressions and clicks, the
+Generative AI performance report where shown, and which tools AI assistants named.
 
 **Own channels:** `x.md` holds the launch post (max=280) and an optional 3–5 post thread
 (each max=280). `linkedin.md` holds one post (max=3000). `email-list.md` holds the subject
 (max=60) and the body (max=200 unit=words).
+
+**Long-form article (owned first):** a launch or build article (the hashnode guide, a
+LinkedIn article, a post on the founder's own blog) is published first on the founder's
+own site. Its guide says so in `## Setup` and `## Launch day`: copies on Hashnode,
+dev.to or Medium set their canonical URL to that original (`platforms-core.md`, hashnode
+and *Own channels*), and a LinkedIn article links to it. With no site of their own, the
+founder publishes it in one place only, and the guide lists a site under "Founder inputs
+needed". When an interview transcript was supplied, the draft is built from its quoted
+answers and the founder edits it before publishing (`launch-story.md` §1).
 
 ## Founder-voice brief
 
@@ -228,6 +242,8 @@ wording. It contains:
   - Applies `launch-story.md`: restates the launch story, passes the copy test, covers
     the X checklist in `x.md`, and puts the disclosure in the post itself for any paid,
     gifted or relationship-based post.
+  - Never copies an interview transcript into the kit, and never drafts text from it for
+    a founder-voice file (`launch-story.md` §1, §6).
 
 ## Reviewer contract (Step 6, fresh subagent)
 
@@ -262,7 +278,12 @@ Blocking checks:
    publish as their own; a step gathers, trades or unlocks votes (an engagement gate used
    for launches the founder did not try and recommend); a contact's name or personal data appears
    anywhere in `launch-kit/`; a story element has no source; or a marketing line fails
-   the copy test (`launch-story.md` §2).
+   the copy test (`launch-story.md` §2). Also: interview transcript text beyond the quoted
+   answers, or a name from it, appears in `launch-kit/`; a founder-voice file holds
+   wording drawn from the transcript; a long-form article copy lacks the canonical or
+   home link to the founder's original; or an after-launch step scripts a Google or
+   assistant query, or seeds, buys or trades a review or mention, or offers payment for
+   inclusion (`launch-story.md` §7).
 9. **Link schemes:** a plan or guide recommends a path for its link (dofollow, domain
    rating, a backlink), describes a paid tier by the link it buys instead of as
    advertising whose link must be nofollow or sponsored, makes a badge path the default,
