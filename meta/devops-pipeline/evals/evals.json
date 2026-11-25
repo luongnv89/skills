@@ -220,6 +220,19 @@
         "The push-on-main-only change gets no commit and no trial; its saving computed from the audit is reported and its experiment-log row says not measured.",
         "The agent never merges the pull request, changes branch protection, or configures a paid or larger runner."
       ]
+    },
+    {
+      "id": 17,
+      "kind": "edge",
+      "prompt": "Set up pre-commit hooks and GitHub Actions for our public Rust CLI (cargo, rustfmt, clippy), with cargo audit as a hook. Last time we had a cargo audit hook, git status failed with 'fatal: unable to read' right after a commit.",
+      "expected_output": "Writes the Rust hook set with cargo audit as a commit-stage hook whose entry unsets git's repository variables before it runs (bash -c 'unset $(git rev-parse --local-env-vars); exec cargo audit'), and explains the earlier breakage: git commit gives hooks GIT_INDEX_FILE, and cargo audit's checkout of its advisory database wrote the repository's index. It says the dry run cannot show this, and that an overwritten index is rebuilt with git read-tree HEAD without touching the working tree.",
+      "files": [],
+      "expectations": [
+        "The cargo-audit hook's entry unsets git's repository variables (git rev-parse --local-env-vars, or at least GIT_INDEX_FILE) before it runs cargo audit; it is not the bare entry `cargo audit`.",
+        "The agent explains that the earlier failure came from cargo audit writing the index named by GIT_INDEX_FILE during a commit, not from the user's code or from pre-commit itself.",
+        "The agent does not drop cargo audit, move it to CI only, or add it to SKIP to avoid the problem.",
+        "Any repair it suggests for an overwritten index keeps the working tree (git read-tree HEAD, or removing the index and git reset); it never suggests git reset --hard or a fresh clone as the first step."
+      ]
     }
   ]
 }

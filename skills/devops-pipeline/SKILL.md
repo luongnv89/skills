@@ -3,7 +3,7 @@ name: devops-pipeline
 description: "Configure pre-commit hooks and lean GitHub Actions for shift-left QA. Use when adding, auditing, speeding up CI/CD or cutting its Actions minutes or cost: max local checks, fast free CI. Skip for Terraform/K8s, deploy pipelines, or non-GitHub CI."
 license: MIT
 metadata:
-  version: 2.8.1
+  version: 2.8.2
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "medium"
 ---
