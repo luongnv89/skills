@@ -54,7 +54,7 @@ Existing findings must not block day one, and a baseline must never hold a secre
 | detect-secrets | `.secrets.baseline` | hashed secrets, file and line |
 | Bandit | `-b bandit-baseline.json`, generated without B105, B106, B107 (below) | finding metadata and quoted source lines (`code`); hardcoded-password findings never go in it |
 | Semgrep | none in the repo; on pull requests CI passes `--baseline-commit <base sha>` with `fetch-depth: 0` | nothing |
-| SwiftLint | `--write-baseline <temp file>`, copied in, then `--baseline <file>` | finding metadata, the flagged source line (`text`) and machine-specific file paths: with SwiftLint 0.65.1 a copy of the repo at another path did not match the baseline, so confirm it matches in CI (verify on install) |
+| SwiftLint | `--write-baseline <temp file>`, run from the repo root, copied in, then `--baseline <file>` | finding metadata, the flagged source line (`text`) and file paths relative to the directory lint ran in (seen with SwiftLint 0.65.1; verify on install) |
 | ESLint | bulk suppressions in recent versions (`--suppress-all`); verify on install | rule counts per file |
 | golangci-lint | `--new-from-rev <base>` | nothing |
 | Linters without a baseline | the hook checks staged files only; CI lints changed files on PRs | nothing |
@@ -71,7 +71,7 @@ Generate the baseline from the repo root into the temporary folder, with one con
 
 A Bandit or SwiftLint baseline can still quote a secret on a line no secret rule flagged. Such a baseline is never written into the repo before it is checked:
 
-1. Write it to the temporary folder outside the repo: Bandit as above; SwiftLint with `swiftlint lint --write-baseline "$tmp/swiftlint-baseline.json"` (SwiftLint 0.65.1 exited 2 when violations were found and still wrote the file, so judge the file, not the exit code).
+1. Write it to the temporary folder outside the repo: Bandit as above; SwiftLint with `swiftlint lint --write-baseline "$tmp/swiftlint-baseline.json"` (SwiftLint 0.65.1 exited 2 on error-level violations and still wrote the file, so judge the file, not the exit code).
 2. Scan the temporary file with the repo's secret scanner, redacted: `gitleaks dir --redact "$tmp/<baseline file>"`. Show each hit to the user (file, rule, line; the value is `REDACTED`).
 3. Drop every finding whose hit the user does not confirm as a false positive or already rotated, and report that secret to rotate.
 4. Copy the file into the repo only after the user confirms, then delete the temporary file.
