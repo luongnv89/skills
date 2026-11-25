@@ -15,13 +15,16 @@ P1 api  /work/api (toplevel) · Python 88% · pre-commit · 3 files per commit
     H2 gitleaks 8.x  hook id gitleaks (staged diff, --redact) ~0.3 s
        ruff: already configured (hook ruff) — skipped
   CI (create .github/workflows/code-analysis.yml):
-    J1 semgrep scan --config p/python --metrics=off --error   pull_request, push main
-       (registry rules: Semgrep Rules License, not OSI open source)
+    J1 semgrep scan --config p/python --metrics=off --error --baseline-commit <base sha>
+       (fetch-depth: 0)                                          pull_request
+       (registry rules: Semgrep Rules License, not OSI open source;
+        not on push main: no base to compare with, see Baselines)
     J2 gitleaks git --redact (fetch-depth: 0)                   pull_request, push main
     J3 osv-scanner scan source -r . (v2 syntax)                 weekly + workflow_dispatch
   Baselines:
-    B1 .gitleaksignore: tree + history fingerprints, scanned after install (Step 4); you confirm each finding
-    B2 bandit-baseline.json (-n 1): existing findings, generated after install, then secret-scanned
+    B1 .gitleaksignore: tracked-file tree + history fingerprints, scanned after install (Step 4); you confirm each finding
+    B2 bandit-baseline.json (-n 1, without B105-B107): written outside the repo after install,
+       secret-scanned, copied in on your yes
   Installs (each its own item):
     I1 pre-commit install-hooks (builds hook environments in pre-commit's cache)
   Expected hook time: ~1.2 s per typical commit (budget 10 s)
@@ -47,7 +50,7 @@ Verification (after install):
   timing:  pre-commit run --files app/main.py app/db.py app/models.py
            snapshot git write-tree + git status --porcelain before and after
            gitleaks hook: not measured (staged-diff scanner)
-  acceptance: gitleaks CI command and the hook-side tree scan (gitleaks dir --redact .) re-run, each must exit 0
+  acceptance: gitleaks CI command and the hook-side tree scan (tracked files only, index export) re-run, each must exit 0
 
 Nothing has been written. Reply: approve all · approve <IDs> · change … · stop
 ```

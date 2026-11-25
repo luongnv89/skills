@@ -52,37 +52,47 @@ Existing findings must not block day one, and a baseline must never hold a secre
 |---|---|---|
 | gitleaks | `.gitleaksignore` (preferred) | one fingerprint per line |
 | detect-secrets | `.secrets.baseline` | hashed secrets, file and line |
-| Bandit | `-b bandit-baseline.json` | finding metadata and quoted source lines (`code`); hardcoded-password findings (B105, B106, B107) never go in it (below) |
-| Semgrep | none in the repo; CI passes `--baseline-commit <base sha>` on pull requests | nothing |
-| SwiftLint | `--write-baseline` then `--baseline <file>` | finding metadata and the flagged source line (`text`, seen with SwiftLint 0.65.1; verify on install) |
+| Bandit | `-b bandit-baseline.json`, generated without B105, B106, B107 (below) | finding metadata and quoted source lines (`code`); hardcoded-password findings never go in it |
+| Semgrep | none in the repo; on pull requests CI passes `--baseline-commit <base sha>` with `fetch-depth: 0` | nothing |
+| SwiftLint | `--write-baseline <temp file>`, copied in, then `--baseline <file>` | finding metadata, the flagged source line (`text`) and machine-specific file paths: with SwiftLint 0.65.1 a copy of the repo at another path did not match the baseline, so confirm it matches in CI (verify on install) |
 | ESLint | bulk suppressions in recent versions (`--suppress-all`); verify on install | rule counts per file |
 | golangci-lint | `--new-from-rev <base>` | nothing |
 | Linters without a baseline | the hook checks staged files only; CI lints changed files on PRs | nothing |
 
+A push to the default branch has no base commit to compare with, so a Semgrep job on push would report every existing finding. On day one, Semgrep runs on pull requests only; when the user also wants it on push, it goes in a separate job that is not required, and the plan says so.
+
 ### Bandit
 
-A Bandit baseline report quotes the flagged source lines, so a hardcoded-password finding (B105, B106, B107) would copy a secret value into it. Those findings are handled as secret findings: never written to the baseline, reported to rotate, or, when the user confirms a false positive, marked with an inline `# nosec B105` (or the matching id), a source edit shown to the user in Step 4 and made only on their yes. Before writing the baseline, check that it holds no such finding. Generate it with one context line per finding, `bandit -r <paths> -n 1 -f json -o bandit-baseline.json` (flags verify on install), so it quotes as little source as possible.
+A Bandit baseline report quotes the flagged source lines (`code`), so a hardcoded-password finding (B105, B106, B107) would copy a secret value into it. Those findings are handled as secret findings: never written to the baseline, reported to rotate, or, when the user confirms a false positive, marked with an inline `# nosec B105` (or the matching id), a source edit shown to the user in Step 4 and made only on their yes.
+
+Generate the baseline from the repo root into the temporary folder, with one context line per finding and without those tests: `bandit -r <paths> -n 1 --skip B105,B106,B107 -f json -o "$tmp/bandit-baseline.json"` (checked with Bandit 1.9.4; verify on install). Then follow *Baselines that quote source* below. The configured hook and CI commands keep B105 to B107 on; never add the `--skip` there. Each such finding therefore still fails the Bandit acceptance run until it is rotated or marked `# nosec`, and until then the report says that check fails (Bandit 1.9.4: a command without the skip, reading a baseline made with it, exited 1 on the remaining B105 finding).
 
 ### Baselines that quote source
 
-A Bandit or SwiftLint baseline can still quote a secret on a line no rule flagged as one. After writing such a baseline, scan it with the repo's configured secret scanner, redacted (`gitleaks dir --redact <baseline file>`). Show each hit to the user (file, rule, line; the value is `REDACTED`) and keep the baseline only once the user confirms every hit is a false positive or already rotated. Otherwise drop the finding from the baseline and report the secret to rotate.
+A Bandit or SwiftLint baseline can still quote a secret on a line no secret rule flagged. Such a baseline is never written into the repo before it is checked:
+
+1. Write it to the temporary folder outside the repo: Bandit as above; SwiftLint with `swiftlint lint --write-baseline "$tmp/swiftlint-baseline.json"` (SwiftLint 0.65.1 exited 2 when violations were found and still wrote the file, so judge the file, not the exit code).
+2. Scan the temporary file with the repo's secret scanner, redacted: `gitleaks dir --redact "$tmp/<baseline file>"`. Show each hit to the user (file, rule, line; the value is `REDACTED`).
+3. Drop every finding whose hit the user does not confirm as a false positive or already rotated, and report that secret to rotate.
+4. Copy the file into the repo only after the user confirms, then delete the temporary file.
 
 ### gitleaks
 
-Fingerprints must come from the same kind of scan each configured command runs. A tree scan (`gitleaks dir`) and a history scan (`gitleaks git`) can report the same secret at different lines (a line added above it in a later commit), and a secret deleted from the tree is found only in history.
+Fingerprints must come from the same kind of scan each configured command runs, over the same files. A tree scan (`gitleaks dir`) and a history scan (`gitleaks git`) can report the same secret at different lines (a line added above it in a later commit), and a secret deleted from the tree is found only in history. A `gitleaks dir` run in the working copy also reads gitignored and untracked files (a local `.env`) that no commit and no CI checkout holds, so the tree scan covers tracked files only.
 
 1. Run each scan the configured commands run, with redaction, into temporary reports **outside the repo**:
-   - tree: `gitleaks dir --redact --report-format json --report-path "$tmp/tree.json" .`
+   - tree (tracked files only): export the index outside the repo and scan it from inside the export, so the paths stay repo-relative: `git checkout-index -a --prefix="$tmp/tree/"`, then `(cd "$tmp/tree" && gitleaks dir --redact --report-format json --report-path "$tmp/tree.json" .)`.
    - history (when CI scans history): `gitleaks git --redact --report-format json --report-path "$tmp/history.json" .`
-2. Show each finding to the user (file, rule, line, commit; the value is `REDACTED`). Each one is either a false positive or already rotated (baseline it), or a real secret (report it to rotate; do not baseline).
+   - local files: `gitleaks dir --redact --report-format json --report-path "$tmp/local.json" .` in the working copy. A finding whose `File` is not listed by `git ls-files` is local-only.
+2. Show each finding to the user (file, rule, line, commit; the value is `REDACTED`). Each one is either a false positive or already rotated (baseline it), or a real secret (report it to rotate; do not baseline). Local-only findings are listed separately as `local-only, not committed` and are never baselined; the user decides what to do with them.
 3. Write the confirmed findings' `Fingerprint` values to `.gitleaksignore` in the commit-less `file:rule:line` form: tree fingerprints already have it; strip the leading `<commit>:` from history fingerprints. A commit-less entry suppresses that rule at that file and line in every commit, so each entry is shown to the user before it is written.
-4. Delete the temporary reports.
+4. Delete the temporary reports and the export.
 
-With gitleaks 8.30.1 this was checked on scratch repos: tree fingerprints alone did not cover a history finding whose line had moved, and the union of tree and stripped history fingerprints made both `gitleaks dir` and `gitleaks git` exit 0. Confirm on the installed version with the acceptance check below.
+With gitleaks 8.30.1 this was checked on scratch repos: tree fingerprints alone did not cover a history finding whose line had moved, and the union of tree and stripped history fingerprints made both `gitleaks dir` and `gitleaks git` exit 0. A tracked file got the same `file:rule:line` fingerprint from the index export as from `gitleaks dir` in the working copy; with it in `.gitleaksignore`, `gitleaks dir` and `gitleaks git` in a fresh clone both exited 0, while `gitleaks dir` in the working copy still failed on a gitignored `.env`. Confirm on the installed version with the acceptance check below.
 
 If a `--baseline-path <report.json>` file is used instead, that report must have been written with `--redact`, and every gitleaks command that reads it (hook and CI) also passes `--redact`. The plan then shows both commands.
 
-**Acceptance check:** re-run the exact gitleaks command configured in CI on the baselined repo; it must exit 0. The hook's staged-diff command (`gitleaks git --pre-commit --staged`, or the `gitleaks` pre-commit hook id) passes trivially with nothing staged (checked with gitleaks 8.30.1: ~0 bytes scanned, exit 0), so running it proves nothing. The hook-side proof is the matching tree scan, `gitleaks dir --redact .`, with the same `.gitleaksignore`; it must exit 0. A `.gitleaksignore` file that exists is not proof. If one still fails, re-scan with that command's report, show the remaining findings (redacted), and repeat steps 2 to 4 for them; a finding the user does not confirm stays a finding, and the report says the check fails.
+**Acceptance check:** re-run the exact gitleaks command configured in CI on the baselined repo; it must exit 0. A CI `gitleaks dir` command is re-run on a fresh index export, as below, since a CI checkout holds no gitignored files. The hook's staged-diff command (`gitleaks git --pre-commit --staged`, or the `gitleaks` pre-commit hook id) passes trivially with nothing staged (checked with gitleaks 8.30.1: ~0 bytes scanned, exit 0), so running it proves nothing. The hook-side proof is the same tracked-files tree scan on a fresh export. Step 4 leaves `.gitleaksignore` uncommitted, so it is not in the export and is passed explicitly: `(cd "$tmp/tree" && gitleaks dir --redact -i "<repo toplevel>/.gitleaksignore" .)`; it must exit 0. `gitleaks dir .` in the working copy is not the check: a local-only file makes it fail. A `.gitleaksignore` file that exists is not proof. If one still fails, re-scan with that command's report, show the remaining findings (redacted), and repeat steps 2 to 4 for them; a finding the user does not confirm stays a finding, and the report says the check fails. Delete the export afterwards.
 
 ## Timing (Step 5)
 

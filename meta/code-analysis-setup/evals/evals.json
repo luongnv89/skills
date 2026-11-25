@@ -21,7 +21,7 @@
         "The existing ruff hook in .pre-commit-config.yaml is unchanged and appears exactly once; new hooks (for example bandit and gitleaks) are appended, and .github/workflows/ci.yml is unchanged.",
         "The new CI workflow declares `permissions: contents: read`, a `timeout-minutes` on each job, pinned action refs, and runs gitleaks as a CLI with `--redact` (not gitleaks-action).",
         "Any secret baseline holds only fingerprints or hashes, and every secret match in the output and Final Report is shown as REDACTED, never as a value.",
-        "The exact gitleaks command configured in CI and the hook's matching tree scan (`gitleaks dir --redact .` with the same .gitleaksignore) are re-run on the baselined repo and each exits 0; the staged-diff hook command is not counted as proof.",
+        "The exact gitleaks command configured in CI and the hook's matching tree scan over tracked files only (`gitleaks dir --redact` on an index export, with the same .gitleaksignore) are re-run on the baselined repo and each exits 0; the staged-diff hook command is not counted as proof, and a finding in a gitignored or untracked file is reported as local-only, never baselined.",
         "Warm-up (for example `pre-commit install-hooks`) is reported as setup time, separately from the per-commit time measured with `pre-commit run --files <sample>` against the 10 s budget.",
         "`git write-tree` and `git status --porcelain` are captured before the timing run and are identical after it; no `git add` is run for timing.",
         "The run ends with Result, Evidence, Uncertainty and Decision lines, and nothing is committed."
@@ -144,7 +144,7 @@
         "Package-based Go tools (go vet, golangci-lint, gosec, govulncheck) are placed in CI, not in the hook, with the reason given.",
         "Timing runs each underlying file-list tool command on an explicit list of clean tracked files in check mode, never through `lefthook run` with staging, lint-staged or `git add`; a staged-diff scanner (gitleaks) is reported as `not measured (staged-diff scanner)`.",
         "`git write-tree` and `git status --porcelain` are identical before and after the timing run, or the run prints `timing: skipped (<reason>)`.",
-        "The configured gitleaks CI command and the hook's matching tree scan (`gitleaks dir --redact .`), if gitleaks is installed, exit 0 on the baselined repo, and no secret value appears in any output."
+        "The configured gitleaks CI command and the hook's matching tree scan over tracked files only (an index export), if gitleaks is installed, exit 0 on the baselined repo, and no secret value appears in any output."
       ]
     },
     {

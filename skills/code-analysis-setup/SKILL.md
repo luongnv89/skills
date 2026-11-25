@@ -105,7 +105,7 @@ Per repository, in plan order:
 1. Run the *Repo Sync*.
 2. Write each approved config file. Merge hook entries into the existing hook manager and CI jobs into the repo's workflows by the rules in `references/merge-and-baseline.md`: append, dedup, keep existing order and settings.
 3. Install only the approved tools and hook managers, by the commands the plan showed.
-4. Generate baselines as `references/merge-and-baseline.md` → *Baselines* says: secrets as fingerprints or hashes, never values. The user confirms each finding (redacted); a likely real secret is reported to rotate. Temporary reports go outside the repo and are deleted.
+4. Generate baselines as `references/merge-and-baseline.md` → *Baselines* says: secrets as fingerprints or hashes, never values. The user confirms each finding (redacted); a likely real secret is reported to rotate. Temporary reports go outside the repo and are deleted. A baseline that quotes source is written there first and copied in only after its secret scan and the user's yes.
 5. Changes stay uncommitted on the current branch unless the user asks for a commit.
 
 ### Step 5: Verify and time
@@ -117,7 +117,7 @@ Follow `references/merge-and-baseline.md` → *Timing*:
 3. **Sample:** tracked files not in the pre-sync dirty list and not written in Step 4, sized to the typical files per commit. An empty sample prints `timing: skipped (no clean tracked files)`.
 4. **Time the per-commit run** on that explicit file list, tools in check mode (`pre-commit run --files <sample>`, or each tool's own command). Never time through lint-staged or another staging wrapper, and never `git add`. A staged-diff scanner (the gitleaks hook) is reported as `not measured (staged-diff scanner)`.
 5. **Compare** the snapshot. If the tree or status changed, restore it (`git read-tree <saved tree>`, `git checkout -- <sample>`) and report it. When the invariant cannot be guaranteed, print `timing: skipped (<reason>)` instead of timing.
-6. **Acceptance check:** re-run the exact configured CI secret-scan command, the hook's matching tree scan (`gitleaks dir --redact .`; the staged-diff hook command passes trivially with nothing staged), and every other baselined tool on the baselined repo; each must exit 0. A file merely existing is not proof.
+6. **Acceptance check:** re-run the exact configured CI secret-scan command, the hook's matching tree scan over tracked files only (an index export, `references/merge-and-baseline.md` → *gitleaks*; the staged-diff hook command passes trivially with nothing staged), and every other baselined tool on the baselined repo; each must exit 0. A finding in a gitignored or untracked file is reported as `local-only, not committed`, never baselined. A file merely existing is not proof.
 
 ## Final Report
 
@@ -153,7 +153,7 @@ More examples and the step report format: `references/plan-template.md`.
 - Every tool is free and open source, or labelled (Bearer) and off by default.
 - Existing hooks and CI jobs are unchanged, and no tool runs twice (security-setup's tools included).
 - No baseline, report or timing output contains a secret value.
-- The configured CI secret-scan command and the hook's matching tree scan exit 0 on the baselined repo.
+- The configured CI secret-scan command and the hook's matching tree scan (tracked files only) exit 0 on the baselined repo.
 - The timing run left `git write-tree` and `git status --porcelain` unchanged, or reports why it was skipped or restored.
 - The run closes with the Final Report.
 
