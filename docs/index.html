@@ -939,9 +939,9 @@
         <path class="hring" d="M42.75 13.72A1 1 0 0 1 44.24 12.85A24.875 24.875 0 1 1 19.76 12.85A1 1 0 0 1 21.25 13.72V18.16A1 1 0 0 1 20.83 18.97A19.125 19.125 0 1 0 43.17 18.97A1 1 0 0 1 42.75 18.16Z" fill="currentColor"/>
         <path class="hcard" d="M26.75 4.5H33.69A0.75 0.75 0 0 1 34.22 4.72L39.28 9.78A0.75 0.75 0 0 1 39.5 10.31V33.75A2.25 2.25 0 0 1 37.25 36H26.75A2.25 2.25 0 0 1 24.5 33.75V6.75A2.25 2.25 0 0 1 26.75 4.5ZM26.75 28.75A0.75 0.75 0 0 1 28.25 28.75V31.75A0.75 0.75 0 0 1 26.75 31.75ZM29.75 28.75A0.75 0.75 0 0 1 31.25 28.75V31.75A0.75 0.75 0 0 1 29.75 31.75ZM32.75 28.75A0.75 0.75 0 0 1 34.25 28.75V31.75A0.75 0.75 0 0 1 32.75 31.75ZM35.75 28.75A0.75 0.75 0 0 1 37.25 28.75V31.75A0.75 0.75 0 0 1 35.75 31.75Z" fill="#00FF41" fill-rule="evenodd"/>
       </svg>
-      <a class="pill fadeup" style="--i:0" href="https://github.com/luongnv89/skills/releases/tag/v6.0.0">
+      <a class="pill fadeup" style="--i:0" href="https://github.com/luongnv89/skills/releases/tag/v7.0.0">
         <span class="led" aria-hidden="true"></span>
-        v6.0.0 · 52 skills · MIT
+        v7.0.0 · 52 skills · MIT
         <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6h7M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <h1 class="fadeup" style="--i:1">Plug in a skill.<br>Your agent knows&nbsp;it<span class="ph">.</span></h1>
@@ -1121,9 +1121,9 @@
           </div>
         </div>
         <p class="asm-note" data-reveal>agent-skill-manager (asm) installs, searches, and audits skills across your agent tools, and scans each skill before it installs. <a href="https://github.com/luongnv89/asm">asm on GitHub ↗</a></p>
-        <p class="asm-note" data-reveal>lstack 0.11.0 downloads, with the 17 core skills: <a href="https://github.com/luongnv89/skills/releases/download/v6.0.0/lstack-0.11.0.zip">standalone bundle</a>, <a href="https://github.com/luongnv89/skills/releases/download/v6.0.0/lstack-claude-0.11.0.zip">Claude Code marketplace</a>, or <a href="https://github.com/luongnv89/skills/releases/download/v6.0.0/lstack-codex-0.11.0.zip">Codex marketplace</a>. The other 32 install with <code>install.sh</code> or the lstack-extras plugin.</p>
+        <p class="asm-note" data-reveal>lstack 0.12.0 downloads, with the 20 core skills: <a href="https://github.com/luongnv89/skills/releases/download/v7.0.0/lstack-0.12.0.zip">standalone bundle</a>, <a href="https://github.com/luongnv89/skills/releases/download/v7.0.0/lstack-claude-0.12.0.zip">Claude Code marketplace</a>, or <a href="https://github.com/luongnv89/skills/releases/download/v7.0.0/lstack-codex-0.12.0.zip">Codex marketplace</a>. The other 32 install with <code>install.sh</code> or the lstack-extras plugin.</p>
         <p class="asm-note" data-reveal>For Claude Code, run <code>claude plugin marketplace add luongnv89/skills</code>, then <code>claude plugin install lstack@lstack --scope user</code>. Start a new session and use <code>/lstack:code-review</code>. For the other 32, run <code>claude plugin install lstack-extras@lstack --scope user</code> and call them as <code>/lstack-extras:&lt;skill&gt;</code>, such as <code>/lstack-extras:idea-validator</code>. The <a href="https://github.com/luongnv89/skills/blob/main/packages/lstack/README.md">lstack installation guide</a> covers local marketplaces, Codex setup, and updates.</p>
-        <p class="upgrade-note" data-reveal>Upgrading? If you load lstack from a clone with <code>claude --plugin-dir</code>, point it at the clone&rsquo;s <code>skills/</code> folder instead of the repository root, and add a second <code>--plugin-dir</code> for its <code>extras/</code> folder. Marketplace installs run <code>claude plugin marketplace update lstack</code>, then <code>claude plugin update lstack@lstack --scope user</code>, then <code>claude plugin install lstack-extras@lstack --scope user</code>, and restart Claude Code. Latest: <code>ship</code> is now <code>cut-release</code>, because Claude Code has its own built-in <code>/ship</code>; install <code>cut-release</code>, remove the old installed <code>ship</code> copy, and run <code>/cut-release</code>. From v5: write or rewrite a README with <code>readme-generator</code>; <code>landing-page-generator</code> still builds landing pages from your README but no longer edits it, and if the old <code>readme-to-landing-page</code> skill is still installed, remove it. From v4: skills outside the 16-skill core moved to lstack-extras, so call them as <code>/lstack-extras:&lt;skill&gt;</code> instead of <code>/lstack:&lt;skill&gt;</code>. The Codex plugin and ZIP downloads now hold only the core; install the other 32 with <code>install.sh</code> or <code>remote-install.sh</code>, which still offer all 49. From v3: install <code>ship</code>, replace <code>/release-manager</code> with <code>/ship</code>, and remove the obsolete installed copy; <code>/ship --no-auto</code> keeps step-by-step confirmations. Earlier changes: <code>herdr-agent-comms</code> is now <code>herdr-agent</code>, and <code>plan-to-issues</code> moved to <a href="https://github.com/luongnv89/idd">luongnv89/idd</a>. From v1, <code>docs-generator</code> is now <code>doc-manager</code>.</p>
+        <p class="upgrade-note" data-reveal>Upgrading? If you load lstack from a clone with <code>claude --plugin-dir</code>, point it at the clone&rsquo;s <code>skills/</code> folder instead of the repository root, and add a second <code>--plugin-dir</code> for its <code>extras/</code> folder. Marketplace installs run <code>claude plugin marketplace update lstack</code>, then <code>claude plugin update lstack@lstack --scope user</code>, then <code>claude plugin install lstack-extras@lstack --scope user</code>, and restart Claude Code. From v6: <code>ship</code> is now <code>cut-release</code>, because Claude Code has its own built-in <code>/ship</code>; install <code>cut-release</code>, remove the old installed <code>ship</code> copy, and run <code>/cut-release</code>. From v5: write or rewrite a README with <code>readme-generator</code>; <code>landing-page-generator</code> still builds landing pages from your README but no longer edits it, and if the old <code>readme-to-landing-page</code> skill is still installed, remove it. From v4: skills outside the 16-skill core moved to lstack-extras, so call them as <code>/lstack-extras:&lt;skill&gt;</code> instead of <code>/lstack:&lt;skill&gt;</code>. The Codex plugin and ZIP downloads now hold only the core; install the other 32 with <code>install.sh</code> or <code>remote-install.sh</code>, which still offer all 49. From v3: install <code>ship</code>, replace <code>/release-manager</code> with <code>/ship</code>, and remove the obsolete installed copy; <code>/ship --no-auto</code> keeps step-by-step confirmations. Earlier changes: <code>herdr-agent-comms</code> is now <code>herdr-agent</code>, and <code>plan-to-issues</code> moved to <a href="https://github.com/luongnv89/idd">luongnv89/idd</a>. From v1, <code>docs-generator</code> is now <code>doc-manager</code>.</p>
         <a class="btn btn-secondary" data-reveal href="https://github.com/luongnv89/skills#install">All install options</a>
       </div>
     </section>
@@ -1152,7 +1152,7 @@
           <div class="tile" data-reveal>
             <span class="num">03</span>
             <h3>Versioned</h3>
-            <p>Each skill keeps its own version and changelog. lstack and lstack-extras 0.11.0 package them independently of this catalog release.</p>
+            <p>Each skill keeps its own version and changelog. lstack and lstack-extras 0.12.0 package them independently of this catalog release.</p>
           </div>
           <div class="tile" data-reveal style="--i:1">
             <span class="num">04</span>
@@ -1236,6 +1236,39 @@
               <span class="cat">Code Quality</span>
               <span class="name">user-test</span>
               <span class="desc">Use your app, API or CLI the way a real user would, log each problem with evidence, and fix the simple ones for your review.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal href="https://github.com/luongnv89/skills/tree/main/skills/comment-audit">
+            <span class="scard-in">
+              <span class="cat">Code Quality</span>
+              <span class="name">comment-audit</span>
+              <span class="desc">Sort every code comment into delete, fix or keep, and change nothing until you approve each one.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:1" href="https://github.com/luongnv89/skills/tree/main/skills/verify-setup">
+            <span class="scard-in">
+              <span class="cat">Code Quality</span>
+              <span class="name">verify-setup</span>
+              <span class="desc">Get a repo-local verify skill that starts your web app, API or CLI and checks each feature end to end.</span>
+              <span class="foot">
+                <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </span>
+            </span>
+          </a>
+          <a class="scard" data-reveal style="--i:2" href="https://github.com/luongnv89/skills/tree/main/skills/code-analysis-setup">
+            <span class="scard-in">
+              <span class="cat">Shipping</span>
+              <span class="name">code-analysis-setup</span>
+              <span class="desc">Plan free linting, security, secret and dependency checks across your repos, and install nothing until you approve.</span>
               <span class="foot">
                 <span class="contacts" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
                 <span class="arr" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2.5 7h9M8 3.5 11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -1394,23 +1427,23 @@
       <div class="container">
         <div class="section-head" data-reveal>
           <span class="eyebrow">Latest release</span>
-          <h2>v6.0.0: a README writer, coverage that stays on GitHub, and lstack 0.11.0.</h2>
+          <h2>v7.0.0: /cut-release replaces /ship, three new core skills, and lstack 0.12.0.</h2>
         </div>
         <div class="release-panel" data-reveal>
           <div class="col">
-            <h3>READMEs that get users started</h3>
-            <p>The new <code>readme-generator</code> writes or rewrites your project README so a new user sees how to install it and run their first command on the first screen. Everything else follows below.</p>
+            <h3>Three new core skills</h3>
+            <p>Set up free linting, security, secret and dependency checks across your repos with <code>code-analysis-setup</code>. Audit every code comment with <code>comment-audit</code>. Get a repo-local check that starts your app and tests each feature end to end with <code>verify-setup</code>. Each one shows you its plan and changes nothing until you approve.</p>
           </div>
           <div class="col">
-            <h3>Coverage that stays on GitHub</h3>
-            <p>CI pipelines from <code>devops-pipeline</code> now show test coverage right in the GitHub Actions run summary, without sending anything to an outside coverage service.</p>
+            <h3>Reviews and plans built on evidence</h3>
+            <p>Code reviews name the commit they reviewed, separate new problems from old ones, and flag changes that weaken tests. The SEO, search and launch skills read your Search Console exports and a log of where AI assistants cite you, so their advice follows what your site actually ranks for.</p>
           </div>
           <div class="col">
-            <h3>lstack 0.11.0: action needed</h3>
-            <p>lstack 0.11.0 adds <code>readme-generator</code> to the 17-skill core. Action needed: use <code>readme-generator</code> to write or rewrite a README. <code>landing-page-generator</code> still builds landing pages from your README, but it no longer edits the README itself. If the old <code>readme-to-landing-page</code> skill is still installed, remove it so it does not compete with <code>readme-generator</code>. lstack and lstack-extras are now 0.11.0.</p>
+            <h3>lstack 0.12.0: action needed</h3>
+            <p>Action needed: <code>ship</code> is now <code>cut-release</code>, because Claude Code&rsquo;s own <code>/ship</code> opens a pull request instead. Install <code>cut-release</code> (or update the lstack plugin), remove the old <code>ship</code> skill, and run <code>/cut-release</code> to cut a release. lstack 0.12.0 grows the core to 20 engineering skills. lstack and lstack-extras are now 0.12.0.</p>
           </div>
         </div>
-        <a class="btn btn-secondary release-more" data-reveal href="https://github.com/luongnv89/skills/releases/tag/v6.0.0">Read the release notes</a>
+        <a class="btn btn-secondary release-more" data-reveal href="https://github.com/luongnv89/skills/releases/tag/v7.0.0">Read the release notes</a>
       </div>
     </section>
 
@@ -1493,7 +1526,7 @@
           <h4>Project</h4>
           <ul>
             <li><a href="https://github.com/luongnv89/skills">GitHub</a></li>
-            <li><a href="https://github.com/luongnv89/skills/releases/tag/v6.0.0">Release v6.0.0</a></li>
+            <li><a href="https://github.com/luongnv89/skills/releases/tag/v7.0.0">Release v7.0.0</a></li>
             <li><a href="https://github.com/luongnv89/skills/blob/main/CHANGELOG.md">Changelog</a></li>
             <li><a href="https://github.com/luongnv89/skills/blob/main/CONTRIBUTING.md">Contribute</a></li>
           </ul>
