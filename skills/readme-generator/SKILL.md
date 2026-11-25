@@ -19,7 +19,7 @@ Every README this skill writes opens with these parts, in this order, on every r
 1. **Name and pitch.** `# <project name>` (or an HTML header with one logo and the name), an optional single line of badges, then one sentence of 25 words or fewer that says what the project does and for whom.
 2. **Install.** `## Install` (`## Get started` for a hosted app), a one-line prerequisite when one exists, then one install command in its own code block, or the download or sign-up link when the project installs from a link. Other install methods live in the detail area, linked in one line.
 3. **Quick start.** `## Quick start`, one sentence naming the most common task, the command or code for that task in its own code block, then its expected output.
-4. **Next links (optional).** One line of links to the detail sections or the docs, led by `Website` when a project file names the product website.
+4. **Next links (optional).** One line of links to the detail sections or the docs, led by `Website` when a project file names the product website (not for a hosted app, which links it under `## Get started`).
 
 Nothing else comes before the Quick start output: no diagram, feature table, table of contents, screenshot, or "Why" section. The detail sections follow in the order in `references/section-templates.md`. `references/landing-section.md` gives the landing template, the variant for each project type (CLI, library, service, app, GitHub Action, extension), and the allowed sources for each command.
 
