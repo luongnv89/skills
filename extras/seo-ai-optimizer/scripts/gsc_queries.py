@@ -192,20 +192,21 @@ def long_questions(query_rows, limit):
 
 def low_ctr(query_rows, min_impr, max_ctr, limit):
     impressions = [r["impressions"] for r in query_rows if r.get("impressions") is not None]
-    ctrs = [r["ctr"] for r in query_rows if r.get("ctr") is not None]
+    clicked = [r["ctr"] for r in query_rows if r.get("ctr")]
     derived = {}
     if min_impr is None:
         min_impr = percentile(impressions, 0.75)
         derived["min_impressions"] = "75th percentile of query impressions in this export"
     if max_ctr is None:
-        max_ctr = percentile(ctrs, 0.5)
-        derived["max_ctr"] = "median query CTR in this export (rows strictly below it)"
+        max_ctr = percentile(clicked, 0.5) or 0.0
+        derived["max_ctr"] = ("median CTR of the queries with clicks in this export (rows strictly "
+                              "below it; a query with no clicks always counts)")
     out = []
     if min_impr is not None and max_ctr is not None:
         for row in query_rows:
             if row.get("ctr") is None:
                 continue
-            if row["impressions"] >= min_impr and row["ctr"] < max_ctr:
+            if row["impressions"] >= min_impr and (row["ctr"] < max_ctr or row["ctr"] == 0):
                 page = row.get("page") or None
                 rec = ("%s already shows for this query but few searchers click: answer the query "
                        "in that page's title, description or first lines" % page

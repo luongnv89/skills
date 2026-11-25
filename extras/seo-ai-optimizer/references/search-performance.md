@@ -54,7 +54,8 @@ which each analysis has `status` `covered` or `not covered`. Header names vary b
 language: a file whose headers it does not know is listed under `unrecognised` with its
 headers. Never read an unrecognised file as "no findings"; map its columns by hand or ask for an
 English-language export. The high-impression and low-click cut-offs are derived from the export
-(75th percentile of impressions, median CTR) and printed under `thresholds`; `--min-impressions`
+(75th percentile of impressions; median CTR of the queries that got clicks, and a query with no
+clicks always counts as low) and printed under `thresholds`; `--min-impressions`
 and `--max-ctr` override them. Without Python, apply the same filters by hand.
 
 ### What the report lists

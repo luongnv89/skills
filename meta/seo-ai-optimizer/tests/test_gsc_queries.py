@@ -160,6 +160,29 @@ class UiExport(Base):
         self.assertNotIn("new page for", text)
 
 
+class ZeroClicks(Base):
+    def test_high_impression_zero_click_query_is_listed_when_most_rows_have_no_clicks(self):
+        path = self.put("Queries.csv", (
+            "Top queries,Clicks,Impressions,CTR,Position\n"
+            "invoice software for freelancers,0,5000,0%,11\n"
+            "acme,30,100,30%,1\n"
+            "a,0,10,0%,40\n"
+            "b,0,20,0%,35\n"
+            "c,0,30,0%,30\n"))
+        _, report = self.run_script(path)
+        section = report["high_impression_low_click"]
+        self.assertAlmostEqual(section["thresholds"]["max_ctr"], 0.30)
+        self.assertEqual([i["query"] for i in section["items"]], ["invoice software for freelancers"])
+
+    def test_all_zero_click_export_still_lists_high_impression_queries(self):
+        path = self.put("Queries.csv", (
+            "Top queries,Clicks,Impressions,CTR,Position\n"
+            "big,0,900,0%,9\nsmall,0,10,0%,30\nmid,0,50,0%,20\n"))
+        _, report = self.run_script(path)
+        # 75th percentile of [10, 50, 900] is 50, so "small" stays out.
+        self.assertEqual([i["query"] for i in report["high_impression_low_click"]["items"]], ["big", "mid"])
+
+
 class QueryPageRows(Base):
     def test_low_ctr_query_maps_to_the_page_that_ranks(self):
         path = self.put("api.csv", QUERY_PAGE)
