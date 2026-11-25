@@ -16,6 +16,24 @@ from pathlib import Path
 # Scanner-stated prerequisite: AP2 is advertised through the A2A Agent Card.
 DEPENDS = {"ap2": "a2aAgentCard"}
 
+# Checks whose tasks publish llms.txt, llms-full.txt or Markdown responses.
+# Keyed on the check id, never on scanner prose, which is untrusted.
+AI_TEXT_CHECKS = ("llmsTxt", "llmsFullTxt", "markdownNegotiation")
+
+# Renderer-owned header note for plans that carry those tasks. Static text: no
+# scanner string reaches it. Source: Google Search Central's generative AI guide.
+AI_TEXT_NOTE = (
+    "**Note:** tasks {tasks} publish llms.txt, llms-full.txt or Markdown "
+    "versions of pages. They serve AI agents and other tools that read those "
+    "files. Google Search does not use llms.txt: \"You don't need to create new "
+    "machine readable files, AI text files, markup, or Markdown to appear in "
+    "Google Search (including its generative AI capabilities), as Google Search "
+    "itself doesn't use them.\" ([Google Search Central, *Optimizing your "
+    "website for generative AI features on Google Search*]"
+    "(https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)) "
+    "This note is the renderer's, not the scanner's; the tasks are unchanged."
+)
+
 MILESTONE_EXIT = {
     "P0": "re-scan reports level {next_target} ({next_name}) or higher",
     "P1": "re-scan reports every discoverability and content-accessibility check as pass",
@@ -80,6 +98,12 @@ def main() -> int:
                  f"{n} {'check' if n == 1 else 'checks'} ({why}); their "
                  f"descriptions fall back to the check message. Affected: "
                  + ", ".join(f"`{c}`" for c in degraded) + ".")
+    # One note for the whole plan, however many AI-text tasks it has. Deferred,
+    # neutral and passing rows are not tasks, so they never trigger it.
+    ai_text = [ids[task["check"]] for ph in t["phases"] for task in ph["tasks"]
+               if task["check"] in AI_TEXT_CHECKS]
+    if ai_text:
+        L.append(AI_TEXT_NOTE.format(tasks=", ".join(ai_text)))
     L.append("")
     L.append("Each task closes exactly one failing check. The scanner is the only "
              "source: descriptions are its own fix prompts, and every task is "

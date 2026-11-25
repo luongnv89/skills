@@ -107,6 +107,16 @@ out — always pass the path.
 `--dry-run` combined with an explicit path is not a documented invocation. The preview
 this skill offers is Gate G3: the user reads the rendered plan before any issue exists.
 
+## Header notes
+
+`render_plan.py` may add `**Note:**` lines between the header fields and the first phase.
+They are the renderer's static text, never tasks, and they leave the task list exactly as
+the scan produced it. When any task closes `llmsTxt`, `llmsFullTxt` or
+`markdownNegotiation`, one note (one for the whole plan) names those tasks, says they
+serve AI agents and other tools, and quotes Google Search Central's generative AI guide:
+Google Search does not use llms.txt or other AI text files. The trigger is the check id,
+never scanner prose. Deferred, neutral and passing checks never add it.
+
 ## Sanitisation
 
 `render_plan.py` passes every scanner-derived string through `clean()`: whitespace
