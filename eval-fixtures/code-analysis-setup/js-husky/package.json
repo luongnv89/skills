@@ -1,0 +1,15 @@
+{
+  "name": "greeter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src",
+    "test": "node --test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "eslint": "^9.12.0",
+    "husky": "^9.1.6"
+  }
+}

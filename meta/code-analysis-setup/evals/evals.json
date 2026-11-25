@@ -1,0 +1,175 @@
+{
+  "skill_name": "code-analysis-setup",
+  "evals": [
+    {
+      "id": 1,
+      "name": "python-precommit",
+      "kind": "happy-path",
+      "prompt": "Set up free static analysis for this Python repo: linting, SAST, secret scanning and dependency scanning, with a fast pre-commit hook and the heavier scans in CI. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there. When the plan is printed, reply `approve all` as the user.)",
+      "expected_output": "Analyses the repo read-only, prints one plan (bandit and gitleaks appended to the existing .pre-commit-config.yaml, ruff skipped as already configured, semgrep, gitleaks history and osv-scanner in a new .github/workflows/code-analysis.yml, sync skipped because there is no origin, the verification command and sample) and stops. After `approve all` it merges the hooks, writes the workflow, baselines existing findings, warms up, times the hook on clean tracked files, and ends with a four-line Final Report.",
+      "files": [
+        "../../eval-fixtures/code-analysis-setup/python-precommit/pyproject.toml",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/.pre-commit-config.yaml",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/src/inventory/__init__.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/src/inventory/stock.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/tests/test_stock.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/.github/workflows/ci.yml"
+      ],
+      "expectations": [
+        "No file is written and no install, stash, fetch or hook run happens before the plan is printed and the runner replies `approve all`.",
+        "The plan states `sync: skipped (no origin)` for the repo before approval, and the install records the same.",
+        "The existing ruff hook in .pre-commit-config.yaml is unchanged and appears exactly once; new hooks (for example bandit and gitleaks) are appended, and .github/workflows/ci.yml is unchanged.",
+        "The new CI workflow declares `permissions: contents: read`, a `timeout-minutes` on each job, pinned action refs, and runs gitleaks as a CLI with `--redact` (not gitleaks-action).",
+        "Any secret baseline holds only fingerprints or hashes, and every secret match in the output and Final Report is shown as REDACTED, never as a value.",
+        "The exact gitleaks command configured in the hook and the exact one configured in CI are re-run on the baselined repo and each exits 0.",
+        "Warm-up (for example `pre-commit install-hooks`) is reported as setup time, separately from the per-commit time measured with `pre-commit run --files <sample>` against the 10 s budget.",
+        "`git write-tree` and `git status --porcelain` are captured before the timing run and are identical after it; no `git add` is run for timing.",
+        "The run ends with Result, Evidence, Uncertainty and Decision lines, and nothing is committed."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "js-husky",
+      "kind": "happy-path",
+      "prompt": "What static analysis should this Node project run, and where? It already uses husky. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.)",
+      "expected_output": "Analyses the repo, finds husky (.husky/pre-commit runs `npm run lint`) and ESLint already configured, and prints a plan that appends to .husky/pre-commit rather than replacing it, adds no second JS linter, puts secret scanning in the hook and dependency scanning in CI on a weekly schedule, then stops with nothing written.",
+      "files": [
+        "../../eval-fixtures/code-analysis-setup/js-husky/package.json",
+        "../../eval-fixtures/code-analysis-setup/js-husky/.husky/pre-commit",
+        "../../eval-fixtures/code-analysis-setup/js-husky/eslint.config.js",
+        "../../eval-fixtures/code-analysis-setup/js-husky/src/greet.js"
+      ],
+      "expectations": [
+        "The hook manager is detected as husky, and ESLint is reported as already configured (eslint.config.js, `npm run lint`) and is not added again.",
+        "Every hook item appends to .husky/pre-commit after the existing `npm run lint` line; no item replaces the file or installs pre-commit as a second hook manager.",
+        "Tools are called through the repo's own binaries or a declared package, not an undeclared `npx` package.",
+        "Dependency scanning (npm audit or osv-scanner) is placed in CI with a weekly schedule, not in the hook.",
+        "The run stops at the plan: no file is written, nothing is installed, `git status` is unchanged, and the Final Report is PARTIAL because no user approved."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "swift-app",
+      "kind": "happy-path",
+      "prompt": "Plan a free lint and security analysis setup for this Swift package. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.)",
+      "expected_output": "Detects Swift (Package.swift, Sources/Tally/main.swift) with no hook manager, plans SwiftLint on staged files in a pre-commit hook and the full SwiftLint run plus secret and dependency scans in CI, lists CodeQL and Bearer as left out with reasons, and stops at the plan.",
+      "files": [
+        "../../eval-fixtures/code-analysis-setup/swift-app/Package.swift",
+        "../../eval-fixtures/code-analysis-setup/swift-app/Sources/Tally/main.swift"
+      ],
+      "expectations": [
+        "SwiftLint is planned in the pre-commit hook on staged files and again in CI, with its MIT licence; pre-commit is proposed as the hook manager because none exists.",
+        "CodeQL is not planned for a repo that is not known to be public; it is listed under Left out with the paid GitHub Advanced Security reason.",
+        "Bearer is not enabled; if mentioned it is labelled Elastic License 2.0, not open source, off by default.",
+        "The plan gives an expected hook time per commit against the budget and lists the verification command and sample.",
+        "Nothing is written or installed, and the Final Report is PARTIAL because no user approved the plan."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "multi-repo",
+      "kind": "happy-path",
+      "prompt": "Plan one static-analysis setup across three projects: the Python repo, the Node repo and the Swift folder. (Eval runner: copy python-precommit and js-husky each to its own scratch folder and run `git init` then `git add -A && git commit -m fixture` in each; copy swift-app to a third scratch folder outside any git repo and do not run `git init` there. Pass all three paths to the skill.)",
+      "expected_output": "Resolves the git toplevel of each input, produces a single plan with one block per project, states that hooks and history metrics are left out for the Swift folder because it is not a git repo, and stops at the gate with nothing written.",
+      "files": [
+        "../../eval-fixtures/code-analysis-setup/python-precommit/pyproject.toml",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/.pre-commit-config.yaml",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/src/inventory/__init__.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/src/inventory/stock.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/tests/test_stock.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/.github/workflows/ci.yml",
+        "../../eval-fixtures/code-analysis-setup/js-husky/package.json",
+        "../../eval-fixtures/code-analysis-setup/js-husky/.husky/pre-commit",
+        "../../eval-fixtures/code-analysis-setup/js-husky/eslint.config.js",
+        "../../eval-fixtures/code-analysis-setup/js-husky/src/greet.js",
+        "../../eval-fixtures/code-analysis-setup/swift-app/Package.swift",
+        "../../eval-fixtures/code-analysis-setup/swift-app/Sources/Tally/main.swift"
+      ],
+      "expectations": [
+        "The plan is a single plan with one section per project (three sections), not three separate runs.",
+        "The Swift folder is reported as not inside a git repo, and the plan says its hooks and history metrics are left out; it still gets config and CI items or says why not.",
+        "Each git project shows its own sync line (`skipped (no origin)` for these scratch repos) and its own expected hook time against the budget.",
+        "Existing hooks are respected per project: ruff not re-added in the Python repo, ESLint not re-added in the Node repo.",
+        "Nothing is written in any of the three folders, and the Final Report is PARTIAL because no user approved."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "rejected-plan",
+      "kind": "edge-case",
+      "prompt": "Add static analysis hooks and CI scans to this repo. (Eval runner: copy the python-precommit fixture to a new scratch folder, run `git init`, `git add -A && git commit -m fixture`, then `git clone --bare . ../origin.git && git remote add origin ../origin.git`. Record `git rev-parse HEAD` and `git stash list`. When the plan is printed, reply `stop, don't install anything` as the user.)",
+      "expected_output": "Prints the plan and stops. After the user rejects it, nothing is written, stashed, fetched or pulled; HEAD, the working tree and the stash list are unchanged; the Final Report is BLOCKED.",
+      "files": [
+        "../../eval-fixtures/code-analysis-setup/python-precommit/pyproject.toml",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/.pre-commit-config.yaml",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/src/inventory/__init__.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/src/inventory/stock.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/tests/test_stock.py",
+        "../../eval-fixtures/code-analysis-setup/python-precommit/.github/workflows/ci.yml"
+      ],
+      "expectations": [
+        "The plan is printed with a sync line for the repo (it has an origin) and the approval question, and nothing runs before the reply.",
+        "After the `stop` reply, no file in the scratch repo is created or modified and `git status --porcelain` is empty.",
+        "`git rev-parse HEAD` and `git stash list` are the same as before the run.",
+        "No fetch or pull ran: `.git/FETCH_HEAD` does not exist in the scratch repo.",
+        "The Final Report's Result line is BLOCKED and says the plan was rejected and nothing was written."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "negative-trigger",
+      "kind": "negative-trigger",
+      "prompt": "Install the local-first security hardening stack in this one repo: a pre-commit security runner with gitleaks and trivy, reports under security/, and the gated free security CI workflow.",
+      "expected_output": "Recognised as a one-repo security-stack request for security-setup; code-analysis-setup does not run its workflow.",
+      "files": [],
+      "expectations": [
+        "The run does not print a code-analysis-setup plan or Final Report and does not write .github/workflows/code-analysis.yml.",
+        "The answer routes to security-setup (or runs it) for the one-repo security stack."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "lefthook-merge",
+      "kind": "happy-path",
+      "prompt": "Add free static analysis to this Go service. Keep using lefthook. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there. When the plan is printed, reply `approve all` as the user.)",
+      "expected_output": "Detects lefthook with an existing gofmt command, plans new lefthook commands appended under pre-commit (for example a secret scan on staged files) and Go analysis such as go vet, golangci-lint, gosec and govulncheck in CI, and after approval merges them without touching the gofmt command, then times the underlying tool commands on clean tracked files.",
+      "files": [
+        "../../eval-fixtures/code-analysis-setup/lefthook-go/go.mod",
+        "../../eval-fixtures/code-analysis-setup/lefthook-go/lefthook.yml",
+        "../../eval-fixtures/code-analysis-setup/lefthook-go/main.go"
+      ],
+      "expectations": [
+        "The existing `gofmt` command in lefthook.yml is unchanged; new commands are added under `pre-commit: commands:` with their own names and `{staged_files}`.",
+        "pre-commit is not installed as a second hook manager, and `lefthook install` is run only if lefthook's hook is not already installed.",
+        "Package-based Go tools (go vet, golangci-lint, gosec, govulncheck) are placed in CI, not in the hook, with the reason given.",
+        "Timing runs each underlying tool command on an explicit list of clean tracked files in check mode, never through `lefthook run` with staging, lint-staged or `git add`.",
+        "`git write-tree` and `git status --porcelain` are identical before and after the timing run, or the run prints `timing: skipped (<reason>)`.",
+        "The configured gitleaks hook and CI commands (if gitleaks is installed) exit 0 on the baselined repo, and no secret value appears in any output."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "existing-ci-scanner",
+      "kind": "edge-case",
+      "prompt": "This repo needs proper static analysis. Plan what to add. (Eval runner: copy the fixture to a new scratch folder, run `git init`, then `git add -A && git commit -m fixture`, and run the skill there.)",
+      "expected_output": "Detects security-setup's footprint (security-check hook, scripts/security_check.py, security/security-tools.json listing gitleaks and semgrep, .github/workflows/security.yml) and plans no second gitleaks or semgrep entry, saying they are covered by security-setup; it adds only what is not covered, such as a Python linter and a dependency scanner, and stops at the plan.",
+      "files": [
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/pyproject.toml",
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/.pre-commit-config.yaml",
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/app/__init__.py",
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/app/notes.py",
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/scripts/security_check.py",
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/security/security-tools.json",
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/security/semgrep-rules.yml",
+        "../../eval-fixtures/code-analysis-setup/ci-scanner/.github/workflows/security.yml"
+      ],
+      "expectations": [
+        "The security-setup footprint is reported, with gitleaks (secrets) and semgrep (static) read from security/security-tools.json.",
+        "The plan contains no gitleaks or semgrep hook entry and no gitleaks or semgrep CI job; both are listed as covered by security-setup.",
+        "The existing `security-check` hook and .github/workflows/security.yml are not changed by any plan item.",
+        "The plan adds only uncovered categories (for example ruff for lint, and a dependency scanner because security-tools.json lists none).",
+        "Nothing is written and the Final Report is PARTIAL because no user approved."
+      ]
+    }
+  ]
+}

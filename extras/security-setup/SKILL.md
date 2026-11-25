@@ -1,11 +1,11 @@
 ---
 name: security-setup
-description: "Install local-first security hardening: pre-commit secret detection, offline dependency scans, static analysis, reports, and gated free CI. Use when hardening repos or adding security hooks. Don't use for incident response or cloud security reviews."
+description: "Install local-first security hardening in one repo: pre-commit secret scans, offline dep scans, static analysis, gated free CI. Use when hardening a repo. Don't use for incident response, cloud reviews or multi-repo lint/SAST (code-analysis-setup)."
 license: MIT
 compatibility: "Cross-platform (macOS, Linux, Windows). Requires git, Python 3.8+, and project write access. Uses pre-commit plus free local tools such as gitleaks, trivy, semgrep, bandit, or cargo-audit when appropriate. Semgrep on Windows requires WSL2."
 effort: high
 metadata:
-  version: 1.6.3
+  version: 1.6.4
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 

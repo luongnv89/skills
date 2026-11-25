@@ -1,0 +1,6 @@
+rules:
+  - id: python-debug-enabled
+    message: Debug mode must not be enabled in committed code.
+    severity: ERROR
+    languages: [python]
+    pattern: DEBUG = True

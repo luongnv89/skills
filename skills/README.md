@@ -1,6 +1,6 @@
 # lstack
 
-lstack is a Claude Code plugin with 19 first-party Agent Skills for everyday
+lstack is a Claude Code plugin with 20 first-party Agent Skills for everyday
 engineering work: code review, test generation, documentation, diagrams,
 CI pipelines, release shipping, repository cleanup, open-source readiness,
 architecture documents and agent instruction files. Each skill is a plain-text
@@ -60,6 +60,7 @@ working in. That is the only network access many skills make.
 | auto-push | your git remote | all working-tree changes and the commit message | `git add`, commit and push, automatic once the safety scan passes | git |
 | cleanup-project | your git remote, GitHub API via `gh` | branch names; on confirmation, commits, branches and PR text | after one confirmation: delete remote branches, push main or archive branches, `gh pr create` | git, gh |
 | cli-builder | your git remote; package registries when adding CLI framework dependencies | dependency names | local branch and commits only | git, pip, npm, go, `npx oclif`, project test runner |
+| code-analysis-setup | your git remote; pre-commit hook repos and package registries, only for tools you approve; the generated CI fetches GitHub Actions, the tools, and advisory databases (OSV.dev, Semgrep registry rules if planned) when it runs | none from the skill; the generated dependency scans send package names and versions to the advisory service | after you approve the plan: appends hook entries, writes a CI workflow and baseline files, installs the approved tools and hooks, runs the hook once to time it; no commit or push | git, pre-commit, husky or lefthook, and the analyzers you approve (ruff, eslint, gitleaks, semgrep, osv-scanner and similar) |
 | code-review | your git remote; Context7 MCP (optional) | library doc queries | local commits per cleanup category (cleanup mode); no push | git, knip, madge, ts-prune, vulture, jscpd, pylint and similar linters |
 | comment-audit | GitHub API via `gh`, only for issues you approve; your git remote | issue titles and bodies, which quote the removed comments and their file paths | after you approve each plan: writes ADRs, files issues, deletes comments, adds a lint ratchet, and commits locally; no push | git, gh, the project's linter and test runner |
 | cut-release | your git remote, GitHub API via `gh`, PyPI (`pypi.org` JSON API, `twine upload`), npm registry | release commits, tags, release notes, built packages, package lookups | **automatic by default**: commit, tag, push, `gh release create`, `twine upload`, `npm publish`; `--no-auto` asks first; never force-pushes. A registry that refuses the upload is skipped and reported | git, gh, curl, python -m build, twine, npm, your project's build |

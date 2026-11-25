@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: security-check
+        name: local security hardening check
+        entry: python3 scripts/security_check.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
