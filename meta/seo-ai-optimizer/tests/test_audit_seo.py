@@ -4,10 +4,9 @@ Run directly from the repository root::
 
     python3 -m unittest discover -s meta/seo-ai-optimizer/tests -p 'test_*.py'
 
-Every fixture is written to a per-test temporary directory. The robots.txt
-fixtures use only forms that ``urllib.robotparser`` reads the same way on
-Python 3.9 and on 3.13+ (plain ``Disallow: /``, empty ``Disallow:``, a named
-group overriding ``*``).
+Every fixture is written to a per-test temporary directory. The audit matches
+robots.txt itself (RFC 9309 groups, longest match, Allow wins a tie), so every
+fixture must give the same verdict on Python 3.9 and on 3.13+.
 """
 
 from __future__ import annotations
@@ -156,6 +155,47 @@ class RobotsTests(AuditFixture):
         self.assertIn("Cannot read robots.txt", errors[0]["message"])
         self.assertIn("cannot read robots.txt", self.stderr)
 
+    def test_disallow_star_blocks_the_whole_site(self):
+        self.write("robots.txt", "User-agent: *\nDisallow: /*\n")
+        blocks = self.robots_blocks(self.audit())
+        self.assertEqual(sorted(blocks), sorted(CRAWLERS))
+        self.assertEqual(blocks["Googlebot"]["severity"], "critical")
+        self.assertIn("from the whole site", blocks["Googlebot"]["message"])
+
+    def test_blank_line_inside_a_group_keeps_the_rule_in_the_group(self):
+        self.write("robots.txt", "User-agent: GPTBot\n\nDisallow: /\n")
+        blocks = self.robots_blocks(self.audit())
+        self.assertEqual(list(blocks), ["GPTBot"])
+        self.assertEqual(blocks["GPTBot"]["source_group"], "User-agent: GPTBot")
+
+    def test_trailing_rule_less_named_group_allows_that_crawler(self):
+        # RFC 9309 and Google: a matching group with no rules allows everything; `*` does not apply.
+        self.write("robots.txt", "User-agent: *\nDisallow: /\n\nUser-agent: GPTBot\n")
+        blocks = self.robots_blocks(self.audit())
+        self.assertEqual(sorted(blocks), sorted(c for c in CRAWLERS if c != "GPTBot"))
+        for check in blocks.values():
+            self.assertEqual(check["source_group"], "User-agent: *")
+
+    def test_homepage_only_allow_counts_as_a_site_block(self):
+        self.write("robots.txt", "User-agent: *\nDisallow: /\nAllow: /$\n")
+        blocks = self.robots_blocks(self.audit())
+        self.assertEqual(sorted(blocks), sorted(CRAWLERS))
+        self.assertEqual(blocks["Googlebot"]["severity"], "critical")
+        self.assertIn("every page except the homepage", blocks["Googlebot"]["message"])
+        self.assertIn("intentional", blocks["Googlebot"]["message"])
+
+    def test_allow_wins_a_tie_with_disallow(self):
+        self.write("robots.txt", "User-agent: *\nDisallow: /\nAllow: /\n\nUser-agent: PerplexityBot\nDisallow: /docs/\nAllow: /docs/\n")
+        report = self.audit()
+        self.assertEqual(self.robots_blocks(report), {})
+        self.assertTrue(any("allows GPTBot" in m for m in self.messages(report, "ai-bot")))
+
+    def test_longer_allow_opens_a_key_path_inside_a_disallowed_prefix(self):
+        self.write("robots.txt", "User-agent: PerplexityBot\nDisallow: /d\nAllow: /docs/\n")
+        report = self.audit()
+        self.assertEqual(self.robots_blocks(report), {})
+        self.assertEqual([c for c in report["project_checks"] if c.get("crawler")], [])
+
     def test_live_evidence_dir_reports_robots_block(self):
         self.write("manifest.json", json.dumps(MANIFEST))
         self.write("page.html", CONTENT_PAGE)
@@ -224,6 +264,23 @@ class RawHtmlTests(AuditFixture):
         self.assertEqual(len(errors), 1)
         self.assertIn("cannot read the page URL", self.stderr)
         self.assertEqual(report["raw_html"]["internal_links"], 1)
+
+    @staticmethod
+    def shell_page(words, mount=True, bundle=True):
+        script = '<script type="module" src="/assets/index.js"></script>' if bundle else "<script>window.x = 1;</script>"
+        body = " ".join(["word"] * words)
+        div = f'<div id="root"><p>{body}</p></div>' if mount else f"<main><p>{body}</p></main>"
+        return f'<!doctype html><html lang="en"><head><title>App</title>{script}</head><body>{div}</body></html>'
+
+    def test_shell_boundary_warns_at_49_words_not_at_50(self):
+        self.assertEqual(len(self.shell_warnings(self.live_evidence(self.shell_page(49)))), 1)
+        self.assertEqual(self.shell_warnings(self.live_evidence(self.shell_page(50))), [])
+
+    def test_mount_element_without_script_src_gets_no_shell_warning(self):
+        self.assertEqual(self.shell_warnings(self.live_evidence(self.shell_page(0, bundle=False))), [])
+
+    def test_script_bundle_without_mount_element_gets_no_shell_warning(self):
+        self.assertEqual(self.shell_warnings(self.live_evidence(self.shell_page(0, mount=False))), [])
 
     def test_page_html_without_manifest_gets_no_shell_check(self):
         self.write("page.html", SHELL_PAGE)

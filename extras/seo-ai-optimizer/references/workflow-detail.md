@@ -180,7 +180,7 @@ After implementation, validation shows: `critical issues: 2 → 0`, `GPTBot bloc
 - [ ] Findings are grouped by severity (Critical / Warning / Info) and each cites the affected file path.
 - [ ] User explicitly approved the improvement plan before any file was modified.
 - [ ] Safety Protocol (Diff & Confirm) was followed for all file modifications.
-- [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0.
+- [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0, except crawler blocks the user confirmed intentional.
 - [ ] `robots.txt` and `sitemap.xml` are present (or explicitly justified); each robots.txt block of a checked crawler is confirmed intentional by the user. `llms.txt` is offered, user's choice, and never required.
 - [ ] Step 8 either records the live-site agent-readiness score and `agent-ready-plan.md`, records the reused orchestrator scan's score without re-scanning, or names the precondition that made it skip.
 - [ ] Live-evidence-only orchestrated run (no repo): the approval, Diff & Confirm, validation and file-presence items above are marked `n/a — needs source repo`; every fix is listed as `needs source repo`, and files the manifest records as blocked are reported as "not tested".

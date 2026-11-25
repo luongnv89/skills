@@ -1,6 +1,6 @@
 ---
 name: seo-ai-optimizer
-description: "Audit and optimize websites for technical SEO, content SEO, and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, llms.txt, and GPTBot/ClaudeBot directives. Don't use for App Store ASO, paid search, or blog writing."
+description: "Audit and optimize websites for technical SEO, content SEO and AI bot accessibility. Fixes meta tags, sitemaps, robots.txt, structured data, optional llms.txt and GPTBot/ClaudeBot directives. Don't use for App Store ASO, paid search, or blog writing."
 license: MIT
 effort: high
 metadata:
@@ -217,8 +217,8 @@ Cases).
 
 After a full run, the agent should produce:
 1. **Audit Report:** A structured markdown report grouping findings by severity.
-2. **Implementation:** Modified or new files (robots.txt, llms.txt, sitemap.xml, JSON-LD) with confirmed changes.
-3. **Validation Report:** A post-fix verification showing critical issues reduced to 0.
+2. **Implementation:** Confirmed edits or new files: robots.txt, sitemap.xml, JSON-LD, optional llms.txt.
+3. **Validation Report:** Post-fix audit: 0 criticals except crawler blocks confirmed intentional.
 4. **Agent-Readiness Handoff:** The live-site score and `agent-ready-plan.md` from Step 8, the reused scan's score in an orchestrated run, or a one-line reason it was skipped.
 5. **Final Report:** The four-line closing block.
 

@@ -15,7 +15,6 @@ import os
 import re
 import json
 import urllib.parse
-import urllib.robotparser
 from pathlib import Path
 from html.parser import HTMLParser
 
@@ -30,6 +29,8 @@ ROBOTS_CRAWLERS = {
     "Googlebot": "Google's crawler for Google Search and all its features",
 }
 ROBOTS_KEY_PATHS = ("/blog/", "/docs/", "/about/")
+# A page other than the homepage, with a prefix no real rule is likely to target.
+ROBOTS_DEEP_PROBE = "/zz-seo-audit-probe/page"
 
 # Text inside these elements is not shown to a reader of the raw HTML.
 HIDDEN_TEXT_TAGS = {"script", "style", "template", "noscript"}
@@ -382,23 +383,64 @@ def audit_file(filepath):
     return issues, info
 
 
-def robots_rule_group(crawler, robots_lines):
-    """Name the robots.txt group that governs a crawler: its own group, else `*`."""
-    name = crawler.lower()
-    for line in robots_lines:
-        field, _, value = line.partition(":")
-        if field.strip().lower() != "user-agent":
+def robots_groups(robots_text):
+    """Split robots.txt into RFC 9309 groups of (user-agent values, [(is_allow, pattern)]).
+
+    Consecutive User-agent lines share a group and a User-agent line after a rule starts
+    a new one. Blank lines, comments and other fields (Sitemap, Crawl-delay) are skipped.
+    """
+    groups = []
+    for line in robots_text.splitlines():
+        field, sep, value = line.split("#", 1)[0].partition(":")
+        field, value = field.strip().lower(), value.strip()
+        if not sep:
             continue
-        token = value.split("#", 1)[0].strip()
-        if token and token != "*" and token.lower() in name:
-            return f"User-agent: {token}"
-    return "User-agent: *"
+        if field == "user-agent":
+            if not groups or groups[-1][1]:
+                groups.append(([], []))
+            groups[-1][0].append(value)
+        elif field in ("allow", "disallow") and groups:
+            groups[-1][1].append((field == "allow", value))
+    return groups
+
+
+def robots_rules_for(crawler, groups):
+    """Return (source_group, merged rules) for the crawler's own groups, else the `*` groups.
+
+    A matching group with no rules still counts, so it allows everything (RFC 9309, Google).
+    """
+    for wanted in (crawler.lower(), "*"):
+        matched = []
+        for agents, rules in groups:
+            for agent in agents:
+                token = "*" if agent.startswith("*") else re.match(r"[A-Za-z_-]*", agent).group().lower()
+                if token == wanted:
+                    matched.append((agent, rules))
+                    break
+        if matched:
+            return f"User-agent: {matched[0][0]}", [rule for _, rules in matched for rule in rules]
+    return None, []
+
+
+def robots_allows(rules, path):
+    """Longest matching pattern wins, with `*` and a trailing `$`; on a tie Allow wins."""
+    best_length, allowed = -1, True
+    for is_allow, pattern in rules:
+        if not pattern:
+            continue
+        anchored = pattern.endswith("$")
+        regex = ".*".join(re.escape(part) for part in (pattern[:-1] if anchored else pattern).split("*"))
+        if not re.match(regex + (r"\Z" if anchored else ""), path):
+            continue
+        if len(pattern) > best_length or (len(pattern) == best_length and is_allow):
+            best_length, allowed = len(pattern), is_allow
+    return allowed
 
 
 def check_robots(robots_file):
     """Report each listed crawler that robots.txt blocks from the site or a key path."""
     try:
-        # utf-8-sig drops a byte-order mark, which robotparser would read as part of the first line.
+        # utf-8-sig drops a byte-order mark, which would otherwise be read as part of the first field.
         robots_text = robots_file.read_text(encoding="utf-8-sig", errors="replace")
     except OSError as e:
         print(
@@ -412,33 +454,32 @@ def check_robots(robots_file):
             "message": f"Cannot read robots.txt at {robots_file}: {e}",
         }]
 
-    robots_lines = robots_text.splitlines()
-    rules = urllib.robotparser.RobotFileParser()
-    rules.parse(robots_lines)
+    groups = robots_groups(robots_text)
 
     findings = []
     for crawler, role in ROBOTS_CRAWLERS.items():
-        group = robots_rule_group(crawler, robots_lines)
-        if not rules.can_fetch(crawler, "/"):
+        group, rules = robots_rules_for(crawler, groups)
+        home_blocked = not robots_allows(rules, "/")
+        deep_blocked = not robots_allows(rules, ROBOTS_DEEP_PROBE)
+        if home_blocked or deep_blocked:
+            scope = "the whole site" if home_blocked and deep_blocked else (
+                "the homepage" if home_blocked else "every page except the homepage")
             findings.append({
                 "severity": "critical" if crawler == "Googlebot" else "warning",
                 "category": "ai-bot",
                 "crawler": crawler,
                 "source_group": group,
-                "message": f"robots.txt blocks {crawler} ({role}) from the whole site through `{group}`. Is this block intentional?",
+                "message": f"robots.txt blocks {crawler} ({role}) from {scope} through `{group}`. Is this block intentional?",
             })
             continue
-        blocked_paths = [path for path in ROBOTS_KEY_PATHS if not rules.can_fetch(crawler, path)]
+        blocked_paths = [path for path in ROBOTS_KEY_PATHS if not robots_allows(rules, path)]
         if blocked_paths:
             findings.append({
                 "severity": "info",
                 "category": "ai-bot",
                 "crawler": crawler,
                 "source_group": group,
-                "message": (
-                    f"robots.txt blocks {crawler} from {', '.join(blocked_paths)} through `{group}`. Is this intentional? "
-                    "Wildcard rules and overlapping Allow rules are matched differently before Python 3.13, so read the rule to confirm."
-                ),
+                "message": f"robots.txt blocks {crawler} from {', '.join(blocked_paths)} through `{group}`. Is this intentional?",
             })
 
     if not findings:

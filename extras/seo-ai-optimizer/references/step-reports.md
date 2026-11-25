@@ -88,7 +88,7 @@ Adapt the check names to match what the step actually validates. Use `√` for p
 ```
 ◆ Validation (step 7 of 8 — post-fix verification)
 ··································································
-  SEO score improved:       √ pass (critical issues: N → 0)
+  SEO score improved:       √ pass (critical issues: N → 0, bar confirmed crawler blocks)
   No regressions:           √ pass
   AI crawl accessible:      √ pass (every robots.txt block intentional + no unintended noindex)
   ____________________________
