@@ -16,6 +16,7 @@
 - Research latest SEO and AI bot best practices via web search
 - Handle large codebases by sampling representative files
 - Hand off to `/website-agent-readiness` for a live-site agent-readiness score
+- Read a Search Console export you supply (long questions, high-impression low-click queries, positions 8 to 15, branded impressions, the Generative AI performance report) and a by-hand log of what AI assistants name and cite, and turn both into recommendations you write on the pages that already rank
 - Under `/search-optimizer` with a URL and no repo, audit the captured live evidence only and list fixes as "needs source repo"
 - Close every run with a four-line Final Report (Result, Evidence, Uncertainty, Decision) and a COMPLETE, PARTIAL or BLOCKED status
 
@@ -28,6 +29,7 @@
 | "Add structured data" | Implement schema.org markup |
 | "Optimize for AI bots" | Check robots.txt per crawler (blocks confirmed intentional); offer llms.txt as optional |
 | "Check the live site too" | Hand off to `/website-agent-readiness` (Step 8) |
+| "What do my Search Console queries say?" | Mine the supplied export with `scripts/gsc_queries.py`; recommendations only, never a page per query |
 
 ## How It Works
 

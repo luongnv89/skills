@@ -1,13 +1,16 @@
 # Launch story, copy tests and campaign tracks
 
-Read by you in Step 4 (the story and tracks in the plan, and the L-day rule), by the
-Step 5 writers and by the Step 6 reviewer.
+Read by you in Step 4 (the story and tracks in the plan, the L-day rule, and the §7
+after-launch rows), by the Step 5 writers and by the Step 6 reviewer.
 
 The story, the copy test, the X checklist and the tracks draw on "The secret behind viral
 product launches" by Kyle Jeong with Tereza Tizkova
 (x.com/kylejeong/status/2119925224334586085, 2026-11-09; practitioner advice, not
 platform rules). The disclosure rule in §5 comes from the US FTC. The lead times in §4
-are this skill's planning defaults, not figures from the post.
+are this skill's planning defaults, not figures from the post. Ideas marked
+*(practitioner)* in §1 and §7 come from Oleksii Sidorov's X carousel "48 SEO & GEO tricks
+from a YC founder" (x.com/acecreamu/status/2125234701912985928): one founder's advice. The
+Google pages §7 quotes override it.
 
 ## 1. The launch story
 
@@ -38,6 +41,29 @@ page and talks. It has five elements:
   of marketing), never a name; with it off, `Story owner: none (track off)`.
 - A plan with no `## Launch story` or `## Campaign tracks` section: treat every track as
   off, and write `copy.story.*` fields only for elements a Profile row sources.
+- **Founder interview (optional)** *(practitioner)*: the founder answers the copy-bank
+  story prompts in a recorded 20–30 minute session and gives you the transcript, in the
+  request or as a file path. You read it in Step 4; the answers you use reach the writers
+  only as sourced rows in `launch-plan.md` (`## Launch story`, Product Profile). The
+  explorer reads it only when it comes with the request (`product-profile.md`, source 1).
+  - A quoted answer is a founder input in the founder's own words. Its source is
+    `user: "<quote>" (interview transcript)`, the form `product-profile.md` already
+    accepts, for a story element or a fact. Quote only what the founder said; never fill
+    a gap from it by inference.
+  - Own-voice long form (a build article, a LinkedIn article, a post on the founder's
+    own site) is drafted from the quoted answers. The founder edits it before it goes
+    out, and it is published first on the founder's own site: copies on Hashnode, dev.to
+    or Medium set their canonical URL to that original, and a LinkedIn article links to
+    it (`launch-kit.md`, *Long-form article (owned first)*).
+  - Founder-voice rules still apply. A platform whose rules ban generated or AI-edited
+    text (hacker-news, r/programming, awesome lists, a subreddit that bans LLM-written
+    posts) never gets text drafted from the transcript: its brief may point to which
+    answers to draw on, and the founder writes the words.
+  - Contacts and the transcript itself stay out of the kit (§6).
+- **Cross-posts:** with or without a transcript, when the request mentions a long-form
+  article or a cross-post, the plan's `## Assumptions and unknowns` states the
+  owned-first rule: the original goes on the founder's own site and every copy sets its
+  canonical URL to it, or links to it.
 
 ## 2. The copy test
 
@@ -131,3 +157,56 @@ Source: US FTC, "Disclosures 101 for Social Media Influencers"
 - The supporter list stays in the founder's own private tool (a spreadsheet, a CRM).
   The kit holds counts or roles only: "12 customers, 3 investors, 2 partner teams".
 - Outreach and invite drafts carry no recipient name. The founder adds it when sending.
+- A founder interview transcript (§1) is never copied into `launch-kit/`: the kit holds
+  only the quoted answers it uses. Before quoting, remove the names and personal data of
+  anyone the founder mentions (customers, colleagues, investors); keep their role only.
+
+## 7. After launch: signal checks and AI-cited pages
+
+Founder-run, by hand, after L-day. It needs no opt-in and no lead time, so it never moves
+L-day and adds no row before L-day: §5 of `plan-and-reports.md` puts it at L+7 and L+30,
+and the README's `## After launch` section holds the steps and a blank log. The kit gives
+no figures, and the skill never runs any step itself.
+
+### Signal check (L+7 and L+30)
+
+1. **Branded search:** in the founder's own Search Console (Performance → Search
+   results), filter Query to those containing the product name, and compare impressions
+   and clicks for the days since L-day (7 at L+7, 28 at L+30) with the same number of
+   days just before L-day.
+   Record each figure with its date range. No Search Console for the site: "not
+   available: verify the site in Search Console".
+2. **Generative AI performance report:** where Search Console shows it for the site,
+   note its figures for the launch pages, each column exactly as labelled; otherwise
+   "not available". Google's guide: "To measure how your content is performing in
+   generative AI features on Google Search and Discover, use the Generative AI
+   performance report in Search Console."
+   (https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)
+3. **AI answers** *(practitioner)*: the founder asks 2–3 AI assistants they use, in their
+   own session, "what's the best tool for <category>?", with the category in a
+   customer's words. They note whether the product is named, which tools are named, and
+   which pages are cited.
+
+Each result is one log row: `| Date | Check | Source | Result |`. Never script Google
+queries, scrape rankings, or send automated questions to an assistant. Google's spam
+policies (*Machine-generated traffic*): "This includes scraping results for rank-checking
+purposes or other types of automated access to Google Search conducted without express
+permission." (https://developers.google.com/search/docs/essentials/spam-policies) The
+founder can hand the exports and the AI-answer log to `/seo-ai-optimizer`, whose
+`search-performance` and `ai-citations` checks read them.
+
+### AI-cited pages: legitimate actions only
+
+Each page step 3 found cited for the category gets one action, by its kind:
+
+| Cited page | Action |
+| --- | --- |
+| Review site (G2, Capterra, TrustRadius) | The founder's own profile there, under that site's review rules (`platforms-directories.md`): reviews come from real users, never conditional on a positive one. |
+| Listicle or article | A short factual note the founder writes to its author: what the product does, for whom and how it differs, from Profile facts, disclosing any material connection (§5). The kit lists the facts and never drafts the note. No payment, product or perk for inclusion: paying for a place in the list is never an action here, and ads stay in the paid amplification track (§4, §5). |
+| Reddit or forum thread | The Reddit rules (`platforms-core.md` reddit, the `reddit.md` Participation plan): help in the thread where its rules allow, and disclose whenever the product comes up. Never post to get the product named. |
+| A page that answers the question better than the founder's site | A better page on the founder's own site: hand it to `/seo-ai-optimizer`. |
+
+Never seed, write, buy or trade reviews or mentions, and never ask friends to post them.
+Google's guide: "However, seeking inauthentic "mentions" across the web isn't as helpful as
+it might seem." (https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)
+Refuse such a request, quote this rule, and offer the action in the table instead.

@@ -31,7 +31,7 @@ second A/B variant) after the deliverable exists does not change a `COMPLETE`.
 Result: PARTIAL. Delivered full PAS landing copy for AcmeDesk, built as HTML in landing-page/; 2 of 6 CTAs still fail the CTA Button Rules.
 Evidence: Framework PAS applied via references/section-templates.md; hero headline 8 words; CTA Button Rules check: "Learn more" (pricing section) and "Submit" (FAQ) state no outcome; companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; page: built (landing-page/: index.html, privacy.html, changelog.html); page checks passed; visual check at 375 and 1280 px showed no ban-table row.
 Uncertainty: The brief names no outcome for the pricing link, so a replacement CTA is a guess; not confirmed with the user.
-Decision: Approve "Compare AcmeDesk plans" and "Ask us a question" as the two CTAs, or name your own.
+Decision: Approve "Compare AcmeDesk plans" and "Ask us a question" as the two CTAs, or name your own. On the day the page goes live, link it from your site navigation and README.
 ```
 
 ## PARTIAL example — page not built
@@ -73,7 +73,9 @@ Decision: Provide the product name, target audience, problem solved, and primary
   real metrics) in the same line after `No approval needed.` When a Privacy Policy or
   Terms of Use was delivered, name its legal review as a remaining user action that comes
   before publishing: `No approval needed. Before publishing: have a lawyer review the
-  Privacy Policy.`
+  Privacy Policy.` When pages were built, end the line with the launch-day step: `On the day
+  the page goes live, link it from your site navigation and README.` That is the user's
+  action: the skill writes nothing outside the output folder and never edits `README.md`.
 
 ## Step completion reports
 

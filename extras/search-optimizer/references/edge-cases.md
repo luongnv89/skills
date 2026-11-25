@@ -12,6 +12,7 @@
 | "Both" run | viral-product-evaluator runs once (web phase) and its result covers the app too; never twice. |
 | Store listing URL only, no repo | aso-marketing works from the listing text; it writes nothing until its plan gate is approved. |
 | Google Play and App Store both present | aso-marketing handles both platforms in its own run. |
+| No Search Console export or AI-citation log supplied | `search-performance` and `ai-citations` go under "Not covered" with the export or log to supply; no ranking or AI-citation row is P1 (`references/merge-format.md`). |
 | Optional member missing | Skip it; its checks go to "Not covered" with the install line. |
 | Required member missing for the branch | Stop before intake with install lines. In "both", stop and offer to rerun with only the branch whose required member is installed. |
 | User approves seo fixes, then wants a re-scan | A re-scan is a new G1 after deploy; never re-scan silently. |

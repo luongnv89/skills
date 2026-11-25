@@ -6,7 +6,7 @@ effort: high
 dependencies:
   - frontend-design
 metadata:
-  version: 2.1.0
+  version: 2.2.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
 ---
 
@@ -36,6 +36,7 @@ each decision with its reason:
 | Terms of Use | The product has user accounts, a paid plan, a free trial, or a subscription. An open-source tool with none of these gets no Terms page: its license governs use |
 | Changelog | Always |
 | Docs | The product is a CLI, library/SDK, self-hosted service, plugin/extension, or API, or the brief or project names a setup step the product's users perform outside its UI (install command, API key, environment variable, config file, DNS record). Contributor setup does not count |
+| About | Opt-in: the user asks for it, or the brief names who makes the product |
 
 - If the user asks for a single section or says "landing page only", skip every companion page and record the skip.
 - If the user names extra pages, add them to the pages the table applies. If the user says "only" those pages, write only them and record the rest as `skipped — not requested`.
@@ -125,6 +126,7 @@ Collect before writing:
 | Competitive advantage | Differentiation |
 | Desired visitor action | Primary CTA |
 | Social proof | Testimonials, metrics, logos |
+| Real customer questions the user supplies: a Search Console query export, support tickets, sales-call notes | FAQ questions; never read Search Console yourself |
 | Data collected, analytics, processors | Privacy Policy |
 | Accounts, plans, trial, billing | Terms of Use |
 | Release history: versions, dates, changes | Changelog |
@@ -161,7 +163,7 @@ substitute a generic Hero/Problem/Solution layout when another framework applies
 - How It Works: 3–4 simple steps, a short description each; CTA at the end
 - Social proof: quote + name + role + company, or `[proof needed]` when proof is unavailable
 - Pricing (if applicable): feature comparison, recommended plan callout, guarantee copy or `[proof needed]`
-- FAQ: 5–7 common objections with clear, confident answers
+- FAQ: 5–7 entries. Questions come from the customer questions the user supplied, close to word for word, else from assumed objections listed on the Final Report's `Uncertainty:` line; each answer opens with the direct answer (`references/section-templates.md` → *FAQ rules*)
 - CTAs: follow CTA Button Rules; place primary and secondary CTAs where the template specifies
 - Final CTA: risk reversal (guarantee, trial); urgency or scarcity only when genuine; button text reinforces value
 
@@ -236,8 +238,8 @@ End every run, stops included, with this compact text block. Status is `COMPLETE
 ```text
 Result: COMPLETE. Delivered full PAS landing copy for AcmeDesk (hero through final CTA), A/B test ideas, and Privacy Policy, Terms of Use, and Changelog pages, built as HTML in landing-page/; Docs skipped (hosted app, no setup outside the app).
 Evidence: Framework PAS named and applied via references/section-templates.md; hero headline 8 words; every CTA starts with an action verb; pages: Privacy Policy, Terms of Use, Changelog delivered, Docs skipped (hosted app); companion checks Pages decided, Facts traced, No compliance claims, Footer links, Changelog style, Anti-slop passed; [proof needed] markers: 2 on the landing page, 18 on the companion pages; anti-slop check passed; page: built (landing-page/: index.html, privacy.html, terms.html, changelog.html) by frontend-design; page checks Pages built, Sections carried, CTAs carried, Markers carried (24/24), Nothing added, Notes excluded, Links resolve, Design checks passed; sync: skipped (new folder).
-Uncertainty: Assumed a setup-time objection belongs in the FAQ; the brief gives no contrarian take, so the hero leaves it out; no data practices, legal entity, or release date were supplied, so those facts are markers; Visual check untested: no browser available; CSS inspected.
-Decision: No approval needed. Before publishing: replace the [proof needed] markers with real facts, and have a lawyer review the Privacy Policy and Terms of Use.
+Uncertainty: No customer questions were supplied, so the FAQ questions are assumed objections; the brief gives no contrarian take, so the hero leaves it out; no data practices, legal entity, or release date were supplied, so those facts are markers; Visual check untested: no browser available; CSS inspected.
+Decision: No approval needed. Before publishing: replace the [proof needed] markers with real facts, and have a lawyer review the Privacy Policy and Terms of Use. On the day the page goes live, link it from your site navigation and README.
 ```
 
 ## Acceptance Criteria

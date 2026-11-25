@@ -308,6 +308,9 @@ paste-ready article that the founder must review · Confidence: medium
     everything you publish."
 - **Link:** unknown.
 - **Do:** write how it was built and why, not an ad, and tag it with relevant tags.
+- **Owned first:** publish the article on the founder's own site first; the Hashnode copy
+  sets its canonical URL to that original (confirmed for imports; the editor field is
+  unverified) (`launch-kit.md`, *Long-form article (owned first)*).
 - **Sources:** hashnode.com/pricing, /changelog and /code-of-conduct.
 
 ## github — GitHub
@@ -357,5 +360,9 @@ traction on the core platforms depends on. Mode: paste-ready. The limits below a
 - **email-list — email to your list:** only when the profile shows a waitlist or a
   newsletter. Subject ≤60 characters, body ≤200 words, one link. Send it on L-day after
   the core launch is live.
+- **Long-form syndication (notes, not catalog rows):** a launch or build article goes
+  first on the founder's own site. A dev.to or Medium copy sets its canonical URL to the
+  original (dev.to's canonical URL setting, Medium's story import; both unverified); a
+  LinkedIn article links to the original.
 - **Rule for every own-channel post:** ask for feedback or a visit. On days with a Product
   Hunt or HN launch, link the launch page and never ask for votes.

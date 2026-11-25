@@ -42,7 +42,16 @@ Use this template when presenting the prioritized improvement plan to the user:
 
 ### Offered, User's Choice
 - [ ] llms.txt (optional, for AI tools that read it; Google Search does not use it)
+
+### Recommendations for You to Write (search-performance, ai-citations; never applied in Step 6)
+- [ ] Answer "[question]" in the first lines of [page that already ranks]
+- [ ] Improve [page at average position 8-15]: [what to add]
+- [ ] Outreach note to [cited source]: [honest offer, connection disclosed]
 ```
+
+Omit the last section when neither check had data. Each item names an existing page; merge
+wordings of one question into one item, and never propose a page per query variation
+(`references/search-performance.md`).
 
 ## Step 6: Implementation Details
 
@@ -183,6 +192,8 @@ After implementation, validation shows: `critical issues: 2 → 0`, `GPTBot bloc
 - [ ] Post-implementation validation re-runs the audit script and shows the critical-issue count drop to 0, except crawler blocks the user confirmed intentional.
 - [ ] `robots.txt` and `sitemap.xml` are present (or explicitly justified); each robots.txt block of a checked crawler is confirmed intentional by the user. `llms.txt` is offered, user's choice, and never required.
 - [ ] Step 8 either records the live-site agent-readiness score and `agent-ready-plan.md`, records the reused orchestrator scan's score without re-scanning, or names the precondition that made it skip.
+- [ ] `search-performance` and `ai-citations`: with supplied data, every listed row carries a recommendation for the user to write on an existing page, none creates a page per query variation, and none reached Step 6; without data, each reads `not covered` and names the export. Nothing queried Google or an assistant by script.
+- [ ] Data-only run (no repo): the approval, Diff & Confirm, validation, file-presence and Step 8 items above are marked `n/a — no source repo`.
 - [ ] Live-evidence-only orchestrated run (no repo): the approval, Diff & Confirm, validation and file-presence items above are marked `n/a — needs source repo`; every fix is listed as `needs source repo`, and files the manifest records as blocked are reported as "not tested".
 
 ### Edge Cases
@@ -190,4 +201,5 @@ After implementation, validation shows: `critical issues: 2 → 0`, `GPTBot bloc
 - **Conflicting canonical URLs:** Flags each conflict individually; does not auto-fix without user approval.
 - **Large codebase (100+ pages):** Audits a representative 50-file sample; offers `--max-files N` flag to expand scope.
 - **Repo has no deployed site (library, template, pre-launch):** Step 8 is skipped, not failed — say so and finish at Step 7.
+- **Search Console export with no page column:** List the queries with page `not mapped` and name the query-and-page export; never guess which page ranks.
 - **`website-agent-readiness` returns fixes this skill already applied:** Report the duplicate rather than re-applying it; the live scan may predate the deploy.

@@ -23,6 +23,9 @@ blockers and lists the assets that already exist.
 
 1. **Facts the user stated:** take them from the request as the source
    `user: "<quote>"`, for example a price or a launch date the page does not show.
+   A founder interview transcript that comes with the request counts the same way, as
+   `user: "<quote>" (interview transcript)`; remove the names and personal data of the
+   people it mentions (`launch-story.md` §1, §6).
 2. **Landing page URL:**
    - Read the page text with WebFetch.
    - Download the raw HTML with `curl -sL -A "Mozilla/5.0" "<url>" -o "$tmp/page.html"`.

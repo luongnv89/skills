@@ -9,7 +9,7 @@
 
 > One run to optimize a website or app for SEO, AI-bot search and app-store search, with one merged report.
 
-Version: **1.2.2** · Author: Luong NGUYEN · License: MIT
+Version: **1.3.0** · Author: Luong NGUYEN · License: MIT
 
 ## Highlights
 
@@ -17,6 +17,7 @@ Version: **1.2.2** · Author: Luong NGUYEN · License: MIT
 - Web: `seo-ai-optimizer`, `website-agent-readiness` and `viral-product-evaluator` share one evidence capture and a check-ownership matrix; `seo-ai-optimizer` owns crawler directives (audit and fix).
 - The agent-readiness scan runs once; `seo-ai-optimizer` reuses it instead of scanning again.
 - Store: `aso-marketing` with its plan-approval gate, plus `viral-product-evaluator` (run once even when both branches run).
+- Asks once for an optional Search Console export or AI-citation log; a ranking or AI-citation finding is P1 only with that measured evidence, never from a proxy such as a missing llms.txt.
 - One deduplicated `search-optimization.md`. Every write stays inside a member's approval gate.
 
 ## When to Use

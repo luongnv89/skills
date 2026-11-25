@@ -298,7 +298,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | [**product-planner**](extras/product-planner/) | 1.2.1 | high | One run from idea to sprint tasks: idea-validator → prd-generator → tad-generator → tasks-generator, resuming from existing files |
 | [**idea-validator**](extras/idea-validator/) | 1.11.0 | max | Market, feasibility, competitor checks for ideas |
 | [**viral-product-evaluator**](extras/viral-product-evaluator/) | 1.8.4 | high | Score codebase + landing page vs 32 viral principles |
-| [**product-launch**](extras/product-launch/) | 1.5.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan; submits to Product Hunt through its MCP only after you approve the preview |
+| [**product-launch**](extras/product-launch/) | 1.6.0 | high | Pick launch sites from 50 (Product Hunt, HN, Reddit, directories) for a product, then write setup guides, posts and pitches after you approve the plan; submits to Product Hunt through its MCP only after you approve the preview |
 | [**brand-name-checker**](extras/brand-name-checker/) | 1.9.0 | max | Trademark, domain, social, registry conflicts |
 | [**prd-generator**](extras/prd-generator/) | 1.7.0 | max | Structured PRD from idea or validate notes |
 | [**tad-generator**](skills/tad-generator/) | 1.8.2 | max | Technical architecture document from PRD |
@@ -333,10 +333,10 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
 | [**doc-manager**](skills/doc-manager/) | 2.2.1 | medium | Generate/update docs to match code, cited to path:line, never invented |
-| [**readme-generator**](skills/readme-generator/) | 1.0.0 | high | Write or rewrite a README onboarding-first: pitch, install, the most common use with its output, then every detail |
-| [**landing-page-generator**](extras/landing-page-generator/) | 2.1.0 | high | Landing pages: marketing copy from a brief or a README (read only), with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
-| [**search-optimizer**](extras/search-optimizer/) | 1.2.2 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
-| [**seo-ai-optimizer**](extras/seo-ai-optimizer/) | 1.8.0 | high | Technical SEO + AI-bot directives |
+| [**readme-generator**](skills/readme-generator/) | 1.1.0 | high | Write or rewrite a README onboarding-first: pitch, install, the most common use with its output, then every detail |
+| [**landing-page-generator**](extras/landing-page-generator/) | 2.2.0 | high | Landing pages: marketing copy from a brief or a README (read only), with privacy, terms, changelog, and docs pages, built as HTML with frontend-design |
+| [**search-optimizer**](extras/search-optimizer/) | 1.3.0 | high | One run to optimize SEO, AI-bot and app-store search: web or store branch, one merged report |
+| [**seo-ai-optimizer**](extras/seo-ai-optimizer/) | 1.9.0 | high | Technical SEO + AI-bot directives |
 | [**website-agent-readiness**](extras/website-agent-readiness/) | 1.5.0 | high | Scan a live site for agent readiness, plan the gaps, file them as issues |
 | [**oss-ready**](skills/oss-ready/) | 1.5.1 | low | Add OSS files and templates |
 | [**agent-config**](skills/agent-config/) | 2.4.0 | medium | AGENTS.md by default (CLAUDE.md on request), shadow-checked and evidence-pruned |
@@ -345,7 +345,7 @@ Adjacent skills: **test-coverage** (generate tests for untested branches) · **u
 
 | Skill | Version | Effort | What it does |
 |---|---|---|---|
-| [**aso-marketing**](extras/aso-marketing/) | 1.7.0 | max | App Store + Google Play keyword and metadata optimization |
+| [**aso-marketing**](extras/aso-marketing/) | 1.8.0 | max | App Store + Google Play keyword and metadata optimization |
 | [**appstore-assets**](extras/appstore-assets/) | 1.5.0 | high | Upload-ready App Store screenshots and creative assets for iPhone, iPad and Mac, including looping header and search videos, from code or a landing page |
 | [**appstore-review-checker**](extras/appstore-review-checker/) | 1.8.1 | high | Pre-submission audit vs Apple guidelines |
 

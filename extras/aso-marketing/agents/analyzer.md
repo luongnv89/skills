@@ -74,7 +74,9 @@ If the app is already live:
 - Note the install count if the store shows it publicly
 - Check for existing reviews (sentiment)
 - Record the current rank for each candidate keyword as the Keyword Rank Baseline (`unranked` or `unknown` where there is no data; a pre-launch app is `unranked` throughout). Phase 7 measures against it. Take each rank from an allowed source and record its source and date; never script store or Google searches (`references/aso_best_practices.md` → Measurement and Iteration)
+- Record the brand status (known or unknown) with its evidence, source and date as the Brand Search Baseline (`references/aso_best_practices.md` → Brand position)
 - If weak ratings or retention point at the product itself, say so in Key Findings: ASO will not fix it
+- Optional, only from answers the user gathered by hand: list the review sites and lists AI assistants cite for the category as AI-Cited Pages (`references/aso_best_practices.md` → Outside the store); never query an assistant yourself
 
 ### Step 6: Gather Competitive Landscape
 
@@ -151,6 +153,18 @@ Generate a comprehensive analysis report:
 | Keyword | Store | Title Pattern | First-Screenshot Message | Source and date |
 |---------|-------|---------------|--------------------------|-----------------|
 | [keyword] | iOS | [e.g. keyword first, brand last] | [e.g. benefit headline] | [manual store search, ISO date] |
+
+#### Brand Search Baseline
+
+- [brand name]: known / unknown — [evidence, source and date]
+
+#### AI-Cited Pages (optional, by hand)
+
+| Cited page (review site or list) | Cited by (assistant, date the user asked) | App listed? | Suggested pitch |
+|----------------------------------|-------------------------------------------|-------------|-----------------|
+| [page] | [assistant, ISO date] | [yes/no] | [genuine pitch to the editor, material connection disclosed] |
+
+With no answers from the user: `not checked (no answers from the user)`.
 
 ### Key Findings
 

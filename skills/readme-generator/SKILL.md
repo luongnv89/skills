@@ -3,7 +3,7 @@ name: readme-generator
 description: "Write or rewrite README.md that opens onboarding-first: pitch, install, a common-use example, then details. Use to create, restructure, or make a README sell (StoryBrand, PAS). Don't use for HTML landing pages, docs synced to code, or one-line fixes."
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   author: "Luong NGUYEN <luongnv89@gmail.com>"
   effort: "high"
 ---
@@ -19,7 +19,7 @@ Every README this skill writes opens with these parts, in this order, on every r
 1. **Name and pitch.** `# <project name>` (or an HTML header with one logo and the name), an optional single line of badges, then one sentence of 25 words or fewer that says what the project does and for whom.
 2. **Install.** `## Install` (`## Get started` for a hosted app), a one-line prerequisite when one exists, then one install command in its own code block, or the download or sign-up link when the project installs from a link. Other install methods live in the detail area, linked in one line.
 3. **Quick start.** `## Quick start`, one sentence naming the most common task, the command or code for that task in its own code block, then its expected output.
-4. **Next links (optional).** One line of links to the detail sections or the docs.
+4. **Next links (optional).** One line of links to the detail sections or the docs, led by `Website` when a project file names the product website (not for a hosted app, which links it under `## Get started`).
 
 Nothing else comes before the Quick start output: no diagram, feature table, table of contents, screenshot, or "Why" section. The detail sections follow in the order in `references/section-templates.md`. `references/landing-section.md` gives the landing template, the variant for each project type (CLI, library, service, app, GitHub Action, extension), and the allowed sources for each command.
 
@@ -69,7 +69,7 @@ fi
 ### Step 1: Gather facts
 
 1. Read `README.md` if it exists. Pick the mode from the *Modes* table.
-2. Read the manifest, `LICENSE`, `CHANGELOG.md`, `docs/`, `examples/`, tests, release and CI config, the entry point's argument definitions, and the code that reads config files and environment variables.
+2. Read the manifest, `LICENSE`, `CHANGELOG.md`, `docs/`, `examples/`, tests, release and CI config, the entry point's argument definitions, and the code that reads config files and environment variables. Read issues or support questions only when the user supplies them.
 3. Record the project name, project type, audience, install command, most common task, and expected output. Give each a source, or `none`.
 4. If the project's purpose is unclear, ask the user what it does. Infer the audience from the project, and list it under `Uncertainty:` as an assumption.
 5. If two or more tasks could be the most common and no source ranks them (`references/landing-section.md` → *Most common task*), ask the user once and list the candidates.
